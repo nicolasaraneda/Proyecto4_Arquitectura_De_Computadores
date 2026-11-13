@@ -36,6 +36,7 @@ TB_OFICIAL := tb/tb_proyecto_4.sv
 # Copias parametrizadas del testbench oficial (el original no se modifica)
 PERIODO_NS ?= 100000
 NTICKS     ?= 2000
+SERIE      ?= tb/practica.csv
 
 # Productos de síntesis
 JSON := $(BUILD)/$(TOP).json
@@ -43,7 +44,8 @@ ASC  := $(BUILD)/$(TOP).asc
 BIN  := $(BUILD)/$(TOP).bin
 FREQ ?= 25
 
-.PHONY: all asm test-asm tb tb-param cpi check check-hex synth pnr bin prog \
+.PHONY: all asm test-asm test-ref tb tb-param cpi check check-hex synth pnr bin prog \
+        equiv equiv-r3 equiv-r2 equiv-r1 equiv-verilator equiv-largo medir-ticks \
         medir-base hallazgos clean
 
 # Objetivo por defecto: todo lo verificable sin la placa
@@ -58,7 +60,7 @@ sw/%.hex: sw/%.s $(ASMDEP)
 
 asm: $(HEX)
 
-# Tests del ensamblador (73 tests, incluye la comparación con los .hex del repo base)
+# Tests del ensamblador (87 tests, incluye la comparación con los .hex del repo base)
 test-asm:
 	cd tools/asm && $(PYTHON) -m unittest discover -s tests -t .
 
@@ -74,23 +76,54 @@ tb: $(HEX) | $(BUILD)
 	$(VVP) -n $(BUILD)/tb_p4 | tee $(BUILD)/tb_p4.log
 	@grep -q "Testbenchs aprobados: 4/4" $(BUILD)/tb_p4.log
 
-# Copia del testbench con otro período o número de ticks, por ejemplo:
+# Copia del testbench con otro período, número de ticks o serie, por ejemplo:
 #   make tb-param PERIODO_NS=1000000 NTICKS=500
-tb-param: $(HEX) | $(BUILD)
-	sed -e 's/PERIODO_NS = [0-9]*;/PERIODO_NS = $(PERIODO_NS);/' \
-	    -e 's/NTICKS     = [0-9]*;/NTICKS     = $(NTICKS);/' \
-	    $(TB_OFICIAL) > $(BUILD)/tb_p4_param.sv
-	$(IVERILOG) -g2012 -s tb_proyecto_4 -o $(BUILD)/tb_p4_param $(CELLS_SIM) $(SRC) $(BUILD)/tb_p4_param.sv
-	$(VVP) -n $(BUILD)/tb_p4_param | tee $(BUILD)/tb_p4_param.log
-	@grep -q "Testbenchs aprobados: 4/4" $(BUILD)/tb_p4_param.log
+# Compara además el decisiones.csv con la referencia (es tools/equiv.sh).
+tb-param: $(HEX)
+	tools/equiv.sh param $(PERIODO_NS) $(NTICKS) $(SERIE)
 
-# CPI medido en simulación (instrucciones completadas y ciclos, por clase)
+# --- Equivalencia entre el RTL y la referencia en Python --------------------
+# El decisiones.csv del testbench (copia parametrizada, el oficial no se toca)
+# debe ser idéntico byte a byte al de ref/trader.py. Conviene `make -j4 equiv`.
+#   equiv-r3: los 20 000 ticks de práctica al período de la ronda 3, con Icarus
+#             (unos 13 minutos).
+#   equiv-r2 y equiv-r1: pocos ticks a 1 ms y 10 ms con Icarus, para validar el
+#             modelo de los precios que se pierden durante el reset.
+#   equiv-verilator: los 20 000 ticks a 0,1 ms y a 1 ms con Verilator.
+#   equiv-largo: los 20 000 ticks a 10 ms con Verilator (unos 25 minutos). No
+#             corre en la integración continua.
+equiv: equiv-r3 equiv-r2 equiv-r1 equiv-verilator
+
+equiv-r3: $(HEX)
+	tools/equiv.sh r3 100000 20000
+equiv-r2: $(HEX)
+	tools/equiv.sh r2 1000000 200
+equiv-r1: $(HEX)
+	tools/equiv.sh r1 10000000 20
+equiv-verilator: $(HEX)
+	SIM=verilator tools/equiv.sh v_r3 100000 20000
+	SIM=verilator tools/equiv.sh v_r2 1000000 20000
+equiv-largo: $(HEX)
+	SIM=verilator tools/equiv.sh v_r1 10000000 20000
+
+# Mercado y referencia: pruebas en Python (ref/test_ref.py)
+test-ref:
+	$(PYTHON) ref/test_ref.py
+
+# CPI medido en simulación (instrucciones completadas y ciclos, por clase) y
+# mediciones por tick con precios de un LFSR. Es rápido: 200 ticks con Icarus.
 cpi: $(HEX) | $(BUILD)
 	$(IVERILOG) -g2012 -s tb_cpi -o $(BUILD)/tb_cpi $(CELLS_SIM) $(SRC) tb/tb_cpi.sv
 	$(VVP) -n $(BUILD)/tb_cpi
 
+# Mediciones por tick del punto 3.2 (IC, ciclos, CPI y tiempo, promedio y peor
+# caso) con la serie de práctica al período de cada ronda. Usa Verilator.
+# Resultado en docs/mediciones/ticks_software.txt.
+medir-ticks: $(HEX)
+	tools/medir_ticks.sh software
+
 # Lo que corre la integración continua en cada push
-check: test-asm check-hex tb
+check: test-asm test-ref check-hex tb
 
 # --- Síntesis, place and route y bitstream ----------------------------------
 synth: $(JSON)
