@@ -216,7 +216,7 @@ Predicción, con las definiciones de la clase. No hay nada medido todavía.
 - **Trabajo útil por paso:** 8 operaciones (4 productos y 4 sumas).
 - **Solo software, sin multiplicador ni shifter:** cada producto por constante son sumas, y cada desplazamiento a la derecha cuesta 6 instrucciones con el método de la memoria. El estimador calibrado tiene seis desplazamientos de números con signo, y el frente del algoritmo estima el tick completo en unas 140 instrucciones contra las 27 de la regla base. Descontando las 19 que no son del estimador quedan unas 120 instrucciones, cerca de 260 ciclos en el Espino base. Eso da 0,8 MOPS.
 - **Con `kal2`:** una instrucción. 2 ciclos en el Espino base (100 MOPS) y 1 ciclo en el pipeline de 3 etapas (200 MOPS).
-- **Amdahl.** El resto del tick (leer el precio, decidir y escribir) cuesta unos 41 ciclos. Con el estimador en 260 ciclos, la fracción acelerada es f = 260 / 301 = 0,86 y el factor F = 260 / 2 = 130. S = 1 / ((1 - 0,86) + 0,86 / 130) = 6,8 para el tick completo.
+- **Amdahl.** El resto del tick (leer el precio, decidir y escribir) cuesta unos 41 ciclos. Con el estimador en 260 ciclos, la fracción acelerada es f = 260 / 301 = 0,864 y el factor F = 260 / 2 = 130. S = 1 / ((1 - 0,864) + 0,864 / 130) = 7,0 para el tick completo.
 - **Roofline.** El paso mueve un byte (el precio) y hace 8 operaciones: intensidad de 8 Op/B, muy a la derecha del quiebre de 0,125 Op/B. Está limitado por cómputo, no por memoria.
 
 Las 140 instrucciones son una estimación: el estimador de dos estados no está escrito en assembly. Estos números se reemplazan por mediciones si la instrucción se construye para la edición de exhibición.
