@@ -27,7 +27,7 @@ El mismo algoritmo está escrito en C en ref/motor/motor.c, para barrer miles
 de combinaciones. ref/test_candidatos.py exige que los dos coincidan.
 
     python3 ref/candidatos.py                   # lista los candidatos y su costo estimado
-    python3 ref/protocolo.py --estrategia cand:intermedio
+    python3 ref/protocolo.py --estrategia cand:max_media
     python3 ref/protocolo.py --estrategia trader:E=96,X=0,J=8
 
 Ninguno de estos candidatos está en la placa todavía: sw/trade.s sigue siendo

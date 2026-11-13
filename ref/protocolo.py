@@ -29,7 +29,7 @@ todos los precios (como en la competencia, con la placa ya encendida).
 
 Una estrategia es cualquier objeto con un método decidir(precio) que devuelve
 el byte de DECISION. Se nombra como "base", "base:k=4,entra=3,sale=1",
-"sma64", "cand:intermedio" (un candidato de ref/candidatos.py),
+"sma64", "cand:max_media" (un candidato de ref/candidatos.py),
 "trader:E=96,X=0,J=8" (la familia paramétrica con esos parámetros) o
 "modulo:fabrica" para una clase de otro archivo de ref/.
 
