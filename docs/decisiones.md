@@ -245,7 +245,7 @@ Hay tres hechos que estas decisiones no cambian y con los que se planifica:
 - **Qué se pierde.** Mientras no se elija, la equivalencia del RTL y el bitstream siguen siendo los de la regla base.
 
 
-### TB1. El core segmentado convive con el base y se elige al compilar (13/11)
+### T32. El core segmentado convive con el base y se elige al compilar (13/11)
 
 - **Decisión.** El pipeline de 3 etapas vive en los mismos módulos del Espino, bajo el parámetro `Pipeline` de `pochoco_soc` (0 base, 1 segmentado con fetch en flanco de bajada, 2 segmentado con ROM combinacional). Su valor por defecto sale de las definiciones `ESPINO_SEGMENTADO` y `ESPINO_ROM`, y sin ninguna es 0: el core por defecto sigue siendo el base.
 - **Razón.** El testbench oficial instancia `pochoco_soc` sin parámetros de variante y no se puede modificar, así que la variante se elige con una definición en la línea de comandos. Así el mismo testbench, las mismas copias parametrizadas y el mismo flujo de síntesis sirven para las dos variantes. Que sea el mismo módulo con un parámetro, como `EarlyRead` en el Proyecto 3, deja a la vista que sigue siendo Espino.
@@ -253,65 +253,65 @@ Hay tres hechos que estas decisiones no cambian y con los que se planifica:
 - **Qué se pierde.** Los archivos del core base cambiaron de texto aunque no de lógica: con `Pipeline = 0` se genera el circuito original (1083 celdas, las mismas trazas ciclo a ciclo contra el gemelo, las mismas decisiones en 20 000 ticks), pero los nombres internos cambiaron y `make bin` ya no reproduce el hash de `bitstreams/competencia_v1.bin`, porque nextpnr ubica distinto. El archivo guardado no se tocó.
 - **Cómo se cubre.** `make formal-base` prueba con los pases `equiv_*` de Yosys que, con `Pipeline = 0`, las etapas IF e ID (que incluyen el decodificador y la ALU) son lógicamente equivalentes a las del repositorio base: 266 y 1110 puntos de comparación, todos probados. Como control, con el contador de programa de 11 bits la misma prueba deja 42 puntos sin probar. No cubre `pochoco_ram.v` ni `espino_register_file.v`, que tienen memorias y cuyo cambio en el modo base es de cableado, ni el cableado de `espino_core.v` y `pochoco_soc.v`: eso lo cubren `make cosim` y `make equiv`.
 
-### TB2. La instrucción se lee en el flanco de bajada, desde BRAM (13/11)
+### T33. La instrucción se lee en el flanco de bajada, desde BRAM (13/11)
 
 - **Decisión.** De los dos caminos evaluados para tener la instrucción antes del flanco, se eligió leer la memoria de instrucciones en el flanco de bajada (`SB_RAM40_4KNR`). La ROM combinacional queda disponible y verificada con `-DESPINO_ROM`.
 - **Razón.** Medido en 10 semillas: el flanco de bajada ocupa 994 celdas y 12 BRAM con 51,1 a 54,5 MHz, y la ROM 1055 celdas y 8 BRAM con 50,0 a 55,1 MHz. La BRAM cuesta 61 celdas menos y conserva el cambio de programa con `icebram` sin sintetizar de nuevo, que es parte del plan de contingencia.
 - **Alternativas.** La ROM combinacional. Una etapa de fetch de un ciclo completo, que es el pipeline que estima la clase 7: no tiene rutas de medio ciclo, pero el salto tomado cuesta 3 ciclos en vez de 2.
 - **Qué se pierde.** Hay rutas que disponen de medio ciclo. nextpnr las analiza con medio período (se comprobó con un diseño de prueba) y ninguna pasa de 9,8 ns de los 20 disponibles, pero el análisis supone un reloj con ciclo de trabajo de 50 %. Es lo primero que hay que revisar con la maestra real.
 
-### TB3. La memoria del fetch es una copia explícita (13/11)
+### T34. La memoria del fetch es una copia explícita (13/11)
 
 - **Decisión.** `pochoco_ram` tiene un segundo arreglo, `mem_f`, que recibe las mismas escrituras y se lee en el flanco de bajada.
 - **Razón.** Con un solo arreglo y puertos de lectura en flancos distintos, Yosys no usa BRAM y genera 16 384 flip-flops (47 551 celdas). Con dos arreglos mapea a 8 BRAM, las mismas que usa la memoria original, que también se duplica porque cada BRAM tiene un solo puerto de lectura.
 - **Qué se pierde.** Nada en recursos. Hay dos `$readmemh` del mismo archivo, y `icebram` tendrá que reemplazar el programa en las dos copias: hay que verificarlo cuando se pruebe `icebram`.
 
-### TB4. Adelantamiento a la salida de la BRAM y lectura detenida durante la carga (13/11)
+### T35. Adelantamiento a la salida de la BRAM y lectura detenida durante la carga (13/11)
 
 - **Decisión.** El banco de registros sigue en BRAM. Un registro guarda el dato que se escribe y un multiplexor a la salida lo elige cuando la dirección leída coincide con la escrita. Mientras una carga espera su dato el banco no lee.
 - **Razón.** Es el diseño del Proyecto 3, adaptado: allá el banco era de flip-flops y el adelantamiento iba antes del registro de salida. En una BRAM el registro de salida está dentro del bloque, así que el multiplexor va después.
 - **Alternativas.** Banco en flip-flops (480 flip-flops y dos multiplexores de 16 entradas: no cabe). Insertar una burbuja cuando hay dependencia (sube el CPI justo en el patrón más común de `trade.s`, calcular y usar). Fundir el adelantamiento con el multiplexor de operandos para sacar un nivel de lógica (no hizo falta: la ruta crítica mide 19,6 ns de 40).
 - **Qué se pierde.** 32 flip-flops y 64 LUT, y un multiplexor más en la ruta de ejecución.
 
-### TB5. El contador de programa de 11 bits se aplica solo al segmentado (13/11)
+### T36. El contador de programa de 11 bits se aplica solo al segmentado (13/11)
 
 - **Decisión.** El parámetro `PcW` vale 11 en el segmentado y 32 en el base.
 - **Razón.** El recorte recupera 133 celdas en el base y 180 en el segmentado, pero cambia el circuito del base, y el bitstream de competencia no debe cambiar hasta pasar por la maestra.
 - **Qué se pierde.** Fuera de las 512 palabras los dos cores ya no son idénticos: leen la misma instrucción, pero `auipc` y el enlace de `jal` entregan el contador recortado. `trade.s` no sale de la memoria. La ejecución en paralelo se corre también con el contador de 32 bits para comparar el resto del pipeline sin esa diferencia.
 
-### TB6. Recortes que se midieron y no se aplicaron (13/11)
+### T37. Recortes que se midieron y no se aplicaron (13/11)
 
 - **Observación.** Quitar la decodificación que nadie usa movió el conteo entre 17 celdas menos y 12 más en el segmentado, según cómo se escribiera, y los registros de lectura de los periféricos ya los recorta la síntesis (0 celdas).
 - **Decisión.** No se tocó el decodificador ni los periféricos. Es el ruido que describe T6, y el decodificador es compartido con el base.
 
-### TB7. Verificación del pipeline: tres comparaciones independientes y controles negativos (13/11)
+### T38. Verificación del pipeline: tres comparaciones independientes y controles negativos (13/11)
 
 - **Decisión.** El segmentado se compara contra el Espino base (trazas funcionales de los programas de riesgos del Proyecto 3, y ejecución en paralelo de dos SoC con programas aleatorios), contra el gemelo digital con su tabla de ciclos (ciclo a ciclo) y contra la referencia en Python (decisiones). Cinco mutaciones bajo `ifdef` comprueban que las pruebas detectan errores.
 - **Razón.** Cada comparación cubre algo distinto: el base dice si el resultado es correcto, el gemelo dice si los ciclos son los esperados y la referencia dice si el trader decide igual.
 - **Alternativas.** Mutar copias del RTL en vez de dejar `ifdef` en el código (como la revisión del Proyecto 3). Se prefirió el `ifdef` para que las mutaciones queden versionadas y corran con `make`.
 - **Qué se pierde.** El RTL tiene cinco bloques `ifdef MUTA_*` que no se sintetizan nunca. La ejecución en paralelo deja el bus SPI quieto, porque con tráfico los dos cores leerían valores distintos al ir a distinta velocidad: el tráfico SPI se cubre con el gemelo.
 
-### TB8. Las cifras de timing son de nextpnr, no de icetime (13/11)
+### T39. Las cifras de timing son de nextpnr, no de icetime (13/11)
 
 - **Observación.** Con una ruta de prueba entre una BRAM de flanco de bajada y un registro de flanco de subida, nextpnr informa `negedge -> posedge` y calcula la frecuencia como 1 / (2 × retardo). `icetime` informa el doble.
 - **Decisión.** El cierre de timing se declara con nextpnr en 10 semillas (`make timing-seg`).
 
-### TB9. El gemelo lleva la tabla de ciclos de cada core (13/11)
+### T40. El gemelo lleva la tabla de ciclos de cada core (13/11)
 
 - **Decisión.** `ref/gemelo/gemelo.c` acepta `--pipeline`: 1 ciclo por instrucción, 2 los loads y 2 los saltos tomados, contador de programa de 11 bits y lazo de sondeo de 5 ciclos. Sin la opción es el base. `make cosim-seg` lo valida contra el RTL.
 - **Detalle.** Apareció un caso que el base no tiene: después de un store al esclavo SPI, la instrucción siguiente se completa en el ciclo inmediato, y el conteo de instrucciones por tick tenía que anticiparla. Lo encontró la comparación con programas aleatorios.
 
-### TB10. `hazard_cycles.s` lee los interruptores (13/11)
+### T41. `hazard_cycles.s` lee los interruptores (13/11)
 
 - **Decisión.** En el Proyecto 3 este programa leía el contador `CYCLES`, que este SoC no tiene (T7). Aquí lee `BTN` y el testbench cambia los interruptores en cada ciclo. Cada comprobación compara el valor usado en la instrucción inmediata con el mismo valor usado una instrucción después.
 - **Qué se pierde.** El gemelo no modela interruptores que cambian, así que este programa no se compara ciclo a ciclo contra él.
 
-### TB11. riscv-formal queda documentado y sin hacer (13/11)
+### T42. riscv-formal queda documentado y sin hacer (13/11)
 
 - **Decisión.** No se integró riscv-formal en este tramo. `docs/espino_segmentado.md` lista lo que falta: interfaz RVFI, envoltorio con el banco en flip-flops, excluir shifts y excepciones, y limitar los registros a 16.
 - **Razón.** Es cerca de un día de trabajo y el plazo para el hardware que va a la maestra es el 18/11. Se priorizó la comparación contra el Espino base con 2,9 millones de instrucciones aleatorias y los controles negativos.
 
-### TB12. El bitstream del segmentado se guarda aparte (13/11)
+### T43. El bitstream del segmentado se guarda aparte (13/11)
 
 - **Decisión.** `bitstreams/segmentado_v1.bin` es el SoC con el core segmentado y el mismo `trade.hex`. `competencia_v1.bin` no se tocó.
 - **Pendiente.** Decidir si el segmentado va a la maestra real el 19/11 como candidato a la edición de competencia. Con la regla base no cambia el patrimonio. Sí libera 89 celdas y deja la respuesta en 26 ciclos en vez de 44.

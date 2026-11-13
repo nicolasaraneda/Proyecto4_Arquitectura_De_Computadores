@@ -116,7 +116,7 @@ El binario contra la referencia con las series nuevas (`make equiv-gemelo`): 381
 ### Qué quedó hecho
 
 - **Pipeline de 3 etapas en la FPGA** (`docs/espino_segmentado.md`). Es el core con lectura anticipada del Proyecto 3, portado a BRAM: la memoria de instrucciones se lee en el flanco de bajada (`SB_RAM40_4KNR`), el banco de registros lee durante el fetch y adelanta el dato recién escrito. Se elige al compilar con `-DESPINO_SEGMENTADO`. **El core por defecto sigue siendo el Espino base** y `bitstreams/competencia_v1.bin` no se tocó.
-- **Los dos caminos de fetch de la sección 15**, construidos y medidos: flanco de bajada sobre BRAM y ROM combinacional de `trade.s` (`-DESPINO_ROM`). Se eligió el primero (TB2).
+- **Los dos caminos de fetch de la sección 15**, construidos y medidos: flanco de bajada sobre BRAM y ROM combinacional de `trade.s` (`-DESPINO_ROM`). Se eligió el primero (T33).
 - **Recorte de celdas** medido uno por uno. El único que rinde es el contador de programa de 11 bits.
 - **Verificación**: prueba formal de que el base no cambió (`make formal-base`), programas de riesgos del Proyecto 3 (`make riesgos`), ejecución en paralelo de dos SoC con programas aleatorios (`make paralelo`, `make paralelo-largo`), controles negativos por mutación (`make mutaciones`), gemelo ciclo a ciclo (`make cosim-seg`) y equivalencia con la referencia (`make equiv-seg`, `make equiv-rom`).
 - **Gemelo digital** con la tabla de ciclos del segmentado (`--pipeline`), validado contra el RTL.
@@ -124,7 +124,7 @@ El binario contra la referencia con las series nuevas (`make equiv-gemelo`): 381
 - **Mediciones** en `docs/mediciones/`: `espino_segmentado.txt`, `ticks_segmentado.txt`, `paralelo_largo.txt` y `mutaciones.txt`.
 - **Bitstream** `bitstreams/segmentado_v1.bin`, con hash, simulado desde el `.asc`.
 - **Integración continua**: `make check-seg` en cada push (cerca de un minuto en local: prueba formal, modelo de costo, riesgos, paralelo, 20 000 ticks y timing en 10 semillas). Lo largo queda como ejecución manual (`segmentado-completo`).
-- Decisiones TB1 a TB12 en `docs/decisiones.md`.
+- Decisiones T32 a T43 en `docs/decisiones.md`.
 
 ### Qué se midió
 
@@ -172,15 +172,15 @@ Verificación:
 1. **El pipeline medido supera la estimación de la clase 7.** El salto tomado cuesta 2 ciclos y no 3, porque la instrucción se lee medio ciclo después de que cambia el contador de programa y hay una sola instrucción que anular.
 2. **El pipeline sube la frecuencia máxima en vez de bajarla**, de 43,7 a 53,5 MHz de mediana. El multiplexor de adelantamiento entra a la ruta crítica, pero la decodificación sale de ella.
 3. **El prototipo anotado (24,4 a 25,6 MHz con el core sin rediseñar) no se reprodujo**: con la decodificación registrada el flanco de bajada cierra con más del doble de margen.
-4. **Yosys no reparte en BRAM una memoria con puertos de lectura en flancos distintos.** Con un solo arreglo el diseño ocupaba 47 551 celdas. Hace falta una copia explícita para el fetch (TB3).
-5. **El gemelo tenía un caso que el base no ejercita**: la instrucción que sigue a un store al esclavo SPI se completa en el ciclo inmediato. Lo encontraron los programas aleatorios (TB9).
-6. **`make bin` ya no reproduce el hash de `competencia_v1.bin`.** La lógica del base es la misma, pero cambiaron nombres internos y nextpnr ubica distinto (TB1).
+4. **Yosys no reparte en BRAM una memoria con puertos de lectura en flancos distintos.** Con un solo arreglo el diseño ocupaba 47 551 celdas. Hace falta una copia explícita para el fetch (T34).
+5. **El gemelo tenía un caso que el base no ejercita**: la instrucción que sigue a un store al esclavo SPI se completa en el ciclo inmediato. Lo encontraron los programas aleatorios (T40).
+6. **`make bin` ya no reproduce el hash de `competencia_v1.bin`.** La lógica del base es la misma, pero cambiaron nombres internos y nextpnr ubica distinto (T32).
 
 ### Qué falta del frente B
 
 - **Decidir si el segmentado va a la maestra el 19/11** como candidato a la edición de competencia. No cambia el patrimonio con la regla base. Libera 89 celdas y baja la respuesta de 44 a 26 ciclos.
 - **Probar `segmentado_v1.bin` en la placa.** Lo hace Nicolás con `iceprog`. El riesgo propio de este diseño es el ciclo de trabajo del reloj: las rutas de medio ciclo toleran entre 25 % y 75 %.
-- **riscv-formal.** Evaluado y sin hacer. `docs/espino_segmentado.md` lista lo que falta, cerca de un día (TB11).
+- **riscv-formal.** Evaluado y sin hacer. `docs/espino_segmentado.md` lista lo que falta, cerca de un día (T42).
 - **`icebram` con dos copias de la memoria.** El programa está en la memoria de datos y en la del fetch: hay que comprobar que `icebram` reemplaza las dos.
 - **Equivalencia formal de `pochoco_ram.v` y `espino_register_file.v` en modo base.** `make formal-base` cubre IF e ID. Esos dos tienen memorias y hoy se cubren con simulación.
 
