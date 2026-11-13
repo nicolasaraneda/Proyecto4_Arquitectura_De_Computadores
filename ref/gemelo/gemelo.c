@@ -15,6 +15,12 @@
  *       cualquier instrucción ............ 2 ciclos
  *       load ............................. 3 ciclos (acceso al bus en el 2.o)
  *       salto tomado, jal, jalr .......... 3 ciclos (una burbuja)
+ *   - Espino segmentado (--pipeline), el pipeline de 3 etapas de
+ *     docs/espino_segmentado.md: las mismas instrucciones con otro costo.
+ *       cualquier instrucción ............ 1 ciclo
+ *       load ............................. 2 ciclos (acceso al bus en el 1.o)
+ *       salto tomado, jal, jalr .......... 2 ciclos (una burbuja)
+ *     El contador de programa tiene 11 bits, como en el RTL.
  *     Decodifica igual que espino_decoder.v, incluidos los casos raros: los
  *     shifts se ejecutan como suma (la ALU los tiene deshabilitados) y una
  *     instrucción desconocida no hace nada.
@@ -33,8 +39,8 @@
  * Atajo del sondeo: el programa pasa casi todo el tiempo en el lazo
  *     lw rA, STATUS(rB) ; andi rA, rA, 1 ; beqz rA, lazo
  * Cuando el gemelo reconoce ese lazo y no hay precio nuevo, calcula en qué
- * vuelta va a llegar y se salta las anteriores (8 ciclos y 3 instrucciones
- * por vuelta). El resultado es idéntico al de simular cada vuelta: se
+ * vuelta va a llegar y se salta las anteriores (3 instrucciones por vuelta,
+ * que son 8 ciclos en el Espino base y 5 en el segmentado). El resultado es idéntico al de simular cada vuelta: se
  * comprueba corriendo con y sin --sin-atajo (make cosim).
  *
  * Compilar:  cc -O2 -o build/gemelo ref/gemelo/gemelo.c   (o make gemelo)
@@ -61,10 +67,20 @@ static struct {
   int      caja0, comision;
   int      atajo;
   int      resumen;
+  int      pipeline;         /* 0: Espino base. 1: pipeline de 3 etapas */
 } cfg = {
   "sw/trade.hex", "tb/practica.csv", NULL, NULL, NULL, NULL,
-  0, 12, 4000, 100000, 1000, 500, 500, 1, 10000, 5, 1, 1
+  0, 12, 4000, 100000, 1000, 500, 500, 1, 10000, 5, 1, 1, 0
 };
+
+/* Tabla de ciclos de la variante del core.
+ *   EJ:     ciclos desde que parte una instruccion hasta el ciclo en que se
+ *           ejecuta y completa (1 en el base, por la espera del banco de
+ *           registros; 0 en el segmentado).
+ *   VUELTA: ciclos de una vuelta del lazo de sondeo (lw, andi, beq tomado). */
+#define EJ      (cfg.pipeline ? 0 : 1)
+#define VUELTA  (cfg.pipeline ? 5 : 8)
+#define PC_MASK (cfg.pipeline ? 0x7ffu : 0xffffffffu)
 
 enum { EV_CS, EV_SCLK, EV_MOSI, EV_MUESTRA };
 typedef struct { int64_t ciclo; int tipo, valor; } Evento;
@@ -77,6 +93,7 @@ typedef struct {
   int64_t  c;                /* ciclo en que parte la instruccion actual */
   int64_t  ic, n_load, n_store, n_br_t, n_br_nt, n_jump, n_otras, vueltas_saltadas;
   int64_t  load_pend;        /* ciclo en que se completa el load en curso, o -1 */
+  int64_t  sig_pend;         /* segmentado: ciclo en que se completa la instruccion que sigue a un store, o -1 */
   /* perifericos */
   uint8_t  digit, led;
   /* esclavo SPI: estado durante el ciclo spi_c */
@@ -187,11 +204,13 @@ static int64_t proximo_evento(Sim *s) {
 static int64_t ic_hasta(Sim *s, int64_t y) {
   /* un load accede al bus un ciclo antes de completarse: si el esclavo avanza
    * durante ese acceso, la instruccion todavia no esta contada en ic */
-  if (!s->ff) return s->ic + (s->load_pend >= 0 && s->load_pend <= y);
-  /* dentro del atajo: vueltas del sondeo que parten en ff_c, 8 ciclos cada una,
-   * con instrucciones completadas en los ciclos +2, +4 y +6 */
-  int64_t d = y - s->ff_c, r = d % 8;
-  return s->ff_ic + 3 * (d / 8) + (r >= 2) + (r >= 4) + (r >= 6);
+  if (!s->ff) return s->ic + (s->load_pend >= 0 && s->load_pend <= y) + (s->sig_pend >= 0 && s->sig_pend <= y);
+  /* dentro del atajo: vueltas del sondeo que parten en ff_c. En el base son 8
+   * ciclos, con instrucciones completadas en los ciclos +2, +4 y +6. En el
+   * segmentado son 5 ciclos, con instrucciones completadas en +1, +2 y +3. */
+  int64_t d = y - s->ff_c, r = d % VUELTA;
+  if (cfg.pipeline) return s->ff_ic + 3 * (d / VUELTA) + (r >= 1) + (r >= 2) + (r >= 3);
+  return s->ff_ic + 3 * (d / VUELTA) + (r >= 2) + (r >= 4) + (r >= 6);
 }
 
 /* ---- Esclavo SPI: un flanco de reloj ---------------------------------------- */
@@ -399,8 +418,8 @@ static void atajo_sondeo(Sim *s) {
   if (w3 != (0xfe000ce3u | (uint32_t)(ra << 15))) return;                         /* beq ra, x0, -8 */
 
   int64_t c = s->c;
-  spi_avanzar(s, c + 1);                   /* la primera lectura de STATUS se hace de verdad */
-  lectura_status(s, c + 1);
+  spi_avanzar(s, c + EJ);                  /* la primera lectura de STATUS se hace de verdad */
+  lectura_status(s, c + EJ);
   if (s->new_price) return;
 
   s->ff = 1; s->ff_c = c; s->ff_ic = s->ic;
@@ -416,37 +435,39 @@ static void atajo_sondeo(Sim *s) {
     spi_paso(s, 0, 0, 0);
   }
   s->ff = 0;
-  /* primera vuelta cuya lectura (en c + 1 + 8 i) ve el precio nuevo. Si no hay
+  /* primera vuelta cuya lectura (en c + EJ + VUELTA i) ve el precio nuevo. Si no hay
    * mas precios se salta hasta cerca del final y las ultimas vueltas se simulan. */
-  int64_t i = fin ? (s->c_fin - c) / 8 - 1 : (s->spi_c - (c + 1) + 7) / 8;
+  int64_t i = fin ? (s->c_fin - c) / VUELTA - 1 : (s->spi_c - (c + EJ) + VUELTA - 1) / VUELTA;
   if (i <= 0) return;
-  s->c += 8 * i; s->ic += 3 * i;
+  s->c += VUELTA * i; s->ic += 3 * i;
   s->n_load += i; s->n_otras += i; s->n_br_t += i; s->vueltas_saltadas += i;
   s->x[ra] = 0;
 }
 
 static void correr_core(Sim *s) {
-  while (s->c < s->c_fin) {
-    if (cfg.atajo && !s->f_traza) { atajo_sondeo(s); if (s->c >= s->c_fin) break; }
+  while (s->c + EJ <= s->c_fin) {
+    if (cfg.atajo && !s->f_traza) { atajo_sondeo(s); if (s->c + EJ > s->c_fin) break; }
     uint32_t w = s->w, pc = s->pc;
     int64_t  c = s->c;
     int opcode = w & 0x7f, rd = (w >> 7) & 15, f3 = (w >> 12) & 7, rs1 = (w >> 15) & 15, rs2 = (w >> 20) & 15;
     int f7b5 = (w >> 30) & 1;
     uint32_t a = s->x[rs1], b = s->x[rs2];
     uint32_t imm_i = (uint32_t)((int32_t)w >> 20);
-    uint32_t npc = pc + 4;
-    int ciclos = 2;
+    int64_t  e = c + EJ;                 /* ciclo en que la instruccion se ejecuta */
+    uint32_t pc4 = (pc + 4) & PC_MASK;
+    uint32_t npc = pc4;
+    int ciclos = 1 + EJ;
     int ya_leida = 0;
 
     switch (opcode) {
-      case 0x37: completar(s, c + 1, rd, w & 0xfffff000u); s->n_otras++; break;             /* lui */
-      case 0x17: completar(s, c + 1, rd, pc + (w & 0xfffff000u)); s->n_otras++; break;      /* auipc */
-      case 0x13: completar(s, c + 1, rd, alu(alu_op(f3, f7b5, 0), a, imm_i)); s->n_otras++; break;
-      case 0x33: completar(s, c + 1, rd, alu(alu_op(f3, f7b5, 1), a, b)); s->n_otras++; break;
+      case 0x37: completar(s, e, rd, w & 0xfffff000u); s->n_otras++; break;             /* lui */
+      case 0x17: completar(s, e, rd, pc + (w & 0xfffff000u)); s->n_otras++; break;      /* auipc */
+      case 0x13: completar(s, e, rd, alu(alu_op(f3, f7b5, 0), a, imm_i)); s->n_otras++; break;
+      case 0x33: completar(s, e, rd, alu(alu_op(f3, f7b5, 1), a, b)); s->n_otras++; break;
       case 0x03: {                                                                           /* loads */
         uint32_t addr = a + imm_i, dato = 0, r;
-        s->load_pend = c + 2;
-        if (c + 1 <= s->c_fin) dato = bus_leer(s, c + 1, addr);
+        s->load_pend = e + 1;
+        if (e <= s->c_fin) dato = bus_leer(s, e, addr);
         s->load_pend = -1;
         uint32_t half = (addr & 2) ? dato >> 16 : dato & 0xffff;
         uint32_t byte = (addr & 1) ? (half >> 8) & 0xff : half & 0xff;
@@ -457,8 +478,8 @@ static void correr_core(Sim *s) {
           case 5:  r = half; break;                                 /* lhu */
           default: r = dato; break;                                 /* lw (y funct3 invalido) */
         }
-        completar(s, c + 2, rd, r);
-        s->n_load++; ciclos = 3;
+        completar(s, e + 1, rd, r);
+        s->n_load++; ciclos = 2 + EJ;
         break;
       }
       case 0x23: {                                                                           /* stores */
@@ -471,8 +492,13 @@ static void correr_core(Sim *s) {
         }
         s->w = s->mem[(npc >> 2) & (NWORDS - 1)];    /* la siguiente instruccion se lee antes de escribir */
         ya_leida = 1;
-        completar(s, c + 1, 0, 0);
-        if (c + 1 <= s->c_fin) bus_escribir(s, c + 1, addr, be, wdata);
+        completar(s, e, 0, 0);
+        /* En el segmentado la instruccion siguiente se completa en el ciclo
+         * e + 1, salvo que sea un load. Si el esclavo avanza a ese ciclo
+         * durante la escritura, esa instruccion ya debe contarse. */
+        if (cfg.pipeline && (s->w & 0x7f) != 0x03 && e + 1 <= s->c_fin) s->sig_pend = e + 1;
+        if (e <= s->c_fin) bus_escribir(s, e, addr, be, wdata);
+        s->sig_pend = -1;
         s->n_store++;
         break;
       }
@@ -487,24 +513,24 @@ static void correr_core(Sim *s) {
           case 7:  tomado = a >= b; break;
           default: tomado = 0; break;
         }
-        completar(s, c + 1, 0, 0);
+        completar(s, e, 0, 0);
         if (tomado) {
           uint32_t imm_b = ((uint32_t)((int32_t)w >> 31) << 12) | ((w << 4) & 0x800) | ((w >> 20) & 0x7e0) | ((w >> 7) & 0x1e);
-          npc = pc + imm_b; ciclos = 3; s->n_br_t++;
+          npc = (pc + imm_b) & PC_MASK; ciclos = 2 + EJ; s->n_br_t++;
         } else s->n_br_nt++;
         break;
       }
       case 0x6f: {                                                                           /* jal */
         uint32_t imm_j = ((uint32_t)((int32_t)w >> 31) << 20) | (w & 0xff000) | ((w >> 9) & 0x800) | ((w >> 20) & 0x7fe);
-        completar(s, c + 1, rd, pc + 4);
-        npc = pc + imm_j; ciclos = 3; s->n_jump++;
+        completar(s, e, rd, pc4);
+        npc = (pc + imm_j) & PC_MASK; ciclos = 2 + EJ; s->n_jump++;
         break;
       }
       case 0x67:                                                                             /* jalr */
-        completar(s, c + 1, rd, pc + 4);
-        npc = (a + imm_i) & ~1u; ciclos = 3; s->n_jump++;
+        completar(s, e, rd, pc4);
+        npc = (a + imm_i) & ~1u & PC_MASK; ciclos = 2 + EJ; s->n_jump++;
         break;
-      default: completar(s, c + 1, 0, 0); s->n_otras++; break;      /* no hace nada */
+      default: completar(s, e, 0, 0); s->n_otras++; break;      /* no hace nada */
     }
     s->pc = npc;
     if (!ya_leida) s->w = s->mem[(npc >> 2) & (NWORDS - 1)];
@@ -529,6 +555,7 @@ static void simular(Sim *s, const uint32_t *programa, const int *precio, int nti
   s->c_fin = (cfg.inicio_ns + (int64_t)nticks * cfg.periodo_ns - T_POS0 - 1) / T_CLK;
   s->t0 = -1;
   s->load_pend = -1;
+  s->sig_pend = -1;
   s->spi_c = 0;
   s->pc = 0; s->w = s->mem[0];
   s->c = s->R + 1;                         /* primera instruccion: el ciclo siguiente al fin del reset */
@@ -582,6 +609,7 @@ static void ayuda(void) {
        "  --por-bits N          ancho del contador de reset de pochoco_soc (12)\n"
        "  --caja N, --comision N   contabilidad (10000 y 5)\n"
        "  --borde 0|1           1: un cambio de pin que coincide con un flanco se ve en ese flanco (1)\n"
+       "  --pipeline            core segmentado (pipeline de 3 etapas) en vez del Espino base\n"
        "  --sin-atajo           simular cada vuelta del sondeo\n"
        "  --csv ARCHIVO         escribir decisiones.csv, igual al del testbench oficial\n"
        "  --ticks ARCHIVO       escribir una fila por tick, igual a la de tb/tb_cpi.sv\n"
@@ -613,6 +641,7 @@ int main(int argc, char **argv) {
     CON_VALOR("--comision", cfg.comision = (int)num(v))
     CON_VALOR("--borde", cfg.borde = (int)num(v))
     if (!strcmp(o, "--sin-atajo")) { cfg.atajo = 0; continue; }
+    if (!strcmp(o, "--pipeline")) { cfg.pipeline = 1; continue; }
     if (!strcmp(o, "--callado")) { cfg.resumen = 0; continue; }
     if (!strcmp(o, "--ayuda") || !strcmp(o, "-h") || !strcmp(o, "--help")) { ayuda(); return 0; }
     morir("opcion desconocida", o);
