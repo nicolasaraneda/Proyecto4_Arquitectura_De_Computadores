@@ -26,3 +26,6 @@ sim/sim
 # Artefactos de construccion y de simulacion del Proyecto 4
 build/
 decisiones.csv
+
+# Bitstreams de competencia: estos si se versionan, con su hash
+!bitstreams/*.bin

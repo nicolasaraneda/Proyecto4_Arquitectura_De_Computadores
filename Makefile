@@ -46,7 +46,7 @@ FREQ ?= 25
 
 .PHONY: all asm test-asm test-ref tb tb-param cpi check check-hex synth pnr bin prog \
         equiv equiv-r3 equiv-r2 equiv-r1 equiv-verilator equiv-largo medir-ticks \
-        medir-base hallazgos clean
+        sim-bitstream guardar-bitstream medir-base hallazgos clean
 
 # Objetivo por defecto: todo lo verificable sin la placa
 all: check
@@ -140,6 +140,18 @@ $(ASC): $(JSON) $(PCF)
 bin: $(BIN)
 $(BIN): $(ASC)
 	icepack $(ASC) $(BIN)
+
+# Simula el bitstream (no el RTL): icebox_vlog reconstruye un Verilog desde el
+# .asc y se comprueba que decide igual que la referencia. Unos 8 minutos.
+sim-bitstream: $(ASC)
+	tools/sim_bitstream.sh $(ASC) 2000
+
+# Copia el bitstream recién construido a bitstreams/ con su hash
+# (make guardar-bitstream NOMBRE=competencia_v1)
+NOMBRE ?= competencia
+guardar-bitstream: $(BIN)
+	cp $(BIN) bitstreams/$(NOMBRE).bin
+	cd bitstreams && sha256sum *.bin > SHA256SUMS && cat SHA256SUMS
 
 # Programar la placa (lo ejecuta una persona, con la Go Board conectada)
 prog: $(BIN)
