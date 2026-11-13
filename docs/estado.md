@@ -2,6 +2,41 @@
 
 Se actualiza al cerrar cada tramo de trabajo. La versión anterior queda en el historial de git.
 
+## Tramos 4 y 5: integración continua y frente C, producto 2x2 (13/11)
+
+Los frentes A (algoritmo) y B (Espino segmentado) se trabajan en paralelo, cada uno en su rama. Esta sección cubre lo que se hizo aparte de ellos.
+
+### Qué quedó hecho
+
+- **Integración continua más corta** (T22). Los 20 000 ticks con Icarus salieron del push. Los reemplazan el gemelo digital a los tres períodos (`make equiv-gemelo-20k`, `tools/equiv_gemelo.sh`) y Verilator sobre el RTL. La corrida con Icarus queda como ejecución manual: `make equiv-r3`, o `gh workflow run CI -f icarus_completo=true`.
+- **Producto 2x2 en punto fijo, solo diseño y costo** (`docs/producto_2x2.md`, T23 y T24). Especificación de la instrucción propuesta `kal2`, modelo de referencia (`ref/mv2x2.py`), generador de la versión de coeficientes fijos (`tools/gen_mv2x2.py`), versión con multiplicadores reales (`rtl/exhibicion/mv2x2_mult.v`), testbench (`tb/tb_mv2x2.sv`) y script de costo (`tools/costo_mv2x2.py`). No está en el SoC ni en el ensamblador.
+
+### Qué se midió
+
+- La integración continua pasó de 32 a 14 minutos. La equivalencia por push demora 2 minutos 19 segundos en local.
+- Producto 2x2 (`make costo-mv2x2`, salida en `docs/mediciones/mv2x2_costo.txt`), con coeficientes de ejemplo:
+
+| Versión | FPGA, módulo suelto | FPGA, integrada en el SoC base | GF180, solo síntesis |
+|---------|---------------------|--------------------------------|----------------------|
+| Coeficientes fijos, forma factorizada | 160 a 396 LUT según la precisión | agrega 217 a 368 celdas: no cabe (1291 de 1280 la más barata) | 8 000 a 20 000 um² |
+| Coeficientes fijos, forma directa | 324 a 427 LUT | | 30 000 um² |
+| Multiplicadores reales | 1645 LUT (8 bits) y 3094 LUT (14 bits): más que la FPGA | | 67 000 a 130 000 um² |
+
+- Las tres implementaciones coinciden con el modelo en 20 000 vectores por matriz.
+
+### Qué falta
+
+- **Repetir el costo con los coeficientes calibrados.** Los de las tablas salen de los parámetros puestos a mano de la familia `dos_componentes`.
+- **Medir las formas de achicarlo** (carriles más angostos, sin saturación, versión secuencial o periférico). Son estimaciones.
+- **Equivalencia formal** entre las dos versiones y contra la especificación.
+- **La integración en el core se hizo solo para contar celdas.** No está verificada como instrucción y el ensamblador no la conoce.
+- **Correr `make equiv-r3` a mano** antes de cada etiqueta y cada vez que cambie el RTL del core o del esclavo SPI.
+
+### Qué conviene atacar después y por qué
+
+1. **Decidir si el producto 2x2 se construye.** Depende de dos resultados que todavía no están: si el estimador de dos estados gana bajo el protocolo (frente A) y cuántas celdas deja libres el pipeline (frente B). Con lo medido hoy, en la FPGA solo cabría como periférico secuencial.
+2. **El resto del frente C** (especificación de la extensión en custom-0, soporte en el ensamblador, periférico estimador y la escalera de la clase 7 medida) necesita el kernel definitivo del frente A.
+
 ## Tramo 3: gemelo digital, series de prueba y protocolo de evaluación (13/11)
 
 ### Qué quedó hecho
