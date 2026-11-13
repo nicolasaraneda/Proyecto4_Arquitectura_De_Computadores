@@ -55,6 +55,7 @@ Verificación:
 | `make mutaciones` | 5 de 5 detectadas, por los programas de riesgos y por la ejecución en paralelo |
 | `make cosim-seg` | Gemelo contra RTL: 1 007 124 eventos de `trade.hex`, 846 705 escrituras de programas aleatorios, 20 000 ticks |
 | `make equiv-seg`, `make equiv-rom` | 20 000 ticks idénticos a `ref/trader.py` (Verilator a 0,1 ms y 1 ms, Icarus corto, gemelo a los tres períodos) |
+| `make equiv-r3` y `make equiv-seg-icarus` | La corrida manual de T22, que toca repetir porque cambió el RTL del core: 20 000 ticks con Icarus, base y segmentado, idénticos a la referencia (patrimonio 26 795) |
 | `make sim-bitstream-seg` | El bitstream simulado decide igual que la referencia en 2000 ticks |
 
 ### Hallazgos
@@ -73,7 +74,6 @@ Verificación:
 - **riscv-formal.** Evaluado y sin hacer. `docs/espino_segmentado.md` lista lo que falta, cerca de un día (TB11).
 - **`icebram` con dos copias de la memoria.** El programa está en la memoria de datos y en la del fetch: hay que comprobar que `icebram` reemplaza las dos.
 - **Equivalencia formal de `pochoco_ram.v` y `espino_register_file.v` en modo base.** `make formal-base` cubre IF e ID. Esos dos tienen memorias y hoy se cubren con simulación.
-- **Mediciones por tick con Icarus del segmentado a 20 000 ticks** quedan como ejecución manual, igual que en el base (T22).
 
 ### Qué conviene atacar después y por qué
 

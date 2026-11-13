@@ -219,7 +219,7 @@ hallazgos:
 # (-DESPINO_ROM) y repiten sobre ellas las pruebas del core base.
 .PHONY: tb-seg equiv-seg equiv-gemelo-seg cosim-seg cpi-seg riesgos paralelo paralelo-largo \
         mutaciones timing-seg synth-seg pnr-seg bin-seg sim-bitstream-seg medir-espino \
-        check-seg equiv-rom medir-ticks-seg formal-base
+        check-seg equiv-rom medir-ticks-seg formal-base equiv-seg-icarus
 
 SEG_DEFS := -DESPINO_SEGMENTADO
 JSON_SEG := $(BUILD)/$(TOP)_seg.json
@@ -237,6 +237,9 @@ equiv-seg: $(HEX) equiv-gemelo-seg
 	DEFS="$(SEG_DEFS)" SIM=verilator tools/equiv.sh seg_v_r2 1000000 20000
 	DEFS="$(SEG_DEFS)" tools/equiv.sh seg_r2 1000000 200
 	DEFS="$(SEG_DEFS)" tools/equiv.sh seg_r1 10000000 20
+# Ejecución manual: los 20 000 ticks con Icarus (unos 13 minutos)
+equiv-seg-icarus: $(HEX)
+	DEFS="$(SEG_DEFS)" tools/equiv.sh seg_r3 100000 20000
 equiv-gemelo-seg: $(GEMELO) $(HEX)
 	GEM_OPTS=--pipeline ETQ=seg tools/equiv_gemelo.sh
 
