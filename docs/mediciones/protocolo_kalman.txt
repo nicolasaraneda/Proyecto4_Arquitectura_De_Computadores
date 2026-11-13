@@ -1,0 +1,64 @@
+Protocolo: series de 2000 ticks, 1000 remuestreos, 200 series por familia, semilla 0
+
+Estrategia: cand:kalman
+conjunto                     n    media  mediana      p5    peor   mejor   >B&H  >10000  ordenes  B&H media
+practica, 10 bloques        10    11002    10568    9678    9678   13589    90%     90%     46.7       9746
+remuestreo (1000)         1000    10895    10844    8899    6198   19376    74%     79%     50.3       9583
+--- familias plausibles ---
+modelo                     200    10574    10407    8870    3242   31563    57%     72%     40.6      10093
+modelo_vecino              200    11897    10404    8817    3093  112201    62%     73%     55.4      10050
+dos_componentes            200    10859    10852    9023    7055   14260    63%     80%     61.0       9996
+cambio_volatilidad         200    11215    11015    7873    2993   23604    66%     72%     80.2       9941
+--- familias de estres ---
+paseo                      200     9917    10081    7638    2241   18210    54%     52%     42.9      10035
+tendencia                  200     9210     9907    4680     393   29697    47%     43%     43.7      12713
+reversion                  200    12208    10854   10154    9980   50160    96%     98%     41.7      10001
+saltos                     200    12722    10788    4498     910  116416    56%     61%     63.8       9836
+cambio_de_caracter         200     8865     9563    2219     268   40561    46%     42%     46.0      10471
+volatil                    200    22156    15523    7688    1960  286461    80%     85%    218.0      10343
+nivel_bajo                 200    21041    13132    6152     622  144560    64%     80%    237.0      11764
+plana                      200    10000    10000   10000   10000   10000   100%      0%      0.0       9995
+borde_bajo                 200    34367    32810   18969   14129   71886    92%    100%    394.9      12110
+borde_alto                 200    16611    16533   14869   13715   19800   100%    100%     86.7       9996
+--- grupos completos ---
+plausibles, todas          800    11136    10628    8692    2993  112201    62%     74%     59.3      10020
+estres, todas             2000    15710    10838    6466     268  286461    73%     66%    117.5      10727
+
+Bloques de practica, uno por uno (patrimonio, ordenes, perdida maxima, comprar y mantener):
+  bloque 0:  10010   72   1820   B&H   6695
+  bloque 1:   9678   36   1032   B&H  10589
+  bloque 2:  11806   63   1323   B&H  11499
+  bloque 3:  10568   16    159   B&H  10157
+  bloque 4:  13589   72    715   B&H  13195
+  bloque 5:  10490   16    320   B&H  10175
+  bloque 6:  11420   50   1138   B&H   8555
+  bloque 7:  10332   16    162   B&H   9715
+  bloque 8:  11874   64    526   B&H   8915
+  bloque 9:  10249   62   1763   B&H   7970
+Protocolo: series de 2000 ticks, 1000 remuestreos, 200 series por familia, semilla 0
+
+Candidata: cand:kalman   Base: base
+conjunto                     n media cand media base     dif   +-ee  gana en  p5 cand  p5 base peor cand peor base
+practica, 10 bloques        10      11002      11069     -67    205      70%     9678     9720      9678      9720
+remuestreo (1000)         1000      10895      10772    +123     24      59%     8899     8914      6198      6520
+--- familias plausibles ---
+modelo                     200      10574      10406    +168     55      62%     8870     8930      3242      3263
+modelo_vecino              200      11897      11381    +517    211      56%     8817     8543      3093      4445
+dos_componentes            200      10859      10772     +87     55      54%     9023     9138      7055      7276
+cambio_volatilidad         200      11215      11261     -46     99      56%     7873     7484      2993      2766
+--- familias de estres ---
+paseo                      200       9917       9927     -11     57      44%     7638     7866      2241      2271
+tendencia                  200       9210       9410    -200     62      40%     4680     5777       393       636
+reversion                  200      12208      11513    +695     95      88%    10154    10000      9980      9764
+saltos                     200      12722      12584    +138    220      54%     4498     4567       910      1094
+cambio_de_caracter         200       8865       9043    -177     55      41%     2219     2592       268       256
+volatil                    200      22156      20952   +1204    458      53%     7688     8047      1960      2238
+nivel_bajo                 200      21041      18042   +2998    634      70%     6152     7278       622      1855
+plana                      200      10000      10000      +0      0       0%    10000    10000     10000     10000
+borde_bajo                 200      34367      18496  +15871    614      99%    18969    10046     14129      8851
+borde_alto                 200      16611      14966   +1644     58      98%    14869    13363     13715     12731
+
+Criterio a (bloques: media y peor bloque):      no cumple
+Criterio b (remuestreos: media y percentil 5):  no cumple
+Criterio c (ninguna familia baja mas de 1 %):   no cumple
+Veredicto: la candidata NO reemplaza a la base
