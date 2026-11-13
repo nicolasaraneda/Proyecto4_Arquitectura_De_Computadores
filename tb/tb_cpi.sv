@@ -37,7 +37,7 @@
 //   make cpi
 // Parámetros (todos con -D): PROGRAMA, SERIE (CSV "tick,price"; sin SERIE los
 // precios salen de un LFSR), NTICKS, PERIODO_NS, INICIO_NS, CS_SETUP_NS,
-// SCLK_MEDIO_NS, CS_HOLD_NS, TICKS_CSV, TRAZA.
+// SCLK_MEDIO_NS, CS_HOLD_NS, POR_BITS, TICKS_CSV, TRAZA.
 //
 // Este testbench mira señales internas del Espino base (u_core.u_id.commit,
 // u_core.pc_set, u_core.rf_we). Si la microarquitectura cambia, hay que
@@ -66,6 +66,9 @@
 `ifndef CS_HOLD_NS
   `define CS_HOLD_NS 500
 `endif
+`ifndef POR_BITS
+  `define POR_BITS 12
+`endif
 
 module tb_cpi;
 
@@ -77,7 +80,7 @@ module tb_cpi;
   logic sclk = 0, mosi = 0, cs_n = 1;
   wire  miso;
 
-  pochoco_soc #(.MemFile(`PROGRAMA)) dut (
+  pochoco_soc #(.MemFile(`PROGRAMA), .PorBits(`POR_BITS)) dut (
     .i_Clk(clk), .o_LED(), .i_Switch(4'b0000),
     .o_Segment1_A(), .o_Segment1_B(), .o_Segment1_C(), .o_Segment1_D(),
     .o_Segment1_E(), .o_Segment1_F(), .o_Segment1_G(),

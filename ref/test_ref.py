@@ -13,6 +13,9 @@ Qué comprueba:
     la fórmula directa de la regla base. La actualización de la media se
     revisa de forma exhaustiva: todos los valores de S y todos los precios.
   - El modelo de los precios que se pierden durante el reset.
+  - Las series de prueba: rango, largo y reproducibilidad con la semilla.
+  - El protocolo: los números conocidos de la regla base.
+  - El gemelo digital contra la referencia, en un lote chico de series.
 """
 import os
 import random
@@ -21,8 +24,11 @@ import unittest
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
+import gemelo           # noqa: E402
 import market           # noqa: E402
 import p4_baseline      # noqa: E402
+import protocolo        # noqa: E402
+import series           # noqa: E402
 import trader           # noqa: E402
 
 RAIZ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -143,6 +149,72 @@ class ResetTests(unittest.TestCase):
                 return p
         self.assertEqual(trader.decisiones([10, 20, 30, 40], Eco()), [0, 10, 20, 30])
         self.assertEqual(trader.decisiones([10, 20, 30, 40], Eco(), perdidos=2), [0, 0, 0, 30])
+
+
+class SeriesTests(unittest.TestCase):
+    def test_rango_y_largo(self):
+        for nombre in ["remuestreo"] + list(series.FAMILIAS):
+            for s in series.lote(nombre, 5, 500, semilla=3):
+                self.assertEqual(len(s), 500, nombre)
+                self.assertTrue(all(isinstance(p, int) and 1 <= p <= 255 for p in s), nombre)
+
+    def test_reproducible(self):
+        for nombre in ["remuestreo", "paseo", "saltos"]:
+            self.assertEqual(series.lote(nombre, 3, 300, semilla=7), series.lote(nombre, 3, 300, semilla=7))
+            self.assertNotEqual(series.lote(nombre, 1, 300, semilla=7), series.lote(nombre, 1, 300, semilla=8))
+
+    def test_reflejar(self):
+        self.assertEqual([series.reflejar(x) for x in (1, 255, 0, -3, 256, 259, 509, 510)],
+                         [1, 255, 2, 5, 254, 251, 1, 2])
+
+    def test_bloques(self):
+        b = series.bloques(series.practica())
+        self.assertEqual((len(b), len(b[0]), len(b[-1])), (10, 2000, 2000))
+
+    def test_remuestreo_usa_incrementos_de_la_practica(self):
+        p = series.practica()
+        incrementos = {b - a for a, b in zip(p, p[1:])}
+        s = series.lote("remuestreo", 1, 2000, semilla=0)[0]
+        fuera = [b - a for a, b in zip(s, s[1:]) if b - a not in incrementos]
+        self.assertLess(len(fuera), 20)       # solo los rebotes en los bordes pueden salirse
+
+
+class ProtocoloTests(unittest.TestCase):
+    def test_regla_base_en_los_bloques(self):
+        b = series.bloques(series.practica())
+        r = protocolo.resumen(protocolo.evaluar("base", b), b)
+        self.assertEqual((round(r["media"]), r["peor"], r["sobre_byh"]), (11069, 9720, 0.9))
+
+    def test_fabrica_con_parametros(self):
+        e = protocolo.fabrica("base:k=4,entra=3,sale=1")()
+        self.assertEqual((e.k, e.umbral_compra, e.umbral_venta), (4, -48, 17))
+
+    def test_suma_movil_igual_al_punto_de_partida(self):
+        p = series.practica()
+        w, ordenes, dd = p4_baseline.simular(p, p4_baseline.reversion_sma(64, 4, 1), {})
+        m = trader.correr(p, protocolo.SumaMovil(64, 4, 1))
+        self.assertEqual((m.w, m.ordenes, m.max_dd), (w, ordenes, dd))
+
+
+class GemeloTests(unittest.TestCase):
+    """sw/trade.hex en el gemelo digital contra la referencia."""
+
+    def test_lote_igual_a_la_referencia(self):
+        lote = [s for nombre in ("remuestreo", "plana", "borde_bajo", "borde_alto", "saltos")
+                for s in series.lote(nombre, 4, 600, semilla=5)]
+        for periodo in (100000, 1000000):
+            res = gemelo.correr_lote(lote, periodo_ns=periodo)
+            for s, g in zip(lote, res):
+                m = trader.correr(s)
+                self.assertEqual((g["patrimonio"], g["ordenes"], g["perdida_max"]), (m.w, m.ordenes, m.max_dd))
+                self.assertEqual((g["respuestas"], g["precios_perdidos"]), (len(s), 0))
+
+    def test_reset_del_testbench(self):
+        """Con la primera transacción a los 4000 ns se pierden 2 precios a 0,1 ms, como en el RTL."""
+        p = series.practica()[:300]
+        g = gemelo.correr_lote([p], inicio_ns=4000)[0]
+        m = trader.correr(p, perdidos=trader.ticks_perdidos(100000))
+        self.assertEqual((g["patrimonio"], g["ordenes"], g["respuestas"]), (m.w, m.ordenes, 298))
 
 
 if __name__ == "__main__":

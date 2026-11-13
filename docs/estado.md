@@ -2,6 +2,55 @@
 
 Se actualiza al cerrar cada tramo de trabajo. La versión anterior queda en el historial de git.
 
+## Tramos 2 y 3 (13/11): regla base de punta a punta, gemelo digital y protocolo
+
+La sesión se cortó antes de terminar el cierre del tramo 3. Lo que sigue separa lo verificado de lo pendiente.
+
+### Qué quedó hecho y verificado
+
+- **Ensamblador:** directiva `.org` y salidas `--vh` y `--rom` del Proyecto 3. 87 tests. `trade.hex` relleno a 512 palabras.
+- **Referencia:** `ref/market.py` (porte del testbench) y `ref/trader.py` (regla base con la aritmética de `trade.s`, modela los precios perdidos en el reset). `make test-ref`: 22 pruebas.
+- **`sw/trade.s` solo software:** regla base sin saltos que dependan del precio. Testbench oficial sin modificar: 4/4, peor caso 44 ciclos de 2 262. Explicado en `docs/trade_s.md`.
+- **`make equiv`:** `decisiones.csv` idéntico byte a byte a la referencia en los 20 000 ticks a 0,1 ms con Icarus (patrimonio 26 795), en 20 000 ticks a 0,1 ms y 1 ms con Verilator (27 306 a 1 ms), en pocos ticks a 1 ms y 10 ms con Icarus, y en una serie de cada familia sintética (`make equiv-series`, 11 series).
+- **Mediciones por tick (`make medir-ticks`):** respuesta 41 ciclos promedio y 44 peor caso (IC 19,5 y 21, CPI 2,10); tick completo 63 y 66 ciclos (IC 28,5 y 30, CPI 2,21). Igual en las tres rondas.
+- **Bitstream:** `bitstreams/competencia_v1.bin` (1083 celdas, 12 BRAM, 44,0 MHz), con hash. `make sim-bitstream`: el bitstream simulado decide igual que la referencia en 2000 ticks.
+- **Gemelo digital (`ref/gemelo/gemelo.c`, `make cosim`):** traza idéntica al RTL ciclo a ciclo con `trade.hex` (timing oficial y tres timings distintos de SPI, período y reset) y con 4 programas aleatorios (`tools/prog_aleatorio.py`); `decisiones.csv` y resumen idénticos al testbench oficial en 20 000 ticks; mediciones por tick idénticas en 19 998 ticks. Corre 20 000 ticks a 10 ms en 0,02 s.
+- **`ref/series.py`:** bloques, remuestreo por bloques de incrementos y 10 familias sintéticas.
+- **`ref/protocolo.py`:** evaluación, comparación con criterio de aceptación, meseta y verificación del binario. `--binario`: `trade.hex` en el gemelo coincide con la referencia en 3010 series a los tres períodos (18 millones de ticks).
+
+### Qué se midió con el protocolo (regla base)
+
+| Conjunto | Media | Percentil 5 | Peor | Supera a comprar y mantener |
+|----------|-------|-------------|------|-----------------------------|
+| 10 bloques de práctica | 11 069 | 9 720 | 9 720 | 90 % |
+| 1000 remuestreos | 10 772 | 8 914 | 6 520 | 72 % |
+| Paseo aleatorio (200) | 9 873 | 7 126 | 2 918 | 42 % |
+| Tendencia (200) | 9 543 | 4 530 | 969 | 46 % |
+
+- **Meseta:** (k, entra, sale) = (5, 4, 0) es el máximo en los bloques (11 069; vecinos entre 10 446 y 11 043). En los remuestreos da 10 816 y el vecino (5, 3, 0) da 10 921. No es un máximo aislado, pero en los bloques hay sesgo de selección.
+- **Suma móvil de 64 contra la base:** no la reemplaza (pierde en bloques y remuestreos), aunque gana en las familias sintéticas.
+- **Peor caso real de respuesta:** barriendo la fase con el gemelo es 49 ciclos para el primer precio (pasa por la inicialización) y 44 para el resto. El testbench solo ve 44.
+- **Costo de entrada:** el límite de 63 acciones hace que entrar tome hasta 6 órdenes al final de la serie de práctica.
+- **Pérdidas grandes en tendencia y paseo** (peor caso 969 y 2 918): es lo que debe cubrir la guardia de régimen.
+
+### Qué falta de estos tramos
+
+- **No se hizo `git push`.** Los commits están solo en local. La integración continua nueva (equivalencia de 20 000 ticks, pruebas de la referencia) no ha corrido en GitHub. Falta agregarle `make cosim` y `make equiv-gemelo`.
+- **`make equiv-largo`** (20 000 ticks a 10 ms con Verilator) quedó corriendo. El resultado está en `build/equiv_largo.out`.
+- **Documentos de estudio sin escribir:** `docs/gemelo.md` y `docs/protocolo.md`. El Makefile ya los nombra.
+- **Decisiones sin registrar:** gemelo en C, atajo del sondeo, resolución de la coincidencia entre SCLK y el reloj, criterio de aceptación del protocolo, largo de bloque del remuestreo.
+- **`docs/trade_s.md`** dice que la respuesta va de 38 a 44 ciclos. Hay que agregar el caso del primer precio (hasta 49) y el rango 37 a 44 sobre todas las fases.
+- **`make protocolo`** no se corrió con el Makefile: faltan los archivos `docs/mediciones/protocolo_*.txt`.
+- **README:** falta la sección del gemelo, las series y el protocolo.
+- **Programar la placa:** lo hace Nicolás con `iceprog`. No se ha probado en hardware.
+
+### Qué conviene atacar después y por qué
+
+1. Cerrar lo pendiente de arriba y empujar, para que `main` en GitHub tenga la integración continua completa en verde.
+2. Frente A con el protocolo ya armado: identificar el generador, guardia de régimen (tendencia y paseo son donde se pierde), y manejo del límite de 63 acciones.
+3. Frente B, Espino segmentado: el gemelo y `tools/prog_aleatorio.py` ya sirven para la ejecución en paralelo contra el original.
+4. Probar `icebram` con el `trade.hex` de 512 palabras.
+
 ## Tramo 1: repositorio, flujo completo y mediciones de partida (12/11 y 13/11)
 
 ### Qué quedó hecho

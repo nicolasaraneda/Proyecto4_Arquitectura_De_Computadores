@@ -41,11 +41,13 @@ SERIE      ?= tb/practica.csv
 # Productos de síntesis
 JSON := $(BUILD)/$(TOP).json
 ASC  := $(BUILD)/$(TOP).asc
+GEMELO := $(BUILD)/gemelo
 BIN  := $(BUILD)/$(TOP).bin
 FREQ ?= 25
 
 .PHONY: all asm test-asm test-ref tb tb-param cpi check check-hex synth pnr bin prog \
         equiv equiv-r3 equiv-r2 equiv-r1 equiv-verilator equiv-largo medir-ticks \
+        equiv-series equiv-gemelo gemelo cosim protocolo \
         sim-bitstream guardar-bitstream medir-base hallazgos clean
 
 # Objetivo por defecto: todo lo verificable sin la placa
@@ -90,9 +92,10 @@ tb-param: $(HEX)
 #   equiv-r2 y equiv-r1: pocos ticks a 1 ms y 10 ms con Icarus, para validar el
 #             modelo de los precios que se pierden durante el reset.
 #   equiv-verilator: los 20 000 ticks a 0,1 ms y a 1 ms con Verilator.
+#   equiv-series: una serie de cada familia sintética, con Verilator.
 #   equiv-largo: los 20 000 ticks a 10 ms con Verilator (unos 25 minutos). No
 #             corre en la integración continua.
-equiv: equiv-r3 equiv-r2 equiv-r1 equiv-verilator
+equiv: equiv-r3 equiv-r2 equiv-r1 equiv-verilator equiv-series
 
 equiv-r3: $(HEX)
 	tools/equiv.sh r3 100000 20000
@@ -106,9 +109,41 @@ equiv-verilator: $(HEX)
 equiv-largo: $(HEX)
 	SIM=verilator tools/equiv.sh v_r1 10000000 20000
 
-# Mercado y referencia: pruebas en Python (ref/test_ref.py)
-test-ref:
+# Lotes de series de prueba por el RTL: una serie de cada familia sintética y
+# un remuestreo, 2000 ticks cada una, con Verilator. Conviene make -j4.
+FAMILIAS := remuestreo paseo tendencia reversion dos_componentes saltos \
+            cambio_volatilidad cambio_de_caracter plana borde_bajo borde_alto
+equiv-series: $(addprefix equiv-serie-,$(FAMILIAS))
+equiv-serie-%: $(HEX)
+	$(PYTHON) ref/series.py $* --n 2000 --semilla 1 -o $(BUILD)/series/$*.csv > /dev/null
+	SIM=verilator tools/equiv.sh serie_$* 100000 2000 $(BUILD)/series/$*.csv
+
+# Mercado, referencia, series y protocolo: pruebas en Python (ref/test_ref.py)
+test-ref: $(GEMELO)
 	$(PYTHON) ref/test_ref.py
+
+# --- Gemelo digital ------------------------------------------------------------
+# Simulador en C con exactitud de ciclo (docs/gemelo.md).
+gemelo: $(GEMELO)
+$(GEMELO): ref/gemelo/gemelo.c | $(BUILD)
+	$(CC) -O2 -Wall -Wextra -o $@ $<
+
+# Valida el gemelo contra el RTL: trazas ciclo a ciclo, programas aleatorios,
+# testbench oficial y control negativo. Unos 2 minutos.
+cosim: $(GEMELO) $(HEX)
+	tools/cosim.sh
+
+# El binario sw/trade.hex, corrido en el gemelo sobre las 3010 series del
+# protocolo y a los tres períodos, debe dar lo mismo que ref/trader.py.
+equiv-gemelo: $(GEMELO) $(HEX)
+	$(PYTHON) ref/protocolo.py --binario
+
+# --- Protocolo de evaluación de algoritmos (docs/protocolo.md) ----------------
+# Deja los resultados de la regla base en docs/mediciones/.
+protocolo: $(GEMELO)
+	$(PYTHON) ref/protocolo.py | tee docs/mediciones/protocolo_base.txt
+	$(PYTHON) ref/protocolo.py --meseta | tee docs/mediciones/protocolo_meseta.txt
+	$(PYTHON) ref/protocolo.py --comparar sma64 | tee docs/mediciones/protocolo_sma64.txt
 
 # CPI medido en simulación (instrucciones completadas y ciclos, por clase) y
 # mediciones por tick con precios de un LFSR. Es rápido: 200 ticks con Icarus.
