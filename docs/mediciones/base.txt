@@ -1,0 +1,81 @@
+Mediciones del repo base (etiqueta base-curso, nic0villegasc/pochoco_soc en 33e8b5a)
+Generado por tools/medir_base.sh. No editar a mano.
+
+Herramientas:
+  Yosys 0.68+195 (git sha1 435977e97-dirty, Release, Clang /usr/bin/clang++ 21.1.8)
+  "nextpnr-ice40" -- Next Generation Place and Route (Version nextpnr-0.11.1-19-g8dbcee5c)
+  Icarus Verilog version 14.0 (devel) (s20260301-403-g5ab23063f-dirty)
+
+1. Base sin cambios (nextpnr --hx1k --package vq100 --freq 25)
+  Celdas logicas: 1065 de 1280
+  BRAM:           12 de 16
+  LUT4 segun yosys: 888
+  Frecuencia maxima por semilla (MHz):
+    semilla  1: 47.10
+    semilla  2: 44.42
+    semilla  3: 43.69
+    semilla  4: 44.56
+    semilla  5: 44.97
+    semilla  6: 42.66
+    semilla  7: 43.29
+    semilla  8: 43.65
+    semilla  9: 42.99
+    semilla 10: 45.55
+  Minima 42.66, mediana 44.055, maxima 47.10 MHz
+
+2. Shifter completo habilitado (sll, srl y sra descomentados en espino_alu.v)
+  Celdas logicas: 1491 de 1280
+  BRAM:           12 de 16
+  LUT4 segun yosys: 1321
+  Cabe en el HX1K: no
+  nextpnr: ERROR: Unable to place cell 'per_sel_SB_LUT4_I3_O_SB_DFFER_E_1_Q_SB_DFFER_Q_2_DFFLC', no BELs remaining to implement cell type 'ICESTORM_LC'
+
+3. PLL (SB_PLL40_CORE de 25 a 50 MHz en pochoco_soc.v)
+  nextpnr termina bien: no
+  nextpnr: ERROR: PLL 'u_pll' couldn't be placed anywhere, no suitable BEL found.
+  nextpnr: ERROR: Packing design failed.
+  Log completo en docs/mediciones/pll_nextpnr.log
+
+4. CPI del Espino base en simulacion (tb/tb_cpi.sv)
+  Programa:                 build/base/src/sw/blink.hex
+  Ticks:                    20 con periodo de 100000 ns
+  Instrucciones (IC):       20033
+  Ciclos:                   50080
+  CPI medido:               2.4999
+    loads:                  0
+    stores:                 1
+    branches tomados:       10014
+    branches no tomados:    0
+    jal y jalr:             0
+    otras:                  10018
+  Modelo 2*IC+loads+saltos: 50080 ciclos (diferencia con lo medido: 0)
+  PASS el modelo de costo coincide con lo medido
+
+  Programa:                 build/base/src/sw/7seg.hex
+  Ticks:                    20 con periodo de 100000 ns
+  Instrucciones (IC):       20032
+  Ciclos:                   50078
+  CPI medido:               2.4999
+    loads:                  0
+    stores:                 1
+    branches tomados:       10014
+    branches no tomados:    0
+    jal y jalr:             0
+    otras:                  10017
+  Modelo 2*IC+loads+saltos: 50078 ciclos (diferencia con lo medido: 0)
+  PASS el modelo de costo coincide con lo medido
+
+  Programa:                 build/base/src/sw/buttons_leds.hex
+  Ticks:                    20 con periodo de 100000 ns
+  Instrucciones (IC):       18781
+  Ciclos:                   50081
+  CPI medido:               2.6666
+    loads:                  6260
+    stores:                 6259
+    branches tomados:       0
+    branches no tomados:    0
+    jal y jalr:             6259
+    otras:                  3
+  Modelo 2*IC+loads+saltos: 50081 ciclos (diferencia con lo medido: 0)
+  PASS el modelo de costo coincide con lo medido
+
