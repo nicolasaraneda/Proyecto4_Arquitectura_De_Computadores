@@ -1,0 +1,63 @@
+Mediciones por tick, variante: software
+Programa sw/trade.hex, serie tb/practica.csv. Generado por tools/medir_ticks.sh (make medir-ticks).
+Reloj de 25 MHz: un ciclo son 40 ns.
+
+== Ronda 1 ==
+Programa:                 sw/trade.hex
+Ticks:                    2000 con periodo de 10000000 ns
+Instrucciones (IC):       187508996
+Ciclos:                   499996002
+CPI medido:               2.6665
+  loads:                  62491004
+  stores:                 3998
+  branches tomados:       62485006
+  branches no tomados:    1999
+  jal y jalr:             2000
+  otras:                  62524989
+Modelo 2*IC+loads+saltos: 499996002 ciclos (diferencia con lo medido: 0)
+Por tick, 1999 ticks medidos, T = 10000000 ns, presupuesto 249762 ciclos:
+  respuesta, promedio          IC   19.50   ciclos   41.00   CPI 2.103   tiempo   1.640 us   ( 0.016 % de T)
+  respuesta, peor caso         IC   21.00   ciclos   44.00   CPI 2.095   tiempo   1.760 us   ( 0.018 % de T)
+  tick completo, promedio      IC   28.50   ciclos   63.00   CPI 2.211   tiempo   2.520 us   ( 0.025 % de T)
+  tick completo, peor caso     IC   30.00   ciclos   66.00   CPI 2.200   tiempo   2.640 us   ( 0.026 % de T)
+PASS el modelo de costo coincide con lo medido
+
+== Ronda 2 ==
+Programa:                 sw/trade.hex
+Ticks:                    20000 con periodo de 1000000 ns
+Instrucciones (IC):       187603496
+Ciclos:                   499996002
+CPI medido:               2.6652
+  loads:                  62414504
+  stores:                 39998
+  branches tomados:       62354506
+  branches no tomados:    19999
+  jal y jalr:             20000
+  otras:                  62754489
+Modelo 2*IC+loads+saltos: 499996002 ciclos (diferencia con lo medido: 0)
+Por tick, 19999 ticks medidos, T = 1000000 ns, presupuesto 24762 ciclos:
+  respuesta, promedio          IC   19.50   ciclos   41.00   CPI 2.103   tiempo   1.640 us   ( 0.164 % de T)
+  respuesta, peor caso         IC   21.00   ciclos   44.00   CPI 2.095   tiempo   1.760 us   ( 0.176 % de T)
+  tick completo, promedio      IC   28.50   ciclos   63.00   CPI 2.211   tiempo   2.520 us   ( 0.252 % de T)
+  tick completo, peor caso     IC   30.00   ciclos   66.00   CPI 2.200   tiempo   2.640 us   ( 0.264 % de T)
+PASS el modelo de costo coincide con lo medido
+
+== Ronda 3 ==
+Programa:                 sw/trade.hex
+Ticks:                    20000 con periodo de 100000 ns
+Instrucciones (IC):       18853490
+Ciclos:                   49996000
+CPI medido:               2.6518
+  loads:                  6164508
+  stores:                 39996
+  branches tomados:       6104513
+  branches no tomados:    19998
+  jal y jalr:             19999
+  otras:                  6504476
+Modelo 2*IC+loads+saltos: 49996000 ciclos (diferencia con lo medido: 0)
+Por tick, 19998 ticks medidos, T = 100000 ns, presupuesto 2262 ciclos:
+  respuesta, promedio          IC   19.50   ciclos   41.00   CPI 2.103   tiempo   1.640 us   ( 1.640 % de T)
+  respuesta, peor caso         IC   21.00   ciclos   44.00   CPI 2.095   tiempo   1.760 us   ( 1.760 % de T)
+  tick completo, promedio      IC   28.50   ciclos   63.00   CPI 2.211   tiempo   2.520 us   ( 2.520 % de T)
+  tick completo, peor caso     IC   30.00   ciclos   66.00   CPI 2.200   tiempo   2.640 us   ( 2.640 % de T)
+PASS el modelo de costo coincide con lo medido
