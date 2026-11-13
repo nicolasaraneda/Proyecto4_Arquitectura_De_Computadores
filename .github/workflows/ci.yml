@@ -4,7 +4,8 @@
 # En cada push y en cada pull request se corre lo mismo que `make check`
 # (tests del ensamblador y de la referencia, trade.hex al día, testbench
 # oficial con 4/4), la equivalencia con la referencia en los 20 000 ticks, la
-# medición de CPI y la síntesis completa hasta el bitstream.
+# validación del gemelo digital contra el RTL, la medición de CPI y la
+# síntesis completa hasta el bitstream.
 # Usa la misma versión de OSS CAD Suite que usamos en el desarrollo.
 
 name: CI
@@ -48,6 +49,12 @@ jobs:
 
       - name: Equivalencia con la referencia (20 000 ticks)
         run: make -j4 equiv
+
+      - name: Gemelo digital contra el RTL
+        run: make cosim
+
+      - name: El binario en el gemelo contra la referencia (3010 series)
+        run: make equiv-gemelo
 
       - name: CPI y modelo de costo
         run: make cpi

@@ -1,0 +1,21 @@
+Protocolo: series de 2000 ticks, 1000 remuestreos, 200 series por familia, semilla 0
+
+Candidata: sma64   Base: base
+conjunto                     n media cand media base     dif  gana en  p5 cand  p5 base peor cand peor base
+practica, 10 bloques        10      10951      11069    -118      40%    10148     9720     10148      9720
+remuestreo (1000)         1000      10624      10772    -149      48%     8275     8914      5158      6520
+paseo                      200       9994       9873    +121      57%     5898     7126      3131      2918
+tendencia                  200       9767       9543    +223      50%     3570     4530       510       969
+reversion                  200      42613      40086   +2526      65%    20321    19832     14879     14305
+dos_componentes            200      27057      25138   +1919      70%    17294    16399     13739     13134
+saltos                     200      42344      37679   +4666      64%    15921    15827      7090      7761
+cambio_volatilidad         200      64951      63697   +1254      56%    27793    25722     19160     17099
+cambio_de_caracter         200      13362      13225    +137      55%     3553     3507       915       389
+plana                      200      10000      10000      +0       0%    10000    10000     10000     10000
+borde_bajo                 200      35421      18496  +16925      98%    14729    10046      6517      8851
+borde_alto                 200      17126      14966   +2160      99%    14955    13363     14083     12731
+
+Criterio a (bloques: media y peor bloque):      no cumple
+Criterio b (remuestreos: media y percentil 5):  no cumple
+Criterio c (ninguna familia baja mas de 1 %):   cumple
+Veredicto: la candidata NO reemplaza a la base

@@ -135,3 +135,39 @@ Hay tres hechos que estas decisiones no cambian y con los que se planifica:
 - **Razón.** El día de la competencia hay que grabar un archivo que ya se probó, no uno recién sintetizado. Con el hash se puede comprobar que el archivo de la placa es el que pasó por la maestra real.
 - **Alternativas.** Regenerarlo cada vez con `make bin`. Con las mismas versiones el resultado es el mismo, pero depende de tener el entorno intacto ese día.
 - **Qué se pierde.** 32 kB por bitstream en el repositorio.
+
+### T17. El gemelo digital se escribe en C y se valida por trazas (13/11)
+
+- **Decisión.** `ref/gemelo/gemelo.c` simula el SoC con exactitud de ciclo: el core por instrucción, con el ciclo exacto de cada acceso al bus y de cada escritura de registro, y el esclavo SPI flanco por flanco con la misma lógica del Verilog. Se valida con `make cosim`, que exige trazas idénticas a las del RTL.
+- **Razón.** La simulación del RTL no alcanza para las rondas de 10 ms ni para miles de series: Icarus demoraría unas 22 horas en 20 000 ticks a 10 ms y Verilator 22 minutos. El gemelo demora 0,02 segundos. Python puro habría sido unas 100 veces más lento, y no hay numpy en el entorno.
+- **Alternativas.** Usar solo Verilator (sirve para una corrida, no para la matriz de estrés ni para correr el binario en el protocolo). Un modelo por tick sin ciclos (no sirve para medir la respuesta ni para probar otros tiempos de SPI).
+- **Qué se pierde.** Hay un segundo modelo del hardware que mantener. Cuando el core se segmente, hay que actualizar su tabla de ciclos y volver a validarlo. Hace falta un compilador de C para las pruebas.
+- **Método.** La traza por eventos y la comparación con `cmp` vienen del `tb/core_trace_tb.v` y el `tb/comparar_trazas.py` del Proyecto 3.
+
+### T18. El gemelo se salta las vueltas del sondeo que no cambian nada (13/11)
+
+- **Decisión.** Cuando el contador de programa está en el lazo `lw`, `andi`, `beqz` sobre `STATUS` y no hay precio nuevo, el gemelo calcula en qué vuelta va a llegar y se salta las anteriores.
+- **Razón.** El programa pasa más del 97 % del tiempo en ese lazo. Sin el atajo los 20 000 ticks a 10 ms toman 21 segundos y con el atajo 0,02.
+- **Alternativas.** No optimizar, o reconocer el lazo por dirección. Se reconoce por el contenido de las tres instrucciones, para que siga funcionando si el programa cambia de lugar.
+- **Qué se pierde.** Código más delicado. Se cubre comparando el resultado con y sin atajo en cada `make cosim`, incluidos los totales de instrucciones y de ciclos. Con `--traza` el atajo se desactiva.
+
+### T19. El gemelo resuelve la coincidencia entre SCLK y el reloj igual que los simuladores (13/11)
+
+- **Observación.** El testbench oficial sube `SCLK` exactamente en un flanco de subida del reloj de 25 MHz (5500 ns = 20 + 40 × 137). Qué ve el sincronizador depende del orden de los eventos en el simulador. Icarus y Verilator coinciden: el flanco ya ve el valor nuevo.
+- **Decisión.** El gemelo usa esa resolución por defecto (`--borde 1`) y permite la contraria (`--borde 0`).
+- **Consecuencia.** El peor caso que informa el testbench (44 ciclos) depende de esa coincidencia y de la fase del lazo de sondeo. Barriendo todas las fases, el peor caso real es 49 ciclos, en el primer precio. Las decisiones no cambian con ninguna de las dos resoluciones. En la placa la maestra es asíncrona y se dan los dos casos.
+
+### T20. Protocolo de evaluación y criterio de aceptación (13/11)
+
+- **Decisión.** Un algoritmo se evalúa con `ref/protocolo.py` sobre series de 2000 ticks: los 10 bloques de práctica, 1000 remuestreos por bloques de 100 incrementos y 200 series de cada una de 10 familias sintéticas. Una candidata reemplaza a la regla base solo si (a) en los bloques la media y el peor bloque son mayores o iguales, (b) en los remuestreos la media y el percentil 5 son mayores o iguales, y (c) en ninguna familia sintética la media baja más de 1 %.
+- **Razón.** Fijar la vara antes de probar ideas. La regla base está casi en el máximo de su grilla sobre la serie completa, así que ese número ya tiene sesgo de selección.
+- **Alternativas.** Mitad de la serie para ajustar y mitad para validar (quedan 5 bloques por lado, muy pocos). Pedir significancia estadística en vez de mayor o igual (queda como mejora: con 1000 remuestreos se puede calcular el error de la diferencia).
+- **Qué se pierde.** El remuestreo por bloques conserva la dependencia dentro de 100 ticks y pierde la de más largo plazo: es más duro que la serie original para una regla de reversión. La tolerancia de 1 % y el largo del bloque son elecciones nuestras. Las familias sintéticas no están calibradas contra la serie de práctica: eso es parte del frente del algoritmo.
+- **Primer resultado.** La suma móvil de 64 no reemplaza a la regla base: pierde en bloques y en remuestreos, aunque gana en las familias sintéticas (`docs/protocolo.md`).
+
+### T21. Todo en Python estándar, sin numpy (13/11)
+
+- **Decisión.** `ref/` usa solo la biblioteca estándar de Python. Lo que necesita velocidad va en C (el gemelo) o se reparte entre procesos con `multiprocessing`.
+- **Razón.** El entorno no tiene numpy y no instalamos nada en el sistema. Además quien revise el repositorio lo puede correr sin preparar nada, y la integración continua tampoco instala paquetes.
+- **Qué se pierde.** Los barridos grandes de parámetros serán más lentos que con vectores. La evaluación completa de una estrategia toma unos 5 segundos, que por ahora alcanza.
+

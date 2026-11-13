@@ -61,10 +61,12 @@ Otros objetivos:
 | Comando | Qué hace |
 |---------|----------|
 | `make tb-param PERIODO_NS=1000000 NTICKS=500` | Corre una copia del testbench oficial con otro período y otro número de ticks, y compara el resultado con la referencia. El original no se toca. |
-| `make -j4 equiv` | Equivalencia con la referencia: el `decisiones.csv` del testbench debe ser idéntico byte a byte al de `ref/trader.py`. Incluye los 20 000 ticks de práctica a 0,1 ms con Icarus (13 minutos) y a 0,1 ms y 1 ms con Verilator. |
+| `make -j4 equiv` | Equivalencia con la referencia: el `decisiones.csv` del testbench debe ser idéntico byte a byte al de `ref/trader.py`. Incluye los 20 000 ticks de práctica a 0,1 ms con Icarus (13 minutos), a 0,1 ms y 1 ms con Verilator, y una serie de cada familia sintética. |
 | `make equiv-largo` | Lo mismo con los 20 000 ticks a 10 ms, con Verilator (unos 25 minutos). |
 | `make medir-ticks` | Mediciones por tick del punto 3.2: IC, ciclos, CPI y tiempo, promedio y peor caso, en las tres rondas. Resultado en `docs/mediciones/ticks_software.txt`. |
 | `make sim-bitstream` | Simula el bitstream ya ruteado (no el RTL) y comprueba que decide igual que la referencia. |
+| `make cosim` | Valida el gemelo digital contra el RTL: trazas idénticas ciclo a ciclo, programas aleatorios y testbench oficial. |
+| `make equiv-gemelo` | Corre `trade.hex` en el gemelo sobre las 3010 series del protocolo, a los tres períodos, y lo compara con la referencia. |
 | `make cpi` | Mide instrucciones, ciclos y CPI del core con `tb/tb_cpi.sv`, y comprueba el modelo de costo. Corrida corta, con precios de un LFSR. |
 | `make check` | Tests del ensamblador y de la referencia, `trade.hex` al día y testbench oficial. |
 
@@ -87,6 +89,17 @@ Resultado de la regla base sobre la serie de práctica completa (20 000 ticks, v
 | No operar | 10 000 | 0 | 0 | 0 |
 | Comprar y mantener | 6 497 | 1 | 5 | |
 | Regla base (`trade.s`) | 27 062 | 388 | 1 940 | 2 929 |
+
+## Piezas avanzadas
+
+Cada una tiene su documento de estudio, su prueba y el número que la respalda.
+
+| Pieza | Qué es | Cómo se corre su prueba | Número que la respalda | Documento |
+|-------|--------|-------------------------|------------------------|-----------|
+| Gemelo digital | Simulador en C del SoC con exactitud de ciclo. Corre el mismo `trade.hex` del bitstream. | `make cosim` | Traza idéntica al RTL en 8 configuraciones, más de un millón de eventos. 20 000 ticks a 10 ms en 0,02 s (Verilator: 22 minutos). | `docs/gemelo.md` |
+| Protocolo de evaluación | 10 bloques de práctica, 1000 remuestreos y 10 familias sintéticas, con criterio de aceptación. | `make protocolo` y `make equiv-gemelo` | Regla base: media 10 772 y percentil 5 de 8 914 en los remuestreos. El binario coincide con la referencia en 18 millones de ticks. | `docs/protocolo.md` |
+| Simulación del bitstream | Simula lo que se graba en la placa, reconstruido desde el `.asc`. | `make sim-bitstream` | 2000 ticks idénticos a la referencia. | `docs/decisiones.md`, T15 |
+| Programas aleatorios | Generador de programas para comparar dos modelos del SoC. | `make cosim` | 469 343 escrituras de registro y de memoria comparadas con 4 semillas. | `docs/gemelo.md`, sección 3 |
 
 ## Cómo sintetizar y programar la placa
 
@@ -115,8 +128,8 @@ Extrae la copia sin cambios del repositorio base (etiqueta `base-curso`) y mide 
 | `rtl/`     | Pochoco SoC y Espino Core. |
 | `sw/`      | `trade.s` y los programas de ejemplo del repositorio base. |
 | `tb/`      | Testbench oficial, serie de práctica y testbenches propios. |
-| `ref/`     | Referencia del algoritmo en Python, mercado de la maestra y análisis de la serie. |
-| `tools/`   | Ensamblador y scripts de equivalencia y de medición. |
+| `ref/`     | Referencia del algoritmo en Python, mercado de la maestra, series de prueba, protocolo de evaluación y gemelo digital. |
+| `tools/`   | Ensamblador, generador de programas aleatorios y scripts de equivalencia, co-simulación y medición. |
 | `bitstreams/` | Bitstreams de competencia, con su hash. |
 | `formal/`  | Verificación formal (todavía vacía). |
 | `docs/`    | Enunciado, estado, decisiones, documentación y mediciones. |

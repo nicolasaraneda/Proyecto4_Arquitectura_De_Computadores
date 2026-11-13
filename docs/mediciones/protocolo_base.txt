@@ -1,0 +1,28 @@
+Protocolo: series de 2000 ticks, 1000 remuestreos, 200 series por familia, semilla 0
+
+Estrategia: base
+conjunto                     n    media  mediana      p5    peor   mejor   >B&H  >10000  ordenes  B&H media
+practica, 10 bloques        10    11069    11103    9720    9720   13357    90%     80%     29.9       9746
+remuestreo (1000)         1000    10772    10703    8914    6520   15637    72%     79%     30.2       9583
+paseo                      200     9873     9947    7126    2918   16360    42%     48%     56.2      10621
+tendencia                  200     9543    10015    4530     969   26687    46%     50%     59.8      12874
+reversion                  200    40086    32441   19832   14305  128144   100%    100%    290.8       9987
+dos_componentes            200    25138    23137   16399   13134   46075   100%    100%    193.8       9889
+saltos                     200    37679    29912   15827    7761  175296    99%    100%    274.2      10020
+cambio_volatilidad         200    63697    53886   25722   17099  210342   100%    100%    293.6      10434
+cambio_de_caracter         200    13225    13800    3507     389   38657    76%     72%    124.5       9880
+plana                      200    10000    10000   10000   10000   10000   100%      0%      0.0       9995
+borde_bajo                 200    18496    16854   10046    8851   47823    70%     96%    134.8      12110
+borde_alto                 200    14966    14921   13363   12731   17615   100%    100%     53.5       9996
+
+Bloques de practica, uno por uno (patrimonio, ordenes, perdida maxima, comprar y mantener):
+  bloque 0:   9720   50   1989   B&H   6695
+  bloque 1:  10828   20    554   B&H  10589
+  bloque 2:  12726   58   1448   B&H  11499
+  bloque 3:  10085    4     89   B&H  10157
+  bloque 4:  13357   60    715   B&H  13195
+  bloque 5:  10408    6    252   B&H  10175
+  bloque 6:  11199   33   1074   B&H   8555
+  bloque 7:  10000    0      0   B&H   9715
+  bloque 8:  11261   24    296   B&H   8915
+  bloque 9:  11103   44   1079   B&H   7970

@@ -2,54 +2,138 @@
 
 Se actualiza al cerrar cada tramo de trabajo. La versión anterior queda en el historial de git.
 
-## Tramos 2 y 3 (13/11): regla base de punta a punta, gemelo digital y protocolo
+## Tramo 3: gemelo digital, series de prueba y protocolo de evaluación (13/11)
 
-La sesión se cortó antes de terminar el cierre del tramo 3. Lo que sigue separa lo verificado de lo pendiente.
+### Qué quedó hecho
 
-### Qué quedó hecho y verificado
+- **Gemelo digital** (`ref/gemelo/gemelo.c`, `ref/gemelo.py`, `docs/gemelo.md`). Simulador en C del SoC con exactitud de ciclo: core por instrucción, esclavo SPI flanco por flanco, reset, maestra y contabilidad. Ejecuta el mismo `trade.hex` del bitstream.
+- **Validación contra el RTL** (`make cosim`, `tools/cosim.sh`). `tb/tb_cpi.sv` escribe una traza con el ciclo de cada evento y el gemelo escribe la misma. Se comparan con `cmp`.
+- **Generador de programas aleatorios** (`tools/prog_aleatorio.py`). Toda la ISA base, shifts, codificaciones inválidas y accesos a los periféricos. Sirve también para comparar el Espino original con el segmentado.
+- **Series de prueba** (`ref/series.py`). Bloques de práctica, remuestreo por bloques de incrementos y 10 familias sintéticas, reproducibles con semilla.
+- **Protocolo** (`ref/protocolo.py`, `docs/protocolo.md`). Evaluación, comparación con criterio de aceptación, meseta de parámetros y verificación del binario contra la referencia.
+- **Integración continua.** Se agregaron la equivalencia de 20 000 ticks, las pruebas de la referencia, `make cosim` y `make equiv-gemelo`.
+- Decisiones T17 a T21 en `docs/decisiones.md`.
 
-- **Ensamblador:** directiva `.org` y salidas `--vh` y `--rom` del Proyecto 3. 87 tests. `trade.hex` relleno a 512 palabras.
-- **Referencia:** `ref/market.py` (porte del testbench) y `ref/trader.py` (regla base con la aritmética de `trade.s`, modela los precios perdidos en el reset). `make test-ref`: 22 pruebas.
-- **`sw/trade.s` solo software:** regla base sin saltos que dependan del precio. Testbench oficial sin modificar: 4/4, peor caso 44 ciclos de 2 262. Explicado en `docs/trade_s.md`.
-- **`make equiv`:** `decisiones.csv` idéntico byte a byte a la referencia en los 20 000 ticks a 0,1 ms con Icarus (patrimonio 26 795), en 20 000 ticks a 0,1 ms y 1 ms con Verilator (27 306 a 1 ms), en pocos ticks a 1 ms y 10 ms con Icarus, y en una serie de cada familia sintética (`make equiv-series`, 11 series).
-- **Mediciones por tick (`make medir-ticks`):** respuesta 41 ciclos promedio y 44 peor caso (IC 19,5 y 21, CPI 2,10); tick completo 63 y 66 ciclos (IC 28,5 y 30, CPI 2,21). Igual en las tres rondas.
-- **Bitstream:** `bitstreams/competencia_v1.bin` (1083 celdas, 12 BRAM, 44,0 MHz), con hash. `make sim-bitstream`: el bitstream simulado decide igual que la referencia en 2000 ticks.
-- **Gemelo digital (`ref/gemelo/gemelo.c`, `make cosim`):** traza idéntica al RTL ciclo a ciclo con `trade.hex` (timing oficial y tres timings distintos de SPI, período y reset) y con 4 programas aleatorios (`tools/prog_aleatorio.py`); `decisiones.csv` y resumen idénticos al testbench oficial en 20 000 ticks; mediciones por tick idénticas en 19 998 ticks. Corre 20 000 ticks a 10 ms en 0,02 s.
-- **`ref/series.py`:** bloques, remuestreo por bloques de incrementos y 10 familias sintéticas.
-- **`ref/protocolo.py`:** evaluación, comparación con criterio de aceptación, meseta y verificación del binario. `--binario`: `trade.hex` en el gemelo coincide con la referencia en 3010 series a los tres períodos (18 millones de ticks).
+### Qué se midió
 
-### Qué se midió con el protocolo (regla base)
+Gemelo contra RTL (`make cosim`):
 
-| Conjunto | Media | Percentil 5 | Peor | Supera a comprar y mantener |
-|----------|-------|-------------|------|-----------------------------|
-| 10 bloques de práctica | 11 069 | 9 720 | 9 720 | 90 % |
-| 1000 remuestreos | 10 772 | 8 914 | 6 520 | 72 % |
-| Paseo aleatorio (200) | 9 873 | 7 126 | 2 918 | 42 % |
-| Tendencia (200) | 9 543 | 4 530 | 969 | 46 % |
+| Prueba | Resultado |
+|--------|-----------|
+| `trade.hex`, timing oficial, 300 ticks | 282 210 eventos idénticos |
+| `trade.hex` con otros tres timings de SPI, período y reset | 347 867 eventos idénticos |
+| 4 programas aleatorios | 555 966 eventos idénticos |
+| Testbench oficial, 20 000 ticks | `decisiones.csv` y resumen idénticos |
+| Mediciones por tick, 20 000 ticks | 19 998 ticks idénticos |
+| Con y sin atajo del sondeo, a los tres períodos | Idénticos |
+| Control negativo (`--borde 0`) | La traza difiere |
 
-- **Meseta:** (k, entra, sale) = (5, 4, 0) es el máximo en los bloques (11 069; vecinos entre 10 446 y 11 043). En los remuestreos da 10 816 y el vecino (5, 3, 0) da 10 921. No es un máximo aislado, pero en los bloques hay sesgo de selección.
-- **Suma móvil de 64 contra la base:** no la reemplaza (pierde en bloques y remuestreos), aunque gana en las familias sintéticas.
-- **Peor caso real de respuesta:** barriendo la fase con el gemelo es 49 ciclos para el primer precio (pasa por la inicialización) y 44 para el resto. El testbench solo ve 44.
-- **Costo de entrada:** el límite de 63 acciones hace que entrar tome hasta 6 órdenes al final de la serie de práctica.
-- **Pérdidas grandes en tendencia y paseo** (peor caso 969 y 2 918): es lo que debe cubrir la guardia de régimen.
+Velocidad, 20 000 ticks a 10 ms: Icarus unas 22 horas (estimado), Verilator 22 minutos, gemelo 0,02 segundos.
 
-### Qué falta de estos tramos
+Regla base bajo el protocolo (`make protocolo`, resultados en `docs/mediciones/protocolo_*.txt`):
 
-- **No se hizo `git push`.** Los commits están solo en local. La integración continua nueva (equivalencia de 20 000 ticks, pruebas de la referencia) no ha corrido en GitHub. Falta agregarle `make cosim` y `make equiv-gemelo`.
-- **`make equiv-largo`** (20 000 ticks a 10 ms con Verilator) quedó corriendo. El resultado está en `build/equiv_largo.out`.
-- **Documentos de estudio sin escribir:** `docs/gemelo.md` y `docs/protocolo.md`. El Makefile ya los nombra.
-- **Decisiones sin registrar:** gemelo en C, atajo del sondeo, resolución de la coincidencia entre SCLK y el reloj, criterio de aceptación del protocolo, largo de bloque del remuestreo.
-- **`docs/trade_s.md`** dice que la respuesta va de 38 a 44 ciclos. Hay que agregar el caso del primer precio (hasta 49) y el rango 37 a 44 sobre todas las fases.
-- **`make protocolo`** no se corrió con el Makefile: faltan los archivos `docs/mediciones/protocolo_*.txt`.
-- **README:** falta la sección del gemelo, las series y el protocolo.
-- **Programar la placa:** lo hace Nicolás con `iceprog`. No se ha probado en hardware.
+| Conjunto | Media | Mediana | Percentil 5 | Peor | Supera a comprar y mantener |
+|----------|-------|---------|-------------|------|-----------------------------|
+| 10 bloques de práctica | 11 069 | 11 103 | 9 720 | 9 720 | 90 % |
+| 1000 remuestreos | 10 772 | 10 703 | 8 914 | 6 520 | 72 % |
+| Paseo aleatorio (200) | 9 873 | 9 947 | 7 126 | 2 918 | 42 % |
+| Tendencia (200) | 9 543 | 10 015 | 4 530 | 969 | 46 % |
+| Cambio de carácter (200) | 13 225 | 13 800 | 3 507 | 389 | 76 % |
+| Dos componentes (200) | 25 138 | 23 137 | 16 399 | 13 134 | 100 % |
 
-### Qué conviene atacar después y por qué
+- **Meseta.** (k, entra, sale) = (5, 4, 0) es el máximo de 45 combinaciones en los bloques (11 069; sus vecinos dan entre 10 446 y 11 043). En 300 remuestreos da 10 816 y el vecino con entra 3 da 10 921. No es un máximo aislado y la diferencia es del tamaño del ruido.
+- **Suma móvil de 64 contra la base.** No la reemplaza: pierde en la media de los bloques (10 951 contra 11 069) y en los remuestreos (10 624 contra 10 772), aunque gana en todas las familias sintéticas.
+- **El binario contra la referencia** (`make equiv-gemelo`). 3010 series a 0,1 ms, 1 ms y 10 ms: 18 060 000 ticks, cero diferencias, ningún precio sin respuesta.
 
-1. Cerrar lo pendiente de arriba y empujar, para que `main` en GitHub tenga la integración continua completa en verde.
-2. Frente A con el protocolo ya armado: identificar el generador, guardia de régimen (tendencia y paseo son donde se pierde), y manejo del límite de 63 acciones.
-3. Frente B, Espino segmentado: el gemelo y `tools/prog_aleatorio.py` ya sirven para la ejecución en paralelo contra el original.
-4. Probar `icebram` con el `trade.hex` de 512 palabras.
+### Hallazgos
+
+1. **El peor caso del testbench no es el peor caso.** El testbench informa 44 ciclos. Barriendo las 8 fases del lazo de sondeo con el gemelo, la respuesta va de 37 a 44 ciclos en régimen y de 42 a 49 con el primer precio. El peor caso real es 49 ciclos.
+2. **El testbench sube SCLK justo en un flanco del reloj.** Icarus y Verilator lo resuelven igual. En la placa la maestra es asíncrona. Las decisiones no dependen de eso (T19).
+3. **La regla base no tiene tope de pérdida.** En tendencia a la baja compra y no vende hasta que el precio recupere la media. Peor caso 969 en `tendencia` y 389 en `cambio_de_caracter`.
+4. **La ganancia esperada por ronda es del orden de 8 %, con mucha dispersión.** En los remuestreos el patrimonio final va de 6 520 a 15 637 y uno de cada cinco termina bajo 10 000.
+5. **El redondeo a enteros fabrica reversión aparente.** Un paseo aleatorio redondeado tiene razón de varianza 0,87 a 10 ticks. Hay que separarlo de la reversión real al identificar el generador.
+
+### Qué falta del tramo 3
+
+- **Las familias sintéticas no están calibradas** contra la serie de práctica. `dos_componentes` tiene la forma del modelo, con parámetros puestos a mano.
+- **El criterio de aceptación usa mayor o igual**, sin error estadístico. Con 1000 remuestreos pareados se puede calcular el error de la diferencia.
+- **El gemelo modela solo el Espino base.** Cuando el core cambie hay que actualizar su tabla de ciclos y repetir `make cosim`.
+
+## Tramo 2: regla base de punta a punta (13/11)
+
+### Qué quedó hecho
+
+- **Ensamblador.** Directiva `.org` y salidas `--vh` y `--rom` del Proyecto 3. 87 tests. `trade.hex` queda relleno a 512 palabras.
+- **Referencia.** `ref/market.py` (porte del mercado del testbench) y `ref/trader.py` (regla base con la aritmética de `trade.s`, y modelo de los precios que se pierden en el reset). `make test-ref`: 22 pruebas.
+- **`sw/trade.s`, variante solo software.** Regla base sin saltos que dependan del precio. Explicado bloque por bloque en `docs/trade_s.md`.
+- **`make equiv`** (`tools/equiv.sh`). Copia parametrizada del testbench contra la referencia, con `cmp`.
+- **Mediciones por tick** (`make medir-ticks`, `tb/tb_cpi.sv`).
+- **Primer bitstream de competencia** en `bitstreams/competencia_v1.bin`, con hash, y `make sim-bitstream`.
+- Decisiones T10 a T16.
+
+### Qué se midió
+
+Testbench oficial sin modificar: **4/4**, peor caso 44 ciclos de 2 262 disponibles, patrimonio 9 617 en los 2000 ticks por defecto.
+
+Equivalencia con la referencia (`decisiones.csv` idéntico byte a byte):
+
+| Corrida | Simulador | Ticks | Patrimonio |
+|---------|-----------|-------|------------|
+| 0,1 ms | Icarus | 20 000 | 26 795 |
+| 0,1 ms | Verilator | 20 000 | 26 795 |
+| 1 ms | Verilator | 20 000 | 27 306 |
+| 10 ms (`make equiv-largo`) | Verilator | 20 000 | 27 306 |
+| 1 ms y 10 ms | Icarus | 200 y 20 | |
+| Una serie de cada familia sintética | Verilator | 11 de 2000 | |
+
+El patrimonio no es 27 062 porque en el testbench el programa no ve los primeros precios, que llegan durante el reset (2 a 0,1 ms, 1 a 1 ms y 10 ms). La referencia lo modela (T13).
+
+Tabla del punto 3.1, serie completa viendo todos los precios (`python3 ref/trader.py tb/practica.csv`):
+
+| Estrategia | Patrimonio | Órdenes | Comisiones | Pérdida máxima |
+|------------|------------|---------|------------|----------------|
+| No operar | 10 000 | 0 | 0 | 0 |
+| Comprar y mantener | 6 497 | 1 | 5 | |
+| Regla base | 27 062 | 388 | 1 940 | 2 929 |
+
+Mediciones por tick del punto 3.2, iguales en las tres rondas (`docs/mediciones/ticks_software.txt`):
+
+| Ventana | IC promedio | IC peor | Ciclos promedio | Ciclos peor | CPI | Tiempo peor caso |
+|---------|-------------|---------|-----------------|-------------|-----|------------------|
+| Respuesta (hasta `DECISION`) | 19,5 | 21 | 41 | 44 | 2,10 | 1,76 us |
+| Tick completo | 28,5 | 30 | 63 | 66 | 2,21 | 2,64 us |
+
+El trabajo sin la espera son 27 instrucciones y 58 ciclos. La actualización de la media es el bloque más caro: 8 instrucciones y 17 ciclos, el 29 %.
+
+Bitstream `competencia_v1.bin`: 1083 celdas de 1280 (84 %), 12 BRAM, 44,0 MHz. Simulado desde el `.asc`: 2000 ticks idénticos a la referencia.
+
+### Diferencias con lo que teníamos anotado
+
+1. **Costo de la regla base.** Estimábamos unas 30 instrucciones y 70 ciclos por tick. Medido: 28,5 instrucciones y 63 ciclos con la espera, 27 y 58 sin ella.
+2. **Entrar no es una sola orden.** Por el límite de 63 acciones, entrar toma 2 órdenes con la caja inicial y hasta 6 cuando el patrimonio crece. La regla base entra 75 veces y ejecuta 388 órdenes.
+3. **No hay numpy en el entorno.** Todo `ref/` usa la biblioteca estándar (T21).
+
+Nada de lo encontrado contradice al enunciado ni al testbench.
+
+### Qué falta del tramo 2
+
+- **Probar el bitstream en la placa.** Lo hace Nicolás con `iceprog`. Sin la maestra no hay nada que observar: el programa no usa LEDs ni displays.
+- **Reset más corto.** Sigue pendiente medir en la placa el reset mínimo que arranca bien (T3).
+- **`icebram`.** `trade.hex` ya tiene el tamaño que necesita, pero no se ha probado el cambio de programa dentro del bitstream.
+
+## Pendientes generales
+
+- **Colaboradores.** Falta el usuario de GitHub de Santiago Muñoz y el de quien deba revisar la entrega.
+- **Preguntas al ayudante.** Siguen abiertas las diez. Las que más pesan ahora: si las series ocultas salen del mismo generador, cuántos ticks dura cada ronda, si la maestra usa el timing del testbench y si la placa parte encendida antes del primer precio (define si se pierde alguno).
+- **Verificación formal.** `formal/` sigue vacía.
+
+## Qué conviene atacar después y por qué
+
+1. **Frente A, guardia de régimen y tope de pérdida.** Es el hallazgo más caro: sin reversión la regla base puede perder casi todo. El protocolo ya mide exactamente eso, y la guardia tiene que mejorar `tendencia` y `cambio_de_caracter` sin tocar los bloques ni los remuestreos.
+2. **Frente A, identificar el generador.** Calibrar `dos_componentes` contra la serie de práctica y separar el efecto del redondeo. Con el modelo se puede calcular la política óptima y se obtienen series fuera de muestra que sí se parecen a la real.
+3. **Frente A, límite de 63 acciones.** Entrar en 6 ticks cuesta comisiones y precio. Conviene evaluar entradas escalonadas y si vale la pena operar con menos que todo el patrimonio.
+4. **Frente B, Espino segmentado.** La traza de `tb/tb_cpi.sv`, el generador de programas aleatorios y el gemelo ya están listos para la ejecución en paralelo contra el original. Tiene que estar antes del 18/11 para llegar a la maestra.
+5. **Frente E, `icebram` y matriz de estrés.** Con el gemelo la matriz de períodos, tiempos de SPI, comisión y caja es cuestión de minutos.
 
 ## Tramo 1: repositorio, flujo completo y mediciones de partida (12/11 y 13/11)
 

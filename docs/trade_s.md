@@ -137,7 +137,8 @@ El programa ocupa 40 palabras. El único dato en memoria es `TMP`, la última pa
 | Ronda 1, 10 ms | Icarus | 20 | Idénticos. |
 | Ronda 3, 0,1 ms | Verilator | 20 000 | Idénticos. Patrimonio 26 795. |
 | Ronda 2, 1 ms | Verilator | 20 000 | Idénticos. Patrimonio 27 306. |
-| Ronda 1, 10 ms (`make equiv-largo`) | Verilator | 20 000 | Ver `docs/estado.md`. |
+| Ronda 1, 10 ms (`make equiv-largo`) | Verilator | 20 000 | Idénticos. Patrimonio 27 306. |
+| Una serie de cada familia sintética y un remuestreo (`make equiv-series`) | Verilator | 11 series de 2000 | Idénticos. |
 
 Control negativo: si la referencia no modela los precios que se pierden en el reset, los archivos difieren desde la línea 3.
 
@@ -188,7 +189,18 @@ El mínimo de la respuesta son 38 ciclos (los primeros cinco bloques). Lo que fa
 
 El algoritmo tarda siempre lo mismo. Lo que varía es en qué punto del lazo de sondeo está el programa cuando llega el precio. Una vuelta del lazo dura 8 ciclos (`lw` 3, `andi` 2, `beqz` tomado 3), y la bandera puede levantarse en cualquiera de ellos. En el testbench el período son 2500 ciclos, que no es múltiplo de 8 (sobran 4), así que la fase va rotando y la respuesta toma exactamente cuatro valores con la misma frecuencia: 38, 40, 42 y 44 ciclos. El promedio es 41 y el peor caso 44.
 
-Además el testbench cambia `SCLK` justo en un flanco del reloj de 25 MHz, y el simulador resuelve esa coincidencia siempre igual. En la placa la maestra es asíncrona respecto a nuestro reloj, así que la respuesta real puede variar un ciclo más o menos. No cambia nada: sobran más de 2200 ciclos en la ronda más rápida.
+Además el testbench cambia `SCLK` justo en un flanco del reloj de 25 MHz, y el simulador resuelve esa coincidencia siempre igual. En la placa la maestra es asíncrona respecto a nuestro reloj, así que la respuesta real puede variar un ciclo más o menos.
+
+### El peor caso sobre todas las fases
+
+El testbench oficial solo recorre cuatro de las ocho fases del lazo. Con el gemelo digital (`docs/gemelo.md`) se barrieron las ocho, moviendo el inicio de la primera transacción de a 40 ns, con las dos formas de resolver la coincidencia de `SCLK`:
+
+| Caso | Respuesta (ciclos) | Tick completo (ciclos) |
+|------|--------------------|------------------------|
+| Régimen, todas las fases | 37 a 44 | 59 a 66 |
+| Primer precio (pasa por `primero`: un `mv` y un `j` más, 5 ciclos) | 42 a 49 | 64 a 71 |
+
+El peor caso real de respuesta es **49 ciclos**, y ocurre una sola vez, con el primer precio. En el testbench oficial ese tick cae en una fase favorable y por eso informa 44. Frente a los 2 262 ciclos disponibles en la ronda más rápida es el 2,2 %.
 
 ## 7. Cómo reproducir
 
