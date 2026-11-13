@@ -12,7 +12,9 @@ Se actualiza al cerrar cada tramo de trabajo. La versión anterior queda en el h
 - `sw/trade.s` trivial (comprar y mantener) y `Makefile` con todo el flujo: ensamblar, testbench oficial, copias parametrizadas del testbench, CPI, síntesis, place and route y bitstream.
 - Power-on reset largo traído del Proyecto 2 (`PorBits = 12`).
 - Scripts de medición: `tools/medir_base.sh` y `ref/hallazgos.py`.
-- Integración continua en GitHub Actions: tests del ensamblador, `trade.hex` al día, testbench oficial, CPI y síntesis hasta el bitstream.
+- Integración continua en GitHub Actions: tests del ensamblador, `trade.hex` al día, testbench oficial, CPI y síntesis hasta el bitstream. La primera corrida en GitHub terminó en verde.
+- `main` protegido en GitHub: exige que el chequeo `verificar` de la integración continua haya pasado, y no admite `push --force` ni borrar la rama. El dueño del repositorio puede empujar directo. Los demás integrantes entran por pull request desde una rama.
+- `Vcalderone` invitado como colaborador con permiso de escritura.
 - `README.md`, `docs/decisiones.md` y `docs/ensamblador.md`.
 
 ### Qué se midió
@@ -74,7 +76,7 @@ Nada de lo encontrado contradice al enunciado ni al testbench.
 
 ### Qué falta del tramo 1
 
-- **Protección de `main` en GitHub.** Ver el resultado en la sección siguiente.
+- **Equivalencia y verificación formal en la integración continua.** Todavía no existen. Se agregan al flujo cuando estén `make equiv` y las pruebas de `formal/`.
 - **Colaboradores.** Falta el usuario de GitHub de Santiago Muñoz y el de quien deba revisar la entrega.
 - **Definición de Ops/s y roofline vista en clases.** No está en el repositorio. Hace falta la diapositiva para el frente del co-diseño.
 
