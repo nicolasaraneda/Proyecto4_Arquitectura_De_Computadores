@@ -1,0 +1,47 @@
+Info: constrained 'i_Clk' to bel 'X0/Y8/io1'
+Warning: unmatched constraint 'i_UART_RX' (on line 5)
+Warning: unmatched constraint 'o_UART_TX' (on line 6)
+Info: constrained 'o_LED[0]' to bel 'X13/Y6/io1'
+Info: constrained 'o_LED[1]' to bel 'X13/Y7/io0'
+Info: constrained 'o_LED[2]' to bel 'X13/Y7/io1'
+Info: constrained 'o_LED[3]' to bel 'X13/Y8/io0'
+Info: constrained 'i_Switch[0]' to bel 'X13/Y4/io1'
+Info: constrained 'i_Switch[1]' to bel 'X13/Y3/io1'
+Info: constrained 'i_Switch[2]' to bel 'X13/Y6/io0'
+Info: constrained 'i_Switch[3]' to bel 'X13/Y4/io0'
+Info: constrained 'o_Segment1_A' to bel 'X0/Y13/io1'
+Info: constrained 'o_Segment1_B' to bel 'X0/Y13/io0'
+Info: constrained 'o_Segment1_C' to bel 'X5/Y17/io1'
+Info: constrained 'o_Segment1_D' to bel 'X6/Y17/io0'
+Info: constrained 'o_Segment1_E' to bel 'X6/Y17/io1'
+Info: constrained 'o_Segment1_F' to bel 'X0/Y14/io1'
+Info: constrained 'o_Segment1_G' to bel 'X0/Y14/io0'
+Info: constrained 'o_Segment2_A' to bel 'X1/Y17/io1'
+Info: constrained 'o_Segment2_B' to bel 'X2/Y17/io1'
+Info: constrained 'o_Segment2_C' to bel 'X3/Y17/io1'
+Info: constrained 'o_Segment2_D' to bel 'X4/Y17/io1'
+Info: constrained 'o_Segment2_E' to bel 'X5/Y17/io0'
+Info: constrained 'o_Segment2_F' to bel 'X0/Y12/io0'
+Info: constrained 'o_Segment2_G' to bel 'X4/Y17/io0'
+Info: constrained 'i_SPI_CS_n' to bel 'X13/Y11/io1'
+Info: constrained 'i_SPI_MOSI' to bel 'X13/Y11/io0'
+Info: constrained 'o_SPI_MISO' to bel 'X13/Y9/io0'
+Info: constrained 'i_SPI_SCLK' to bel 'X13/Y8/io1'
+
+Info: Packing constants..
+Info: Packing IOs..
+Info: Packing LUT-FFs..
+Info:      807 LCs used as LUT4 only
+Info:       98 LCs used as LUT4 and DFF
+Info: Packing non-LUT FFs..
+Info:      160 LCs used as DFF only
+Info: Packing carries..
+Info:        1 LCs used as CARRY only
+Info: Packing indirect carry+LUT pairs...
+Info:        0 LUTs merged into carry LCs
+Info: Packing RAMs..
+Info: Placing PLLs..
+ERROR: PLL 'u_pll' couldn't be placed anywhere, no suitable BEL found.
+
+ERROR: Packing design failed.
+2 warnings, 2 errors

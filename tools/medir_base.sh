@@ -120,12 +120,12 @@ open(ruta, "w", encoding="utf-8").write(texto.replace(original, pll))
 EOF
 sintetizar $B/src_pll $B/pll
 pll_ok=si; pnr $B/pll 1 || pll_ok=no
-cp $B/pll.s1.nextpnr.log docs/mediciones/pll_nextpnr.log
+cp $B/pll.s1.nextpnr.log docs/mediciones/pll_nextpnr.txt
 {
   echo "3. PLL (SB_PLL40_CORE de 25 a 50 MHz en pochoco_soc.v)"
   echo "  nextpnr termina bien: $pll_ok"
   grep -E '^ERROR' $B/pll.s1.nextpnr.log | sed 's/^/  nextpnr: /' || true
-  echo "  Log completo en docs/mediciones/pll_nextpnr.log"
+  echo "  Log completo en docs/mediciones/pll_nextpnr.txt"
   echo
 } >> $RES
 

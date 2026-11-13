@@ -1,60 +1,113 @@
-# Pochoco SoC & Espino Core
+# Proyecto 4: Pochoco Trader
 
-> Meet Pochoco SoC and Espino Core. Inspired by the native flora of the Pochoco trails, it is an entry-level, highly efficient architecture designed to flourish in resource-constrained environments.
+Agente de inversión que corre en el Pochoco SoC, con el procesador Espino (RV32E), sobre la Nandland Go Board (iCE40 HX1K, 25 MHz). Una FPGA maestra envía por SPI el precio de una acción en cada tick y el programa responde si compra, vende o mantiene, y cuántas acciones.
 
-![Pochoco SoC Architecture](pochoco_soc.svg)
+Arquitectura de Computadores, Universidad de los Andes, semestre 2026-2. Profesor: Jorge Gómez Mir.
 
-Welcome to the repository! This project contains the RTL for a custom 32-bit processor and its surrounding System-on-Chip (SoC) designed for FPGA deployment. The design is kept straightforward to help explore and understand computer architecture fundamentals.
+Grupo: Nicolás Araneda, Vicente Calderón y Santiago Muñoz.
 
-This is meant to be forked, not just cloned. You'll be poking around the RTL, so make it your own, we won't judge (we might even be a little proud).
+El enunciado está en `docs/Proyecto_4_arq.pdf`. El avance del trabajo se registra en `docs/estado.md` y las decisiones de diseño en `docs/decisiones.md`.
 
-## Repository Structure
+## Origen del código
 
-The hardware is written in Verilog and divided into these main categories:
+- El punto de partida es el repositorio base del curso, [nic0villegasc/pochoco_soc](https://github.com/nic0villegasc/pochoco_soc), de Nicolás Villegas, importado sin cambios desde su commit `33e8b5a`. Esa copia quedó marcada con la etiqueta `base-curso`. Los archivos del repositorio base conservan su encabezado de autor y su licencia (Solderpad Hardware License 0.51). Cuando modificamos uno de esos archivos, lo indicamos debajo del encabezado original.
+- El ensamblador `tools/pochoasm.py` es el que escribió este grupo para el Proyecto 2, con el nombre y la interfaz que espera el testbench del Proyecto 4.
+- El power-on reset largo de `rtl/pochoco_soc.v` también viene de nuestro Proyecto 2.
+- `tb/tb_proyecto_4.sv` y `tb/practica.csv` son el testbench y la serie de práctica entregados por el curso. No se modifican.
 
-* **The Espino Core**: The central processing unit. It includes all standard pipeline stages like instruction fetch, instruction decode, an ALU for execution, a register file, a load/store unit for memory operations, and a pipeline controller. It implements [RV32E](https://docs.riscv.org/reference/isa/v20260120/unpriv/rv32.html) with a catch you might want to check out the code for.
-* **The Pochoco SoC**: The top-level system wrapper. It connects the CPU core to a unified instruction/data RAM, physical board peripherals (like LEDs, switches, and displays), and an external SPI slave interface.
-* **Build Files**: Constraints to map the design to the physical FPGA pins, and automation scripts for synthesis, routing, and flashing using an open-source toolchain.
+## Herramientas y versiones
 
-## Memory Map
+Todo se corre con [OSS CAD Suite](https://github.com/YosysHQ/oss-cad-suite-build), versión del 2026-09-06, sobre Ubuntu (WSL2):
 
-The SoC routes memory and data requests using a hardcoded address decoding scheme based on the highest bits of the 32-bit address.
+| Herramienta    | Versión                    |
+|----------------|----------------------------|
+| Yosys          | 0.68+195                   |
+| nextpnr-ice40  | 0.11.1-19-g8dbcee5c        |
+| Icarus Verilog | 14.0 (devel, s20260301)    |
+| Python         | 3.11 o superior            |
+| icepack, iceprog | los de OSS CAD Suite     |
 
-* **`0x0000_0000` - Unified RAM**: The shared memory space for both instructions and data.
-* **`0x8000_0000` - Board Peripherals**: Memory-mapped I/O for the physical board.
-  * `Offset 0x00`: 7-Segment Displays
-  * `Offset 0x04`: LEDs
-  * `Offset 0x08`: Button Inputs
-* **`0x8001_0000` - SPI Slave**: Custom SPI interface routing.
-  * `Offset 0x00`: SPI Status (Chip Select state, New Data flag)
-  * `Offset 0x04`: Received "Price" byte (from external master)
-  * `Offset 0x08`: "Decision" byte (written by CPU to transmit)
+No se necesita un toolchain de RISC-V: el ensamblador es propio y está en el repositorio.
 
-Dive into the source code to see exactly how these components and connections are built under the hood!
+Todos los comandos se ejecutan desde la raíz del repositorio.
 
-## How to Build
-
-To synthesize and build the project, you will need the open-source FPGA toolchain.
-
-1. Install the tools by following the instructions at the [oss-cad-suite-build repository](https://github.com/yosyshq/oss-cad-suite-build).
-2. Once installed, ~~blindly copy-paste~~ (we strongly encourage reading the Makefile first to make sure we aren't deleting your home directory) the following command in the project root to generate and program the final bitstream:
+## Cómo ensamblar `trade.s`
 
 ```bash
-make all
+python3 tools/pochoasm.py sw/trade.s -o sw/trade.hex
 ```
 
-## Software
+o `make asm`. La sintaxis que acepta el ensamblador está en `docs/ensamblador.md`, y sus 73 tests se corren con `make test-asm`.
 
-The `sw/` folder holds the RV32E assembly example programs that run on the Espino Core (`blink.s`, `7seg.s`, `buttons_leds.s`), plus a `Makefile` to assemble them into the `.hex` files the RTL loads at boot via `$readmemh`.
+## Cómo correr los testbenches
 
-You'll need a RISC-V toolchain on your `PATH` (`riscv64-unknown-elf-{as,ld,objcopy}` on Debian/Ubuntu/WSL via `sudo apt install gcc-riscv64-unknown-elf`, or `brew install riscv64-unknown-elf-gcc` on macOS). If your toolchain uses a different prefix, override it on the command line rather than editing the Makefile:
+Testbench oficial, con los mismos comandos de su encabezado:
 
 ```bash
-cd sw
-make blink                        # assembles blink.s -> blink.hex
-make PREFIX=riscv64-elf- blink    # if your toolchain uses a different prefix
+python3 tools/pochoasm.py sw/trade.s -o sw/trade.hex
+iverilog -g2012 -s tb_proyecto_4 -o /tmp/tb_p4 $(yosys-config --datdir)/ice40/cells_sim.v rtl/*.v rtl/espino_core/*.v tb/tb_proyecto_4.sv
+vvp -n /tmp/tb_p4
 ```
 
-Drop a new `<name>.s` file in `sw/` and `make <name>` picks it up automatically, no `Makefile` changes needed. Don't forget to change the MemFile in pochoco_soc.v.
+o `make tb`, que hace lo mismo y además falla si el resultado no es 4/4. La corrida por defecto (2000 ticks con período de 0,1 ms) demora cerca de un minuto y medio. El detalle por tick queda en `decisiones.csv`.
 
-**CATCH:** The core implements [RV32E](https://docs.riscv.org/reference/isa/v20260120/unpriv/rv32.html), with one thing worth knowing: shift instructions (`SLL`/`SRL`/`SRA`/`SLLI`/`SRLI`/`SRAI`) are decoded correctly but disabled in the ALU to save LUTs on the target FPGA, so they currently execute as `ADD` instead. Avoid shifts in your assembly, or design your own shifter...
+Otros objetivos:
+
+| Comando | Qué hace |
+|---------|----------|
+| `make tb-param PERIODO_NS=1000000 NTICKS=500` | Corre una copia del testbench oficial con otro período y otro número de ticks. El original no se toca. |
+| `make cpi` | Mide instrucciones, ciclos y CPI del core con `tb/tb_cpi.sv`, y comprueba el modelo de costo. |
+| `make check` | Tests del ensamblador, `trade.hex` al día y testbench oficial. Es lo que corre la integración continua. |
+
+## Cómo correr la versión de referencia del algoritmo
+
+```bash
+python3 ref/p4_baseline.py tb/practica.csv
+python3 ref/hallazgos.py tb/practica.csv
+```
+
+o `make hallazgos`. El primero simula el mercado con las mismas reglas del testbench y compara las estrategias de partida. El segundo agrega el análisis estadístico de la serie de práctica.
+
+## Cómo sintetizar y programar la placa
+
+```bash
+make bin      # yosys, nextpnr e icepack: deja build/pochoco_soc.bin
+make prog     # iceprog build/pochoco_soc.bin, con la Go Board conectada por USB
+```
+
+`make bin` ensambla `sw/trade.s` si hace falta y deja el programa dentro del bitstream. El resumen de celdas, BRAM y frecuencia máxima queda en `build/nextpnr.log`.
+
+## Mediciones del repositorio base
+
+```bash
+make medir-base
+```
+
+Extrae la copia sin cambios del repositorio base (etiqueta `base-curso`) y mide celdas lógicas, BRAM, frecuencia máxima con 10 semillas, el costo de habilitar el shifter completo, si el encapsulado acepta un PLL y el CPI en simulación. El resultado queda en `docs/mediciones/base.txt`.
+
+## Estructura
+
+| Carpeta    | Contenido |
+|------------|-----------|
+| `rtl/`     | Pochoco SoC y Espino Core. |
+| `sw/`      | `trade.s` y los programas de ejemplo del repositorio base. |
+| `tb/`      | Testbench oficial, serie de práctica y testbenches propios. |
+| `ref/`     | Referencia del algoritmo en Python y análisis de la serie. |
+| `tools/`   | Ensamblador y scripts de medición. |
+| `formal/`  | Verificación formal (todavía vacía). |
+| `docs/`    | Enunciado, estado, decisiones, documentación y mediciones. |
+| `informe/` | Informe en LaTeX (todavía vacío). |
+
+## Mapa de memoria
+
+| Dirección     | Registro | Uso |
+|---------------|----------|-----|
+| `0x0000_0000` | RAM unificada de 512 palabras | Instrucciones y datos. |
+| `0x8000_0000` | Displays de 7 segmentos | Escritura. |
+| `0x8000_0004` | LEDs | Escritura. |
+| `0x8000_0008` | Interruptores | Lectura. |
+| `0x8001_0000` | `STATUS` del SPI | Bit 0: hay un precio nuevo. Bit 1: `CS_n` activo. |
+| `0x8001_0004` | `PRICE` | Último precio recibido. Leerlo baja la bandera de precio nuevo. |
+| `0x8001_0008` | `DECISION` | Byte que la maestra lee en la transacción siguiente. |
+
+![Arquitectura del Pochoco SoC](docs/pochoco_soc.svg)

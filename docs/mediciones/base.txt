@@ -34,7 +34,7 @@ Herramientas:
   nextpnr termina bien: no
   nextpnr: ERROR: PLL 'u_pll' couldn't be placed anywhere, no suitable BEL found.
   nextpnr: ERROR: Packing design failed.
-  Log completo en docs/mediciones/pll_nextpnr.log
+  Log completo en docs/mediciones/pll_nextpnr.txt
 
 4. CPI del Espino base en simulacion (tb/tb_cpi.sv)
   Programa:                 build/base/src/sw/blink.hex
