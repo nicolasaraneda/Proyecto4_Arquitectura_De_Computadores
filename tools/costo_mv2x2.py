@@ -44,6 +44,11 @@ COMMIT_CORE = "16f9cc3"     # core base sobre el que se mide la integración
 CELDAS_FPGA = 1280
 NVEC = 20000
 
+# Coeficientes del estimador calibrado contra la serie de práctica
+# (docs/algoritmo.md, sección 4.1): phi = 1 - 1/32 - 1/128, K1 = 1/2 + 1/8 y
+# K2 = 1/8 + 1/16. Con 7 bits de fracción son exactos: 123, 80 y 24.
+CALIBRADA = ["--c", "7", "--k1", "0.625", "--k2", "0.1875", "--phi", "0.9609375"]
+
 
 def correr(cmd, log=None, check=True):
     r = subprocess.run(cmd, cwd=RAIZ, capture_output=True, text=True)
@@ -102,7 +107,8 @@ def fpga_suelto():
     casos = [(f"fija, factorizada, C = {c}", f"fact_c{c}", ["--c", str(c)]) for c in (3, 4, 5, 6, 8)]
     casos += [(f"fija, directa, S = {s}", f"dir_s{s}", ["--forma", "directa", "--s", str(s)]) for s in (6, 8, 12)]
     casos += [("fija, factorizada, C = 6, sin saturar", "fact_c6_nosat", ["--c", "6", "--sin-saturar"]),
-              ("fija, k1 = 1/32, k2 = 1/2, phi = 7/8", "fact_barata", ["--c", "5", "--k1", "0.03125", "--k2", "0.5", "--phi", "0.875"])]
+              ("fija, k1 = 1/32, k2 = 1/2, phi = 7/8", "fact_barata", ["--c", "5", "--k1", "0.03125", "--k2", "0.5", "--phi", "0.875"]),
+              ("fija, calibrada (docs/algoritmo.md)", "fact_cal", CALIBRADA)]
     filas = {}
 
     def uno(caso):
@@ -207,6 +213,7 @@ def fpga_integrado(semillas):
     variantes = [("SoC base, sin la instrucción", "soc_base", fuentes_base, None),
                  ("con kal2, k1 = 1/32, k2 = 1/2, phi = 7/8", "soc_barata", fuentes_kal2,
                   ["--c", "5", "--k1", "0.03125", "--k2", "0.5", "--phi", "0.875"]),
+                 ("con kal2, calibrada", "soc_cal", fuentes_kal2, CALIBRADA),
                  ("con kal2, factorizada, C = 4", "soc_c4", fuentes_kal2, ["--c", "4"]),
                  ("con kal2, factorizada, C = 6", "soc_c6", fuentes_kal2, ["--c", "6"])]
     print(f"{'variante':<42} {'celdas':>7} {'de 1280':>8} {'agrega':>7}   frecuencia máxima en {len(semillas)} semillas (MHz)")
@@ -283,6 +290,7 @@ def asic():
     env = f"{D}/mv2x2_prog.v"
     open(os.path.join(RAIZ, env), "w", newline="\n").write(ENVOLTORIO)
     casos = [("fija, k1 = 1/32, k2 = 1/2, phi = 7/8", "fact_barata", [f"{D}/fact_barata.v"], ""),
+             ("fija, calibrada", "fact_cal", [f"{D}/fact_cal.v"], ""),
              ("fija, factorizada, C = 6", "fact_c6", [f"{D}/fact_c6.v"], ""),
              ("fija, directa, S = 12", "dir_s12", [f"{D}/dir_s12.v"], ""),
              ("multiplicadores de 17 x 8", "mv2x2_mult", [MULT], "chparam -set CW 8 -set S 6 mv2x2_mult;"),

@@ -19,6 +19,7 @@ Los frentes A (algoritmo) y B (Espino segmentado) se trabajan en paralelo, cada 
 | Versión | FPGA, módulo suelto | FPGA, integrada en el SoC base | GF180, solo síntesis |
 |---------|---------------------|--------------------------------|----------------------|
 | Coeficientes fijos, forma factorizada | 160 a 396 LUT según la precisión | agrega 217 a 368 celdas: no cabe (1291 de 1280 la más barata) | 8 000 a 20 000 um² |
+| Coeficientes fijos, con los coeficientes calibrados del frente A | 251 LUT | agrega 328 celdas: no cabe (1402 de 1280) | 14 776 um² |
 | Coeficientes fijos, forma directa | 324 a 427 LUT | | 30 000 um² |
 | Multiplicadores reales | 1645 LUT (8 bits) y 3094 LUT (14 bits): más que la FPGA | | 67 000 a 130 000 um² |
 
@@ -26,7 +27,6 @@ Los frentes A (algoritmo) y B (Espino segmentado) se trabajan en paralelo, cada 
 
 ### Qué falta
 
-- **Repetir el costo con los coeficientes calibrados.** Los de las tablas salen de los parámetros puestos a mano de la familia `dos_componentes`.
 - **Medir las formas de achicarlo** (carriles más angostos, sin saturación, versión secuencial o periférico). Son estimaciones.
 - **Equivalencia formal** entre las dos versiones y contra la especificación.
 - **La integración en el core se hizo solo para contar celdas.** No está verificada como instrucción y el ensamblador no la conoce.
@@ -34,7 +34,7 @@ Los frentes A (algoritmo) y B (Espino segmentado) se trabajan en paralelo, cada 
 
 ### Qué conviene atacar después y por qué
 
-1. **Decidir si el producto 2x2 se construye.** Depende de dos resultados que todavía no están: si el estimador de dos estados gana bajo el protocolo (frente A) y cuántas celdas deja libres el pipeline (frente B). Con lo medido hoy, en la FPGA solo cabría como periférico secuencial.
+1. **El producto 2x2 queda en la edición de exhibición.** El estimador de dos estados no gana bajo el protocolo (T30) y el hardware no cabe en la FPGA. Si se construye, es para la edición ASIC o como periférico secuencial, y para medir el peldaño de la escalera.
 2. **El resto del frente C** (especificación de la extensión en custom-0, soporte en el ensamblador, periférico estimador y la escalera de la clase 7 medida) necesita el kernel definitivo del frente A.
 
 ## Tramo 4: frente A, algoritmo (13/11)

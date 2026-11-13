@@ -133,7 +133,9 @@ Falta la equivalencia formal entre las dos versiones y contra la especificación
 
 ## 6. Costo medido
 
-Los coeficientes de estas tablas son de ejemplo: salen de los parámetros de la familia `dos_componentes` de `ref/series.py`, que están puestos a mano. El costo depende de cuántos términos tienen las constantes, así que se midió para varias precisiones. Cuando el frente del algoritmo entregue los coeficientes calibrados se repite con ellos.
+La fila "calibrada" usa los coeficientes del estimador ajustado a la serie de práctica (`docs/algoritmo.md`, sección 4.1): `phi = 1 - 1/32 - 1/128`, `K1 = 1/2 + 1/8` y `K2 = 1/8 + 1/16`. Con 7 bits de fracción son exactos: 123, 80 y 24. Las demás filas usan coeficientes de ejemplo, de un modelo con parámetros puestos a mano, y sirven para ver cómo cambia el costo con la precisión y con la cantidad de términos de las constantes.
+
+Hay una diferencia con la referencia del algoritmo: `candidatos.Trader` con `est=1` trunca después de cada desplazamiento, porque así lo haría el programa en assembly, y `kal2` hace las sumas con precisión completa y trunca una sola vez. Los resultados pueden diferir en el último bit. Si la instrucción se construye hay que elegir una de las dos definiciones y dejarla en la referencia.
 
 ### FPGA, módulo suelto
 
@@ -151,12 +153,13 @@ Síntesis con `synth_ice40`. `C` es la cantidad de bits de fracción de `phi`, `
 | Fija, directa, S = 12 | [1462, -1316] [2513, 1424] / 2^12 | 18 | 427 |
 | Fija, factorizada, C = 6, sin saturar | la misma de C = 6 | 9 | 280 |
 | Fija, k1 = 1/32, k2 = 1/2, phi = 7/8 | [32, -28] [512, 448] / 2^10 | 4 | 160 |
+| **Fija, calibrada** | [10240, -9840] [3072, 12792] / 2^14 | 7 | **251** |
 | Multiplicadores, coeficientes de 8 bits | programable | | 1645 |
 | Multiplicadores, coeficientes de 14 bits | programable | | 3094 |
 
 - La forma factorizada cuesta entre 26 % y 44 % menos que la directa con los mismos bits de fracción en la matriz (217 contra 324, 218 contra 387 y 314 contra 427).
 - La saturación cuesta 34 LUT.
-- El caso más barato usa ganancias que son potencias de 2 o casi: 160 LUT.
+- El caso más barato usa ganancias que son potencias de 2 o casi: 160 LUT. Los coeficientes calibrados tienen 7 términos y cuestan 251.
 - La versión de multiplicadores pide más LUT que las 1280 de la FPGA completa. La HX1K no tiene bloques multiplicadores. Esa versión solo existe en ASIC.
 
 ### FPGA, integrado en el core base
@@ -167,10 +170,11 @@ El módulo suelto no cuenta el multiplexor de 32 bits en la escritura del banco 
 |----------|--------|---------|--------|-----------|
 | SoC base, sin la instrucción | 1074 | 84 % | | Cierra en 5 de 5 semillas, mediana 44,6 MHz |
 | Con `kal2`, k1 = 1/32, k2 = 1/2, phi = 7/8 | 1291 | 101 % | +217 | No cabe |
+| **Con `kal2`, calibrada** | 1402 | 110 % | +328 | No cabe |
 | Con `kal2`, factorizada, C = 4 | 1345 | 105 % | +271 | No cabe |
 | Con `kal2`, factorizada, C = 6 | 1442 | 113 % | +368 | No cabe |
 
-Integrar cuesta unas 55 celdas más que el módulo suelto. La versión más barata se pasa por 11 celdas incluso junto al core base, que deja 206 libres. Como no cabe, no hay frecuencia máxima que informar.
+Integrar cuesta entre 55 y 77 celdas más que el módulo suelto. La versión más barata se pasa por 11 celdas incluso junto al core base, que deja 206 libres, y la calibrada se pasa por 122. Como no cabe, no hay frecuencia máxima que informar.
 
 ### ASIC, GF180MCU
 
@@ -179,6 +183,7 @@ Síntesis con Yosys y abc contra el liberty típico de la biblioteca de 7 pistas
 | Versión | Celdas | Área (um²) | Respecto del SoC del Proyecto 3 |
 |---------|--------|------------|---------------------------------|
 | Fija, k1 = 1/32, k2 = 1/2, phi = 7/8 | 402 | 7 971 | 4 % |
+| **Fija, calibrada** | 742 | 14 776 | 7 % |
 | Fija, factorizada, C = 6 | 993 | 20 325 | 10 % |
 | Fija, directa, S = 12 | 1 473 | 30 331 | 15 % |
 | Multiplicadores de 17 x 8 | 3 407 | 66 897 | 32 % |
@@ -191,8 +196,10 @@ El SoC completo del Proyecto 3 ocupó 208 439 um² de celdas en este mismo proce
 
 La condición para entrar a la edición de competencia tiene dos partes: que el estimador de dos estados gane bajo el protocolo y que el hardware quepa junto al pipeline.
 
-- **La primera** depende del frente del algoritmo.
-- **La segunda hoy no se cumple.** La versión más barata agrega 217 celdas y no cabe ni junto al core base. Para que quepa junto al pipeline, este tiene que dejar libres más de 220 celdas, o hay que achicar el camino de datos.
+- **La primera no se cumple.** Bajo el protocolo el estimador de dos estados empata con la regla base: con la semilla reservada gana 30 ± 5 en el remuestreo, pierde 8 ± 8 en las familias plausibles y baja más de 1 % en tres familias de estrés (`docs/algoritmo.md`, sección 7.4, y decisión T30). La razón está en el modelo: el nivel y la transitoria se mueven a escalas parecidas, y el filtro óptimo apenas baja la incertidumbre de la transitoria de 1,19 a 1,11.
+- **La segunda tampoco.** Con los coeficientes calibrados agrega 328 celdas y no cabe ni junto al core base. Para que quepa junto al pipeline, este tiene que dejar libres más de 330 celdas, o hay que achicar el camino de datos.
+
+Con las dos condiciones en contra, el producto 2x2 queda en la edición de exhibición.
 
 Formas de achicarlo, ninguna medida todavía:
 
@@ -204,15 +211,15 @@ En la FPGA lo que falta es área y lo que sobra es tiempo: la regla base respond
 
 ## 8. Lugar en la escalera de la clase 7
 
-Predicción, con las definiciones de la clase. No hay nada medido todavía porque el estimador de dos estados no está escrito en assembly.
+Predicción, con las definiciones de la clase. No hay nada medido todavía.
 
 - **Trabajo útil por paso:** 8 operaciones (4 productos y 4 sumas).
-- **Solo software, sin multiplicador ni shifter:** cada producto por constante son sumas, y cada desplazamiento a la derecha cuesta 6 instrucciones con el método de la memoria. Estimamos entre 30 y 80 instrucciones según la precisión de los coeficientes, es decir, entre 70 y 170 ciclos en el Espino base. Eso da entre 1,2 y 2,9 MOPS.
+- **Solo software, sin multiplicador ni shifter:** cada producto por constante son sumas, y cada desplazamiento a la derecha cuesta 6 instrucciones con el método de la memoria. El estimador calibrado tiene seis desplazamientos de números con signo, y el frente del algoritmo estima el tick completo en unas 140 instrucciones contra las 27 de la regla base. Descontando las 19 que no son del estimador quedan unas 120 instrucciones, cerca de 260 ciclos en el Espino base. Eso da 0,8 MOPS.
 - **Con `kal2`:** una instrucción. 2 ciclos en el Espino base (100 MOPS) y 1 ciclo en el pipeline de 3 etapas (200 MOPS).
-- **Amdahl.** Si el resto del tick (leer el precio, decidir y escribir) cuesta unos 40 ciclos y el estimador 70, la fracción acelerada es f = 0,64 y el factor F = 35. S = 1 / ((1 - 0,64) + 0,64 / 35) = 2,6 para el tick completo. Con el estimador de 170 ciclos, f = 0,81, F = 85 y S = 5,0.
+- **Amdahl.** El resto del tick (leer el precio, decidir y escribir) cuesta unos 41 ciclos. Con el estimador en 260 ciclos, la fracción acelerada es f = 260 / 301 = 0,86 y el factor F = 260 / 2 = 130. S = 1 / ((1 - 0,86) + 0,86 / 130) = 6,8 para el tick completo.
 - **Roofline.** El paso mueve un byte (el precio) y hace 8 operaciones: intensidad de 8 Op/B, muy a la derecha del quiebre de 0,125 Op/B. Está limitado por cómputo, no por memoria.
 
-Estos números se reemplazan por mediciones cuando el frente del algoritmo entregue el estimador en assembly y la instrucción se construya.
+Las 140 instrucciones son una estimación: el estimador de dos estados no está escrito en assembly. Estos números se reemplazan por mediciones si la instrucción se construye para la edición de exhibición.
 
 ## 9. Archivos
 

@@ -193,7 +193,7 @@ Hay tres hechos que estas decisiones no cambian y con los que se planifica:
 - **Razón de la forma factorizada.** La matriz es de rango 1 más una diagonal, y calcular la innovación una sola vez deja tres productos por constante en vez de cuatro. Cuesta entre 26 % y 44 % menos LUT que la forma directa con la misma precisión.
 - **Condición para entrar a la competencia.** Que el estimador de dos estados gane bajo el protocolo y que el hardware quepa junto al pipeline. La segunda hoy no se cumple. Para cumplirla habría que angostar los carriles, quitar la saturación o hacer una versión secuencial, y ninguna de esas está medida.
 - **Qué se pierde.** Nada en la competencia: en la FPGA sobra tiempo (44 ciclos usados de 2262) y falta área, así que el estimador de dos estados puede correr en software. Se pierde mostrar este peldaño funcionando en la placa.
-- **Pendiente.** Los coeficientes de las tablas son de ejemplo. Hay que repetir la medición con los que entregue la calibración del generador.
+- **Actualización con el frente del algoritmo.** Con los coeficientes calibrados (`phi = 123/128`, `K1 = 5/8`, `K2 = 3/16`) la versión fija cuesta 251 LUT suelta, agrega 328 celdas integrada (1402 de 1280) y ocupa 14 776 um² en GF180. El estimador de dos estados no gana bajo el protocolo (T30). Las dos condiciones quedan en contra y el producto 2x2 se queda en la edición de exhibición.
 
 ### T25. El generador se modela como nivel más transitoria más redondeo, con dos regímenes (13/11)
 
