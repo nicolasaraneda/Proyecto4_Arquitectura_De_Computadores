@@ -52,7 +52,7 @@ Rama `frente-a`. El detalle está en `docs/algoritmo.md`. **`ref/trader.py` y `s
 - **Ideas que aprenden en vivo** (`ref/experimentos.py`): población de traders, adaptación con prior fuerte y perceptrón, con control de rotación.
 - **Guardia de régimen y tope de pérdida**, sin multiplicaciones.
 - **Candidatos sobre la frontera** (`ref/frontera.py`), evaluados con una semilla que no se usó para elegir nada.
-- Decisiones TA1 a TA7 en `docs/decisiones.md` (etiquetas provisionales).
+- Decisiones T25 a T31 en `docs/decisiones.md`.
 
 ### Qué se midió
 
