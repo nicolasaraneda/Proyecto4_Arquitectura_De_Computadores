@@ -70,6 +70,9 @@ jobs:
       - name: CPI y modelo de costo
         run: make cpi
 
+      - name: Producto 2x2 en punto fijo contra su modelo
+        run: make tb-mv2x2
+
       - name: Síntesis, place and route y bitstream
         run: make bin
 

@@ -1,0 +1,36 @@
+== Testbench: tres implementaciones contra ref/mv2x2.py ==
+PASS tb_mv2x2: 20000 vectores por matriz, las tres implementaciones coinciden con ref/mv2x2.py
+     matriz factorizada G x 2^12 = [[1472, -1334], [2496, 1450]], matriz directa G x 2^8 = [[91, -82], [157, 89]]
+
+== Costo en la FPGA, módulo suelto (synth_ice40) ==
+La FPGA tiene 1280 celdas y el SoC base deja libres unas 200.
+versión                            matriz entera                      términos   LUT4  acarreo
+fija, factorizada, C = 3           [24, -21] [40, 21] / 2^6                  6    217      125
+fija, factorizada, C = 4           [96, -84] [160, 84] / 2^8                 6    218      125
+fija, factorizada, C = 5           [352, -319] [640, 348] / 2^10             8    264      172
+fija, factorizada, C = 6           [1472, -1334] [2496, 1450] / 2^12         9    314      180
+fija, factorizada, C = 8           [23296, -20930] [40192, 22770] / 2^16       12    396      266
+fija, directa, S = 6               [23, -21] [39, 22] / 2^6                 12    324      170
+fija, directa, S = 8               [91, -82] [157, 89] / 2^8                15    387      231
+fija, directa, S = 12              [1462, -1316] [2513, 1424] / 2^12        18    427      321
+fija, factorizada, C = 6, sin saturar [1472, -1334] [2496, 1450] / 2^12         9    280      177
+fija, k1 = 1/32, k2 = 1/2, phi = 7/8 [32, -28] [512, 448] / 2^10               4    160       86
+multiplicadores, coeficientes de 8 bits entradas (programable)                        1645       80
+multiplicadores, coeficientes de 14 bits entradas (programable)                        3094       91
+
+== Costo en la FPGA, integrado como instrucción en el core base (16f9cc3) ==
+variante                                    celdas  de 1280  agrega   frecuencia máxima en 5 semillas (MHz)
+SoC base, sin la instrucción                  1074      84%      +0   mín 41.5, mediana 44.6, máx 47.5, cierran a 25 MHz 5 de 5
+con kal2, k1 = 1/32, k2 = 1/2, phi = 7/8      1291     101%    +217   no cabe: falla el place and route
+con kal2, factorizada, C = 4                  1345     105%    +271   no cabe: falla el place and route
+con kal2, factorizada, C = 6                  1442     113%    +368   no cabe: falla el place and route
+
+== Costo en ASIC, GF180MCU 7 pistas, liberty típico (síntesis con abc, sin place and route) ==
+versión                                     celdas  área (um2)
+fija, k1 = 1/32, k2 = 1/2, phi = 7/8           402        7971
+fija, factorizada, C = 6                       993       20325
+fija, directa, S = 12                         1473       30331
+multiplicadores de 17 x 8                     3407       66897
+multiplicadores de 17 x 14                    6373      123978
+multiplicadores de 17 x 14 y 4 registros      6599      129804
+Referencia de escala: el SoC completo del Proyecto 3 ocupó 208 439 um2 de celdas en este mismo proceso.

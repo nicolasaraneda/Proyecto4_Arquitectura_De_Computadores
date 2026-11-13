@@ -49,6 +49,7 @@ FREQ ?= 25
         equiv equiv-r3 equiv-r2 equiv-r1 equiv-verilator equiv-largo medir-ticks \
         equiv-icarus equiv-completo equiv-gemelo-20k \
         equiv-series equiv-gemelo gemelo cosim protocolo \
+        tb-mv2x2 costo-mv2x2 \
         sim-bitstream guardar-bitstream medir-base hallazgos clean
 
 # Objetivo por defecto: todo lo verificable sin la placa
@@ -202,6 +203,18 @@ guardar-bitstream: $(BIN)
 # Programar la placa (lo ejecuta una persona, con la Go Board conectada)
 prog: $(BIN)
 	iceprog $(BIN)
+
+# --- Producto 2x2 en punto fijo: diseño y costo (docs/producto_2x2.md) -------
+# No toca el SoC: todo se arma en build/mv2x2/.
+#   tb-mv2x2:    las versiones de coeficientes fijos y la de multiplicadores
+#                contra ref/mv2x2.py. Corre en la integración continua.
+#   costo-mv2x2: además mide LUT en la FPGA (suelto e integrado en una copia
+#                del core base) y celdas y área en GF180. Resultado en
+#                docs/mediciones/mv2x2_costo.txt.
+tb-mv2x2:
+	$(PYTHON) tools/costo_mv2x2.py --solo-tb
+costo-mv2x2:
+	$(PYTHON) tools/costo_mv2x2.py | tee docs/mediciones/mv2x2_costo.txt
 
 # --- Mediciones reproducibles -----------------------------------------------
 # Recursos, frecuencia máxima, shifter, PLL y CPI del repo base (etiqueta base-curso)

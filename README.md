@@ -70,6 +70,7 @@ Otros objetivos:
 | `make equiv-gemelo` | Corre `trade.hex` en el gemelo sobre las 3010 series del protocolo, a los tres períodos, y lo compara con la referencia. |
 | `make cpi` | Mide instrucciones, ciclos y CPI del core con `tb/tb_cpi.sv`, y comprueba el modelo de costo. Corrida corta, con precios de un LFSR. |
 | `make check` | Tests del ensamblador y de la referencia, `trade.hex` al día y testbench oficial. |
+| `make tb-mv2x2` y `make costo-mv2x2` | Producto 2x2 en punto fijo (solo diseño y costo): compara las versiones de hardware con su modelo y mide LUT en la FPGA y área en GF180. Resultado en `docs/mediciones/mv2x2_costo.txt`. |
 
 ## Cómo correr la versión de referencia del algoritmo
 
@@ -101,6 +102,7 @@ Cada una tiene su documento de estudio, su prueba y el número que la respalda.
 | Protocolo de evaluación | 10 bloques de práctica, 1000 remuestreos y 10 familias sintéticas, con criterio de aceptación. | `make protocolo` y `make equiv-gemelo` | Regla base: media 10 772 y percentil 5 de 8 914 en los remuestreos. El binario coincide con la referencia en 18 millones de ticks. | `docs/protocolo.md` |
 | Simulación del bitstream | Simula lo que se graba en la placa, reconstruido desde el `.asc`. | `make sim-bitstream` | 2000 ticks idénticos a la referencia. | `docs/decisiones.md`, T15 |
 | Programas aleatorios | Generador de programas para comparar dos modelos del SoC. | `make cosim` | 469 343 escrituras de registro y de memoria comparadas con 4 semillas. | `docs/gemelo.md`, sección 3 |
+| Producto 2x2 en punto fijo (diseño y costo) | Instrucción propuesta `kal2`: un paso del filtro de Kalman de dos estados como producto de matriz 2x2 por vector, con el estado empaquetado en dos carriles de 16 bits. No está en el SoC. | `make tb-mv2x2` y `make costo-mv2x2` | Tres implementaciones idénticas al modelo en 20 000 vectores por matriz. Coeficientes fijos: 160 a 396 LUT, agrega 217 celdas o más al SoC y hoy no cabe. Multiplicadores reales: 3094 LUT en la FPGA, 124 000 um² en GF180. | `docs/producto_2x2.md` |
 
 ## Cómo sintetizar y programar la placa
 
