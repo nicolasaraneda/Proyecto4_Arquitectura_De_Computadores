@@ -122,7 +122,7 @@ Además, `make equiv-gemelo` corre `trade.hex` en el gemelo sobre las 3810 serie
 
 ### Qué no modela
 
-- **Timing eléctrico.** No hay retardos de compuertas ni metaestabilidad. Que el diseño cierre a 25 MHz lo dice nextpnr, y que el SPI funcione con la maestra real se prueba el 19/11.
+- **Timing eléctrico.** No hay retardos de compuertas ni metaestabilidad. Que el diseño cierre a 25 MHz lo dice nextpnr, y que el SPI funcione con la maestra real se prueba el 26/11.
 - **Valores indefinidos.** Una palabra que no está en el `.hex` vale 0 (en el RTL simulado sería X). Por eso `trade.hex` se rellena a 512 palabras, y el gemelo avisa si recibe un `.hex` más corto.
 - **Solo el Espino base.** Cuando el core se segmente, la tabla de ciclos de la sección 2 cambia. El gemelo se actualiza y se vuelve a validar con `make cosim`.
 - **Interruptores.** Valen 0, como en el testbench.
