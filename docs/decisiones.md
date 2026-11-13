@@ -84,3 +84,54 @@ Hay tres hechos que estas decisiones no cambian y con los que se planifica:
 - **Decisión.** `tb/practica.csv` se sube al repositorio, aunque el `.gitignore` del repositorio base ignora todos los `.csv`.
 - **Razón.** El testbench oficial la lee desde `tb/practica.csv` y todos los números del algoritmo salen de ella.
 - **Aclaración.** La regla del enunciado prohíbe guardar series de precios dentro del diseño. La serie está en el repositorio solo como dato de prueba: ni el RTL ni `trade.s` la contienen.
+
+### T10. El ensamblador pasa a ser el del Proyecto 3, con la directiva `.org` (13/11)
+
+- **Decisión.** Se trajeron del ensamblador del Proyecto 3 las salidas en Verilog (`--vh` y `--rom`) con sus tests, y se agregó la directiva `.org dirección`, que rellena con ceros. `sw/trade.s` termina con `.org 0x800`, así que `trade.hex` tiene siempre 512 palabras. Reemplaza en parte a T2.
+- **Razón.** En simulación una palabra que no está en el `.hex` queda indefinida y en la placa queda en cero: con el relleno las dos parten igual. Además `icebram` necesita un `.hex` del tamaño completo de la memoria. Las salidas en Verilog se van a usar en el frente del Espino segmentado, si se evalúa la ROM combinacional.
+- **Alternativas.** Una opción `--pad` en la línea de comandos, o rellenar siempre. La primera no sirve porque el comando del testbench oficial no lleva opciones. La segunda rompe la comparación con los `.hex` del repositorio base.
+- **Qué se pierde.** Nada. La suite pasa de 73 a 87 tests.
+
+### T11. El desplazamiento a la derecha se hace con la memoria (13/11)
+
+- **Decisión.** La regla base necesita `(32 p - S) >> 5`. En `trade.s` se calcula como `p - ((S + 31) >> 5)`, y el desplazamiento de `S + 31`, que es positivo, se hace multiplicando por 8 con tres sumas, guardando la palabra en memoria y leyendo su segundo byte con `lbu`. Cuesta 6 instrucciones y 13 ciclos.
+- **Razón.** La ALU no tiene shifter y el shifter completo no cabe (116 % de la FPGA). Leer un byte de una palabra es un desplazamiento de 8 bits que el hardware ya tiene en la unidad de carga. El costo es fijo y no depende del dato.
+- **Alternativas.** Un lazo que arma el resultado bit a bit (unas 24 instrucciones). Llevar la parte entera y la fracción de la media en registros separados y normalizar con restas sucesivas (pocas instrucciones en el caso normal, pero hasta 9 vueltas en el peor caso). Cambiar la regla por la suma móvil de 64, que no necesita desplazar pero rinde menos (24 143 contra 27 062 en la serie completa) y ocupa 64 palabras de memoria.
+- **Qué se pierde.** Una palabra de RAM (`TMP`) y un store y un load por tick. Queda como el candidato natural para la extensión de la ISA: una instrucción de paso de media exponencial reemplaza las 8 instrucciones del bloque.
+
+### T12. `trade.s` no tiene saltos que dependan del precio (13/11)
+
+- **Decisión.** Las comparaciones se hacen con `slti` y la posición se actualiza con `or` y `and`. El byte de decisión se arma con aritmética. El único salto condicional es el del sondeo de `STATUS`.
+- **Razón.** El trabajo por tick es constante: 27 instrucciones y 58 ciclos, sin contar la espera. El peor caso se puede enunciar sin buscar la peor entrada. También simplifica la verificación exhaustiva y el modelo de costo.
+- **Alternativas.** Saltos condicionales, que ahorran 1 o 2 instrucciones en algunos caminos y agregan variación.
+- **Qué se pierde.** Nada medible. La respuesta varía entre 38 y 44 ciclos solo por la fase del lazo de sondeo, que dura 8 ciclos. Eso no se puede eliminar sin interrupciones.
+- **Detalle.** Si las dos condiciones se cumplieran a la vez, la forma sin saltos saldría y la forma con saltos entraría. Con umbrales en que entrar exige estar bajo la media y salir exige estar sobre ella, nunca se cumplen juntas. `ref/trader.py` rechaza parámetros en que podrían coincidir.
+
+### T13. La referencia modela los precios que se pierden en el reset (13/11)
+
+- **Decisión.** `ref/trader.py` recibe el período del testbench y calcula cuántos precios iniciales llegan durante el power-on reset (`ticks_perdidos`): 2 a 0,1 ms y 1 a 1 ms y a 10 ms. Esos precios no se entregan a la estrategia.
+- **Razón.** La equivalencia debe ser byte a byte con el testbench oficial sin modificar, y el reset largo (T3) es parte del diseño.
+- **Alternativas.** Acortar el reset para que el testbench no pierda precios (pendiente de T3, hay que medirlo en la placa), o comparar a partir del tick 3.
+- **Qué se pierde.** El patrimonio del testbench en la serie completa (26 795 a 0,1 ms, 27 306 a 1 ms) no es el de la regla base viendo todos los precios (27 062). Los tres números salen de la misma referencia con distinto parámetro. Para evaluar el algoritmo se usa el caso sin pérdidas, que es el de la competencia.
+
+### T14. Icarus es el simulador oficial y Verilator se usa para las corridas largas (13/11)
+
+- **Decisión.** `make tb` y `make equiv-r3` usan Icarus, con los comandos del encabezado del testbench. Las corridas de 20 000 ticks a 1 ms y a 10 ms y las mediciones por tick usan Verilator, con la misma copia del testbench.
+- **Razón.** Icarus demora 13 minutos en 20 000 ticks a 0,1 ms. A 10 ms serían unas 22 horas. Verilator es unas 50 veces más rápido y acepta el testbench oficial tal cual (`--binary --timing`).
+- **Validación.** Las dos herramientas dan la misma traza ciclo a ciclo y el mismo `decisiones.csv`. Eso incluye el caso delicado: el testbench cambia `SCLK` en el mismo instante en que sube el reloj, y las dos resuelven esa coincidencia igual.
+- **Qué se pierde.** Nada. Verilator viene en OSS CAD Suite.
+
+### T15. Antes de programar la placa se simula el bitstream (13/11)
+
+- **Decisión.** `make sim-bitstream` convierte el `.asc` del place and route en Verilog con `icebox_vlog` y lo simula por los pines con la maestra del testbench (`tb/tb_bitstream.sv`). Los bytes que lee la maestra se pasan por `ref/market.py` y el resultado debe ser idéntico al de la referencia.
+- **Razón.** El testbench oficial simula el RTL, no lo que se graba en la placa. Esta prueba cubre la síntesis, el place and route y sobre todo el contenido inicial de las BRAM, que es donde va el programa. En el Proyecto 2 el problema que tuvimos en la placa fue justamente de arranque con las BRAM.
+- **Alternativas.** Simular la netlist de Yosys (no cubre el place and route) o confiar en el flujo.
+- **Qué se pierde.** Ocho minutos por bitstream con Icarus. No cubre el timing ni el comportamiento eléctrico: eso se prueba el 19/11.
+- **Detalle.** `icebox_vlog` declara los puertos dos veces e Icarus lo rechaza. `tools/chip_vlog.py` reescribe solo el encabezado del módulo.
+
+### T16. Los bitstreams de competencia se versionan con su hash (13/11)
+
+- **Decisión.** Cada bitstream candidato queda en `bitstreams/` con su SHA-256 y una tabla con el commit, los recursos y las pruebas que pasó.
+- **Razón.** El día de la competencia hay que grabar un archivo que ya se probó, no uno recién sintetizado. Con el hash se puede comprobar que el archivo de la placa es el que pasó por la maestra real.
+- **Alternativas.** Regenerarlo cada vez con `make bin`. Con las mismas versiones el resultado es el mismo, pero depende de tener el entorno intacto ese día.
+- **Qué se pierde.** 32 kB por bitstream en el repositorio.

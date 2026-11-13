@@ -2,7 +2,8 @@
 # Grupo: Nicolás Araneda, Vicente Calderón y Santiago Muñoz.
 #
 # En cada push y en cada pull request se corre lo mismo que `make check`
-# (tests del ensamblador, trade.hex al día, testbench oficial con 4/4), la
+# (tests del ensamblador y de la referencia, trade.hex al día, testbench
+# oficial con 4/4), la equivalencia con la referencia en los 20 000 ticks, la
 # medición de CPI y la síntesis completa hasta el bitstream.
 # Usa la misma versión de OSS CAD Suite que usamos en el desarrollo.
 
@@ -15,7 +16,7 @@ on:
 jobs:
   verificar:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
 
@@ -30,16 +31,23 @@ jobs:
           yosys -V
           nextpnr-ice40 --version
           iverilog -V | head -1
+          verilator --version
           python3 --version
 
       - name: Tests del ensamblador
         run: make test-asm
+
+      - name: Tests del mercado y de la referencia
+        run: make test-ref
 
       - name: trade.hex corresponde a trade.s
         run: make check-hex
 
       - name: Testbench oficial sin modificar (4/4)
         run: make tb
+
+      - name: Equivalencia con la referencia (20 000 ticks)
+        run: make -j4 equiv
 
       - name: CPI y modelo de costo
         run: make cpi
