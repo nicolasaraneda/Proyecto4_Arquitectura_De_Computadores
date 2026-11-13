@@ -1,0 +1,30 @@
+== Sin mutacion: todo debe pasar ==
+PASS sin mutacion: riesgos y ejecucion en paralelo pasan
+== MUTA_FWD ==
+  detectada por las pruebas de riesgos: 11 comprobaciones fallan
+    hazard_test: funcional (base contra segmentado): DIFIEREN (rf) en el evento 6: ref='rf x5 = 0000000f' act='rf x5 = 0000000a'
+    hazard_review: funcional (base contra segmentado): DIFIEREN (rf) en el evento 8: ref='rf x3 = 00000003' act='rf x3 = 00000001'
+    hazard_cycles: funcional (base contra segmentado): DIFIEREN (io) en el evento 1: ref='io led=0000 seg=1000000_0010010' act='io led=0000 seg=1000000_0100100'
+  detectada por la ejecucion en paralelo: 4 de 4 programas aleatorios difieren
+== MUTA_LOADUSE ==
+  detectada por las pruebas de riesgos: 12 comprobaciones fallan
+    hazard_test: funcional (base contra segmentado): DIFIEREN (rf) en el evento 84: ref='rf x5 = 00000002' act='rf x5 = 00000795'
+    hazard_review: funcional (base contra segmentado): DIFIEREN (rf) en el evento 55: ref='rf x5 = 00000604' act='rf x5 = 00000713'
+    hazard_cycles: funcional (base contra segmentado): DIFIEREN (io) en el evento 1: ref='io led=0000 seg=1000000_0010010' act='io led=0000 seg=1000000_1111001'
+  detectada por la ejecucion en paralelo: 4 de 4 programas aleatorios difieren
+== MUTA_RDEN ==
+  detectada por las pruebas de riesgos: 6 comprobaciones fallan
+    hazard_test: funcional (base contra segmentado): DIFIEREN (rf) en el evento 88: ref='rf x4 = 0000007f' act='rf x4 = ffffffff'
+    hazard_review: funcional (base contra segmentado): DIFIEREN (rf) en el evento 115: ref='rf x4 = ffffff80' act='rf x4 = ffffffff'
+  detectada por la ejecucion en paralelo: 4 de 4 programas aleatorios difieren
+== MUTA_X0 ==
+  detectada por las pruebas de riesgos: 8 comprobaciones fallan
+    hazard_test: funcional (base contra segmentado): DIFIEREN (rf) en el evento 250: ref='rf x5 = 00000001' act='rf x5 = 00000006'
+    hazard_review: funcional (base contra segmentado): DIFIEREN (rf) en el evento 225: ref='rf x5 = 00000000' act='rf x5 = 000000f6'
+  detectada por la ejecucion en paralelo: 3 de 4 programas aleatorios difieren
+== MUTA_SQUASH ==
+  detectada por las pruebas de riesgos: 4 comprobaciones fallan
+    hazard_test: funcional (base contra segmentado): DIFIEREN (rf) en el evento 180: ref='rf x14 = 0000001f' act='rf x14 = 00000082'
+    hazard_review: funcional (base contra segmentado): DIFIEREN (rf) en el evento 40: ref='rf x5 = 0000000c' act='rf x3 = 0000006f'
+  detectada por la ejecucion en paralelo: 4 de 4 programas aleatorios difieren
+PASS mutaciones: las 5 mutaciones son detectadas por las pruebas de riesgos y por la ejecucion en paralelo
