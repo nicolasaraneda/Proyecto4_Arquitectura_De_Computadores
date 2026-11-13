@@ -21,7 +21,9 @@
 #
 # Uso, desde la raíz: tools/cosim.sh
 # Variables: SEMILLAS (por defecto "1 2 3 4"), TICKS_ALEATORIO (150),
-#            SIM_ALEATORIO (iverilog o verilator).
+#            SIM_ALEATORIO (iverilog o verilator),
+#            VARIANTE (base, por defecto, o segmentado: el pipeline de 3
+#            etapas contra el gemelo con --pipeline).
 set -euo pipefail
 
 SEMILLAS=${SEMILLAS:-"1 2 3 4"}
@@ -32,7 +34,14 @@ SRC=$(echo rtl/*.v rtl/espino_core/*.v)
 CELLS_SIM=$(yosys-config --datdir)/ice40/cells_sim.v
 SERIE=tb/practica.csv
 G=build/gemelo
-D=build/cosim
+VARIANTE=${VARIANTE:-base}
+case "$VARIANTE" in
+  base)       DEFS="";                    GEM_OPTS="";           D=build/cosim ;;
+  segmentado) DEFS="-DESPINO_SEGMENTADO"; GEM_OPTS="--pipeline"; D=build/cosim_segmentado ;;
+  *) echo "VARIANTE debe ser base o segmentado"; exit 1 ;;
+esac
+export DEFS
+echo "== Variante del core: $VARIANTE =="
 mkdir -p "$D"
 [ -x "$G" ] || { echo "falta $G: correr make gemelo"; exit 1; }
 
@@ -42,11 +51,11 @@ rtl() {
   local defs=("-DPROGRAMA=\"$hex\"" "-DSERIE=\"$SERIE\"" "-DNTICKS=$nt" "-DTICKS_CSV=\"$D/${et}_rtl_ticks.csv\"")
   [ "${SIN_TRAZA:-0}" = 1 ] || defs+=("-DTRAZA=\"$D/${et}_rtl_traza.txt\"")
   if [ "$sim" = verilator ]; then
-    verilator --binary --timing -Wno-fatal -Wno-lint -Wno-style --top-module tb_cpi -O3 "${defs[@]}" "$@" \
+    verilator --binary --timing -Wno-fatal -Wno-lint -Wno-style --top-module tb_cpi -O3 $DEFS "${defs[@]}" "$@" \
       --Mdir "$D/${et}_obj" -o sim "$CELLS_SIM" $SRC tb/tb_cpi.sv > "$D/${et}_verilator.log" 2>&1
     "$D/${et}_obj/sim" > "$D/${et}_rtl.log"
   else
-    iverilog -g2012 -s tb_cpi "${defs[@]}" "$@" -o "$D/${et}_sim" "$CELLS_SIM" $SRC tb/tb_cpi.sv
+    iverilog -g2012 -s tb_cpi $DEFS "${defs[@]}" "$@" -o "$D/${et}_sim" "$CELLS_SIM" $SRC tb/tb_cpi.sv
     vvp -n "$D/${et}_sim" > "$D/${et}_rtl.log"
   fi
 }
@@ -61,7 +70,7 @@ comparar() {
 
 gem() {   # gem ETIQUETA HEX NTICKS [opciones...]
   local et=$1 hex=$2 nt=$3; shift 3
-  "$G" --hex "$hex" --serie "$SERIE" --nticks "$nt" --traza "$D/${et}_gem_traza.txt" \
+  "$G" $GEM_OPTS --hex "$hex" --serie "$SERIE" --nticks "$nt" --traza "$D/${et}_gem_traza.txt" \
        --ticks "$D/${et}_gem_ticks.csv" --callado "$@"
 }
 
@@ -94,24 +103,24 @@ done
 echo "     programas aleatorios: $total escrituras de registro y de memoria comparadas"
 
 echo "== D: testbench oficial, 20 000 ticks =="
-SIM=verilator tools/equiv.sh cosim_r3 100000 20000 > "$D/D_equiv.log"
-"$G" --csv "$D/D_gem.csv" > "$D/D_gem.log" || true
-cmp build/equiv/cosim_r3/tb.csv "$D/D_gem.csv" || { echo "FAIL D: decisiones.csv distinto"; exit 1; }
-diff <(grep -v -e '^- ' -e 'finish' build/equiv/cosim_r3/tb.log) <(grep -v '^Gemelo' "$D/D_gem.log") \
+SIM=verilator tools/equiv.sh cosim_r3_$VARIANTE 100000 20000 > "$D/D_equiv.log"
+"$G" $GEM_OPTS --csv "$D/D_gem.csv" > "$D/D_gem.log" || true
+cmp build/equiv/cosim_r3_$VARIANTE/tb.csv "$D/D_gem.csv" || { echo "FAIL D: decisiones.csv distinto"; exit 1; }
+diff <(grep -v -e '^- ' -e 'finish' build/equiv/cosim_r3_$VARIANTE/tb.log) <(grep -v '^Gemelo' "$D/D_gem.log") \
   || { echo "FAIL D: resumen distinto"; exit 1; }
 echo "PASS D: decisiones.csv (20 000 filas) y resumen identicos al testbench: $(grep 'Peor caso' "$D/D_gem.log")"
 
 echo "== E: mediciones por tick, 20 000 ticks =="
 SIN_TRAZA=1 rtl E verilator sw/trade.hex 20000
-"$G" --ticks "$D/E_gem_ticks.csv" --callado
+"$G" $GEM_OPTS --ticks "$D/E_gem_ticks.csv" --callado
 cmp "$D/E_rtl_ticks.csv" "$D/E_gem_ticks.csv" || { echo "FAIL E: mediciones por tick distintas"; exit 1; }
 echo "PASS E: $(($(wc -l < "$D/E_rtl_ticks.csv") - 1)) ticks con las mismas mediciones (ciclo de llegada, ciclos e IC)"
 
 echo "== F: atajo del sondeo =="
 for r in "100000 20000" "1000000 20000" "10000000 2000"; do
   set -- $r
-  "$G" --periodo-ns "$1" --nticks "$2" --csv "$D/F_con.csv" --ticks "$D/F_con_ticks.csv" > "$D/F_con.log"
-  "$G" --periodo-ns "$1" --nticks "$2" --csv "$D/F_sin.csv" --ticks "$D/F_sin_ticks.csv" --sin-atajo > "$D/F_sin.log"
+  "$G" $GEM_OPTS --periodo-ns "$1" --nticks "$2" --csv "$D/F_con.csv" --ticks "$D/F_con_ticks.csv" > "$D/F_con.log"
+  "$G" $GEM_OPTS --periodo-ns "$1" --nticks "$2" --csv "$D/F_sin.csv" --ticks "$D/F_sin_ticks.csv" --sin-atajo > "$D/F_sin.log"
   cmp "$D/F_con.csv" "$D/F_sin.csv" && cmp "$D/F_con_ticks.csv" "$D/F_sin_ticks.csv" \
     && diff <(sed 's/, [0-9]* vueltas.*//' "$D/F_con.log") <(sed 's/, [0-9]* vueltas.*//' "$D/F_sin.log") \
     || { echo "FAIL F: el atajo cambia el resultado (periodo $1)"; exit 1; }
@@ -119,9 +128,9 @@ done
 echo "PASS F: con y sin atajo dan lo mismo a 0,1 ms, 1 ms y 10 ms (decisiones, mediciones, IC y ciclos totales)"
 
 echo "== G: control negativo =="
-"$G" --nticks 300 --borde 0 --traza "$D/G_gem_traza.txt" --callado
+"$G" $GEM_OPTS --nticks 300 --borde 0 --traza "$D/G_gem_traza.txt" --callado
 if cmp -s "$D/A_rtl_traza.txt" "$D/G_gem_traza.txt"; then
   echo "FAIL G: la comparacion no detecta un cambio de un ciclo en el esclavo SPI"; exit 1
 fi
 echo "PASS G: con --borde 0 la traza difiere de la del RTL en $(cmp -l "$D/A_rtl_traza.txt" "$D/G_gem_traza.txt" 2>/dev/null | wc -l) bytes"
-echo "PASS cosim: el gemelo coincide con el RTL"
+echo "PASS cosim ($VARIANTE): el gemelo coincide con el RTL"
