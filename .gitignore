@@ -20,3 +20,9 @@ module_stats/
 sim/sim
 *.vcd
 *.csv
+# Proyecto 4: la serie de practica si se versiona (el testbench la lee desde tb/)
+!tb/practica.csv
+
+# Artefactos de construccion y de simulacion del Proyecto 4
+build/
+decisiones.csv
