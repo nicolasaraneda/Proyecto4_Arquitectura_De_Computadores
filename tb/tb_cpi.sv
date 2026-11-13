@@ -7,8 +7,11 @@
 // mismo timing del testbench oficial. Entrega tres cosas:
 //
 // 1. CPI global y por clase de instrucción, comparado con el modelo de costo
-//    leído del RTL del Espino base:
-//        ciclos = 2 * IC + loads + saltos tomados (branch tomado, jal, jalr)
+//    leído del RTL:
+//        Espino base:           ciclos = 2 * IC + loads + saltos tomados
+//        pipeline de 3 etapas:  ciclos =     IC + loads + saltos tomados
+//    (saltos tomados: branch tomado, jal y jalr). La variante del core se
+//    elige con -DESPINO_SEGMENTADO o -DESPINO_ROM, igual que en el RTL.
 //
 // 2. Mediciones por tick, en dos ventanas que parten cuando llega el precio
 //    (byte_done):
@@ -39,9 +42,9 @@
 // precios salen de un LFSR), NTICKS, PERIODO_NS, INICIO_NS, CS_SETUP_NS,
 // SCLK_MEDIO_NS, CS_HOLD_NS, POR_BITS, TICKS_CSV, TRAZA.
 //
-// Este testbench mira señales internas del Espino base (u_core.u_id.commit,
-// u_core.pc_set, u_core.rf_we). Si la microarquitectura cambia, hay que
-// actualizar esas rutas.
+// Este testbench mira señales internas del core (u_core.u_id.commit,
+// u_core.pc_set, u_core.rf_we, u_core.instr_ex). Tienen el mismo nombre y el
+// mismo significado en el Espino base y en el segmentado.
 
 `timescale 1ns/1ps
 
@@ -70,6 +73,14 @@
   `define POR_BITS 12
 `endif
 
+`ifdef ESPINO_ROM
+  `define CICLOS_BASE 1
+`elsif ESPINO_SEGMENTADO
+  `define CICLOS_BASE 1
+`else
+  `define CICLOS_BASE 2
+`endif
+
 module tb_cpi;
 
   localparam int SPI_NS = `CS_SETUP_NS + 16 * `SCLK_MEDIO_NS + `CS_HOLD_NS;
@@ -91,7 +102,7 @@ module tb_cpi;
   // Señales internas
   wire        commit = dut.u_core.u_id.commit;      // instrucción completada en este ciclo
   wire        pc_set = dut.u_core.pc_set;           // salto tomado en este ciclo
-  wire [31:0] instr  = dut.u_core.instr_rdata_i;
+  wire [31:0] instr  = dut.u_core.instr_ex;     // instrucción en ejecución
   wire        rf_we  = dut.u_core.rf_we;
   wire [3:0]  rf_wa  = dut.u_core.rf_waddr;
   wire [31:0] rf_wd  = dut.u_core.rf_wdata;
@@ -250,7 +261,7 @@ module tb_cpi;
     if (fd_ticks != 0) $fclose(fd_ticks);
     if (fd_traza != 0) $fclose(fd_traza);
 
-    modelo = 2 * s_ic + s_load + s_br_t + s_jump;
+    modelo = `CICLOS_BASE * s_ic + s_load + s_br_t + s_jump;
     $display("Programa:                 %s", `PROGRAMA);
     $display("Ticks:                    %0d con periodo de %0d ns", `NTICKS, `PERIODO_NS);
     $display("Instrucciones (IC):       %0d", s_ic);
@@ -262,7 +273,7 @@ module tb_cpi;
     $display("  branches no tomados:    %0d", s_br_nt);
     $display("  jal y jalr:             %0d", s_jump);
     $display("  otras:                  %0d", s_otras);
-    $display("Modelo 2*IC+loads+saltos: %0d ciclos (diferencia con lo medido: %0d)", modelo, s_ciclos - modelo);
+    $display("Modelo %0d*IC+loads+saltos: %0d ciclos (diferencia con lo medido: %0d)", `CICLOS_BASE, modelo, s_ciclos - modelo);
     if (ticks_medidos > 0) begin
       $display("Por tick, %0d ticks medidos, T = %0d ns, presupuesto %0d ciclos:", ticks_medidos, `PERIODO_NS,
                (`PERIODO_NS - SPI_NS) / 40);

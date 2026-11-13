@@ -19,6 +19,9 @@
 #   HEX   programa (por defecto sw/trade.hex)
 #   SRC   fuentes RTL (por defecto rtl/*.v rtl/espino_core/*.v)
 #   SIM   iverilog (por defecto) o verilator
+#   DEFS  definiciones para elegir la variante del core: vacío para el Espino
+#         base, -DESPINO_SEGMENTADO para el pipeline de 3 etapas, o
+#         -DESPINO_ROM (y la ROM del programa agregada a SRC)
 set -euo pipefail
 
 ETIQUETA=$1
@@ -28,6 +31,7 @@ SERIE=${4:-tb/practica.csv}
 HEX=${HEX:-sw/trade.hex}
 SRC=${SRC:-$(echo rtl/*.v rtl/espino_core/*.v)}
 SIM=${SIM:-iverilog}
+DEFS=${DEFS:-}
 PYTHON=${PYTHON:-python3}
 CELLS_SIM=$(yosys-config --datdir)/ice40/cells_sim.v
 
@@ -48,11 +52,11 @@ fi
 
 if [ "$SIM" = verilator ]; then
   verilator --binary --timing -Wno-fatal -Wno-lint -Wno-style --top-module tb_proyecto_4 \
-    -DNO_ICE40_DEFAULT_ASSIGNMENTS -O3 --Mdir "$D/obj" -o sim \
+    -DNO_ICE40_DEFAULT_ASSIGNMENTS $DEFS -O3 --Mdir "$D/obj" -o sim \
     "$CELLS_SIM" $SRC "$D/tb_p4.sv" > "$D/verilator.log" 2>&1
   "$D/obj/sim" > "$D/tb.log"
 else
-  iverilog -g2012 -s tb_proyecto_4 -o "$D/sim" "$CELLS_SIM" $SRC "$D/tb_p4.sv"
+  iverilog -g2012 $DEFS -s tb_proyecto_4 -o "$D/sim" "$CELLS_SIM" $SRC "$D/tb_p4.sv"
   vvp -n "$D/sim" > "$D/tb.log"
 fi
 

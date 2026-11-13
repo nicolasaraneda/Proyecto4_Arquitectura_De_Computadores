@@ -9,12 +9,32 @@
 // - Nicolás Villegas <navillegas@miuandes.cl>
 //
 // Modificado para el Proyecto 4 por Nicolás Araneda, Vicente Calderón y
-// Santiago Muñoz: programa por defecto sw/trade.hex y power-on reset largo.
+// Santiago Muñoz: programa por defecto sw/trade.hex, power-on reset largo y
+// elección de la variante del core (docs/espino_segmentado.md).
+//
+// Variante del core, parámetro Pipeline:
+//   0  Espino base, el del repositorio del curso. Es el valor por defecto.
+//   1  Pipeline de 3 etapas, con la memoria de instrucciones leída en el
+//      flanco de bajada. Se elige al compilar con -DESPINO_SEGMENTADO.
+//   2  Pipeline de 3 etapas, con el programa en una ROM combinacional
+//      (módulo pochoco_rom, generado con tools/pochoasm.py --rom). Se elige
+//      con -DESPINO_ROM y hay que agregar el archivo de la ROM a las fuentes.
+`ifdef ESPINO_ROM
+  `define ESPINO_PIPELINE_DEF 2
+`elsif ESPINO_SEGMENTADO
+  `define ESPINO_PIPELINE_DEF 1
+`else
+  `define ESPINO_PIPELINE_DEF 0
+`endif
 
 module pochoco_soc #(
   parameter NumWords   = 512,
   parameter MemFile    = "sw/trade.hex",   // ruta relativa a la raíz del repositorio
-  parameter PorBits    = 12                // el reset dura 2^PorBits - 1 ciclos
+  parameter PorBits    = 12,               // el reset dura 2^PorBits - 1 ciclos
+  parameter Pipeline   = `ESPINO_PIPELINE_DEF,
+  // Bits del contador de programa. El core base conserva los 32 originales.
+  // El segmentado usa el ancho real de la memoria (11 bits con 512 palabras).
+  parameter PcW        = (Pipeline != 0) ? $clog2(NumWords) + 2 : 32
 ) (
   input  wire       i_Clk,
 
@@ -50,17 +70,19 @@ module pochoco_soc #(
   // Core-memory wiring
   wire        instr_req;
   wire [31:0] instr_addr, instr_rdata;
+  wire [31:0] instr_next, ram_a_next;
 
   wire        data_req, data_we;
   wire [3:0]  data_be;
   wire [31:0] data_addr, data_wdata, data_rdata;
 
-  espino_core #(.BootAddr(32'h0000_0000)) u_core (
+  espino_core #(.BootAddr(32'h0000_0000), .Pipeline(Pipeline), .PcW(PcW)) u_core (
     .clk_i         (clk),
     .rst_ni        (rst_ni),
     .instr_req_o   (instr_req),
     .instr_addr_o  (instr_addr),
     .instr_rdata_i (instr_rdata),
+    .instr_next_i  (instr_next),
     .data_req_o    (data_req),
     .data_we_o     (data_we),
     .data_be_o     (data_be),
@@ -94,11 +116,12 @@ module pochoco_soc #(
   assign data_rdata = rd_is_per ? per_rdata :
                       rd_is_spi ? spi_rdata : ram_b_rdata;
 
-  pochoco_ram #(.NumWords(NumWords), .MemFile(MemFile)) u_ram (
+  pochoco_ram #(.NumWords(NumWords), .MemFile(MemFile), .FetchMode(Pipeline)) u_ram (
     .clk_i     (clk),
     .a_req_i   (instr_req),
     .a_addr_i  (instr_addr),
     .a_rdata_o (instr_rdata),
+    .a_next_o  (ram_a_next),
     .b_req_i   (ram_b_req),
     .b_we_i    (data_we),
     .b_be_i    (data_be),
@@ -106,6 +129,17 @@ module pochoco_soc #(
     .b_wdata_i (data_wdata),
     .b_rdata_o (ram_b_rdata)
   );
+
+  // Origen de la instrucción del pipeline: la BRAM leída en el flanco de
+  // bajada o la ROM combinacional del programa.
+`ifdef ESPINO_ROM
+  pochoco_rom u_rom (
+    .addr_i (instr_addr),
+    .data_o (instr_next)
+  );
+`else
+  assign instr_next = ram_a_next;
+`endif
 
   // Peripherals
   wire [6:0] seg1, seg2;
