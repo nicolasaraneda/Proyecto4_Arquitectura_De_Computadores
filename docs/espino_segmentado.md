@@ -112,6 +112,8 @@ En el base no existe ninguno de estos riesgos, porque cada instrucción lee el b
 
 Solución: adelantamiento, en `espino_register_file.v` (bloque `g_bypass`). En ese flanco se guarda el dato que se escribe (`wdata_q`) y un bit por puerto que dice si la dirección leída coincide con la escrita (`fwd_a_q`, `fwd_b_q`). Un multiplexor a la salida de la BRAM elige el dato guardado cuando el bit vale 1. Una dependencia a dos instrucciones de distancia ya lee la BRAM actualizada, así que basta un solo nivel de adelantamiento.
 
+Un detalle que importa en la placa: lo que entrega una BRAM cuando se lee y se escribe la misma dirección en el mismo flanco depende del hardware, y el modelo de simulación entrega el valor viejo. El diseño no depende de eso. Justo en ese caso el multiplexor elige el dato guardado y la salida de la BRAM se descarta.
+
 Costo: 32 flip-flops y 64 LUT de multiplexor, que es parte de las 91 celdas que cuesta el pipeline. La clase 7 advertía que este multiplexor puede bajar la frecuencia máxima. Medido: el multiplexor queda en la ruta crítica, pero la ruta completa es más corta que la del base, porque la decodificación ya no está en ella (sección 8).
 
 ### 5.2 Carga seguida de uso
@@ -216,6 +218,7 @@ Toda la verificación corre con `make` y compara contra algo independiente: el E
 | `make formal-base` | Etapas IF e ID en modo base contra las del repositorio del curso, con Yosys | 1376 puntos de comparación probados equivalentes: el Espino base no cambió |
 | `make tb-seg` | Copia del testbench oficial, con el core segmentado | 4/4, peor caso 26 ciclos, `decisiones.csv` idéntico a la referencia |
 | `make equiv-seg` | Los 20 000 ticks de práctica por el RTL (Verilator, 0,1 ms y 1 ms), pocos ticks con Icarus a 1 ms y 10 ms, y el gemelo a los tres períodos, contra `ref/trader.py` | Idénticos byte a byte. Patrimonio 26 795 y 27 306, los mismos del base |
+| `make equiv-seg-icarus` y `make equiv-r3` | Los 20 000 ticks con Icarus, el simulador del testbench oficial, con el segmentado y con el base (ejecución manual, 13 minutos cada una) | Idénticos a la referencia, 4/4, patrimonio 26 795 |
 | `make equiv-rom` | Lo mismo con la ROM combinacional, 20 000 ticks | Idénticos |
 | `make riesgos` | `hazard_test.s`, `hazard_review.s` y `hazard_cycles.s` del Proyecto 3 en el base, el segmentado y el de ROM | Ver abajo |
 | `make paralelo-largo` | Base y segmentado corriendo a la vez 16 programas aleatorios | 1 300 756 instrucciones comparadas una por una (contador de 11 bits) y 1 600 000 (contador de 32 bits), cero diferencias |
