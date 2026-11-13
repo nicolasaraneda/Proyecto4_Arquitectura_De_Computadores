@@ -65,7 +65,8 @@ module pochoco_ram #(
       end
       assign a_rdata_o = a_q;
       assign a_next_o  = 32'b0;
-    end else if (FetchMode == 1) begin : g_neg
+    end
+    if (FetchMode == 1) begin : g_neg
       // Copia de la memoria para el fetch, con las mismas escrituras
       reg [31:0] mem_f [0:NumWords-1];
       initial begin
@@ -87,7 +88,8 @@ module pochoco_ram #(
       end
       assign a_rdata_o = 32'b0;
       assign a_next_o  = a_q;
-    end else begin : g_sin
+    end
+    if (FetchMode > 1) begin : g_sin
       assign a_rdata_o = 32'b0;
       assign a_next_o  = 32'b0;
     end

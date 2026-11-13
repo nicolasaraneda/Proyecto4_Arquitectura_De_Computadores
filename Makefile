@@ -213,5 +213,94 @@ hallazgos:
 	$(PYTHON) ref/p4_baseline.py tb/practica.csv
 	$(PYTHON) ref/hallazgos.py tb/practica.csv
 
+# === Espino segmentado: pipeline de 3 etapas (docs/espino_segmentado.md) =======
+# El core por defecto sigue siendo el Espino base. Estos objetivos compilan la
+# variante segmentada (-DESPINO_SEGMENTADO) o la de ROM combinacional
+# (-DESPINO_ROM) y repiten sobre ellas las pruebas del core base.
+.PHONY: tb-seg equiv-seg equiv-gemelo-seg cosim-seg cpi-seg riesgos paralelo paralelo-largo \
+        mutaciones timing-seg synth-seg pnr-seg bin-seg sim-bitstream-seg medir-espino \
+        check-seg equiv-rom
+
+SEG_DEFS := -DESPINO_SEGMENTADO
+JSON_SEG := $(BUILD)/$(TOP)_seg.json
+ASC_SEG  := $(BUILD)/$(TOP)_seg.asc
+BIN_SEG  := $(BUILD)/$(TOP)_seg.bin
+
+# Copia del testbench oficial (solo cambia el nombre del archivo de salida)
+# con el core segmentado: 4/4 y decisiones idénticas a la referencia.
+tb-seg: $(HEX)
+	DEFS="$(SEG_DEFS)" tools/equiv.sh seg_tb 100000 2000
+
+# Equivalencia con la referencia, como make equiv, con el core segmentado
+equiv-seg: $(HEX) equiv-gemelo-seg
+	DEFS="$(SEG_DEFS)" SIM=verilator tools/equiv.sh seg_v_r3 100000 20000
+	DEFS="$(SEG_DEFS)" SIM=verilator tools/equiv.sh seg_v_r2 1000000 20000
+	DEFS="$(SEG_DEFS)" tools/equiv.sh seg_r2 1000000 200
+	DEFS="$(SEG_DEFS)" tools/equiv.sh seg_r1 10000000 20
+equiv-gemelo-seg: $(GEMELO) $(HEX)
+	GEM_OPTS=--pipeline ETQ=seg tools/equiv_gemelo.sh
+
+# Lo mismo con el programa en una ROM combinacional (variante 2)
+equiv-rom: $(HEX) | $(BUILD)
+	mkdir -p $(BUILD)/rom
+	$(PYTHON) $(ASM) sw/trade.s -o $(BUILD)/rom/trade.hex --rom $(BUILD)/rom/pochoco_rom.v > /dev/null
+	DEFS="-DESPINO_ROM" SRC="$(SRC) $(BUILD)/rom/pochoco_rom.v" SIM=verilator tools/equiv.sh rom_v_r3 100000 20000
+
+# Gemelo digital (con --pipeline) contra el RTL del core segmentado
+cosim-seg: $(GEMELO) $(HEX)
+	VARIANTE=segmentado tools/cosim.sh
+
+# CPI y modelo de costo del core segmentado: ciclos = IC + loads + saltos tomados
+cpi-seg: $(HEX) | $(BUILD)
+	$(IVERILOG) -g2012 $(SEG_DEFS) -s tb_cpi -o $(BUILD)/tb_cpi_seg $(CELLS_SIM) $(SRC) tb/tb_cpi.sv
+	$(VVP) -n $(BUILD)/tb_cpi_seg
+
+# Riesgos de datos y de control: los programas de riesgos del Proyecto 3 en el
+# base, en el segmentado y en el de ROM, comparando trazas (tools/riesgos.sh)
+riesgos: $(GEMELO)
+	tools/riesgos.sh
+
+# Ejecución en paralelo del base y del segmentado con programas aleatorios,
+# comparando registros y memoria en cada instrucción (tb/tb_paralelo.sv).
+# paralelo: 4 programas de 25 000 instrucciones por configuración (en la
+# integración continua). paralelo-largo: 16 de 100 000, más de un millón.
+paralelo:
+	tools/paralelo.sh 4 25000
+paralelo-largo:
+	ETQ=largo tools/paralelo.sh 16 100000 | tee docs/mediciones/paralelo_largo.txt
+
+# Controles negativos: cinco errores puestos a propósito en el core segmentado
+# deben ser detectados por riesgos y por paralelo (unos 2 minutos)
+mutaciones: $(GEMELO)
+	tools/mutaciones.sh
+
+# Cierre de timing: las 10 semillas de nextpnr deben cerrar a 25 MHz
+timing-seg: $(HEX)
+	DEFS="$(SEG_DEFS)" EXIGIR=1 tools/medir_variante.sh segmentado 10
+
+# Síntesis, place and route y bitstream del core segmentado
+synth-seg: $(JSON_SEG)
+$(JSON_SEG): $(SRC) $(HEX) | $(BUILD)
+	yosys -q -l $(BUILD)/yosys_seg.log \
+	  -p "read_verilog $(SEG_DEFS) $(SRC); chparam -set MemFile \"$(HEX)\" $(TOP); synth_ice40 -top $(TOP) -json $(JSON_SEG)"
+pnr-seg: $(ASC_SEG)
+$(ASC_SEG): $(JSON_SEG) $(PCF)
+	nextpnr-ice40 --hx1k --package vq100 --freq $(FREQ) --json $(JSON_SEG) --pcf $(PCF) \
+	  --asc $(ASC_SEG) -l $(BUILD)/nextpnr_seg.log -q
+	@grep -E "ICESTORM_LC|ICESTORM_RAM|Max frequency" $(BUILD)/nextpnr_seg.log | tail -3
+bin-seg: $(BIN_SEG)
+$(BIN_SEG): $(ASC_SEG)
+	icepack $(ASC_SEG) $(BIN_SEG)
+sim-bitstream-seg: $(ASC_SEG)
+	tools/sim_bitstream.sh $(ASC_SEG) 2000
+
+# Recursos, frecuencia máxima, recortes de celdas, CPI, MIPS y Ops/s del base
+# y del segmentado, con los mismos programas. Deja docs/mediciones/espino_segmentado.txt
+medir-espino: $(GEMELO) $(HEX)
+	tools/medir_espino.sh
+
+# Lo que corre la integración continua para el core segmentado
+check-seg: tb-seg cpi-seg riesgos paralelo timing-seg
+
 clean:
 	rm -rf $(BUILD) decisiones.csv

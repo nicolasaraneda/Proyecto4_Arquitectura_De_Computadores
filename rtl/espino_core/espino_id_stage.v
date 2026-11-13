@@ -196,6 +196,11 @@ module espino_id_stage #(
         else         stall_q <= stall_i;
       end
       assign rf_rd_en_o = ~stall_q;
+`elsif MUTA_RDEN
+      // MUTACIÓN (solo para make mutaciones): el banco lee en todos los
+      // flancos. Durante la espera de una carga pierde los operandos de la
+      // carga y la LSU alinea el dato con la dirección equivocada.
+      assign rf_rd_en_o = 1'b1;
 `else
       assign rf_rd_en_o = advance;
 `endif
