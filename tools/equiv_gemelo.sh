@@ -13,7 +13,9 @@
 # manual. El gemelo se valida contra el RTL en make cosim.
 #
 # Uso, desde la raíz del repositorio: tools/equiv_gemelo.sh [NTICKS]
-# Variables de entorno: HEX (por defecto sw/trade.hex), SERIE (tb/practica.csv).
+# Variables de entorno: HEX (por defecto sw/trade.hex), SERIE (tb/practica.csv),
+# GEM_OPTS (opciones para el gemelo, por ejemplo --pipeline para el core
+# segmentado) y ETQ (sufijo de la carpeta de salida).
 set -euo pipefail
 
 NTICKS=${1:-20000}
@@ -21,17 +23,19 @@ HEX=${HEX:-sw/trade.hex}
 SERIE=${SERIE:-tb/practica.csv}
 PYTHON=${PYTHON:-python3}
 G=build/gemelo
-D=build/equiv/gemelo
+GEM_OPTS=${GEM_OPTS:-}
+ETQ=${ETQ:-}
+D=build/equiv/gemelo${ETQ:+_$ETQ}
 mkdir -p "$D"
 [ -x "$G" ] || { echo "falta $G: correr make gemelo"; exit 1; }
 
 for PERIODO_NS in 100000 1000000 10000000; do
-  "$G" --hex "$HEX" --serie "$SERIE" --periodo-ns "$PERIODO_NS" --nticks "$NTICKS" \
+  "$G" $GEM_OPTS --hex "$HEX" --serie "$SERIE" --periodo-ns "$PERIODO_NS" --nticks "$NTICKS" \
        --csv "$D/gem_$PERIODO_NS.csv" > "$D/gem_$PERIODO_NS.log"
   $PYTHON ref/trader.py "$SERIE" --nticks "$NTICKS" --periodo-ns "$PERIODO_NS" \
        -o "$D/ref_$PERIODO_NS.csv" > "$D/ref_$PERIODO_NS.log"
 
-  RESUMEN="gemelo: periodo $PERIODO_NS ns, $NTICKS ticks, $SERIE, $(grep 'Peor caso' "$D/gem_$PERIODO_NS.log" | sed 's/  */ /g')"
+  RESUMEN="gemelo${ETQ:+ ($ETQ)}: periodo $PERIODO_NS ns, $NTICKS ticks, $SERIE, $(grep 'Peor caso' "$D/gem_$PERIODO_NS.log" | sed 's/  */ /g')"
   if ! grep -q "Testbenchs aprobados: 4/4" "$D/gem_$PERIODO_NS.log"; then
     echo "FAIL $RESUMEN: no entrega 4/4"; exit 1
   fi

@@ -60,7 +60,7 @@ module espino_core #(
 
   wire        illegal_insn;
 
-  espino_if_stage #(.BootAddr(BootAddr), .PcW(PcW)) u_if (
+  espino_if_stage #(.BootAddr(BootAddr), .PcW(PcW), .Pipeline(Pipeline)) u_if (
     .clk_i            (clk_i),
     .rst_ni           (rst_ni),
     .pc_set_i         (pc_set),

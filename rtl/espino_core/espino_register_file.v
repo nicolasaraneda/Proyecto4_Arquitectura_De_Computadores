@@ -90,6 +90,11 @@ module espino_register_file #(
       // MUTACIÓN (solo para make mutaciones): sin adelantamiento.
       wire fwd_a = 1'b0;
       wire fwd_b = 1'b0;
+`elsif MUTA_X0
+      // MUTACIÓN (solo para make mutaciones): el adelantamiento no excluye
+      // a x0, así que leer x0 justo después de escribirlo entrega el dato.
+      wire fwd_a = we_i & (raddr_a_i == waddr_i);
+      wire fwd_b = we_i & (raddr_b_i == waddr_i);
 `else
       wire fwd_a = wr & (raddr_a_i == waddr_i);
       wire fwd_b = wr & (raddr_b_i == waddr_i);
