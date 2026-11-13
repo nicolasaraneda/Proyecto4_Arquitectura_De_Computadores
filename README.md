@@ -14,6 +14,7 @@ El enunciado está en `docs/Proyecto_4_arq.pdf`. El avance del trabajo se regist
 - El ensamblador `tools/pochoasm.py` es el que escribió este grupo para el Proyecto 2 y amplió en el Proyecto 3, con el nombre y la interfaz que espera el testbench del Proyecto 4.
 - Del Proyecto 3 del grupo vienen también el formato de la traza de `tb/tb_cpi.sv` y el método de comparar trazas ciclo a ciclo.
 - El power-on reset largo de `rtl/pochoco_soc.v` también viene de nuestro Proyecto 2.
+- El core segmentado parte del diseño con lectura anticipada de nuestro Proyecto 3 (`nicolasaraneda/Proyecto3_Arquitectura_De_Computadores`). De ahí vienen también `sw/hazard_test.s` y `sw/hazard_review.s` (sin cambios), `sw/hazard_cycles.s` (adaptado), `tb/core_trace_tb.v`, `tb/comparar_trazas.py` y el método de los controles negativos por mutación.
 - `tb/tb_proyecto_4.sv` y `tb/practica.csv` son el testbench y la serie de práctica entregados por el curso. No se modifican.
 
 ## Herramientas y versiones
@@ -101,6 +102,25 @@ Cada una tiene su documento de estudio, su prueba y el número que la respalda.
 | Protocolo de evaluación | 10 bloques de práctica, 1000 remuestreos y 10 familias sintéticas, con criterio de aceptación. | `make protocolo` y `make equiv-gemelo` | Regla base: media 10 772 y percentil 5 de 8 914 en los remuestreos. El binario coincide con la referencia en 18 millones de ticks. | `docs/protocolo.md` |
 | Simulación del bitstream | Simula lo que se graba en la placa, reconstruido desde el `.asc`. | `make sim-bitstream` | 2000 ticks idénticos a la referencia. | `docs/decisiones.md`, T15 |
 | Programas aleatorios | Generador de programas para comparar dos modelos del SoC. | `make cosim` | 469 343 escrituras de registro y de memoria comparadas con 4 semillas. | `docs/gemelo.md`, sección 3 |
+| Espino segmentado | Pipeline de 3 etapas: la memoria de instrucciones se lee en el flanco de bajada y el banco de registros adelanta el dato recién escrito. Es el mismo Espino, elegido al compilar con `-DESPINO_SEGMENTADO`. El core por defecto sigue siendo el base. | `make check-seg`, `make paralelo-largo`, `make mutaciones`, `make cosim-seg` y `make equiv-seg` | CPI con el mix de la clase 7: 1,350 contra 2,350 del base (la clase estimó 1,5). Respuesta de `trade.s`: 22 ciclos en promedio contra 41. 994 celdas contra 1083. Cierra a 25 MHz en 10 de 10 semillas, con 51,1 MHz en la peor. 2,9 millones de instrucciones aleatorias comparadas una por una con el base. | `docs/espino_segmentado.md` |
+
+### Espino segmentado
+
+El core segmentado no reemplaza al base: se compila aparte y todas las pruebas se repiten sobre él.
+
+| Comando | Qué hace |
+|---------|----------|
+| `make formal-base` | Prueba formal, con Yosys, de que el Espino base no cambió al agregar el pipeline: sus etapas IF e ID son equivalentes a las del repositorio del curso. |
+| `make tb-seg` | Copia del testbench oficial con el core segmentado: 4/4 y decisiones idénticas a la referencia. |
+| `make cpi-seg` | CPI y modelo de costo: `ciclos = IC + loads + saltos tomados`. |
+| `make riesgos` | Programas de riesgos del Proyecto 3 en el base, el segmentado y la variante con ROM. Compara trazas contra el base, entre las dos variantes y contra el gemelo. |
+| `make paralelo` y `make paralelo-largo` | Dos SoC completos, uno con cada core, corriendo el mismo programa aleatorio. Compara cada instrucción completada y el banco de registros entero. |
+| `make mutaciones` | Cinco errores puestos a propósito en el core segmentado. Las pruebas anteriores tienen que detectarlos. |
+| `make cosim-seg` | Gemelo digital con `--pipeline` contra el RTL, ciclo a ciclo. |
+| `make equiv-seg` y `make equiv-rom` | Los 20 000 ticks contra la referencia, con el core segmentado y con la variante de ROM combinacional. |
+| `make timing-seg` | Las 10 semillas de nextpnr deben cerrar a 25 MHz. |
+| `make medir-espino` | Recursos, frecuencia máxima, CPI, MIPS y Ops/s del base y del segmentado. Resultado en `docs/mediciones/espino_segmentado.txt`. |
+| `make bin-seg` y `make sim-bitstream-seg` | Bitstream del core segmentado y su simulación desde el `.asc`. |
 
 ## Cómo sintetizar y programar la placa
 
@@ -127,12 +147,12 @@ Extrae la copia sin cambios del repositorio base (etiqueta `base-curso`) y mide 
 | Carpeta    | Contenido |
 |------------|-----------|
 | `rtl/`     | Pochoco SoC y Espino Core. |
-| `sw/`      | `trade.s` y los programas de ejemplo del repositorio base. |
+| `sw/`      | `trade.s`, los programas de ejemplo del repositorio base, los programas de riesgos (`hazard_*.s`) y `mix_clase7.s`. |
 | `tb/`      | Testbench oficial, serie de práctica y testbenches propios. |
 | `ref/`     | Referencia del algoritmo en Python, mercado de la maestra, series de prueba, protocolo de evaluación y gemelo digital. |
 | `tools/`   | Ensamblador, generador de programas aleatorios y scripts de equivalencia, co-simulación y medición. |
 | `bitstreams/` | Bitstreams de competencia, con su hash. |
-| `formal/`  | Verificación formal (todavía vacía). |
+| `formal/`  | Verificación formal. Por ahora, la equivalencia del Espino base con el del repositorio del curso (`formal/base_sin_cambios/`). |
 | `docs/`    | Enunciado, estado, decisiones, documentación y mediciones. |
 | `informe/` | Informe en LaTeX (todavía vacío). |
 

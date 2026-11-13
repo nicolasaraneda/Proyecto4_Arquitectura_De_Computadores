@@ -5,7 +5,10 @@
 # (tests del ensamblador y de la referencia, trade.hex al día, testbench
 # oficial con 4/4), la equivalencia con la referencia en los 20 000 ticks con
 # el gemelo digital y con Verilator, la validación del gemelo contra el RTL,
-# la medición de CPI y la síntesis completa hasta el bitstream.
+# la medición de CPI y la síntesis completa hasta el bitstream. Después se
+# repite lo esencial con el core segmentado (make check-seg): prueba formal de
+# que el core base no cambió, modelo de costo, riesgos, ejecución en paralelo,
+# equivalencia de los 20 000 ticks y cierre de timing en 10 semillas.
 # Usa la misma versión de OSS CAD Suite que usamos en el desarrollo.
 #
 # Los 20 000 ticks con Icarus, el simulador del testbench oficial, no corren
@@ -73,6 +76,10 @@ jobs:
       - name: Síntesis, place and route y bitstream
         run: make bin
 
+      # --- Espino segmentado (pipeline de 3 etapas) ---
+      - name: Core segmentado (modelo de costo, riesgos, paralelo, equivalencia y timing en 10 semillas)
+        run: make check-seg
+
   # Ejecución manual: la corrida completa con el simulador del testbench oficial
   equiv-icarus:
     if: github.event_name == 'workflow_dispatch' && inputs.icarus_completo
@@ -89,3 +96,30 @@ jobs:
 
       - name: Equivalencia con la referencia (20 000 ticks, Icarus)
         run: make equiv-r3
+
+
+  # Ejecución manual: verificación completa del core segmentado
+  segmentado-completo:
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Instalar OSS CAD Suite
+        uses: YosysHQ/setup-oss-cad-suite@v4
+        with:
+          version: '2026-09-06'
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Gemelo con --pipeline contra el RTL
+        run: make cosim-seg
+
+      - name: Controles negativos (mutaciones)
+        run: make mutaciones
+
+      - name: Ejecución en paralelo, 16 programas de 100 000 instrucciones
+        run: make paralelo-largo
+
+      - name: Equivalencia con la referencia, core segmentado y ROM
+        run: make equiv-seg equiv-rom

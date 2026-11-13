@@ -40,6 +40,18 @@ No reemplaza a nada. La referencia del algoritmo sigue siendo `ref/trader.py`, y
 
 Es el modelo de costo de 2 ciclos por instrucción, más 1 en cada load y 1 en cada salto tomado, leído de `espino_id_stage.v`, `espino_controller.v` y `espino_load_store_unit.v`. El gemelo decodifica igual que `espino_decoder.v`, incluidos los casos que un programa normal no usa: los shifts se ejecutan como una suma, una instrucción desconocida no hace nada, un load con `funct3` inválido se comporta como `lw`, y los campos de registro tienen 4 bits.
 
+**El core segmentado.** Con la opción `--pipeline` el gemelo usa la tabla de ciclos del pipeline de 3 etapas (`docs/espino_segmentado.md`). Las instrucciones hacen lo mismo y cambia cuándo:
+
+| Instrucción | Acceso al bus | Escritura del registro | Siguiente instrucción |
+|-------------|---------------|------------------------|-----------------------|
+| Aritmética, `lui`, `auipc` | | `c` | `c + 1` |
+| Store | `c` | | `c + 1` |
+| Load | `c` | `c + 1` | `c + 2` |
+| Branch no tomado | | | `c + 1` |
+| Branch tomado, `jal`, `jalr` | | `c` (el enlace) | `c + 2` |
+
+Además el contador de programa tiene 11 bits, como en el RTL, y una vuelta del lazo de sondeo dura 5 ciclos en vez de 8. `make cosim-seg` valida este modo contra el RTL del core segmentado con las mismas pruebas del base: 1 007 124 eventos de `trade.hex` en cuatro configuraciones de tiempos, 846 705 escrituras de 4 programas aleatorios, los 20 000 ticks del testbench y las mediciones por tick.
+
 **El esclavo SPI.** Aquí no hay atajo: `spi_paso` es la misma lógica de `pochoco_spi_slave.v`, flanco por flanco, con los tres sincronizadores de 3 etapas, el contador de bits, los registros de desplazamiento y la bandera de precio nuevo. Lo único que se ahorra es el tiempo en que las tres líneas están quietas: si los sincronizadores ya tienen el valor del pin, el estado no puede cambiar hasta el próximo evento de la maestra, y se salta hasta ahí.
 
 **La maestra.** Los instantes en nanosegundos de `tb_proyecto_4.sv`: baja `CS_n`, espera 1000 ns, 8 bits con `SCLK` de 1 MHz, espera 500 ns y sube. Todos esos tiempos son parámetros, igual que el período, el instante de la primera transacción, la caja y la comisión.
