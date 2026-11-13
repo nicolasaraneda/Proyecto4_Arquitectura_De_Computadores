@@ -2,6 +2,80 @@
 
 Se actualiza al cerrar cada tramo de trabajo. La versión anterior queda en el historial de git.
 
+## Tramo 4: frente A, algoritmo (13/11)
+
+Rama `frente-a`. El detalle está en `docs/algoritmo.md`. **`ref/trader.py` y `sw/trade.s` no cambiaron: la regla base sigue siendo el algoritmo de la placa hasta que se elija un candidato.**
+
+### Qué quedó hecho
+
+- **Modelo del generador** (`ref/generador.py`, `ref/calibracion.py`). Nivel que pasea más transitoria AR(1) más redondeo, con dos regímenes de volatilidad y saltos. Ajustado por máxima verosimilitud con el filtro de Kalman y validado contra la serie de práctica.
+- **Familias sintéticas calibradas en dos grupos** (`ref/series.py`). 4 plausibles y 10 de estrés, todas derivadas del modelo. Se agregaron `modelo`, `modelo_vecino`, `volatil` y `nivel_bajo`.
+- **Protocolo** (`ref/protocolo.py`). Grupos, diferencia pareada con error estándar, candidatos por nombre (`cand:...`, `trader:...`) y semilla reservada.
+- **Filtro de Kalman y política óptima** (`ref/politica_optima.py`). Ganancias en estado estacionario, matriz 2x2 en punto fijo y programación dinámica con comisión, desfase de un tick y 63 acciones por orden.
+- **Familia paramétrica de estrategias** (`ref/candidatos.py`) y **motor en C** (`ref/motor/motor.c`, `ref/motor.py`), con pruebas de que coinciden (`make test-candidatos`, en la integración continua).
+- **Exploración por ideas** (`ref/explorar.py`): bandas, estimadores, bandas escaladas con la volatilidad, saltos, cortes, guardia, tope, tamaño de órdenes, asimetría y potencia de una guardia estadística.
+- **Ideas que aprenden en vivo** (`ref/experimentos.py`): población de traders, adaptación con prior fuerte y perceptrón, con control de rotación.
+- **Guardia de régimen y tope de pérdida**, sin multiplicaciones.
+- **Candidatos sobre la frontera** (`ref/frontera.py`), evaluados con una semilla que no se usó para elegir nada.
+- Decisiones TA1 a TA7 en `docs/decisiones.md` (etiquetas provisionales).
+
+### Qué se midió
+
+Generador (`make generador`):
+
+| Medición | Valor |
+|----------|-------|
+| Paso del nivel y de la transitoria, régimen tranquilo | 0,39 y 0,33 por tick |
+| Vida media de la transitoria | 17,5 ticks |
+| Régimen ruidoso | 14 % del tiempo, 2,98 veces más volatilidad |
+| Saltos | 5 en 20 000 ticks, permanentes |
+| Mejora de la verosimilitud por incluir la reversión | 10,2 en 20 000 ticks, 1 por ronda |
+| Razón de varianza a 100 ticks: medida, sin redondeo, paseo redondeado | 0,53, 0,67 y 0,77 |
+
+Regla base con las familias calibradas (`make protocolo`): plausibles 10 955 de media y 8 553 de percentil 5. Estrés: `tendencia` 9 410 y 5 777, `cambio_de_caracter` 9 043 y 2 592, `paseo` 9 927 y 7 866.
+
+Política óptima (`make politica`): 8,4 % por ronda como techo del modelo. La regla base saca 5,2 % en el modelo. Las bandas óptimas del modelo, probadas en el remuestreo, dan 10 119 contra 10 813 de la regla base.
+
+Candidatos con la semilla reservada (`make frontera`), diferencia contra la regla base con su error estándar:
+
+| Candidato | Bloques: media, peor | Remuestreo: media, dif., p5 | Plausibles: media, dif., p5 | Estrés: p5 |
+|-----------|----------------------|-----------------------------|------------------------------|------------|
+| `prudente` (E=192, X=-32) | 10 712, 10 000 | 10 639, -115 ± 14, 9 308 | 10 619, -334 ± 19, 9 048 | 6 986 |
+| `base` (E=128, X=0) | 11 069, 9 720 | 10 754, 8 958 | 10 954, 8 741 | 5 615 |
+| `max_media` (E=96, X=0) | 11 043, 9 620 | 10 833, +79 ± 11, 8 788 | 11 103, +150 ± 15, 8 622 | 5 071 |
+| `guardia` (E=96 con saltos y guardia) | 11 018, 9 024 | 10 735, -20 ± 14, 8 881 | 10 893, -60 ± 15, 8 434 | 6 658 |
+| `guardia_tope` (además tope de pérdida) | 11 018, 9 024 | 10 716, -38 ± 15, 8 833 | 10 714, -239 ± 32, 8 052 | 6 828 |
+
+Guardia y tope: en los 10 bloques de práctica no se activan nunca. En los remuestreos la guardia pausa en el 2,3 % de las series y el tope salta en el 1,7 %. La guardia sube el percentil 5 de `tendencia` de 4 631 a 6 375 y el de `cambio_de_caracter` de 2 136 a 5 692. El tope deja el peor caso de esas familias sobre 5 200.
+
+El binario contra la referencia con las series nuevas (`make equiv-gemelo`): 3810 series a los tres períodos, 22 860 000 ticks, cero diferencias.
+
+### Hallazgos
+
+1. **La mitad de la reversión aparente es redondeo** y no se puede operar, porque la orden se ejecuta un tick después.
+2. **La señal es débil y el techo está cerca.** No hay una mejora grande escondida: lo que queda sobre la regla base es del orden de 1 a 3 puntos de media.
+3. **El estimador casi no importa.** Media exponencial, suma móvil y Kalman de dos estados rinden lo mismo con bandas equivalentes. El filtro óptimo baja la incertidumbre de la transitoria de 1,19 a 1,11.
+4. **Lo que mueve el resultado es cuánto se opera.** Bandas más angostas suben la media en el modelo y bajan el percentil 5 en todos lados.
+5. **Todo corte de pérdidas cuesta media**, porque en una serie que revierte se vende en el fondo.
+6. **No se puede detectar en vivo si la serie revierte.** La guardia mide si las entradas vuelven a la media.
+7. **Población, adaptación en vivo y perceptrón no ganan** aun con control de rotación.
+8. **Ningún candidato reemplaza formalmente a la regla base** con las tres condiciones del protocolo. `max_media` falla por 26 puntos en la media de los bloques (el error es 238) y por las familias de estrés.
+
+### Qué falta
+
+- **Elegir el candidato.** Es decisión de Nicolás. La recomendación con el perfil de máximo patrimonio esperado es `max_media`, y `guardia` si se le da más de 20 % de probabilidad a una serie con tendencia.
+- **Escribir el candidato elegido en `sw/trade.s`** con su equivalencia. `max_media` es cambiar una constante. `guardia` son unas 70 instrucciones (estimado).
+- **Niveles por presupuesto.** No se hizo: ningún modelo más pesado ganó, así que no hay nada que correr con el tiempo que sobra en las rondas 1 y 2.
+- **Rondas largas.** La guardia pausa 1000 ticks y el tope apaga hasta el final. Si una ronda dura mucho más que 2000 ticks hay que rearmar el tope.
+- **Tabla del punto 3.1 con el algoritmo final**, cuando se elija.
+
+### Qué conviene atacar después y por qué
+
+1. **Decidir entre `max_media` y `guardia`** y llevarlo a `trade.s` antes del 18/11, para que llegue a la maestra.
+2. **Preguntar al ayudante si las series ocultas salen del mismo generador y cuánto dura una ronda.** Las dos respuestas cambian la elección: con el mismo generador gana `max_media`, con rondas largas hay que rearmar el tope.
+3. **Frente C.** El producto de matriz 2x2 ya tiene sus coeficientes (`docs/algoritmo.md`, sección 4.1). Va a la edición de exhibición.
+4. **Frente E.** La matriz de estrés puede usar el motor y las familias calibradas tal como están.
+
 ## Tramo 3: gemelo digital, series de prueba y protocolo de evaluación (13/11)
 
 ### Qué quedó hecho
@@ -55,8 +129,8 @@ Regla base bajo el protocolo (`make protocolo`, resultados en `docs/mediciones/p
 
 ### Qué falta del tramo 3
 
-- **Las familias sintéticas no están calibradas** contra la serie de práctica. `dos_componentes` tiene la forma del modelo, con parámetros puestos a mano.
-- **El criterio de aceptación usa mayor o igual**, sin error estadístico. Con 1000 remuestreos pareados se puede calcular el error de la diferencia.
+- **Las familias sintéticas no estaban calibradas.** Resuelto en el tramo 4: salen del modelo ajustado. Los números de las familias sintéticas de la tabla de arriba son los de antes de calibrar.
+- **El criterio de aceptación no tenía error estadístico.** Resuelto en el tramo 4: la comparación entrega la diferencia pareada con su error estándar.
 - **El gemelo modela solo el Espino base.** Cuando el core cambie hay que actualizar su tabla de ciclos y repetir `make cosim`.
 
 ## Tramo 2: regla base de punta a punta (13/11)

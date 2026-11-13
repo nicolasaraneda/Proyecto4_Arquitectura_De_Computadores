@@ -67,7 +67,9 @@ Otros objetivos:
 | `make medir-ticks` | Mediciones por tick del punto 3.2: IC, ciclos, CPI y tiempo, promedio y peor caso, en las tres rondas. Resultado en `docs/mediciones/ticks_software.txt`. |
 | `make sim-bitstream` | Simula el bitstream ya ruteado (no el RTL) y comprueba que decide igual que la referencia. |
 | `make cosim` | Valida el gemelo digital contra el RTL: trazas idénticas ciclo a ciclo, programas aleatorios y testbench oficial. |
-| `make equiv-gemelo` | Corre `trade.hex` en el gemelo sobre las 3010 series del protocolo, a los tres períodos, y lo compara con la referencia. |
+| `make equiv-gemelo` | Corre `trade.hex` en el gemelo sobre las 3810 series del protocolo, a los tres períodos, y lo compara con la referencia. |
+| `make test-candidatos` | Pruebas de la familia paramétrica de estrategias: el motor en C coincide con la referencia en Python, las familias calibradas son reproducibles. |
+| `make algoritmo` | Todo el estudio del algoritmo: ajuste del generador, política óptima, una tabla por idea, experimentos y candidatos. Deja las salidas en `docs/mediciones/` (unos 3 minutos). |
 | `make cpi` | Mide instrucciones, ciclos y CPI del core con `tb/tb_cpi.sv`, y comprueba el modelo de costo. Corrida corta, con precios de un LFSR. |
 | `make check` | Tests del ensamblador y de la referencia, `trade.hex` al día y testbench oficial. |
 
@@ -98,7 +100,8 @@ Cada una tiene su documento de estudio, su prueba y el número que la respalda.
 | Pieza | Qué es | Cómo se corre su prueba | Número que la respalda | Documento |
 |-------|--------|-------------------------|------------------------|-----------|
 | Gemelo digital | Simulador en C del SoC con exactitud de ciclo. Corre el mismo `trade.hex` del bitstream. | `make cosim` | Traza idéntica al RTL en 8 configuraciones, más de un millón de eventos. 20 000 ticks a 10 ms en 0,02 s (Verilator: 22 minutos). | `docs/gemelo.md` |
-| Protocolo de evaluación | 10 bloques de práctica, 1000 remuestreos y 10 familias sintéticas, con criterio de aceptación. | `make protocolo` y `make equiv-gemelo` | Regla base: media 10 772 y percentil 5 de 8 914 en los remuestreos. El binario coincide con la referencia en 18 millones de ticks. | `docs/protocolo.md` |
+| Protocolo de evaluación | 10 bloques de práctica, 1000 remuestreos y 14 familias sintéticas calibradas (plausibles y de estrés), con criterio de aceptación. | `make protocolo` y `make equiv-gemelo` | Regla base: media 10 772 y percentil 5 de 8 914 en los remuestreos. El binario coincide con la referencia en 23 millones de ticks. | `docs/protocolo.md` |
+| Modelo del generador y candidatos | Modelo de nivel, transitoria y redondeo ajustado a la serie de práctica; política óptima; guardia de régimen y tope de pérdida; candidatos sobre la frontera entre media y percentil 5. El algoritmo de la placa sigue siendo la regla base hasta elegir. | `make algoritmo` y `make test-candidatos` | Techo del modelo: 8,4 % por ronda. Mejor candidato: 0,7 % sobre la regla base en remuestreos y 1,4 % en las familias plausibles, con semilla reservada. | `docs/algoritmo.md` |
 | Simulación del bitstream | Simula lo que se graba en la placa, reconstruido desde el `.asc`. | `make sim-bitstream` | 2000 ticks idénticos a la referencia. | `docs/decisiones.md`, T15 |
 | Programas aleatorios | Generador de programas para comparar dos modelos del SoC. | `make cosim` | 469 343 escrituras de registro y de memoria comparadas con 4 semillas. | `docs/gemelo.md`, sección 3 |
 

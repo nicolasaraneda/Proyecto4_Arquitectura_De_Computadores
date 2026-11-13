@@ -179,3 +179,51 @@ Hay tres hechos que estas decisiones no cambian y con los que se planifica:
 - **Alternativas.** Dejar todo como estaba, o correr Icarus solo en `main`. La segunda deja pasar a `main` un cambio que después falla ahí.
 - **Qué se pierde.** Una diferencia entre Icarus y Verilator que solo aparezca después del tick 2000 no se vería en el push. Por eso la corrida manual se repite antes de cada etiqueta (`v-maestra-19nov` y `v-competencia`) y cada vez que cambie el RTL del core o del esclavo SPI.
 
+### TA1. El generador se modela como nivel más transitoria más redondeo, con dos regímenes (13/11)
+
+- **Decisión.** El modelo de la serie de práctica es un nivel que pasea, una componente transitoria AR(1) y redondeo a enteros, con dos regímenes de volatilidad que escalan las dos varianzas por la misma razón y saltos de nivel poco frecuentes. Se ajusta por máxima verosimilitud con el filtro de Kalman (`ref/generador.py`) y las constantes quedan en `ref/calibracion.py`.
+- **Razón.** Es el modelo más chico que reproduce a la vez la razón de varianza, la curtosis y la persistencia de la volatilidad. Con un solo régimen la curtosis sale 3 en vez de 14. Con parámetros separados por régimen la verosimilitud mejora 0,1: no se justifican.
+- **Alternativas.** Reversión a una media fija (no explica que la razón de varianza se estabilice en 0,5), volatilidad estocástica continua o un modelo oculto de Markov ajustado por EM (más parámetros de los que 20 000 ticks pueden fijar).
+- **Qué se pierde.** El modelo es gaussiano dentro de cada régimen. En la práctica las caídas grandes rebotan el doble que en el modelo, y la regla base gana 5 % en el modelo contra 8 % en el remuestreo. Por eso el modelo no se usa solo.
+
+### TA2. Las familias sintéticas se calibran con el modelo y se separan en plausibles y de estrés (13/11)
+
+- **Decisión.** Todas las familias de `ref/series.py` salen del modelo calibrado, quitando, exagerando o reemplazando una pieza. Cuatro son plausibles y diez de estrés. Se agregaron `modelo`, `modelo_vecino`, `volatil` y `nivel_bajo`. Reemplaza la parte de T20 que decía que las familias no estaban calibradas.
+- **Razón.** Con los parámetros puestos a mano, `reversion` daba 40 086 y `dos_componentes` 25 138 con la regla base: no decían nada sobre la competencia. Calibradas dan 11 513 y 10 772.
+- **Alternativas.** Mantener las familias antiguas junto a las nuevas. Se descartó para no tener dos tablas con el mismo nombre de familia.
+- **Qué se pierde.** Los números del protocolo del tramo 3 para las familias sintéticas ya no se reproducen (los bloques y los remuestreos sí). La verificación del binario pasa de 3010 a 3810 series.
+
+### TA3. Dos evidencias y una semilla reservada (13/11)
+
+- **Decisión.** Una idea se acepta solo si mejora a la vez en el remuestreo de la serie real y en el modelo calibrado. Los parámetros se eligen con la semilla 0. Los finalistas se evalúan con la semilla 1, que no se miró para decidir nada. La comparación entrega la diferencia pareada con su error estándar.
+- **Razón.** Se probaron unas 3000 combinaciones. El máximo de 3000 números con ruido es optimista aunque ninguna combinación sea mejor que otra. Además el remuestreo y el modelo se equivocan hacia lados distintos: el remuestreo hereda la suerte de la serie de práctica y el modelo no captura las caídas grandes.
+- **Alternativas.** Partir la serie de práctica en mitad de ajuste y mitad de validación: quedan 5 bloques por lado y un solo tramo ruidoso por lado.
+- **Qué se pierde.** Los 10 bloques de práctica no tienen reserva posible: se usaron para elegir la regla base original.
+
+### TA4. Para explorar se usa un motor en C validado contra la referencia en Python (13/11)
+
+- **Decisión.** La familia paramétrica de estrategias está escrita dos veces: `candidatos.Trader` en Python, que es la referencia, y `ref/motor/motor.c`, que corre unas cien veces más rápido. `ref/test_candidatos.py` exige que coincidan serie por serie en los candidatos y en 60 combinaciones de parámetros al azar.
+- **Razón.** Sin numpy, evaluar una configuración sobre 15 000 series toma decenas de segundos en Python y 0,3 segundos en C. La exploración completa son unas 1800 configuraciones.
+- **Alternativas.** Solo Python con menos series (el ruido tapa diferencias de 1 %), o solo C (se pierde la referencia legible).
+- **Qué se pierde.** Hay dos versiones que mantener iguales. La prueba lo vigila en cada push.
+
+### TA5. La guardia de régimen mide el resultado de las entradas, no un estadístico del precio (13/11)
+
+- **Decisión.** La guardia es: tope de tiempo de 48 ticks por posición y, si tres posiciones seguidas terminan por ese tope, 1000 ticks sin operar. El tope de pérdida apaga la estrategia si la caída acumulada en unidades de precio, desde el mejor momento, pasa de la mitad del precio. El manejo de saltos corre la media cuando el precio cambia 8 o más en un tick.
+- **Razón.** Un estadístico que detecte en vivo si la serie revierte no tiene potencia: en 2000 ticks la razón de varianza de una serie que revierte y la de un paseo aleatorio se traslapan casi enteras, y la evidencia a favor de la reversión es de una unidad de log-verosimilitud por ronda. Lo que sí se observa es si las entradas vuelven a la media.
+- **Alternativas.** Guardia por tendencia con una media lenta de la desviación (para proteger tiene que activarse en más de la mitad de los remuestreos), tope de precio por posición (cuesta 5 % de media con 6 unidades), tope de pérdida de 25 % (salta en el 9 % de los remuestreos).
+- **Qué se pierde.** La guardia cuesta 1 % de media en el remuestreo y 2 % en las familias plausibles. El tope cuesta otro 0,2 y 1,6 %, y casi toda la ganancia si la serie es mucho más volátil que la de práctica. Ninguno cubre un salto grande con la posición abierta.
+
+### TA6. El estimador de dos estados queda en la edición de exhibición (13/11)
+
+- **Decisión.** El filtro de Kalman de dos estados en punto fijo (`est=1` en `candidatos.Trader`) no entra a la edición de competencia.
+- **Razón.** Bajo el protocolo no reemplaza a la regla base: cumple en bloques y remuestreos por 0,3 % y baja más de 1 % en tres familias. Con la semilla reservada gana 30 ± 5 en el remuestreo y pierde 8 ± 8 en las familias plausibles. En software cuesta unas 140 instrucciones por tick contra 27.
+- **Alternativas.** Aceptarlo por la ventaja en el remuestreo. Es del tamaño de lo que se gana o se pierde por elegir una banda vecina.
+- **Qué se pierde.** Nada medible en patrimonio. Queda como el caso de uso del producto de matriz 2x2 en hardware, con su matriz en `docs/algoritmo.md`, sección 4.1.
+
+### TA7. `ref/trader.py` no cambia hasta que se elija un candidato (13/11)
+
+- **Decisión.** La regla base sigue siendo la referencia oficial y el programa de la placa. Los candidatos viven en `ref/candidatos.py` y se presentan sobre la frontera entre media y percentil 5 (`docs/algoritmo.md`, sección 7).
+- **Razón.** Ningún candidato cumple las tres condiciones del protocolo contra la regla base: los que suben la media bajan el peor bloque o una familia de estrés, y los que protegen bajan la media. La elección depende del perfil de riesgo y es de Nicolás.
+- **Alternativas.** Fijar `max_media` por ser el de mayor media con significancia.
+- **Qué se pierde.** Mientras no se elija, la equivalencia del RTL y el bitstream siguen siendo los de la regla base.

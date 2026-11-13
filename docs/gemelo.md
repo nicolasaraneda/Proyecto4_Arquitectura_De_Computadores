@@ -22,7 +22,7 @@ Existe por el tiempo de simulación. Los 20 000 ticks de la serie de práctica t
 | 1 ms | cerca de 2 horas (estimado) | 2,5 minutos | 0,02 segundos |
 | 10 ms | cerca de 22 horas (estimado) | 22 minutos | 0,02 segundos |
 
-Con eso se pueden correr millones de ticks: las 3010 series del protocolo a los tres períodos (18 millones de ticks) toman menos de 30 segundos, incluida la referencia en Python.
+Con eso se pueden correr millones de ticks: las 3810 series del protocolo a los tres períodos (23 millones de ticks) toman menos de 30 segundos, incluida la referencia en Python.
 
 No reemplaza a nada. La referencia del algoritmo sigue siendo `ref/trader.py`, y lo que manda es el RTL con el testbench oficial. El gemelo es un tercer modelo, del hardware, que sirve para llegar donde la simulación del RTL no alcanza.
 
@@ -106,7 +106,7 @@ Las pruebas B existen porque el timing oficial es muy regular: el período son 2
 
 Los programas aleatorios cubren lo que `trade.hex` no usa: toda la ISA base, los shifts, loads y stores de los tres tamaños con cualquier desplazamiento, los seis branches, `jal`, `jalr`, palabras que el decodificador no reconoce y accesos a todos los registros del esclavo SPI y de los periféricos. Los saltos van siempre hacia adelante y el cuerpo se repite para siempre, así que cada vuelta toma caminos distintos. Más semillas: `SEMILLAS="1 2 3 4 5 6 7 8" tools/cosim.sh`.
 
-Además, `make equiv-gemelo` corre `trade.hex` en el gemelo sobre las 3010 series del protocolo, a los tres períodos, y compara patrimonio, órdenes y pérdida máxima con `ref/trader.py`: cero diferencias en 18 millones de ticks.
+Además, `make equiv-gemelo` corre `trade.hex` en el gemelo sobre las 3810 series del protocolo, a los tres períodos, y compara patrimonio, órdenes y pérdida máxima con `ref/trader.py`: cero diferencias en 23 millones de ticks.
 
 ### Qué no modela
 
@@ -119,7 +119,7 @@ Además, `make equiv-gemelo` corre `trade.hex` en el gemelo sobre las 3010 serie
 
 **El peor caso del testbench no es el peor caso.** El testbench oficial informa 44 ciclos. Barriendo las 8 fases posibles del lazo de sondeo (moviendo el inicio de a 40 ns), la respuesta va de 37 a 44 ciclos en régimen, y de 42 a 49 para el primer precio, que pasa por el bloque de inicialización (5 ciclos más). El peor caso real es 49 ciclos. No cambia nada frente a los 2 262 disponibles, pero es el número correcto para el informe.
 
-**El programa responde todos los precios en todas las series.** En las 3010 series y los tres períodos no hay ningún precio sin respuesta ni perdido.
+**El programa responde todos los precios en todas las series.** En las 3810 series y los tres períodos no hay ningún precio sin respuesta ni perdido.
 
 ## 5. Uso
 
@@ -132,7 +132,7 @@ build/gemelo --inicio-ns 200000               # placa encendida antes del primer
 build/gemelo --lote series.txt                # una serie por línea, un resultado por línea
 build/gemelo --ayuda
 make cosim                                    # validación contra el RTL (unos 2 minutos)
-make equiv-gemelo                             # el binario contra la referencia en 3010 series
+make equiv-gemelo                             # el binario contra la referencia en 3810 series
 ```
 
 La salida normal son las mismas líneas del testbench oficial, más dos líneas propias con instrucciones, ciclos y mediciones por tick.

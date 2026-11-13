@@ -144,7 +144,7 @@ $(GEMELO): ref/gemelo/gemelo.c | $(BUILD)
 cosim: $(GEMELO) $(HEX)
 	tools/cosim.sh
 
-# El binario sw/trade.hex, corrido en el gemelo sobre las 3010 series del
+# El binario sw/trade.hex, corrido en el gemelo sobre las 3810 series del
 # protocolo y a los tres períodos, debe dar lo mismo que ref/trader.py.
 equiv-gemelo: $(GEMELO) $(HEX)
 	$(PYTHON) ref/protocolo.py --binario
