@@ -132,7 +132,8 @@ El programa ocupa 40 palabras. El único dato en memoria es `TMP`, la última pa
 
 | Corrida | Simulador | Ticks | Resultado |
 |---------|-----------|-------|-----------|
-| Ronda 3, 0,1 ms | Icarus | 20 000 | Idénticos. Patrimonio 26 795. |
+| Ronda 3, 0,1 ms (`make equiv-r3`, ejecución manual) | Icarus | 20 000 | Idénticos. Patrimonio 26 795. |
+| Rondas 3, 2 y 1 (`make equiv-gemelo-20k`) | Gemelo digital | 20 000 cada una | Idénticos. Patrimonio 26 795, 27 306 y 27 306. |
 | Ronda 2, 1 ms | Icarus | 200 | Idénticos. |
 | Ronda 1, 10 ms | Icarus | 20 | Idénticos. |
 | Ronda 3, 0,1 ms | Verilator | 20 000 | Idénticos. Patrimonio 26 795. |
@@ -209,7 +210,8 @@ python3 tools/pochoasm.py sw/trade.s -o sw/trade.hex   # ensamblar
 make tb                # testbench oficial sin modificar: 4/4
 make test-ref          # pruebas del mercado y de la referencia
 python3 ref/trader.py tb/practica.csv                   # tabla del punto 3.1
-make -j4 equiv         # equivalencia con la referencia (unos 13 minutos)
+make -j4 equiv         # equivalencia con la referencia: gemelo y Verilator
+make equiv-r3          # los 20 000 ticks con Icarus, ejecución manual (unos 13 minutos)
 make cpi               # CPI y modelo de costo (rápido)
 make medir-ticks       # mediciones por tick en las tres rondas
 ```

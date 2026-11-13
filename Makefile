@@ -47,6 +47,7 @@ FREQ ?= 25
 
 .PHONY: all asm test-asm test-ref tb tb-param cpi check check-hex synth pnr bin prog \
         equiv equiv-r3 equiv-r2 equiv-r1 equiv-verilator equiv-largo medir-ticks \
+        equiv-icarus equiv-completo equiv-gemelo-20k \
         equiv-series equiv-gemelo gemelo cosim protocolo \
         sim-bitstream guardar-bitstream medir-base hallazgos clean
 
@@ -87,15 +88,25 @@ tb-param: $(HEX)
 # --- Equivalencia entre el RTL y la referencia en Python --------------------
 # El decisiones.csv del testbench (copia parametrizada, el oficial no se toca)
 # debe ser idéntico byte a byte al de ref/trader.py. Conviene `make -j4 equiv`.
-#   equiv-r3: los 20 000 ticks de práctica al período de la ronda 3, con Icarus
-#             (unos 13 minutos).
+# `make equiv` es lo que corre la integración continua en cada push:
+#   equiv-gemelo-20k: los 20 000 ticks de práctica en el gemelo digital, con
+#             el timing del testbench oficial, a 0,1 ms, 1 ms y 10 ms.
+#   equiv-verilator: los 20 000 ticks por el RTL a 0,1 ms y a 1 ms, con
+#             Verilator.
 #   equiv-r2 y equiv-r1: pocos ticks a 1 ms y 10 ms con Icarus, para validar el
 #             modelo de los precios que se pierden durante el reset.
-#   equiv-verilator: los 20 000 ticks a 0,1 ms y a 1 ms con Verilator.
 #   equiv-series: una serie de cada familia sintética, con Verilator.
-#   equiv-largo: los 20 000 ticks a 10 ms con Verilator (unos 25 minutos). No
-#             corre en la integración continua.
-equiv: equiv-r3 equiv-r2 equiv-r1 equiv-verilator equiv-series
+# Corridas manuales, fuera del push:
+#   equiv-r3 (o equiv-icarus): los 20 000 ticks al período de la ronda 3 con
+#             Icarus, el simulador del testbench oficial (unos 13 minutos).
+#   equiv-largo: los 20 000 ticks a 10 ms con Verilator (unos 25 minutos).
+#   equiv-completo: todo lo anterior.
+equiv: equiv-gemelo-20k equiv-r2 equiv-r1 equiv-verilator equiv-series
+equiv-icarus: equiv-r3
+equiv-completo: equiv equiv-r3 equiv-largo
+
+equiv-gemelo-20k: $(GEMELO) $(HEX)
+	tools/equiv_gemelo.sh
 
 equiv-r3: $(HEX)
 	tools/equiv.sh r3 100000 20000

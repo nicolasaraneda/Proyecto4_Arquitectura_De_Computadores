@@ -61,7 +61,8 @@ Otros objetivos:
 | Comando | Qué hace |
 |---------|----------|
 | `make tb-param PERIODO_NS=1000000 NTICKS=500` | Corre una copia del testbench oficial con otro período y otro número de ticks, y compara el resultado con la referencia. El original no se toca. |
-| `make -j4 equiv` | Equivalencia con la referencia: el `decisiones.csv` del testbench debe ser idéntico byte a byte al de `ref/trader.py`. Incluye los 20 000 ticks de práctica a 0,1 ms con Icarus (13 minutos), a 0,1 ms y 1 ms con Verilator, y una serie de cada familia sintética. |
+| `make -j4 equiv` | Equivalencia con la referencia: el `decisiones.csv` debe ser idéntico byte a byte al de `ref/trader.py`. Incluye los 20 000 ticks de práctica en el gemelo digital a los tres períodos, los mismos 20 000 ticks por el RTL con Verilator a 0,1 ms y 1 ms, y una serie de cada familia sintética. Es lo que corre la integración continua en cada push. |
+| `make equiv-r3` | Los 20 000 ticks a 0,1 ms con Icarus, el simulador del testbench oficial (13 minutos). Es una ejecución manual: no corre en cada push. En GitHub se lanza con `gh workflow run CI -f icarus_completo=true`. |
 | `make equiv-largo` | Lo mismo con los 20 000 ticks a 10 ms, con Verilator (unos 25 minutos). |
 | `make medir-ticks` | Mediciones por tick del punto 3.2: IC, ciclos, CPI y tiempo, promedio y peor caso, en las tres rondas. Resultado en `docs/mediciones/ticks_software.txt`. |
 | `make sim-bitstream` | Simula el bitstream ya ruteado (no el RTL) y comprueba que decide igual que la referencia. |

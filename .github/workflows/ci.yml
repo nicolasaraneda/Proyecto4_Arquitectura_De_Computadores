@@ -3,16 +3,27 @@
 #
 # En cada push y en cada pull request se corre lo mismo que `make check`
 # (tests del ensamblador y de la referencia, trade.hex al día, testbench
-# oficial con 4/4), la equivalencia con la referencia en los 20 000 ticks, la
-# validación del gemelo digital contra el RTL, la medición de CPI y la
-# síntesis completa hasta el bitstream.
+# oficial con 4/4), la equivalencia con la referencia en los 20 000 ticks con
+# el gemelo digital y con Verilator, la validación del gemelo contra el RTL,
+# la medición de CPI y la síntesis completa hasta el bitstream.
 # Usa la misma versión de OSS CAD Suite que usamos en el desarrollo.
+#
+# Los 20 000 ticks con Icarus, el simulador del testbench oficial, no corren
+# en cada push porque son la parte más lenta. Quedan como ejecución manual:
+# en la pestaña Actions con "Run workflow", o con
+#   gh workflow run CI -f icarus_completo=true
 
 name: CI
 
 on:
   push:
   pull_request:
+  workflow_dispatch:
+    inputs:
+      icarus_completo:
+        description: 'Correr también los 20 000 ticks con Icarus (make equiv-r3)'
+        type: boolean
+        default: true
 
 jobs:
   verificar:
@@ -47,7 +58,7 @@ jobs:
       - name: Testbench oficial sin modificar (4/4)
         run: make tb
 
-      - name: Equivalencia con la referencia (20 000 ticks)
+      - name: Equivalencia con la referencia (20 000 ticks, gemelo y Verilator)
         run: make -j4 equiv
 
       - name: Gemelo digital contra el RTL
@@ -61,3 +72,20 @@ jobs:
 
       - name: Síntesis, place and route y bitstream
         run: make bin
+
+  # Ejecución manual: la corrida completa con el simulador del testbench oficial
+  equiv-icarus:
+    if: github.event_name == 'workflow_dispatch' && inputs.icarus_completo
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Instalar OSS CAD Suite
+        uses: YosysHQ/setup-oss-cad-suite@v4
+        with:
+          version: '2026-09-06'
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Equivalencia con la referencia (20 000 ticks, Icarus)
+        run: make equiv-r3

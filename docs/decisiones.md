@@ -171,3 +171,11 @@ Hay tres hechos que estas decisiones no cambian y con los que se planifica:
 - **Razón.** El entorno no tiene numpy y no instalamos nada en el sistema. Además quien revise el repositorio lo puede correr sin preparar nada, y la integración continua tampoco instala paquetes.
 - **Qué se pierde.** Los barridos grandes de parámetros serán más lentos que con vectores. La evaluación completa de una estrategia toma unos 5 segundos, que por ahora alcanza.
 
+### T22. Los 20 000 ticks con Icarus salen del push y quedan como ejecución manual (13/11)
+
+- **Decisión.** En cada push la equivalencia de los 20 000 ticks se comprueba con el gemelo digital (`make equiv-gemelo-20k`, a los tres períodos) y con Verilator sobre el RTL (`make equiv-verilator`, a 0,1 ms y 1 ms). La corrida con Icarus (`make equiv-r3`) queda como ejecución manual: en local, o en GitHub con `gh workflow run CI -f icarus_completo=true`.
+- **Razón.** La integración continua demoraba 32 minutos y la mayor parte era esa corrida. Con dos frentes trabajando en paralelo, cada rama tiene que esperar la integración continua antes de entrar a `main`, y media hora por intento es demasiado.
+- **Por qué no se pierde cobertura.** Verilator simula el mismo RTL con la misma copia del testbench y ya se comprobó que da la misma traza que Icarus (T14). El gemelo se valida contra el RTL en cada push con `make cosim`. El testbench oficial sin modificar sigue corriendo con Icarus en cada push (`make tb`, 2000 ticks), igual que las corridas cortas a 1 ms y 10 ms.
+- **Alternativas.** Dejar todo como estaba, o correr Icarus solo en `main`. La segunda deja pasar a `main` un cambio que después falla ahí.
+- **Qué se pierde.** Una diferencia entre Icarus y Verilator que solo aparezca después del tick 2000 no se vería en el push. Por eso la corrida manual se repite antes de cada etiqueta (`v-maestra-19nov` y `v-competencia`) y cada vez que cambie el RTL del core o del esclavo SPI.
+
