@@ -5,9 +5,10 @@ Traduce un archivo .s a un .hex con el formato que lee $readmemh:
 
     python3 tools/pochoasm.py sw/trade.s -o sw/trade.hex
 
-Es el ensamblador que el grupo escribio para el Proyecto 2 (antes
-assembler/asm.py), con el nombre y la interfaz que espera el testbench del
-Proyecto 4. No invoca ninguna herramienta externa. Ver docs/ensamblador.md.
+Es el ensamblador que el grupo escribio para el Proyecto 2 y amplio en el
+Proyecto 3 (antes assembler/asm.py), con el nombre y la interfaz que espera el
+testbench del Proyecto 4. Opcionalmente escribe el programa como include de
+Verilog (--vh) o como ROM combinacional (--rom). No invoca ninguna herramienta externa. Ver docs/ensamblador.md.
 
 Grupo: Nicolás Araneda, Vicente Calderón y Santiago Muñoz.
 Arquitectura de Computadores, Universidad de los Andes, 2026-2.
@@ -19,7 +20,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent / "asm"))
 
-from core import IDENT_RE, assemble_file, parse_number  # noqa: E402
+from core import IDENT_RE, assemble_file, format_verilog_image, format_verilog_rom, parse_number  # noqa: E402
 from errors import AssemblerError  # noqa: E402
 
 
@@ -37,6 +38,16 @@ def main(argv=None):
         "--allow-shifts",
         action="store_true",
         help="permite sll/srl/sra/slli/srli/srai (la ALU los ejecuta como ADD en este core; usar bajo tu propio riesgo)",
+    )
+    parser.add_argument(
+        "--vh",
+        metavar="SALIDA.vh",
+        help="escribe además la imagen del programa como include de Verilog (PROG_WORDS y prog_word)",
+    )
+    parser.add_argument(
+        "--rom",
+        metavar="SALIDA.v",
+        help="escribe además el módulo pochoco_rom: una ROM combinacional con el programa",
     )
     parser.add_argument(
         "-D",
@@ -73,6 +84,20 @@ def main(argv=None):
         return 1
 
     print(f"{input_path} -> {output_path} ({len(words)} palabras, {len(words) * 4} bytes)")
+
+    for ruta, formato, nombre in ((args.vh, format_verilog_image, "imagen Verilog"),
+                                  (args.rom, format_verilog_rom, "ROM combinacional")):
+        if not ruta:
+            continue
+        destino = Path(ruta)
+        try:
+            destino.parent.mkdir(parents=True, exist_ok=True)
+            with open(destino, "w", encoding="utf-8", newline="\n") as f:
+                f.write(formato(words, input_path.as_posix(), allow_shifts=args.allow_shifts))
+        except OSError as e:
+            print(f"error: {e}", file=sys.stderr)
+            return 1
+        print(f"{input_path} -> {destino} ({nombre}, {len(words)} palabras)")
     return 0
 
 

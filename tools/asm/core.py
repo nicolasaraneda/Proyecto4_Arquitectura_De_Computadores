@@ -229,6 +229,10 @@ class Assembler:
                     if len(ln.operands) == 0:
                         raise AssemblerError(ln.lineno, ".word requiere al menos un valor")
                     size = 4 * len(ln.operands)
+                elif ln.name == ".org":
+                    size = self._org_size(ln, symtab, addr)
+                    if size == 0:
+                        continue
                 elif ln.name in (".section", ".text", ".global"):
                     continue
                 else:
@@ -248,7 +252,9 @@ class Assembler:
 
         words = []
         for ln, address, size in sized:
-            if ln.kind == "directive":
+            if ln.kind == "directive" and ln.name == ".org":
+                words.extend([0] * (size // 4))
+            elif ln.kind == "directive":
                 for tok in ln.operands:
                     val = resolve_value(tok, symtab, ln.lineno, "valor")
                     words.append(val & 0xFFFFFFFF)
@@ -269,6 +275,26 @@ class Assembler:
         if name in symtab:
             raise AssemblerError(lineno, f"{kind} duplicada: '{name}'")
         symtab[name] = value
+
+    def _org_size(self, ln, symtab, addr):
+        """.org DIRECCION: avanza hasta DIRECCION rellenando con palabras en
+        cero. Devuelve cuántos bytes de relleno hacen falta."""
+        if len(ln.operands) != 1:
+            raise AssemblerError(ln.lineno, ".org requiere una dirección")
+        target = resolve_value(ln.operands[0], symtab, ln.lineno, "dirección")
+        if target % 4 != 0:
+            raise AssemblerError(ln.lineno, f".org: la dirección {target} no es múltiplo de 4")
+        if target < addr:
+            raise AssemblerError(
+                ln.lineno,
+                f".org no puede retroceder: la dirección actual es 0x{addr:x} y se pidió 0x{target:x}",
+            )
+        if target > RAM_BYTES:
+            raise AssemblerError(
+                ln.lineno,
+                f".org: la dirección 0x{target:x} queda fuera de las {RAM_WORDS} palabras de RAM ({RAM_BYTES} bytes)",
+            )
+        return target - addr
 
     def _handle_equ(self, ln, symtab):
         if len(ln.operands) != 2:
@@ -480,6 +506,111 @@ def format_hex(words):
     if not words:
         return ""
     return "\n".join(f"{w & 0xFFFFFFFF:08x}" for w in words) + "\n"
+
+
+def assemble_file(input_path, output_path, allow_shifts=False, defines=None):
+    with open(input_path, "r", encoding="utf-8") as f:
+        text = f.read()
+    words = assemble_text(text, allow_shifts=allow_shifts, defines=defines)
+    with open(output_path, "w", encoding="utf-8", newline="\n") as f:
+        f.write(format_hex(words))
+    return words
+
+
+def format_verilog_image(words, source_name="", allow_shifts=False):
+    """Imagen del programa como include de Verilog (viene del Proyecto 3).
+
+    Define PROG_WORDS y la función prog_word(idx), un case con una palabra
+    por dirección, comentada con su desensamblado. El RTL la usa de dos
+    formas: evaluada con la dirección de fetch queda una ROM combinacional, y
+    evaluada en índices constantes sirve como valor de reset de una memoria en
+    flip-flops.
+    """
+    from disasm import decode_one  # import local: disasm importa de core
+
+    lines = [
+        f"// Generado por tools/pochoasm.py a partir de {source_name or 'el programa'}.",
+        "// No editar a mano: se regenera desde el .s (opciones --vh y --rom).",
+        f"// {len(words)} palabras de programa ({len(words) * 4} bytes).",
+        "",
+        f"localparam integer PROG_WORDS = {len(words)};",
+        "",
+        "function [31:0] prog_word;",
+        "  input integer idx;",
+        "  begin",
+        "    case (idx)",
+    ]
+    width = len(str(max(len(words) - 1, 0)))
+    for i, w in enumerate(words):
+        w &= 0xFFFFFFFF
+        try:
+            text = decode_one(w, 4 * i, allow_shifts=allow_shifts)
+        except Exception:
+            text = None
+        comment = f"0x{4 * i:04x}: {text}" if text else f"0x{4 * i:04x}: .word 0x{w:08x}"
+        lines.append(f"      {i:>{width}}: prog_word = 32'h{w:08x};  // {comment}")
+    lines += [
+        "      default: prog_word = 32'h00000000;",
+        "    endcase",
+        "  end",
+        "endfunction",
+        "",
+    ]
+    return "\n".join(lines)
+
+
+def format_verilog_rom(words, source_name="", allow_shifts=False):
+    """Módulo pochoco_rom completo: la ROM combinacional del programa (viene
+    del Proyecto 3, donde la memoria de instrucciones del ASIC era esta ROM).
+
+    Es un case con una palabra por dirección, igual al de format_verilog_image,
+    pero dentro de un módulo propio: no tiene reloj ni flip-flops, y la
+    síntesis lo convierte en lógica combinacional. Una dirección fuera del
+    programa entrega 0.
+    """
+    from disasm import decode_one  # import local: disasm importa de core
+
+    n = len(words)
+    aw = max(1, (n - 1).bit_length())
+    width = len(str(max(n - 1, 0)))
+    lines = [
+        f"// Generado por tools/pochoasm.py a partir de {source_name or 'el programa'}.",
+        "// No editar a mano: se regenera desde el .s (opciones --vh y --rom).",
+        "//",
+        "// ROM combinacional del programa: un case",
+        "// con una palabra por dirección. No tiene reloj ni flip-flops; la síntesis",
+        "// la convierte en lógica combinacional. Una dirección fuera del programa",
+        "// entrega 0.",
+        f"// {n} palabras de programa ({n * 4} bytes), {aw} bits de dirección de palabra.",
+        "",
+        "module pochoco_rom (",
+        "  input  wire [31:0] addr_i,   // dirección de byte",
+        "  output reg  [31:0] data_o",
+        ");",
+        "",
+        f"  wire [{aw - 1}:0] word = addr_i[{aw + 1}:2];",
+        "",
+        "  always @* begin",
+        "    case (word)",
+    ]
+    for i, w in enumerate(words):
+        w &= 0xFFFFFFFF
+        try:
+            text = decode_one(w, 4 * i, allow_shifts=allow_shifts)
+        except Exception:
+            text = None
+        comment = f"0x{4 * i:04x}: {text}" if text else f"0x{4 * i:04x}: .word 0x{w:08x}"
+        lines.append(f"      {aw}'d{i:<{width}}: data_o = 32'h{w:08x};  // {comment}")
+    lines += [
+        "      default: data_o = 32'h00000000;",
+        "    endcase",
+        "  end",
+        "",
+        f"  wire _unused = &{{1'b0, addr_i[31:{aw + 2}], addr_i[1:0]}};",
+        "endmodule",
+        "",
+    ]
+    return "\n".join(lines)
 
 
 def assemble_file(input_path, output_path, allow_shifts=False, defines=None):

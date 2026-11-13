@@ -4,7 +4,7 @@ Este documento describe el ensamblador del proyecto, que traduce programas en as
 
 ## 1. Origen y alcance
 
-El testbench oficial del Proyecto 4 espera el comando `python3 tools/pochoasm.py sw/trade.s -o sw/trade.hex`, pero el repositorio base del curso no trae ese archivo. Usamos el ensamblador que el grupo escribió para el Proyecto 2 (ahí se llamaba `assembler/asm.py`), con el nombre y la interfaz que pide el testbench. El punto de entrada es `tools/pochoasm.py` y los módulos están en `tools/asm/`.
+El testbench oficial del Proyecto 4 espera el comando `python3 tools/pochoasm.py sw/trade.s -o sw/trade.hex`, pero el repositorio base del curso no trae ese archivo. Usamos el ensamblador que el grupo escribió para el Proyecto 2 y amplió en el Proyecto 3 (ahí se llamaba `assembler/asm.py`), con el nombre y la interfaz que pide el testbench. Del Proyecto 3 vienen las salidas en Verilog (`--vh` y `--rom`). En este proyecto se agregó la directiva `.org`. El punto de entrada es `tools/pochoasm.py` y los módulos están en `tools/asm/`.
 
 Está escrito en Python 3 sin dependencias y no invoca ninguna herramienta externa, así que no hace falta instalar un toolchain de RISC-V. Por eso se eliminó `sw/Makefile` del repositorio base, que llamaba a `riscv64-unknown-elf-as`: ahora existe una sola regla para generar los `.hex`, en el `Makefile` de la raíz.
 
@@ -15,7 +15,7 @@ Las instrucciones propias de la extensión de la ISA (espacio custom-0) se agreg
 ## 2. Uso
 
 ```
-python3 tools/pochoasm.py ENTRADA.s [-o SALIDA.hex] [-D NOMBRE=VALOR ...] [--allow-shifts]
+python3 tools/pochoasm.py ENTRADA.s [-o SALIDA.hex] [-D NOMBRE=VALOR ...] [--allow-shifts] [--vh SALIDA.vh] [--rom SALIDA.v]
 ```
 
 | Opción                  | Efecto                                                                                     |
@@ -24,6 +24,8 @@ python3 tools/pochoasm.py ENTRADA.s [-o SALIDA.hex] [-D NOMBRE=VALOR ...] [--all
 | `-o`, `--output`        | Archivo `.hex` de salida. Por defecto, la entrada con extensión `.hex`.                    |
 | `-D`, `--define`        | `NOMBRE=VALOR`: fija una constante y pisa el `.equ` del mismo nombre. Se puede repetir.    |
 | `--allow-shifts`        | Acepta `sll`, `srl`, `sra`, `slli`, `srli` y `srai`.                                       |
+| `--vh SALIDA.vh`        | Escribe además el programa como include de Verilog: `PROG_WORDS` y la función `prog_word(idx)`. |
+| `--rom SALIDA.v`        | Escribe además el módulo `pochoco_rom`, una ROM combinacional con el programa (un `case` por dirección). |
 
 Ejemplos:
 
@@ -69,9 +71,12 @@ Pedir `x16` o superior es un **error** ("x16 no existe: RV32E solo tiene x0-x15"
 |------------------------------|-------------------------------------------------------------------------------------------------|
 | `.equ NOMBRE, valor`         | Define una constante. El valor es un literal u otra constante ya definida. No ocupa memoria.    |
 | `.word v1, v2, ...`          | Emite una o más palabras de 32 bits literales. El valor puede ser un literal, una constante o una etiqueta. |
+| `.org dirección`             | Avanza hasta esa dirección de byte rellenando con palabras en cero. La dirección debe ser múltiplo de 4, no puede ser menor que la actual ni pasar de 0x800. |
 | `.section`, `.text`, `.global` | Se aceptan e ignoran. Existen para que el mismo archivo se lea bien con otras herramientas.   |
 
 Cualquier otra directiva es un error. Un `.equ` con un nombre repetido también es error, salvo que el nombre venga fijado por `-D`, caso en que el `.equ` del archivo se ignora. Las constantes deben definirse antes de usarse.
+
+`sw/trade.s` termina con `.org 0x800`, así que `trade.hex` tiene siempre las 512 palabras de la RAM. Hay dos razones. La primera es que en simulación una palabra que no aparece en el `.hex` queda indefinida, mientras que en la placa queda en cero: con el relleno las dos parten con la misma memoria. La segunda es que `icebram`, la herramienta que cambia el programa dentro de un bitstream sin volver a sintetizar, necesita un `.hex` del tamaño completo de la memoria. Se eligió una directiva dentro del archivo, y no una opción de la línea de comandos, porque el comando del testbench oficial (`python3 tools/pochoasm.py sw/trade.s -o sw/trade.hex`) no lleva opciones.
 
 ## 6. Etiquetas, inmediatos y pseudo-instrucciones
 
@@ -174,7 +179,7 @@ Más las pseudo-instrucciones de la sección 6.
 
 El assembler rechaza con un mensaje de error, indicando el número de línea, los casos siguientes: registro fuera de x0 a x15 o desconocido, shift sin `--allow-shifts`, mnemónico o directiva desconocidos, etiqueta o constante repetida o no definida, inmediato fuera de rango, número incorrecto de operandos, operando de memoria mal formado, salto a dirección impar o fuera de alcance, y programa de más de 512 palabras.
 
-La suite se corre con `make test-asm` y tiene **73 tests**, repartidos así:
+La suite se corre con `make test-asm` y tiene **87 tests**, repartidos así:
 
 | Archivo                          | Tests | Qué verifica                                                                                                  |
 |----------------------------------|-------|---------------------------------------------------------------------------------------------------------------|
@@ -185,7 +190,9 @@ La suite se corre con `make test-asm` y tiene **73 tests**, repartidos así:
 | `tests/test_defines.py`          | 3     | `-D` pisa el `.equ`, `-D` sin `.equ` en el archivo, y valor no numérico es error.                              |
 | `tests/test_validation.py`       | 28    | Todas las validaciones del párrafo anterior, con casos límite en los rangos.                                   |
 | `tests/test_roundtrip.py`        | 5     | Ensamblar, desensamblar con `tools/asm/disasm.py` y volver a ensamblar da lo mismo, para todas las instrucciones y para los tres ejemplos. Detecta errores de codificación que la comparación con archivos de referencia no ve. |
-| **Total**                        | **73**|                                                                                                               |
+| `tests/test_org.py`              | 9     | `.org`: relleno con ceros, relleno hasta las 512 palabras, etiquetas después del relleno y los cuatro errores (retroceder, dirección impar, fuera de la RAM, código después de llenar la RAM). |
+| `tests/test_image.py`            | 5     | Las salidas `--vh` y `--rom` contienen las mismas palabras que el `.hex`, en el mismo orden, con el desensamblado como comentario. |
+| **Total**                        | **87**|                                                                                                               |
 
 ## 9. Ejemplo completo de traducción: `sw x9, OFF_LEDS(x2)`
 
