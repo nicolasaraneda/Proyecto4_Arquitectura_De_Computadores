@@ -7,10 +7,14 @@
 // 
 // Authors:
 // - Nicolás Villegas <navillegas@miuandes.cl>
+//
+// Modificado para el Proyecto 4 por Nicolás Araneda, Vicente Calderón y
+// Santiago Muñoz: programa por defecto sw/trade.hex y power-on reset largo.
 
 module pochoco_soc #(
   parameter NumWords   = 512,
-  parameter MemFile    = "../sw/blink.hex"
+  parameter MemFile    = "sw/trade.hex",   // ruta relativa a la raíz del repositorio
+  parameter PorBits    = 12                // el reset dura 2^PorBits - 1 ciclos
 ) (
   input  wire       i_Clk,
 
@@ -31,13 +35,17 @@ module pochoco_soc #(
   wire clk;
   assign clk = i_Clk;
 
-  // Power-on reset
-  reg  [3:0] por_cnt = 4'b0;
-  wire       rst_ni;
+  // Power-on reset. Con PorBits = 12 dura 4095 ciclos (164 us a 25 MHz).
+  // Las BRAM del iCE40 no entregan datos válidos hasta un tiempo después de
+  // configurar la FPGA: con el reset original de 15 ciclos, en la placa el
+  // core arrancaba leyendo ceros y el programa empezaba por la mitad (lo
+  // medimos en el Proyecto 2).
+  reg  [PorBits-1:0] por_cnt = {PorBits{1'b0}};
+  wire               rst_ni;
   always @(posedge clk) begin
-    if (por_cnt != 4'hF) por_cnt <= por_cnt + 4'd1;
+    if (~&por_cnt) por_cnt <= por_cnt + 1'b1;
   end
-  assign rst_ni = (por_cnt == 4'hF);
+  assign rst_ni = &por_cnt;
 
   // Core-memory wiring
   wire        instr_req;
