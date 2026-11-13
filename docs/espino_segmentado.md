@@ -207,7 +207,7 @@ En el segmentado la ruta crítica no es de medio ciclo. Es de un ciclo completo,
 
 En el base la ruta crítica mide 22 a 23,6 ns porque incluye la decodificación: la instrucción sale de la BRAM, pasa por el decodificador y recién entonces llega a la ALU. En el segmentado la decodificación está registrada y queda fuera. Por eso el pipeline, que agrega un multiplexor, igual sube la frecuencia máxima.
 
-Qué no cubre este análisis: nextpnr supone un reloj con ciclo de trabajo de 50 %. Con los 9,8 ns medidos el diseño tolera un ciclo de trabajo entre 25 % y 75 %. El oscilador de la Go Board está muy lejos de eso, pero es lo primero que hay que mirar el 19/11 si el segmentado falla en la placa y el base no.
+Qué no cubre este análisis: nextpnr supone un reloj con ciclo de trabajo de 50 %. Con los 9,8 ns medidos el diseño tolera un ciclo de trabajo entre 25 % y 75 %. El oscilador de la Go Board está muy lejos de eso, pero es lo primero que hay que mirar el 26/11 si el segmentado falla en la placa y el base no.
 
 ## 9. Verificación
 
@@ -352,4 +352,4 @@ Para compilar a mano cualquier testbench con el segmentado basta agregar `-DESPI
 - **¿Por qué no se adelanta desde más atrás?** No hay más atrás. La instrucción escribe al final de EX y la siguiente lee en ese mismo flanco: solo existe la distancia 1.
 - **¿Cómo sabemos que las pruebas detectan errores?** Por las cinco mutaciones.
 - **¿El pipeline cambia las decisiones del trader?** No. `decisiones.csv` es idéntico byte a byte en los 20 000 ticks. Cambia cuántos ciclos demora cada una.
-- **¿Sirve para la competencia?** Con la regla base la respuesta ya ocupaba 44 de 2262 ciclos, así que no cambia el resultado. Sirve si el algoritmo final es más pesado, y libera 89 celdas para la extensión de la ISA. Solo puede ir en el bitstream de competencia si pasa por la maestra real el 19/11.
+- **¿Sirve para la competencia?** Con la regla base la respuesta ya ocupaba 44 de 2262 ciclos, así que no cambia el resultado. Sirve si el algoritmo final es más pesado, y libera 89 celdas para la extensión de la ISA. Solo puede ir en el bitstream de competencia si pasa por la maestra real el 26/11.

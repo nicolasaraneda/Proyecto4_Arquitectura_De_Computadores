@@ -19,7 +19,7 @@ Hay tres hechos que estas decisiones no cambian y con los que se planifica:
 
 1. Las reglas del enunciado. La decisión la calcula Espino.
 2. La FPGA tiene 1280 celdas lógicas y 16 BRAM.
-3. La maestra real está disponible un solo día, el 19/11. El bitstream de competencia solo puede contener hardware que haya pasado esa prueba.
+3. La maestra real está disponible un solo día, el 26/11 (hasta el 13/11 la fecha era el 19/11: ver T44). El bitstream de competencia solo puede contener hardware que haya pasado esa prueba.
 
 ## Decisiones técnicas
 
@@ -315,3 +315,10 @@ Hay tres hechos que estas decisiones no cambian y con los que se planifica:
 
 - **Decisión.** `bitstreams/segmentado_v1.bin` es el SoC con el core segmentado y el mismo `trade.hex`. `competencia_v1.bin` no se tocó.
 - **Pendiente.** Decidir si el segmentado va a la maestra real el 19/11 como candidato a la edición de competencia. Con la regla base no cambia el patrimonio. Sí libera 89 celdas y deja la respuesta en 26 ciclos en vez de 44.
+
+### T44. El calendario se corre una semana (13/11)
+
+- **Decisión.** Todas las fechas del proyecto se mueven una semana. La maestra real está disponible el 26/11, y la entrega y la competencia son el 1/12 (10:00 y 10:30). El plan interno se corre igual: el hardware que quiera llegar a la competencia se etiqueta el 25/11 en la noche (`v-maestra-26nov`), del 27 al 29/11 solo se aceptan cambios que no tocan el hardware probado, el 29/11 se congela y el 30/11 es el ensayo general.
+- **Razón.** Cambio de fechas del curso, informado por Nicolás el 13/11. El enunciado en PDF (`docs/Proyecto_4_arq.pdf`) todavía muestra las fechas anteriores, 19/11 y 24/11.
+- **Consecuencia.** Donde las decisiones anteriores dicen 18/11, 19/11 o 24/11 debe leerse 25/11, 26/11 y 1/12, y la etiqueta `v-maestra-19nov` pasa a llamarse `v-maestra-26nov`. Las decisiones anteriores no se reescriben. Se corrigió la fecha en `bitstreams/README.md`, `docs/gemelo.md` y `docs/espino_segmentado.md`.
+- **Qué se gana.** Siete días más antes de la prueba con la maestra real.
