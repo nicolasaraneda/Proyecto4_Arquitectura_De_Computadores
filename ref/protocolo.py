@@ -10,7 +10,9 @@ conjuntos de series de 2000 ticks (ref/series.py):
 
   1. Los 10 bloques de 2000 ticks de la serie de práctica.
   2. 1000 remuestreos por bloques de los incrementos de la serie de práctica.
-  3. 200 series de cada familia sintética.
+  3. 200 series de cada familia sintética, calibradas contra la práctica y
+     separadas en dos grupos: plausibles (parecidas a la práctica) y de
+     estrés (algo importante es distinto).
 
 Para cada conjunto se informa: media, mediana, percentil 5, peor caso,
 probabilidad de superar a comprar y mantener y a no operar, y órdenes
@@ -27,13 +29,21 @@ todos los precios (como en la competencia, con la placa ya encendida).
 
 Una estrategia es cualquier objeto con un método decidir(precio) que devuelve
 el byte de DECISION. Se nombra como "base", "base:k=4,entra=3,sale=1",
-"sma64", o "modulo:fabrica" para una clase de otro archivo de ref/.
+"sma64", "cand:intermedio" (un candidato de ref/candidatos.py),
+"trader:E=96,X=0,J=8" (la familia paramétrica con esos parámetros) o
+"modulo:fabrica" para una clase de otro archivo de ref/.
 
 Criterio de aceptación (--comparar). Una candidata reemplaza a la regla base
 solo si se cumplen las tres condiciones:
   a. En los 10 bloques de práctica: media y peor bloque mayores o iguales.
   b. En los remuestreos: media y percentil 5 mayores o iguales.
   c. En ninguna familia sintética la media baja más de 1 %.
+Además se informa la diferencia pareada de la media, serie por serie, con su
+error estándar: una diferencia menor que dos errores no se distingue del
+ruido.
+
+La semilla 0 es la de exploración: con ella se eligieron los parámetros. La
+semilla 1 queda reservada para evaluar solo a los finalistas (--semilla 1).
 """
 import argparse
 import importlib
@@ -43,6 +53,7 @@ from multiprocessing import Pool
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
+import candidatos       # noqa: E402
 import market           # noqa: E402
 import series           # noqa: E402
 import trader           # noqa: E402
@@ -86,12 +97,15 @@ class NoOperar:
         return market.MANTENER
 
 
-FABRICAS = {"base": trader.ReglaBase, "sma64": SumaMovil, "comprar63": Comprar63, "nada": NoOperar}
+FABRICAS = {"base": trader.ReglaBase, "sma64": SumaMovil, "comprar63": Comprar63, "nada": NoOperar,
+            "trader": candidatos.Trader}
 
 
 def fabrica(nombre):
     """Convierte "base:k=4,entra=3" o "modulo:Clase" en una función que crea la estrategia."""
     cabeza, _, resto = nombre.partition(":")
+    if cabeza == "cand":
+        return candidatos.crear(resto)
     if cabeza in FABRICAS:
         kw = {}
         for par in filter(None, resto.split(",")):
@@ -104,12 +118,34 @@ def fabrica(nombre):
 # ---- Conjuntos de series -----------------------------------------------------------
 
 def conjuntos(remuestreos=1000, por_familia=200, semilla=0):
-    """Lista de (nombre, series). El orden es fijo y todo es reproducible."""
+    """Lista de (nombre, series). El orden es fijo y todo es reproducible.
+
+    Primero los bloques y los remuestreos, después las familias plausibles y
+    al final las de estrés.
+    """
     c = [("practica, 10 bloques", series.bloques(series.practica(), LARGO)),
          (f"remuestreo ({remuestreos})", series.lote("remuestreo", remuestreos, LARGO, semilla))]
-    for nombre in series.FAMILIAS:
+    for nombre in series.PLAUSIBLES + series.ESTRES:
         c.append((nombre, series.lote(nombre, por_familia, LARGO, semilla)))
     return c
+
+
+def grupo_de(nombre):
+    """"plausible" o "estres" para una familia; "practica" para bloques y remuestreos."""
+    if nombre in series.PLAUSIBLES:
+        return "plausible"
+    if nombre in series.ESTRES:
+        return "estres"
+    return "practica"
+
+
+def diferencia_pareada(rc, rb):
+    """Media de la diferencia de patrimonio serie por serie, y su error estándar."""
+    dif = [a[0] - b[0] for a, b in zip(rc, rb)]
+    n = len(dif)
+    m = sum(dif) / n
+    var = sum((v - m) ** 2 for v in dif) / (n - 1) if n > 1 else 0.0
+    return m, (var / n) ** 0.5
 
 
 # ---- Evaluación --------------------------------------------------------------------
@@ -164,10 +200,23 @@ def informe(nombre, cjs, pool):
     print(f"Estrategia: {nombre}")
     print(ENCABEZADO)
     tabla = {}
+    juntos = {"plausible": ([], []), "estres": ([], [])}
+    anterior = "practica"
     for cj, lista in cjs:
+        g = grupo_de(cj)
+        if g != anterior:
+            print(f"--- familias {'plausibles' if g == 'plausible' else 'de estres'} ---")
+            anterior = g
         res = evaluar(nombre, lista, pool)
         tabla[cj] = (res, resumen(res, lista))
         print(linea(cj, tabla[cj][1]))
+        if g in juntos:
+            juntos[g][0].extend(res)
+            juntos[g][1].extend(lista)
+    print("--- grupos completos ---")
+    for g, etiqueta in (("plausible", "plausibles, todas"), ("estres", "estres, todas")):
+        if juntos[g][0]:
+            print(linea(etiqueta, resumen(*juntos[g])))
     res, _ = tabla[cjs[0][0]]
     print("\nBloques de practica, uno por uno (patrimonio, ordenes, perdida maxima, comprar y mantener):")
     for i, (r, s) in enumerate(zip(res, cjs[0][1])):
@@ -178,14 +227,19 @@ def informe(nombre, cjs, pool):
 def comparar(candidata, base, cjs, pool):
     """Candidata contra base, serie por serie, con el criterio de aceptación."""
     print(f"Candidata: {candidata}   Base: {base}")
-    print(f"{'conjunto':24s} {'n':>5s} {'media cand':>10s} {'media base':>10s} {'dif':>7s} {'gana en':>8s} "
+    print(f"{'conjunto':24s} {'n':>5s} {'media cand':>10s} {'media base':>10s} {'dif':>7s} {'+-ee':>6s} {'gana en':>8s} "
           f"{'p5 cand':>8s} {'p5 base':>8s} {'peor cand':>9s} {'peor base':>9s}")
     ok = {"a": True, "b": True, "c": True}
+    anterior = "practica"
     for idx, (cj, lista) in enumerate(cjs):
+        if grupo_de(cj) != anterior:
+            anterior = grupo_de(cj)
+            print(f"--- familias {'plausibles' if anterior == 'plausible' else 'de estres'} ---")
         rc, rb = evaluar(candidata, lista, pool), evaluar(base, lista, pool)
         sc, sb = resumen(rc, lista), resumen(rb, lista)
         gana = sum(a[0] > b[0] for a, b in zip(rc, rb)) / len(lista)
-        print(f"{cj:24s} {sc['n']:5d} {sc['media']:10.0f} {sb['media']:10.0f} {sc['media'] - sb['media']:+7.0f} "
+        dif, ee = diferencia_pareada(rc, rb)
+        print(f"{cj:24s} {sc['n']:5d} {sc['media']:10.0f} {sb['media']:10.0f} {dif:+7.0f} {ee:6.0f} "
               f"{100 * gana:7.0f}% {sc['p5']:8d} {sb['p5']:8d} {sc['peor']:9d} {sb['peor']:9d}")
         if idx == 0:
             ok["a"] = sc["media"] >= sb["media"] and sc["peor"] >= sb["peor"]

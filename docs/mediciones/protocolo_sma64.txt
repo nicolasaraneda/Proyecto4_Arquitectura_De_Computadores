@@ -1,21 +1,27 @@
 Protocolo: series de 2000 ticks, 1000 remuestreos, 200 series por familia, semilla 0
 
 Candidata: sma64   Base: base
-conjunto                     n media cand media base     dif  gana en  p5 cand  p5 base peor cand peor base
-practica, 10 bloques        10      10951      11069    -118      40%    10148     9720     10148      9720
-remuestreo (1000)         1000      10624      10772    -149      48%     8275     8914      5158      6520
-paseo                      200       9994       9873    +121      57%     5898     7126      3131      2918
-tendencia                  200       9767       9543    +223      50%     3570     4530       510       969
-reversion                  200      42613      40086   +2526      65%    20321    19832     14879     14305
-dos_componentes            200      27057      25138   +1919      70%    17294    16399     13739     13134
-saltos                     200      42344      37679   +4666      64%    15921    15827      7090      7761
-cambio_volatilidad         200      64951      63697   +1254      56%    27793    25722     19160     17099
-cambio_de_caracter         200      13362      13225    +137      55%     3553     3507       915       389
-plana                      200      10000      10000      +0       0%    10000    10000     10000     10000
-borde_bajo                 200      35421      18496  +16925      98%    14729    10046      6517      8851
-borde_alto                 200      17126      14966   +2160      99%    14955    13363     14083     12731
+conjunto                     n media cand media base     dif   +-ee  gana en  p5 cand  p5 base peor cand peor base
+practica, 10 bloques        10      10951      11069    -118    221      40%    10148     9720     10148      9720
+remuestreo (1000)         1000      10624      10772    -149     37      48%     8275     8914      5158      6520
+--- familias plausibles ---
+modelo                     200      10651      10406    +246     74      66%     8705     8930      2960      3263
+modelo_vecino              200      11755      11381    +374    252      57%     8700     8543      4765      4445
+dos_componentes            200      11037      10772    +265     75      64%     8844     9138      6807      7276
+cambio_volatilidad         200      11527      11261    +266    140      60%     7641     7484      2134      2766
+--- familias de estres ---
+paseo                      200       9993       9927     +65     66      55%     7553     7866      3147      2271
+tendencia                  200       9376       9410     -34     95      52%     4070     5777       390       636
+reversion                  200      12526      11513   +1013    101      91%    10272    10000      9762      9764
+saltos                     200      13151      12584    +568    605      62%     4903     4567       558      1094
+cambio_de_caracter         200       8907       9043    -136     82      49%     2077     2592       266       256
+volatil                    200      22387      20952   +1435    720      52%     7294     8047      1898      2238
+nivel_bajo                 200      21130      18042   +3087   1032      61%     3568     7278       712      1855
+plana                      200      10000      10000      +0      0       0%    10000    10000     10000     10000
+borde_bajo                 200      35421      18496  +16925    754      98%    14729    10046      6517      8851
+borde_alto                 200      17126      14966   +2160     80      99%    14955    13363     14083     12731
 
 Criterio a (bloques: media y peor bloque):      no cumple
 Criterio b (remuestreos: media y percentil 5):  no cumple
-Criterio c (ninguna familia baja mas de 1 %):   cumple
+Criterio c (ninguna familia baja mas de 1 %):   no cumple
 Veredicto: la candidata NO reemplaza a la base

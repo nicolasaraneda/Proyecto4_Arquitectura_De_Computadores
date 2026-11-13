@@ -1,0 +1,19 @@
+1. Filtro de Kalman en estado estacionario (redondeo como ruido de varianza 1/12)
+   regimen tranquilo: K1 = 0.6142, K2 = 0.1843, varianza de la innovacion 0.414, error de la transitoria 1.11 (su desviacion estandar es 1.19)
+   regimen ruidoso  : K1 = 0.7424, K2 = 0.2246, varianza de la innovacion 2.521, error de la transitoria 3.29 (su desviacion estandar es 3.54)
+   En punto fijo: phi = 1 - 1/32 - 1/128 = 0.9609375, K1 = 1/2 + 1/8 = 0.625, K2 = 1/8 + 1/16 = 0.1875
+
+2. Actualizacion como producto de matriz 2x2 por vector: x' = A x + K p, con x = [nivel, transitoria]
+   A = [[0.3750000, -0.6005859], [-0.1875000, 0.7807617]]   K = [0.625, 0.1875]
+   En Q8 (por 256): A = [[96, -154], [-48, 200]]   K = [160, 48]
+   Forma con sumas y desplazamientos (la de candidatos.Trader, estado en Q8):
+      Tp = T - (T >> 5) - (T >> 7)
+      e  = (p << 8) - L - Tp
+      L  = L + (e >> 1) + (e >> 3)
+      T  = Tp + (e >> 3) + (e >> 4)
+
+3. Politica optima por programacion dinamica (precio 128, caja 10 000, comision 5, 63 acciones por orden)
+   regimen tranquilo: desv. est. de z 0.43. Primera orden si z < -0.34, segunda si z < -0.69, vende si z > +0.34. Ganancia optima 595 por 2000 ticks
+   regimen ruidoso  : desv. est. de z 1.29. Primera orden si z < -0.65, segunda si z < -1.29, vende si z > +0.65. Ganancia optima 2371 por 2000 ticks
+   Mezcla de regimenes (86 % tranquilo): 844 por 2000 ticks (8.4 % de la caja)
+   Sin comision, regimen tranquilo: 987 por 2000 ticks, compra si z < +0.00
