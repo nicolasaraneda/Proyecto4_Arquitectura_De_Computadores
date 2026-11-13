@@ -157,7 +157,7 @@ La memoria del fetch es una copia que recibe las mismas escrituras que la de dat
 
 No cambiaron `espino_decoder.v`, `espino_alu.v`, `espino_load_store_unit.v`, `espino_controller.v`, `pochoco_periph.v` ni `pochoco_spi_slave.v`. Con `Pipeline = 0` cada módulo genera la lógica original.
 
-Eso último no se dejó a la vista: `make formal-base` lo prueba. Con los pases `equiv_*` de Yosys (el método de la equivalencia entre RTL y netlist del Proyecto 3) compara las etapas IF e ID del repositorio base con las actuales en modo base, registro por registro y salida por salida: 266 y 1110 puntos de comparación, todos probados equivalentes. La etapa ID lleva dentro el decodificador y la ALU. Como control negativo, con el contador de programa de 11 bits la misma prueba deja 42 puntos sin probar.
+Eso último está probado formalmente con `make formal-base`. Con los pases `equiv_*` de Yosys (el método de la equivalencia entre RTL y netlist del Proyecto 3) compara las etapas IF e ID del repositorio base con las actuales en modo base, registro por registro y salida por salida: 266 y 1110 puntos de comparación, todos probados equivalentes. La etapa ID lleva dentro el decodificador y la ALU. Como control negativo, con el contador de programa de 11 bits la misma prueba deja 42 puntos sin probar.
 
 Por qué la copia de la memoria: Yosys no reparte en BRAM un arreglo que tiene un puerto de lectura en el flanco de subida y otro en el de bajada, y lo convierte en 16 000 flip-flops. Con dos arreglos que reciben las mismas escrituras sí lo hace. No cuesta BRAM adicionales: la memoria original también se duplica, porque cada BRAM del iCE40 tiene un solo puerto de lectura. Son 8 bloques en los dos casos.
 
