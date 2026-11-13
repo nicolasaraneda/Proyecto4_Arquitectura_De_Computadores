@@ -7,9 +7,18 @@
 // 
 // Authors:
 // - Nicolás Villegas <navillegas@miuandes.cl>
+//
+// Modificado para el Proyecto 4 por Nicolás Araneda, Vicente Calderón y
+// Santiago Muñoz (docs/espino_segmentado.md):
+//   - PcW: bits del contador de programa que se implementan. Con 32 es el
+//     módulo original. El core segmentado usa el ancho real de la memoria
+//     (11 bits para 512 palabras) y los bits altos se leen como cero.
+//   - MUTA_SQUASH: mutación de prueba, solo se activa desde la línea de
+//     comandos (make mutaciones).
 
 module espino_if_stage #(
-  parameter [31:0] BootAddr = 32'h0000_0000
+  parameter [31:0] BootAddr = 32'h0000_0000,
+  parameter integer PcW     = 32
 ) (
   input  wire        clk_i,
   input  wire        rst_ni,
@@ -25,19 +34,25 @@ module espino_if_stage #(
   output wire        instr_valid_id_o
 );
 
-  reg  [31:0] pc_q;
-  wire [31:0] pc_next;
-  reg  [31:0] pc_id_q;
-  reg         valid_q;
-  wire        valid_d;
+  reg  [PcW-1:0] pc_q;
+  wire [PcW-1:0] pc_next;
+  reg  [PcW-1:0] pc_id_q;
+  reg            valid_q;
+  wire           valid_d;
 
-  assign pc_next = pc_set_i ? pc_target_i : (pc_q + 32'd4);
+  assign pc_next = pc_set_i ? pc_target_i[PcW-1:0] : (pc_q + 32'd4);
+`ifdef MUTA_SQUASH
+  // MUTACIÓN (solo para make mutaciones): la instrucción que sigue a un salto
+  // tomado no se anula.
+  assign valid_d = 1'b1;
+`else
   assign valid_d = ~pc_set_i;
+`endif
 
   always @(posedge clk_i or negedge rst_ni) begin
     if (!rst_ni) begin
-      pc_q    <= BootAddr;
-      pc_id_q <= BootAddr;
+      pc_q    <= BootAddr[PcW-1:0];
+      pc_id_q <= BootAddr[PcW-1:0];
       valid_q <= 1'b0;
     end else if (!stall_i) begin
       pc_q    <= pc_next;
@@ -47,6 +62,7 @@ module espino_if_stage #(
   end
 
   assign instr_req_o      = ~stall_i;
+  // Con PcW < 32 la asignación extiende con ceros
   assign instr_addr_o     = pc_q;
   assign pc_id_o          = pc_id_q;
   assign instr_valid_id_o = valid_q;

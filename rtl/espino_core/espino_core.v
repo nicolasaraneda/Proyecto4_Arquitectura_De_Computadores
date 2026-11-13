@@ -7,9 +7,20 @@
 // 
 // Authors:
 // - Nicolás Villegas <navillegas@miuandes.cl>
+//
+// Modificado para el Proyecto 4 por Nicolás Araneda, Vicente Calderón y
+// Santiago Muñoz (docs/espino_segmentado.md):
+//   - Pipeline = 0: Espino base, sin cambios.
+//   - Pipeline != 0: pipeline de 3 etapas. La memoria entrega por
+//     instr_next_i la instrucción de la dirección instr_addr_o antes del
+//     flanco siguiente, y el banco de registros adelanta el dato que se
+//     escribe en el mismo flanco en que se lee.
+//   - PcW: bits del contador de programa que se implementan.
 
 module espino_core #(
-  parameter [31:0] BootAddr = 32'h0000_0000
+  parameter [31:0] BootAddr = 32'h0000_0000,
+  parameter integer Pipeline = 0,
+  parameter integer PcW      = 32
 ) (
   input  wire        clk_i,
   input  wire        rst_ni,
@@ -17,6 +28,7 @@ module espino_core #(
   output wire        instr_req_o,
   output wire [31:0] instr_addr_o,
   input  wire [31:0] instr_rdata_i,
+  input  wire [31:0] instr_next_i,
 
   output wire        data_req_o,
   output wire        data_we_o,
@@ -39,6 +51,8 @@ module espino_core #(
   wire [31:0] rf_rdata_a, rf_rdata_b, rf_wdata;
   wire        rf_we;
   wire        rf_ready;
+  wire        rf_rd_en;
+  wire [31:0] instr_ex;   // instrucción en ejecución (para los testbenches)
 
   wire        lsu_req, lsu_we, lsu_sign, lsu_busy;
   wire [1:0]  lsu_type;
@@ -46,7 +60,7 @@ module espino_core #(
 
   wire        illegal_insn;
 
-  espino_if_stage #(.BootAddr(BootAddr)) u_if (
+  espino_if_stage #(.BootAddr(BootAddr), .PcW(PcW)) u_if (
     .clk_i            (clk_i),
     .rst_ni           (rst_ni),
     .pc_set_i         (pc_set),
@@ -58,15 +72,17 @@ module espino_core #(
     .instr_valid_id_o (instr_valid_id)
   );
 
-  espino_id_stage u_id (
+  espino_id_stage #(.Pipeline(Pipeline), .PcW(PcW)) u_id (
     .clk_i          (clk_i),
     .rst_ni         (rst_ni),
     .instr_valid_i  (instr_valid_id),
     .instr_rdata_i  (instr_rdata_i),
+    .instr_next_i   (instr_next_i),
     .pc_id_i        (pc_id),
     .stall_i        (stall),
     .rf_raddr_a_o   (rf_raddr_a),
     .rf_raddr_b_o   (rf_raddr_b),
+    .rf_rd_en_o     (rf_rd_en),
     .rf_rdata_a_i   (rf_rdata_a),
     .rf_rdata_b_i   (rf_rdata_b),
     .rf_waddr_o     (rf_waddr),
@@ -83,12 +99,14 @@ module espino_core #(
     .jump_o         (jump),
     .pc_target_o    (pc_target),
     .rf_ready_o     (rf_ready),
+    .instr_ex_o     (instr_ex),
     .illegal_insn_o (illegal_insn)
   );
 
-  espino_register_file u_rf (
+  espino_register_file #(.Bypass(Pipeline != 0)) u_rf (
     .clk_i     (clk_i),
     .rst_ni    (rst_ni),
+    .rd_en_i   (rf_rd_en),
     .raddr_a_i (rf_raddr_a),
     .rdata_a_o (rf_rdata_a),
     .raddr_b_i (rf_raddr_b),
