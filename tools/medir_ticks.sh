@@ -13,13 +13,15 @@
 # herramientas dan la misma traza ciclo a ciclo (make cosim lo comprueba).
 #
 # Uso, desde la raíz: tools/medir_ticks.sh [VARIANTE]
-# Variables de entorno: HEX, SRC, NT_R1, NT_R2, NT_R3 (ticks por ronda).
+# Variables de entorno: HEX, SRC, NT_R1, NT_R2, NT_R3 (ticks por ronda) y DEFS
+# (variante del core: -DESPINO_SEGMENTADO para el pipeline de 3 etapas).
 set -euo pipefail
 
 VARIANTE=${1:-software}
 HEX=${HEX:-sw/trade.hex}
 SRC=${SRC:-$(echo rtl/*.v rtl/espino_core/*.v)}
 SERIE=${SERIE:-tb/practica.csv}
+DEFS=${DEFS:-}
 NT_R1=${NT_R1:-2000}
 NT_R2=${NT_R2:-20000}
 NT_R3=${NT_R3:-20000}
@@ -29,7 +31,7 @@ mkdir -p "$D" docs/mediciones
 
 correr() {   # ronda periodo_ns nticks
   local r=$1 periodo=$2 nticks=$3 o="$D/${VARIANTE}_$1"
-  verilator --binary --timing -Wno-fatal -Wno-lint -Wno-style --top-module tb_cpi -O3 \
+  verilator --binary --timing -Wno-fatal -Wno-lint -Wno-style --top-module tb_cpi -O3 $DEFS \
     "-DPROGRAMA=\"$HEX\"" "-DSERIE=\"$SERIE\"" -DNTICKS="$nticks" -DPERIODO_NS="$periodo" \
     "-DTICKS_CSV=\"${o}_ticks.csv\"" --Mdir "${o}_obj" -o sim \
     "$CELLS_SIM" $SRC tb/tb_cpi.sv > "${o}_verilator.log" 2>&1

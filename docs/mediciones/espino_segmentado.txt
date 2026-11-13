@@ -1,0 +1,56 @@
+Espino base contra Espino segmentado (pipeline de 3 etapas)
+Generado por tools/medir_espino.sh (make medir-espino). No editar a mano.
+
+Herramientas:
+  Yosys 0.68+195 (git sha1 435977e97-dirty, Release, Clang /usr/bin/clang++ 21.1.8)
+  "nextpnr-ice40" -- Next Generation Place and Route (Version nextpnr-0.11.1-19-g8dbcee5c)
+  Icarus Verilog version 14.0 (devel) (s20260301-403-g5ab23063f-dirty)
+
+1. Recursos y frecuencia maxima (nextpnr --hx1k --package vq100 --freq 25, 10 semillas)
+
+  Variante                                           Celdas BRAM  Fmax min  mediana     max  Cierran
+  Espino base (el del bitstream de competencia)        1083   12     42.43    43.74   45.08  10 de 10
+  Espino base con contador de programa de 11 bits       950   12     44.45    45.35   47.52  10 de 10
+  Segmentado con contador de programa de 32 bits       1174   12     48.43    49.71   53.29  10 de 10
+  Segmentado, fetch en flanco de bajada (BRAM)          994   12     51.13    53.50   54.50  10 de 10
+  Segmentado, programa en ROM combinacional            1055    8     50.04    53.16   55.05  10 de 10
+
+  Recorte del contador de programa y sus sumadores (32 a 11 bits):
+    en el base:       1083 a 950 celdas, recupera 133
+    en el segmentado: 1174 a 994 celdas, recupera 180
+  Costo del pipeline sin el recorte: +91 celdas sobre el base
+  Segmentado final contra el base:   -89 celdas. Quedan libres 286 de 1280
+  ROM combinacional contra BRAM:     +61 celdas y -4 BRAM
+
+2. CPI medido en simulacion (tb/tb_cpi.sv), con los mismos programas
+
+  Programa     Core              IC   Ciclos     CPI   loads  tomados  Modelo de costo
+  trade        base          187040   496000  2.6518   32.7%    32.5%  2*IC + loads + tomados, diferencia 0 ciclos
+  trade        segmentado    299264   496000  1.6574   32.9%    32.8%  1*IC + loads + tomados, diferencia 0 ciclos
+  mix_clase7   base           19575    46000  2.3499   20.0%    15.0%  2*IC + loads + tomados, diferencia 0 ciclos
+  mix_clase7   segmentado     34077    46003  1.3500   20.0%    15.0%  1*IC + loads + tomados, diferencia 0 ciclos
+  aleatorio    base           19968    46002  2.3038   18.4%    12.0%  2*IC + loads + tomados, diferencia 0 ciclos
+  aleatorio    segmentado     35280    46002  1.3039   18.4%    12.0%  1*IC + loads + tomados, diferencia 0 ciclos
+
+  El modelo de costo coincide ciclo por ciclo en los tres programas, asi que el costo por clase es:
+    Clase de instruccion          Base   Segmentado   Estimado en la clase 7 (pipeline de 3 etapas)
+    ALU (registro o inmediato)       2            1   1
+    store                            2            1   1
+    load                             3            2   2
+    salto no tomado                  2            1   1
+    salto tomado, jal, jalr          3            2   3
+
+3. Comparacion con la clase 7 (reloj de 25 MHz)
+
+                                         Base  Segmentado  Clase 7, estimado
+  CPI con el mix de la clase            2.350       1.350    1,5 (base 2,35)
+  MIPS con el mix (25 / CPI)            10.64       18.52               16,7
+  Ppeak en MOPS (25 x 1/CPI de ALU)     12.50       25.00   25 (CPI ideal 1)
+  Speedup en el mix                      1.00        1.74               1.57
+  CPI de trade.s (con el sondeo)        2.652       1.657
+
+  Ppeak = f x instrucciones por ciclo x operaciones por instruccion x nucleos, con una
+  operacion por instruccion y un nucleo. El pipeline medido supera la estimacion de la
+  clase porque el salto tomado cuesta 2 ciclos y no 3: la instruccion se lee en el flanco
+  de bajada, medio ciclo despues de que cambia el contador de programa, y no hay una
+  etapa de fetch de un ciclo completo que anular.
