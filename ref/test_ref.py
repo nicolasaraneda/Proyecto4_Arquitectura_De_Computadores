@@ -1,0 +1,149 @@
+#!/usr/bin/env python3
+"""Pruebas del mercado y de la referencia del algoritmo.
+
+Grupo: Nicolás Araneda, Vicente Calderón y Santiago Muñoz.
+Arquitectura de Computadores, Universidad de los Andes, 2026-2.
+
+    python3 ref/test_ref.py        (o make test-ref)
+
+Qué comprueba:
+  - market.py da lo mismo que el mercado de ref/p4_baseline.py, que es el
+    archivo de partida del proyecto.
+  - La aritmética de ReglaBase (la de trade.s, sin shifter) da lo mismo que
+    la fórmula directa de la regla base. La actualización de la media se
+    revisa de forma exhaustiva: todos los valores de S y todos los precios.
+  - El modelo de los precios que se pierden durante el reset.
+"""
+import os
+import random
+import sys
+import unittest
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
+import market           # noqa: E402
+import p4_baseline      # noqa: E402
+import trader           # noqa: E402
+
+RAIZ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+SERIE = os.path.join(RAIZ, "tb", "practica.csv")
+
+
+class Directa:
+    """Regla base con la fórmula directa (la de p4_baseline.reversion_ema)."""
+
+    def __init__(self, k, entra, sale):
+        self.f = p4_baseline.reversion_ema(k, entra, sale)
+        self.s = {}
+
+    def decidir(self, p):
+        return self.f(self.s, p)
+
+
+class MercadoTests(unittest.TestCase):
+    def test_division_trunca_hacia_cero(self):
+        self.assertEqual(market.div_sv(7, 2), 3)
+        self.assertEqual(market.div_sv(-7, 2), -3)      # Python daría -4
+        self.assertEqual(market.div_sv(-2, 10), 0)      # Python daría -1
+        self.assertEqual(market.div_sv(0, 5), 0)
+
+    def test_igual_al_mercado_de_partida(self):
+        p = market.leer_serie(SERIE)
+        for k, entra, sale in [(5, 4, 0), (4, 2, 1), (6, 8, 0)]:
+            w, ordenes, dd = p4_baseline.simular(p, p4_baseline.reversion_ema(k, entra, sale), {})
+            m = trader.correr(p, trader.ReglaBase(k, entra, sale))
+            self.assertEqual((m.w, m.ordenes, m.max_dd), (w, ordenes, dd))
+
+    def test_comprar_y_mantener(self):
+        p = market.leer_serie(SERIE)
+        self.assertEqual(market.comprar_y_mantener(p), p4_baseline.comprar_y_mantener(p))
+
+    def test_orden_en_cero_no_paga(self):
+        m = market.Mercado()
+        m.ejecutar(market.VENDER_63, 100)               # no hay acciones: no se ejecuta
+        self.assertEqual((m.caja, m.acciones, m.ordenes), (10000, 0, 0))
+        m.ejecutar(market.COMPRAR_63, 100)              # compra 63
+        m.ejecutar(market.COMPRAR_63, 100)              # compra lo que alcanza: 36
+        m.ejecutar(market.COMPRAR_63, 100)              # ya no alcanza: no se ejecuta
+        self.assertEqual((m.acciones, m.ordenes, m.caja), (99, 2, 90))
+        m.ejecutar(0xC0 | 63, 100)                      # accion 11: mantener
+        self.assertEqual((m.acciones, m.ordenes), (99, 2))
+
+    def test_formato_csv(self):
+        filas = []
+        market.simular([100, 101], [0x00, 0x7F], filas=filas)
+        texto = market.formatear_csv(filas)
+        self.assertEqual(texto, "tick,precio,decision,caja,acciones,patrimonio\n"
+                                "0,100,00,10000,0,10000\n1,101,7f,3632,63,9995\n")
+
+
+class ReglaBaseTests(unittest.TestCase):
+    def test_media_exhaustiva(self):
+        """S + p - ((S + 31) * 8 >> 8) == S + ((32 p - S) >> 5) para todo S y todo p."""
+        casos = 0
+        for S in range(0, 255 * 32 + 1):
+            c = ((S + 31) << 3) >> 8
+            self.assertLess((S + 31) << 3, 1 << 16)      # el resultado cabe en el segundo byte
+            self.assertEqual(c, -((-S) >> 5))            # es ceil(S / 32)
+            for p in (0, 1, 2, 127, 128, 254, 255):
+                self.assertEqual(S + p - c, S + (((p << 5) - S) >> 5))
+                casos += 1
+        # la identidad es lineal en p: p - ceil(S/32). Con todos los S queda cubierta.
+        self.assertEqual(casos, 8161 * 7)
+
+    def test_media_no_sale_de_rango(self):
+        for S in (32, 8160):
+            for p in (1, 255):
+                r = trader.ReglaBase()
+                r.S = S
+                r.decidir(p)
+                self.assertTrue(32 <= r.S <= 8160)
+
+    def test_decision_exhaustiva(self):
+        """Para todo dev posible y las dos posiciones, el byte es el de la fórmula directa."""
+        for dev in range(-8128, 8129):
+            for pos in (0, 1):
+                esperado = 1 if dev < -128 else (0 if dev > 0 else pos)
+                compra = 1 if dev < -128 else 0
+                no_vende = 1 if dev < 1 else 0
+                nuevo = (pos | compra) & no_vende
+                self.assertEqual(nuevo, esperado)
+                byte = (0xBF + ((-nuevo) & ~0x3F)) & 0xFF
+                self.assertEqual(byte, market.COMPRAR_63 if esperado else market.VENDER_63)
+
+    def test_igual_a_la_formula_directa(self):
+        p = market.leer_serie(SERIE)
+        rng = random.Random(4)
+        series = [p,
+                  [rng.randint(1, 255) for _ in range(5000)],
+                  [1] * 50 + [255] * 50 + [1] * 50,
+                  [255] * 50 + [1] * 50 + [255] * 50]
+        for k in range(1, 9):
+            for entra, sale in [(4, 0), (1, 0), (0, 0), (7, 2), (3, 5)]:
+                for serie in series:
+                    a, b = trader.ReglaBase(k, entra, sale), Directa(k, entra, sale)
+                    self.assertEqual([a.decidir(x) for x in serie], [b.decidir(x) for x in serie],
+                                     f"k={k} entra={entra} sale={sale}")
+
+    def test_serie_de_practica(self):
+        m = trader.correr(market.leer_serie(SERIE))
+        self.assertEqual((m.w, m.ordenes, m.comisiones, m.max_dd), (27062, 388, 1940, 2929))
+
+
+class ResetTests(unittest.TestCase):
+    def test_ticks_perdidos(self):
+        self.assertEqual(trader.ticks_perdidos(100000), 2)        # ronda 3
+        self.assertEqual(trader.ticks_perdidos(1000000), 1)       # ronda 2
+        self.assertEqual(trader.ticks_perdidos(10000000), 1)      # ronda 1
+        self.assertEqual(trader.ticks_perdidos(100000, por_bits=4), 0)   # reset del repositorio base
+
+    def test_desfase(self):
+        class Eco:
+            def decidir(self, p):
+                return p
+        self.assertEqual(trader.decisiones([10, 20, 30, 40], Eco()), [0, 10, 20, 30])
+        self.assertEqual(trader.decisiones([10, 20, 30, 40], Eco(), perdidos=2), [0, 0, 0, 30])
+
+
+if __name__ == "__main__":
+    unittest.main()
