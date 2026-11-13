@@ -1,0 +1,15 @@
+1. Estadísticos de la serie de práctica y de series simuladas del mismo largo (20 000 ticks)
+serie                         var d    VR2   VR10   VR50  VR100  VR500  acf(1)   curt  |d|:1 |d|:100    d=0  max
+practica                      0.754   0.89   0.77   0.62   0.53   0.54  -0.112   14.4   0.19   0.17   0.56   14
+modelo, semilla 0             0.706   0.88   0.74   0.61   0.59   0.64  -0.123    9.0   0.16   0.12   0.56   12
+modelo, semilla 1             0.477   0.82   0.66   0.57   0.55   0.52  -0.176   12.8   0.04   0.03   0.60   10
+modelo, semilla 2             0.548   0.83   0.68   0.53   0.46   0.45  -0.166   23.9   0.09   0.03   0.58   13
+modelo, semilla 3             0.645   0.86   0.72   0.51   0.41   0.39  -0.143   21.7   0.13   0.10   0.57   15
+modelo, semilla 4             0.585   0.85   0.70   0.58   0.52   0.42  -0.147   10.1   0.12   0.09   0.58   11
+un solo regimen, semilla 0    0.727   0.89   0.75   0.61   0.55   0.56  -0.112    3.0  -0.00  -0.00   0.47    3
+un solo regimen, semilla 1    0.730   0.86   0.72   0.58   0.55   0.49  -0.137    3.0   0.01  -0.01   0.47    3
+
+2. La regla base en series de 2000 ticks (patrimonio final: media, mediana, percentil 5, peor, mejor)
+   practica, 10 bloques        11069   11103    9720    9720   13357   comprar y mantener    9746
+   remuestreo (400)            10798   10703    8924    6746   15480   comprar y mantener    9615
+   modelo (400)                10478   10243    9113    5023   25013   comprar y mantener   10032

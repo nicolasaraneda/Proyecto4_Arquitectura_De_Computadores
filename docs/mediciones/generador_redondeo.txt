@@ -1,0 +1,15 @@
+Razón de varianza de la serie de práctica, medida y descontando el redondeo (varianza 1/12 por precio)
+horizonte   medida  sin redondeo  paseo redondeado
+        2    0.888         0.998             0.887
+        5    0.795         0.964             0.823
+       10    0.772         0.962             0.805
+       20    0.709         0.896             0.792
+       50    0.616         0.785             0.786
+      100    0.526         0.672             0.767
+      200    0.514         0.659             0.781
+      500    0.541         0.694             0.820
+     1000    0.509         0.653             0.813
+
+Varianza del cambio a 1 tick: 0.754. De eso, el redondeo aporta 0.167 (22 %).
+La columna del paseo redondeado es un paseo aleatorio sin ninguna reversión, con la misma varianza
+latente, redondeado a enteros: toda su reversión aparente viene del redondeo.
