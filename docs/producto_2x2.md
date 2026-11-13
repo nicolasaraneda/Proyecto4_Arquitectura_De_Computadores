@@ -197,7 +197,7 @@ El SoC completo del Proyecto 3 ocupó 208 439 um² de celdas en este mismo proce
 La condición para entrar a la edición de competencia tiene dos partes: que el estimador de dos estados gane bajo el protocolo y que el hardware quepa junto al pipeline.
 
 - **La primera no se cumple.** Bajo el protocolo el estimador de dos estados empata con la regla base: con la semilla reservada gana 30 ± 5 en el remuestreo, pierde 8 ± 8 en las familias plausibles y baja más de 1 % en tres familias de estrés (`docs/algoritmo.md`, sección 7.4, y decisión T30). La razón está en el modelo: el nivel y la transitoria se mueven a escalas parecidas, y el filtro óptimo apenas baja la incertidumbre de la transitoria de 1,19 a 1,11.
-- **La segunda tampoco.** Con los coeficientes calibrados agrega 328 celdas y no cabe ni junto al core base. Para que quepa junto al pipeline, este tiene que dejar libres más de 330 celdas, o hay que achicar el camino de datos.
+- **La segunda tampoco.** Con los coeficientes calibrados agrega 328 celdas. El pipeline de 3 etapas ocupa 994 celdas y deja 286 libres (`docs/espino_segmentado.md`), así que faltan unas 40. La cifra de 328 se midió sobre el core base: en el pipeline el multiplexor de escritura es otro y habría que repetirla. La versión de ganancias baratas (217 celdas) cabría en el papel, pero no son las ganancias calibradas.
 
 Con las dos condiciones en contra, el producto 2x2 queda en la edición de exhibición.
 

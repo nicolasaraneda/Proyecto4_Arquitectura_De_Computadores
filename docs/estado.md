@@ -34,7 +34,7 @@ Los frentes A (algoritmo) y B (Espino segmentado) se trabajan en paralelo, cada 
 
 ### Qué conviene atacar después y por qué
 
-1. **El producto 2x2 queda en la edición de exhibición.** El estimador de dos estados no gana bajo el protocolo (T30) y el hardware no cabe en la FPGA. Si se construye, es para la edición ASIC o como periférico secuencial, y para medir el peldaño de la escalera.
+1. **El producto 2x2 queda en la edición de exhibición.** El estimador de dos estados no gana bajo el protocolo (T30) y el hardware no cabe en la FPGA: agrega 328 celdas y el pipeline deja 286 libres. Si se construye, es para la edición ASIC o como periférico secuencial, y para medir el peldaño de la escalera.
 2. **El resto del frente C** (especificación de la extensión en custom-0, soporte en el ensamblador, periférico estimador y la escalera de la clase 7 medida) necesita el kernel definitivo del frente A.
 
 ## Tramo 4: frente A, algoritmo (13/11)
