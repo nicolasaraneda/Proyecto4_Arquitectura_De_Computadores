@@ -1,0 +1,27 @@
+Protocolo: series de 2000 ticks, 1000 remuestreos, 200 series por familia, semilla 0
+
+Candidata: trader:est=1,E=250,X=-40   Base: base
+conjunto                     n media cand media base     dif   +-ee  gana en  p5 cand  p5 base peor cand peor base
+practica, 10 bloques        10      11102      11069     +33     66      40%    10000     9720     10000      9720
+remuestreo (1000)         1000      10809      10772     +37     11      47%     8969     8914      6404      6520
+--- familias plausibles ---
+modelo                     200      10403      10406      -3     19      42%     9028     8930      3769      3263
+modelo_vecino              200      11505      11381    +124    154      33%     8543     8543      4445      4445
+dos_componentes            200      10765      10772      -7     20      45%     9201     9138      7007      7276
+cambio_volatilidad         200      11224      11261     -37     44      44%     7378     7484      2741      2766
+--- familias de estres ---
+paseo                      200       9974       9927     +47     32      39%     7997     7866      2495      2271
+tendencia                  200       9416       9410      +6     21      38%     5469     5777       578       636
+reversion                  200      11544      11513     +31     32      26%    10000    10000      9541      9764
+saltos                     200      12398      12584    -185    135      38%     4808     4567      1087      1094
+cambio_de_caracter         200       9015       9043     -27     35      32%     2513     2592       253       256
+volatil                    200      21530      20952    +578    249      55%     8415     8047      2264      2238
+nivel_bajo                 200      18090      18042     +47    176      36%     6974     7278      1855      1855
+plana                      200      10000      10000      +0      0       0%    10000    10000     10000     10000
+borde_bajo                 200      17459      18496   -1038    197      22%    10000    10046      7786      8851
+borde_alto                 200      14711      14966    -255     31      30%    13347    13363     12469     12731
+
+Criterio a (bloques: media y peor bloque):      cumple
+Criterio b (remuestreos: media y percentil 5):  cumple
+Criterio c (ninguna familia baja mas de 1 %):   no cumple
+Veredicto: la candidata NO reemplaza a la base

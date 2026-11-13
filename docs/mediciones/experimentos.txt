@@ -1,0 +1,14 @@
+Ideas que aprenden en vivo, contra la regla base. Diferencia pareada de patrimonio y su error estandar.
+estrategia                   conjunto                 media    base    dif  +-ee     p5 p5 base  ordenes   base
+poblacion (15 traders)       practica, 10 bloques     10987   11069    -81   314   8675    9720     35.6   29.9
+poblacion (15 traders)       remuestreo (400)         10741   10798    -57    45   8630    8924     50.8   30.3
+poblacion (15 traders)       modelo (400)             10639   10482   +157    49   8560    9076     44.7   22.7
+poblacion (15 traders)       paseo (200)               9841    9927    -86    83   7629    7866     41.8   25.1
+adaptacion con prior fuerte  practica, 10 bloques     11048   11069    -21    38   9720    9720     31.4   29.9
+adaptacion con prior fuerte  remuestreo (400)         10783   10798    -16     9   8914    8924     30.8   30.3
+adaptacion con prior fuerte  modelo (400)             10501   10482    +19    10   9076    9076     23.7   22.7
+adaptacion con prior fuerte  paseo (200)               9913    9927    -14    10   7866    7866     25.8   25.1
+perceptron                   practica, 10 bloques     10430   11069   -639   382   9050    9720     45.4   29.9
+perceptron                   remuestreo (400)         10600   10798   -199    57   8896    8924     53.2   30.3
+perceptron                   modelo (400)             10433   10482    -49    57   8793    9076     45.5   22.7
+perceptron                   paseo (200)               9765    9927   -162    97   7529    7866     41.0   25.1
