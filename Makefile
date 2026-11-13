@@ -290,7 +290,7 @@ hallazgos:
 # (-DESPINO_ROM) y repiten sobre ellas las pruebas del core base.
 .PHONY: tb-seg equiv-seg equiv-gemelo-seg cosim-seg cpi-seg riesgos paralelo paralelo-largo \
         mutaciones timing-seg synth-seg pnr-seg bin-seg sim-bitstream-seg medir-espino \
-        check-seg equiv-rom
+        check-seg equiv-rom medir-ticks-seg formal-base
 
 SEG_DEFS := -DESPINO_SEGMENTADO
 JSON_SEG := $(BUILD)/$(TOP)_seg.json
@@ -343,7 +343,7 @@ paralelo-largo:
 # Controles negativos: cinco errores puestos a propósito en el core segmentado
 # deben ser detectados por riesgos y por paralelo (unos 2 minutos)
 mutaciones: $(GEMELO)
-	tools/mutaciones.sh
+	tools/mutaciones.sh | tee docs/mediciones/mutaciones.txt
 
 # Cierre de timing: las 10 semillas de nextpnr deben cerrar a 25 MHz
 timing-seg: $(HEX)
@@ -370,8 +370,24 @@ sim-bitstream-seg: $(ASC_SEG)
 medir-espino: $(GEMELO) $(HEX)
 	tools/medir_espino.sh
 
-# Lo que corre la integración continua para el core segmentado
-check-seg: tb-seg cpi-seg riesgos paralelo timing-seg
+# Mediciones por tick del punto 3.2 con el core segmentado
+# (docs/mediciones/ticks_segmentado.txt)
+medir-ticks-seg: $(HEX)
+	DEFS="$(SEG_DEFS)" tools/medir_ticks.sh segmentado
+
+# Prueba formal de que el Espino base no cambió: con Pipeline = 0 las etapas
+# IF e ID (con el decodificador y la ALU) son equivalentes a las del
+# repositorio base, con los pases equiv_* de Yosys. Unos segundos.
+formal-base:
+	formal/base_sin_cambios/equiv.sh
+
+# Lo que corre la integración continua para el core segmentado en cada push:
+# modelo de costo, riesgos, ejecución en paralelo, los 20 000 ticks contra la
+# referencia (Verilator y gemelo) y cierre de timing en 10 semillas.
+# Quedan como ejecución manual: tb-seg y equiv-seg (Icarus), cosim-seg,
+# mutaciones y paralelo-largo.
+check-seg: formal-base cpi-seg riesgos paralelo equiv-gemelo-seg timing-seg
+	DEFS="$(SEG_DEFS)" SIM=verilator tools/equiv.sh seg_v_r3 100000 20000
 
 clean:
 	rm -rf $(BUILD) decisiones.csv

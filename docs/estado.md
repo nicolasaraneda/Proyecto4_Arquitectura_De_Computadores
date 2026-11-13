@@ -111,6 +111,85 @@ El binario contra la referencia con las series nuevas (`make equiv-gemelo`): 381
 3. **Frente C.** El producto de matriz 2x2 ya tiene sus coeficientes (`docs/algoritmo.md`, sección 4.1). Va a la edición de exhibición.
 4. **Frente E.** La matriz de estrés puede usar el motor y las familias calibradas tal como están.
 
+## Tramo 5: frente B, Espino segmentado (13/11)
+
+### Qué quedó hecho
+
+- **Pipeline de 3 etapas en la FPGA** (`docs/espino_segmentado.md`). Es el core con lectura anticipada del Proyecto 3, portado a BRAM: la memoria de instrucciones se lee en el flanco de bajada (`SB_RAM40_4KNR`), el banco de registros lee durante el fetch y adelanta el dato recién escrito. Se elige al compilar con `-DESPINO_SEGMENTADO`. **El core por defecto sigue siendo el Espino base** y `bitstreams/competencia_v1.bin` no se tocó.
+- **Los dos caminos de fetch de la sección 15**, construidos y medidos: flanco de bajada sobre BRAM y ROM combinacional de `trade.s` (`-DESPINO_ROM`). Se eligió el primero (TB2).
+- **Recorte de celdas** medido uno por uno. El único que rinde es el contador de programa de 11 bits.
+- **Verificación**: prueba formal de que el base no cambió (`make formal-base`), programas de riesgos del Proyecto 3 (`make riesgos`), ejecución en paralelo de dos SoC con programas aleatorios (`make paralelo`, `make paralelo-largo`), controles negativos por mutación (`make mutaciones`), gemelo ciclo a ciclo (`make cosim-seg`) y equivalencia con la referencia (`make equiv-seg`, `make equiv-rom`).
+- **Gemelo digital** con la tabla de ciclos del segmentado (`--pipeline`), validado contra el RTL.
+- **`tb/tb_cpi.sv`** mide las dos variantes: ya no depende de señales que solo existen en el base.
+- **Mediciones** en `docs/mediciones/`: `espino_segmentado.txt`, `ticks_segmentado.txt`, `paralelo_largo.txt` y `mutaciones.txt`.
+- **Bitstream** `bitstreams/segmentado_v1.bin`, con hash, simulado desde el `.asc`.
+- **Integración continua**: `make check-seg` en cada push (cerca de un minuto en local: prueba formal, modelo de costo, riesgos, paralelo, 20 000 ticks y timing en 10 semillas). Lo largo queda como ejecución manual (`segmentado-completo`).
+- Decisiones TB1 a TB12 en `docs/decisiones.md`.
+
+### Qué se midió
+
+Recursos y timing, `nextpnr --hx1k --package vq100 --freq 25`, 10 semillas (`make medir-espino`):
+
+| Variante | Celdas | BRAM | Fmax mínima | Mediana | Máxima | Cierran a 25 MHz |
+|----------|--------|------|-------------|---------|--------|------------------|
+| Espino base | 1083 | 12 | 42,43 | 43,74 | 45,08 | 10 de 10 |
+| Segmentado, fetch en flanco de bajada | 994 | 12 | 51,13 | 53,50 | 54,50 | 10 de 10 |
+| Segmentado, ROM combinacional | 1055 | 8 | 50,04 | 53,16 | 55,05 | 10 de 10 |
+
+- **Recortes.** Contador de programa de 32 a 11 bits: recupera 133 celdas en el base (1083 a 950) y 180 en el segmentado (1174 a 994). Decodificación sin uso: dentro del ruido (entre 17 menos y 12 más). Registros de lectura de periféricos: 0, la síntesis ya los recorta.
+- **Costo del pipeline.** 91 celdas con el mismo ancho de contador. Con el recorte queda 89 celdas bajo el base y deja 286 libres.
+- **Rutas de medio ciclo.** nextpnr las analiza con medio período (comprobado con un diseño de prueba; `icetime` no). Ninguna pasa de 9,8 ns de los 20 disponibles. La ruta crítica es de ciclo completo: 19,6 ns en la peor semilla.
+
+CPI, con los mismos programas (`tb/tb_cpi.sv`, modelo de costo con diferencia de 0 ciclos en todos):
+
+| | Base | Segmentado | Clase 7, estimado |
+|-|------|------------|-------------------|
+| ALU, store, salto no tomado | 2 | 1 | 1 |
+| Load | 3 | 2 | 2 |
+| Salto tomado, `jal`, `jalr` | 3 | 2 | 3 |
+| CPI con el mix de la clase (`sw/mix_clase7.s`) | 2,350 | 1,350 | 1,5 |
+| MIPS con el mix | 10,64 | 18,52 | 16,7 |
+| Ppeak | 12,5 MOPS | 25 MOPS | 25 MOPS |
+| `trade.s`, respuesta: ciclos promedio y peor caso | 41 y 44 | 22 y 26 | |
+| `trade.s`, tick completo: ciclos promedio y peor caso | 63 y 66 | 34 y 38 | |
+| `trade.s`, peor caso real barriendo la fase del sondeo | 49 | 27 | |
+
+Verificación:
+
+| Prueba | Resultado |
+|--------|-----------|
+| `make formal-base` | Etapas IF e ID en modo base equivalentes a las del repositorio del curso: 1376 puntos probados |
+| `make riesgos` | `hazard_test` (56 comprobaciones), `hazard_review` (48) y `hazard_cycles` (5): mismas secuencias que el base, trazas idénticas entre BRAM y ROM, e idénticas al gemelo |
+| `make paralelo-largo` | 1 300 756 instrucciones comparadas una por una con el contador de 11 bits y 1 600 000 con el de 32, con el banco de registros completo en cada una. Cero diferencias |
+| `make mutaciones` | 5 de 5 detectadas, por los programas de riesgos y por la ejecución en paralelo |
+| `make cosim-seg` | Gemelo contra RTL: 1 007 124 eventos de `trade.hex`, 846 705 escrituras de programas aleatorios, 20 000 ticks |
+| `make equiv-seg`, `make equiv-rom` | 20 000 ticks idénticos a `ref/trader.py` (Verilator a 0,1 ms y 1 ms, Icarus corto, gemelo a los tres períodos) |
+| `make sim-bitstream-seg` | El bitstream simulado decide igual que la referencia en 2000 ticks |
+
+### Hallazgos
+
+1. **El pipeline medido supera la estimación de la clase 7.** El salto tomado cuesta 2 ciclos y no 3, porque la instrucción se lee medio ciclo después de que cambia el contador de programa y hay una sola instrucción que anular.
+2. **El pipeline sube la frecuencia máxima en vez de bajarla**, de 43,7 a 53,5 MHz de mediana. El multiplexor de adelantamiento entra a la ruta crítica, pero la decodificación sale de ella.
+3. **El prototipo anotado (24,4 a 25,6 MHz con el core sin rediseñar) no se reprodujo**: con la decodificación registrada el flanco de bajada cierra con más del doble de margen.
+4. **Yosys no reparte en BRAM una memoria con puertos de lectura en flancos distintos.** Con un solo arreglo el diseño ocupaba 47 551 celdas. Hace falta una copia explícita para el fetch (TB3).
+5. **El gemelo tenía un caso que el base no ejercita**: la instrucción que sigue a un store al esclavo SPI se completa en el ciclo inmediato. Lo encontraron los programas aleatorios (TB9).
+6. **`make bin` ya no reproduce el hash de `competencia_v1.bin`.** La lógica del base es la misma, pero cambiaron nombres internos y nextpnr ubica distinto (TB1).
+
+### Qué falta del frente B
+
+- **Decidir si el segmentado va a la maestra el 19/11** como candidato a la edición de competencia. No cambia el patrimonio con la regla base. Libera 89 celdas y baja la respuesta de 44 a 26 ciclos.
+- **Probar `segmentado_v1.bin` en la placa.** Lo hace Nicolás con `iceprog`. El riesgo propio de este diseño es el ciclo de trabajo del reloj: las rutas de medio ciclo toleran entre 25 % y 75 %.
+- **riscv-formal.** Evaluado y sin hacer. `docs/espino_segmentado.md` lista lo que falta, cerca de un día (TB11).
+- **`icebram` con dos copias de la memoria.** El programa está en la memoria de datos y en la del fetch: hay que comprobar que `icebram` reemplaza las dos.
+- **Equivalencia formal de `pochoco_ram.v` y `espino_register_file.v` en modo base.** `make formal-base` cubre IF e ID. Esos dos tienen memorias y hoy se cubren con simulación.
+- **Mediciones por tick con Icarus del segmentado a 20 000 ticks** quedan como ejecución manual, igual que en el base (T22).
+
+### Qué conviene atacar después y por qué
+
+1. **Frente C sobre el segmentado.** Quedan 286 celdas libres y 4 BRAM. La instrucción de paso de media exponencial reemplaza el bloque más caro de `trade.s`, y el producto 2x2 cabe o no según su versión de coeficientes fijos.
+2. **Checklist del 19/11 con los dos bitstreams.** Si el segmentado va a competir tiene que pasar ese día. Conviene llevar `competencia_v1.bin` y `segmentado_v1.bin` y probar los dos.
+3. **`icebram`** antes del 18/11, porque condiciona el kit de contingencia y ahora hay dos memorias que actualizar.
+
 ## Tramo 3: gemelo digital, series de prueba y protocolo de evaluación (13/11)
 
 ### Qué quedó hecho
