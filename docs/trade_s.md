@@ -139,7 +139,7 @@ El programa ocupa 40 palabras. El único dato en memoria es `TMP`, la última pa
 | Ronda 3, 0,1 ms | Verilator | 20 000 | Idénticos. Patrimonio 26 795. |
 | Ronda 2, 1 ms | Verilator | 20 000 | Idénticos. Patrimonio 27 306. |
 | Ronda 1, 10 ms (`make equiv-largo`) | Verilator | 20 000 | Idénticos. Patrimonio 27 306. |
-| Una serie de cada familia sintética y un remuestreo (`make equiv-series`) | Verilator | 11 series de 2000 | Idénticos. |
+| Una serie de cada familia sintética y un remuestreo (`make equiv-series`) | Verilator | 13 series de 2000 | Idénticos. |
 
 Control negativo: si la referencia no modela los precios que se pierden en el reset, los archivos difieren desde la línea 3.
 

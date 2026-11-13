@@ -67,7 +67,7 @@ jobs:
       - name: Gemelo digital contra el RTL
         run: make cosim
 
-      - name: El binario en el gemelo contra la referencia (3010 series)
+      - name: El binario en el gemelo contra la referencia (3810 series)
         run: make equiv-gemelo
 
       - name: CPI y modelo de costo
