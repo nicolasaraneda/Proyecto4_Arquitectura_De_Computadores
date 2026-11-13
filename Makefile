@@ -122,8 +122,8 @@ equiv-largo: $(HEX)
 
 # Lotes de series de prueba por el RTL: una serie de cada familia sintética y
 # un remuestreo, 2000 ticks cada una, con Verilator. Conviene make -j4.
-FAMILIAS := remuestreo paseo tendencia reversion dos_componentes saltos \
-            cambio_volatilidad cambio_de_caracter plana borde_bajo borde_alto
+FAMILIAS := remuestreo modelo paseo tendencia reversion dos_componentes saltos \
+            cambio_volatilidad cambio_de_caracter nivel_bajo plana borde_bajo borde_alto
 equiv-series: $(addprefix equiv-serie-,$(FAMILIAS))
 equiv-serie-%: $(HEX)
 	$(PYTHON) ref/series.py $* --n 2000 --semilla 1 -o $(BUILD)/series/$*.csv > /dev/null
@@ -169,7 +169,7 @@ medir-ticks: $(HEX)
 	tools/medir_ticks.sh software
 
 # Lo que corre la integración continua en cada push
-check: test-asm test-ref check-hex tb
+check: test-asm test-ref test-candidatos check-hex tb
 
 # --- Síntesis, place and route y bitstream ----------------------------------
 synth: $(JSON)
@@ -202,6 +202,64 @@ guardar-bitstream: $(BIN)
 # Programar la placa (lo ejecuta una persona, con la Go Board conectada)
 prog: $(BIN)
 	iceprog $(BIN)
+
+# === Frente A: algoritmo (docs/algoritmo.md) ==================================
+# Todo lo de este bloque deja su salida en docs/mediciones/.
+#   test-candidatos: la familia paramétrica, el motor en C y las familias
+#             calibradas (5 segundos). Corre en la integración continua.
+#   generador: ajuste del modelo a la serie de práctica, validación y efecto
+#             del redondeo.
+#   politica: filtro de Kalman en estado estacionario y política óptima.
+#   exploracion: una tabla por idea (bandas, estimadores, saltos, cortes,
+#             guardia, tope, órdenes, asimetría). Poco más de un minuto.
+#   experimentos: población de traders, adaptación y perceptrón.
+#   frontera: los candidatos con la semilla de exploración y con la reservada.
+#   protocolo-candidatos: cada candidato contra la regla base con la
+#             referencia en Python y el criterio de aceptación.
+#   algoritmo: todo lo anterior.
+MOTOR := $(BUILD)/motor
+MED   := docs/mediciones
+CANDIDATOS_A := max_media guardia guardia_tope prudente kalman
+
+.PHONY: motor test-candidatos generador politica exploracion experimentos frontera \
+        protocolo-candidatos algoritmo
+
+motor: $(MOTOR)
+$(MOTOR): ref/motor/motor.c | $(BUILD)
+	$(CC) -O2 -Wall -Wextra -o $@ $<
+
+test-candidatos: $(MOTOR)
+	$(PYTHON) ref/test_candidatos.py
+
+generador:
+	$(PYTHON) ref/generador.py --ajustar | tee $(MED)/generador_ajuste.txt
+	$(PYTHON) ref/generador.py --validar | tee $(MED)/generador_validacion.txt
+	$(PYTHON) ref/generador.py --redondeo | tee $(MED)/generador_redondeo.txt
+
+politica:
+	$(PYTHON) ref/politica_optima.py | tee $(MED)/politica_optima.txt
+
+exploracion: $(MOTOR)
+	$(PYTHON) ref/explorar.py > $(MED)/exploracion.txt
+	@grep -c "^==" $(MED)/exploracion.txt | xargs echo "tablas en $(MED)/exploracion.txt:"
+
+experimentos:
+	$(PYTHON) ref/experimentos.py | tee $(MED)/experimentos.txt
+
+frontera: $(MOTOR)
+	$(PYTHON) ref/frontera.py --detalle > $(MED)/frontera.txt
+	@grep -c "" $(MED)/frontera.txt | xargs echo "lineas en $(MED)/frontera.txt:"
+
+protocolo-candidatos:
+	for c in $(CANDIDATOS_A); do \
+	  $(PYTHON) ref/protocolo.py --estrategia cand:$$c > $(MED)/protocolo_$$c.txt || exit 1; \
+	  $(PYTHON) ref/protocolo.py --comparar cand:$$c >> $(MED)/protocolo_$$c.txt; \
+	  tail -4 $(MED)/protocolo_$$c.txt; \
+	done
+	$(PYTHON) ref/protocolo.py --comparar trader:est=1,E=250,X=-40 | tee $(MED)/protocolo_kalman_base.txt | tail -4
+
+algoritmo: generador politica exploracion experimentos frontera protocolo-candidatos
+# === Fin del bloque del frente A ==============================================
 
 # --- Mediciones reproducibles -----------------------------------------------
 # Recursos, frecuencia máxima, shifter, PLL y CPI del repo base (etiqueta base-curso)

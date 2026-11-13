@@ -52,6 +52,9 @@ jobs:
       - name: Tests del mercado y de la referencia
         run: make test-ref
 
+      - name: Tests de los candidatos, del motor y de las familias calibradas
+        run: make test-candidatos
+
       - name: trade.hex corresponde a trade.s
         run: make check-hex
 
