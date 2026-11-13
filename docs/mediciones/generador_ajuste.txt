@@ -1,0 +1,33 @@
+1. Regímenes de volatilidad (desviación estándar de los cambios en +-50 ticks, umbral 0.95)
+   Fracción de ticks ruidosos: 0.140
+   Tramos tranquilos: [4293, 3300, 2345, 7268]  (media 4302)
+   Tramos ruidosos:   [457, 782, 927, 628]  (media 698)
+   Régimen tranquilo: varianza de los cambios 0.427, media de |cambio| 0.404, mayor |cambio| 2
+   Régimen ruidoso: varianza de los cambios 2.534, media de |cambio| 1.213, mayor |cambio| 6
+
+2. Saltos (|cambio| >= 8): 5 en 20000 ticks: [(1555, -9), (3181, 12), (3258, -14), (6983, 8), (11796, -13)]
+   tick 1555: salto -9; media de los 20 ticks anteriores 122.7, de los ticks 20 a 60 siguientes 112.5 (se conserva 113 % del salto)
+   tick 3181: salto +12; media de los 20 ticks anteriores 111.4, de los ticks 20 a 60 siguientes 119.7 (se conserva 69 % del salto)
+   tick 3258: salto -14; media de los 20 ticks anteriores 117.9, de los ticks 20 a 60 siguientes 104.0 (se conserva 99 % del salto)
+   tick 6983: salto +8; media de los 20 ticks anteriores 132.9, de los ticks 20 a 60 siguientes 138.0 (se conserva 64 % del salto)
+   tick 11796: salto -13; media de los 20 ticks anteriores 175.0, de los ticks 20 a 60 siguientes 163.8 (se conserva 87 % del salto)
+
+3. Ajuste por máxima verosimilitud (4 parámetros: q_nivel, q_trans, phi, razón entre regímenes)
+   desde [0.15, 0.08, 0.95, 9.0]: q_nivel 0.1560, q_trans 0.1070, phi 0.9612, razón 8.907, -log L 3661.23
+   desde [0.1, 0.15, 0.8, 9.0]: q_nivel 0.1560, q_trans 0.1070, phi 0.9612, razón 8.906, -log L 3661.23
+   desde [0.2, 0.03, 0.98, 9.0]: q_nivel 0.1560, q_trans 0.1070, phi 0.9612, razón 8.907, -log L 3661.23
+   Resultado: desv. est. del paso del nivel 0.395, de la innovación transitoria 0.327; desv. est. de la transitoria 1.19 (tranquilo) y 3.54 (ruidoso); vida media 17.5 ticks
+
+4. Modelos alternativos (misma segmentación)
+   Solo paseo aleatorio más redondeo (sin transitoria): -log L 3671.44. La transitoria mejora en 10.2 con 2 parámetros más
+   Parámetros separados por régimen (6): tranquilo q_nivel 0.1537, q_trans 0.1093, phi 0.9617; ruidoso q_nivel 1.6750, q_trans 0.6664, phi 0.9382; -log L 3661.13. Mejora en 0.1 con 2 parámetros más
+
+5. Constantes de ref/calibracion.py
+   Q_NIVEL        ajustado    0.15601   guardado    0.15600   coincide
+   Q_TRANS        ajustado    0.10700   guardado    0.10700   coincide
+   PHI            ajustado    0.96123   guardado    0.96120   coincide
+   RAZON_RUIDOSO  ajustado    8.90705   guardado    8.90700   coincide
+   P_SALTO        ajustado    0.00025   guardado    0.00025   coincide
+   DUR_TRANQUILO  ajustado 4301.50000   guardado 4300.00000   coincide
+   DUR_RUIDOSO    ajustado  698.50000   guardado  700.00000   coincide
+PASS las constantes guardadas corresponden al ajuste

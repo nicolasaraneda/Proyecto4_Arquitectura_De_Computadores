@@ -15,10 +15,14 @@ con una semilla:
      donde gana la reversión). Entre bloques se pierde, así que el nivel de
      largo plazo de la serie remuestreada es un paseo aleatorio. Para una
      regla de reversión es una prueba más dura que la serie original.
-  3. Familias sintéticas (`FAMILIAS`): paseo aleatorio, tendencia, reversión,
-     saltos, cambios de volatilidad, serie plana, bordes 1 y 255, y un modelo
-     de dos componentes (nivel lento más componente transitoria). Sirven para
-     ver qué pasa si la serie oculta no se parece a la de práctica.
+  3. Familias sintéticas (`FAMILIAS`), calibradas contra la serie de práctica
+     con los parámetros de ref/calibracion.py y separadas en dos grupos:
+       - `PLAUSIBLES`: el modelo ajustado a la serie de práctica y sus
+         vecinos. Es a lo que debería parecerse la serie oculta si sale del
+         mismo generador.
+       - `ESTRES`: paseo aleatorio, tendencia, saltos frecuentes, cambio de
+         carácter, otra volatilidad, otro nivel, serie plana y bordes 1 y
+         255. Sirven para ver cuánto se pierde si la serie oculta es distinta.
 
 Estas series son datos de prueba. Nada de esto queda dentro del diseño.
 
@@ -29,13 +33,15 @@ Uso como programa, para generar un CSV que el testbench puede leer:
     python3 ref/series.py remuestreo --n 2000 --semilla 1 -o build/series/remuestreo_1.csv
 """
 import argparse
+import math
 import os
 import random
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-import market           # noqa: E402
+import calibracion as cal   # noqa: E402
+import market               # noqa: E402
 
 RAIZ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PRACTICA = os.path.join(RAIZ, "tb", "practica.csv")
@@ -85,88 +91,123 @@ def remuestreo(precios, n, rng, bloque=100):
     return salida
 
 
-# ---- Familias sintéticas -----------------------------------------------------------
+# ---- Modelo calibrado del generador ---------------------------------------------------
 
-def paseo(n, rng, sigma=1.0, p0=None):
-    """Paseo aleatorio: cada cambio es independiente del anterior. No hay nada que predecir."""
-    x = rng.uniform(90, 170) if p0 is None else p0
-    salida = []
-    for _ in range(n):
-        salida.append(x)
-        x = reflejar(x + rng.gauss(0, sigma))
-    return a_precios(salida)
+def modelo(n, rng, q_nivel=cal.Q_NIVEL, q_trans=cal.Q_TRANS, phi=cal.PHI, razon=cal.RAZON_RUIDOSO,
+           dur_tranquilo=cal.DUR_TRANQUILO, dur_ruidoso=cal.DUR_RUIDOSO, p_salto=cal.P_SALTO,
+           salto_tam=cal.SALTO_TAM, p0=None, deriva=0.0, redondear=True):
+    """Modelo ajustado a la serie de práctica (ref/generador.py, ref/calibracion.py).
 
-
-def tendencia(n, rng, sigma=1.0, recorrido=80.0):
-    """Paseo aleatorio con deriva: sube o baja `recorrido` unidades a lo largo de la serie."""
-    signo = rng.choice([-1, 1])
-    x = rng.uniform(100, 150) - signo * recorrido / 2
-    deriva = signo * recorrido / n
-    salida = []
-    for _ in range(n):
-        salida.append(x)
-        x = reflejar(x + deriva + rng.gauss(0, sigma))
-    return a_precios(salida)
-
-
-def reversion(n, rng, theta=0.05, sigma=2.0, mu=None):
-    """Reversión a una media fija (proceso de Ornstein-Uhlenbeck discreto)."""
-    mu = rng.uniform(60, 200) if mu is None else mu
-    x = mu
-    salida = []
-    for _ in range(n):
-        salida.append(x)
-        x = x + theta * (mu - x) + rng.gauss(0, sigma)
-    return a_precios(salida)
-
-
-def dos_componentes(n, rng, sigma_nivel=0.6, phi=0.9, sigma_trans=1.5, p0=None):
-    """Nivel lento (paseo aleatorio) más componente transitoria AR(1), y redondeo.
-
-    Es la forma del modelo que el frente del algoritmo debe ajustar a la serie
-    de práctica. Los valores por defecto no están calibrados.
+    Nivel lento (paseo aleatorio) más componente transitoria AR(1), dos
+    regímenes de volatilidad que se alternan, saltos de nivel poco frecuentes
+    y redondeo a enteros. `deriva` suma una tendencia al nivel.
     """
-    nivel = rng.uniform(80, 180) if p0 is None else p0
-    trans = 0.0
+    nivel = rng.uniform(*cal.NIVEL_INICIAL) if p0 is None else p0
+    ruidoso = rng.random() < dur_ruidoso / (dur_tranquilo + dur_ruidoso)
+    escala = math.sqrt(razon) if ruidoso else 1.0
+    s_nivel, s_trans = math.sqrt(q_nivel), math.sqrt(q_trans)
+    trans = rng.gauss(0, escala * s_trans / math.sqrt(1 - phi * phi))
     salida = []
     for _ in range(n):
         salida.append(nivel + trans)
-        nivel = reflejar(nivel + rng.gauss(0, sigma_nivel))
-        trans = phi * trans + rng.gauss(0, sigma_trans)
-    return a_precios(salida)
+        if rng.random() < 1.0 / (dur_ruidoso if ruidoso else dur_tranquilo):
+            ruidoso = not ruidoso
+            escala = math.sqrt(razon) if ruidoso else 1.0
+        nivel = reflejar(nivel + deriva + rng.gauss(0, escala * s_nivel))
+        if rng.random() < p_salto:
+            nivel = reflejar(nivel + rng.choice([-1, 1]) * rng.uniform(*salto_tam))
+        trans = phi * trans + rng.gauss(0, escala * s_trans)
+    return a_precios(salida) if redondear else salida
 
 
-def saltos(n, rng, prob=0.004, tam=(10, 30)):
-    """Reversión a una media que cada cierto tiempo salta de golpe a otro nivel."""
-    mu = rng.uniform(80, 180)
-    x = mu
-    salida = []
-    for _ in range(n):
-        salida.append(x)
-        if rng.random() < prob:
-            mu = reflejar(mu + rng.choice([-1, 1]) * rng.uniform(*tam))
-            x = mu + (x - mu) * 0.2            # el precio salta con el nivel
-        x = x + 0.05 * (mu - x) + rng.gauss(0, 2.0)
-    return a_precios(salida)
+def _log_uniforme(rng, amplitud):
+    """Factor al azar entre exp(-amplitud) y exp(amplitud)."""
+    return math.exp(rng.uniform(-amplitud, amplitud))
 
 
-def cambio_volatilidad(n, rng, sigmas=(0.7, 4.0), tramo=(200, 800)):
-    """Dos componentes con tramos de volatilidad baja y alta que se alternan."""
-    nivel = rng.uniform(80, 180)
-    trans = 0.0
-    salida = []
-    alta = rng.random() < 0.5
-    quedan = rng.randint(*tramo)
-    for _ in range(n):
-        salida.append(nivel + trans)
-        if quedan == 0:
-            alta = not alta
-            quedan = rng.randint(*tramo)
-        quedan -= 1
-        s = sigmas[1] if alta else sigmas[0]
-        nivel = reflejar(nivel + rng.gauss(0, 0.3 * s))
-        trans = 0.9 * trans + rng.gauss(0, s)
-    return a_precios(salida)
+def modelo_vecino(n, rng):
+    """El modelo calibrado con cada parámetro movido al azar, hasta la mitad o el doble.
+
+    Cubre el error de la calibración y la posibilidad de que la serie oculta
+    salga del mismo generador con otros parámetros: más o menos volatilidad,
+    reversión más rápida o más lenta, más o menos tiempo en el régimen ruidoso.
+    """
+    vida_media = math.log(0.5) / math.log(cal.PHI) * _log_uniforme(rng, 0.7)
+    volatilidad = _log_uniforme(rng, 0.7)
+    return modelo(n, rng,
+                  q_nivel=cal.Q_NIVEL * volatilidad,
+                  q_trans=cal.Q_TRANS * volatilidad * _log_uniforme(rng, 0.7),
+                  phi=0.5 ** (1.0 / vida_media),
+                  razon=cal.RAZON_RUIDOSO * _log_uniforme(rng, 0.5),
+                  dur_tranquilo=cal.DUR_TRANQUILO * _log_uniforme(rng, 0.7),
+                  dur_ruidoso=cal.DUR_RUIDOSO * _log_uniforme(rng, 0.7),
+                  p_salto=cal.P_SALTO * _log_uniforme(rng, 1.0),
+                  p0=rng.uniform(60, 200))
+
+
+# Varianza del cambio de un tick antes de redondear, en el régimen tranquilo: es
+# lo que usan las familias sin componente transitoria para tener la misma
+# volatilidad que la serie de práctica.
+Q_TOTAL = cal.Q_NIVEL + 2 * cal.Q_TRANS / (1 + cal.PHI)
+# Mezcla de los dos regímenes en un solo número (86 % tranquilo, 14 % ruidoso)
+FRAC_RUIDOSO = cal.DUR_RUIDOSO / (cal.DUR_TRANQUILO + cal.DUR_RUIDOSO)
+MEZCLA = 1 - FRAC_RUIDOSO + FRAC_RUIDOSO * cal.RAZON_RUIDOSO
+
+
+# ---- Familias sintéticas -----------------------------------------------------------
+# Todas están calibradas contra la serie de práctica: la volatilidad, los
+# regímenes, la escala de la reversión y el tamaño de los saltos salen de
+# ref/calibracion.py. Lo que cambia de una familia a otra es qué pieza del
+# modelo se quita, se exagera o se reemplaza.
+
+def paseo(n, rng, p0=None):
+    """Paseo aleatorio con la volatilidad y los regímenes de la práctica, sin reversión."""
+    return modelo(n, rng, q_nivel=Q_TOTAL, q_trans=1e-12, p_salto=0.0, p0=p0)
+
+
+def tendencia(n, rng, deriva=None):
+    """Paseo aleatorio con deriva: entre 40 y 120 unidades en 2000 ticks, hacia arriba o hacia abajo.
+
+    El tramo de tendencia más fuerte de la práctica baja 45 unidades en 800
+    ticks (0,056 por tick). Aquí la deriva va de 0,02 a 0,06 por tick y dura
+    toda la serie.
+    """
+    if deriva is None:
+        deriva = rng.choice([-1, 1]) * rng.uniform(0.02, 0.06)
+    p0 = min(230.0, max(25.0, rng.uniform(100, 150) - deriva * n / 2))
+    return modelo(n, rng, q_nivel=Q_TOTAL, q_trans=1e-12, p_salto=0.0, p0=p0, deriva=deriva)
+
+
+def reversion(n, rng, mu=None):
+    """Reversión a una media fija: la transitoria de la práctica sin el paseo del nivel."""
+    mu = rng.uniform(60, 200) if mu is None else mu
+    return modelo(n, rng, q_nivel=1e-12, q_trans=Q_TOTAL * (1 + cal.PHI) / 2, p_salto=0.0, p0=mu)
+
+
+def dos_componentes(n, rng, p0=None):
+    """Nivel lento más transitoria con los parámetros calibrados, en un solo régimen de volatilidad."""
+    return modelo(n, rng, q_nivel=cal.Q_NIVEL * MEZCLA, q_trans=cal.Q_TRANS * MEZCLA, razon=1.0, p_salto=0.0, p0=p0)
+
+
+def saltos(n, rng):
+    """El modelo con saltos 20 veces más frecuentes (uno cada 200 ticks) y de hasta 30 unidades."""
+    return modelo(n, rng, p_salto=20 * cal.P_SALTO, salto_tam=(cal.SALTO_TAM[0], 30))
+
+
+def cambio_volatilidad(n, rng):
+    """El modelo con los regímenes alternando rápido: tramos de 200 a 800 ticks, mitad del tiempo en cada uno."""
+    return modelo(n, rng, dur_tranquilo=500, dur_ruidoso=500, p_salto=0.0)
+
+
+def volatil(n, rng):
+    """El modelo siempre en el régimen ruidoso y con el doble de varianza."""
+    return modelo(n, rng, q_nivel=2 * cal.Q_NIVEL * cal.RAZON_RUIDOSO, q_trans=2 * cal.Q_TRANS * cal.RAZON_RUIDOSO,
+                  razon=1.0)
+
+
+def nivel_bajo(n, rng):
+    """El modelo con precios entre 15 y 40: los mismos movimientos pesan mucho más en porcentaje."""
+    return modelo(n, rng, p0=rng.uniform(15, 40))
 
 
 def plana(n, rng, p0=None):
@@ -197,25 +238,37 @@ def _ou_libre(n, rng, mu, theta, sigma):
 
 
 def cambio_de_caracter(n, rng):
-    """Primera mitad con reversión, segunda mitad con tendencia, sin salto de nivel entre las dos."""
-    a = dos_componentes(n // 2, rng)
-    b = tendencia(n - n // 2, rng)
+    """Primera mitad como la práctica, segunda mitad con tendencia, sin salto de nivel entre las dos."""
+    a = modelo(n // 2, rng)
+    b = tendencia(n - n // 2, rng, deriva=rng.choice([-1, 1]) * rng.uniform(0.04, 0.10))
     corrimiento = a[-1] - b[0]
     return a + [reflejar(v + corrimiento) for v in b]
 
 
 FAMILIAS = {
+    "modelo": modelo,
+    "modelo_vecino": modelo_vecino,
+    "dos_componentes": dos_componentes,
+    "cambio_volatilidad": cambio_volatilidad,
     "paseo": paseo,
     "tendencia": tendencia,
     "reversion": reversion,
-    "dos_componentes": dos_componentes,
     "saltos": saltos,
-    "cambio_volatilidad": cambio_volatilidad,
     "cambio_de_caracter": cambio_de_caracter,
+    "volatil": volatil,
+    "nivel_bajo": nivel_bajo,
     "plana": plana,
     "borde_bajo": borde_bajo,
     "borde_alto": borde_alto,
 }
+
+# Plausibles: se parecen a la serie de práctica. Si la serie oculta sale del
+# mismo generador, debería parecerse a una de estas.
+PLAUSIBLES = ["modelo", "modelo_vecino", "dos_componentes", "cambio_volatilidad"]
+# De estrés: algo importante es distinto. Sirven para ver cuánto se pierde si
+# la serie oculta no se parece a la de práctica.
+ESTRES = ["paseo", "tendencia", "reversion", "saltos", "cambio_de_caracter", "volatil", "nivel_bajo",
+          "plana", "borde_bajo", "borde_alto"]
 
 
 def semilla_de(nombre, semilla, i=0):
@@ -269,7 +322,8 @@ def main(argv=None):
         for nombre in ["remuestreo"] + list(FAMILIAS):
             s = lote(nombre, 1, 2000, 0)[0]
             doc = "bloques de incrementos de la serie de practica" if nombre == "remuestreo" else FAMILIAS[nombre].__doc__.split("\n")[0]
-            print(f"{nombre:20s} {min(s):4d} {max(s):4d} {razon_de_varianza(s, 10):7.2f} {razon_de_varianza(s, 50):7.2f}  {doc}")
+            grupo = "plausible" if nombre in PLAUSIBLES or nombre == "remuestreo" else "estres"
+            print(f"{nombre:20s} {min(s):4d} {max(s):4d} {razon_de_varianza(s, 10):7.2f} {razon_de_varianza(s, 50):7.2f}  [{grupo}] {doc}")
         return 0
     if a.familia != "remuestreo" and a.familia not in FAMILIAS:
         ap.error(f"familia desconocida: {a.familia} (ver: python3 ref/series.py listar)")
