@@ -1,0 +1,55 @@
+159. Printing statistics.
+
+=== asic_top ===
+
+        +----------Local Count, excluding submodules.
+        |        +-Local Area, excluding submodules.
+        |        | 
+     5000        - wires
+     5018        - wire bits
+      798        - public wires
+      816        - public wire bits
+       10        - ports
+       28        - port bits
+     5009 1.23E+05 cells
+      135 2.37E+03   gf180mcu_fd_sc_mcu7t5v0__and2_1
+       17  373.184   gf180mcu_fd_sc_mcu7t5v0__and3_1
+        6  144.883   gf180mcu_fd_sc_mcu7t5v0__and4_1
+      145  3183.04   gf180mcu_fd_sc_mcu7t5v0__aoi211_1
+      321 5.64E+03   gf180mcu_fd_sc_mcu7t5v0__aoi21_1
+       55 1.33E+03   gf180mcu_fd_sc_mcu7t5v0__aoi221_1
+        3   92.198   gf180mcu_fd_sc_mcu7t5v0__aoi222_1
+      175  3457.44   gf180mcu_fd_sc_mcu7t5v0__aoi22_1
+       14        -   gf180mcu_fd_sc_mcu7t5v0__buf_1
+      131 1.15E+03   gf180mcu_fd_sc_mcu7t5v0__clkinv_1
+      681 4.34E+04   gf180mcu_fd_sc_mcu7t5v0__dffq_1
+       93 6.94E+03   gf180mcu_fd_sc_mcu7t5v0__dffrnq_1
+        3  237.082   gf180mcu_fd_sc_mcu7t5v0__dffsnq_1
+      326 1.07E+04   gf180mcu_fd_sc_mcu7t5v0__mux2_2
+        3  210.739   gf180mcu_fd_sc_mcu7t5v0__mux4_1
+     1314 1.44E+04   gf180mcu_fd_sc_mcu7t5v0__nand2_1
+      120 1.84E+03   gf180mcu_fd_sc_mcu7t5v0__nand3_1
+       22   434.65   gf180mcu_fd_sc_mcu7t5v0__nand4_1
+      244 3.21E+03   gf180mcu_fd_sc_mcu7t5v0__nor2_1
+       34  597.094   gf180mcu_fd_sc_mcu7t5v0__nor3_1
+        9  197.568   gf180mcu_fd_sc_mcu7t5v0__nor4_1
+      148 3.25E+03   gf180mcu_fd_sc_mcu7t5v0__oai211_1
+      721 1.27E+04   gf180mcu_fd_sc_mcu7t5v0__oai21_1
+       19  500.506   gf180mcu_fd_sc_mcu7t5v0__oai221_1
+       30   658.56   gf180mcu_fd_sc_mcu7t5v0__oai22_1
+       22  531.238   gf180mcu_fd_sc_mcu7t5v0__oai31_1
+        5  131.712   gf180mcu_fd_sc_mcu7t5v0__oai32_1
+      104 1.83E+03   gf180mcu_fd_sc_mcu7t5v0__or2_1
+        6  131.712   gf180mcu_fd_sc_mcu7t5v0__or3_1
+        2   52.685   gf180mcu_fd_sc_mcu7t5v0__or4_1
+        1    8.781   gf180mcu_fd_sc_mcu7t5v0__tieh
+       12  342.451   gf180mcu_fd_sc_mcu7t5v0__xnor2_1
+        2   105.37   gf180mcu_fd_sc_mcu7t5v0__xnor3_1
+       81 2.13E+03   gf180mcu_fd_sc_mcu7t5v0__xor2_1
+        5  252.448   gf180mcu_fd_sc_mcu7t5v0__xor3_1
+
+   Area for cell type \gf180mcu_fd_sc_mcu7t5v0__buf_1 is unknown!
+
+   Chip area for module '\asic_top': 122509.721600
+     of which used for sequential elements: 50531.308800 (41.25%)
+

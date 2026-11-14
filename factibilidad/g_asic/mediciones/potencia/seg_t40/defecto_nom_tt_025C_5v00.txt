@@ -1,0 +1,35 @@
+potencia.tcl: esquina nom_tt_025C_5v00, modo defecto
+  liberty: /home/nicolasaraneda/.ciel/ciel/gf180mcu/versions/54435919abffb937387ec956209f9cf5fd2dfbee/gf180mcuD/libs.ref/gf180mcu_fd_sc_mcu7t5v0/lib/gf180mcu_fd_sc_mcu7t5v0__tt_025C_5v00.lib
+  netlist: factibilidad/g_asic/runs/seg_t40/final/nl/asic_top.nl.v
+  sdc:     factibilidad/g_asic/runs/seg_t40/final/sdc/asic_top.sdc
+  spef:    factibilidad/g_asic/runs/seg_t40/final/spef/nom/asic_top.nom.spef
+
+=== clocks ===
+clock clk: periodo 40.000000, propagado 1
+
+MODO defecto: sin actividad anotada (actividad por defecto de OpenSTA en las entradas, propagada)
+
+=== report_activity_annotation ===
+unannotated 17895
+
+=== report_power -corner nom_tt_025C_5v00 ===
+Group                    Internal    Switching      Leakage        Total
+                            Power        Power        Power        Power (Watts)
+------------------------------------------------------------------------
+Sequential           1.282322e-02 1.685472e-03 3.103558e-07 1.450900e-02  25.7%
+Combinational        1.490866e-02 1.752789e-02 5.637096e-07 3.243711e-02  57.5%
+Clock                5.339455e-03 4.172028e-03 6.286940e-07 9.512112e-03  16.8%
+Macro                0.000000e+00 0.000000e+00 0.000000e+00 0.000000e+00   0.0%
+Pad                  0.000000e+00 0.000000e+00 0.000000e+00 0.000000e+00   0.0%
+------------------------------------------------------------------------
+Total                3.307132e-02 2.338539e-02 1.502758e-06 5.645821e-02 100.0%
+                            58.6%        41.4%         0.0%
+
+=== sonda: actividad de puertos (densidad 1/s, duty, origen) ===
+sonda puerto clk: 5.00000e+07 0.500 clock
+sonda puerto rst_n: 2.50000e+06 0.500 input
+sonda puerto spi_sclk: 2.50000e+06 0.500 input
+sonda puerto spi_cs_n: 2.50000e+06 0.500 input
+sonda puerto spi_miso: 4.29049e+06 0.098 propagated
+
+=== design_power (W): interna 0.03307131677865982 conmutacion 0.023385388776659966 fuga 1.5027583231130848e-6 total 0.056458208709955215 ===

@@ -1,0 +1,92 @@
+max fanout
+
+Pin                                   Limit Fanout  Slack
+---------------------------------------------------------
+clkbuf_0_clk/Z                           10     16     -6 (VIOLATED)
+clkbuf_leaf_54_clk/Z                     10     12     -2 (VIOLATED)
+clkbuf_leaf_62_clk/Z                     10     12     -2 (VIOLATED)
+clkbuf_leaf_63_clk/Z                     10     12     -2 (VIOLATED)
+clkbuf_leaf_66_clk/Z                     10     12     -2 (VIOLATED)
+clkbuf_leaf_72_clk/Z                     10     12     -2 (VIOLATED)
+clkbuf_leaf_14_clk/Z                     10     11        (VIOLATED)
+clkbuf_leaf_19_clk/Z                     10     11        (VIOLATED)
+clkbuf_leaf_20_clk/Z                     10     11        (VIOLATED)
+clkbuf_leaf_25_clk/Z                     10     11        (VIOLATED)
+clkbuf_leaf_31_clk/Z                     10     11        (VIOLATED)
+clkbuf_leaf_51_clk/Z                     10     11        (VIOLATED)
+clkbuf_leaf_53_clk/Z                     10     11        (VIOLATED)
+clkbuf_leaf_60_clk/Z                     10     11        (VIOLATED)
+clkbuf_leaf_83_clk/Z                     10     11        (VIOLATED)
+clkbuf_leaf_90_clk/Z                     10     11        (VIOLATED)
+
+max capacitance
+
+Pin                                        Limit         Cap       Slack
+------------------------------------------------------------------------
+clkbuf_0_clk/Z                          0.200000    0.412769   -0.212769 (VIOLATED)
+
+
+
+report_parasitic_annotation -report_unannotated
+Found 56 unannotated drivers.
+ clkload0/Z
+ clkload1/Z
+ clkload10/ZN
+ clkload11/ZN
+ clkload12/Z
+ clkload13/Z
+ clkload14/ZN
+ clkload15/ZN
+ clkload16/ZN
+ clkload17/ZN
+ clkload18/ZN
+ clkload19/ZN
+ clkload2/ZN
+ clkload20/ZN
+ clkload21/Z
+ clkload22/ZN
+ clkload23/ZN
+ clkload24/ZN
+ clkload25/Z
+ clkload26/Z
+ clkload27/Z
+ clkload28/Z
+ clkload29/ZN
+ clkload3/ZN
+ clkload30/ZN
+ clkload31/ZN
+ clkload32/Z
+ clkload33/ZN
+ clkload34/Z
+ clkload35/ZN
+ clkload36/Z
+ clkload37/ZN
+ clkload38/Z
+ clkload39/ZN
+ clkload4/Z
+ clkload40/ZN
+ clkload41/ZN
+ clkload42/Z
+ clkload43/ZN
+ clkload44/Z
+ clkload45/ZN
+ clkload46/Z
+ clkload47/Z
+ clkload48/ZN
+ clkload49/Z
+ clkload5/Z
+ clkload50/ZN
+ clkload51/Z
+ clkload52/Z
+ clkload53/ZN
+ clkload54/Z
+ clkload55/Z
+ clkload6/Z
+ clkload7/Z
+ clkload8/ZN
+ clkload9/Z
+Found 0 partially unannotated drivers.
+
+max slew violation count 0
+max fanout violation count 16
+max cap violation count 1

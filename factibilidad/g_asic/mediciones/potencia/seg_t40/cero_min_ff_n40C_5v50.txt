@@ -1,0 +1,35 @@
+potencia.tcl: esquina min_ff_n40C_5v50, modo cero
+  liberty: /home/nicolasaraneda/.ciel/ciel/gf180mcu/versions/54435919abffb937387ec956209f9cf5fd2dfbee/gf180mcuD/libs.ref/gf180mcu_fd_sc_mcu7t5v0/lib/gf180mcu_fd_sc_mcu7t5v0__ff_n40C_5v50.lib
+  netlist: factibilidad/g_asic/runs/seg_t40/final/nl/asic_top.nl.v
+  sdc:     factibilidad/g_asic/runs/seg_t40/final/sdc/asic_top.sdc
+  spef:    factibilidad/g_asic/runs/seg_t40/final/spef/min/asic_top.min.spef
+
+=== clocks ===
+clock clk: periodo 40.000000, propagado 1
+
+MODO cero: set_power_activity -global -activity 0 -duty 0.5 (solo conmuta el reloj)
+
+=== report_activity_annotation ===
+unannotated 17895
+
+=== report_power -corner min_ff_n40C_5v50 ===
+Group                    Internal    Switching      Leakage        Total
+                            Power        Power        Power        Power (Watts)
+------------------------------------------------------------------------
+Sequential           1.232043e-02 0.000000e+00 3.828157e-07 1.232081e-02  51.2%
+Combinational        0.000000e+00 0.000000e+00 7.073045e-07 7.073045e-07   0.0%
+Clock                6.893128e-03 4.850950e-03 7.600444e-07 1.174484e-02  48.8%
+Macro                0.000000e+00 0.000000e+00 0.000000e+00 0.000000e+00   0.0%
+Pad                  0.000000e+00 0.000000e+00 0.000000e+00 0.000000e+00   0.0%
+------------------------------------------------------------------------
+Total                1.921357e-02 4.850950e-03 1.850258e-06 2.406637e-02 100.0%
+                            79.8%        20.2%         0.0%
+
+=== sonda: actividad de puertos (densidad 1/s, duty, origen) ===
+sonda puerto clk: 5.00000e+07 0.500 clock
+sonda puerto rst_n: 0.00000e+00 0.500 global
+sonda puerto spi_sclk: 0.00000e+00 0.500 global
+sonda puerto spi_cs_n: 0.00000e+00 0.500 global
+sonda puerto spi_miso: 0.00000e+00 0.500 global
+
+=== design_power (W): interna 0.019213568419218063 conmutacion 0.004850949626415968 fuga 1.8502579450796475e-6 total 0.024066368117928505 ===

@@ -1,0 +1,42 @@
+potencia.tcl: esquina max_ss_125C_4v50, modo vcd
+  liberty: /home/nicolasaraneda/.ciel/ciel/gf180mcu/versions/54435919abffb937387ec956209f9cf5fd2dfbee/gf180mcuD/libs.ref/gf180mcu_fd_sc_mcu7t5v0/lib/gf180mcu_fd_sc_mcu7t5v0__ss_125C_4v50.lib
+  netlist: factibilidad/g_asic/runs/seg_t40/final/nl/asic_top.nl.v
+  sdc:     factibilidad/g_asic/runs/seg_t40/final/sdc/asic_top.sdc
+  spef:    factibilidad/g_asic/runs/seg_t40/final/spef/max/asic_top.max.spef
+
+=== clocks ===
+clock clk: periodo 40.000000, propagado 1
+
+MODO vcd: read_vcd -scope tb_asic_puertos/dut factibilidad/g_asic/build/potencia/seg_t40/calculo.vcd
+Annotated 17895 pin activities.
+
+=== report_activity_annotation ===
+vcd         17895
+unannotated     0
+
+=== report_activity_annotation -report_unannotated ===
+vcd         17895
+unannotated     0
+Unannotated pins:
+
+=== report_power -corner max_ss_125C_4v50 ===
+Group                    Internal    Switching      Leakage        Total
+                            Power        Power        Power        Power (Watts)
+------------------------------------------------------------------------
+Sequential           8.514308e-03 1.925945e-04 8.999028e-07 8.707803e-03  38.6%
+Combinational        2.433716e-03 3.679154e-03 2.815344e-06 6.115685e-03  27.1%
+Clock                4.184763e-03 3.557565e-03 6.179783e-06 7.748508e-03  34.3%
+Macro                0.000000e+00 0.000000e+00 0.000000e+00 0.000000e+00   0.0%
+Pad                  0.000000e+00 0.000000e+00 0.000000e+00 0.000000e+00   0.0%
+------------------------------------------------------------------------
+Total                1.513280e-02 7.429311e-03 9.895114e-06 2.257201e-02 100.0%
+                            67.0%        32.9%         0.0%
+
+=== sonda: actividad de puertos (densidad 1/s, duty, origen) ===
+sonda puerto clk: 5.00000e+07 0.500 clock
+sonda puerto rst_n: 0.00000e+00 1.000 vcd
+sonda puerto spi_sclk: 3.12500e+05 0.156 vcd
+sonda puerto spi_cs_n: 3.12500e+05 0.688 vcd
+sonda puerto spi_miso: 3.12500e+05 0.188 vcd
+
+=== design_power (W): interna 0.015132799744606018 conmutacion 0.00742931105196476 fuga 9.895114089886192e-6 total 0.022572005167603493 ===

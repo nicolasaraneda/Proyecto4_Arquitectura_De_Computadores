@@ -1,0 +1,4 @@
+PASS asic base (verilator): periodo 100000 ns, 20000 ticks, Peor caso precio->decision: 46 ciclos (disponibles: 2262), 4/4, 20000 filas identicas a ref/trader.py, patrimonio 26795
+PASS asic seg (verilator): periodo 100000 ns, 20000 ticks, Peor caso precio->decision: 24 ciclos (disponibles: 2262), 4/4, 20000 filas identicas a ref/trader.py, patrimonio 26795
+PASS asic base (verilator): periodo 1000000 ns, 20000 ticks, Peor caso precio->decision: 46 ciclos (disponibles: 24762), 4/4, 20000 filas identicas a ref/trader.py, patrimonio 27306
+PASS asic seg (verilator): periodo 1000000 ns, 20000 ticks, Peor caso precio->decision: 24 ciclos (disponibles: 24762), 4/4, 20000 filas identicas a ref/trader.py, patrimonio 27306

@@ -1,0 +1,6 @@
+PASS rtl base: 2000 ticks a 15000 ns identicos a ref/trader.py, MISO sin X, patrimonio 9720, cambios del byte de decision 26, simulacion 11 s
+PASS rtl seg: 2000 ticks a 15000 ns identicos a ref/trader.py, MISO sin X, patrimonio 9720, cambios del byte de decision 26, simulacion 13 s
+PASS sint base_t40: 300 ticks a 15000 ns identicos a ref/trader.py, MISO sin X, patrimonio 9156, cambios del byte de decision 8, simulacion 50 s
+PASS sint seg_t40: 300 ticks a 15000 ns identicos a ref/trader.py, MISO sin X, patrimonio 9156, cambios del byte de decision 8, simulacion 53 s
+PASS pnr base_t40: 2000 ticks a 15000 ns identicos a ref/trader.py, MISO sin X, patrimonio 9720, cambios del byte de decision 26, simulacion 502 s
+PASS pnr seg_t40: 2000 ticks a 15000 ns identicos a ref/trader.py, MISO sin X, patrimonio 9720, cambios del byte de decision 26, simulacion 508 s
