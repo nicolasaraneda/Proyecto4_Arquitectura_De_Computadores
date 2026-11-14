@@ -1,0 +1,37 @@
+Variantes de la prueba de placa
+Comando: factibilidad/e_warmboot/scripts/variantes_demo.sh
+
+--- sin_dormir: icepack -s ---
+imagen 0: Setting warmboot to 'enabled', nosleep to 'enabled'. CRC Check OK.
+imagen 1: Setting warmboot to 'enabled', nosleep to 'enabled'. CRC Check OK.
+tamaño: 64600 bytes de 131072 (49.3 %), sobran 66472
+RESULTADO: correcto
+
+--- frec_media: comando 51 01 ---
+imagen 0: Setting freqrange to 'medium'. CRC Check OK.
+imagen 0: al desempaquetar entrega el mismo .asc que la original
+imagen 0: bytes distintos de la original: 1 (posición 10, contando desde 1)
+imagen 1: Setting freqrange to 'medium'. CRC Check OK.
+imagen 1: al desempaquetar entrega el mismo .asc que la original
+imagen 1: bytes distintos de la original: 1 (posición 10, contando desde 1)
+tamaño: 64600 bytes de 131072 (49.3 %), sobran 66472
+vector 0 (encendido ) -> 0x0000A0   modo 0x00, oscilador de configuración en frecuencia media, warm boot habilitado
+RESULTADO: correcto
+
+--- frec_alta: comando 51 02 ---
+imagen 0: Setting freqrange to 'high'. CRC Check OK.
+imagen 0: al desempaquetar entrega el mismo .asc que la original
+imagen 0: bytes distintos de la original: 1 (posición 10, contando desde 1)
+imagen 1: Setting freqrange to 'high'. CRC Check OK.
+imagen 1: al desempaquetar entrega el mismo .asc que la original
+imagen 1: bytes distintos de la original: 1 (posición 10, contando desde 1)
+tamaño: 64600 bytes de 131072 (49.3 %), sobran 66472
+vector 0 (encendido ) -> 0x0000A0   modo 0x00, oscilador de configuración en frecuencia alta, warm boot habilitado
+RESULTADO: correcto
+
+SHA-256:
+  4255c9eb6a65340093d65f7d4fb99f117d94cc6b8fa69f8184094e90af534805  variantes/wb_demo_multi_frec_alta.bin
+  438eb07a6e12aad87add47ad37800554dd430a3174076110d17133122f9d75b4  variantes/wb_demo_multi_frec_media.bin
+  50e96bcc4f536b18e69063b69441a0fdedbecbca93f42cd0394400b98a9e7afd  variantes/wb_demo_multi_sin_dormir.bin
+
+RESULTADO: correcto

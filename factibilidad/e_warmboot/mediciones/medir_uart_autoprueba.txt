@@ -1,0 +1,15 @@
+bytes recibidos: 301 (A: 151, b: 150, otros: 0)
+cambios de imagen: 300 de 300 intervalos
+período medio: 94.952 ms (300 intervalos en 28.486 s, error por los extremos menor que 0.053 ms)
+  de A a b (carga la imagen 1): media 94.97 ms en 150 intervalos (cada intervalo suelto tiene hasta 16 ms de error)
+  de b a A (carga la imagen 0): media 94.93 ms en 150 intervalos (cada intervalo suelto tiene hasta 16 ms de error)
+espera conocida del modo rapido: 41.943 ms
+RESULTADO: tiempo de reconfiguración = 53.01 ms (modo rapido, 300 intervalos, error menor que 0.05 ms)
+bytes recibidos: 301 (A: 151, b: 150, otros: 0)
+cambios de imagen: 300 de 300 intervalos
+período medio: 724.121 ms (300 intervalos en 217.236 s, error por los extremos menor que 0.053 ms)
+  de A a b (carga la imagen 1): media 724.45 ms en 150 intervalos (cada intervalo suelto tiene hasta 16 ms de error)
+  de b a A (carga la imagen 0): media 723.79 ms en 150 intervalos (cada intervalo suelto tiene hasta 16 ms de error)
+espera conocida del modo lento: 671.089 ms
+RESULTADO: tiempo de reconfiguración = 53.03 ms (modo lento, 300 intervalos, error menor que 0.05 ms)
+autoprueba: correcta

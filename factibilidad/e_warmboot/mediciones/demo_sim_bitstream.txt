@@ -1,0 +1,103 @@
+Simulación desde el .asc de las dos imágenes de la prueba de placa
+Comando: factibilidad/e_warmboot/scripts/sim_demo.sh bitstream
+icebox_vlog sobre build/demo/img0.asc e img1.asc. Esperas reales:
+WLento = 24 (16 777 216 ciclos, 0,671 s), WRapido = 20 (1 048 576 ciclos, 41,9 ms), WAntirreb = 18
+
+imagen 0, escenario 0
+  ok    BOOT no sube sin apretar nada
+  ok    el display izquierdo muestra la letra de la imagen
+  ok    LED 1 y LED 4 indican la imagen
+  ok    LED 2: salto manual armado
+  ok    MISO en 0 todo el tiempo
+  ok    la UART envia la letra una sola vez
+  dato UART: 0x41, display derecho: 0111111
+PASS imagen 0 escenario 0
+imagen 0, escenario 1
+  ok    SW1 apretado desde el arranque no dispara
+  ok    LED 2 apagado: no esta armado
+PASS imagen 0 escenario 1
+imagen 0, escenario 2
+  ok    armado despues de ver SW1 suelto
+  ok    los rebotes no disparan
+  ok    SW1 apretado dispara BOOT
+  ok    S1 S0 apuntan a la otra imagen mientras BOOT esta en alto
+  ok    BOOT queda en alto
+  ok    el LED 4 se invierte junto con BOOT
+  S1 S0 = 01
+PASS imagen 0 escenario 2
+imagen 0, escenario 3
+  ok    SW2 mantenido no dispara antes de 2^WLento ciclos
+  ok    SW2 mantenido dispara al cumplir 2^WLento ciclos
+  BOOT sube en el ciclo 16777218 (2^WLento = 16777216, diferencia 2)
+  ok    S1 S0 apuntan a la otra imagen mientras BOOT esta en alto
+  ok    BOOT queda en alto
+  ok    el LED 4 se invierte junto con BOOT
+  S1 S0 = 01
+PASS imagen 0 escenario 3
+imagen 0, escenario 4
+  ok    SW3 mantenido no dispara antes de 2^WRapido ciclos
+  ok    SW3 mantenido dispara al cumplir 2^WRapido ciclos
+  BOOT sube en el ciclo 1048579 (2^WRapido = 1048576, diferencia 3)
+  ok    S1 S0 apuntan a la otra imagen mientras BOOT esta en alto
+  ok    BOOT queda en alto
+  ok    el LED 4 se invierte junto con BOOT
+  S1 S0 = 01
+PASS imagen 0 escenario 4
+imagen 0, escenario 5
+  ok    sin SW3 no dispara
+  ok    SW3 apretado tarde dispara al pasar el antirrebote
+  ok    S1 S0 apuntan a la otra imagen mientras BOOT esta en alto
+  ok    BOOT queda en alto
+  ok    el LED 4 se invierte junto con BOOT
+  S1 S0 = 01
+PASS imagen 0 escenario 5
+imagen 1, escenario 0
+  ok    BOOT no sube sin apretar nada
+  ok    el display izquierdo muestra la letra de la imagen
+  ok    LED 1 y LED 4 indican la imagen
+  ok    LED 2: salto manual armado
+  ok    MISO en 0 todo el tiempo
+  ok    la UART envia la letra una sola vez
+  dato UART: 0x62, display derecho: 0111111
+PASS imagen 1 escenario 0
+imagen 1, escenario 1
+  ok    SW1 apretado desde el arranque no dispara
+  ok    LED 2 apagado: no esta armado
+PASS imagen 1 escenario 1
+imagen 1, escenario 2
+  ok    armado despues de ver SW1 suelto
+  ok    los rebotes no disparan
+  ok    SW1 apretado dispara BOOT
+  ok    S1 S0 apuntan a la otra imagen mientras BOOT esta en alto
+  ok    BOOT queda en alto
+  ok    el LED 4 se invierte junto con BOOT
+  S1 S0 = 00
+PASS imagen 1 escenario 2
+imagen 1, escenario 3
+  ok    SW2 mantenido no dispara antes de 2^WLento ciclos
+  ok    SW2 mantenido dispara al cumplir 2^WLento ciclos
+  BOOT sube en el ciclo 16777218 (2^WLento = 16777216, diferencia 2)
+  ok    S1 S0 apuntan a la otra imagen mientras BOOT esta en alto
+  ok    BOOT queda en alto
+  ok    el LED 4 se invierte junto con BOOT
+  S1 S0 = 00
+PASS imagen 1 escenario 3
+imagen 1, escenario 4
+  ok    SW3 mantenido no dispara antes de 2^WRapido ciclos
+  ok    SW3 mantenido dispara al cumplir 2^WRapido ciclos
+  BOOT sube en el ciclo 1048579 (2^WRapido = 1048576, diferencia 3)
+  ok    S1 S0 apuntan a la otra imagen mientras BOOT esta en alto
+  ok    BOOT queda en alto
+  ok    el LED 4 se invierte junto con BOOT
+  S1 S0 = 00
+PASS imagen 1 escenario 4
+imagen 1, escenario 5
+  ok    sin SW3 no dispara
+  ok    SW3 apretado tarde dispara al pasar el antirrebote
+  ok    S1 S0 apuntan a la otra imagen mientras BOOT esta en alto
+  ok    BOOT queda en alto
+  ok    el LED 4 se invierte junto con BOOT
+  S1 S0 = 00
+PASS imagen 1 escenario 5
+
+RESUMEN: 12 corridas PASS, 0 FAIL; 58 comprobaciones correctas, 0 con falla

@@ -1,0 +1,117 @@
+Simulación del relevo: del programa colgado a la imagen de respaldo
+Comando: factibilidad/e_warmboot/scripts/relevo.sh
+Principal: copia del SoC con vigilante (N = 4) y sw/cuelgue.s (20 precios y se cuelga).
+Respaldo: core base con sw/trade.hex. Maestra y contabilidad del testbench oficial.
+TCFG y el nivel del pin suelto son supuestos del modelo, no mediciones.
+
+=== Parte 1. Los tres períodos ===
+--- p1_r1_53_t1 ---
+  RELEVO periodo_ns=10000000 tcfg_ns=53000000 dboot_ns=0 tiron=1 nticks=60
+  ultimo_precio_respondido_por_el_principal: tick 20
+  disparo_del_vigilante: tick 25 (t = 250013600 ns), S1S0 = 01, CS_n en bajo al disparar: 0
+  al_disparar: acciones 67, patrimonio 9190
+  ticks_con_el_pin_suelto: 5 (bytes FF: 5, 00: 0, otros: 0)
+  transacciones_cortadas_por_un_cambio_de_fase: 0
+  respaldo: empieza a correr en el tick 30 (t = 303013600 ns), primer precio recibido en el tick 31, primera escritura en DECISION en el tick 31
+  ticks_sin_decision_nueva: 10 (desde el ultimo precio respondido hasta la primera escritura del respaldo)
+  ordenes_ejecutadas_durante_el_corte: 0
+  posicion_en_cero_en_el_tick: 33
+  final: caja 9042, acciones 0, patrimonio 9042, ordenes 4, bits de MISO con X: 0
+  PASS relevo
+--- p1_r2_53_t1 ---
+  RELEVO periodo_ns=1000000 tcfg_ns=53000000 dboot_ns=0 tiron=1 nticks=140
+  ultimo_precio_respondido_por_el_principal: tick 20
+  disparo_del_vigilante: tick 25 (t = 25013600 ns), S1S0 = 01, CS_n en bajo al disparar: 0
+  al_disparar: acciones 67, patrimonio 9190
+  ticks_con_el_pin_suelto: 53 (bytes FF: 53, 00: 0, otros: 0)
+  transacciones_cortadas_por_un_cambio_de_fase: 0
+  respaldo: empieza a correr en el tick 78 (t = 78013600 ns), primer precio recibido en el tick 79, primera escritura en DECISION en el tick 79
+  ticks_sin_decision_nueva: 58 (desde el ultimo precio respondido hasta la primera escritura del respaldo)
+  ordenes_ejecutadas_durante_el_corte: 0
+  posicion_en_cero_en_el_tick: 81
+  final: caja 9771, acciones 0, patrimonio 9771, ordenes 4, bits de MISO con X: 0
+  PASS relevo
+--- p1_r3_53_t1 ---
+  RELEVO periodo_ns=100000 tcfg_ns=53000000 dboot_ns=0 tiron=1 nticks=700
+  ultimo_precio_respondido_por_el_principal: tick 21
+  disparo_del_vigilante: tick 26 (t = 2613600 ns), S1S0 = 01, CS_n en bajo al disparar: 0
+  al_disparar: acciones 67, patrimonio 9190
+  ticks_con_el_pin_suelto: 530 (bytes FF: 530, 00: 0, otros: 0)
+  transacciones_cortadas_por_un_cambio_de_fase: 0
+  respaldo: empieza a correr en el tick 556 (t = 55613600 ns), primer precio recibido en el tick 558, primera escritura en DECISION en el tick 558
+  ticks_sin_decision_nueva: 536 (desde el ultimo precio respondido hasta la primera escritura del respaldo)
+  ordenes_ejecutadas_durante_el_corte: 0
+  posicion_en_cero_en_el_tick: 560
+  final: caja 8644, acciones 0, patrimonio 8644, ordenes 4, bits de MISO con X: 0
+  PASS relevo
+--- p1_r3_53_t0 ---
+  RELEVO periodo_ns=100000 tcfg_ns=53000000 dboot_ns=0 tiron=0 nticks=700
+  ultimo_precio_respondido_por_el_principal: tick 21
+  disparo_del_vigilante: tick 26 (t = 2613600 ns), S1S0 = 01, CS_n en bajo al disparar: 0
+  al_disparar: acciones 67, patrimonio 9190
+  ticks_con_el_pin_suelto: 530 (bytes FF: 0, 00: 530, otros: 0)
+  transacciones_cortadas_por_un_cambio_de_fase: 0
+  respaldo: empieza a correr en el tick 556 (t = 55613600 ns), primer precio recibido en el tick 558, primera escritura en DECISION en el tick 558
+  ticks_sin_decision_nueva: 536 (desde el ultimo precio respondido hasta la primera escritura del respaldo)
+  ordenes_ejecutadas_durante_el_corte: 0
+  posicion_en_cero_en_el_tick: 560
+  final: caja 8644, acciones 0, patrimonio 8644, ordenes 4, bits de MISO con X: 0
+  PASS relevo
+--- p1_r3_25_t1 ---
+  RELEVO periodo_ns=100000 tcfg_ns=25000000 dboot_ns=0 tiron=1 nticks=700
+  ultimo_precio_respondido_por_el_principal: tick 21
+  disparo_del_vigilante: tick 26 (t = 2613600 ns), S1S0 = 01, CS_n en bajo al disparar: 0
+  al_disparar: acciones 67, patrimonio 9190
+  ticks_con_el_pin_suelto: 250 (bytes FF: 250, 00: 0, otros: 0)
+  transacciones_cortadas_por_un_cambio_de_fase: 0
+  respaldo: empieza a correr en el tick 276 (t = 27613600 ns), primer precio recibido en el tick 278, primera escritura en DECISION en el tick 278
+  ticks_sin_decision_nueva: 256 (desde el ultimo precio respondido hasta la primera escritura del respaldo)
+  ordenes_ejecutadas_durante_el_corte: 0
+  posicion_en_cero_en_el_tick: 280
+  final: caja 9718, acciones 0, patrimonio 9718, ordenes 16, bits de MISO con X: 0
+  PASS relevo
+--- p1_r3_13_t1 ---
+  RELEVO periodo_ns=100000 tcfg_ns=13000000 dboot_ns=0 tiron=1 nticks=700
+  ultimo_precio_respondido_por_el_principal: tick 21
+  disparo_del_vigilante: tick 26 (t = 2613600 ns), S1S0 = 01, CS_n en bajo al disparar: 0
+  al_disparar: acciones 67, patrimonio 9190
+  ticks_con_el_pin_suelto: 130 (bytes FF: 130, 00: 0, otros: 0)
+  transacciones_cortadas_por_un_cambio_de_fase: 0
+  respaldo: empieza a correr en el tick 156 (t = 15613600 ns), primer precio recibido en el tick 158, primera escritura en DECISION en el tick 158
+  ticks_sin_decision_nueva: 136 (desde el ultimo precio respondido hasta la primera escritura del respaldo)
+  ordenes_ejecutadas_durante_el_corte: 0
+  posicion_en_cero_en_el_tick: 160
+  final: caja 10004, acciones 0, patrimonio 10004, ordenes 25, bits de MISO con X: 0
+  PASS relevo
+
+Resumen de la parte 1 (ticks sin decisión nueva = desde el último precio respondido
+por el principal hasta la primera escritura del respaldo, sin contar los extremos):
+  caso          TCFG       tirón ticks sin decisión    ticks pin suelto resultado 
+  p1_r1_53_t1   53 ms      1      10                     5                PASS relevo
+  p1_r2_53_t1   53 ms      1      58                     53               PASS relevo
+  p1_r3_53_t1   53 ms      1      536                    530              PASS relevo
+  p1_r3_53_t0   53 ms      0      536                    530              PASS relevo
+  p1_r3_25_t1   25 ms      1      256                    250              PASS relevo
+  p1_r3_13_t1   13 ms      1      136                    130              PASS relevo
+
+=== Parte 2. Barrido del instante de vuelta (66 simulaciones) ===
+tirón = 1: 33 simulaciones, 33 PASS. En 16 la vuelta cae dentro de una transacción.
+  bytes leídos en esas transacciones: 00 80 c0 e0 f0 f8 fc fe
+  órdenes ejecutadas durante el corte, sumando todas: 0
+tirón = 0: 33 simulaciones, 33 PASS. En 16 la vuelta cae dentro de una transacción.
+  bytes leídos en esas transacciones: 00
+  órdenes ejecutadas durante el corte, sumando todas: 0
+
+=== Parte 3. Barrido del retardo entre BOOT y la salida del pin (132 simulaciones) ===
+DECISION = 0x7f, tirón = 1: 33 simulaciones. En 16 la salida cae dentro de una transacción.
+  bytes leídos en esas transacciones: 7f ff
+  simulaciones en que la maestra ejecuta una orden durante el corte: 0
+DECISION = 0x7f, tirón = 0: 33 simulaciones. En 16 la salida cae dentro de una transacción.
+  bytes leídos en esas transacciones: 00 40 60 70 78 7c 7e
+  simulaciones en que la maestra ejecuta una orden durante el corte: 0
+DECISION = 0x00, tirón = 1: 33 simulaciones. En 16 la salida cae dentro de una transacción.
+  bytes leídos en esas transacciones: 01 03 07 0f 1f 3f 7f ff
+  simulaciones en que la maestra ejecuta una orden durante el corte: 2 (retardo de 92000 ns, 92500 ns)
+DECISION = 0x00, tirón = 0: 33 simulaciones. En 16 la salida cae dentro de una transacción.
+  bytes leídos en esas transacciones: 00
+  simulaciones en que la maestra ejecuta una orden durante el corte: 0

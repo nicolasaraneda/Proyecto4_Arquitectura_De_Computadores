@@ -1,0 +1,68 @@
+Testbench oficial sin modificar sobre el SoC con vigilante
+Comando: factibilidad/e_warmboot/scripts/probar_soc.sh
+tb/tb_proyecto_4.sv, sha256 f83486755fe2b3de..., 2000 ticks a 0,1 ms, sw/trade.hex
+
+--- repo_base ---
+  Patrimonio final:          9617
+  Ordenes ejecutadas:        52
+  Perdida maxima:            2082
+  No operar:                 10000
+  Comprar y mantener:        6695
+  Peor caso precio->decision: 44 ciclos (disponibles: 2262)
+  Detalle por tick en decisiones.csv
+  PASS MISO sin valores X
+  PASS el programa escribe DECISION
+  PASS el programa lee todos los precios
+  PASS la decision llega antes del siguiente tick
+  Testbenchs aprobados: 4/4
+  decisiones.csv: sha256 3fd1bebe688550c1b34bcf5031b579258f0ad68445c84731e08f1cd793ddb39c
+--- vig_base ---
+  Patrimonio final:          9617
+  Ordenes ejecutadas:        52
+  Perdida maxima:            2082
+  No operar:                 10000
+  Comprar y mantener:        6695
+  Peor caso precio->decision: 44 ciclos (disponibles: 2262)
+  Detalle por tick en decisiones.csv
+  PASS MISO sin valores X
+  PASS el programa escribe DECISION
+  PASS el programa lee todos los precios
+  PASS la decision llega antes del siguiente tick
+  Testbenchs aprobados: 4/4
+  monitor: precios=1998 escrituras=1998 max_sin_respuesta=1 ciclos_con_BOOT=0 N=4
+  decisiones.csv: sha256 3fd1bebe688550c1b34bcf5031b579258f0ad68445c84731e08f1cd793ddb39c
+--- repo_seg ---
+  Patrimonio final:          9617
+  Ordenes ejecutadas:        52
+  Perdida maxima:            2082
+  No operar:                 10000
+  Comprar y mantener:        6695
+  Peor caso precio->decision: 26 ciclos (disponibles: 2262)
+  Detalle por tick en decisiones.csv
+  PASS MISO sin valores X
+  PASS el programa escribe DECISION
+  PASS el programa lee todos los precios
+  PASS la decision llega antes del siguiente tick
+  Testbenchs aprobados: 4/4
+  decisiones.csv: sha256 3fd1bebe688550c1b34bcf5031b579258f0ad68445c84731e08f1cd793ddb39c
+--- vig_seg ---
+  Patrimonio final:          9617
+  Ordenes ejecutadas:        52
+  Perdida maxima:            2082
+  No operar:                 10000
+  Comprar y mantener:        6695
+  Peor caso precio->decision: 26 ciclos (disponibles: 2262)
+  Detalle por tick en decisiones.csv
+  PASS MISO sin valores X
+  PASS el programa escribe DECISION
+  PASS el programa lee todos los precios
+  PASS la decision llega antes del siguiente tick
+  Testbenchs aprobados: 4/4
+  monitor: precios=1998 escrituras=1998 max_sin_respuesta=1 ciclos_con_BOOT=0 N=4
+  decisiones.csv: sha256 3fd1bebe688550c1b34bcf5031b579258f0ad68445c84731e08f1cd793ddb39c
+
+decisiones.csv de vig_base idéntico al de repo_base: sí
+decisiones.csv de vig_seg idéntico al de repo_seg: sí
+vig_base: el vigilante no dispara y la cuenta no pasa de 1: sí
+vig_seg: el vigilante no dispara y la cuenta no pasa de 1: sí
+RESULTADO: correcto

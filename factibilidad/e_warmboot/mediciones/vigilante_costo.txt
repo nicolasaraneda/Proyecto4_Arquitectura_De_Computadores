@@ -1,0 +1,28 @@
+Costo del vigilante integrado en el SoC
+Comando: factibilidad/e_warmboot/scripts/medir_vigilante.sh 10
+Herramientas: Yosys 0.68+195, nextpnr nextpnr-0.11.1-19-g8dbcee5c
+nextpnr --hx1k --package vq100 --freq 25, 10 semillas, programa sw/trade.hex
+
+fact_e_repo_base       celdas 1083 de 1280, BRAM 12 de 16, LUT4  906, fmax min  42.43 mediana  43.74 max  45.08 MHz, cierran a 25 MHz 10 de 10
+fact_e_base_sin        celdas 1076 de 1280, BRAM 12 de 16, LUT4  899, fmax min  42.74 mediana  44.75 max  46.13 MHz, cierran a 25 MHz 10 de 10
+fact_e_base_vig        celdas 1085 de 1280, BRAM 12 de 16, LUT4  906, fmax min  45.09 mediana  45.61 max  47.63 MHz, cierran a 25 MHz 10 de 10
+fact_e_repo_seg        celdas  994 de 1280, BRAM 12 de 16, LUT4  802, fmax min  51.13 mediana  53.50 max  54.50 MHz, cierran a 25 MHz 10 de 10
+fact_e_seg_sin         celdas 1001 de 1280, BRAM 12 de 16, LUT4  810, fmax min  51.83 mediana  53.77 max  55.44 MHz, cierran a 25 MHz 10 de 10
+fact_e_seg_vig         celdas 1010 de 1280, BRAM 12 de 16, LUT4  817, fmax min  51.41 mediana  53.56 max  54.39 MHz, cierran a 25 MHz 10 de 10
+
+Primitiva SB_WARMBOOT ubicada por nextpnr (semilla 1):
+  fact_e_base_vig     SB_WARMBOOT: 1/ 1 100%
+  fact_e_seg_vig      SB_WARMBOOT: 1/ 1 100%
+
+Módulo vigilante sintetizado solo (yosys synth_ice40, sin place and route):
+  N = 1   3 SB_DFFER, 5 SB_LUT4
+  N = 4   1 SB_CARRY, 4 SB_DFFER, 8 SB_LUT4
+  N = 15  3 SB_CARRY, 6 SB_DFFER, 13 SB_LUT4
+
+Frecuencia máxima por semilla (MHz), semillas 1 a 10:
+  fact_e_repo_base   43.30 43.42 44.23 43.22 45.02 45.08 42.43 44.06 42.72 44.85 
+  fact_e_base_sin    42.74 44.01 45.17 45.80 43.52 44.87 44.12 45.86 44.64 46.13 
+  fact_e_base_vig    45.09 45.26 46.25 47.63 45.83 46.93 45.38 45.14 47.02 45.31 
+  fact_e_repo_seg    54.50 53.60 53.69 53.30 53.40 54.34 51.13 54.01 51.65 52.54 
+  fact_e_seg_sin     54.40 55.44 55.22 54.84 52.42 53.52 52.79 52.75 51.83 54.01 
+  fact_e_seg_vig     54.39 53.34 52.71 53.86 52.42 51.41 54.17 51.95 53.79 54.22 

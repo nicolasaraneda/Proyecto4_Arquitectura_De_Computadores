@@ -1,0 +1,89 @@
+Hechos de la plataforma comprobados sin la placa
+Comando: factibilidad/e_warmboot/scripts/plataforma.sh
+
+=== Herramientas ===
+Yosys 0.68+195 (git sha1 435977e97-dirty, Release, Clang /usr/bin/clang++ 21.1.8)
+"nextpnr-ice40" -- Next Generation Place and Route (Version nextpnr-0.11.1-19-g8dbcee5c)
+icepack, icemulti, iceprog: los de OSS CAD Suite (/home/nicolasaraneda/herramientas/oss-cad-suite/bin)
+
+=== Bitstreams de la HX1K ===
+bitstreams/competencia_v1.bin                   32220 bytes (257760 bits)
+bitstreams/segmentado_v1.bin                    32220 bytes (257760 bits)
+factibilidad/e_warmboot/build/demo/img0.bin     32220 bytes (257760 bits)
+factibilidad/e_warmboot/build/demo/img1.bin     32220 bytes (257760 bits)
+Cabecera, según icepack -u -v:
+  bitstreams/competencia_v1.bin                Setting freqrange to 'low'. Setting warmboot to 'enabled', nosleep to 'disabled'. CRC Check OK.
+  bitstreams/segmentado_v1.bin                 Setting freqrange to 'low'. Setting warmboot to 'enabled', nosleep to 'disabled'. CRC Check OK.
+  factibilidad/e_warmboot/build/demo/img0.bin  Setting freqrange to 'low'. Setting warmboot to 'enabled', nosleep to 'disabled'. CRC Check OK.
+Primeros 16 bytes de bitstreams/competencia_v1.bin: ff0000ff7eaa997e5100010592002062
+  7eaa997e sincronía, 51 00 oscilador de configuración en frecuencia baja, 01 05 reinicio del CRC,
+  92 00 20 warm boot habilitado y flash a bajo consumo al terminar
+
+=== icemulti ===
+  Usage: /home/nicolasaraneda/herramientas/oss-cad-suite/libexec/icemulti [options] input-files
+  
+   -c
+   coldboot mode, power on reset image is selected by CBSEL0/CBSEL1
+  
+   -p0, -p1, -p2, -p3
+   select power on reset image when not using coldboot mode
+  
+   -a<n>, -A<n>
+   align images at 2^<n> bytes. -A also aligns image 0.
+  
+   -o filename
+   write output image to file instead of stdout
+  
+   -v
+   verbose (repeat to increase verbosity)
+  
+Con 5 imágenes: icemulti: Too many images supplied
+
+=== SB_WARMBOOT en la HX1K VQ100 con nextpnr ===
+Imagen 0 de la prueba de placa (build/demo/nextpnr_img0.log):
+ ICESTORM_LC: 184/ 1280 14%
+ ICESTORM_RAM: 0/ 16 0%
+ SB_IO: 25/ 72 34%
+ SB_GB: 1/ 8 12%
+ SB_WARMBOOT: 1/ 1 100%
+Dos primitivas en el mismo diseño:
+  ERROR: Unable to place cell 'u_a', no BELs remaining to implement cell type 'SB_WARMBOOT'
+
+=== iceprog: opciones que importan (texto de ayuda leído del binario, sin ejecutarlo) ===
+    -o <offset in bytes>  start address for read/write [default: 0]
+    -i [4,32,64]          select erase block size [default: 64k]
+    [default]             write file contents to flash, then verify
+    -r                    read first 256 kB from flash and write to file
+    -R <size in bytes>    read the specified number of bytes from flash
+    -c                    do not write flash, only verify (`check')
+    -t                    just read the flash ID sequence
+    [default]             erase aligned chunks of 64kB in write mode
+    -b                    bulk erase entire flash before writing
+    -e <size in bytes>    erase flash as if we were writing that number of bytes
+    -n                    do not erase flash before writing
+
+=== Ticks que se pierden, con los tiempos de la hoja de datos (estimado, no medido) ===
+tCONFIG típico de la iCE40HX1K (DS1040, tabla SPI Master or NVCM Configuration Time):
+53 ms con el oscilador en frecuencia baja, 25 ms en media y 13 ms en alta.
+Cuenta: N + 1 = 5 precios para que el vigilante dispare. BOOT sube 13,6 us después del
+comienzo del quinto (al terminar su transacción). Desde ahí pasan tCONFIG y el reset de
+4095 ciclos (0,164 ms), y el respaldo responde al primer precio que recibe completo.
+La misma cuenta sale de la simulación del relevo (mediciones/relevo.txt).
+  T        tCONFIG    ticks sin el chip      ticks sin decisión nueva     de una ronda de 2000    
+  10 ms    53 ms      5.3                    10                           0.5 %                   
+  10 ms    25 ms      2.5                    7                            0.3 %                   
+  10 ms    13 ms      1.3                    6                            0.3 %                   
+  1 ms     53 ms      53.2                   58                           2.9 %                   
+  1 ms     25 ms      25.2                   30                           1.5 %                   
+  1 ms     13 ms      13.2                   18                           0.9 %                   
+  0,1 ms   53 ms      531.8                  536                          26.8 %                  
+  0,1 ms   25 ms      251.8                  256                          12.8 %                  
+  0,1 ms   13 ms      131.8                  136                          6.8 %                   
+Una ronda de 2000 ticks dura 20 s a 10 ms, 2 s a 1 ms y 0,2 s a 0,1 ms.
+
+Lectura del bitstream a la frecuencia típica del oscilador (DS1040, fMCLK): 257760 bits
+  baja    7.5 MHz:  34.4 ms
+  media  24.0 MHz:  10.7 ms
+  alta   40.0 MHz:   6.4 ms
+La diferencia con tCONFIG es lo que la FPGA demora en borrar su memoria de configuración,
+despertar la flash y arrancar. No está desglosado en la hoja de datos.

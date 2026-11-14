@@ -1,0 +1,52 @@
+Archivo de la prueba de relevo: SoC con vigilante + bitstream de competencia
+Comando: factibilidad/e_warmboot/scripts/construir_relevo.sh
+Herramientas: Yosys 0.68+195, nextpnr nextpnr-0.11.1-19-g8dbcee5c
+
+imagen 0: copia del SoC, Vigilante = 1, VigN = 4, VigBoton = 1, programa sw/cuelgue.s con K = 500
+  celdas lógicas   1106 de 1280
+  BRAM             12 de 16
+  SB_WARMBOOT      1 de 1
+  frecuencia máx.  45.39 MHz (PASS at 25.00 MHz) (semilla 1)
+  sha256           e5ceaa0fca8fefcea514dbbc93d92666bffad0368e5c53cf7987775a5b3cc21c
+imagen 1: bitstreams/competencia_v1.bin
+  sha256           4e902ec878e4dde33353e7fb97b6695bec259bd7e229222735009d1ea6fb0b83
+
+icemulti -a15 -v -o relevo_prueba_multi.bin principal.bin bitstreams/competencia_v1.bin:
+  Place image 0 at 0000a0 .. 008000 (`factibilidad/e_warmboot/build/relevo_img/principal.bin')
+  Place image 1 at 008000 .. 010000 (`bitstreams/competencia_v1.bin')
+
+archivo: factibilidad/e_warmboot/relevo_prueba_multi.bin
+tamaño: 64988 bytes de 131072 (49.6 %), sobran 66084
+sha256: b35aa1e5619100fa0419a36c34ce7bc95c9d833b2eb60adb025c75177d5ba1e3
+vector 0 (encendido ) -> 0x0000A0   modo 0x00, oscilador de configuración en frecuencia baja, warm boot habilitado
+vector 1 (S1 S0 = 00) -> 0x0000A0   modo 0x00, oscilador de configuración en frecuencia baja, warm boot habilitado
+vector 2 (S1 S0 = 01) -> 0x008000   modo 0x00, oscilador de configuración en frecuencia baja, warm boot habilitado
+vector 3 (S1 S0 = 10) -> 0x0000A0   modo 0x00, oscilador de configuración en frecuencia baja, warm boot habilitado
+vector 4 (S1 S0 = 11) -> 0x0000A0   modo 0x00, oscilador de configuración en frecuencia baja, warm boot habilitado
+imágenes distintas: 2, en 0x0000A0, 0x008000
+imagen 0: factibilidad/e_warmboot/build/relevo_img/principal.bin, 32220 bytes, sha256 e5ceaa0fca8fefcea514dbbc93d92666bffad0368e5c53cf7987775a5b3cc21c, copia idéntica
+imagen 1: bitstreams/competencia_v1.bin, 32220 bytes, sha256 4e902ec878e4dde33353e7fb97b6695bec259bd7e229222735009d1ea6fb0b83, copia idéntica
+RESULTADO: correcto
+
+Simulación de la imagen 0 desde el .asc (tb/tb_chip_relevo.sv):
+imagen principal de la prueba de relevo, con maestra (K = 500, N = 4, periodo 100000 ns)
+  ok    a mitad de los K precios BOOT sigue en 0
+  ok    LED 1 encendido: corre la imagen principal
+  primer byte 0x7F leido en el tick 3; bytes 0x00: 3, 0x7F: 504, otros: 0
+  BOOT sube en el tick 506 (esperado 506), 100 ns despues de que CS_n sube; S1 S0 = 01
+  ok    BOOT sube despues de N + 1 precios sin respuesta, ni antes ni despues
+  ok    BOOT sube con CS_n en alto
+  ok    S1 S0 = 01: la imagen de respaldo
+  ok    los displays muestran 00: no quedan precios por responder
+  ok    la maestra solo leyo 0x00 y 0x7F
+  ok    MISO sin valores X
+  ok    BOOT queda en alto y el destino no cambia
+PASS imagen principal modo 0
+imagen principal de la prueba de relevo, sin maestra (disparo con el interruptor 4)
+  ok    sin maestra y sin tocar nada, BOOT sigue en 0 despues de 20 000 ciclos
+  ok    LED 1 encendido: corre la imagen principal
+  ok    los interruptores 1, 2 y 3 no disparan
+  ok    el interruptor 4 sube BOOT
+  ok    S1 S0 = 01: la imagen de respaldo
+  ok    BOOT queda en alto al soltar el interruptor
+PASS imagen principal modo 1
