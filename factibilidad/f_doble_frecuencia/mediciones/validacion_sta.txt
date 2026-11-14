@@ -1,0 +1,31 @@
+Validación de scripts/sta_icestorm.py
+
+1. Rutas por flanco (rtl/top_clases.v). Retardo de la ruta crítica en ns.
+   caso                               sem | nextpnr: flancos        retardo | sta: clase  retardo | diferencia
+   larga de bajada a subida             1 | negedge -> posedge         5.52 | neg>pos        5.57 | +0.05 ns (+1.0 %)
+   larga de bajada a subida             2 | negedge -> posedge         5.48 | neg>pos        5.47 | -0.01 ns (-0.2 %)
+   larga de bajada a subida             3 | negedge -> posedge         5.25 | neg>pos        5.46 | +0.21 ns (+3.9 %)
+   larga de bajada a subida             4 | negedge -> posedge         5.06 | neg>pos        5.18 | +0.11 ns (+2.3 %)
+   larga de bajada a subida             5 | negedge -> posedge         5.01 | neg>pos        5.08 | +0.07 ns (+1.5 %)
+   larga de subida a bajada             1 | posedge -> negedge         5.01 | pos>neg        5.14 | +0.14 ns (+2.7 %)
+   larga de subida a bajada             2 | posedge -> negedge         5.01 | pos>neg        5.21 | +0.21 ns (+4.1 %)
+   larga de subida a bajada             3 | posedge -> negedge         5.01 | pos>neg        5.14 | +0.14 ns (+2.7 %)
+   larga de subida a bajada             4 | posedge -> negedge         5.01 | pos>neg        5.13 | +0.12 ns (+2.4 %)
+   larga de subida a bajada             5 | posedge -> negedge         5.23 | pos>neg        5.35 | +0.12 ns (+2.3 %)
+   nextpnr usa un solo valor por arco (el máximo de la base, con la entrada lógica de la LUT) y sta_icestorm.py
+   la entrada física que quedó ruteada. Lo que se valida es que la clase y el orden de magnitud coinciden.
+
+2. Ruta de un período en el SoC (corridas de scripts/medir_soc.sh, objetivo 50 MHz), en ns
+   variante sem |      sta  icetime  nextpnr | sta menos icetime, sta menos nextpnr
+   base_x1    1 |    22.74    22.84    22.49 | -0.10, +0.25
+   base_x1    2 |    22.11    22.21    21.72 | -0.10, +0.39
+   base_x2    1 |    22.45    22.55    22.22 | -0.10, +0.23
+   base_x2    2 |    21.70    21.80    21.01 | -0.10, +0.69
+   seg_x1     1 |    18.12    18.22    18.27 | -0.10, -0.16
+   seg_x1     2 |    18.59    18.69    19.35 | -0.10, -0.76
+   seg_x2     1 |    17.60    17.63    17.66 | -0.03, -0.05
+   seg_x2     2 |    18.14    18.24    18.21 | -0.10, -0.07
+   (se muestran dos semillas por variante)
+   En las 40 corridas: sta menos icetime de -0.10 a -0.03 ns. sta menos nextpnr de -0.76 a +0.75 ns.
+   En el segmentado nextpnr puede informar una ruta de medio ciclo como la crítica (la cuenta doble):
+   por eso su período mínimo no siempre es la ruta de subida a subida.

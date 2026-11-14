@@ -1,0 +1,6 @@
+# Productos intermedios de la pieza F
+build/
+__pycache__/
+
+# El bitstream de la prueba de placa sí se versiona, con su hash
+!placa/placa_x2.bin

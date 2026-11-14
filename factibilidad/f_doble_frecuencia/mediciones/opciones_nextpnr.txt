@@ -1,0 +1,24 @@
+Opciones de nextpnr sobre el SoC con reloj doblado (10 semillas, objetivo 56,4 MHz en la red clk)
+Frecuencia máxima según nextpnr (MHz: mínima, mediana y máxima). 56,4 MHz: ciclo de trabajo de 45 a 55 %.
+58,8 MHz: lo mismo más 0,727 ns de skew de la red global.
+
+variante opciones                             | terminan  | nextpnr                | >= 50     >= 56,4   >= 58,8  
+seg_x2   (por defecto)                        | 10 de 10  | 51.66 54.66 56.63      | 10 de 10  1 de 10   0 de 10  
+seg_x2   --opt-timing                         | 10 de 10  | 48.48 51.88 54.72      | 8 de 10   0 de 10   0 de 10  
+seg_x2   --tmg-ripup                          | 10 de 10  | 50.69 54.66 56.63      | 10 de 10  1 de 10   0 de 10  
+seg_x2   --opt-timing --tmg-ripup             | 8 de 10   | 48.48 51.80 54.72      | 6 de 8    0 de 8    0 de 8   
+seg_x2   --placer-heap-timingweight 30        | 10 de 10  | 51.64 53.21 55.82      | 10 de 10  0 de 10   0 de 10  
+base_x2  (por defecto)                        | 10 de 10  | 44.51 45.70 47.78      | 0 de 10   0 de 10   0 de 10  
+base_x2  --opt-timing                         | 10 de 10  | 37.47 39.80 42.39      | 0 de 10   0 de 10   0 de 10  
+
+terminan: corridas que nextpnr completó dentro del tiempo límite de 300 s. Las demás no tienen resultado.
+
+Detalle por semilla (MHz; -: no terminó)
+variante opciones                             |     s1     s2     s3     s4     s5     s6     s7     s8     s9    s10
+seg_x2   (por defecto)                        |  56.63  54.90  53.40  54.65  55.21  53.06  54.15  55.91  54.67  51.66
+seg_x2   --opt-timing                         |  48.48  52.35  52.19  49.98  53.18  51.68  51.70  51.84  54.72  51.91
+seg_x2   --tmg-ripup                          |  56.63  54.90  53.40  54.65  55.47  53.06  54.15  55.91  54.67  50.69
+seg_x2   --opt-timing --tmg-ripup             |  48.48      -  52.19  49.98  53.18  51.68      -  51.84  54.72  51.76
+seg_x2   --placer-heap-timingweight 30        |  52.86  53.89  53.19  55.81  54.95  53.23  55.82  51.64  52.77  52.95
+base_x2  (por defecto)                        |  45.01  47.59  44.51  45.79  45.61  47.78  46.97  45.36  45.19  47.76
+base_x2  --opt-timing                         |  38.73  39.13  41.57  41.25  41.16  40.29  42.39  37.47  39.30  38.14

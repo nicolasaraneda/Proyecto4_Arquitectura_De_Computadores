@@ -1,0 +1,51 @@
+Prueba del duplicador para la Go Board (rtl/placa_x2.v)
+
+1. Simulación (tb/tb_placa_x2.v, modelo de retardo)
+    Sin botones: 300 ciclos de 25 MHz, 600 del reloj doblado
+    PASS el contador del reloj doblado avanza el doble
+    PASS LED1 encendido y LED2 apagado
+    PASS los displays muestran los bits altos de cada contador
+    PASS pin de prueba: reloj doblado dividido por 2 (periodo de 40 ns)
+    PASS SW3 (toma de 2 LUT): en verde despues de borrar con SW4
+    SW1: pulso ideal de 1500 ps con minimo de 2000 ps
+    PASS SW1 (sin cadena): reloj detenido, la prueba marca error
+    PASS el error queda retenido al soltar SW1
+    PASS en verde otra vez despues de borrar con SW4
+    SW4: el anillo mide D = 76 (0x4c). Esperado 1280 / 16.80 ns = 76
+    PASS la medicion del anillo es 1280 / periodo
+    PASS con SW4 los displays muestran la medicion del anillo
+    SW4: pulso crudo en el pin de prueba, 10500 ps en alto
+    PASS con SW4 el pin de prueba entrega el pulso crudo
+    PASS la medicion queda guardada al soltar SW4
+    PASS el duplicador sigue en verde despues de usar el anillo
+    RESULTADO: PASS
+    Control negativo: cadena de 18500 ps con semiperiodo de 20000 ps
+    PASS la prueba marca error (LED1 apagado, LED2 encendido)
+    RESULTADO: PASS
+
+2. Recursos y frecuencia máxima según nextpnr (10 semillas; MHz: mínima, mediana y máxima)
+    celdas lógicas: 207 de 1280. Buffers globales: 3 de 8. BRAM: 0.
+    clk2x                      122.25 128.06 140.39 MHz, objetivo 56.40 MHz, cierran 10 de 10
+    clk_ani                    169.06 180.38 180.38 MHz, objetivo 150.01 MHz, cierran 10 de 10
+    i_Clk$SB_IO_IN_$glb_clk    171.09 171.09 171.09 MHz, objetivo 25.00 MHz, cierran 10 de 10
+
+3. Bitstream (semilla 1): factibilidad/f_doble_frecuencia/placa/placa_x2.bin, 32220 bytes
+    SHA-256: b97efed0d0142c7421a2cd5489d120be3d5d0ba2013e8c5d04c1264146352d55
+
+4. Ancho del pulso del reloj doblado con cada botón, en el bitstream (ns, base de tiempos de icestorm)
+    El multiplexor de tomas suma su retardo: por eso la cadena completa da más que en mediciones/cadena.txt,
+    y con SW1 queda un pulso aunque no haya ninguna LUT de la cadena en el camino.
+    botón              | mínima: sube, baja | típica: sube, baja | máxima: sube, baja
+    ninguno (8 LUT)    | 8.54, 7.98         | 9.44, 8.83         | 10.63, 9.93       
+    SW1 (sin cadena)   | 1.05, 1.00         | 1.17, 1.10         | 1.31, 1.24        
+    SW2 (1 LUT)        | 2.30, 2.26         | 2.54, 2.50         | 2.86, 2.81        
+    SW3 (2 LUT)        | 3.70, 3.64         | 4.10, 4.02         | 4.61, 4.52        
+    Pulso mínimo de la red global según la hoja de datos (tW_GBUF, iCE40HX): 0,88 ns.
+
+5. Oscilador en anillo (compuerta NAND y 8 LUT de retardo), en el bitstream
+    esquina    período (ns)  D esperado = 1280 / T   displays con SW4 (hex)
+    mínima            13.33                     96                       60
+    típica            14.74                     86                       56
+    máxima            16.58                     77                       4D
+    Si los displays muestran D, el período real del anillo es 1280 / D ns (D en decimal).
+    Retardo real respecto de la esquina máxima de la base: (1280 / D) / 16.58.

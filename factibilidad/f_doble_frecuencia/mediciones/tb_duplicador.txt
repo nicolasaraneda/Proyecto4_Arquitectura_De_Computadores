@@ -1,0 +1,32 @@
+Testbench del duplicador (tb/tb_duplicador.v), retardos de factibilidad/f_doble_frecuencia/build/cadena/m0_n8_fijo_1_8_s1.sta.json
+Semiperíodos en ps, ya corregidos por la diferencia de latencia entre flancos.
+
+min_duty45                 alto 17775 bajo 22225 cadena  6145/ 5530 ps: PASS (como se esperaba)
+      Tiempo en alto: 5530 a 6145 ps. Tiempo en bajo: 11630 a 16695 ps. Periodo: 17775 a 22225 ps
+min_duty50                 alto 19775 bajo 20225 cadena  6145/ 5530 ps: PASS (como se esperaba)
+      Tiempo en alto: 5530 a 6145 ps. Tiempo en bajo: 13630 a 14695 ps. Periodo: 19775 a 20225 ps
+min_duty55                 alto 21775 bajo 18225 cadena  6145/ 5530 ps: PASS (como se esperaba)
+      Tiempo en alto: 5530 a 6145 ps. Tiempo en bajo: 12695 a 15630 ps. Periodo: 18225 a 21775 ps
+tip_duty45                 alto 17757 bajo 22243 cadena  6795/ 6115 ps: PASS (como se esperaba)
+      Tiempo en alto: 6115 a 6795 ps. Tiempo en bajo: 10962 a 16128 ps. Periodo: 17757 a 22243 ps
+tip_duty50                 alto 19757 bajo 20243 cadena  6795/ 6115 ps: PASS (como se esperaba)
+      Tiempo en alto: 6115 a 6795 ps. Tiempo en bajo: 12962 a 14128 ps. Periodo: 19757 a 20243 ps
+tip_duty55                 alto 21757 bajo 18243 cadena  6795/ 6115 ps: PASS (como se esperaba)
+      Tiempo en alto: 6115 a 6795 ps. Tiempo en bajo: 12128 a 14962 ps. Periodo: 18243 a 21757 ps
+max_duty45                 alto 17733 bajo 22267 cadena  7645/ 6880 ps: PASS (como se esperaba)
+      Tiempo en alto: 6880 a 7645 ps. Tiempo en bajo: 10088 a 15387 ps. Periodo: 17733 a 22267 ps
+max_duty50                 alto 19733 bajo 20267 cadena  7645/ 6880 ps: PASS (como se esperaba)
+      Tiempo en alto: 6880 a 7645 ps. Tiempo en bajo: 12088 a 13387 ps. Periodo: 19733 a 20267 ps
+max_duty55                 alto 21733 bajo 18267 cadena  7645/ 6880 ps: PASS (como se esperaba)
+      Tiempo en alto: 6880 a 7645 ps. Tiempo en bajo: 11387 a 14088 ps. Periodo: 18267 a 21733 ps
+control_cadena_larga       alto 20000 bajo 20000 cadena 20500/20500 ps: FAIL (como se esperaba)
+      Tiempo en alto: 19500 a 19500 ps. Tiempo en bajo: 500 a 500 ps. Periodo: 20000 a 20000 ps
+      FAIL el ancho del pulso es el retardo de la cadena
+      FAIL tiempos en alto y en bajo sobre el minimo
+      RESULTADO: FAIL (2 comprobaciones)
+control_cadena_corta       alto 20000 bajo 20000 cadena   300/  300 ps: FAIL (como se esperaba)
+      Tiempo en alto: 300 a 300 ps. Tiempo en bajo: 19700 a 19700 ps. Periodo: 20000 a 20000 ps
+      FAIL tiempos en alto y en bajo sobre el minimo
+      RESULTADO: FAIL (1 comprobaciones)
+
+TODOS LOS CASOS COMO SE ESPERABA

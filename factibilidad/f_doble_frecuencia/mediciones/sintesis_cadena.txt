@@ -1,0 +1,25 @@
+Cadena de 8 LUT del duplicador después de synth_ice40 (Yosys 0.68+195)
+
+forma de escribirla y opciones                             | cadena  | XOR | LUT4 | qué llega al buffer global
+primitivas SB_LUT4 con keep, flujo por defecto             | 8 de 8 | sí  |   35 | buffer global alimentado por u_dup.u_xor
+primitivas SB_LUT4 sin keep, flujo por defecto             | 8 de 8 | sí  |   35 | buffer global alimentado por u_dup.u_xor
+primitivas con keep, synth_ice40 -relut                    | 8 de 8 | sí  |   35 | buffer global alimentado por u_dup.u_xor
+primitivas sin keep, synth_ice40 -relut                    | 8 de 8 | sí  |   35 | buffer global alimentado por u_dup.u_xor
+primitivas con keep, synth_ice40 -abc9                     | 8 de 8 | sí  |   35 | buffer global alimentado por u_dup.u_xor
+primitivas sin keep, synth_ice40 -abc9                     | 8 de 8 | sí  |   35 | buffer global alimentado por u_dup.u_xor
+asignaciones comunes (CADENA_RTL), flujo por defecto       | 0 de 8 | no  |   26 | entrada del buffer global constante (0): el reloj doblado desapareció
+AND y OR de 4 entradas con keep, flujo por defecto         | 8 de 8 | sí  |   35 | buffer global alimentado por u_dup.u_xor
+AND y OR de 4 entradas sin keep, synth_ice40 -relut        | 8 de 8 | sí  |   35 | buffer global alimentado por u_dup.u_xor
+
+nextpnr sobre el caso a (primitivas con keep), cadena fija en X1/Y8:
+  celdas lógicas del duplicador después de empaquetar: 9 (8 de la cadena y el XOR)
+    X0/Y9/gb     u_dup.u_gb
+    X1/Y8/lc0    u_dup.g_ret[0].g_buf.u_buf_LC
+    X1/Y8/lc1    u_dup.g_ret[1].g_buf.u_buf_LC
+    X1/Y8/lc2    u_dup.g_ret[2].g_buf.u_buf_LC
+    X1/Y8/lc3    u_dup.g_ret[3].g_buf.u_buf_LC
+    X1/Y8/lc4    u_dup.g_ret[4].g_buf.u_buf_LC
+    X1/Y8/lc5    u_dup.g_ret[5].g_buf.u_buf_LC
+    X1/Y8/lc6    u_dup.g_ret[6].g_buf.u_buf_LC
+    X1/Y8/lc7    u_dup.g_ret[7].g_buf.u_buf_LC
+    X1/Y9/lc0    u_dup.u_xor_LC
