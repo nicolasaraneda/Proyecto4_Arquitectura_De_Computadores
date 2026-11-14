@@ -1,0 +1,40 @@
+== Testbenches por módulo contra ref/xd.py (completo) ==
+PASS modelo xd.py: 2725001 casos
+PASS xd_ema_kb0: 20784 vectores identicos al modelo ref/xd.py
+PASS xd_srak_kb0: 20784 vectores identicos al modelo ref/xd.py
+PASS xd_opa_kb0: 66448 vectores identicos al modelo ref/xd.py
+PASS xd_ema_kb2: 83136 vectores identicos al modelo ref/xd.py
+PASS xd_srak_kb2: 83136 vectores identicos al modelo ref/xd.py
+PASS xd_opa_kb2: 191152 vectores identicos al modelo ref/xd.py
+PASS xd_ema_kb3: 166272 vectores identicos al modelo ref/xd.py
+PASS xd_srak_kb3: 166272 vectores identicos al modelo ref/xd.py
+PASS xd_opa_kb3: 357424 vectores identicos al modelo ref/xd.py
+PASS xd_ema_kb5: 665088 vectores identicos al modelo ref/xd.py
+PASS xd_srak_kb5: 665088 vectores identicos al modelo ref/xd.py
+PASS xd_opa_kb5: 1355056 vectores identicos al modelo ref/xd.py
+PASS xd_ema_dominio: 2072895 vectores identicos al modelo ref/xd.py
+PASS xd_opa_dominio: 4145790 vectores identicos al modelo ref/xd.py
+PASS xd_simd8_m0: 258960 vectores identicos al modelo ref/xd.py
+PASS xd_simd8_m28: 604240 vectores identicos al modelo ref/xd.py
+PASS xd_simd8_m31: 863200 vectores identicos al modelo ref/xd.py
+PASS xd_simd8_m32: 258960 vectores identicos al modelo ref/xd.py
+PASS xd_simd8_m63: 863200 vectores identicos al modelo ref/xd.py
+PASS xd_alu_carriles: 431600 vectores identicos al modelo ref/xd.py
+PASS xd_mulstep: 118864 vectores identicos al modelo ref/xd.py
+PASS xd_divstep: 346770 vectores identicos al modelo ref/xd.py
+PASS xd_mulc_aw8: 86320 vectores identicos al modelo ref/xd.py
+PASS xd_mulc_aw16: 20784 vectores identicos al modelo ref/xd.py
+PASS tb_xd_mul_mmio: 56000 ciclos identicos al modelo ref/xd.py
+PASS: todos los módulos coinciden con el modelo
+
+== Controles negativos por mutación ==
+detectada     muta_ema: 1400 diferencias en 2784 vectores
+detectada     muta_srak: 7593 diferencias en 22272 vectores
+detectada     muta_opa: 926 diferencias en 12448 vectores
+detectada     muta_simd: 50833 diferencias en 204960 vectores
+detectada     muta_alu: 101052 diferencias en 341600 vectores
+detectada     muta_mulstep: 98171 diferencias en 100864 vectores
+detectada     muta_divstep: 11307 diferencias en 310770 vectores
+detectada     muta_mulc: 33875 diferencias en 68320 vectores
+detectada     muta_mmio: 6468 diferencias en 38000 ciclos
+Mutaciones detectadas: 9 de 9

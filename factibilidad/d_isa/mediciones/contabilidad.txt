@@ -1,0 +1,61 @@
+Contabilidad propia con mulstep y divstep
+Generado por factibilidad/d_isa/tools/contabilidad.py (make contabilidad). No editar a mano.
+
+== 1. Anchos ==
+Contabilidad oficial (tb/tb_proyecto_4.sv): compra recortada a (caja - comisión) / p, venta recortada a las
+acciones, a lo más 63 acciones por orden. Precio p de 1 a 255 (8 bits).
+
+cantidad                                                      máximo  bits
+precio p                                                         255     8
+acciones por orden q                                              63     6
+costo de una orden q * p                                       16065    14
+caja inicial                                                  100000    17
+acciones con caja inicial y p = 1                              99995    17
+acciones si el patrimonio se multiplica por 100 y p = 1     10000000    24
+multiplicando que acepta mulstep con 8 pasos                16777215    24
+producto que cabe en un registro                          4294967295    32
+
+El multiplicador siempre es el precio (8 bits, 8 pasos). El multiplicando es q (6 bits) o las acciones.
+Con 8 pasos de mulstep el multiplicando puede tener 24 bits: 16,7 millones de acciones, 167 veces la
+caja inicial más grande aun con el precio en 1. El producto acciones * p cabe en 32 bits.
+El cociente de la compra recortada es menor que 63 (6 bits), así que los 8 bits de divstep sobran, y su
+condición N < 256 D se cumple siempre que hay recorte, porque ahí caja - comisión < 63 p.
+
+== 2. Comprobación contra ref/market.py ==
+serie y órdenes                                        caja0  com.   ticks  patrimonio   prod.   coc.
+práctica, regla base (comprar 63 y vender 63)           1000     0   20000        3134   20151     76
+práctica, regla base (comprar 63 y vender 63)           1000     5   20000        1567   20151     76
+práctica, regla base (comprar 63 y vender 63)           1000    50   20000          59   20018      9
+práctica, regla base (comprar 63 y vender 63)          10000     0   20000       30735   20416     73
+práctica, regla base (comprar 63 y vender 63)          10000     5   20000       27062   20388     75
+práctica, regla base (comprar 63 y vender 63)          10000    50   20000        7699   20226     68
+práctica, regla base (comprar 63 y vender 63)         100000     0   20000      189866   22181     47
+práctica, regla base (comprar 63 y vender 63)         100000     5   20000      177633   22138     47
+práctica, regla base (comprar 63 y vender 63)         100000    50   20000       91133   21683     54
+300 series al azar de 2000 ticks, órdenes al azar     varias  0-50  600000
+
+PASS: caja, acciones y patrimonio idénticos a ref/market.py en 780000 ticks de 309 corridas.
+Productos hechos: 975207. Cocientes hechos: 10726. Por tick, peor caso: 2 productos y 1 cociente.
+Máximos vistos: caja 398371 (19 bits), acciones 2238 (12 bits), patrimonio 609822 (20 bits).
+El cociente solo aparece en la compra recortada. La venta se recorta con una comparación.
+La caja que queda después de una compra recortada es el resto de esa misma división.
+
+== 3. Costo de cada forma de multiplicar y de dividir (ESTIMADO, no hay programa) ==
+Instrucciones por operación, contadas a mano sobre la secuencia que usaría el programa. En el barrel cada
+instrucción de un hilo son 4 ciclos de reloj; en el segmentado, 1 ciclo (2 un load). El periférico exige
+pedir la lectura 9 ciclos o más después de escribir MULB: en el segmentado son 8 ciclos de espera.
+
+forma                                                instr.  notas
+Producto 8 x 24, solo RV32E (sumar y duplicar)           48  8 bits del precio x 6 instrucciones, sin saltos
+Producto con mulstep                                     10  sb y lw para dejar el precio en los 8 bits altos (no hay shift), y 8 pasos
+Producto con el periférico MMIO                       3 + 2  sw, sw, dos instrucciones cualesquiera y lw (barrel: el lw va 12 ciclos después); tiene estado: un solo hilo
+Producto con mulc (combinacional)                         1  8 x 8 cabe; 16 x 8 no cabe; acciones de más de 8 bits no caben
+Cociente de 6 bits, solo RV32E (6 restas de prueba)      35  5 sumas para 2p a 32p y 6 x 5 de comparar y restar
+Cociente y resto con divstep                             11  8 pasos, andi para el cociente, y sw y lbu para el resto (es menor que p: un byte)
+Cociente buscando con el multiplicador                   60  6 pasos de búsqueda binaria x (producto y comparación)
+
+Contabilidad completa de un tick, peor caso (una compra recortada): 2 productos y 1 cociente más unas
+12 instrucciones de comparar, sumar y elegir (estimado). Con mulstep y divstep: 2 x 10 + 11 + 12 = 43
+instrucciones. Solo con RV32E: 2 x 48 + 35 + 12 = 143. Con mulstep y sin divstep: 2 x 10 + 35 + 12 = 67.
+En el barrel, a 4 ciclos por instrucción del hilo: 172, 572 y 268 ciclos. El presupuesto de la ronda más
+rápida son 2262 ciclos, así que las tres caben; lo que cambia es cuánto queda para el resto del tick.

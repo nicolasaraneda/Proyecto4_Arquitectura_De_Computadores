@@ -1,0 +1,30 @@
+Kernel de cuatro bandas: instrucciones de RV32E contra carriles de 4 x 8 bits
+Generado por factibilidad/d_isa/tools/medir_kernel.sh (make kernel). No editar a mano.
+
+PASS kernel_bandas.py: 256 vueltas, escalar y carriles coinciden, 4 resultados distintos
+Programas sw/bandas_*.s en la copia del SoC (core/ con -DXD_SIMD=28), Icarus Verilog. 256 vueltas del lazo.
+Ciclos e instrucciones entre la primera y la última escritura a MARCA (tb/tb_xd_kernel.sv).
+
+core        programa         modelo    instr   ciclos  instr/vta ciclos/vta
+base        bandas_vacio     igual      1537     3329       6.00      13.00
+base        bandas_escalar   igual      8961    18177      35.00      71.00
+base        bandas_carriles  igual      3329     6913      13.00      27.00
+segmentado  bandas_vacio     igual      1537     1792       6.00       7.00
+segmentado  bandas_escalar   igual      8961     9216      35.00      36.00
+segmentado  bandas_carriles  igual      3329     3584      13.00      14.00
+
+Kernel solo (restando el lazo vacío, que hace una instrucción, mv, en su lugar):
+core        versión      instr/vta   ciclos/vta       MOPS (1)
+base        escalar           30.00        60.00           1.67
+base        carriles           8.00        16.00           6.25
+segmentado  escalar           30.00        30.00           3.33
+segmentado  carriles           8.00         8.00          12.50
+
+Speedup medido del kernel (ciclos por vuelta del escalar sobre los de carriles):
+  base        kernel solo 60.00 / 16.00 = 3.75      vuelta completa del lazo 71.00 / 27.00 = 2.63
+  segmentado  kernel solo 30.00 / 8.00 = 3.75      vuelta completa del lazo 36.00 / 14.00 = 2.57
+Predicho por conteo de instrucciones: 30 / 8 = 3.75 (todas son de un ciclo de ejecución, sin loads ni saltos).
+
+(1) Operaciones útiles por segundo, en millones: una operación es evaluar una banda (entrar, salir y
+    actualizar la posición de una estrategia). El kernel hace 4 por vuelta: MOPS = 4 x 25 MHz / ciclos.
+PASS: las seis corridas entregan los resultados del modelo

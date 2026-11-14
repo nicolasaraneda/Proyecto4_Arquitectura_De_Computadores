@@ -1,0 +1,28 @@
+trade.s con la extensión de la ISA: equivalencia y mediciones por tick
+Generado por factibilidad/d_isa/tools/medir_xd.sh (make medir-ticks). No editar a mano.
+
+Serie tb/practica.csv, 20000 ticks, período de la ronda 3 (100000 ns, presupuesto 2262 ciclos). Verilator.
+RTL: la copia factibilidad/d_isa/core con las definiciones de cada fila. Reloj de 25 MHz.
+Equivalencia: copia parametrizada del testbench oficial, 4/4 y decisiones.csv idéntico a ref/trader.py.
+Ciclos e IC: tb/tb_cpi.sv. 'resp' es la respuesta (byte_done a DECISION) y 'tick' el tick completo
+(hasta que el programa vuelve a sondear STATUS). Incluyen la espera del sondeo, que depende de la fase.
+
+core        programa     definiciones               equiv     IC_resp    resp resp_pc IC_tick tick_mn    tick tick_pc     CPI  modelo de costo
+base        trade_sw     -                          4/4,igual   19.50   41.00   44.00   28.50      60   63.00   66.00   2.211  coincide
+base        trade_srak   -DXD_SRAK=0                4/4,igual   19.12   40.50   44.00   22.12      46   49.50   53.00   2.237  coincide
+base        trade_emad   -DXD_EMAD=0                4/4,igual   19.13   40.50   44.00   21.13      44   47.50   51.00   2.249  coincide
+base        trade_ema    -DXD_EMA=0 -DXD_EMAALU     4/4,igual   19.13   40.50   44.00   21.13      44   47.50   51.00   2.249  coincide
+base        trade_media  -DXD_EMAD=0 -DXD_DEVK=0    4/4,igual   14.12   30.50   34.00   16.12      34   37.50   41.00   2.326  coincide
+
+segmentado  trade_sw     -                          4/4,igual   19.20   22.00   26.00   28.20      32   34.00   38.00   1.206  coincide
+segmentado  trade_srak   -DXD_SRAK=0                4/4,igual   19.20   22.00   26.00   22.20      25   27.00   31.00   1.216  coincide
+segmentado  trade_emad   -DXD_EMAD=0                4/4,igual   19.20   22.00   26.00   21.20      24   26.00   30.00   1.226  coincide
+segmentado  trade_ema    -DXD_EMA=0 -DXD_EMAALU     4/4,igual   19.20   22.00   26.00   21.20      24   26.00   30.00   1.226  coincide
+segmentado  trade_media  -DXD_EMAD=0 -DXD_DEVK=0    4/4,igual   14.20   17.00   21.00   16.20      19   21.00   25.00   1.296  coincide
+
+Columnas: IC_resp y resp, instrucciones y ciclos promedio de la respuesta; resp_pc, peor caso de la respuesta;
+IC_tick, instrucciones promedio del tick completo; tick_mn, tick y tick_pc, ciclos mínimo, promedio y peor caso
+del tick completo; CPI del tick completo. 'modelo de costo' es la comprobación de tb_cpi.sv:
+ciclos = IC + loads + saltos tomados en el segmentado, y 2 IC + loads + saltos tomados en el base.
+Las instrucciones nuevas cuestan lo mismo que una de la ALU: 1 ciclo en el segmentado y 2 en el base.
+PASS: las cinco versiones entregan las mismas decisiones que ref/trader.py en los dos cores

@@ -1,0 +1,18 @@
+instrucción                  funct7 funct3  ejemplo                      palabra
+ema                         00kkkkk    000  ema x3, x6, x3, 5            0x0a33018b
+emad                        00kkkkk    100  emad x3, x6, x3, 5           0x0a33418b
+devk                        00kkkkk    101  devk x6, x5, x3, 5           0x0a32d30b
+srak                        00kkkkk    011  srak x7, x6, 5               0x0a03338b
+padd8                       0000000    001  padd8 x7, x8, x9             0x0094138b
+psub8                       0000001    001  psub8 x7, x8, x9             0x0294138b
+pcmpltu8                    0000010    001  pcmpltu8 x7, x8, x9          0x0494138b
+pcmplt8                     0000011    001  pcmplt8 x7, x8, x9           0x0694138b
+pminu8                      0000100    001  pminu8 x7, x8, x9            0x0894138b
+pmaxu8                      0000101    001  pmaxu8 x7, x8, x9            0x0a94138b
+paddus8                     0000110    001  paddus8 x7, x8, x9           0x0c94138b
+psubus8                     0000111    001  psubus8 x7, x8, x9           0x0e94138b
+pbcast8                     0001000    001  pbcast8 x7, x8               0x1004138b
+pmovmsk8                    0001001    001  pmovmsk8 x7, x8              0x1204138b
+mulstep                     0000000    010  mulstep x7, x7, x8           0x0083a38b
+divstep                     0000001    010  divstep x7, x7, x8           0x0283a38b
+mulc                        0000010    010  mulc x7, x7, x8              0x0483a38b
