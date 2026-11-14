@@ -1,0 +1,13 @@
+Regla base en el hilo 0 del barrel contra ref/trader.py, serie de practica completa
+Generado por factibilidad/a_barrel/tools/equiv_ref.sh (make equiv). No editar a mano.
+
+Herramientas:
+  Yosys 0.68+195 (git sha1 435977e97-dirty, Release, Clang /usr/bin/clang++ 21.1.8)
+  "nextpnr-ice40" -- Next Generation Place and Route (Version nextpnr-0.11.1-19-g8dbcee5c)
+  Icarus Verilog version 14.0 (devel) (s20260301-403-g5ab23063f-dirty)
+Commit de partida: 4bcd4ab (rama factibilidad-fondo)
+  Verilator 5.053 devel rev v5.052-22-g7cf8c5cca (mod)
+
+PASS ronda3_0p1ms: periodo 100000 ns, 20000 ticks, Peor caso precio->decision: 83 ciclos (disponibles: 2262), 4/4, 20000 filas identicas a ref/trader.py, patrimonio 26795
+PASS ronda2_1ms: periodo 1000000 ns, 20000 ticks, Peor caso precio->decision: 87 ciclos (disponibles: 24762), 4/4, 20000 filas identicas a ref/trader.py, patrimonio 27306
+PASS ronda1_10ms: periodo 10000000 ns, 20000 ticks, Peor caso precio->decision: 87 ciclos (disponibles: 249762), 4/4, 20000 filas identicas a ref/trader.py, patrimonio 27306

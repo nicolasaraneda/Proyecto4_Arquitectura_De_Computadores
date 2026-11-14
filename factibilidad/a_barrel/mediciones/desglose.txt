@@ -1,0 +1,44 @@
+Desglose por modulo: donde estan las celdas
+Generado por factibilidad/a_barrel/tools/medir_recursos.sh (make recursos). No editar a mano.
+
+Herramientas:
+  Yosys 0.68+195 (git sha1 435977e97-dirty, Release, Clang /usr/bin/clang++ 21.1.8)
+  "nextpnr-ice40" -- Next Generation Place and Route (Version nextpnr-0.11.1-19-g8dbcee5c)
+
+1. Sintesis con las fronteras del SoC conservadas (keep_hierarchy en u_core, u_ram, u_spi y u_periph)
+
+  Dentro de cada modulo todo se aplana y se optimiza. Entre modulos no, asi que el total de LUT4
+  es algo mayor que el del flujo normal, que aplana todo. Una celda logica del iCE40 tiene una LUT4
+  y un flip-flop: el numero de celdas despues de empaquetar es menor que LUT4 + FF.
+
+  Modulo                                                         Base           Segmentado          Barrel      
+                                                            LUT4   FF acarr  LUT4   FF acarr  LUT4   FF acarr
+  core                                                       748   67   149   689  130    86   577  158    79
+  memoria (pochoco_ram)                                       89  117     0    47   81     0    89  117     0
+  esclavo SPI                                                 38   52     2    38   52     2    38   52     2
+  perifericos                                                 26   16     0    26   16     0    26   16     0
+  pochoco_soc: reset, seleccion y multiplexor de lectura     101   14    10   101   14    10   101   14    10
+  total con fronteras                                       1002  266   161   901  293    98   831  357    91
+  flujo normal (todo aplanado): LUT4                         906              802              762           
+  flujo normal: celdas logicas despues de nextpnr           1083              994              934           
+
+  El banco de registros (4 BRAM) esta dentro del core y la memoria usa 8 BRAM en los tres casos.
+
+2. Bloques del core barrel sintetizados por separado (sin aplanar nada)
+
+  Cada modulo se sintetiza completo, aunque el barrel no use todas sus salidas. Sirve para ver el
+  tamano de cada bloque reutilizado, no para sumar.
+
+  Modulo                                                    LUT4   FF acarr
+  espino_alu (reutilizada sin cambios)                       255    0    63
+  espino_decoder (reutilizado sin cambios)                    94    0     0
+  espino_load_store_unit (cada una de las dos instancias)    118    1     0
+  espino_barrel_core: registros de etapa, PC y multiplexores   159  150    16
+
+3. Lo mismo medido por diferencia en el flujo normal (mediciones/recursos.txt, seccion 2)
+
+  contador de programa de 32 bits (en vez de 11)        +197 celdas
+  contador de reset de 4 bits (en vez de 12)             -14 celdas
+  sin pochoco_periph (LEDs, display, interruptores)      -39 celdas
+  registro HILO y arranque comun (en vez de la tabla)     +5 celdas
+  memoria sin emulacion de lectura durante escritura    -140 celdas
