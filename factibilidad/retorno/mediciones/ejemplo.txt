@@ -1,0 +1,74 @@
+../build/ejemplo/arnes listar | grep -E "^  (ejemplo|seguidor) "
+  ejemplo      ejemplo: reversion que dimensiona la orden con su propia cuenta. k, entra, sale
+  seguidor     ejemplo: tres candidatos en papel, copia al que lleva mas patrimonio
+../build/ejemplo/arnes causal --estrategia ejemplo
+Prueba de causalidad: decisiones identicas al cambiar o cortar el futuro, y al repetir la ronda
+  ejemplo                                                      ok
+PASS: 1 estrategias, 78 comparaciones, 0 fallas
+../build/ejemplo/arnes causal --estrategia seguidor
+Prueba de causalidad: decisiones identicas al cambiar o cortar el futuro, y al repetir la ronda
+  seguidor                                                     ok
+PASS: 1 estrategias, 78 comparaciones, 0 fallas
+../build/ejemplo/arnes correr --estrategia ejemplo --serie ../../../tb/practica.csv
+estrategia ejemplo (ejemplo), serie ../../../tb/practica.csv, 20000 ticks, precios iniciales sin ver 0
+patrimonio 26983 ordenes 398 comisiones 1990 perdida_maxima 2921 comprar_y_mantener 6497
+../build/ejemplo/arnes correr --estrategia "ejemplo:k=5,entra=3,sale=0" --serie ../../../tb/practica.csv
+estrategia ejemplo:k=5,entra=3,sale=0 (ejemplo:k=5,entra=3,sale=0), serie ../../../tb/practica.csv, 20000 ticks, precios iniciales sin ver 0
+patrimonio 25839 ordenes 630 comisiones 3150 perdida_maxima 6250 comprar_y_mantener 6497
+../build/ejemplo/arnes resumen --conjunto bloques --largo 2000 --estrategia "base;max_media;ejemplo;seguidor"
+# bloques, 2000 ticks: 10 series. candidato n media dif ee mediana p5 peor mejor sobre_byh ordenes act geom pausa tope vetado
+base 10 11068.700000 0.000000 0.000000 11103 9720 9720 13357 0.900000 29.9000 0.000000 11015.0255 0.000000 0.000000 0.000000
+max_media 10 11042.600000 -26.100000 237.918168 10971 9620 9620 14304 0.900000 46.0000 0.000000 10971.1546 0.000000 0.000000 0.000000
+ejemplo 10 11066.100000 -2.600000 1.739732 11103 9720 9720 13345 0.900000 30.2000 0.000000 11012.6579 0.000000 0.000000 0.000000
+seguidor 10 11109.800000 41.100000 206.195185 10852 9625 9625 14096 0.900000 34.6000 1.000000 11047.0592 0.000000 0.000000 0.001100
+../build/ejemplo/arnes veredicto --candidata seguidor --referencia base --largo 2000 --semilla 0
+Veredicto del criterio de corte: seguidor contra base
+Semilla 0 (exploracion), campo mixto, G = 10 rivales, caja 10000, comision 5.
+Puntos de 0 a 2. dif = candidata - referencia, pareada. Juicio con dos errores estandar.
+Series: todas, o interiores (precio siempre entre 21 y 249). H3s y H3r: lineal sobre la suma del patrimonio y sobre
+la suma de W/B&H de las tres rondas; su p5 es el de esos mismos puntos.
+
+largo  series     conjunto        |    cand     ref      dif   +-ee media    | p5 cand  p5 ref      dif   +-ee p5 (3r)  | fila
+2000   todas      evidencia  H3a  |   1.405   1.465   -0.061  0.004 empeora  |   0.786   0.835   -0.050  0.015 empeora  | no pasa
+2000   todas      evidencia  H3b  |   1.369   1.437   -0.069  0.004 empeora  |   0.767   0.872   -0.106  0.029 empeora  | no pasa
+2000   todas      evidencia  H3s  |   1.605   1.682   -0.077  0.006 empeora  |   0.626   0.708   -0.082  0.035 empeora  | (informativa)
+2000   todas      evidencia  H3r  |   1.626   1.702   -0.076  0.006 empeora  |   0.694   0.764   -0.070  0.035 empeora  | (informativa)
+2000   todas      evidencia  H1   |   10781   10879      -98     11 empeora  |    8841    8875      -34                 | (informativa: patrimonio, n = 10000)
+2000   todas      remuestreo H3a  |   1.431   1.503   -0.071  0.005 empeora  |   0.805   0.884   -0.079  0.023 empeora  | (informativa)
+2000   todas      remuestreo H3b  |   1.401   1.478   -0.077  0.006 empeora  |   0.800   0.911   -0.111  0.028 empeora  | (informativa)
+2000   todas      remuestreo H1   |   10699   10813     -114     11 empeora  |    8993    9017      -24                 | (informativa: patrimonio, n = 5000)
+2000   todas      plausibles H3a  |   1.374   1.428   -0.053  0.004 empeora  |   0.751   0.803   -0.052  0.014 empeora  | (informativa)
+2000   todas      plausibles H3b  |   1.331   1.397   -0.066  0.004 empeora  |   0.733   0.839   -0.106  0.022 empeora  | (informativa)
+2000   todas      plausibles H1   |   10827   10930     -102     12 empeora  |    8673    8725      -52                 | (informativa: patrimonio, n = 10000)
+2000   todas      estres     H3a  |   1.186   1.159   +0.028  0.005 mejora   |   0.465   0.436   +0.029  0.019 igual    | (informativa)
+2000   todas      estres     H3b  |   1.193   1.183   +0.010  0.005 igual    |   0.533   0.567   -0.033  0.026 igual    | (informativa)
+2000   todas      estres     H1   |   12682   12691      -10     53 igual    |    6394    5733     +661                 | (informativa: patrimonio, n = 7000)
+
+Criterio: en evidencia, una fila H3a o H3b pasa si la media de los puntos mejora en mas de 2 ee y el p5 de la
+competencia de tres rondas no baja en mas de 2 ee. A 20000 ticks cuentan las series interiores.
+Filas que no pasan:
+  2000 ticks, H3a: empeora los puntos esperados
+  2000 ticks, H3b: empeora los puntos esperados
+Veredicto literal (solo el signo de las estimaciones, sin error): no pasa
+VEREDICTO 2000: NO_PASA
+VEREDICTO: NO_PASA (2 filas de evidencia)
+make -C minimo probar
+../../build/ejemplo/minimo listar | grep -E "^  mia "
+  mia          ejemplo minimo
+../../build/ejemplo/minimo causal --estrategia mia
+Prueba de causalidad: decisiones identicas al cambiar o cortar el futuro, y al repetir la ronda
+  mia                                                          ok
+PASS: 1 estrategias, 78 comparaciones, 0 fallas
+../../build/ejemplo/minimo correr --estrategia "mia:k=5,entra=4" --serie ../../../../tb/practica.csv
+estrategia mia:k=5,entra=4 (mia:k=5,entra=4), serie ../../../../tb/practica.csv, 20000 ticks, precios iniciales sin ver 0
+patrimonio 27062 ordenes 388 comisiones 1940 perdida_maxima 2929 comprar_y_mantener 6497
+../../build/ejemplo/minimo resumen --conjunto remuestreo --largo 2000 --semilla 0 --estrategia "base;max_media;mia"
+# remuestreo, semilla 0, 2000 ticks: 5000 series. candidato n media dif ee mediana p5 peor mejor sobre_byh ordenes act geom pausa tope vetado
+base 5000 10813.067800 0.000000 0.000000 10668 9017 2580 24444 0.703800 30.6378 0.000000 10732.7487 0.000000 0.000000 0.000000
+max_media 5000 10868.416800 55.349000 11.192326 10745 8866 2346 25916 0.719400 50.1052 0.000000 10774.4106 0.000000 0.000000 0.000000
+mia 5000 10868.416800 55.349000 11.192326 10745 8866 2346 25916 0.719400 50.1052 0.000000 10774.4106 0.000000 0.000000 0.000000
+../../build/ejemplo/minimo veredicto --candidata mia --referencia base --largo 2000 --semilla 0 | tail -4
+competencia de tres rondas no baja en mas de 2 ee. A 20000 ticks cuentan las series interiores.
+Veredicto literal (solo el signo de las estimaciones, sin error): pasa
+VEREDICTO 2000: PASA
+VEREDICTO: PASA (2 filas de evidencia)

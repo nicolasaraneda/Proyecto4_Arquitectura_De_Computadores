@@ -1,0 +1,13 @@
+Validacion del arnes de retorno
+PASS  mercado contra ref/market.py: 400 flujos, 334250 ticks, 113673 ordenes ejecutadas, 0 filas distintas
+PASS  regla base en la serie completa: patrimonio 27062 (27062), ordenes 388 (388), comprar y mantener 6497 (6497)
+PASS  regla base en los 10 bloques: media 11068.7 (11069), peor 9720 (9720)
+PASS  regla base con los 2 precios perdidos del testbench: patrimonio 26795 (26795)
+PASS  suma movil de 64, entra 4, sale 1: patrimonio 24143 (24143)
+PASS  decisiones.csv contra ref/trader.py: 20000 filas con 0, 1 y 2 precios perdidos: 0 archivos distintos
+PASS  familia parametrica contra ref/motor/motor.c: 74 configuraciones (14 candidatos y 60 al azar), 32 lotes, 33561 series, 2483514 corridas comparadas, 0 distintas
+PASS  candidatos contra ref/candidatos.py y ref/trader.py: 14 candidatos, 431 series de 32 lotes (2000 y 20000 ticks), 6465 corridas comparadas, 0 distintas
+PASS  rival reversion k=5 a=4 b=0 igual a la regla base: 11210 series, 0 distintas
+PASS  rivales de suma movil, comprar 63 y no operar contra ref/protocolo.py: 273 corridas, 0 distintas
+PASS  frontera anterior (docs/mediciones/frontera.txt): semillas [0, 1], 552 cifras comparadas, 0 distintas
+PASS: el arnes coincide con todas las referencias

@@ -1,0 +1,24 @@
+PASS  pesos de los 61 rivales en los 3 campos: diferencia maxima con lo que imprime el arnes 0.0048 puntos porcentuales (se imprime con 2 decimales), sumas 1.000000 1.000000 1.000000
+PASS  H3b contra su valor esperado exacto: 36 cifras, 0 fuera de 4 errores del sorteo, peor caso 2.00 errores
+      ingenuo  base       exacto 1.5957   arnes G=5,10,15: 1.595 1.593 1.595
+      ingenuo  max_media  exacto 1.6050   arnes G=5,10,15: 1.608 1.604 1.605
+      ingenuo  guardia    exacto 1.5650   arnes G=5,10,15: 1.567 1.564 1.565
+      ingenuo  prudente   exacto 1.5462   arnes G=5,10,15: 1.545 1.545 1.546
+      mixto    base       exacto 1.4776   arnes G=5,10,15: 1.479 1.478 1.478
+      mixto    max_media  exacto 1.4965   arnes G=5,10,15: 1.497 1.498 1.496
+      mixto    guardia    exacto 1.4386   arnes G=5,10,15: 1.440 1.440 1.438
+      mixto    prudente   exacto 1.4281   arnes G=5,10,15: 1.430 1.428 1.429
+      fuerte   base       exacto 1.2170   arnes G=5,10,15: 1.217 1.217 1.217
+      fuerte   max_media  exacto 1.2747   arnes G=5,10,15: 1.272 1.274 1.274
+      fuerte   guardia    exacto 1.1575   arnes G=5,10,15: 1.155 1.156 1.157
+      fuerte   prudente   exacto 1.1101   arnes G=5,10,15: 1.108 1.110 1.111
+PASS  H3a contra un sorteo independiente (G = 10, 12 campos por serie): 8 cifras, 0 fuera de 4 errores, peor caso 1.70 errores
+      mixto    base       sorteo propio 1.5042   arnes 1.503   diferencia -0.0017 (error combinado 0.0016)
+      mixto    max_media  sorteo propio 1.5276   arnes 1.529   diferencia +0.0009 (error combinado 0.0015)
+      mixto    guardia    sorteo propio 1.4717   arnes 1.471   diferencia -0.0003 (error combinado 0.0015)
+      mixto    prudente   sorteo propio 1.4087   arnes 1.407   diferencia -0.0016 (error combinado 0.0016)
+      fuerte   base       sorteo propio 1.4143   arnes 1.413   diferencia -0.0012 (error combinado 0.0019)
+      fuerte   max_media  sorteo propio 1.4570   arnes 1.454   diferencia -0.0026 (error combinado 0.0019)
+      fuerte   guardia    sorteo propio 1.3752   arnes 1.372   diferencia -0.0031 (error combinado 0.0018)
+      fuerte   prudente   sorteo propio 1.2818   arnes 1.280   diferencia -0.0022 (error combinado 0.0018)
+PASS: los puntajes del torneo coinciden con el calculo independiente

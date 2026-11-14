@@ -1,0 +1,55 @@
+Auditoria de la contabilidad: cuatro implementaciones con los mismos flujos
+Flujos: 44 casos de borde y 600 al azar, 354635 ticks y 106693 ordenes ejecutadas en total (316 en los casos de borde).
+Columnas comparadas en cada tick: caja, acciones, patrimonio, ordenes ejecutadas y perdida maxima.
+PASS  propia contra ref/market.py: 354635 ticks, 0 filas distintas
+PASS  propia contra arnes (comando mercado): 354635 ticks, 0 filas distintas
+PASS  propia contra testbench (tarea ejecutar, lineas 69 a 85, Icarus): 354635 ticks, 0 filas distintas
+
+Casos de borde (caja inicial, comision; por tick: precio, byte -> caja, acciones, ordenes):
+  caja justa para 1 a 1                caja      6 com  5 | p=1 41->0,1,1  p=1 bf->0,1,1
+  falta 1 para 1 a 1                   caja      5 com  5 | p=1 41->5,0,0  p=1 bf->5,0,0
+  sobra 1 para 1 a 1                   caja      7 com  5 | p=1 41->1,1,1  p=1 7f->1,1,1  p=1 bf->1,1,1
+  caja justa para 1 a 255              caja    260 com  5 | p=255 41->0,1,1  p=255 bf->250,0,2
+  falta 1 para 1 a 255                 caja    259 com  5 | p=255 41->259,0,0  p=255 bf->259,0,0
+  sobra 1 para 1 a 255                 caja    261 com  5 | p=255 41->1,1,1  p=255 7f->1,1,1  p=255 bf->251,0,2
+  caja justa para 7 a 13               caja     96 com  5 | p=13 47->0,7,1  p=13 bf->86,0,2
+  falta 1 para 7 a 13                  caja     95 com  5 | p=13 47->12,6,1  p=13 bf->85,0,2
+  sobra 1 para 7 a 13                  caja     97 com  5 | p=13 47->1,7,1  p=13 7f->1,7,1  p=13 bf->87,0,2
+  caja justa para 39 a 255             caja   9950 com  5 | p=255 67->0,39,1  p=255 bf->9940,0,2
+  falta 1 para 39 a 255                caja   9949 com  5 | p=255 67->254,38,1  p=255 bf->9939,0,2
+  sobra 1 para 39 a 255                caja   9951 com  5 | p=255 67->1,39,1  p=255 7f->1,39,1  p=255 bf->9941,0,2
+  caja justa para 63 a 1               caja     68 com  5 | p=1 7f->0,63,1  p=1 bf->58,0,2
+  falta 1 para 63 a 1                  caja     67 com  5 | p=1 7f->0,62,1  p=1 bf->57,0,2
+  sobra 1 para 63 a 1                  caja     69 com  5 | p=1 7f->1,63,1  p=1 7f->1,63,1  p=1 bf->59,0,2
+  caja justa para 63 a 158             caja   9959 com  5 | p=158 7f->0,63,1  p=158 bf->9949,0,2
+  falta 1 para 63 a 158                caja   9958 com  5 | p=158 7f->157,62,1  p=158 bf->9948,0,2
+  sobra 1 para 63 a 158                caja   9960 com  5 | p=158 7f->1,63,1  p=158 7f->1,63,1  p=158 bf->9950,0,2
+  caja justa para 63 a 255             caja  16070 com  5 | p=255 7f->0,63,1  p=255 bf->16060,0,2
+  falta 1 para 63 a 255                caja  16069 com  5 | p=255 7f->254,62,1  p=255 bf->16059,0,2
+  sobra 1 para 63 a 255                caja  16071 com  5 | p=255 7f->1,63,1  p=255 7f->1,63,1  p=255 bf->16061,0,2
+  cantidad 0                           caja  10000 com  5 | p=100 40->10000,0,0  p=100 80->10000,0,0  p=100 45->9495,5,1  p=100 80->9495,5,1  p=100 40->9495,5,1
+  accion 11                            caja  10000 com  5 | 65 ticks, final: caja 8995, acciones 10, patrimonio 9995, ordenes 1
+  venta sin acciones                   caja  10000 com  5 | p=50 bf->10000,0,0  p=50 81->10000,0,0  p=50 43->9845,3,1  p=60 bf->10020,0,2  p=60 bf->10020,0,2
+  caja 0 con comision 5                caja      0 com  5 | p=1 7f->0,0,0  p=2 7f->0,0,0  p=3 7f->0,0,0  p=255 7f->0,0,0
+  caja 1 con comision 5                caja      1 com  5 | p=1 7f->1,0,0  p=2 7f->1,0,0  p=3 7f->1,0,0  p=255 7f->1,0,0
+  caja 3 con comision 5                caja      3 com  5 | p=1 7f->3,0,0  p=2 7f->3,0,0  p=3 7f->3,0,0  p=255 7f->3,0,0
+  caja 4 con comision 5                caja      4 com  5 | p=1 7f->4,0,0  p=2 7f->4,0,0  p=3 7f->4,0,0  p=255 7f->4,0,0
+  caja 5 con comision 5                caja      5 com  5 | p=1 7f->5,0,0  p=2 7f->5,0,0  p=3 7f->5,0,0  p=255 7f->5,0,0
+  caja 6 con comision 5                caja      6 com  5 | p=1 7f->0,1,1  p=2 7f->0,1,1  p=3 7f->0,1,1  p=255 7f->0,1,1
+  venta que no cubre la comision       caja      6 com  5 | p=1 7f->0,1,1  p=1 bf->0,1,1  p=3 bf->0,1,1  p=4 bf->0,1,1  p=5 bf->0,0,2  p=5 bf->0,0,2
+  venta que no cubre la comision 50    caja     60 com 50 | p=2 7f->0,5,1  p=2 bf->0,5,1  p=9 bf->0,5,1  p=10 bf->0,0,2  p=10 bf->0,0,2
+  precio 1, todas las cantidades       caja  10000 com  5 | 128 ticks, final: caja 9370, acciones 0, patrimonio 9370, ordenes 126
+  precio 255, todas las cantidades     caja  10000 com  5 | 128 ticks, final: caja 9910, acciones 0, patrimonio 9910, ordenes 18
+  caja 1000, comision 0                caja   1000 com  0 | 20 ticks, final: caja 1000, acciones 0, patrimonio 1000, ordenes 20
+  caja 1000, comision 50               caja   1000 com 50 | 20 ticks, final: caja 254, acciones 0, patrimonio 254, ordenes 20
+  caja 100000, comision 0              caja 100000 com  0 | 20 ticks, final: caja 100000, acciones 0, patrimonio 100000, ordenes 20
+  caja 100000, comision 50             caja 100000 com 50 | 20 ticks, final: caja 99000, acciones 0, patrimonio 99000, ordenes 20
+  caja 100000, comision 5              caja 100000 com  5 | 20 ticks, final: caja 99900, acciones 0, patrimonio 99900, ordenes 20
+  un solo tick, byte 00                caja  10000 com  5 | p=158 00->10000,0,0
+  un solo tick, byte 7f                caja  10000 com  5 | p=158 7f->41,63,1
+  un solo tick, byte bf                caja  10000 com  5 | p=158 bf->10000,0,0
+  un solo tick, byte ff                caja  10000 com  5 | p=158 ff->10000,0,0
+  los 256 bytes                        caja  10000 com  5 | 257 ticks, final: caja 10028, acciones 0, patrimonio 10028, ordenes 26
+
+Caja negativa en 0 ticks y acciones negativas en 0 ticks (debe ser 0 y 0: no hay deuda ni venta en corto).
+PASS: la contabilidad del arnes es la del testbench

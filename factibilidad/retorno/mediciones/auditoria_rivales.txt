@@ -1,0 +1,62 @@
+Rivales y regla de reversion: implementacion independiente contra el arnes, serie por serie
+Archivos: 14 (17511 series): bloques_n2000, practica_n20000, remuestreo_s0_n2000, modelo_vecino_s2_n2000, tendencia_s0_n2000, cambio_de_caracter_s2_n2000, nivel_bajo_s0_n2000, volatil_s2_n2000, plana_s0_n2000, borde_bajo_s0_n2000, borde_alto_s2_n2000, saltos_s0_n20000, dos_componentes_s0_n20000, remuestreo_s2_n20000
+clase                              reglas  corridas distintas
+cruce                                  14    245154         0
+momentum                               11    192621         0
+comprar_y_mantener                      4     70044         0
+no_operar                               1     17511         0
+reversion                              25    437775         0
+candidatos (regla de reversion)         4     70044         0
+PASS  reglas deterministas: 1033149 corridas comparadas (patrimonio y ordenes), 0 distintas
+
+Rivales de azar (otro generador): media del patrimonio y de las ordenes por serie, propio contra arnes
+rival                  archivo                     patrimonio propio     arnes      z  ordenes propio    arnes      z
+azar:pm=1000,q=63      remuestreo_s0_n2000                    4323.7    4330.1  -0.23         1108.33  1109.83  -0.81
+azar:pm=1000,q=63      modelo_vecino_s2_n2000                 4477.5    4423.9  +1.19         1120.43  1119.57  +0.24
+azar:pm=1000,q=63      tendencia_s0_n2000                     5136.5    5137.7  -0.01         1122.41  1121.00  +0.27
+azar:pm=1000,q=63      cambio_de_caracter_s2_n2000             4271.8    4224.0  +0.49         1112.90  1114.07  -0.24
+azar:pm=1000,q=63      nivel_bajo_s0_n2000                    4244.3    4169.4  +0.29         1536.21  1530.69  +0.55
+azar:pm=1000,q=63      volatil_s2_n2000                       5424.6    5254.4  +0.81         1133.56  1129.60  +0.52
+azar:pm=1000,q=63      dos_componentes_s0_n20000                73.7      74.0  -0.10         2000.51  1991.48  +0.74
+azar:pm=1000,q=63      remuestreo_s2_n20000                     50.6      50.6  -0.06         1967.62  1968.45  -0.13
+azar:pm=1000,q=10      remuestreo_s0_n2000                    1794.0    1800.1  -0.37         1616.94  1616.49  +0.38
+azar:pm=1000,q=10      modelo_vecino_s2_n2000                 1931.4    1930.5  +0.04         1616.45  1616.93  -0.20
+azar:pm=1000,q=10      tendencia_s0_n2000                     2541.8    2569.7  -0.31         1622.39  1623.37  -0.21
+azar:pm=1000,q=10      cambio_de_caracter_s2_n2000             1893.8    1886.9  +0.12         1608.60  1607.73  +0.27
+azar:pm=1000,q=10      nivel_bajo_s0_n2000                    1682.0    1756.0  -0.69         1769.56  1773.63  -0.47
+azar:pm=1000,q=10      volatil_s2_n2000                       2463.5    2439.6  +0.26         1585.18  1588.10  -0.42
+azar:pm=1000,q=10      dos_componentes_s0_n20000                72.6      72.6  -0.00         1985.07  1988.32  -0.44
+azar:pm=1000,q=10      remuestreo_s2_n20000                     49.6      49.7  -0.03         1972.98  1973.06  -0.02
+azar:pm=100,q=63       remuestreo_s0_n2000                    9145.0    9156.5  -0.35          128.95   129.08  -0.35
+azar:pm=100,q=63       modelo_vecino_s2_n2000                 9378.3    9415.4  -0.71          126.04   126.07  -0.04
+azar:pm=100,q=63       tendencia_s0_n2000                    10244.7   10164.7  +0.44          129.91   129.56  +0.47
+azar:pm=100,q=63       cambio_de_caracter_s2_n2000             9089.5    8975.1  +0.74          127.12   126.82  +0.37
+azar:pm=100,q=63       nivel_bajo_s0_n2000                   10628.8   10613.2  +0.06          173.00   172.90  +0.14
+azar:pm=100,q=63       volatil_s2_n2000                      10104.5   10161.2  -0.27          127.40   127.98  -0.64
+azar:pm=100,q=63       dos_componentes_s0_n20000              5306.2    5212.5  +0.43         1135.53  1128.52  +0.87
+azar:pm=100,q=63       remuestreo_s2_n20000                   4733.8    4875.4  -1.00         1146.61  1153.53  -1.42
+azar:pm=100,q=10       remuestreo_s0_n2000                    8903.5    8910.5  -0.28          176.87   176.75  +0.41
+azar:pm=100,q=10       modelo_vecino_s2_n2000                 9136.2    9114.8  +0.56          176.34   176.51  -0.40
+azar:pm=100,q=10       tendencia_s0_n2000                     9746.7    9760.6  -0.09          177.03   177.47  -0.67
+azar:pm=100,q=10       cambio_de_caracter_s2_n2000             8960.6    8898.2  +0.44          176.45   176.83  -0.57
+azar:pm=100,q=10       nivel_bajo_s0_n2000                    9428.1    9510.3  -0.87          188.12   188.68  -0.82
+azar:pm=100,q=10       volatil_s2_n2000                       9337.6    9394.5  -0.41          176.76   177.22  -0.66
+azar:pm=100,q=10       dos_componentes_s0_n20000              2184.7    2140.4  +0.50         1566.58  1555.62  +1.37
+azar:pm=100,q=10       remuestreo_s2_n20000                   1698.0    1693.7  +0.09         1535.60  1533.34  +0.45
+azar:pm=10,q=63        remuestreo_s0_n2000                    9732.7    9734.9  -0.07           12.97    12.94  +0.43
+azar:pm=10,q=63        modelo_vecino_s2_n2000                 9885.9    9942.5  -1.20           12.58    12.53  +0.38
+azar:pm=10,q=63        tendencia_s0_n2000                    10704.5   10801.6  -0.54           12.98    12.80  +1.03
+azar:pm=10,q=63        cambio_de_caracter_s2_n2000             9710.4    9654.7  +0.35           12.76    12.62  +0.77
+azar:pm=10,q=63        nivel_bajo_s0_n2000                   10576.0   10472.7  +0.67           16.28    16.24  +0.22
+azar:pm=10,q=63        volatil_s2_n2000                      10372.0   10302.4  +0.38           12.81    12.60  +1.13
+azar:pm=10,q=63        dos_componentes_s0_n20000             10098.6    9783.6  +1.43          128.93   128.67  +0.28
+azar:pm=10,q=63        remuestreo_s2_n20000                   9176.0    9270.6  -0.71          133.33   133.79  -0.98
+azar:pm=10,q=10        remuestreo_s0_n2000                    9817.7    9809.1  +0.56           16.81    16.69  +1.19
+azar:pm=10,q=10        modelo_vecino_s2_n2000                 9923.0    9911.2  +0.56           16.80    16.74  +0.43
+azar:pm=10,q=10        tendencia_s0_n2000                    10038.7   10060.4  -0.24           16.92    16.72  +0.91
+azar:pm=10,q=10        cambio_de_caracter_s2_n2000             9845.8    9924.6  -0.80           16.90    16.68  +1.01
+azar:pm=10,q=10        nivel_bajo_s0_n2000                   10024.7   10010.2  +0.52           17.05    16.84  +0.94
+azar:pm=10,q=10        volatil_s2_n2000                       9920.3    9951.7  -0.41           16.83    16.67  +0.74
+azar:pm=10,q=10        dos_componentes_s0_n20000              9186.8    9263.8  -0.54          177.93   178.19  -0.37
+azar:pm=10,q=10        remuestreo_s2_n20000                   8326.4    8233.9  +1.16          179.50   179.40  +0.29
+PASS  azar: la mayor diferencia entre medias es 1.43 errores estandar combinados (limite 4)
