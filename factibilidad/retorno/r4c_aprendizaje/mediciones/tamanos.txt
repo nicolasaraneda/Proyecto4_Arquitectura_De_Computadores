@@ -1,0 +1,36 @@
+Memoria que pide cada variante. 4 BRAM libres = 16384 bits. RAM de datos del SoC = 512 palabras de 32 bits.
+celdas: entradas de la tabla. bits: por entrada. logicos: celdas por bits. palabras: tabla mas anillo en la RAM de datos,
+sin empaquetar (una palabra por estimacion, un byte por contador). Una fila en cero es una regla fija: no pide tabla.
+
+Alias entregados (aprendiz.c):
+variante                                                     celdas bits  logicos  % BRAM anillo palabras  % RAM
+espera                                                            0    0        0    0.0%      0        0   0.0%
+aprendiz                                                         32   28      896    5.5%     18       50   9.8%
+aprendiz_rapido                                                  32   26      832    5.1%     18       50   9.8%
+aprendiz_patron                                                4096    2     8192   50.0%      3     1027 200.6%
+aprendiz_puro                                                  4096    3    12288   75.0%      3     1027 200.6%
+
+Barrido, tabla de politica: 166 variantes que aprenden. La mas chica y la mas grande en bits logicos:
+variante                                                     celdas bits  logicos  % BRAM anillo palabras  % RAM
+tabla:modo=1,ka=1,bits=3,h=16,g=0                                32    3       96    0.6%     18       26   5.1%
+tabla:ka=12,h=16,ter=1,filas=2                                  192   28     5376   32.8%     18      210  41.0%
+  variantes que no caben en las 4 BRAM libres (mas de 16384 bits logicos): 0
+  la que mas palabras pide en la RAM de datos: tabla:ka=12,h=16,ter=1,filas=2 (210 palabras, 41.0 % de 512)
+  variantes que no caben en la RAM de datos (mas de 472 palabras libres): 0
+
+Barrido, predictor solo: 24 variantes que aprenden. La mas chica y la mas grande en bits logicos:
+variante                                                     celdas bits  logicos  % BRAM anillo palabras  % RAM
+patron:tipo=2,H=8,sim=2,bits=2,h=1                               16    2       32    0.2%      3        7   1.4%
+patron:tipo=3,H=6,sim=3,bits=3,h=16                            4096    3    20528  125.3%     18     2070 404.3%
+  variantes que no caben en las 4 BRAM libres (mas de 16384 bits logicos): 4
+  la que mas palabras pide en la RAM de datos: patron:tipo=3,H=6,sim=3,bits=3,h=16 (2070 palabras, 404.3 % de 512)
+  variantes que no caben en la RAM de datos (mas de 472 palabras libres): 12
+
+Barrido, predictor como filtro: 39 variantes que aprenden. La mas chica y la mas grande en bits logicos:
+variante                                                     celdas bits  logicos  % BRAM anillo palabras  % RAM
+mm_patron:tipo=2,H=8,sim=2,bits=2,h=1,fe=0,fs=2,maxp=4           16    2       32    0.2%      3        7   1.4%
+mm_patron:tipo=3,H=12,sim=2,bits=2,h=1,fe=2,fs=2,maxp=4        4096    2    16416  100.2%      3     2055 401.4%
+  variantes que no caben en las 4 BRAM libres (mas de 16384 bits logicos): 3
+  la que mas palabras pide en la RAM de datos: mm_patron:tipo=3,H=12,sim=2,bits=2,h=1,fe=2,fs=2,maxp=4 (2055 palabras, 401.4 % de 512)
+  variantes que no caben en la RAM de datos (mas de 472 palabras libres): 12
+

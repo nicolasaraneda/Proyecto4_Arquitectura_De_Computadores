@@ -1,0 +1,42 @@
+Prueba de causalidad: decisiones identicas al cambiar o cortar el futuro, y al repetir la ronda
+  tabla:ka=8                                                   ok
+PASS: 1 estrategias, 78 comparaciones, 0 fallas
+Prueba de causalidad: decisiones identicas al cambiar o cortar el futuro, y al repetir la ronda
+  tabla:ka=8,ter=1,filas=2                                     ok
+PASS: 1 estrategias, 78 comparaciones, 0 fallas
+Prueba de causalidad: decisiones identicas al cambiar o cortar el futuro, y al repetir la ronda
+  tabla:ka=8,modo=1                                            ok
+PASS: 1 estrategias, 78 comparaciones, 0 fallas
+Prueba de causalidad: decisiones identicas al cambiar o cortar el futuro, y al repetir la ronda
+  tabla:ka=8,banda=1,ter=2                                     ok
+PASS: 1 estrategias, 78 comparaciones, 0 fallas
+Prueba de causalidad: decisiones identicas al cambiar o cortar el futuro, y al repetir la ronda
+  patron                                                       ok
+PASS: 1 estrategias, 78 comparaciones, 0 fallas
+Prueba de causalidad: decisiones identicas al cambiar o cortar el futuro, y al repetir la ronda
+  patron:tipo=1,H=12                                           ok
+PASS: 1 estrategias, 78 comparaciones, 0 fallas
+Prueba de causalidad: decisiones identicas al cambiar o cortar el futuro, y al repetir la ronda
+  patron:tipo=3,sim=3,H=6                                      ok
+PASS: 1 estrategias, 78 comparaciones, 0 fallas
+Prueba de causalidad: decisiones identicas al cambiar o cortar el futuro, y al repetir la ronda
+  mm_patron                                                    ok
+PASS: 1 estrategias, 78 comparaciones, 0 fallas
+Prueba de causalidad: decisiones identicas al cambiar o cortar el futuro, y al repetir la ronda
+  mm_patron:tipo=3,fs=2                                        ok
+PASS: 1 estrategias, 78 comparaciones, 0 fallas
+Prueba de causalidad: decisiones identicas al cambiar o cortar el futuro, y al repetir la ronda
+  cand:aprendiz                                                ok
+PASS: 1 estrategias, 78 comparaciones, 0 fallas
+Prueba de causalidad: decisiones identicas al cambiar o cortar el futuro, y al repetir la ronda
+  cand:aprendiz_rapido                                         ok
+PASS: 1 estrategias, 78 comparaciones, 0 fallas
+Prueba de causalidad: decisiones identicas al cambiar o cortar el futuro, y al repetir la ronda
+  cand:espera                                                  ok
+PASS: 1 estrategias, 78 comparaciones, 0 fallas
+Prueba de causalidad: decisiones identicas al cambiar o cortar el futuro, y al repetir la ronda
+  cand:aprendiz_patron                                         ok
+PASS: 1 estrategias, 78 comparaciones, 0 fallas
+Prueba de causalidad: decisiones identicas al cambiar o cortar el futuro, y al repetir la ronda
+  cand:aprendiz_puro                                           ok
+PASS: 1 estrategias, 78 comparaciones, 0 fallas

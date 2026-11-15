@@ -1,0 +1,261 @@
+Resumen del barrido por etapa (semilla 0). Diferencias pareadas contra max_media, campo mixto, G = 10.
+Sale de leer mediciones/barrido_*.txt: no evalua nada.
+
+espera_n2000
+  fijas o con el aprendizaje apagado: 12 variantes. PASA 1, mejora y baja el p5 0, igual 3, empeora 8
+    H1  evidencia: de -17 a +42   (peor: tabla:ter=1,ezb=32,ezs=0; mejor: tabla:ter=1,ezb=96,ezs=-64)
+    H3a evidencia: de -0.018 a +0.005   (peor: tabla:ter=1,ezb=32,ezs=-64; mejor: tabla:ter=1,ezb=64,ezs=-32)
+    H3b evidencia: de -0.002 a +0.018   (peor: tabla:ter=1,ezb=32,ezs=0; mejor: tabla:ter=1,ezb=96,ezs=-32)
+    mejor por H3A: tabla:ter=1,ezb=64,ezs=-32: +0.005 +- 0.002 (remuestreo +0.042, plausibles -0.033, estres -0.020)
+    mejor por H3B: tabla:ter=1,ezb=96,ezs=-32: +0.018 +- 0.003 (remuestreo +0.068, plausibles -0.028, estres -0.016)
+    mejoran H3a y H3b en mas de dos errores en evidencia: 2; con el mismo signo en remuestreo y plausibles: 0
+      tabla:ter=1,ezb=64,ezs=-32: H3a +0.005 (rem +0.042, pla -0.033), H3b +0.017 (rem +0.062, pla -0.026), juicio PASA
+      tabla:ter=1,ezb=96,ezs=-32: H3a +0.005 (rem +0.046, pla -0.037), H3b +0.018 (rem +0.068, pla -0.028), juicio igual
+    mejoran H3a y H3b en mas de dos errores en estres: 0
+
+filtro_n2000
+  que aprenden: 39 variantes. PASA 0, mejora y baja el p5 0, igual 1, empeora 38
+    H1  evidencia: de -39 a +2   (peor: mm_patron:tipo=0,H=8,sim=2,bits=2,h=4,fe=2,fs=0,maxp=16; mejor: mm_patron:tipo=1,H=12,sim=2,bits=2,h=1,fe=2,fs=2,maxp=4)
+    H3a evidencia: de -0.023 a -0.000   (peor: mm_patron:tipo=0,H=8,sim=2,bits=2,h=4,fe=2,fs=0,maxp=16; mejor: mm_patron:tipo=0,H=12,sim=2,bits=2,h=1,fe=0,fs=2,maxp=4)
+    H3b evidencia: de -0.023 a +0.001   (peor: mm_patron:tipo=0,H=8,sim=2,bits=2,h=4,fe=2,fs=0,maxp=16; mejor: mm_patron:tipo=0,H=8,sim=2,bits=2,h=2,fe=1,fs=0,maxp=2)
+    mejor por H3A: mm_patron:tipo=0,H=12,sim=2,bits=2,h=1,fe=0,fs=2,maxp=4: -0.000 +- 0.000 (remuestreo -0.001, plausibles -0.001, estres -0.001)
+    mejor por H3B: mm_patron:tipo=0,H=8,sim=2,bits=2,h=2,fe=1,fs=0,maxp=2: +0.001 +- 0.002 (remuestreo +0.023, plausibles -0.019, estres -0.014)
+    mejoran H3a y H3b en mas de dos errores en evidencia: 0; con el mismo signo en remuestreo y plausibles: 0
+    mejoran H3a y H3b en mas de dos errores en estres: 0
+  fijas o con el aprendizaje apagado: 1 variantes. PASA 0, mejora y baja el p5 0, igual 1, empeora 0
+    H1  evidencia: de +0 a +0   (peor: mm_patron:apr=0; mejor: mm_patron:apr=0)
+    H3a evidencia: de +0.000 a +0.000   (peor: mm_patron:apr=0; mejor: mm_patron:apr=0)
+    H3b evidencia: de +0.000 a +0.000   (peor: mm_patron:apr=0; mejor: mm_patron:apr=0)
+    mejor por H3A: mm_patron:apr=0: +0.000 +- 0.000 (remuestreo +0.000, plausibles +0.000, estres +0.000)
+    mejor por H3B: mm_patron:apr=0: +0.000 +- 0.000 (remuestreo +0.000, plausibles +0.000, estres +0.000)
+    mejoran H3a y H3b en mas de dos errores en evidencia: 0; con el mismo signo en remuestreo y plausibles: 0
+    mejoran H3a y H3b en mas de dos errores en estres: 0
+
+largas_n20000_interiores
+  que aprenden: 35 variantes. PASA 0, mejora y baja el p5 0, igual 2, empeora 33
+    H1  evidencia: de -25414 a +77   (peor: patron:tipo=3,H=8,sim=2,bits=3,h=16; mejor: mm_patron:tipo=0,H=8,sim=2,bits=3,h=1,fe=0,fs=2,maxp=4)
+    H3a evidencia: de -1.818 a +0.000   (peor: patron:tipo=3,H=8,sim=2,bits=3,h=16; mejor: tabla:ka=14,h=16)
+    H3b evidencia: de -1.720 a +0.007   (peor: patron:tipo=3,H=8,sim=2,bits=3,h=16; mejor: mm_patron:tipo=0,H=8,sim=2,bits=3,h=1,fe=0,fs=2,maxp=4)
+    mejor por H3A: tabla:ka=14,h=16: +0.000 +- 0.000 (remuestreo -0.000, plausibles +0.000, estres +0.001)
+    mejor por H3B: mm_patron:tipo=0,H=8,sim=2,bits=3,h=1,fe=0,fs=2,maxp=4: +0.007 +- 0.001 (remuestreo +0.015, plausibles +0.000, estres +0.003)
+    mejoran H3a y H3b en mas de dos errores en evidencia: 0; con el mismo signo en remuestreo y plausibles: 0
+    mejoran H3a y H3b en mas de dos errores en estres: 22
+  fijas o con el aprendizaje apagado: 4 variantes. PASA 0, mejora y baja el p5 0, igual 1, empeora 3
+    H1  evidencia: de -737 a +225   (peor: tabla:ter=3,ezb=64; mejor: tabla:ter=1,ezb=96,ezs=-32)
+    H3a evidencia: de -0.050 a +0.000   (peor: tabla:ter=3,ezb=64; mejor: tabla:ka=0)
+    H3b evidencia: de -0.007 a +0.010   (peor: tabla:ter=3,ezb=64; mejor: tabla:ter=1,ezb=96,ezs=-32)
+    mejor por H3A: tabla:ka=0: +0.000 +- 0.000 (remuestreo +0.000, plausibles +0.000, estres +0.000)
+    mejor por H3B: tabla:ter=1,ezb=96,ezs=-32: +0.010 +- 0.002 (remuestreo +0.067, plausibles -0.041, estres -0.043)
+    mejoran H3a y H3b en mas de dos errores en evidencia: 0; con el mismo signo en remuestreo y plausibles: 0
+    mejoran H3a y H3b en mas de dos errores en estres: 0
+
+largas_n20000_parada
+  que aprenden: 35 variantes. PASA 0, mejora y baja el p5 0, igual 3, empeora 32
+    H1  evidencia: de -19046 a +43   (peor: patron:tipo=3,H=8,sim=2,bits=3,h=16; mejor: mm_patron:tipo=0,H=8,sim=2,bits=3,h=1,fe=0,fs=2,maxp=4)
+    H3a evidencia: de -1.581 a -0.000   (peor: patron:tipo=3,H=8,sim=2,bits=3,h=16; mejor: tabla:ka=14,h=16)
+    H3b evidencia: de -1.456 a +0.014   (peor: patron:tipo=3,H=8,sim=2,bits=3,h=16; mejor: tabla:ter=3,ezb=64,ka=12,h=8)
+    mejor por H3A: tabla:ka=14,h=16: -0.000 +- 0.000 (remuestreo -0.000, plausibles +0.000, estres +0.000)
+    mejor por H3B: tabla:ter=3,ezb=64,ka=12,h=8: +0.014 +- 0.002 (remuestreo +0.060, plausibles -0.030, estres +0.001)
+    mejoran H3a y H3b en mas de dos errores en evidencia: 0; con el mismo signo en remuestreo y plausibles: 0
+    mejoran H3a y H3b en mas de dos errores en estres: 24
+  fijas o con el aprendizaje apagado: 4 variantes. PASA 0, mejora y baja el p5 0, igual 3, empeora 1
+    H1  evidencia: de -185 a +411   (peor: tabla:ter=3,ezb=64; mejor: tabla:ter=1,ezb=96,ezs=-32)
+    H3a evidencia: de -0.020 a +0.000   (peor: tabla:ter=3,ezb=64; mejor: tabla:ka=0)
+    H3b evidencia: de +0.000 a +0.027   (peor: tabla:ka=0; mejor: tabla:ter=1,ezb=96,ezs=-32)
+    mejor por H3A: tabla:ka=0: +0.000 +- 0.000 (remuestreo +0.000, plausibles +0.000, estres +0.000)
+    mejor por H3B: tabla:ter=1,ezb=96,ezs=-32: +0.027 +- 0.002 (remuestreo +0.087, plausibles -0.031, estres -0.006)
+    mejoran H3a y H3b en mas de dos errores en evidencia: 0; con el mismo signo en remuestreo y plausibles: 0
+    mejoran H3a y H3b en mas de dos errores en estres: 0
+
+patron_n2000
+  que aprenden: 24 variantes. PASA 0, mejora y baja el p5 0, igual 0, empeora 24
+    H1  evidencia: de -3693 a -1164   (peor: patron:tipo=0,H=8,sim=2,bits=2,h=1; mejor: patron:tipo=1,H=12,sim=2,bits=3,h=1)
+    H3a evidencia: de -1.350 a -0.466   (peor: patron:tipo=0,H=8,sim=2,bits=2,h=1; mejor: patron:tipo=1,H=12,sim=2,bits=3,h=1)
+    H3b evidencia: de -1.294 a -0.423   (peor: patron:tipo=0,H=8,sim=2,bits=2,h=1; mejor: patron:tipo=1,H=12,sim=2,bits=3,h=1)
+    mejor por H3A: patron:tipo=1,H=12,sim=2,bits=3,h=1: -0.466 +- 0.008 (remuestreo -0.530, plausibles -0.398, estres -0.155)
+    mejor por H3B: patron:tipo=1,H=12,sim=2,bits=3,h=1: -0.423 +- 0.008 (remuestreo -0.480, plausibles -0.359, estres -0.149)
+    mejoran H3a y H3b en mas de dos errores en evidencia: 0; con el mismo signo en remuestreo y plausibles: 0
+    mejoran H3a y H3b en mas de dos errores en estres: 0
+
+redondeo_n2000
+  que aprenden: 8 variantes. PASA 0, mejora y baja el p5 0, igual 3, empeora 5
+    H1  evidencia: de -145 a +0   (peor: tabla:ka=10,h=16,dir=1; mejor: tabla:ka=14,h=16)
+    H3a evidencia: de -0.068 a -0.000   (peor: tabla:ka=10,h=16,dir=1; mejor: tabla:ka=12,h=16)
+    H3b evidencia: de -0.054 a +0.000   (peor: tabla:ka=10,h=16,dir=1; mejor: tabla:ka=12,h=16)
+    mejor por H3A: tabla:ka=12,h=16: -0.000 +- 0.000 (remuestreo -0.000, plausibles -0.000, estres +0.003)
+    mejor por H3B: tabla:ka=12,h=16: +0.000 +- 0.000 (remuestreo +0.000, plausibles +0.000, estres +0.003)
+    mejoran H3a y H3b en mas de dos errores en evidencia: 0; con el mismo signo en remuestreo y plausibles: 0
+    mejoran H3a y H3b en mas de dos errores en estres: 3
+
+redondeo_n20000_interiores
+  que aprenden: 6 variantes. PASA 0, mejora y baja el p5 0, igual 2, empeora 4
+    H1  evidencia: de -8224 a -0   (peor: tabla:ka=12,h=16,dir=1; mejor: tabla:ka=14,h=16)
+    H3a evidencia: de -0.397 a +0.000   (peor: tabla:ka=12,h=16,dir=1; mejor: tabla:ka=14,h=16)
+    H3b evidencia: de -0.192 a +0.000   (peor: tabla:ka=12,h=16,dir=1; mejor: tabla:ka=14,h=16)
+    mejor por H3A: tabla:ka=14,h=16: +0.000 +- 0.000 (remuestreo -0.000, plausibles +0.000, estres +0.001)
+    mejor por H3B: tabla:ka=14,h=16: +0.000 +- 0.000 (remuestreo -0.000, plausibles +0.000, estres +0.001)
+    mejoran H3a y H3b en mas de dos errores en evidencia: 0; con el mismo signo en remuestreo y plausibles: 0
+    mejoran H3a y H3b en mas de dos errores en estres: 1
+
+redondeo_n20000_parada
+  que aprenden: 6 variantes. PASA 0, mejora y baja el p5 0, igual 2, empeora 4
+    H1  evidencia: de -4725 a -0   (peor: tabla:ka=12,h=16,dir=1; mejor: tabla:ka=14,h=16)
+    H3a evidencia: de -0.247 a -0.000   (peor: tabla:ka=12,h=16,dir=1; mejor: tabla:ka=14,h=16)
+    H3b evidencia: de -0.112 a +0.000   (peor: tabla:ka=12,h=16,dir=1; mejor: tabla:ka=14,h=16)
+    mejor por H3A: tabla:ka=14,h=16: -0.000 +- 0.000 (remuestreo -0.000, plausibles +0.000, estres +0.000)
+    mejor por H3B: tabla:ka=14,h=16: +0.000 +- 0.000 (remuestreo +0.000, plausibles +0.000, estres +0.000)
+    mejoran H3a y H3b en mas de dos errores en evidencia: 0; con el mismo signo en remuestreo y plausibles: 0
+    mejoran H3a y H3b en mas de dos errores en estres: 1
+
+signo_n2000
+  que aprenden: 12 variantes. PASA 0, mejora y baja el p5 0, igual 1, empeora 11
+    H1  evidencia: de -255 a +1   (peor: tabla:ter=3,ka=8,h=8,nb=8; mejor: tabla:ter=3,ezb=64,ka=12,h=8)
+    H3a evidencia: de -0.102 a +0.000   (peor: tabla:ter=3,ka=8,h=8,nb=8; mejor: tabla:ter=3,ka=12,h=8)
+    H3b evidencia: de -0.090 a +0.006   (peor: tabla:ter=3,ka=8,h=8,nb=8; mejor: tabla:ter=3,ezb=64,ka=12,h=8)
+    mejor por H3A: tabla:ter=3,ka=12,h=8: +0.000 +- 0.000 (remuestreo +0.000, plausibles +0.000, estres +0.000)
+    mejor por H3B: tabla:ter=3,ezb=64,ka=12,h=8: +0.006 +- 0.003 (remuestreo +0.043, plausibles -0.030, estres -0.015)
+    mejoran H3a y H3b en mas de dos errores en evidencia: 0; con el mismo signo en remuestreo y plausibles: 0
+    mejoran H3a y H3b en mas de dos errores en estres: 3
+  fijas o con el aprendizaje apagado: 5 variantes. PASA 1, mejora y baja el p5 0, igual 0, empeora 4
+    H1  evidencia: de -24 a +37   (peor: tabla:ter=3,ezb=-32; mejor: tabla:ter=1,ezb=64,ezs=-32)
+    H3a evidencia: de -0.047 a +0.005   (peor: tabla:ter=3,ezb=-32; mejor: tabla:ter=1,ezb=64,ezs=-32)
+    H3b evidencia: de -0.020 a +0.017   (peor: tabla:ter=3,ezb=-32; mejor: tabla:ter=1,ezb=64,ezs=-32)
+    mejor por H3A: tabla:ter=1,ezb=64,ezs=-32: +0.005 +- 0.002 (remuestreo +0.042, plausibles -0.033, estres -0.020)
+    mejor por H3B: tabla:ter=1,ezb=64,ezs=-32: +0.017 +- 0.003 (remuestreo +0.062, plausibles -0.026, estres -0.014)
+    mejoran H3a y H3b en mas de dos errores en evidencia: 1; con el mismo signo en remuestreo y plausibles: 0
+      tabla:ter=1,ezb=64,ezs=-32: H3a +0.005 (rem +0.042, pla -0.033), H3b +0.017 (rem +0.062, pla -0.026), juicio PASA
+    mejoran H3a y H3b en mas de dos errores en estres: 0
+
+tabla_banda_n2000
+  que aprenden: 41 variantes. PASA 0, mejora y baja el p5 0, igual 6, empeora 35
+    H1  evidencia: de -297 a +1   (peor: tabla:banda=1,ka=6,h=32,lim=2; mejor: tabla:banda=1,ka=12,h=16,lim=2,nb=64,sh=4)
+    H3a evidencia: de -0.149 a +0.000   (peor: tabla:banda=1,ka=6,h=32,lim=2; mejor: tabla:banda=1,ka=12,h=8,lim=1)
+    H3b evidencia: de -0.125 a +0.000   (peor: tabla:banda=1,ka=6,h=32,lim=2; mejor: tabla:banda=1,ka=12,h=8,lim=1)
+    mejor por H3A: tabla:banda=1,ka=12,h=8,lim=1: +0.000 +- 0.000 (remuestreo +0.000, plausibles +0.000, estres +0.000)
+    mejor por H3B: tabla:banda=1,ka=12,h=8,lim=1: +0.000 +- 0.000 (remuestreo +0.000, plausibles +0.000, estres +0.001)
+    mejoran H3a y H3b en mas de dos errores en evidencia: 0; con el mismo signo en remuestreo y plausibles: 0
+    mejoran H3a y H3b en mas de dos errores en estres: 37
+
+tabla_c_n2000
+  que aprenden: 15 variantes. PASA 0, mejora y baja el p5 0, igual 3, empeora 12
+    H1  evidencia: de -1194 a +0   (peor: tabla:ka=8,h=16,c=8; mejor: tabla:ka=12,h=16,c=64)
+    H3a evidencia: de -0.564 a -0.000   (peor: tabla:ka=8,h=16,c=8; mejor: tabla:ka=12,h=16,c=32)
+    H3b evidencia: de -0.528 a +0.000   (peor: tabla:ka=8,h=16,c=8; mejor: tabla:ka=12,h=16,c=32)
+    mejor por H3A: tabla:ka=12,h=16,c=32: -0.000 +- 0.000 (remuestreo -0.000, plausibles -0.000, estres +0.003)
+    mejor por H3B: tabla:ka=12,h=16,c=32: +0.000 +- 0.000 (remuestreo +0.000, plausibles +0.000, estres +0.003)
+    mejoran H3a y H3b en mas de dos errores en evidencia: 0; con el mismo signo en remuestreo y plausibles: 0
+    mejoran H3a y H3b en mas de dos errores en estres: 11
+
+tabla_contador_n2000
+  que aprenden: 29 variantes. PASA 0, mejora y baja el p5 0, igual 8, empeora 21
+    H1  evidencia: de -2115 a -0   (peor: tabla:modo=1,ka=1,bits=3,h=4,g=0; mejor: tabla:modo=1,ka=1,bits=8,h=4,g=0)
+    H3a evidencia: de -0.939 a -0.000   (peor: tabla:modo=1,ka=1,bits=3,h=4,g=0; mejor: tabla:modo=1,ka=1,bits=8,h=4,g=0)
+    H3b evidencia: de -0.883 a -0.000   (peor: tabla:modo=1,ka=1,bits=3,h=4,g=0; mejor: tabla:modo=1,ka=1,bits=8,h=4,g=0)
+    mejor por H3A: tabla:modo=1,ka=1,bits=8,h=4,g=0: -0.000 +- 0.000 (remuestreo -0.000, plausibles -0.000, estres +0.001)
+    mejor por H3B: tabla:modo=1,ka=1,bits=8,h=4,g=0: -0.000 +- 0.000 (remuestreo -0.000, plausibles +0.000, estres +0.001)
+    mejoran H3a y H3b en mas de dos errores en evidencia: 0; con el mismo signo en remuestreo y plausibles: 0
+    mejoran H3a y H3b en mas de dos errores en estres: 10
+
+tabla_forma_n2000
+  que aprenden: 26 variantes. PASA 0, mejora y baja el p5 0, igual 10, empeora 16
+    H1  evidencia: de -195 a +1   (peor: tabla:ka=10,h=16,nb=8; mejor: tabla:ka=12,h=16,nb=64,sh=4)
+    H3a evidencia: de -0.072 a -0.000   (peor: tabla:ka=10,h=16,nb=8; mejor: tabla:ka=12,h=16,nb=16)
+    H3b evidencia: de -0.065 a +0.000   (peor: tabla:ka=10,h=16,nb=8; mejor: tabla:ka=12,h=16,nb=16)
+    mejor por H3A: tabla:ka=12,h=16,nb=16: -0.000 +- 0.000 (remuestreo -0.000, plausibles -0.000, estres +0.003)
+    mejor por H3B: tabla:ka=12,h=16,nb=16: +0.000 +- 0.000 (remuestreo +0.000, plausibles +0.000, estres +0.003)
+    mejoran H3a y H3b en mas de dos errores en evidencia: 0; con el mismo signo en remuestreo y plausibles: 0
+    mejoran H3a y H3b en mas de dos errores en estres: 13
+
+tabla_ka_h_n2000
+  que aprenden: 20 variantes. PASA 0, mejora y baja el p5 0, igual 7, empeora 13
+    H1  evidencia: de -1229 a +0   (peor: tabla:ka=6,h=32; mejor: tabla:ka=12,h=4)
+    H3a evidencia: de -0.565 a +0.000   (peor: tabla:ka=6,h=32; mejor: tabla:ka=12,h=4)
+    H3b evidencia: de -0.529 a +0.000   (peor: tabla:ka=6,h=32; mejor: tabla:ka=12,h=4)
+    mejor por H3A: tabla:ka=12,h=4: +0.000 +- 0.000 (remuestreo +0.000, plausibles +0.000, estres +0.000)
+    mejor por H3B: tabla:ka=12,h=4: +0.000 +- 0.000 (remuestreo +0.000, plausibles +0.000, estres +0.000)
+    mejoran H3a y H3b en mas de dos errores en evidencia: 0; con el mismo signo en remuestreo y plausibles: 0
+    mejoran H3a y H3b en mas de dos errores en estres: 10
+  fijas o con el aprendizaje apagado: 1 variantes. PASA 0, mejora y baja el p5 0, igual 1, empeora 0
+    H1  evidencia: de +0 a +0   (peor: tabla:ka=0; mejor: tabla:ka=0)
+    H3a evidencia: de +0.000 a +0.000   (peor: tabla:ka=0; mejor: tabla:ka=0)
+    H3b evidencia: de +0.000 a +0.000   (peor: tabla:ka=0; mejor: tabla:ka=0)
+    mejor por H3A: tabla:ka=0: +0.000 +- 0.000 (remuestreo +0.000, plausibles +0.000, estres +0.000)
+    mejor por H3B: tabla:ka=0: +0.000 +- 0.000 (remuestreo +0.000, plausibles +0.000, estres +0.000)
+    mejoran H3a y H3b en mas de dos errores en evidencia: 0; con el mismo signo en remuestreo y plausibles: 0
+    mejoran H3a y H3b en mas de dos errores en estres: 0
+
+tabla_umbral_n2000
+  que aprenden: 18 variantes. PASA 0, mejora y baja el p5 0, igual 0, empeora 18
+    H1  evidencia: de -384 a +2   (peor: tabla:ka=8,h=16,ui=-48,uo=48; mejor: tabla:ka=12,h=16,ui=0,uo=-48)
+    H3a evidencia: de -0.187 a -0.004   (peor: tabla:ka=8,h=16,ui=-48,uo=48; mejor: tabla:ka=12,h=16,ui=-48,uo=0)
+    H3b evidencia: de -0.163 a +0.001   (peor: tabla:ka=8,h=16,ui=-48,uo=48; mejor: tabla:ka=12,h=16,ui=0,uo=-48)
+    mejor por H3A: tabla:ka=12,h=16,ui=-48,uo=0: -0.004 +- 0.001 (remuestreo -0.004, plausibles -0.003, estres -0.001)
+    mejor por H3B: tabla:ka=12,h=16,ui=0,uo=-48: +0.001 +- 0.002 (remuestreo -0.007, plausibles +0.009, estres +0.007)
+    mejoran H3a y H3b en mas de dos errores en evidencia: 0; con el mismo signo en remuestreo y plausibles: 0
+    mejoran H3a y H3b en mas de dos errores en estres: 12
+  fijas o con el aprendizaje apagado: 2 variantes. PASA 0, mejora y baja el p5 0, igual 2, empeora 0
+    H1  evidencia: de +0 a +0   (peor: tabla:ka=0,ui=48,uo=-48; mejor: tabla:ka=0,ui=48,uo=-48)
+    H3a evidencia: de +0.000 a +0.000   (peor: tabla:ka=0,ui=48,uo=-48; mejor: tabla:ka=0,ui=48,uo=-48)
+    H3b evidencia: de +0.000 a +0.000   (peor: tabla:ka=0,ui=48,uo=-48; mejor: tabla:ka=0,ui=48,uo=-48)
+    mejor por H3A: tabla:ka=0,ui=48,uo=-48: +0.000 +- 0.000 (remuestreo +0.000, plausibles +0.000, estres +0.000)
+    mejor por H3B: tabla:ka=0,ui=48,uo=-48: +0.000 +- 0.000 (remuestreo +0.000, plausibles +0.000, estres +0.000)
+    mejoran H3a y H3b en mas de dos errores en evidencia: 0; con el mismo signo en remuestreo y plausibles: 0
+    mejoran H3a y H3b en mas de dos errores en estres: 0
+
+Todas las etapas juntas, variantes distintas de este estudio:
+
+n2000
+  que aprenden: 229 variantes. PASA 0, mejora y baja el p5 0, igual 37, empeora 192
+    H1  evidencia: de -3693 a +2   (peor: patron:tipo=0,H=8,sim=2,bits=2,h=1; mejor: mm_patron:tipo=1,H=12,sim=2,bits=2,h=1,fe=2,fs=2,maxp=4)
+    H3a evidencia: de -1.350 a -0.000   (peor: patron:tipo=0,H=8,sim=2,bits=2,h=1; mejor: mm_patron:tipo=0,H=12,sim=2,bits=2,h=1,fe=0,fs=2,maxp=4)
+    H3b evidencia: de -1.294 a +0.006   (peor: patron:tipo=0,H=8,sim=2,bits=2,h=1; mejor: tabla:ter=3,ezb=64,ka=12,h=8)
+    mejor por H3A: mm_patron:tipo=0,H=12,sim=2,bits=2,h=1,fe=0,fs=2,maxp=4: -0.000 +- 0.000 (remuestreo -0.001, plausibles -0.001, estres -0.001)
+    mejor por H3B: tabla:ter=3,ezb=64,ka=12,h=8: +0.006 +- 0.003 (remuestreo +0.043, plausibles -0.030, estres -0.015)
+    mejoran H3a y H3b en mas de dos errores en evidencia: 0; con el mismo signo en remuestreo y plausibles: 0
+    mejoran H3a y H3b en mas de dos errores en estres: 97
+  fijas o con el aprendizaje apagado: 20 variantes. PASA 1, mejora y baja el p5 0, igual 7, empeora 12
+    H1  evidencia: de -24 a +42   (peor: tabla:ter=3,ezb=-32; mejor: tabla:ter=1,ezb=96,ezs=-64)
+    H3a evidencia: de -0.047 a +0.005   (peor: tabla:ter=3,ezb=-32; mejor: tabla:ter=1,ezb=64,ezs=-32)
+    H3b evidencia: de -0.020 a +0.018   (peor: tabla:ter=3,ezb=-32; mejor: tabla:ter=1,ezb=96,ezs=-32)
+    mejor por H3A: tabla:ter=1,ezb=64,ezs=-32: +0.005 +- 0.002 (remuestreo +0.042, plausibles -0.033, estres -0.020)
+    mejor por H3B: tabla:ter=1,ezb=96,ezs=-32: +0.018 +- 0.003 (remuestreo +0.068, plausibles -0.028, estres -0.016)
+    mejoran H3a y H3b en mas de dos errores en evidencia: 2; con el mismo signo en remuestreo y plausibles: 0
+      tabla:ter=1,ezb=64,ezs=-32: H3a +0.005 (rem +0.042, pla -0.033), H3b +0.017 (rem +0.062, pla -0.026), juicio PASA
+      tabla:ter=1,ezb=96,ezs=-32: H3a +0.005 (rem +0.046, pla -0.037), H3b +0.018 (rem +0.068, pla -0.028), juicio igual
+    mejoran H3a y H3b en mas de dos errores en estres: 0
+
+n20000_parada
+  que aprenden: 39 variantes. PASA 0, mejora y baja el p5 0, igual 4, empeora 35
+    H1  evidencia: de -19046 a +43   (peor: patron:tipo=3,H=8,sim=2,bits=3,h=16; mejor: mm_patron:tipo=0,H=8,sim=2,bits=3,h=1,fe=0,fs=2,maxp=4)
+    H3a evidencia: de -1.581 a -0.000   (peor: patron:tipo=3,H=8,sim=2,bits=3,h=16; mejor: tabla:ka=14,h=16)
+    H3b evidencia: de -1.456 a +0.014   (peor: patron:tipo=3,H=8,sim=2,bits=3,h=16; mejor: tabla:ter=3,ezb=64,ka=12,h=8)
+    mejor por H3A: tabla:ka=14,h=16: -0.000 +- 0.000 (remuestreo -0.000, plausibles +0.000, estres +0.000)
+    mejor por H3B: tabla:ter=3,ezb=64,ka=12,h=8: +0.014 +- 0.002 (remuestreo +0.060, plausibles -0.030, estres +0.001)
+    mejoran H3a y H3b en mas de dos errores en evidencia: 0; con el mismo signo en remuestreo y plausibles: 0
+    mejoran H3a y H3b en mas de dos errores en estres: 24
+  fijas o con el aprendizaje apagado: 4 variantes. PASA 0, mejora y baja el p5 0, igual 3, empeora 1
+    H1  evidencia: de -185 a +411   (peor: tabla:ter=3,ezb=64; mejor: tabla:ter=1,ezb=96,ezs=-32)
+    H3a evidencia: de -0.020 a +0.000   (peor: tabla:ter=3,ezb=64; mejor: tabla:ka=0)
+    H3b evidencia: de +0.000 a +0.027   (peor: tabla:ka=0; mejor: tabla:ter=1,ezb=96,ezs=-32)
+    mejor por H3A: tabla:ka=0: +0.000 +- 0.000 (remuestreo +0.000, plausibles +0.000, estres +0.000)
+    mejor por H3B: tabla:ter=1,ezb=96,ezs=-32: +0.027 +- 0.002 (remuestreo +0.087, plausibles -0.031, estres -0.006)
+    mejoran H3a y H3b en mas de dos errores en evidencia: 0; con el mismo signo en remuestreo y plausibles: 0
+    mejoran H3a y H3b en mas de dos errores en estres: 0
+
+n20000_interiores
+  que aprenden: 39 variantes. PASA 0, mejora y baja el p5 0, igual 3, empeora 36
+    H1  evidencia: de -25414 a +77   (peor: patron:tipo=3,H=8,sim=2,bits=3,h=16; mejor: mm_patron:tipo=0,H=8,sim=2,bits=3,h=1,fe=0,fs=2,maxp=4)
+    H3a evidencia: de -1.818 a +0.000   (peor: patron:tipo=3,H=8,sim=2,bits=3,h=16; mejor: tabla:ka=14,h=16)
+    H3b evidencia: de -1.720 a +0.007   (peor: patron:tipo=3,H=8,sim=2,bits=3,h=16; mejor: mm_patron:tipo=0,H=8,sim=2,bits=3,h=1,fe=0,fs=2,maxp=4)
+    mejor por H3A: tabla:ka=14,h=16: +0.000 +- 0.000 (remuestreo -0.000, plausibles +0.000, estres +0.001)
+    mejor por H3B: mm_patron:tipo=0,H=8,sim=2,bits=3,h=1,fe=0,fs=2,maxp=4: +0.007 +- 0.001 (remuestreo +0.015, plausibles +0.000, estres +0.003)
+    mejoran H3a y H3b en mas de dos errores en evidencia: 0; con el mismo signo en remuestreo y plausibles: 0
+    mejoran H3a y H3b en mas de dos errores en estres: 22
+  fijas o con el aprendizaje apagado: 4 variantes. PASA 0, mejora y baja el p5 0, igual 1, empeora 3
+    H1  evidencia: de -737 a +225   (peor: tabla:ter=3,ezb=64; mejor: tabla:ter=1,ezb=96,ezs=-32)
+    H3a evidencia: de -0.050 a +0.000   (peor: tabla:ter=3,ezb=64; mejor: tabla:ka=0)
+    H3b evidencia: de -0.007 a +0.010   (peor: tabla:ter=3,ezb=64; mejor: tabla:ter=1,ezb=96,ezs=-32)
+    mejor por H3A: tabla:ka=0: +0.000 +- 0.000 (remuestreo +0.000, plausibles +0.000, estres +0.000)
+    mejor por H3B: tabla:ter=1,ezb=96,ezs=-32: +0.010 +- 0.002 (remuestreo +0.067, plausibles -0.041, estres -0.043)
+    mejoran H3a y H3b en mas de dos errores en evidencia: 0; con el mismo signo en remuestreo y plausibles: 0
+    mejoran H3a y H3b en mas de dos errores en estres: 0

@@ -1,0 +1,28 @@
+Variantes evaluadas en el barrido (semilla 0)
+  tabla_ka_h         2000 ticks, todas        21
+  tabla_c            2000 ticks, todas        15
+  tabla_umbral       2000 ticks, todas        20
+  tabla_forma        2000 ticks, todas        26
+  tabla_contador     2000 ticks, todas        29
+  tabla_banda        2000 ticks, todas        41
+  signo              2000 ticks, todas        17
+  redondeo           2000 ticks, todas         8
+  espera             2000 ticks, todas        12
+  patron             2000 ticks, todas        24
+  filtro             2000 ticks, todas        40
+  cota_bandas        2000 ticks, todas        17
+  largas            20000 ticks, interiores   42
+  largas            20000 ticks, parada       42
+  redondeo          20000 ticks, interiores    6
+  redondeo          20000 ticks, parada        6
+Variantes distintas a 2000 ticks: 266 (249 de este estudio y 17 bandas fijas de la cota)
+Preseleccion a 20 000 ticks: 42, mas 6 de la prueba de redondeo
+
+Lectura rapida del criterio (columna juicio), variantes distintas de este estudio:
+    2000 ticks, todas      que aprenden                          229: PASA 0, mejora y baja el p5 0, igual 37, empeora 192
+    2000 ticks, todas      fijas o con el aprendizaje apagado     20: PASA 1, mejora y baja el p5 0, igual 7, empeora 12
+           PASA: tabla:ter=1,ezb=64,ezs=-32
+   20000 ticks, interiores que aprenden                           39: PASA 0, mejora y baja el p5 0, igual 3, empeora 36
+   20000 ticks, interiores fijas o con el aprendizaje apagado      4: PASA 0, mejora y baja el p5 0, igual 1, empeora 3
+   20000 ticks, parada     que aprenden                           39: PASA 0, mejora y baja el p5 0, igual 4, empeora 35
+   20000 ticks, parada     fijas o con el aprendizaje apagado      4: PASA 0, mejora y baja el p5 0, igual 3, empeora 1
