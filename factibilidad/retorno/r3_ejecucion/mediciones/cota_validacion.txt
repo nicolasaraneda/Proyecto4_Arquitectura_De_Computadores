@@ -1,0 +1,30 @@
+Validacion de la copia del nucleo usada para la cota (limite por orden hipotetico)
+Estrategias comparadas: 6 candidatos y 16 rivales de las clases azar, comprar_y_mantener, cruce, momentum, reversion
+
+1. Arnes contra copia, comando detalle, serie por serie
+  bloques_n2000                       10 series x 22 estrategias: 0 lineas distintas
+  practica_n20000                      1 series x 22 estrategias: 0 lineas distintas
+  remuestreo_s0_n2000               5000 series x 22 estrategias: 0 lineas distintas
+  modelo_s0_n2000                   2500 series x 22 estrategias: 0 lineas distintas
+  dos_componentes_s0_n2000          2500 series x 22 estrategias: 0 lineas distintas
+  saltos_s0_n2000                   1000 series x 22 estrategias: 0 lineas distintas
+  nivel_bajo_s0_n2000               1000 series x 22 estrategias: 0 lineas distintas
+  borde_bajo_s0_n2000                200 series x 22 estrategias: 0 lineas distintas
+  borde_alto_s0_n2000                200 series x 22 estrategias: 0 lineas distintas
+  remuestreo_s0_n20000              4000 series x 22 estrategias: 0 lineas distintas
+  cambio_volatilidad_s0_n20000      1000 series x 22 estrategias: 0 lineas distintas
+  tendencia_s0_n20000                400 series x 22 estrategias: 0 lineas distintas
+  total: 17811 series, 391842 corridas, 0 distintas
+
+2. lim:L=63 (copia) contra max_media (arnes): patrimonio, ordenes y perdida maxima de cada serie
+  17811 series, 0 distintas
+
+3. Control negativo: lim:L=126 contra lim:L=63 en la copia (deben diferir)
+  remuestreo_s0_n2000: 4830 de 5000 series distintas
+  (el arnes real no conoce la estrategia lim: True)
+
+4. Comando veredicto completo, max_media contra base, semilla 0, texto de los dos binarios
+  2000 ticks: 30 lineas, identico
+  20000 ticks: 51 lineas, identico
+
+PASS: 0 diferencias

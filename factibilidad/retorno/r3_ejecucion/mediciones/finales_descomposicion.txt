@@ -1,0 +1,129 @@
+=== Descomposicion de la ejecucion: ejec:m=8 (ejec:m=8) ===
+Conjunto evidencia, 2000 ticks, semilla 0: 10000 series, 2000 ticks de media. Caja 10000, comision 5.
+Comprobacion contra correr_serie: 0 series con patrimonio u ordenes distintos.
+Promedios por serie. Entre parentesis, llevado a 2000 ticks.
+
+Patrimonio final 10997. Ordenes 51.1 (51.1). Comisiones 255 (255).
+Posiciones (entradas) 13.48 (13.48). Acciones por posicion 95.3. Ganancia bruta por accion comprada 0.975.
+Ganancia bruta por posicion 92.9. Ordenes de compra por entrada 1.89, de venta por salida 1.88.
+Posiciones segun las ordenes de compra de su entrada: 1: 27.1% 2: 62.4% 3: 8.3% 4: 1.4% 5: 0.4% 6: 0.1% 7: 0.1% 8+: 0.2%
+
+Ordenes por clase y por acciones ejecutadas (promedio por serie)
+lado    clase         tamano |  ordenes  acciones  comision |      bruta bruta/orden bruta/accion
+compra  primera       32-62  |    1.677     96.12      8.38 |      84.07       50.14        0.875
+compra  primera       63     |   11.805    743.74     59.03 |     687.55       58.24        0.924
+compra  primera       total  |   13.482    839.86     67.41 |     771.62       57.23        0.919
+compra  continuacion  4-7    |    0.008      0.06      0.04 |       0.02        1.90        0.272
+compra  continuacion  8-15   |    2.280     26.09     11.40 |      24.27       10.64        0.930
+compra  continuacion  16-31  |    3.559     81.32     17.80 |      76.97       21.62        0.946
+compra  continuacion  32-62  |    3.446    154.35     17.23 |     151.64       44.00        0.982
+compra  continuacion  63     |    2.766    174.26     13.83 |     213.83       77.30        1.227
+compra  continuacion  total  |   12.060    436.07     60.30 |     466.72       38.70        1.070
+compra  recompra      4-7    |    0.021      0.15      0.11 |       0.13        5.95        0.851
+compra  recompra      8-15   |    0.045      0.37      0.23 |       0.99       21.83        2.715
+compra  recompra      16-31  |    0.000      0.00      0.00 |       0.01       96.54        4.827
+compra  recompra      32-62  |    0.028      1.72      0.14 |       1.99       71.43        1.155
+compra  recompra      63     |    0.104      6.56      0.52 |      10.57      101.48        1.611
+compra  recompra      total  |    0.199      8.81      0.99 |      13.70       68.85        1.555
+venta   primera       32-62  |    1.656     94.93      8.28 |
+venta   primera       63     |   11.782    742.26     58.91 |
+venta   primera       total  |   13.438    837.19     67.19 |
+venta   continuacion  1      |    0.000      0.00      0.00 |
+venta   continuacion  2-3    |    0.000      0.00      0.00 |
+venta   continuacion  4-7    |    0.029      0.20      0.14 |
+venta   continuacion  8-15   |    2.291     26.07     11.46 |
+venta   continuacion  16-31  |    3.512     80.22     17.56 |
+venta   continuacion  32-62  |    3.384    151.46     16.92 |
+venta   continuacion  63     |    2.684    169.09     13.42 |
+venta   continuacion  total  |   11.901    427.04     59.50 |
+
+Ordenes que existen por el limite de 63 acciones (promedio por serie; entre parentesis por cada 2000 ticks)
+  comisiones de las continuaciones de compra      60.30 (60.30)   12.06 ordenes
+  comisiones de las continuaciones de venta       59.50 (59.50)   11.90 ordenes
+  suma de comisiones de las continuaciones       119.80 (119.80)   1.09 % del patrimonio final
+Precio de las continuaciones contra la primera orden de su racha (sesgado: solo existen si la senal no cambio; ver el encabezado)
+  compras: precio de mas                         -57.06 (-57.06)   -0.1308 de precio por accion, 436.1 acciones
+  ventas: precio de menos                        -28.22 (-28.22)   -0.0661 de precio por accion, 427.0 acciones
+Recompras (no dependen del limite): 0.20 ordenes, comision 0.99 (0.99)
+
+Camino del precio despues de la primera orden (media +- error entre ordenes; no depende de lo que la estrategia haga despues)
+  primera compra menos precio de la senal (tick anterior): +0.1441 +- 0.0033
+  precio j ticks despues de la primera compra, menos el de la primera compra:
+    j=1 -0.014+-0.004 j=2 +0.007+-0.005 j=3 -0.007+-0.006 j=4 +0.018+-0.007 j=5 +0.040+-0.007 j=6 +0.092+-0.008 j=7 +0.118+-0.008 j=8 +0.161+-0.009
+  primera venta menos precio de la senal (tick anterior): -0.1428 +- 0.0033
+  precio j ticks despues de la primera venta, menos el de la primera venta:
+    j=1 -0.013+-0.003 j=2 -0.071+-0.004 j=3 -0.028+-0.006 j=4 -0.060+-0.006 j=5 -0.099+-0.007 j=6 -0.141+-0.008 j=7 -0.121+-0.008 j=8 -0.114+-0.009
+
+Ordenes que ejecutan menos de m acciones (compras y ventas, todas las clases), promedio por serie
+   m |  ordenes  comision  % ordenes | ganancia bruta de las compras de ese tamano, por orden
+   2 |    0.000      0.00      0.00% | 0.00
+   4 |    0.001      0.00      0.00% | 0.00
+   8 |    0.059      0.29      0.12% | 4.84
+  16 |    4.676     23.38      9.15% | 10.79
+  32 |   11.747     58.73     23.00% | 17.31
+  63 |   21.938    109.69     42.95% | 30.74
+
+=== Descomposicion de la ejecucion: ejec:m=8,m2=24,e2=32 (ejec:m=8,m2=24,e2=32) ===
+Conjunto evidencia, 2000 ticks, semilla 0: 10000 series, 2000 ticks de media. Caja 10000, comision 5.
+Comprobacion contra correr_serie: 0 series con patrimonio u ordenes distintos.
+Promedios por serie. Entre parentesis, llevado a 2000 ticks.
+
+Patrimonio final 11006. Ordenes 47.7 (47.7). Comisiones 238 (238).
+Posiciones (entradas) 13.49 (13.49). Acciones por posicion 93.4. Ganancia bruta por accion comprada 0.987.
+Ganancia bruta por posicion 92.2. Ordenes de compra por entrada 1.67, de venta por salida 1.75.
+Posiciones segun las ordenes de compra de su entrada: 1: 46.7% 2: 45.4% 3: 6.1% 4: 1.1% 5: 0.4% 6: 0.1% 7: 0.1% 8+: 0.2%
+
+Ordenes por clase y por acciones ejecutadas (promedio por serie)
+lado    clase         tamano |  ordenes  acciones  comision |      bruta bruta/orden bruta/accion
+compra  primera       32-62  |    1.675     96.02      8.38 |      83.79       50.02        0.873
+compra  primera       63     |   11.816    744.38     59.08 |     688.74       58.29        0.925
+compra  primera       total  |   13.491    840.40     67.45 |     772.53       57.26        0.919
+compra  continuacion  4-7    |    0.004      0.02      0.02 |       0.06       16.83        2.405
+compra  continuacion  8-15   |    0.635      7.29      3.17 |      10.55       16.61        1.447
+compra  continuacion  16-31  |    2.126     53.61     10.63 |      56.77       26.70        1.059
+compra  continuacion  32-62  |    3.457    154.79     17.28 |     152.48       44.11        0.985
+compra  continuacion  63     |    2.772    174.64     13.86 |     213.76       77.12        1.224
+compra  continuacion  total  |    8.993    390.35     44.97 |     433.62       48.22        1.111
+compra  recompra      4-7    |    0.018      0.12      0.09 |       0.16        9.04        1.297
+compra  recompra      8-15   |    0.731      8.25      3.65 |      10.43       14.27        1.264
+compra  recompra      16-31  |    0.664     13.12      3.32 |      15.25       22.94        1.162
+compra  recompra      32-62  |    0.024      1.46      0.12 |       1.94       81.75        1.324
+compra  recompra      63     |    0.100      6.30      0.50 |      10.25      102.53        1.627
+compra  recompra      total  |    1.537     29.25      7.68 |      38.02       24.74        1.300
+venta   primera       32-62  |    1.654     94.85      8.27 |
+venta   primera       63     |   11.783    742.35     58.92 |
+venta   primera       total  |   13.438    837.20     67.19 |
+venta   continuacion  1      |    0.000      0.00      0.00 |
+venta   continuacion  2-3    |    0.000      0.00      0.00 |
+venta   continuacion  4-7    |    0.021      0.14      0.10 |
+venta   continuacion  8-15   |    1.341     15.26      6.71 |
+venta   continuacion  16-31  |    2.751     65.76     13.76 |
+venta   continuacion  32-62  |    3.396    151.97     16.98 |
+venta   continuacion  63     |    2.688    169.35     13.44 |
+venta   continuacion  total  |   10.197    402.49     50.99 |
+
+Ordenes que existen por el limite de 63 acciones (promedio por serie; entre parentesis por cada 2000 ticks)
+  comisiones de las continuaciones de compra      44.97 (44.97)   8.99 ordenes
+  comisiones de las continuaciones de venta       50.99 (50.99)   10.20 ordenes
+  suma de comisiones de las continuaciones        95.95 (95.95)   0.87 % del patrimonio final
+Precio de las continuaciones contra la primera orden de su racha (sesgado: solo existen si la senal no cambio; ver el encabezado)
+  compras: precio de mas                         -57.04 (-57.04)   -0.1461 de precio por accion, 390.3 acciones
+  ventas: precio de menos                        -28.93 (-28.93)   -0.0719 de precio por accion, 402.5 acciones
+Recompras (no dependen del limite): 1.54 ordenes, comision 7.68 (7.68)
+
+Camino del precio despues de la primera orden (media +- error entre ordenes; no depende de lo que la estrategia haga despues)
+  primera compra menos precio de la senal (tick anterior): +0.1442 +- 0.0033
+  precio j ticks despues de la primera compra, menos el de la primera compra:
+    j=1 -0.014+-0.004 j=2 +0.006+-0.005 j=3 -0.007+-0.006 j=4 +0.017+-0.007 j=5 +0.039+-0.007 j=6 +0.092+-0.008 j=7 +0.117+-0.008 j=8 +0.160+-0.009
+  primera venta menos precio de la senal (tick anterior): -0.1428 +- 0.0033
+  precio j ticks despues de la primera venta, menos el de la primera venta:
+    j=1 -0.013+-0.003 j=2 -0.071+-0.004 j=3 -0.028+-0.006 j=4 -0.060+-0.006 j=5 -0.099+-0.007 j=6 -0.141+-0.008 j=7 -0.121+-0.008 j=8 -0.114+-0.009
+
+Ordenes que ejecutan menos de m acciones (compras y ventas, todas las clases), promedio por serie
+   m |  ordenes  comision  % ordenes | ganancia bruta de las compras de ese tamano, por orden
+   2 |    0.000      0.00      0.00% | 0.00
+   4 |    0.000      0.00      0.00% | 0.00
+   8 |    0.042      0.21      0.09% | 10.33
+  16 |    2.749     13.75      5.77% | 15.28
+  32 |    8.291     41.46     17.40% | 22.31
+  63 |   18.497     92.48     38.81% | 35.51
