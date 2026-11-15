@@ -20,7 +20,8 @@ Nombres:
     <familia>_s<semilla>_n<largo>.bin remuestreo o una familia de ref/series.py
 
 Semillas: 0 exploración, 1 la reservada del tramo anterior (solo a 2000 ticks,
-para reproducir docs/mediciones/frontera.txt) y 2 la reservada de este tramo.
+para reproducir docs/mediciones/frontera.txt), 2 la reservada de este tramo y
+3 la reservada del estudio de cierre (r4_final), que la usa una sola vez.
 
     python3 factibilidad/retorno/generar_series.py              # todo lo que falte
     python3 factibilidad/retorno/generar_series.py --largo 2000 --semilla 0
@@ -51,7 +52,7 @@ ESTRES = [f for f in series.ESTRES if f not in DEGENERADAS]
 # Cantidad de series por lote, según el largo: (remuestreo, cada plausible, cada estrés, cada degenerada)
 CANTIDADES = {2000: (5000, 2500, 1000, 200), 20000: (4000, 1000, 400, 50)}
 # Semillas que se generan para cada largo
-SEMILLAS = {2000: (0, 1, 2), 20000: (0, 2)}
+SEMILLAS = {2000: (0, 1, 2, 3), 20000: (0, 2, 3)}
 
 
 def plan(largos=None, semillas=None):

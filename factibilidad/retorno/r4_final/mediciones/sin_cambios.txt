@@ -1,0 +1,16 @@
+Salidas del arnes con el torneo.c anterior (9b82e81) y con el actual, comparadas byte a byte.
+torneo.c anterior: 8cc3c3094b7637e911337ae45bc9af5c   actual: c5f0dff73b4432a389cbec3322cb6700
+hipotesis_externas.txt                  37879 bytes  1fa256f5ec402c8e  identica
+hipotesis_n2000.tsv.txt                662456 bytes  cc8c94d4ecaa535d  identica
+hipotesis_n2000.txt                     98214 bytes  3c60d7dcff5731e9  identica
+hipotesis_n20000_int.tsv.txt           729761 bytes  b5f6bd9a22c9d687  identica
+hipotesis_n20000_int.txt                98272 bytes  bfeac11d077ba068  identica
+rivales.txt                              6432 bytes  574698666fda534e  identica
+veredicto_ejec_fuerte.txt                2857 bytes  b2f853dd95a72792  identica
+veredicto_fondo_rec.txt                  2937 bytes  ee084e5e28de7faa  identica
+veredicto_kalman_ingenuo15.txt           6967 bytes  28e70728473382df  identica
+veredicto_max_media.txt                  7835 bytes  e9ba4485b7697bb5  identica
+validacion_torneo.txt                    2269 bytes  7c5e0b8c406cf689  identica (make -C .. validar-torneo)
+      fuerte   prudente   sorteo propio 1.2818   arnes 1.280   diferencia -0.0022 (error combinado 0.0018)
+PASS: los puntajes del torneo coinciden con el calculo independiente
+SIN_CAMBIOS: OK

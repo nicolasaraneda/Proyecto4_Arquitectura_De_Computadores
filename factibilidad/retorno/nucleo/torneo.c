@@ -36,9 +36,32 @@
 
 const char *CAMPOS[N_CAMPOS] = {"ingenuo", "mixto", "fuerte"};
 
+/* Campos más duros, agregados en el estudio de cierre (r4_final). Son los
+ * cuatro de la auditoría (auditoria/indep.c):
+ *   racional    cualquier rival que no pierde en la serie de práctica completa
+ *               y que no opera al azar, todos con la misma probabilidad;
+ *   reversores  todos los rivales traen una de las tres mejores reversiones;
+ *   fijos2      el campo mixto, pero dos de los G rivales son siempre la regla
+ *               base y max_media;
+ *   fijos3      lo mismo con tres: además la suma móvil de 64.
+ * La tabla de pesos sigue teniendo N_CAMPOS filas. Un campo de estos se pide
+ * por nombre (--campo racional, o la variable RETORNO_CAMPO) y en esa corrida
+ * ocupa el lugar del mixto: campo_indice devuelve 1, CAMPOS[1] pasa a llamarse
+ * como el campo pedido y rivales_preparar llena esa fila con sus pesos. Sin
+ * pedirlos, nada cambia: las salidas con ingenuo, mixto y fuerte son las de
+ * antes, byte a byte. */
+#define N_EXTRAS 4
+static const char *EXTRAS[N_EXTRAS] = {"racional", "reversores", "fijos2", "fijos3"};
+static const char *FIJOS[3] = {"reversion:k=5,a=4,b=0", "reversion:k=5,a=3,b=0", "reversion:tipo=1,n=64,a=4,b=1"};
+static int extra_pedido;                  /* 0 ninguno; 1 + índice en EXTRAS */
+static const double *extra_peso;          /* la fila de pesos que ocupa el campo pedido */
+static int extra_nfijos, extra_fijo[3];   /* rivales que están siempre en el campo (fijos2 y fijos3) */
+
 int campo_indice(const char *nombre) {
   for (int k = 0; k < N_CAMPOS; k++)
     if (!strcmp(CAMPOS[k], nombre)) return k;
+  for (int e = 0; e < N_EXTRAS; e++)
+    if (!strcmp(EXTRAS[e], nombre)) { extra_pedido = 1 + e; CAMPOS[1] = EXTRAS[e]; return 1; }
   return -1;
 }
 
@@ -82,6 +105,30 @@ int rivales_preparar(Rivales *rv, const Reglas *r) {
       rv->peso[0][miembros[a]] = 1.0 / N_CLASES / n;
       rv->peso[1][miembros[a]] = a < mejores ? 1.0 / N_CLASES / mejores : 0.0;
       rv->peso[2][miembros[a]] = a < mejores ? CLASES[c].fuerte / mejores : 0.0;
+    }
+  }
+  /* campo pedido por nombre (ver campo_indice): reemplaza la fila del mixto */
+  const char *pedido = getenv("RETORNO_CAMPO");
+  if (!extra_pedido && pedido && *pedido && campo_indice(pedido) < 0) {
+    fprintf(stderr, "RETORNO_CAMPO: campo desconocido: %s\n", pedido); return 1;
+  }
+  extra_peso = NULL; extra_nfijos = 0;
+  if (extra_pedido) {
+    double suma = 0;
+    extra_peso = rv->peso[1];
+    for (int k = 0; k < rv->nr; k++) {
+      double mixto = rv->peso[1][k], p = mixto;                        /* fijos2 y fijos3 sortean el resto como el mixto */
+      if (extra_pedido == 1) p = rv->practica[k] >= r->caja0 && strcmp(rv->clase[k], "azar") ? 1.0 : 0.0;
+      if (extra_pedido == 2) p = mixto > 0 && !strcmp(rv->clase[k], "reversion") ? 1.0 : 0.0;
+      rv->peso[1][k] = p; suma += p;
+    }
+    if (suma <= 0) { fprintf(stderr, "campo %s: no queda ningun rival\n", CAMPOS[1]); return 1; }
+    for (int k = 0; k < rv->nr; k++) rv->peso[1][k] /= suma;
+    for (int f = 0; f < (extra_pedido == 3 ? 2 : extra_pedido == 4 ? 3 : 0); f++) {
+      int k = 0;
+      while (k < rv->nr && strcmp(rv->spec[k], FIJOS[f])) k++;
+      if (k == rv->nr) { fprintf(stderr, "campo %s: falta el rival %s\n", CAMPOS[1], FIJOS[f]); return 1; }
+      extra_fijo[extra_nfijos++] = k;
     }
   }
   return 0;
@@ -193,6 +240,9 @@ void torneo(double **W, const double *byh, int nc, int ref, double **R, const do
   acumulada(peso, nr, acum);
   memset(o, 0, sizeof(PuntosTorneo) * (size_t)nc);
   if (G > 64) G = 64;
+  /* con fijos2 y fijos3 los primeros nf rivales del campo no se sortean; en los demás campos nf = 0 */
+  int nf = peso == extra_peso ? extra_nfijos : 0;
+  if (nf > G) nf = G;
 
   /* --- una ronda --- */
   double **sa = matriz(nc, ns), **sb = matriz(nc, ns);              /* promedio por serie */
@@ -200,7 +250,7 @@ void torneo(double **W, const double *byh, int nc, int ref, double **R, const do
   double *tmp = malloc(sizeof(double) * (size_t)ns * FIELDS);
   for (int i = 0; i < ns; i++)
     for (int m = 0; m < FIELDS; m++) {
-      for (int g = 0; g < G; g++) x[g] = R[sortear(acum, nr, &az)][i];
+      for (int g = 0; g < G; g++) x[g] = R[g < nf ? extra_fijo[g] : sortear(acum, nr, &az)][i];
       for (int c = 0; c < nc; c++) {
         double pa = puntos_patrimonio(W[c][i], x, G), pb = puntos_puesto(W[c][i], x, G);
         ta[c][i * FIELDS + m] = pa; tb[c][i * FIELDS + m] = pb;
@@ -227,7 +277,7 @@ void torneo(double **W, const double *byh, int nc, int ref, double **R, const do
       permutar(perm, ns, &az);
       for (int k = 0; k < nk; k++) {
         const int *tr = perm + 3 * k;
-        for (int g = 0; g < G; g++) campo[g] = sortear(acum, nr, &az);
+        for (int g = 0; g < G; g++) campo[g] = g < nf ? extra_fijo[g] : sortear(acum, nr, &az);
         for (int g = 0; g < G; g++) {
           const double *rg = R[campo[g]];
           xs[g] = rg[tr[0]] + rg[tr[1]] + rg[tr[2]];

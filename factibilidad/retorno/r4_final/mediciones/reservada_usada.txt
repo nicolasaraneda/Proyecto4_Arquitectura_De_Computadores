@@ -1,0 +1,6 @@
+La semilla 3 se uso una vez, con esta lista, fijada antes de mirarla (lista_final.txt):
+candidatas: ejec_a, fondo_rec, completo, espera, ejec_b, aprendiz, rec_e, completo_ancla, fondo_min, completo_min, base
+duelos: completo contra ejec_a, rec_e contra ejec_a, completo_min contra ejec_a, fondo_rec contra ejec_a, ejec_b contra ejec_a
+inicio de la corrida: 14/11/2026 21:38
+md5 de lista_final.txt: 3a940a4958f7a18fc118a287618d32c3
+nota: despues de la corrida se cambio el texto de una linea de comentario de lista_final.txt (la que titula las candidatas principales). Las candidatas y los duelos son los de arriba. md5 actual de lista_final.txt: 883c270e3bd21f099b83e381c1607056

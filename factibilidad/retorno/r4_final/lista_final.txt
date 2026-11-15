@@ -1,0 +1,31 @@
+# lista_final.txt: lo que se evalúa con la semilla reservada (3).
+#
+# Grupo: Nicolás Araneda, Vicente Calderón y Santiago Muñoz.
+# Arquitectura de Computadores, Universidad de los Andes, 2026-2.
+#
+# Se fijó el 14/11 con los resultados de la semilla 0 (mediciones/tablas_exploracion_s0.md)
+# y antes de evaluar nada con la semilla 3. La referencia de todas es max_media.
+# Ningún parámetro se ajusta después de mirar la semilla 3 y con ella no se elige nada.
+
+# Principales: las cuatro que este estudio tiene que comparar con max_media.
+ejec_a            # la mejor de ejecución: ejec:m=8 (candidata A del estudio 3)
+fondo_rec         # el fondo recomendado por el estudio del fondo
+completo          # el fondo completo: fondo_rec, aprendiz como cuarto gestor y ejecución A
+espera            # la mejor experimental sola (estudio de aprendizaje)
+
+# Acompañantes, informativas.
+ejec_b            # el estudio 3 dejó pendiente si su ventaja sobre A se confirma
+aprendiz          # la tabla que aprende, sola: es la pieza que de verdad aprende en vivo
+rec_e             # el fondo completo sin el gestor experimental
+completo_ancla    # el fondo completo con ancla en comprar y mantener
+fondo_min         # el fondo que el estudio del fondo recomienda para la exhibición
+completo_min      # el fondo mínimo con aprendiz y ejecución A
+base              # control: la regla base
+
+# Duelos: la misma evaluación con ejec_a como referencia, para saber si el
+# fondo le gana a la mejor estrategia sola y cuánto pone cada pieza.
+completo contra ejec_a
+rec_e contra ejec_a
+completo_min contra ejec_a
+fondo_rec contra ejec_a
+ejec_b contra ejec_a
