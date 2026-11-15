@@ -1,0 +1,28 @@
+Memoria para la tabla de política y vigilante sobre el barrel
+Generado por factibilidad/i_integrado/tools/tabla_vigilante.sh (make tabla-vigilante). No editar a mano.
+
+Herramientas:
+  Yosys 0.68+195 (git sha1 435977e97-dirty, Release, Clang /usr/bin/clang++ 21.1.8)
+  "nextpnr-ice40" -- Next Generation Place and Route (Version nextpnr-0.11.1-19-g8dbcee5c)
+  Icarus Verilog version 14.0 (devel) (s20260301-403-g5ab23063f-dirty)
+Commit de partida: 9b82e81 (rama factibilidad-fondo)
+
+1. Módulos tabla_mmio (256 x 16) y tabla_ram (512 x 32) solos, accesos al azar contra un modelo
+   semilla 1: PASS tb_tabla_mod: 89971 lecturas, 90127 escrituras y 19902 ciclos sin acceso iguales al modelo; contenido inicial (256 palabras) y final (256 y 512 palabras) correctos
+   semilla 2: PASS tb_tabla_mod: 90507 lecturas, 89435 escrituras y 20058 ciclos sin acceso iguales al modelo; contenido inicial (256 palabras) y final (256 y 512 palabras) correctos
+   semilla 3: PASS tb_tabla_mod: 90024 lecturas, 89925 escrituras y 20051 ciclos sin acceso iguales al modelo; contenido inicial (256 palabras) y final (256 y 512 palabras) correctos
+
+2. sw/tabla_prueba.s en el SoC: los cuatro hilos usan cada uno su cuarto de la tabla
+   forma 1 (BRAM de 256 x 16 por MMIO), SoC con -DI_TABLA=1:                 PASS tb_tabla forma 1: 256 entradas iguales al modelo, sumas por hilo 001edab8 001edbb9 001edcba 001fddbb, total 007c70e6, display e6, 3519 ciclos
+   forma 2 (otras 512 palabras de datos), SoC con -DI_TABLA=2:               PASS tb_tabla forma 2: 512 entradas iguales al modelo, sumas por hilo 17d28598 17da8699 17e2879a 17ea889b, total 5f7a1c66, display 66, 6851 ciclos
+   forma 1 dentro de I1 (emad, devk, mulstep y vigilante):                   PASS tb_tabla forma 1: 256 entradas iguales al modelo, sumas por hilo 001edab8 001edbb9 001edcba 001fddbb, total 007c70e6, display e6, 3519 ciclos
+   forma 2 dentro de I1 (emad, devk, mulstep y vigilante):                   PASS tb_tabla forma 2: 512 entradas iguales al modelo, sumas por hilo 17d28598 17da8699 17e2879a 17ea889b, total 5f7a1c66, display 66, 6851 ciclos
+
+3. sw/cuelgue_supervisor.s: el hilo supervisor se cuelga después de 20 precios y los otros tres siguen
+   N = 4, período 0,1 ms, SoC con -DI_VIGILANTE:        PASS tb_vig_barrel N=4: el supervisor responde 20 precios (cuenta maxima 1 mientras responde), BOOT sube con el precio 25 = K + N + 1 con CS_n en alto, destino 01; estrategias vivas: cuentas 4169 4169 4169 al colgarse y 5836 5836 5836 al final
+   N = 1, período 0,1 ms:                               PASS tb_vig_barrel N=1: el supervisor responde 20 precios (cuenta maxima 1 mientras responde), BOOT sube con el precio 22 = K + N + 1 con CS_n en alto, destino 01; estrategias vivas: cuentas 4169 4169 4169 al colgarse y 5211 5211 5211 al final
+   N = 4, período 1 ms:                                 PASS tb_vig_barrel N=4: el supervisor responde 20 precios (cuenta maxima 1 mientras responde), BOOT sube con el precio 25 = K + N + 1 con CS_n en alto, destino 01; estrategias vivas: cuentas 41669 41669 41669 al colgarse y 58336 58336 58336 al final
+   N = 4, período 0,1 ms, dentro de I1 con la tabla 1:  PASS tb_vig_barrel N=4: el supervisor responde 20 precios (cuenta maxima 1 mientras responde), BOOT sube con el precio 25 = K + N + 1 con CS_n en alto, destino 01; estrategias vivas: cuentas 4169 4169 4169 al colgarse y 5836 5836 5836 al final
+   N = 4, período 0,1 ms, dentro de I1 con la tabla 2:  PASS tb_vig_barrel N=4: el supervisor responde 20 precios (cuenta maxima 1 mientras responde), BOOT sube con el precio 25 = K + N + 1 con CS_n en alto, destino 01; estrategias vivas: cuentas 4169 4169 4169 al colgarse y 5836 5836 5836 al final
+
+RESULTADO: PASS, 12 pruebas

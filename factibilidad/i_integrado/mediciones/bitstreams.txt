@@ -1,0 +1,53 @@
+Bitstreams de las configuraciones integradas, con su sha256 y simulados desde el .asc
+Generado por factibilidad/i_integrado/tools/bitstreams.sh (make bitstreams). No editar a mano.
+
+Herramientas:
+  Yosys 0.68+195 (git sha1 435977e97-dirty, Release, Clang /usr/bin/clang++ 21.1.8)
+  "nextpnr-ice40" -- Next Generation Place and Route (Version nextpnr-0.11.1-19-g8dbcee5c)
+  Icarus Verilog version 14.0 (devel) (s20260301-403-g5ab23063f-dirty)
+Commit de partida: 8c14283 (rama factibilidad-fondo)
+nextpnr-ice40 --hx1k --package vq100 --freq 25 --seed 1, goboard.pcf (los .asc son los de tools/medir.sh).
+Los .bin quedan en factibilidad/i_integrado/build/bitstreams/. Ninguno se grabó en la placa.
+Simulación: 500 ticks a 0,1 ms por los pines, con tb/tb_bitstream.sv del repositorio, contra ref/trader.py.
+
+i1a: I1 fondo en un chip: barrel, emad, devk, mulstep, vigilante y tabla de 256 x 16 (13 BRAM)
+   celdas 1071 de 1280, BRAM 13 de 16, SB_WARMBOOT 1 de 1, frecuencia maxima 48.77 MHz con la semilla 1, PASS a 25 MHz
+   32220 bytes, sha256 c7de9de4858d7a7286fbd094550f6a722f9ee785eb31ff23bbe4adbdd154e419
+   PASS simulado desde el .asc por los pines: 500 ticks idénticos a ref/trader.py, patrimonio 9009
+   PASS BOOT de SB_WARMBOOT nunca sube (boot_en_alto=0 S1S0=01)
+i1b: I1 con la tabla en otras 512 palabras de datos (16 BRAM)
+   celdas 1098 de 1280, BRAM 16 de 16, SB_WARMBOOT 1 de 1, frecuencia maxima 48.27 MHz con la semilla 1, PASS a 25 MHz
+   32220 bytes, sha256 89ae68f15ddbf7c720497fd1617bd225c5e73bbddaa10c3fc6457658df8b4927
+   PASS simulado desde el .asc por los pines: 500 ticks idénticos a ref/trader.py, patrimonio 9009
+   PASS BOOT de SB_WARMBOOT nunca sube (boot_en_alto=0 S1S0=01)
+i2: I2 barrel mínimo: barrel y vigilante
+   celdas 939 de 1280, BRAM 12 de 16, SB_WARMBOOT 1 de 1, frecuencia maxima 53.34 MHz con la semilla 1, PASS a 25 MHz
+   32220 bytes, sha256 c879f9e8f7a1e87175bef3566e0b2d147e20f37bd20b6e1655007191593597c5
+   PASS simulado desde el .asc por los pines: 500 ticks idénticos a ref/trader.py, patrimonio 9009
+   PASS BOOT de SB_WARMBOOT nunca sube (boot_en_alto=0 S1S0=01)
+i3a: I3 conservador: segmentado, emad y vigilante
+   celdas 1046 de 1280, BRAM 12 de 16, SB_WARMBOOT 1 de 1, frecuencia maxima 51.99 MHz con la semilla 1, PASS a 25 MHz
+   32220 bytes, sha256 832d807da79b8a03cf9d3e6f45d18447b27aa18453a94d23c7ba3997a4eb6e83
+   PASS simulado desde el .asc por los pines: 500 ticks idénticos a ref/trader.py, patrimonio 9009
+   PASS BOOT de SB_WARMBOOT nunca sube (boot_en_alto=0 S1S0=01)
+i3b: I3 con emad, devk y mulstep
+   celdas 1142 de 1280, BRAM 12 de 16, SB_WARMBOOT 1 de 1, frecuencia maxima 48.07 MHz con la semilla 1, PASS a 25 MHz
+   32220 bytes, sha256 c83bb1fff9c6127a2874a89a325f3940183fe44cd278b9864f68ac7267ed048f
+   PASS simulado desde el .asc por los pines: 500 ticks idénticos a ref/trader.py, patrimonio 9009
+   PASS BOOT de SB_WARMBOOT nunca sube (boot_en_alto=0 S1S0=01)
+i4_base: I4: Espino base de rtl/
+   celdas 1083 de 1280, BRAM 12 de 16, SB_WARMBOOT 0 de 1, frecuencia maxima 43.30 MHz con la semilla 1, PASS a 25 MHz
+   32220 bytes, sha256 3c85d2f98af5c89fe9ee50e6feb08e08cdbe32ad003697e8f8f422dbc69e2e49
+   PASS simulado desde el .asc por los pines: 500 ticks idénticos a ref/trader.py, patrimonio 9009
+i4_segmentado: I4: pipeline de 3 etapas de rtl/
+   celdas 994 de 1280, BRAM 12 de 16, SB_WARMBOOT 0 de 1, frecuencia maxima 54.50 MHz con la semilla 1, PASS a 25 MHz
+   32220 bytes, sha256 7cbc3a814c6b3f69cd272d7b2eaaeece3d5049fe6ea25d6f612c635a5633da9e
+   PASS simulado desde el .asc por los pines: 500 ticks idénticos a ref/trader.py, patrimonio 9009
+
+Bitstreams versionados en bitstreams/ (referencia, no se regeneran aquí):
+   4e902ec878e4dde33353e7fb97b6695bec259bd7e229222735009d1ea6fb0b83  competencia_v1.bin
+   fe4089f7e50ca20120f36ed7b81299e1922cb76dc5b4138e8c0dd3ee9c49e0b4  segmentado_v1.bin
+   Los de I4 de este informe no tienen el mismo hash: son la misma lógica colocada de nuevo (decisión T32).
+
+Tiempo de las simulaciones: 549 s con 5 procesos.
+RESULTADO: PASS, 7 bitstreams generados y simulados

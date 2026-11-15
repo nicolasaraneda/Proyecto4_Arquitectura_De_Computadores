@@ -1,0 +1,71 @@
+# variantes.txt: variantes que mide tools/medir.sh.
+#
+# Grupo: Nicolás Araneda, Vicente Calderón y Santiago Muñoz.
+# Arquitectura de Computadores, Universidad de los Andes, 2026-2.
+#
+# Una variante por línea:
+#   etiqueta | fuentes | definiciones | parámetros | referencia | descripción
+# fuentes:
+#   repo        rtl/ del repositorio, sin tocar (sw/trade.hex)
+#   proto       el prototipo del barrel de factibilidad/a_barrel, sin tocar
+#   barrel      el SoC integrado de esta carpeta (rtl/pochoco_soc.v y
+#               rtl/espino_barrel_core.v), con la regla base en el hilo 0
+#   barrel_dir  lo mismo con la memoria sin emulación de lectura durante
+#               escritura (atributo no_rw_check en una copia de pochoco_ram.v)
+#   seg         el segmentado con la extensión (core de d_isa) y el vigilante
+#               (SoC y esclavo SPI de e_warmboot), sin archivos de esta carpeta
+# referencia: etiqueta contra la que se calcula la columna "agrega".
+# Las líneas "= título" abren un grupo en el informe. La etiqueta de
+# tools/medir_variante.sh es fact2_i_ETIQUETA.
+
+= 1. Referencias (I4): los cores tal como están en el repositorio y el prototipo del barrel
+base          | repo   |                     |             |        | Espino base, rtl/ sin tocar (I4)
+segmentado    | repo   | -DESPINO_SEGMENTADO |             |        | Pipeline de 3 etapas, rtl/ sin tocar (I4)
+proto         | proto  |                     |             |        | Prototipo del barrel, factibilidad/a_barrel sin tocar
+x_ref         | barrel |                     |             | proto  | Copia del barrel de esta carpeta, sin definiciones (control: debe dar lo mismo que el prototipo)
+
+= 2. Extensión de la ISA sobre el barrel, en la etapa de ejecución
+x_emad_k5     | barrel | -DXD_EMAD=0                                                         | | x_ref | (a) emad, k = 5
+x_media_k5    | barrel | -DXD_EMAD=0 -DXD_DEVK=0                                             | | x_ref | emad y devk, k = 5
+x_media_mul   | barrel | -DXD_EMAD=0 -DXD_DEVK=0 -DXD_MULSTEPALU                             | | x_ref | (b) emad, devk y mulstep en el sumador de la ALU: el recomendado
+x_alu_todo    | barrel | -DXD_EMAD=0 -DXD_DEVK=0 -DXD_MULSTEPALU -DXD_SIMDALU=12             | | x_ref | (c) lo anterior más los carriles de bandas en la ALU
+x_media_bandas | barrel | -DXD_EMAD=0 -DXD_DEVK=0 -DXD_MULSTEPALU -DXD_SIMD=28               | | x_ref | (d) lo anterior con los carriles de bandas en unidad aparte
+x_media_muldiv | barrel | -DXD_EMAD=0 -DXD_DEVK=0 -DXD_MULSTEPALU -DXD_DIVSTEP               | | x_ref | (e) el recomendado más divstep
+x_alu_todo_div | barrel | -DXD_EMAD=0 -DXD_DEVK=0 -DXD_MULSTEPALU -DXD_SIMDALU=12 -DXD_DIVSTEP | | x_ref | (e) carriles en la ALU más divstep
+x_bandas_div  | barrel | -DXD_EMAD=0 -DXD_DEVK=0 -DXD_MULSTEPALU -DXD_SIMD=28 -DXD_DIVSTEP   | | x_ref | (e) carriles en unidad aparte más divstep
+
+= 3. Vigilante con SB_WARMBOOT sobre el barrel
+vig           | barrel | -DI_VIGILANTE       |             | x_ref  | Barrel con vigilante, N = 4 (es la configuración I2)
+vig_boton     | barrel | -DI_VIGILANTE       | VigBoton=1  | x_ref  | Lo mismo con el disparo manual en el interruptor 4 (solo para la prueba de placa)
+
+= 4. Memoria para la tabla de política
+tabla1        | barrel | -DI_TABLA=1         |             | x_ref  | BRAM aparte de 256 x 16 por MMIO
+tabla2        | barrel | -DI_TABLA=2         |             | x_ref  | Otras 512 palabras de datos: 1024 en total, las 16 BRAM
+ram1024       | barrel |                     | NumWords=1024 | x_ref | Memoria de 1024 palabras completa (programa y datos): necesita 20 BRAM
+
+= 5. Configuraciones integradas
+i1a           | barrel | -DXD_EMAD=0 -DXD_DEVK=0 -DXD_MULSTEPALU -DI_VIGILANTE -DI_TABLA=1 | | x_ref | I1 fondo en un chip: barrel, emad, devk, mulstep, vigilante y tabla de 256 x 16
+i1b           | barrel | -DXD_EMAD=0 -DXD_DEVK=0 -DXD_MULSTEPALU -DI_VIGILANTE -DI_TABLA=2 | | x_ref | I1 con la tabla en otras 512 palabras de datos (16 BRAM)
+i2            | barrel | -DI_VIGILANTE       |             | x_ref  | I2 barrel mínimo: barrel y vigilante (la misma síntesis que "vig")
+seg_vig       | seg    | -DESPINO_SEGMENTADO |             | segmentado | Segmentado con vigilante, sin extensión (control de I3)
+i3a           | seg    | -DESPINO_SEGMENTADO -DXD_EMAD=0 |  | segmentado | I3 conservador: segmentado, emad y vigilante
+i3b           | seg    | -DESPINO_SEGMENTADO -DXD_EMAD=0 -DXD_DEVK=0 -DXD_MULSTEPALU | | segmentado | I3 con emad, devk y mulstep
+
+= 6. Cuánto más cabe junto al vigilante y la tabla de 256 x 16 (I1 con más instrucciones)
+i1a_carr_alu  | barrel | -DXD_EMAD=0 -DXD_DEVK=0 -DXD_MULSTEPALU -DXD_SIMDALU=12 -DI_VIGILANTE -DI_TABLA=1 | | i1a | I1 más los carriles de bandas en la ALU
+i1a_carr_ap   | barrel | -DXD_EMAD=0 -DXD_DEVK=0 -DXD_MULSTEPALU -DXD_SIMD=28 -DI_VIGILANTE -DI_TABLA=1 | | i1a | I1 más los carriles de bandas en unidad aparte
+i1a_div       | barrel | -DXD_EMAD=0 -DXD_DEVK=0 -DXD_MULSTEPALU -DXD_DIVSTEP -DI_VIGILANTE -DI_TABLA=1 | | i1a | I1 más divstep
+i1a_alu_div   | barrel | -DXD_EMAD=0 -DXD_DEVK=0 -DXD_MULSTEPALU -DXD_SIMDALU=12 -DXD_DIVSTEP -DI_VIGILANTE -DI_TABLA=1 | | i1a | I1 más carriles en la ALU y divstep
+i1a_max       | barrel | -DXD_EMAD=0 -DXD_DEVK=0 -DXD_MULSTEPALU -DXD_SIMD=28 -DXD_DIVSTEP -DI_VIGILANTE -DI_TABLA=1 | | i1a | I1 máximo: más carriles en unidad aparte y divstep
+i1b_carr_alu  | barrel | -DXD_EMAD=0 -DXD_DEVK=0 -DXD_MULSTEPALU -DXD_SIMDALU=12 -DI_VIGILANTE -DI_TABLA=2 | | i1b | I1 con 16 BRAM más los carriles de bandas en la ALU
+i1b_carr_ap   | barrel | -DXD_EMAD=0 -DXD_DEVK=0 -DXD_MULSTEPALU -DXD_SIMD=28 -DI_VIGILANTE -DI_TABLA=2 | | i1b | I1 con 16 BRAM más los carriles de bandas en unidad aparte
+i1b_max       | barrel | -DXD_EMAD=0 -DXD_DEVK=0 -DXD_MULSTEPALU -DXD_SIMD=28 -DXD_DIVSTEP -DI_VIGILANTE -DI_TABLA=2 | | i1b | I1 máximo con 16 BRAM
+
+= 7. Qué hay que sacrificar para que quepa el I1 máximo, en orden
+i1a_dir       | barrel_dir | -DXD_EMAD=0 -DXD_DEVK=0 -DXD_MULSTEPALU -DI_VIGILANTE -DI_TABLA=1 | | i1a | I1 con la memoria sin emulación de lectura durante escritura
+max_s1        | barrel_dir | -DXD_EMAD=0 -DXD_DEVK=0 -DXD_MULSTEPALU -DXD_SIMD=28 -DXD_DIVSTEP -DI_VIGILANTE -DI_TABLA=1 | | i1a_max | I1 máximo, sacrificio 1: memoria sin emulación de lectura durante escritura
+max_s2        | barrel_dir | -DXD_EMAD=0 -DXD_DEVK=0 -DXD_MULSTEPALU -DXD_SIMD=28 -DXD_DIVSTEP -DI_VIGILANTE -DI_TABLA=1 -DBARREL_SIN_PERIPH | | i1a_max | Sacrificios 1 y 2: además sin periféricos (LEDs, display e interruptores)
+max_s3        | barrel_dir | -DXD_EMAD=0 -DXD_DEVK=0 -DXD_MULSTEPALU -DXD_SIMD=28 -DXD_DIVSTEP -DI_VIGILANTE -DI_TABLA=1 -DBARREL_SIN_PERIPH | PorBits=4 | i1a_max | Sacrificios 1, 2 y 3: además reset corto (15 ciclos)
+max_sinper    | barrel | -DXD_EMAD=0 -DXD_DEVK=0 -DXD_MULSTEPALU -DXD_SIMD=28 -DXD_DIVSTEP -DI_VIGILANTE -DI_TABLA=1 -DBARREL_SIN_PERIPH | | i1a_max | I1 máximo solo sin periféricos (sin tocar la memoria)
+max_sinper_por | barrel | -DXD_EMAD=0 -DXD_DEVK=0 -DXD_MULSTEPALU -DXD_SIMD=28 -DXD_DIVSTEP -DI_VIGILANTE -DI_TABLA=1 -DBARREL_SIN_PERIPH | PorBits=4 | i1a_max | I1 máximo sin periféricos y con reset corto (sin tocar la memoria)
+b1max_s1      | barrel_dir | -DXD_EMAD=0 -DXD_DEVK=0 -DXD_MULSTEPALU -DXD_SIMD=28 -DXD_DIVSTEP -DI_VIGILANTE -DI_TABLA=2 | | i1b_max | I1 máximo con 16 BRAM, sacrificio 1: memoria sin emulación

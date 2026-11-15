@@ -1,0 +1,219 @@
+Recursos y frecuencia máxima del diseño integrado
+Generado por factibilidad/i_integrado/tools/medir.sh (make recursos). No editar a mano.
+
+Herramientas: Yosys 0.68+195 (git sha1 435977e97-dirty, Release, Clang /usr/bin/clang++ 21.1.8)
+              "nextpnr-ice40" -- Next Generation Place and Route (Version nextpnr-0.11.1-19-g8dbcee5c)
+Flujo: tools/medir_variante.sh del repositorio, nextpnr-ice40 --hx1k --package vq100 --freq 25, goboard.pcf, semillas 1 a 10.
+SoC completo: core, memoria, esclavo SPI, periféricos y contador de reset. La FPGA tiene 1280 celdas lógicas y 16 BRAM.
+Programa: la regla base (sw/trade.s) en el hilo 0 en las variantes del barrel, y sw/trade.hex en las demás.
+'agrega' es la diferencia de celdas contra la variante de la columna 'contra'. fmin, fmed y fmax son la frecuencia
+máxima mínima, mediana y máxima entre las semillas, en MHz. 'cierran' cuenta las semillas que cumplen los 25 MHz.
+El conteo de celdas de un mismo circuito se mueve unas 10 celdas entre síntesis (decisión T6).
+
+
+-- 1. Referencias (I4): los cores tal como están en el repositorio y el prototipo del barrel
+variante        celdas agrega contra     libres BRAM  LUT4    fmin    fmed    fmax  cierran  qué es
+base              1083                      197   12   906   42.43   43.74   45.08 10 de 10  Espino base, rtl/ sin tocar (I4)
+segmentado         994                      286   12   802   51.13   53.50   54.50 10 de 10  Pipeline de 3 etapas, rtl/ sin tocar (I4)
+proto              934                      346   12   762   52.66   55.52   57.05 10 de 10  Prototipo del barrel, factibilidad/a_barrel sin tocar
+x_ref              935     +1 proto         345   12   763   51.67   58.27   60.13 10 de 10  Copia del barrel de esta carpeta, sin definiciones (control: debe dar lo mismo que el prototipo)
+
+-- 2. Extensión de la ISA sobre el barrel, en la etapa de ejecución
+variante        celdas agrega contra     libres BRAM  LUT4    fmin    fmed    fmax  cierran  qué es
+x_emad_k5          961    +26 x_ref         319   12   788   48.58   53.36   56.27 10 de 10  (a) emad, k = 5
+x_media_k5        1026    +91 x_ref         254   12   849   48.56   50.05   51.95 10 de 10  emad y devk, k = 5
+x_media_mul       1025    +90 x_ref         255   12   848   48.71   49.57   51.35 10 de 10  (b) emad, devk y mulstep en el sumador de la ALU: el recomendado
+x_alu_todo        1044   +109 x_ref         236   12   860   33.68   35.08   35.66 10 de 10  (c) lo anterior más los carriles de bandas en la ALU
+x_media_bandas    1198   +263 x_ref          82   12  1015   46.81   48.98   54.95 10 de 10  (d) lo anterior con los carriles de bandas en unidad aparte
+x_media_muldiv    1111   +176 x_ref         169   12   937   47.52   49.50   50.97 10 de 10  (e) el recomendado más divstep
+x_alu_todo_div    1136   +201 x_ref         144   12   956   34.15   35.39   37.41 10 de 10  (e) carriles en la ALU más divstep
+x_bandas_div      1312   +377 x_ref         -32   12  1130    0.00    0.00    0.00  0 de 10  NO CABE (celdas). (e) carriles en unidad aparte más divstep
+
+-- 3. Vigilante con SB_WARMBOOT sobre el barrel
+variante        celdas agrega contra     libres BRAM  LUT4    fmin    fmed    fmax  cierran  qué es
+vig                939     +4 x_ref         341   12   766   50.95   53.59   56.09 10 de 10  Barrel con vigilante, N = 4 (es la configuración I2)
+vig_boton          944     +9 x_ref         336   12   769   55.22   57.00   58.91 10 de 10  Lo mismo con el disparo manual en el interruptor 4 (solo para la prueba de placa)
+
+-- 4. Memoria para la tabla de política
+variante        celdas agrega contra     libres BRAM  LUT4    fmin    fmed    fmax  cierran  qué es
+tabla1             956    +21 x_ref         324   13   784   53.55   54.80   56.32 10 de 10  BRAM aparte de 256 x 16 por MMIO
+tabla2             991    +56 x_ref         289   16   804   54.04   56.21   59.20 10 de 10  Otras 512 palabras de datos: 1024 en total, las 16 BRAM
+ram1024            949    +14 x_ref         331   20   774    0.00    0.00    0.00  0 de 10  NO CABE (BRAM). Memoria de 1024 palabras completa (programa y datos): necesita 20 BRAM
+
+-- 5. Configuraciones integradas
+variante        celdas agrega contra     libres BRAM  LUT4    fmin    fmed    fmax  cierran  qué es
+i1a               1071   +136 x_ref         209   13   890   46.76   48.62   50.48 10 de 10  I1 fondo en un chip: barrel, emad, devk, mulstep, vigilante y tabla de 256 x 16
+i1b               1098   +163 x_ref         182   16   903   44.94   48.07   51.83 10 de 10  I1 con la tabla en otras 512 palabras de datos (16 BRAM)
+i2                 939     +4 x_ref         341   12   766   50.95   53.59   56.09 10 de 10  I2 barrel mínimo: barrel y vigilante (la misma síntesis que "vig")
+seg_vig           1009    +15 segmentado    271   12   813   49.47   51.86   54.00 10 de 10  Segmentado con vigilante, sin extensión (control de I3)
+i3a               1046    +52 segmentado    234   12   852   48.02   52.36   53.25 10 de 10  I3 conservador: segmentado, emad y vigilante
+i3b               1142   +148 segmentado    138   12   945   46.59   48.05   49.14 10 de 10  I3 con emad, devk y mulstep
+
+-- 6. Cuánto más cabe junto al vigilante y la tabla de 256 x 16 (I1 con más instrucciones)
+variante        celdas agrega contra     libres BRAM  LUT4    fmin    fmed    fmax  cierran  qué es
+i1a_carr_alu      1078     +7 i1a           202   13   889   33.72   34.98   36.87 10 de 10  I1 más los carriles de bandas en la ALU
+i1a_carr_ap       1234   +163 i1a            46   13  1048   46.11   49.73   51.43 10 de 10  I1 más los carriles de bandas en unidad aparte
+i1a_div           1147    +76 i1a           133   13   969   47.97   49.44   50.84 10 de 10  I1 más divstep
+i1a_alu_div       1176   +105 i1a           104   13   991   34.05   35.69   37.02 10 de 10  I1 más carriles en la ALU y divstep
+i1a_max           1350   +279 i1a           -70   13  1163    0.00    0.00    0.00  0 de 10  NO CABE (celdas). I1 máximo: más carriles en unidad aparte y divstep
+i1b_carr_alu      1095     -3 i1b           185   16   889   33.15   34.78   36.53 10 de 10  I1 con 16 BRAM más los carriles de bandas en la ALU
+i1b_carr_ap       1270   +172 i1b            10   16  1070   44.15   48.34   50.28 10 de 10  I1 con 16 BRAM más los carriles de bandas en unidad aparte
+i1b_max           1388   +290 i1b          -108   16  1187    0.00    0.00    0.00  0 de 10  NO CABE (celdas). I1 máximo con 16 BRAM
+
+-- 7. Qué hay que sacrificar para que quepa el I1 máximo, en orden
+variante        celdas agrega contra     libres BRAM  LUT4    fmin    fmed    fmax  cierran  qué es
+i1a_dir            925   -146 i1a           355   13   804   46.47   49.47   51.97 10 de 10  I1 con la memoria sin emulación de lectura durante escritura
+max_s1            1207   -143 i1a_max        73   13  1080   46.80   49.02   53.71 10 de 10  I1 máximo, sacrificio 1: memoria sin emulación de lectura durante escritura
+max_s2            1164   -186 i1a_max       116   13  1050   47.48   50.84   52.91 10 de 10  Sacrificios 1 y 2: además sin periféricos (LEDs, display e interruptores)
+max_s3            1167   -183 i1a_max       113   13  1053   48.00   51.70   54.36 10 de 10  Sacrificios 1, 2 y 3: además reset corto (15 ciclos)
+max_sinper        1302    -48 i1a_max       -22   13  1128    0.00    0.00    0.00  0 de 10  NO CABE (celdas). I1 máximo solo sin periféricos (sin tocar la memoria)
+max_sinper_por    1298    -52 i1a_max       -18   13  1124    0.00    0.00    0.00  0 de 10  NO CABE (celdas). I1 máximo sin periféricos y con reset corto (sin tocar la memoria)
+b1max_s1          1218   -170 i1b_max        62   16  1091   48.36   51.34   54.09 10 de 10  I1 máximo con 16 BRAM, sacrificio 1: memoria sin emulación
+
+Definiciones y parámetros de cada variante
+  base            fuentes repo       (sin definiciones)
+  segmentado      fuentes repo       -DESPINO_SEGMENTADO
+  proto           fuentes proto      (sin definiciones)
+  x_ref           fuentes barrel     (sin definiciones)
+  x_emad_k5       fuentes barrel     -DXD_EMAD=0
+  x_media_k5      fuentes barrel     -DXD_EMAD=0 -DXD_DEVK=0
+  x_media_mul     fuentes barrel     -DXD_EMAD=0 -DXD_DEVK=0 -DXD_MULSTEPALU
+  x_alu_todo      fuentes barrel     -DXD_EMAD=0 -DXD_DEVK=0 -DXD_MULSTEPALU -DXD_SIMDALU=12
+  x_media_bandas  fuentes barrel     -DXD_EMAD=0 -DXD_DEVK=0 -DXD_MULSTEPALU -DXD_SIMD=28
+  x_media_muldiv  fuentes barrel     -DXD_EMAD=0 -DXD_DEVK=0 -DXD_MULSTEPALU -DXD_DIVSTEP
+  x_alu_todo_div  fuentes barrel     -DXD_EMAD=0 -DXD_DEVK=0 -DXD_MULSTEPALU -DXD_SIMDALU=12 -DXD_DIVSTEP
+  x_bandas_div    fuentes barrel     -DXD_EMAD=0 -DXD_DEVK=0 -DXD_MULSTEPALU -DXD_SIMD=28 -DXD_DIVSTEP
+  vig             fuentes barrel     -DI_VIGILANTE
+  vig_boton       fuentes barrel     -DI_VIGILANTE   parámetros: VigBoton=1
+  tabla1          fuentes barrel     -DI_TABLA=1
+  tabla2          fuentes barrel     -DI_TABLA=2
+  ram1024         fuentes barrel     (sin definiciones)   parámetros: NumWords=1024
+  i1a             fuentes barrel     -DXD_EMAD=0 -DXD_DEVK=0 -DXD_MULSTEPALU -DI_VIGILANTE -DI_TABLA=1
+  i1b             fuentes barrel     -DXD_EMAD=0 -DXD_DEVK=0 -DXD_MULSTEPALU -DI_VIGILANTE -DI_TABLA=2
+  i2              fuentes barrel     -DI_VIGILANTE
+  seg_vig         fuentes seg        -DESPINO_SEGMENTADO
+  i3a             fuentes seg        -DESPINO_SEGMENTADO -DXD_EMAD=0
+  i3b             fuentes seg        -DESPINO_SEGMENTADO -DXD_EMAD=0 -DXD_DEVK=0 -DXD_MULSTEPALU
+  i1a_carr_alu    fuentes barrel     -DXD_EMAD=0 -DXD_DEVK=0 -DXD_MULSTEPALU -DXD_SIMDALU=12 -DI_VIGILANTE -DI_TABLA=1
+  i1a_carr_ap     fuentes barrel     -DXD_EMAD=0 -DXD_DEVK=0 -DXD_MULSTEPALU -DXD_SIMD=28 -DI_VIGILANTE -DI_TABLA=1
+  i1a_div         fuentes barrel     -DXD_EMAD=0 -DXD_DEVK=0 -DXD_MULSTEPALU -DXD_DIVSTEP -DI_VIGILANTE -DI_TABLA=1
+  i1a_alu_div     fuentes barrel     -DXD_EMAD=0 -DXD_DEVK=0 -DXD_MULSTEPALU -DXD_SIMDALU=12 -DXD_DIVSTEP -DI_VIGILANTE -DI_TABLA=1
+  i1a_max         fuentes barrel     -DXD_EMAD=0 -DXD_DEVK=0 -DXD_MULSTEPALU -DXD_SIMD=28 -DXD_DIVSTEP -DI_VIGILANTE -DI_TABLA=1
+  i1b_carr_alu    fuentes barrel     -DXD_EMAD=0 -DXD_DEVK=0 -DXD_MULSTEPALU -DXD_SIMDALU=12 -DI_VIGILANTE -DI_TABLA=2
+  i1b_carr_ap     fuentes barrel     -DXD_EMAD=0 -DXD_DEVK=0 -DXD_MULSTEPALU -DXD_SIMD=28 -DI_VIGILANTE -DI_TABLA=2
+  i1b_max         fuentes barrel     -DXD_EMAD=0 -DXD_DEVK=0 -DXD_MULSTEPALU -DXD_SIMD=28 -DXD_DIVSTEP -DI_VIGILANTE -DI_TABLA=2
+  i1a_dir         fuentes barrel_dir -DXD_EMAD=0 -DXD_DEVK=0 -DXD_MULSTEPALU -DI_VIGILANTE -DI_TABLA=1
+  max_s1          fuentes barrel_dir -DXD_EMAD=0 -DXD_DEVK=0 -DXD_MULSTEPALU -DXD_SIMD=28 -DXD_DIVSTEP -DI_VIGILANTE -DI_TABLA=1
+  max_s2          fuentes barrel_dir -DXD_EMAD=0 -DXD_DEVK=0 -DXD_MULSTEPALU -DXD_SIMD=28 -DXD_DIVSTEP -DI_VIGILANTE -DI_TABLA=1 -DBARREL_SIN_PERIPH
+  max_s3          fuentes barrel_dir -DXD_EMAD=0 -DXD_DEVK=0 -DXD_MULSTEPALU -DXD_SIMD=28 -DXD_DIVSTEP -DI_VIGILANTE -DI_TABLA=1 -DBARREL_SIN_PERIPH   parámetros: PorBits=4
+  max_sinper      fuentes barrel     -DXD_EMAD=0 -DXD_DEVK=0 -DXD_MULSTEPALU -DXD_SIMD=28 -DXD_DIVSTEP -DI_VIGILANTE -DI_TABLA=1 -DBARREL_SIN_PERIPH
+  max_sinper_por  fuentes barrel     -DXD_EMAD=0 -DXD_DEVK=0 -DXD_MULSTEPALU -DXD_SIMD=28 -DXD_DIVSTEP -DI_VIGILANTE -DI_TABLA=1 -DBARREL_SIN_PERIPH   parámetros: PorBits=4
+  b1max_s1        fuentes barrel_dir -DXD_EMAD=0 -DXD_DEVK=0 -DXD_MULSTEPALU -DXD_SIMD=28 -DXD_DIVSTEP -DI_VIGILANTE -DI_TABLA=2
+
+Frecuencia máxima por semilla (MHz), semillas 1 a 10. Un 0 es una semilla en que nextpnr no terminó.
+  base            43.30 43.42 44.23 43.22 45.02 45.08 42.43 44.06 42.72 44.85
+  segmentado      54.50 53.60 53.69 53.30 53.40 54.34 51.13 54.01 51.65 52.54
+  proto           53.59 55.51 57.05 52.66 54.56 54.73 56.71 57.05 55.54 55.79
+  x_ref           59.20 51.67 56.71 60.13 58.10 58.79 58.43 54.28 59.15 57.88
+  x_emad_k5       53.65 52.05 48.58 53.52 54.84 51.57 53.20 56.27 54.09 53.02
+  x_media_k5      51.95 49.09 49.57 50.61 50.53 51.17 49.36 49.16 51.32 48.56
+  x_media_mul     49.38 49.18 48.71 51.35 50.86 49.62 49.52 50.55 50.04 48.83
+  x_alu_todo      35.66 35.03 34.83 35.12 35.40 34.19 35.14 35.64 34.20 33.68
+  x_media_bandas  49.05 48.92 49.07 49.48 47.21 54.95 46.81 48.62 50.14 48.10
+  x_media_muldiv  48.29 47.52 50.68 49.76 49.53 50.97 49.74 49.47 49.24 47.95
+  x_alu_todo_div  36.95 35.63 34.79 36.30 34.15 35.16 34.83 37.41 36.87 34.60
+  x_bandas_div    0 0 0 0 0 0 0 0 0 0
+  vig             53.34 55.25 53.85 52.43 55.47 56.04 51.17 52.55 56.09 50.95
+  vig_boton       56.69 57.88 58.91 55.95 55.22 58.59 56.38 55.54 58.31 57.32
+  tabla1          54.96 54.47 56.32 56.21 54.65 54.98 54.03 55.09 53.55 54.32
+  tabla2          57.34 54.04 56.12 56.30 57.35 54.20 59.20 54.92 55.80 58.64
+  ram1024         0 0 0 0 0 0 0 0 0 0
+  i1a             48.77 48.46 49.09 46.76 46.79 47.79 50.48 49.69 49.34 47.37
+  i1b             48.27 44.94 51.83 46.67 47.87 49.34 46.87 51.19 47.60 49.15
+  i2              53.34 55.25 53.85 52.43 55.47 56.04 51.17 52.55 56.09 50.95
+  seg_vig         53.67 49.47 51.36 51.37 53.07 51.78 51.93 52.73 50.94 54.00
+  i3a             51.99 53.25 52.95 53.19 52.73 48.02 51.83 51.78 51.99 52.99
+  i3b             48.07 47.38 49.14 48.71 47.37 48.84 48.88 46.59 48.04 47.63
+  i1a_carr_alu    34.88 34.07 35.68 36.87 35.60 33.72 34.95 35.02 34.14 35.53
+  i1a_carr_ap     50.18 49.76 51.43 48.85 50.30 49.71 47.91 46.11 49.85 46.35
+  i1a_div         48.33 49.94 49.80 49.23 48.74 47.97 50.13 49.66 50.84 48.34
+  i1a_alu_div     37.02 35.76 36.67 35.31 34.79 36.28 34.45 35.61 34.05 36.27
+  i1a_max         0 0 0 0 0 0 0 0 0 0
+  i1b_carr_alu    36.34 33.45 34.14 33.15 36.29 33.33 34.88 36.53 34.67 35.45
+  i1b_carr_ap     47.87 46.72 50.18 50.28 49.99 45.44 44.15 48.82 47.19 49.62
+  i1b_max         0 0 0 0 0 0 0 0 0 0
+  i1a_dir         49.67 51.97 47.60 46.47 50.66 51.66 49.48 47.38 49.47 47.40
+  max_s1          49.19 52.22 50.24 47.03 53.71 48.55 48.86 46.80 48.35 50.09
+  max_s2          52.91 50.50 49.12 51.45 51.67 48.66 47.48 49.37 51.19 51.71
+  max_s3          52.44 51.02 51.76 52.44 50.16 54.36 52.19 48.00 51.65 51.26
+  max_sinper      0 0 0 0 0 0 0 0 0 0
+  max_sinper_por  0 0 0 0 0 0 0 0 0 0
+  b1max_s1        51.20 51.49 50.41 53.08 53.50 48.36 50.37 54.09 53.36 50.06
+
+Primitiva SB_WARMBOOT ubicada por nextpnr (semilla 1), en las variantes con vigilante
+  vig             SB_WARMBOOT: 1 de 1
+  vig_boton       SB_WARMBOOT: 1 de 1
+  i1a             SB_WARMBOOT: 1 de 1
+  i1b             SB_WARMBOOT: 1 de 1
+  i2              SB_WARMBOOT: 1 de 1
+  seg_vig         SB_WARMBOOT: 1 de 1
+  i3a             SB_WARMBOOT: 1 de 1
+  i3b             SB_WARMBOOT: 1 de 1
+  i1a_carr_alu    SB_WARMBOOT: 1 de 1
+  i1a_carr_ap     SB_WARMBOOT: 1 de 1
+  i1a_div         SB_WARMBOOT: 1 de 1
+  i1a_alu_div     SB_WARMBOOT: 1 de 1
+  i1a_max         SB_WARMBOOT: 1 de 1
+  i1b_carr_alu    SB_WARMBOOT: 1 de 1
+  i1b_carr_ap     SB_WARMBOOT: 1 de 1
+  i1b_max         SB_WARMBOOT: 1 de 1
+  i1a_dir         SB_WARMBOOT: 1 de 1
+  max_s1          SB_WARMBOOT: 1 de 1
+  max_s2          SB_WARMBOOT: 1 de 1
+  max_s3          SB_WARMBOOT: 1 de 1
+  max_sinper      SB_WARMBOOT: 1 de 1
+  max_sinper_por  SB_WARMBOOT: 1 de 1
+  b1max_s1        SB_WARMBOOT: 1 de 1
+
+Ruta crítica de la semilla más lenta (de flanco de subida a flanco de subida), del log de nextpnr
+  variante        semilla     ns  lógica  ruteo tramos acarreo  desde -> hasta
+  base                  7  23.57    7.41  16.16     35      17  u_ram.mem.0.0_RAM.RDATA_6 -> per_sel_SB_LUT4_I3_1_O_SB_DFFER_E_1_DFFLC.CEN
+  segmentado            7  19.56    8.53  11.03     77      63  u_core.u_rf.u_bankA.u_lo_RAM.RDATA_1 -> per_sel_SB_LUT4_I3_O_SB_DFFER_E_DFFLC.CEN
+  proto                 4  18.99    8.31  10.68     77      64  u_core.u_rf.u_bankA.u_lo_RAM.RDATA_0 -> per_sel_SB_LUT4_I3_O_SB_DFFER_E_DFFLC.CEN
+  x_ref                 2  19.35    7.07  12.28     81      60  u_core.alu_op_a_sel_x_SB_DFF_Q_D_SB_LUT4_O_LC.O -> per_sel_SB_LUT4_I3_2_O_SB_DFFER_E_DFFLC.CEN
+  x_emad_k5             3  20.58    6.60  13.99     27      19  u_core.u_rf.u_bankB.u_lo_RAM.RDATA_14 -> u_core.pc_next_SB_LUT4_O_6_LC.I2
+  x_media_k5           10  20.59    8.57  12.02     73      53  u_core.u_rf.u_bankA.u_lo_RAM.RDATA_4 -> spi_sel_SB_LUT4_I3_O_SB_DFFER_E_DFFLC.CEN
+  x_media_mul           3  20.53    8.91  11.62     81      66  u_core.u_rf.u_bankA.u_hi_RAM.RDATA_15 -> u_spi.mosi_SB_DFFER_D_Q_SB_DFFER_Q_DFFLC.CEN
+  x_alu_todo           10  29.69   11.71  17.98     99      56  u_core.u_rf.u_bankA.u_hi_RAM.RDATA_15 -> per_sel_SB_LUT4_I3_2_O_SB_DFFER_E_DFFLC.CEN
+  x_media_bandas        7  21.36    8.91  12.45     81      71  u_core.u_rf.u_bankA.u_hi_RAM.RDATA_15 -> per_sel_SB_LUT4_I3_1_O_SB_DFFER_E_DFFLC.CEN
+  x_media_muldiv        2  21.04    8.66  12.39     77      63  u_core.u_rf.u_bankA.u_hi_RAM.RDATA_15 -> per_sel_SB_LUT4_I3_2_O_SB_DFFER_E_1_DFFLC.CEN
+  x_alu_todo_div        5  29.28   11.58  17.70    101      70  u_core.u_rf.u_bankA.u_hi_RAM.RDATA_15 -> u_core.res_m_SB_DFFSR_Q_15_D_SB_LUT4_O_I2_SB_LUT4_O_I3_SB_CARRY_CI_...
+  vig                  10  19.63    6.95  12.68     79      66  u_core.alu_op_a_sel_x_SB_DFF_Q_D_SB_LUT4_O_LC.O -> per_sel_SB_LUT4_I3_O_SB_DFFER_E_1_DFFLC.CEN
+  vig_boton             5  18.11    8.43   9.68     79      65  u_core.u_rf.u_bankA.u_lo_RAM.RDATA_0 -> g_vig.u_vig.decision_wr_i_SB_DFFER_E_DFFLC.CEN
+  tabla1                9  18.67    7.01  11.66     79      54  u_core.alu_op_a_sel_x_SB_DFF_Q_D_SB_LUT4_O_LC.O -> per_sel_SB_LUT4_I3_O_SB_DFFER_E_DFFLC.CEN
+  tabla2                2  18.50    7.01  11.49     79      67  u_core.alu_op_a_sel_x_SB_DFF_Q_D_SB_LUT4_O_LC.O -> spi_precio_SB_DFFER_E_Q_SB_LUT4_I2_O_SB_LUT4_O_6_LC.CEN
+  i1a                   4  21.39    8.97  12.41     81      66  u_core.u_rf.u_bankA.u_hi_RAM.RDATA_15 -> g_vig.u_vig.precio_i_SB_DFFER_E_Q_SB_LUT4_I2_LC.CEN
+  i1b                   2  22.25    8.85  13.41     79      66  u_core.u_rf.u_bankA.u_hi_RAM.RDATA_15 -> i_Switch_SB_LUT4_I2_LC.CEN
+  i2                   10  19.63    6.95  12.68     79      66  u_core.alu_op_a_sel_x_SB_DFF_Q_D_SB_LUT4_O_LC.O -> per_sel_SB_LUT4_I3_O_SB_DFFER_E_1_DFFLC.CEN
+  i3a                   6  20.82    6.70  14.12     29       1  u_core.u_rf.u_bankA.u_hi_RAM.RDATA_15 -> u_core.pc_target_SB_LUT4_O_LC.CEN
+  i3b                   8  21.46    7.36  14.11     73      42  u_core.u_id.g_pipe.instr_q_SB_DFFE_Q_DFFLC.O -> g_vig.u_vig.decision_wr_i_SB_DFFER_E_Q_SB_LUT4_I1_O_SB_LUT4_O_5_I1_...
+  i1a_carr_alu          6  29.66   11.95  17.70    103      56  u_core.u_rf.u_bankA.u_hi_RAM.RDATA_15 -> u_spi.mosi_SB_DFFER_D_Q_SB_DFFER_Q_DFFLC.CEN
+  i1a_carr_ap           8  21.69    8.97  12.71     81      63  u_core.u_rf.u_bankA.u_hi_RAM.RDATA_15 -> u_spi.mosi_SB_DFFER_D_Q_SB_LUT4_I2_O_SB_LUT4_O_1_LC.CEN
+  i1a_div               6  20.85    8.97  11.87     81      65  u_core.u_rf.u_bankA.u_hi_RAM.RDATA_15 -> o_LED_SB_DFFER_Q_1_DFFLC.CEN
+  i1a_alu_div           9  29.37   11.70  17.66    103      68  u_core.u_rf.u_bankA.u_hi_RAM.RDATA_15 -> g_vig.u_vig.decision_wr_i_SB_DFFER_E_DFFLC.CEN
+  i1b_carr_alu          4  30.17   11.96  18.20    103      56  u_core.u_rf.u_bankA.u_hi_RAM.RDATA_15 -> per_sel_SB_LUT4_I3_2_O_SB_DFFER_E_DFFLC.CEN
+  i1b_carr_ap           7  22.65    8.97  13.68     81      68  u_core.u_rf.u_bankA.u_hi_RAM.RDATA_15 -> g_vig.u_vig.decision_wr_i_SB_DFFER_E_Q_SB_LUT4_I1_O_SB_LUT4_O_1_I1_...
+  i1a_dir               4  21.52    9.04  12.48     83      66  u_core.u_rf.u_bankA.u_hi_RAM.RDATA_15 -> g_vig.u_vig.boot_q_SB_DFFER_Q_E_SB_LUT4_O_I1_SB_LUT4_I2_LC.CEN
+  max_s1                8  21.37    7.41  13.96     31      19  u_core.u_rf.u_bankA.u_hi_RAM.RDATA_15 -> u_core.pc_next_SB_LUT4_O_1_LC.I2
+  max_s2                7  21.06    8.76  12.30     73      63  u_core.u_rf.u_bankA.u_lo_RAM.RDATA_4 -> g_vig.u_vig.boot_q_SB_DFFER_Q_E_SB_LUT4_O_I1_SB_LUT4_I2_LC.CEN
+  max_s3                8  20.83    8.57  12.26     73      62  u_core.u_rf.u_bankA.u_lo_RAM.RDATA_11 -> g_vig.u_vig.boot_q_SB_DFFER_Q_E_SB_LUT4_O_I1_SB_LUT4_I2_LC.CEN
+  b1max_s1              6  20.68    8.72  11.96     81      70  u_core.u_rf.u_bankA.u_hi_RAM.RDATA_15 -> per_sel_SB_LUT4_I3_1_O_SB_DFFER_E_DFFLC.CEN
+  'acarreo' cuenta los tramos de la ruta que son de la cadena de acarreo de un sumador.
+
+Variantes que nextpnr no terminó (semilla 1)
+  x_bandas_div    Failed to expand region (0, 0) |_> (13, 17) of 1312 ICESTORM_LCs
+  ram1024         Unable to place cell 'u_ram.mem.1.1_RAM', no BELs remaining to implement cell type 'ICESTORM_RAM'
+  i1a_max         Failed to expand region (0, 0) |_> (13, 17) of 1350 ICESTORM_LCs
+  i1b_max         Failed to expand region (0, 0) |_> (13, 17) of 1388 ICESTORM_LCs
+  max_sinper      Failed to expand region (0, 0) |_> (13, 17) of 1302 ICESTORM_LCs
+  max_sinper_por  Failed to expand region (0, 0) |_> (13, 17) of 1298 ICESTORM_LCs
