@@ -104,6 +104,7 @@ SEM_M=$(esc 1300)                   # por hilo con el SPI: 4 x SEM_M corridas
 SEM_P=$(esc 4500)
 SEM_Q=$(esc 1100)                   # por hilo: 4 x SEM_Q corridas
 INSTR_L=3000                        # tope por hilo, por si un programa no llega a su lazo vacío
+ZONA_COMP=1984                      # 0x7C0: comienzo de la zona de datos en el modo compartido
 INSTR_P=400                         # en el grupo P un jalr libre puede dejar a un hilo dando vueltas
 
 compilar_verif "$O" &
@@ -135,13 +136,13 @@ una() {
     T) $PYTHON $T/prog_hilos.py "$s" --modo trade --hilo-spi "$t" --trade sw/trade.s -n 90 -o "$n.s"
        args="+instrucciones=$INSTR_T +precio_cada=61 +hilo_spi=$t" ;;
     D) $PYTHON $T/prog_hilos.py "$s" --modo compartido -o "$n.s"
-       args="+instrucciones=$INSTR_D +compartida=1" ;;
+       args="+instrucciones=$INSTR_D +compartida=1 +limite_codigo=$ZONA_COMP" ;;
     N) $PYTHON $T/prog_hilos.py "$s" --modo compartido -o "$n.s"
        args="+instrucciones=$INSTR_D +compartida=0" ;;
     J) $PYTHON $T/prog_hilos.py "$s" --modo separado --jalr-libre -o "$n.s"
        args="+instrucciones=$INSTR_B +compartida=0" ;;
     K) $PYTHON $T/prog_hilos.py "$s" --modo separado --jalr-libre -o "$n.s"
-       args="+instrucciones=$INSTR_B +compartida=1" ;;
+       args="+instrucciones=$INSTR_B +compartida=1 +limite_codigo=1792" ;;   # 0x700: zonas del modo separado
     # En la campaña lineal cada corrida usa una semilla del generador que no
     # se repite en otro grupo ni con otro hilo: con la misma semilla dos
     # programas empiezan igual y esas instrucciones no contarían como distintas
@@ -150,7 +151,7 @@ una() {
     M) $PYTHON $T/prog_hilos.py "$((1000000 * (t + 1) + s))" --modo spi1 --hilo-spi "$t" --lineal -o "$n.s"
        args="+instrucciones=$INSTR_L +fin_lazo=1 +precio_cada=11 +hilo_spi=$t +claves=$n.claves" ;;
     P) $PYTHON $T/prog_hilos.py "$((5000000 + s))" --modo compartido --lineal -o "$n.s"
-       args="+instrucciones=$INSTR_P +fin_lazo=1 +compartida=1 +claves=$n.claves" ;;
+       args="+instrucciones=$INSTR_P +fin_lazo=1 +compartida=1 +limite_codigo=$ZONA_COMP +claves=$n.claves" ;;
     Q) $PYTHON $T/prog_hilos.py "$((1000000 * (t + 6) + s))" --modo uno --hilo-spi "$t" -n 300 --lineal -o "$n.s"
        args="+instrucciones=$INSTR_L +fin_lazo=1 +precio_cada=31 +hilo_spi=$t +claves=$n.claves" ;;
   esac
@@ -162,7 +163,7 @@ una() {
   return 0
 }
 export -f una
-export O T TB SW FO PYTHON INSTR_A INSTR_B INSTR_C INSTR_T INSTR_D INSTR_H INSTR_L INSTR_P
+export O T TB SW FO PYTHON INSTR_A INSTR_B INSTR_C INSTR_T INSTR_D INSTR_H INSTR_L INSTR_P ZONA_COMP
 
 : > "$O/corridas.txt"
 lista() {   # lista GRUPO SEMILLAS HILOS...: agrega las corridas del grupo

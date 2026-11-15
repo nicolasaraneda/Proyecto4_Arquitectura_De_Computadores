@@ -65,6 +65,17 @@
 // (un jal x0 a sí mismo): es el final de los programas lineales de
 // tools/barrel/prog_hilos.py --lineal.
 //
+// Programas que ejecutan datos. Con +limite_codigo=DIRECCION la comparación de
+// un hilo termina, sin error, en la primera instrucción que el Espino base
+// ejecuta en esa dirección o más arriba, igual que cuando sale de la memoria.
+// Lo usan los grupos de memoria compartida, donde un jalr con una base
+// cualquiera puede llevar a un hilo a la zona de datos. Ahí el barrel y el
+// modelo de turnos no tienen por qué coincidir, por dos diferencias conocidas
+// (docs/espino_barrel.md, sección 3.8): los otros hilos están escribiendo las
+// palabras que ese hilo busca (código que se modifica), y en la última
+// palabra de la memoria el enlace de un jal vale 0x800 en el base y 0 en el
+// barrel, que tiene el contador de programa de 11 bits.
+//
 // Instrucciones distintas. Cada instrucción comparada se resume en una clave
 // con el hilo, el contador de programa, la instrucción, el valor escrito al
 // banco, el acceso al bus y la palabra de memoria escrita. Una clave que ya
@@ -135,6 +146,7 @@ module tb_verif;
   bit     visto [longint unsigned];   // instrucciones ya vistas con esos mismos datos (ver n_dist)
   bit     listo [4], fuera [4], en_lazo [4];
   int     fin_lazo = 0, fd_claves = 0;
+  longint limite_codigo = 0;
   string  arch_claves;
   longint objetivo = 50000;
   int     compartida = 0, precio_cada = 0, hilo_spi = 0;
@@ -331,7 +343,8 @@ module tb_verif;
     while (!listo[t] && n_cmp[t] < n_b[t] && n_cmp[t] < n_d[t]) begin
       ea = cola_b[t][n_cmp[t] % COLA];
       eb = cola_d[t][n_cmp[t] % COLA];
-      if (PCW < 32 && (ea.pc >> PCW) != 0) begin        // el programa salió de la memoria
+      if ((PCW < 32 && (ea.pc >> PCW) != 0) ||          // el programa salió de la memoria
+          (limite_codigo != 0 && longint'(ea.pc) >= limite_codigo)) begin   // o entró a la zona de datos
         fuera[t] = 1; listo[t] = 1;
         // Con memoria compartida los cuatro Espino base ejecutan por turnos:
         // si uno deja de compararse, la corrida termina para todos
@@ -440,6 +453,7 @@ module tb_verif;
     void'($value$plusargs("precio_cada=%d", precio_cada));
     void'($value$plusargs("hilo_spi=%d", hilo_spi));
     void'($value$plusargs("fin_lazo=%d", fin_lazo));
+    void'($value$plusargs("limite_codigo=%d", limite_codigo));
     if ($value$plusargs("claves=%s", arch_claves)) fd_claves = $fopen(arch_claves, "w");
     for (int i = 0; i < 512; i++) begin img[i] = 32'b0; sucia[i] = 0; end
     $readmemh(hex, img);

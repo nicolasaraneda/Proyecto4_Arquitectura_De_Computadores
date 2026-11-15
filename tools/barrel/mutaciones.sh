@@ -70,14 +70,14 @@ una() {
   "$d/obj/sim" "+hex=$O/prog/H.hex" +instrucciones=1500                                 > "$d/H.log" 2>&1
   "$d/obj/sim" "+hex=$O/prog/B.hex" "+instrucciones=$INSTR"                              > "$d/B.log" 2>&1
   "$d/obj/sim" "+hex=$O/prog/C.hex" "+instrucciones=$INSTR" +precio_cada=29 +hilo_spi=1 > "$d/C.log" 2>&1
-  "$d/obj/sim" "+hex=$O/prog/D.hex" "+instrucciones=$INSTR" +compartida=1               > "$d/D.log" 2>&1
+  "$d/obj/sim" "+hex=$O/prog/D.hex" "+instrucciones=$INSTR" +compartida=1 +limite_codigo=1984 > "$d/D.log" 2>&1
   # L y P: tres programas lineales cada una. Queda el log del primero que falla,
   # o el del último si pasan los tres.
   local g k
   for g in L P; do
     for k in 1 2 3; do
       if [ $g = L ]; then "$d/obj/sim" "+hex=$O/prog/L$k.hex" +instrucciones=3000 +fin_lazo=1 > "$d/$g.log" 2>&1
-      else "$d/obj/sim" "+hex=$O/prog/P$k.hex" +instrucciones=400 +fin_lazo=1 +compartida=1 > "$d/$g.log" 2>&1; fi
+      else "$d/obj/sim" "+hex=$O/prog/P$k.hex" +instrucciones=400 +fin_lazo=1 +compartida=1 +limite_codigo=1984 > "$d/$g.log" 2>&1; fi
       grep -q "^PASS verif" "$d/$g.log" || break
     done
   done
