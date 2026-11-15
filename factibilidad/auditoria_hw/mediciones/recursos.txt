@@ -1,0 +1,98 @@
+Auditoría: celdas, BRAM y frecuencia máxima de I1, I2 e I3, medidos de nuevo
+Generado por factibilidad/auditoria_hw/tools/recursos.sh (make recursos). No editar a mano.
+
+Herramientas:
+  Yosys 0.68+195 (git sha1 435977e97-dirty, Release, Clang /usr/bin/clang++ 21.1.8)
+  "nextpnr-ice40" -- Next Generation Place and Route (Version nextpnr-0.11.1-19-g8dbcee5c)
+  Icarus Verilog version 14.0 (devel) (s20260301-403-g5ab23063f-dirty)
+  Verilator 5.053 devel rev v5.052-22-g7cf8c5cca (mod)
+Commit de partida: 9b82e81 (rama factibilidad-fondo)
+  icetime de Project IceStorm (OSS CAD Suite), segundo analizador de timing
+Flujo: tools/medir_variante.sh, nextpnr-ice40 --hx1k --package vq100 --freq 25, goboard.pcf, semillas 1 a 20.
+Fuentes y definiciones: tools/comun.sh de esta carpeta. Demora: 100 s con 5 procesos.
+
+-- i1a: I1 fondo en un chip, tabla de 256 x 16
+   definiciones: -DXD_EMAD=0 -DXD_DEVK=0 -DXD_MULSTEPALU -DI_VIGILANTE -DI_TABLA=1   programa: factibilidad/auditoria_hw/build/recursos/trade_h0.hex
+   celdas [1071] de 1280 (README 1071), BRAM [13] de 16 (README 13), SB_WARMBOOT ubicada en 20 de 20 semillas
+   fmax por semilla, nextpnr (MHz): 48.77 48.46 49.09 46.76 46.79 47.79 50.48 49.69 49.34 47.37 48.08 49.04 49.22 49.50 46.95 50.28 50.37 47.62 49.09 48.34
+   fmax por semilla, icetime (MHz): 49.68 49.52 49.28 46.44 48.26 46.90 50.75 49.83 48.88 48.05 48.86 48.58 48.61 49.88 47.94 50.27 51.27 48.59 48.76 49.71
+   semillas 1 a 10:  mínima 46.76, mediana 48.62, máxima 50.48; cierran 10 de 10   (README: 46.76, 48.62 y 50.48, 10 de 10)
+   semillas 11 a 20: mínima 46.95, mediana 49.06, máxima 50.37; cierran 10 de 10   (muestra nueva)
+   icetime, 20 semillas: mínima 46.44, mediana 48.87, máxima 51.27; sobre 25 MHz 20 de 20
+PASS i1a: las cifras del README se reproducen con las semillas 1 a 10
+PASS i1a: cierra a 25 MHz en 20 de 20 semillas
+
+-- i1b: I1 con 16 BRAM
+   definiciones: -DXD_EMAD=0 -DXD_DEVK=0 -DXD_MULSTEPALU -DI_VIGILANTE -DI_TABLA=2   programa: factibilidad/auditoria_hw/build/recursos/trade_h0.hex
+   celdas [1098] de 1280 (README 1098), BRAM [16] de 16 (README 16), SB_WARMBOOT ubicada en 20 de 20 semillas
+   fmax por semilla, nextpnr (MHz): 48.27 44.94 51.83 46.67 47.87 49.34 46.87 51.19 47.60 49.15 50.32 51.31 44.68 50.05 47.68 46.50 51.79 44.85 50.11 48.41
+   fmax por semilla, icetime (MHz): 47.65 45.64 50.88 46.71 47.84 50.01 46.93 51.10 47.56 47.75 50.57 51.14 45.29 49.38 46.68 47.65 49.92 45.81 49.80 48.26
+   semillas 1 a 10:  mínima 44.94, mediana 48.07, máxima 51.83; cierran 10 de 10   (README: 44.94, 48.07 y 51.83, 10 de 10)
+   semillas 11 a 20: mínima 44.68, mediana 49.23, máxima 51.79; cierran 10 de 10   (muestra nueva)
+   icetime, 20 semillas: mínima 45.29, mediana 47.80, máxima 51.14; sobre 25 MHz 20 de 20
+PASS i1b: las cifras del README se reproducen con las semillas 1 a 10
+PASS i1b: cierra a 25 MHz en 20 de 20 semillas
+
+-- i2: I2 barrel y vigilante
+   definiciones: -DI_VIGILANTE   programa: factibilidad/auditoria_hw/build/recursos/trade_h0.hex
+   celdas [939] de 1280 (README 939), BRAM [12] de 16 (README 12), SB_WARMBOOT ubicada en 20 de 20 semillas
+   fmax por semilla, nextpnr (MHz): 53.34 55.25 53.85 52.43 55.47 56.04 51.17 52.55 56.09 50.95 53.87 52.24 54.18 56.21 55.18 54.21 54.30 55.92 55.77 54.02
+   fmax por semilla, icetime (MHz): 53.14 54.52 54.50 52.94 54.42 55.56 51.66 52.73 55.54 51.38 54.25 50.92 54.90 55.07 54.11 53.48 54.54 54.92 55.15 52.98
+   semillas 1 a 10:  mínima 50.95, mediana 53.59, máxima 56.09; cierran 10 de 10   (README: 50.95, 53.59 y 56.09, 10 de 10)
+   semillas 11 a 20: mínima 52.24, mediana 54.25, máxima 56.21; cierran 10 de 10   (muestra nueva)
+   icetime, 20 semillas: mínima 50.92, mediana 54.34, máxima 55.56; sobre 25 MHz 20 de 20
+PASS i2: las cifras del README se reproducen con las semillas 1 a 10
+PASS i2: cierra a 25 MHz en 20 de 20 semillas
+
+-- i3a: I3 segmentado, emad y vigilante
+   definiciones: -DESPINO_SEGMENTADO -DXD_EMAD=0   programa: sw/trade.hex
+   celdas [1046] de 1280 (README 1046), BRAM [12] de 16 (README 12), SB_WARMBOOT ubicada en 20 de 20 semillas
+   fmax por semilla, nextpnr (MHz): 51.99 53.25 52.95 53.19 52.73 48.02 51.83 51.78 51.99 52.99 51.31 48.43 52.18 53.63 53.95 54.17 51.57 49.63 52.56 50.24
+   fmax por semilla, icetime (MHz): 52.32 54.00 54.88 54.17 53.04 48.58 51.98 50.52 52.32 53.22 52.30 49.23 53.32 54.31 53.84 53.18 51.94 50.22 52.09 51.69
+   semillas 1 a 10:  mínima 48.02, mediana 52.36, máxima 53.25; cierran 10 de 10   (README: 48.02, 52.36 y 53.25, 10 de 10)
+   semillas 11 a 20: mínima 48.43, mediana 51.88, máxima 54.17; cierran 10 de 10   (muestra nueva)
+   icetime, 20 semillas: mínima 48.58, mediana 52.32, máxima 54.88; sobre 25 MHz 20 de 20
+PASS i3a: las cifras del README se reproducen con las semillas 1 a 10
+PASS i3a: cierra a 25 MHz en 20 de 20 semillas
+
+-- i3b: I3 con emad, devk y mulstep
+   definiciones: -DESPINO_SEGMENTADO -DXD_EMAD=0 -DXD_DEVK=0 -DXD_MULSTEPALU   programa: sw/trade.hex
+   celdas [1142] de 1280 (README 1142), BRAM [12] de 16 (README 12), SB_WARMBOOT ubicada en 20 de 20 semillas
+   fmax por semilla, nextpnr (MHz): 48.07 47.38 49.14 48.71 47.37 48.84 48.88 46.59 48.04 47.63 49.04 50.06 46.19 45.47 49.35 46.70 48.79 45.17 48.22 48.66
+   fmax por semilla, icetime (MHz): 48.78 48.46 48.59 48.04 47.19 48.61 47.60 46.04 47.70 46.87 48.83 48.76 46.26 45.28 48.81 46.49 47.81 45.52 46.91 46.90
+   semillas 1 a 10:  mínima 46.59, mediana 48.05, máxima 49.14; cierran 10 de 10   (README: 46.59, 48.05 y 49.14, 10 de 10)
+   semillas 11 a 20: mínima 45.17, mediana 48.44, máxima 50.06; cierran 10 de 10   (muestra nueva)
+   icetime, 20 semillas: mínima 45.28, mediana 47.65, máxima 48.83; sobre 25 MHz 20 de 20
+PASS i3b: las cifras del README se reproducen con las semillas 1 a 10
+PASS i3b: cierra a 25 MHz en 20 de 20 semillas
+
+-- i1a_fondo: I1 con el programa del fondo en la memoria (fondo en un chip); se compara con las cifras de I1
+   definiciones: -DXD_EMAD=0 -DXD_DEVK=0 -DXD_MULSTEPALU -DI_VIGILANTE -DI_TABLA=1   programa: factibilidad/auditoria_hw/build/recursos/fondo.hex
+   celdas [1071] de 1280 (README 1071), BRAM [13] de 16 (README 13), SB_WARMBOOT ubicada en 20 de 20 semillas
+   fmax por semilla, nextpnr (MHz): 48.77 48.46 49.09 46.76 46.79 47.79 50.48 49.69 49.34 47.37 48.08 49.04 49.22 49.50 46.95 50.28 50.37 47.62 49.09 48.34
+   fmax por semilla, icetime (MHz): 49.68 49.52 49.28 46.44 48.26 46.90 50.75 49.83 48.88 48.05 48.86 48.58 48.61 49.88 47.94 50.27 51.27 48.59 48.76 49.71
+   semillas 1 a 10:  mínima 46.76, mediana 48.62, máxima 50.48; cierran 10 de 10   (README: 46.76, 48.62 y 50.48, 10 de 10)
+   semillas 11 a 20: mínima 46.95, mediana 49.06, máxima 50.37; cierran 10 de 10   (muestra nueva)
+   icetime, 20 semillas: mínima 46.44, mediana 48.87, máxima 51.27; sobre 25 MHz 20 de 20
+PASS i1a_fondo: las cifras del README se reproducen con las semillas 1 a 10
+PASS i1a_fondo: cierra a 25 MHz en 20 de 20 semillas
+
+Resumen
+  config     celdas  libres  BRAM   fmin   fmed   fmax  cierran  | 20 semillas: fmin  cierran  peor semilla | icetime mínima
+  i1a         1071     209    13  46.76  48.62  50.48  10 de 10 |             46.76  20 de 20       4       | 46.44
+  i1b         1098     182    16  44.94  48.07  51.83  10 de 10 |             44.68  20 de 20      13       | 45.29
+  i2           939     341    12  50.95  53.59  56.09  10 de 10 |             50.95  20 de 20      10       | 50.92
+  i3a         1046     234    12  48.02  52.36  53.25  10 de 10 |             48.02  20 de 20       6       | 48.58
+  i3b         1142     138    12  46.59  48.05  49.14  10 de 10 |             45.17  20 de 20      18       | 45.28
+  i1a_fondo   1071     209    13  46.76  48.62  50.48  10 de 10 |             46.76  20 de 20       4       | 46.44
+
+RESULTADO: PASS
+
+Bitstream de la semilla 1 de esta medición (icepack del .asc) contra el sha256 que informa la pieza
+(factibilidad/i_integrado/mediciones/bitstreams.txt, hecho con los scripts de la pieza):
+PASS i1a: 32220 bytes, sha256 c7de9de4858d7a7286fbd094550f6a722f9ee785eb31ff23bbe4adbdd154e419, el mismo que informa la pieza
+PASS i1b: 32220 bytes, sha256 89ae68f15ddbf7c720497fd1617bd225c5e73bbddaa10c3fc6457658df8b4927, el mismo que informa la pieza
+PASS i2: 32220 bytes, sha256 c879f9e8f7a1e87175bef3566e0b2d147e20f37bd20b6e1655007191593597c5, el mismo que informa la pieza
+PASS i3a: 32220 bytes, sha256 832d807da79b8a03cf9d3e6f45d18447b27aa18453a94d23c7ba3997a4eb6e83, el mismo que informa la pieza
+PASS i3b: 32220 bytes, sha256 c83bb1fff9c6127a2874a89a325f3940183fe44cd278b9864f68ac7267ed048f, el mismo que informa la pieza
+RESULTADO de los bitstreams: PASS, los cinco sha256 se reproducen

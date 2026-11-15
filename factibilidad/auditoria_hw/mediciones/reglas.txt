@@ -1,0 +1,82 @@
+Auditoría: reglas del enunciado para el fondo en un chip (hardware I1 con sw/fondo.s)
+Generado por factibilidad/auditoria_hw/tools/reglas.sh (make reglas). No editar a mano.
+
+Herramientas:
+  Yosys 0.68+195 (git sha1 435977e97-dirty, Release, Clang /usr/bin/clang++ 21.1.8)
+  "nextpnr-ice40" -- Next Generation Place and Route (Version nextpnr-0.11.1-19-g8dbcee5c)
+  Icarus Verilog version 14.0 (devel) (s20260301-403-g5ab23063f-dirty)
+  Verilator 5.053 devel rev v5.052-22-g7cf8c5cca (mod)
+Commit de partida: 9b82e81 (rama factibilidad-fondo)
+Hardware: SoC de factibilidad/i_integrado con -DXD_EMAD=0 -DXD_DEVK=0 -DXD_MULSTEPALU -DI_VIGILANTE -DI_TABLA=1
+Programa: factibilidad/b_fondo_hilos/sw/fondo.s (imagen con sha256 c1897a48ce94b2d3...). Serie de práctica, 20 000 ticks a 0,1 ms.
+
+R1. "El core debe leer el precio y escribir la decisión"
+   Precios publicados:  19998 (perdidos por atraso: 0)
+   Decisiones:          19998
+   Lecturas de PRICE:   19998
+   Ciclos con BOOT:     0
+   Violaciones M1..M7:  0 0 0 0 0 0 0
+   Violaciones M8:      0
+PASS R1: los 19998 precios los lee y las 19998 decisiones las escribe el hilo 0 del core, con instrucciones lw y sw
+   Por lectura del RTL, lo único que escribe el registro DECISION (tx_hold del esclavo SPI):
+     117:    if (!rst_ni)                          tx_hold <= 8'h00;
+     118:    else if (wr & (off == REG_DECISION))  tx_hold <= wdata_i[7:0];
+   y lo único que maneja el bus del esclavo (en factibilidad/i_integrado/rtl/pochoco_soc.v):
+     152:  assign spi_sel  = is_mmio &  data_addr[16] & ~tab_mmio;
+     157:  assign spi_req   = data_req &  spi_sel;
+     214:        .wdata_i (data_wdata),
+     240:    .wdata_i   (data_wdata),
+     255:    .req_i      (spi_req),
+     258:    .wdata_i    (data_wdata),
+   data_req, data_we, data_addr y data_wdata salen solo del core: 4 conexiones, todas en u_core.
+   Módulos agregados con salida hacia el esclavo SPI o hacia el bus de datos: ninguno (vigilante solo tiene las salidas boot_o y sel_o;
+   tabla_mmio y tabla_ram solo rdata_o; xd_opa, xd_alu y xd_unit son combinacionales dentro de la etapa X del core).
+   Salidas de cada módulo agregado:
+     vigilante.v: boot_o sel_o 
+     tabla_mmio.v: rdata_o 
+     tabla_ram.v: rdata_o 
+     xd_opa.v: a_o b_cero_o    // el operando B debe valer cero 
+
+R2. "No almacenar series de precios en el diseño"
+   Imagen inicial: 512 palabras; 227 de programa, 24 de datos y 261 en cero entre medio.
+   Palabras de datos distintas de cero en la imagen (dirección: valor): 0x7A4: 10000, 0x7AC: 6, 0x7B0: 5, 0x7B4: 5, 0x7B8: 10, 0x7BC: 9, 0x7C0: 9, 0x7C4: 2, 0x7C8: 1, 0x7CC: 1
+   Palabras de la memoria que cambiaron en 20 000 ticks: 17 de 512 (0x7A0, 0x7A4, 0x7AC, 0x7B0, 0x7B4, 0x7D0, 0x7D4, 0x7D8, 0x7DC, 0x7E0, 0x7E4, 0x7E8, 0x7EC, 0x7F0, 0x7F4, 0x7F8, 0x7FC)
+   De ellas, fuera de las 18 palabras de estado del programa: 0
+PASS R2: después de 20 000 precios el programa cambió 17 palabras, todas de su estado. No hay ningún arreglo que crezca con la serie
+PASS R2: la tabla de 256 x 16 sigue en cero (el programa no la usa y el hardware la entrega en cero)
+   Contenido inicial de memoria en el RTL de I1 ($readmemh y valores por defecto de sus parámetros):
+     rtl/pochoco_ram.v: 2 $readmemh; parameter MemFile   = "" 
+     factibilidad/i_integrado/rtl/tabla_mmio.v: 1 $readmemh; parameter MemFile = "" 
+     factibilidad/i_integrado/rtl/tabla_ram.v: 1 $readmemh; parameter MemFile  = "" 
+     factibilidad/a_barrel/rtl/espino_barrel_regfile.v: 0 $readmemh; 
+     factibilidad/i_integrado/rtl/pochoco_soc.v: parameter MemFile    = "sw/trade.hex" parameter       TablaFile  = "" 
+   Constantes del programa (sw/fondo.s): 52 .equ, ninguna tabla. Umbrales de los gestores: G1_ENTRA,-96 G1_SALE,1 G2_ENTRA,-128 G2_SALE,1 G3_ENTRA,-64 G3_SALE,17 
+
+R3. "Todo hardware agregado debe estar en el repositorio con su testbench"
+   pochoco_spi_slave        SIN testbench que lo instancie solo. Se prueba dentro del SoC
+   espino_decoder_xd        SIN testbench que lo instancie solo. Se prueba dentro del SoC
+   pochoco_soc              propio: factibilidad/i_integrado/tb/tb_tabla.sv factibilidad/i_integrado/tb/tb_vig_barrel.sv factibilidad/i_integrado/tb/tb_xd_barrel.sv 
+   espino_barrel_core       SIN testbench que lo instancie solo. Se prueba dentro del SoC | formal: factibilidad/a_barrel/tools/formal.sh factibilidad/i_integrado/tools/formal.sh 
+   espino_barrel_regbank32  SIN testbench que lo instancie solo. Se prueba dentro del SoC
+   espino_barrel_regfile    SIN testbench que lo instancie solo. Se prueba dentro del SoC
+   vigilante                propio: factibilidad/e_warmboot/tb/tb_vigilante.v | formal: factibilidad/e_warmboot/formal/vigilante.sby 
+   tabla_mmio               propio: factibilidad/i_integrado/tb/tb_tabla_mod.sv 
+   tabla_ram                propio: factibilidad/i_integrado/tb/tb_tabla_mod.sv 
+   xd_alu                   propio: factibilidad/d_isa/tb/tb_xd_alu.sv 
+   xd_divstep               propio: factibilidad/d_isa/tb/tb_xd_divstep.sv 
+   xd_ema                   propio: factibilidad/d_isa/tb/tb_xd_ema.sv 
+   xd_mulc                  propio: factibilidad/d_isa/tb/tb_xd_mulc.sv 
+   xd_mulstep               propio: factibilidad/d_isa/tb/tb_xd_mulstep.sv 
+   xd_opa                   propio: factibilidad/d_isa/tb/tb_xd_opa.sv 
+   xd_simd8                 propio: factibilidad/d_isa/tb/tb_xd_simd8.sv 
+   xd_srak                  propio: factibilidad/d_isa/tb/tb_xd_srak.sv 
+   xd_unit                  SIN testbench que lo instancie solo. Se prueba dentro del SoC
+   xd_mul_mmio              propio: factibilidad/d_isa/tb/tb_xd_mul_mmio.sv 
+   Testbenches que instancian el SoC de I1 (y con él los módulos sin testbench propio): factibilidad/i_integrado/tb/tb_tabla.sv factibilidad/i_integrado/tb/tb_vig_barrel.sv factibilidad/i_integrado/tb/tb_xd_barrel.sv 
+   más factibilidad/a_barrel/tb/tb_verif.sv (cada hilo contra el Espino base, lo usa tools/verif_rv32e.sh de la pieza) y tb/tb_proyecto_4.sv.
+   18 archivos agregados en la lista de fuentes de I1. De los xd_*, I1 solo instancia xd_opa; los demás
+   son de otros subconjuntos de la extensión.
+AVISO R3: 6 módulos agregados no tienen un testbench que los instancie solos (el core, el banco de registros, el decodificador,
+         la copia del esclavo SPI y xd_unit). Se prueban dentro del SoC. Si la regla exige un testbench por módulo, falta escribirlos.
+   En el repositorio: 190 archivos de a_barrel, d_isa y e_warmboot ya están en commits. factibilidad/i_integrado y factibilidad/b_fondo_hilos todavía no:
+   0 archivos versionados. Para cumplir la regla tienen que entrar en un commit, y lo que vaya a la competencia, pasar a rtl/ y tb/.

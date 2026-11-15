@@ -1,0 +1,41 @@
+Auditoría: búsqueda de carreras entre los hilos del fondo (sw/fondo.s en el Espino barrel)
+Generado por factibilidad/auditoria_hw/tools/carreras.sh (make carreras). No editar a mano.
+
+Herramientas:
+  Yosys 0.68+195 (git sha1 435977e97-dirty, Release, Clang /usr/bin/clang++ 21.1.8)
+  "nextpnr-ice40" -- Next Generation Place and Route (Version nextpnr-0.11.1-19-g8dbcee5c)
+  Icarus Verilog version 14.0 (devel) (s20260301-403-g5ab23063f-dirty)
+  Verilator 5.053 devel rev v5.052-22-g7cf8c5cca (mod)
+Commit de partida: 9b82e81 (rama factibilidad-fondo)
+Programas: sin = sw/fondo.s tal cual (c1897a48ce94...); ret4 y ret6 = con retardos según los interruptores
+  (después de publicar, hasta 240 y 960 vueltas de dos instrucciones); ant4 = variante que decide con el tick anterior, con retardos.
+  Palabras distintas de cero en la imagen: sin 237, ret4 268, ret6 270, ant4 268.
+Columnas: corrida, programa, serie, ticks, período (ns), corrimiento máximo de la llegada (ns), ciclos entre cambios de los
+  interruptores, semilla | precios publicados, precios perdidos por atraso, peor respuesta (ciclos) | veces que el supervisor
+  cargó EST_1, EST_2 y EST_3 cuando todavía eran de otro tick y tuvo que volver a leer | monitores | modelo
+Demora: 97 s con 5 procesos.
+
+c01  sin   practica   20000   100000   4000     0   1 | publicados  19998 perdidos     0 peor   440 | esperas 159982     0     0 | PASS monitores | PASS modelo: 19997 filas por 13 campos (736 cambios de posicion de los gestores, 248 cambios del byte)
+c02  ret4  practica   20000   100000   4000    37   1 | publicados  19998 perdidos     0 peor   583 | esperas 163197  1164   673 | PASS monitores | PASS modelo: 19997 filas por 13 campos (736 cambios de posicion de los gestores, 248 cambios del byte)
+c03  ret4  practica   20000   100000   4000    37   2 | publicados  19998 perdidos     0 peor   585 | esperas 163301  1159   759 | PASS monitores | PASS modelo: 19997 filas por 13 campos (736 cambios de posicion de los gestores, 248 cambios del byte)
+c04  ret4  practica   20000   100000   4000    37   3 | publicados  19998 perdidos     0 peor   573 | esperas 164057  1173   752 | PASS monitores | PASS modelo: 19997 filas por 13 campos (736 cambios de posicion de los gestores, 248 cambios del byte)
+c05  ret4  volatil    20000   100000   4000    37   1 | publicados  19998 perdidos     0 peor   591 | esperas 163412  1156   656 | PASS monitores | PASS modelo: 19997 filas por 13 campos (2627 cambios de posicion de los gestores, 898 cambios del byte)
+c06  ret4  volatil    20000   100000   4000    37   2 | publicados  19998 perdidos     0 peor   596 | esperas 163349  1161   636 | PASS monitores | PASS modelo: 19997 filas por 13 campos (2627 cambios de posicion de los gestores, 898 cambios del byte)
+c07  ret4  volatil    20000   100000   4000    37   3 | publicados  19998 perdidos     0 peor   581 | esperas 164148  1121   593 | PASS monitores | PASS modelo: 19997 filas por 13 campos (2627 cambios de posicion de los gestores, 898 cambios del byte)
+c08  ret4  saltos     20000   100000   4000     5   4 | publicados  19998 perdidos     0 peor   581 | esperas 163618  8982  4128 | PASS monitores | PASS modelo: 19997 filas por 13 campos (720 cambios de posicion de los gestores, 244 cambios del byte)
+c09  ret4  saltos     20000   100000   4000   997   5 | publicados  19998 perdidos     0 peor   583 | esperas 162919    11    28 | PASS monitores | PASS modelo: 19997 filas por 13 campos (720 cambios de posicion de los gestores, 244 cambios del byte)
+c10  ret4  practica   20000    60000   4000    37   6 | publicados  19983 perdidos    14 peor  1593 | esperas 542745 80243 54545 | PASS monitores | PASS modelo: 19982 filas por 13 campos (738 cambios de posicion de los gestores, 248 cambios del byte)
+c11  ret4  volatil    20000    60000   4000    37   7 | publicados  19980 perdidos    17 peor  1585 | esperas 520375 75108 57499 | PASS monitores | PASS modelo: 19979 filas por 13 campos (2623 cambios de posicion de los gestores, 910 cambios del byte)
+c12  ret4  practica   20000    40000   2000    37   8 | publicados  15590 perdidos  4418 peor  1046 | esperas 891783 228484 152343 | PASS monitores | PASS modelo: 15589 filas por 13 campos (646 cambios de posicion de los gestores, 230 cambios del byte)
+c13  ret4  volatil    20000    40000   2000    37   9 | publicados  15631 perdidos  4371 peor  1048 | esperas 880230 207614 126730 | PASS monitores | PASS modelo: 15630 filas por 13 campos (2291 cambios de posicion de los gestores, 771 cambios del byte)
+c14  ret4  volatil     3000  1000000  40000    37  10 | publicados   2999 perdidos     0 peor   509 | esperas 24590   180   106 | PASS monitores | PASS modelo: 2998 filas por 13 campos (355 cambios de posicion de los gestores, 129 cambios del byte)
+c15  ret6  practica   20000   100000   4000    37  11 | publicados  11525 perdidos  8474 peor  2596 | esperas 2490062 755216 602465 | PASS monitores | PASS modelo: 11524 filas por 13 campos (594 cambios de posicion de los gestores, 204 cambios del byte)
+c16  ret6  volatil    20000   100000   4000    37  12 | publicados  11496 perdidos  8504 peor  2596 | esperas 2481135 808145 524619 | PASS monitores | PASS modelo: 11495 filas por 13 campos (1845 cambios de posicion de los gestores, 633 cambios del byte)
+c17  ant4  practica   20000   100000   4000    37  13 | publicados  19998 perdidos     0 peor   485 | esperas     0     0     0 | PASS monitores | PASS modelo: 19997 filas por 13 campos (736 cambios de posicion de los gestores, 240 cambios del byte)
+c18  ant4  volatil    20000   100000   4000    37  14 | publicados  19998 perdidos     0 peor   491 | esperas     0     0     0 | PASS monitores | PASS modelo: 19997 filas por 13 campos (2627 cambios de posicion de los gestores, 897 cambios del byte)
+c19  ant4  volatil    20000    60000   4000    37  15 | publicados  19996 perdidos     1 peor  1571 | esperas 19832  8258  5684 | PASS monitores | PASS modelo: 19995 filas por 13 campos (2627 cambios de posicion de los gestores, 897 cambios del byte)
+
+Corridas: 19. Monitores sin violaciones: 19. Iguales al modelo: 19. Decisiones vigiladas: 337174. Violaciones: 0.
+Violaciones por monitor (M1 a M7), sumadas: 0 0 0 0 0 0 0 . M8 (accesos al SPI que no son load o store del hilo 0): 0.
+M9 (decisiones con un EST_k que el supervisor cargó de otro tick): 0. Cargas en que el supervisor encontró EST_1, EST_2 y EST_3 de otro tick y esperó, sumadas: 9318735 2179175 1532216 .
+RESULTADO: PASS, no se encontró ningún caso en que el supervisor decida con datos de dos ticks

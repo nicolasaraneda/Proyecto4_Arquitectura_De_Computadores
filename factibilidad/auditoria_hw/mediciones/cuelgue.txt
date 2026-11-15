@@ -1,0 +1,51 @@
+Auditoría: un hilo de estrategia colgado en el fondo en un chip
+Generado por factibilidad/auditoria_hw/tools/cuelgue.sh (make cuelgue). No editar a mano.
+
+Herramientas:
+  Yosys 0.68+195 (git sha1 435977e97-dirty, Release, Clang /usr/bin/clang++ 21.1.8)
+  "nextpnr-ice40" -- Next Generation Place and Route (Version nextpnr-0.11.1-19-g8dbcee5c)
+  Icarus Verilog version 14.0 (devel) (s20260301-403-g5ab23063f-dirty)
+  Verilator 5.053 devel rev v5.052-22-g7cf8c5cca (mod)
+Commit de partida: 9b82e81 (rama factibilidad-fondo)
+Programa: sw/fondo.s con el gestor del hilo 3 colgado desde el tick 100. 300 ticks de la práctica a 0,1 ms.
+
+-- barrel: barrel prototipo, sin vigilante, gestor 3 colgado
+   Precios publicados:  100 (perdidos por atraso: 197)
+   Decisiones:          99
+   Ultima decision con el precio numero: 99 de 298 recibidos
+   Escrituras EST:      100 100 99
+   Peor respuesta:      243 ciclos
+-- i1a: hardware I1 (vigilante N = 4), gestor 3 colgado
+   Precios publicados:  100 (perdidos por atraso: 197)
+   Decisiones:          99
+   Ultima decision con el precio numero: 99 de 298 recibidos
+   Escrituras EST:      100 100 99
+   Peor respuesta:      243 ciclos
+   Ciclos con BOOT:     487263
+   BOOT sube con el precio numero: 104
+   Cuenta maxima del vigilante: 5
+-- i1a_sano: hardware I1, programa sano (control)
+   Precios publicados:  298 (perdidos por atraso: 0)
+   Decisiones:          298
+   Ultima decision con el precio numero: 298 de 298 recibidos
+   Escrituras EST:      298 298 298
+   Peor respuesta:      231 ciclos
+   Ciclos con BOOT:     0
+   BOOT sube con el precio numero: -1
+   Cuenta maxima del vigilante: 1
+-- i1a_lento: hardware I1, programa sano con retardos largos al azar, 20 000 ticks
+   Precios publicados:  11525 (perdidos por atraso: 8474)
+   Decisiones:          11524
+   Ultima decision con el precio numero: 19997 de 19998 recibidos
+   Escrituras EST:      11524 11525 11525
+   Peor respuesta:      2596 ciclos
+   Ciclos con BOOT:     0
+   BOOT sube con el precio numero: -1
+   Cuenta maxima del vigilante: 4
+
+PASS barrel: la última decisión es la del precio 99. Desde el tick 100 el supervisor espera al gestor 3 y no vuelve a escribir DECISION
+PASS i1a: última decisión con el precio 99 y BOOT sube en la primitiva con el precio 104 = T + N. El vigilante sí releva al fondo cuando un gestor se cuelga
+PASS i1a_sano: con el programa sano BOOT no sube en los 300 ticks
+PASS i1a_lento: con 8474 precios perdidos de 20000 la cuenta del vigilante llega a 4 de las 5 que hacen falta: no hay relevo en falso
+
+RESULTADO: PASS

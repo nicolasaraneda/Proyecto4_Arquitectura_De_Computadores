@@ -1,0 +1,166 @@
+Auditoría: errores nuevos puestos a propósito, contra las pruebas de las piezas
+Generado por factibilidad/auditoria_hw/tools/mutaciones.sh (make mutaciones). No editar a mano.
+
+Herramientas:
+  Yosys 0.68+195 (git sha1 435977e97-dirty, Release, Clang /usr/bin/clang++ 21.1.8)
+  "nextpnr-ice40" -- Next Generation Place and Route (Version nextpnr-0.11.1-19-g8dbcee5c)
+  Icarus Verilog version 14.0 (devel) (s20260301-403-g5ab23063f-dirty)
+  Verilator 5.053 devel rev v5.052-22-g7cf8c5cca (mod)
+Commit de partida: 9b82e81 (rama factibilidad-fondo)
+  SBY v0.68
+Pruebas: XD-I1, XD-ancha y XD-k = tb_xd_barrel de i_integrado, 12 programas por configuración; VIG4 y VIG1 = tb_vig_barrel de
+  i_integrado; FORMAL = prueba por inducción del vigilante de e_warmboot; EQUIV, ATRASO y ATRASO2 = tb_fondo de b_fondo_hilos
+  contra la referencia en C (20 000 ticks, decisiones y estado), sin retardo, con el gestor 3 atrasado 800 ciclos y con el
+  gestor 2 atrasado 800 ciclos; MON y CARRERAS = tb_carreras de esta carpeta.
+Demora: 331 s con 5 procesos.
+
+Sin mutación: todas las pruebas deben pasar
+   PASS XD-I1: 12 de 12 programas iguales al modelo
+   PASS XD-ancha: 12 de 12 programas iguales al modelo
+   PASS XD-k: 12 de 12 programas iguales al modelo
+   PASS VIG4: PASS tb_vig_barrel N=4: el supervisor responde 20 precios (cuenta maxima 1 mientras responde), BOOT sube con e
+   PASS VIG1: PASS tb_vig_barrel N=1: el supervisor responde 20 precios (cuenta maxima 1 mientras responde), BOOT sube con e
+   PASS FORMAL: prueba por inducción del módulo, N = 4
+   PASS VIG4-antes: el testbench de antes de la auditoría pasa
+   PASS EQUIV: 4/4, decisiones idénticas, estado idéntico
+   PASS ATRASO: 4/4, decisiones idénticas, estado idéntico
+   PASS ATRASO2: 4/4, decisiones idénticas, estado idéntico
+   PASS MON: monitores sin violaciones y estado igual al modelo (esperas del supervisor a EST_1, EST_2 y EST_3: 159982 0 0)
+   PASS CARRERAS: monitores sin violaciones y estado igual al modelo (esperas del supervisor a EST_1, EST_2 y EST_3: 163782 1096 693)
+
+DETECTADA opa_con_rs2 [isa]: la detectan XD-I1 XD-ancha XD-k
+      el operando desplazado de emad, devk y mulstep se calcula con rs2 en vez de rs1 (espino_barrel_core.v)
+      XD-I1 FAIL: 0 de 12 programas iguales al modelo (diferencia en el hilo 0, escritura 30: x13 = b48c68e3, esperado x13 = 85076423)
+      XD-ancha FAIL: 0 de 12 programas iguales al modelo (diferencia en el hilo 0, escritura 30: x13 = 00000000, esperado x13 = 97979797)
+      XD-k FAIL: 0 de 12 programas iguales al modelo (diferencia en el hilo 2, escritura 32: x14 = 0000017e, esperado x14 = 0080817f)
+DETECTADA emad_sin_decodificar [isa]: la detectan XD-I1 XD-ancha XD-k
+      el decodificador se instancia sin emad: la instrucción queda como no reconocida (espino_barrel_core.v)
+      XD-I1 FAIL: 0 de 12 programas iguales al modelo (diferencia en el hilo 3, escritura 31: x14 = 988d22b4, esperado x2 = 7d62349b)
+      XD-ancha FAIL: 0 de 12 programas iguales al modelo (diferencia en el hilo 3, escritura 45: x5 = 2a0f4131, esperado x14 = 0300feff)
+      XD-k FAIL: 0 de 12 programas iguales al modelo (diferencia en el hilo 2, escritura 32: x5 = dd3d1e8b, esperado x14 = 0080817f)
+DETECTADA anula_b_siempre [isa]: la detectan XD-I1 XD-ancha XD-k
+      el operando B se anula en todas las instrucciones que usan el operando desplazado, no solo en mulstep con rs1[31] = 0 (espino_barrel_core.v)
+      XD-I1 FAIL: 0 de 12 programas iguales al modelo (diferencia en el hilo 0, escritura 30: x13 = c4a8d2e0, esperado x13 = 85076423)
+      XD-ancha FAIL: 0 de 12 programas iguales al modelo (diferencia en el hilo 3, escritura 30: x8 = 97c81c40, esperado x8 = 9b09db5e)
+      XD-k FAIL: 0 de 12 programas iguales al modelo (diferencia en el hilo 3, escritura 30: x8 = e2000000, esperado x8 = e541bf1e)
+DETECTADA carriles_pegados [isa]: la detectan XD-ancha; no la detectan XD-I1 XD-k
+      el corte de acarreos de los carriles no se suelta: después de una instrucción de carriles de cualquier hilo, las sumas de todos quedan cortadas cada 8 bits (espino_barrel_core.v)
+      XD-I1 PASS: 12 de 12 programas iguales al modelo
+      XD-ancha FAIL: 0 de 12 programas iguales al modelo (diferencia en el hilo 0, escritura 0: x1 = xxxxxxxx, esperado x1 = 00000000)
+      XD-k PASS: 12 de 12 programas iguales al modelo
+DETECTADA k_de_otro_hilo [isa]: la detectan XD-k; no la detectan XD-I1 XD-ancha
+      xd_opa recibe el funct7 (el k del desplazamiento) de la instrucción que sale de la memoria, que es de otro hilo (espino_barrel_core.v)
+      XD-I1 PASS: 12 de 12 programas iguales al modelo
+      XD-ancha PASS: 12 de 12 programas iguales al modelo
+      XD-k FAIL: 0 de 12 programas iguales al modelo (diferencia en el hilo 3, escritura 30: x8 = 0341bf1e, esperado x8 = e541bf1e)
+DETECTADA mulstep_bit_30 [isa]: la detectan XD-I1 XD-ancha XD-k
+      mulstep decide si suma con rs1[30] en vez de rs1[31] (error dentro de xd_opa, visto desde la integración) (xd_opa.v)
+      XD-I1 FAIL: 0 de 12 programas iguales al modelo (diferencia en el hilo 1, escritura 31: x1 = 30f8824c, esperado x1 = 7d36a2df)
+      XD-ancha FAIL: 1 de 12 programas iguales al modelo (diferencia en el hilo 0, escritura 31: x14 = 2f2f2f2e, esperado x14 = 2f2f2f4d)
+      XD-k FAIL: 2 de 12 programas iguales al modelo (diferencia en el hilo 2, escritura 92: x8 = 13131312, esperado x8 = 13131313)
+DETECTADA vig_cuenta_cs [vigilante]: la detectan VIG4 VIG1; no la detectan FORMAL
+      el vigilante cuenta ciclos con CS_n en bajo en vez de precios completos (pochoco_soc.v)
+      VIG4 FAIL: BOOT subio mientras el supervisor respondia
+      VIG1 FAIL: BOOT subio mientras el supervisor respondia
+      FORMAL PASS: prueba por inducción del módulo, N = 4
+      VIG4-antes FAIL: BOOT subio mientras el supervisor respondia
+DETECTADA vig_un_precio_tarde [vigilante]: la detectan VIG4 VIG1 FORMAL
+      el disparo ocurre con un precio más de los debidos (cuenta N + 2) (vigilante.v)
+      VIG4 FAIL: BOOT no subio despues de N + 1 precios sin respuesta
+      VIG1 FAIL: BOOT no subio despues de N + 1 precios sin respuesta
+      FORMAL FAIL: engine_0.basecase: ##   0:00:00  BMC failed!
+      VIG4-antes FAIL: BOOT no subio despues de N + 1 precios sin respuesta
+DETECTADA vig_boot_sin_enganche [vigilante]: la detectan VIG4 VIG1 FORMAL
+      BOOT no queda enganchado: baja cuando CS_n vuelve a bajar (vigilante.v)
+      VIG4 FAIL: BOOT volvio a bajar
+      VIG1 FAIL: BOOT volvio a bajar
+      FORMAL FAIL: engine_0.basecase: ##   0:00:00  BMC failed!
+      VIG4-antes FAIL: BOOT volvio a bajar
+DETECTADA vig_mismo_ciclo [vigilante]: la detectan FORMAL; no la detectan VIG4 VIG1
+      si un precio llega en el mismo ciclo que una escritura en DECISION, la cuenta queda en 0 y ese precio no se cuenta (vigilante.v)
+      VIG4 PASS: PASS tb_vig_barrel N=4: el supervisor responde 20 precios (cuenta maxima 1 mientras responde), BOOT sube con e
+      VIG1 PASS: PASS tb_vig_barrel N=1: el supervisor responde 20 precios (cuenta maxima 1 mientras responde), BOOT sube con e
+      FORMAL FAIL: engine_0.basecase: ##   0:00:00  BMC failed!
+      VIG4-antes PASS: el testbench de antes de la auditoría pasa
+DETECTADA warmboot_pines [vigilante]: la detectan VIG4 VIG1; no la detectan FORMAL
+      S1 y S0 llegan cruzados a la primitiva SB_WARMBOOT: la FPGA cargaría la imagen 2 en vez de la 1 (pochoco_soc.v)
+      VIG4 FAIL: destino S1 S0 = 10 en la primitiva, esperado 01
+      VIG1 FAIL: destino S1 S0 = 10 en la primitiva, esperado 01
+      FORMAL PASS: prueba por inducción del módulo, N = 4
+      VIG4-antes PASS: el testbench de antes de la auditoría pasa
+DETECTADA warmboot_sin_boot [vigilante]: la detectan VIG4 VIG1; no la detectan FORMAL
+      la entrada BOOT de la primitiva queda en 0: el vigilante dispara y la FPGA no se reconfigura (pochoco_soc.v)
+      VIG4 FAIL: BOOT no subio despues de N + 1 precios sin respuesta
+      VIG1 FAIL: BOOT no subio despues de N + 1 precios sin respuesta
+      FORMAL PASS: prueba por inducción del módulo, N = 4
+      VIG4-antes PASS: el testbench de antes de la auditoría pasa
+DETECTADA sin_esperar_g3 [protocolo]: la detectan ATRASO CARRERAS; no la detectan EQUIV ATRASO2 MON
+      el supervisor no comprueba el número de tick de EST_3 (fondo.s)
+      EQUIV PASS: 4/4, decisiones idénticas, estado idéntico
+      ATRASO FAIL: 4/4, decisiones distintas desde la fila 419, estado distinto
+      ATRASO2 PASS: 4/4, decisiones idénticas, estado idéntico
+      MON PASS: monitores sin violaciones y estado igual al modelo (esperas del supervisor a EST_1, EST_2 y EST_3: 159982 0 0)
+      CARRERAS FAIL: violaciones M1..M7: 0 0 0 0 24 0 0, M9: 224; modelo: 19997 filas por 13 campos identicas a la referencia sobre
+DETECTADA sin_esperar_g2 [protocolo]: la detectan ATRASO2 CARRERAS; no la detectan EQUIV ATRASO MON
+      el supervisor no comprueba el número de tick de EST_2 (fondo.s)
+      EQUIV PASS: 4/4, decisiones idénticas, estado idéntico
+      ATRASO PASS: 4/4, decisiones idénticas, estado idéntico
+      ATRASO2 FAIL: 4/4, decisiones distintas desde la fila 58, estado distinto
+      MON PASS: monitores sin violaciones y estado igual al modelo (esperas del supervisor a EST_1, EST_2 y EST_3: 159982 0 0)
+      CARRERAS FAIL: violaciones M1..M7: 0 0 0 0 7 0 0, M9: 300; modelo: 19997 filas por 13 campos identicas a la referencia sobre
+DETECTADA pub_dos_stores [protocolo]: la detectan EQUIV ATRASO ATRASO2 MON CARRERAS
+      PUB se escribe en dos stores: primero el tick y después el precio (fondo.s)
+      EQUIV FAIL: 4/4, decisiones distintas desde la fila 6, estado distinto
+      ATRASO FAIL: 4/4, decisiones distintas desde la fila 6, estado distinto
+      ATRASO2 FAIL: 4/4, decisiones distintas desde la fila 6, estado distinto
+      MON FAIL: violaciones M1..M7: 0 39996 59994 59994 0 0 19998, M9: 0; modelo: 
+      CARRERAS FAIL: violaciones M1..M7: 0 39996 40409 40409 0 226 19998, M9: 0; modelo: 
+DETECTADA g1_sin_sello [protocolo]: la detectan EQUIV ATRASO ATRASO2 MON CARRERAS
+      el supervisor toma la posición de EST_1 sin mirar su número de tick (fondo.s)
+      EQUIV FAIL: 4/4, decisiones distintas desde la fila 58, estado distinto
+      ATRASO FAIL: 4/4, decisiones distintas desde la fila 58, estado distinto
+      ATRASO2 FAIL: 4/4, decisiones distintas desde la fila 58, estado distinto
+      MON FAIL: violaciones M1..M7: 0 0 0 0 0 169 0, M9: 19959; modelo: 19944 de 19997 filas distintas (decision 169, caja 19932,
+      CARRERAS FAIL: violaciones M1..M7: 0 0 0 0 44 774 0, M9: 19299; modelo: 19988 de 19997 filas distintas (decision 774, caja 19726,
+DETECTADA des_despues [protocolo]: la detectan MON CARRERAS; no la detectan EQUIV ATRASO ATRASO2
+      el gestor publica EST_k antes que DES_k (fondo.s)
+      EQUIV PASS: 4/4, decisiones idénticas, estado idéntico
+      ATRASO PASS: 4/4, decisiones idénticas, estado idéntico
+      ATRASO2 PASS: 4/4, decisiones idénticas, estado idéntico
+      MON FAIL: violaciones M1..M7: 0 0 0 59994 0 0 0, M9: 0; modelo: 19997 filas por 13 campos identicas a la referencia sobre
+      CARRERAS FAIL: violaciones M1..M7: 0 0 0 59994 0 0 0, M9: 0; modelo: 19997 filas por 13 campos identicas a la referencia sobre
+DETECTADA est_tick_viejo [protocolo]: la detectan EQUIV ATRASO ATRASO2 MON CARRERAS
+      el gestor sella EST_k con el tick anterior (fondo.s)
+      EQUIV FAIL: 2/4, decisiones distintas desde la fila 5, estado distinto
+      ATRASO FAIL: 2/4, decisiones distintas desde la fila 5, estado distinto
+      ATRASO2 FAIL: 2/4, decisiones distintas desde la fila 5, estado distinto
+      MON FAIL: violaciones M1..M7: 0 0 3 0 0 0 0, M9: 0; modelo: el supervisor no completa ningún tick
+      CARRERAS FAIL: violaciones M1..M7: 0 0 3 0 0 0 0, M9: 0; modelo: el supervisor no completa ningún tick
+
+Resumen: mutación, área, pruebas de las piezas que la detectan, pruebas de la auditoría que la detectan y pruebas que pasan igual
+   opa_con_rs2            isa        XD-I1 XD-ancha XD-k                           -
+   emad_sin_decodificar   isa        XD-I1 XD-ancha XD-k                           -
+   anula_b_siempre        isa        XD-I1 XD-ancha XD-k                           -
+   carriles_pegados       isa        XD-ancha                                      XD-I1 XD-k
+   k_de_otro_hilo         isa        XD-k                                          XD-I1 XD-ancha
+   mulstep_bit_30         isa        XD-I1 XD-ancha XD-k                           -
+   vig_cuenta_cs          vigilante  VIG4 VIG1                                     FORMAL
+   vig_un_precio_tarde    vigilante  VIG4 VIG1 FORMAL                              -
+   vig_boot_sin_enganche  vigilante  VIG4 VIG1 FORMAL                              -
+   vig_mismo_ciclo        vigilante  FORMAL                                        VIG4 VIG1
+   warmboot_pines         vigilante  VIG4 VIG1                                     FORMAL
+   warmboot_sin_boot      vigilante  VIG4 VIG1                                     FORMAL
+   sin_esperar_g3         protocolo  ATRASO                     CARRERAS           EQUIV ATRASO2 MON
+   sin_esperar_g2         protocolo  ATRASO2                    CARRERAS           EQUIV ATRASO MON
+   pub_dos_stores         protocolo  EQUIV ATRASO ATRASO2       MON CARRERAS       -
+   g1_sin_sello           protocolo  EQUIV ATRASO ATRASO2       MON CARRERAS       -
+   des_despues            protocolo  -                          MON CARRERAS       EQUIV ATRASO ATRASO2
+   est_tick_viejo         protocolo  EQUIV ATRASO ATRASO2       MON CARRERAS       -
+
+Mutaciones: 18. Detectadas por alguna prueba de las piezas: 17. Detectadas solo por las pruebas de esta carpeta: des_despues .
+No detectadas por ninguna prueba: ninguna. Problemas con el RTL o el programa sin mutar: 0.
+VIG4-antes es tb/tb_vig_barrel.sv de i_integrado como estaba antes de la auditoría (miraba los cables del vigilante y no las
+entradas de la primitiva). No entra en las cuentas. Mutaciones que VIG4 y VIG1 detectan ahora y ese testbench dejaba pasar: warmboot_pines warmboot_sin_boot .
+ATRASO2 es la variante atraso_800_g2, que la auditoría agregó a make variantes de b_fondo_hilos (antes solo se atrasaba al
+gestor 3). Mutaciones que, de las pruebas de las piezas, solo detecta ATRASO2: sin_esperar_g2 .
+RESULTADO: referencia PASS, 17 de 18 mutaciones detectadas por las pruebas de las piezas y 18 de 18 contando las de la auditoría
