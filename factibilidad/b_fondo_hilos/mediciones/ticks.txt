@@ -1,0 +1,175 @@
+Mediciones por tick del fondo de cuatro hilos (sw/fondo.s) en el Espino barrel
+Generado por factibilidad/b_fondo_hilos/tools/medir_ticks.sh (make ticks). No editar a mano.
+
+Herramientas:
+  Yosys 0.68+195 (git sha1 435977e97-dirty, Release, Clang /usr/bin/clang++ 21.1.8)
+  Icarus Verilog version 14.0 (devel) (s20260301-403-g5ab23063f-dirty)
+  Verilator 5.053 devel rev v5.052-22-g7cf8c5cca (mod)
+Commit de partida: 9b82e81 (rama factibilidad-fondo)
+
+=== A. Serie de practica completa, periodo de la ronda 3 (0,1 ms) ===
+
+PASS ticks_r3: 20000 ticks, periodo 100000 ns, inicio 4000 ns: 4/4 y decisiones identicas a la referencia
+Ticks medidos: 19997 (se descarta la ultima ventana de la corrida, que queda incompleta)
+Ciclos por tick: 2500. Turno de cada hilo: 625 instrucciones por tick (una cada 4 ciclos).
+Ticks con una sola escritura de DECISION: 19997 de 19997
+
+1. Respuesta: ciclos desde byte_done hasta la escritura de DECISION
+
+                                                 ticks   minimo   promedio   maximo
+  todos los ticks                                19997      203     227.36      439
+  primer precio                                      1      203     203.00      203
+  tick comun                                     19957      223     227.00      231
+  tick con frontera de ventana                      39      387     415.00      439
+  En tiempo, a 40 ns por ciclo: promedio 9.09 us, peor caso 17.56 us
+  Instrucciones del supervisor hasta DECISION (contando sus vueltas de espera): 51      57.09      110
+
+2. Hitos del protocolo dentro del tick, en ciclos desde byte_done (ticks comunes)
+
+                                                 ticks   minimo   promedio   maximo
+  el supervisor publica PUB                      19957       27      31.00       35
+  el gestor 1 publica EST_1                      19957      132     134.66      140
+  el gestor 2 publica EST_2                      19957      133     135.66      141
+  el gestor 3 publica EST_3                      19957      134     136.66      142
+  el supervisor escribe DECISION                 19957      223     227.00      231
+  Tramos:
+  llega el precio -> PUB (sondeo del SPI y publicacion)       27      31.00       35
+  PUB -> ultimo EST (los tres gestores, en paralelo)        103     105.66      107
+  ultimo EST -> DECISION (espera, voto y store)              89      90.34       93
+
+3. Instrucciones por tick de cada hilo (trabajo, sin las vueltas de espera que no encuentran nada)
+
+                                                 ticks   minimo   promedio   maximo
+  hilo 0, supervisor                             19997       38      41.99       84
+  hilo 1, gestor max_media                       19997       29      35.00       35
+  hilo 2, gestor base                            19997       29      35.00       35
+  hilo 3, gestor activo                          19997       29      35.00       35
+  Del supervisor:
+    tick comun sin orden que ejecutar            19327       41      41.00       41
+    tick en que el espejo ejecuta una orden        630       61      69.97       72
+    tick con frontera de ventana                    39       72      78.62       84
+    de ellas, en el espejo de la cuenta          19997        5       8.91       39
+    de ellas, en la frontera (cuando la hay)        39       30      36.62       42
+  Instrucciones gastadas en lazos de espera, por tick:
+    supervisor sondeando el SPI                  19997      511     562.00      572
+    supervisor esperando a los gestores          19997       27      33.02       42
+    gestor 1 sondeando PUB                       19997      592     592.00      598
+    gestor 2 sondeando PUB                       19997      592     592.00      598
+    gestor 3 sondeando PUB                       19997      592     592.00      598
+  Trabajo de los cuatro hilos: 146.98 instrucciones por tick de 2500 turnos (5.88 % de ocupacion).
+  CPI por hilo 4,000 y agregado 1,000 por construccion (una instruccion por ciclo, por turnos). Contando solo el trabajo:
+  17.0 ciclos por instruccion util a este periodo.
+
+4. Tick completo: ultimo ciclo en que cada hilo hace trabajo, en ciclos desde byte_done
+
+                                                 ticks   minimo   promedio   maximo
+  hilo 0, supervisor                             19997      227     267.01      475
+  hilo 1, gestor max_media                       19997      144     170.66      176
+  hilo 2, gestor base                            19997      145     171.66      177
+  hilo 3, gestor activo                          19997      146     172.66      178
+  El hilo que termina ultimo deja 2025 ciclos libres antes del byte_done siguiente en el peor tick.
+
+5. Contra el presupuesto del testbench (peor caso de esta corrida; el barrido de la fase va aparte)
+
+  Presupuesto a este periodo: 2262 ciclos. Peor caso: 439 ciclos (19.41 %). Margen: 1823 ciclos.
+
+=== B. Periodo de la ronda 2 (1 ms), 3000 ticks ===
+
+PASS ticks_r2: 3000 ticks, periodo 1000000 ns, inicio 4000 ns: 4/4 y decisiones identicas a la referencia
+Ticks medidos: 2998 (se descarta la ultima ventana de la corrida, que queda incompleta)
+Ciclos por tick: 25000. Turno de cada hilo: 6250 instrucciones por tick (una cada 4 ciclos).
+Ticks con una sola escritura de DECISION: 2998 de 2998
+
+1. Respuesta: ciclos desde byte_done hasta la escritura de DECISION
+
+                                                 ticks   minimo   promedio   maximo
+  todos los ticks                                 2998      207     227.31      439
+  primer precio                                      1      207     207.00      207
+  tick comun                                      2992      223     227.00      231
+  tick con frontera de ventana                       5      387     418.20      439
+  En tiempo, a 40 ns por ciclo: promedio 9.09 us, peor caso 17.56 us
+  Instrucciones del supervisor hasta DECISION (contando sus vueltas de espera): 52      57.08      110
+
+2. Hitos del protocolo dentro del tick, en ciclos desde byte_done (ticks comunes)
+
+                                                 ticks   minimo   promedio   maximo
+  el supervisor publica PUB                       2992       27      31.00       35
+  el gestor 1 publica EST_1                       2992      128     133.99      140
+  el gestor 2 publica EST_2                       2992      129     134.99      141
+  el gestor 3 publica EST_3                       2992      130     135.99      142
+  el supervisor escribe DECISION                  2992      223     227.00      231
+  Tramos:
+  llega el precio -> PUB (sondeo del SPI y publicacion)       27      31.00       35
+  PUB -> ultimo EST (los tres gestores, en paralelo)        103     105.00      107
+  ultimo EST -> DECISION (espera, voto y store)              89      91.00       93
+
+3. Instrucciones por tick de cada hilo (trabajo, sin las vueltas de espera que no encuentran nada)
+
+                                                 ticks   minimo   promedio   maximo
+  hilo 0, supervisor                              2998       38      41.93       84
+  hilo 1, gestor max_media                        2998       29      35.00       35
+  hilo 2, gestor base                             2998       29      35.00       35
+  hilo 3, gestor activo                           2998       29      35.00       35
+  Del supervisor:
+    tick comun sin orden que ejecutar             2900       41      41.00       41
+    tick en que el espejo ejecuta una orden         92       61      69.16       72
+    tick con frontera de ventana                     5       72      79.60       84
+    de ellas, en el espejo de la cuenta           2998        5       8.86       39
+    de ellas, en la frontera (cuando la hay)         5       30      37.60       42
+  Instrucciones gastadas en lazos de espera, por tick:
+    supervisor sondeando el SPI                   2998     6136    6187.06     6197
+    supervisor esperando a los gestores           2998       27      33.01       42
+    gestor 1 sondeando PUB                        2998     6217    6217.00     6223
+    gestor 2 sondeando PUB                        2998     6217    6217.00     6223
+    gestor 3 sondeando PUB                        2998     6217    6217.00     6223
+  Trabajo de los cuatro hilos: 146.92 instrucciones por tick de 25000 turnos (0.59 % de ocupacion).
+  CPI por hilo 4,000 y agregado 1,000 por construccion (una instruccion por ciclo, por turnos). Contando solo el trabajo:
+  170.2 ciclos por instruccion util a este periodo.
+
+4. Tick completo: ultimo ciclo en que cada hilo hace trabajo, en ciclos desde byte_done
+
+                                                 ticks   minimo   promedio   maximo
+  hilo 0, supervisor                              2998      231     266.76      475
+  hilo 1, gestor max_media                        2998      152     169.99      176
+  hilo 2, gestor base                             2998      153     170.99      177
+  hilo 3, gestor activo                           2998      154     171.99      178
+  El hilo que termina ultimo deja 24525 ciclos libres antes del byte_done siguiente en el peor tick.
+
+5. Contra el presupuesto del testbench (peor caso de esta corrida; el barrido de la fase va aparte)
+
+  Presupuesto a este periodo: 24762 ciclos. Peor caso: 439 ciclos (1.77 %). Margen: 24323 ciclos.
+
+=== C. Barrido de la fase: 24 corridas de 1100 ticks, el inicio se corre un ciclo cada vez ===
+
+  24 de 24 fases con 4/4 y decisiones identicas a la referencia
+  fase  0: ticks  1097, respuesta promedio  227.37, peor tick comun  231, peor caso  439
+  fase  1: ticks  1097, respuesta promedio  226.37, peor tick comun  230, peor caso  438
+  fase  2: ticks  1097, respuesta promedio  225.37, peor tick comun  229, peor caso  437
+  fase  3: ticks  1097, respuesta promedio  228.35, peor tick comun  232, peor caso  436
+  fase  4: ticks  1097, respuesta promedio  227.35, peor tick comun  231, peor caso  435
+  fase  5: ticks  1097, respuesta promedio  226.35, peor tick comun  230, peor caso  434
+  fase  6: ticks  1097, respuesta promedio  225.35, peor tick comun  229, peor caso  433
+  fase  7: ticks  1097, respuesta promedio  228.35, peor tick comun  232, peor caso  440
+  fase  8: ticks  1097, respuesta promedio  227.35, peor tick comun  231, peor caso  439
+  fase  9: ticks  1097, respuesta promedio  226.35, peor tick comun  230, peor caso  438
+  fase 10: ticks  1097, respuesta promedio  225.35, peor tick comun  229, peor caso  437
+  fase 11: ticks  1097, respuesta promedio  228.37, peor tick comun  232, peor caso  440
+  fase 12: ticks  1097, respuesta promedio  227.37, peor tick comun  231, peor caso  439
+  fase 13: ticks  1097, respuesta promedio  226.37, peor tick comun  230, peor caso  438
+  fase 14: ticks  1097, respuesta promedio  225.37, peor tick comun  229, peor caso  437
+  fase 15: ticks  1097, respuesta promedio  228.35, peor tick comun  232, peor caso  436
+  fase 16: ticks  1097, respuesta promedio  227.35, peor tick comun  231, peor caso  435
+  fase 17: ticks  1097, respuesta promedio  226.35, peor tick comun  230, peor caso  434
+  fase 18: ticks  1097, respuesta promedio  225.35, peor tick comun  229, peor caso  433
+  fase 19: ticks  1097, respuesta promedio  228.35, peor tick comun  232, peor caso  440
+  fase 20: ticks  1097, respuesta promedio  227.35, peor tick comun  231, peor caso  439
+  fase 21: ticks  1097, respuesta promedio  226.35, peor tick comun  230, peor caso  438
+  fase 22: ticks  1097, respuesta promedio  225.35, peor tick comun  229, peor caso  437
+  fase 23: ticks  1097, respuesta promedio  228.37, peor tick comun  232, peor caso  440
+  Peor caso entre las 24 fases: 440 ciclos, en 26328 ticks. Promedio de los promedios: 226.86.
+  Maximo de cada tramo por separado: llegada a PUB 36 (minimo 25), PUB a ultimo EST 107,
+  ultimo EST a DECISION 301 (con frontera de ventana). Suma de los tres maximos: 444 ciclos.
+  Es una cota de lo observado, no una cota demostrada: los tres maximos no se dieron en el mismo tick.
+    ronda 1 (10 ms)    presupuesto  249762: usa  0.176 %, margen 249322 ciclos (62330 instrucciones por hilo)
+    ronda 2 (1 ms)     presupuesto   24762: usa  1.777 %, margen 24322 ciclos (6080 instrucciones por hilo)
+    ronda 3 (0,1 ms)   presupuesto    2262: usa 19.452 %, margen 1822 ciclos (455 instrucciones por hilo)

@@ -1,0 +1,60 @@
+Estado interno del fondo en el barrel contra la traza del modulo en C, tick a tick
+Generado por factibilidad/b_fondo_hilos/tools/estado.sh (make estado). No editar a mano.
+
+Herramientas:
+  Yosys 0.68+195 (git sha1 435977e97-dirty, Release, Clang /usr/bin/clang++ 21.1.8)
+  Icarus Verilog version 14.0 (devel) (s20260301-403-g5ab23063f-dirty)
+  Verilator 5.053 devel rev v5.052-22-g7cf8c5cca (mod)
+Commit de partida: 9b82e81 (rama factibilidad-fondo)
+
+--- practica_0p1ms: tb/practica.csv, 20000 ticks, periodo 100000 ns, 2 precios sin ver por el reset ---
+  Ordenes ejecutadas: 630
+  Peor caso precio->decision: 439 ciclos (disponibles: 2262)
+  Chequeos aprobados: 4/4
+PASS practica_0p1ms: decisiones.csv identico al de la referencia (20000 filas)
+  filas del testbench 19998, filas de la traza 19998, comparadas 19998
+  campos por fila: 13 (precio, caja, acciones, pos1, pos2, pos3, des1, des2, des3, w1, w2, w3, decision)
+  en esas filas: 630 ticks en que el espejo cambia de acciones, 20 cambios de pesos, pesos finales 7/6/3, espejo final caja 26070 y acciones 0
+PASS practica_0p1ms: 19998 filas por 13 campos idénticas
+
+--- practica_1ms: tb/practica.csv, 3000 ticks, periodo 1000000 ns, 1 precios sin ver por el reset ---
+  Ordenes ejecutadas: 92
+  Peor caso precio->decision: 439 ciclos (disponibles: 24762)
+  Chequeos aprobados: 4/4
+PASS practica_1ms: decisiones.csv identico al de la referencia (3000 filas)
+  filas del testbench 2999, filas de la traza 2999, comparadas 2999
+  campos por fila: 13 (precio, caja, acciones, pos1, pos2, pos3, des1, des2, des3, w1, w2, w3, decision)
+  en esas filas: 92 ticks en que el espejo cambia de acciones, 3 cambios de pesos, pesos finales 6/6/4, espejo final caja 9904 y acciones 0
+PASS practica_1ms: 2999 filas por 13 campos idénticas
+
+--- modelo: factibilidad/b_fondo_hilos/build/series/modelo_1_20000.csv, 20000 ticks, periodo 100000 ns, 2 precios sin ver por el reset ---
+  Ordenes ejecutadas: 325
+  Peor caso precio->decision: 439 ciclos (disponibles: 2262)
+  Chequeos aprobados: 4/4
+PASS modelo: decisiones.csv identico al de la referencia (20000 filas)
+  filas del testbench 19998, filas de la traza 19998, comparadas 19998
+  campos por fila: 13 (precio, caja, acciones, pos1, pos2, pos3, des1, des2, des3, w1, w2, w3, decision)
+  en esas filas: 325 ticks en que el espejo cambia de acciones, 15 cambios de pesos, pesos finales 3/4/9, espejo final caja 11208 y acciones 0
+PASS modelo: 19998 filas por 13 campos idénticas
+
+--- tendencia: factibilidad/b_fondo_hilos/build/series/tendencia_1_20000.csv, 20000 ticks, periodo 100000 ns, 2 precios sin ver por el reset ---
+  Ordenes ejecutadas: 185
+  Peor caso precio->decision: 439 ciclos (disponibles: 2262)
+  Chequeos aprobados: 4/4
+PASS tendencia: decisiones.csv identico al de la referencia (20000 filas)
+  filas del testbench 19998, filas de la traza 19998, comparadas 19998
+  campos por fila: 13 (precio, caja, acciones, pos1, pos2, pos3, des1, des2, des3, w1, w2, w3, decision)
+  en esas filas: 185 ticks en que el espejo cambia de acciones, 6 cambios de pesos, pesos finales 6/2/8, espejo final caja 227 y acciones 51
+PASS tendencia: 19998 filas por 13 campos idénticas
+
+--- volatil: factibilidad/b_fondo_hilos/build/series/volatil_1_20000.csv, 20000 ticks, periodo 100000 ns, 2 precios sin ver por el reset ---
+  Ordenes ejecutadas: 6521
+  Peor caso precio->decision: 439 ciclos (disponibles: 2262)
+  Chequeos aprobados: 4/4
+PASS volatil: decisiones.csv identico al de la referencia (20000 filas)
+  filas del testbench 19998, filas de la traza 19998, comparadas 19998
+  campos por fila: 13 (precio, caja, acciones, pos1, pos2, pos3, des1, des2, des3, w1, w2, w3, decision)
+  en esas filas: 6521 ticks en que el espejo cambia de acciones, 31 cambios de pesos, pesos finales 8/5/3, espejo final caja 307328 y acciones 8442
+PASS volatil: 19998 filas por 13 campos idénticas
+
+Filas comparadas en total: 82991 por 13 campos.

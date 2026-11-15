@@ -1,0 +1,33 @@
+Tamano de sw/fondo.s en la memoria del SoC (512 palabras de 32 bits)
+Generado por factibilidad/b_fondo_hilos/tools/tamano.sh (make programa). No editar a mano.
+
+Programa: factibilidad/b_fondo_hilos/sw/fondo.s
+Bloque                                               palabras
+  Tabla de arranque                                         4
+  Supervisor: inicio, sondeo del SPI y publicación         17
+  Supervisor: espera a los tres gestores                    9
+  Supervisor: voto y DECISION                              14
+  Supervisor: espejo de la cuenta real                     75
+  Supervisor: vuelta al sondeo                              1
+  Supervisor: frontera de ventana (pesos)                  46
+  Entradas de los tres gestores                            12
+  Rutina común de los gestores                             49
+  Total de programa                                       227
+    del supervisor 162, de los gestores 61 (los tres comparten la rutina), tabla 4
+  Datos (desde 0x7A0 hasta el final de la RAM)             24
+    supervisor: 9
+    gestores: 9
+    constantes (topes y pisos de los pesos): 6
+  Total usado                                             251  de 512 (49.0 %)
+  Palabras libres                                         261
+
+Imagen: factibilidad/b_fondo_hilos/build/prog/base/fondo.hex, 512 palabras, sha256 c1897a48ce94b2d3...
+Instrucciones por tipo (palabras de programa):
+  ALU registro-registro      71
+  ALU con inmediato          69
+  salto condicional          32
+  load                       28
+  store                      14
+  jal                        12
+  lui                         1
+  total                     227

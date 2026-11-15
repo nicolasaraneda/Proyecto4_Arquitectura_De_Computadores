@@ -1,0 +1,93 @@
+Variantes del protocolo entre hilos, serie de practica, 20000 ticks
+Generado por factibilidad/b_fondo_hilos/tools/variantes.sh (make variantes). No editar a mano.
+
+Herramientas:
+  Yosys 0.68+195 (git sha1 435977e97-dirty, Release, Clang /usr/bin/clang++ 21.1.8)
+  Icarus Verilog version 14.0 (devel) (s20260301-403-g5ab23063f-dirty)
+  Verilator 5.053 devel rev v5.052-22-g7cf8c5cca (mod)
+Commit de partida: 9b82e81 (rama factibilidad-fondo)
+
+1. Resultado de cada corrida
+
+  base (var): 20000 ticks, periodo 100000 ns: 4/4, precios perdidos 0, respuestas 19998, decisiones identicas a fondo_min, patrimonio 26070, peor caso 439 ciclos
+  espejo_antes (var): 20000 ticks, periodo 100000 ns: 4/4, precios perdidos 0, respuestas 19998, decisiones identicas a fondo_min, patrimonio 26070, peor caso 447 ciclos
+  atraso_800 (var): 20000 ticks, periodo 100000 ns: 4/4, precios perdidos 0, respuestas 19998, decisiones identicas a fondo_min, patrimonio 26070, peor caso 1231 ciclos
+  atraso_800_g2 (var): 20000 ticks, periodo 100000 ns: 4/4, precios perdidos 0, respuestas 19998, decisiones identicas a fondo_min, patrimonio 26070, peor caso 1243 ciclos
+  despues_2000 (var): 20000 ticks, periodo 100000 ns: 4/4, precios perdidos 0, respuestas 19998, decisiones identicas a fondo_min, patrimonio 26070, peor caso 439 ciclos
+  despues_2400 (var): 20000 ticks, periodo 100000 ns: 2/4, precios perdidos 406, respuestas 19589, decisiones DISTINTAS a fondo_min desde la fila 58, patrimonio 26703, peor caso 2499 ciclos
+  atraso_2400 (var): 20000 ticks, periodo 100000 ns: 2/4, precios perdidos 1148, respuestas 18849, decisiones DISTINTAS a fondo_min desde la fila 5, patrimonio 25568, peor caso 2499 ciclos
+  anterior (var): 20000 ticks, periodo 100000 ns: 4/4, precios perdidos 0, respuestas 19998, decisiones identicas a fondo_min_ant, patrimonio 25885, peor caso 343 ciclos
+  atraso_2400 (var_1ms): 3000 ticks, periodo 1000000 ns: 4/4, precios perdidos 0, respuestas 2999, decisiones identicas a fondo_min, patrimonio 9904, peor caso 2827 ciclos
+  vuelta (var): 20000 ticks, periodo 100000 ns: 4/4, precios perdidos 0, respuestas 19998, decisiones identicas a fondo_min, patrimonio 26070, peor caso 439 ciclos
+
+2. Estado interno contra la traza en C (las variantes que deben decidir igual que fondo_min)
+
+  base:
+    filas del testbench 19998, filas de la traza 19998, comparadas 19998
+    campos por fila: 13 (precio, caja, acciones, pos1, pos2, pos3, des1, des2, des3, w1, w2, w3, decision)
+    en esas filas: 630 ticks en que el espejo cambia de acciones, 20 cambios de pesos, pesos finales 7/6/3, espejo final caja 26070 y acciones 0
+  PASS 19998 filas por 13 campos idénticas
+  espejo_antes:
+    filas del testbench 19998, filas de la traza 19998, comparadas 19998
+    campos por fila: 13 (precio, caja, acciones, pos1, pos2, pos3, des1, des2, des3, w1, w2, w3, decision)
+    en esas filas: 630 ticks en que el espejo cambia de acciones, 20 cambios de pesos, pesos finales 7/6/3, espejo final caja 26070 y acciones 0
+  PASS 19998 filas por 13 campos idénticas
+  atraso_800:
+    filas del testbench 19998, filas de la traza 19998, comparadas 19998
+    campos por fila: 13 (precio, caja, acciones, pos1, pos2, pos3, des1, des2, des3, w1, w2, w3, decision)
+    en esas filas: 630 ticks en que el espejo cambia de acciones, 20 cambios de pesos, pesos finales 7/6/3, espejo final caja 26070 y acciones 0
+  PASS 19998 filas por 13 campos idénticas
+  atraso_800_g2:
+    filas del testbench 19998, filas de la traza 19998, comparadas 19998
+    campos por fila: 13 (precio, caja, acciones, pos1, pos2, pos3, des1, des2, des3, w1, w2, w3, decision)
+    en esas filas: 630 ticks en que el espejo cambia de acciones, 20 cambios de pesos, pesos finales 7/6/3, espejo final caja 26070 y acciones 0
+  PASS 19998 filas por 13 campos idénticas
+  despues_2000:
+    filas del testbench 19998, filas de la traza 19998, comparadas 19998
+    campos por fila: 13 (precio, caja, acciones, pos1, pos2, pos3, des1, des2, des3, w1, w2, w3, decision)
+    en esas filas: 630 ticks en que el espejo cambia de acciones, 20 cambios de pesos, pesos finales 7/6/3, espejo final caja 26070 y acciones 0
+  PASS 19998 filas por 13 campos idénticas
+  vuelta:
+    filas del testbench 19998, filas de la traza 19998, comparadas 19998
+    campos por fila: 13 (precio, caja, acciones, pos1, pos2, pos3, des1, des2, des3, w1, w2, w3, decision)
+    en esas filas: 630 ticks en que el espejo cambia de acciones, 20 cambios de pesos, pesos finales 7/6/3, espejo final caja 26070 y acciones 0
+  PASS 19998 filas por 13 campos idénticas
+
+3. Ciclos e instrucciones por tick
+
+  variante                    ticks     resp.     resp.  resp.  fin sup.    fin   trabajo  espera a
+                                     promedio  t. comun   peor  promedio   peor   superv.  gestores
+  base                        19997    227.36    227.00    439    267.01    475     41.99     33.02
+  espejo_antes                19997    232.87    232.50    447    236.87    451     41.99     25.48
+  atraso_800                  19997   1019.36   1019.00   1231   1059.01   1267     41.99    231.02
+  atraso_800_g2               19997   1031.36   1031.00   1243   1071.01   1279     41.99    234.02
+  despues_2000                19997    227.36    227.00    439    267.01    475     41.99     33.02
+  despues_2400                19997   1224.54   1224.65   2499   2496.40   2499     41.33    592.08
+  atraso_2400                 19997   1178.57   1178.58   2499   2498.96   2499     40.34    593.83
+  anterior                    19997    131.37    131.01    343    170.97    379     41.97      9.02
+  atraso_2400 a 1 ms           2998   2615.31   2615.00   2827   2654.76   2863     41.93    630.01
+  vuelta                      19997    227.36    227.00    439    267.01    475     41.99     33.02
+
+  Columnas: respuesta en ciclos desde byte_done hasta DECISION (promedio de todos los ticks, promedio de los
+  ticks sin frontera de ventana y peor caso); ultimo ciclo con trabajo del supervisor (promedio y peor);
+  instrucciones de trabajo del supervisor por tick; instrucciones del supervisor esperando a los gestores.
+
+4. Programas
+
+  base: 0 lineas distintas de sw/fondo.s, sha256 de la imagen c1897a48ce94...
+  espejo_antes: 86 lineas distintas de sw/fondo.s, sha256 de la imagen 36ad1b6bb944...
+  atraso_800: 8 lineas distintas de sw/fondo.s, sha256 de la imagen 80dece4c52c5...
+  atraso_800_g2: 8 lineas distintas de sw/fondo.s, sha256 de la imagen da5d82713534...
+  despues_2000: 8 lineas distintas de sw/fondo.s, sha256 de la imagen 4b3e0287cdfa...
+  despues_2400: 8 lineas distintas de sw/fondo.s, sha256 de la imagen aa8ce3ae0b8d...
+  atraso_2400: 8 lineas distintas de sw/fondo.s, sha256 de la imagen 8770d712d97f...
+  anterior: 6 lineas distintas de sw/fondo.s, sha256 de la imagen 8278e8fa8fdc...
+  vuelta: 2 lineas distintas de sw/fondo.s, sha256 de la imagen 17d4313986a1...
+
+5. Que se espera de cada una
+
+  base, espejo_antes, atraso_800, atraso_800_g2, despues_2000 y vuelta deben dar 4/4 y decisiones identicas a fondo_min.
+  anterior debe dar 4/4 y decisiones identicas a fondo_min_ant.
+  despues_2400 y atraso_2400 a 0,1 ms deben fallar: la vuelta del gestor 3 no cabe en el tick.
+  atraso_2400 a 1 ms debe dar 4/4 y decisiones identicas a fondo_min.
+PASS las diez corridas dan lo esperado

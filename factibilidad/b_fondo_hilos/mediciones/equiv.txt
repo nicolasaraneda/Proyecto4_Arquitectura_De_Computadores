@@ -1,0 +1,26 @@
+Fondo de cuatro hilos (sw/fondo.s) en el barrel contra la referencia en C (fondo_min), byte a byte
+Generado por factibilidad/b_fondo_hilos/tools/equiv.sh (make equiv). No editar a mano.
+
+Herramientas:
+  Yosys 0.68+195 (git sha1 435977e97-dirty, Release, Clang /usr/bin/clang++ 21.1.8)
+  Icarus Verilog version 14.0 (devel) (s20260301-403-g5ab23063f-dirty)
+  Verilator 5.053 devel rev v5.052-22-g7cf8c5cca (mod)
+Commit de partida: 8c14283 (rama factibilidad-fondo)
+Referencia: factibilidad/b_fondo_hilos/build/arnes correr --estrategia fondo_min (factibilidad/retorno/r4b_fondo/fondo.c, sin modificar)
+Testbench: copia de tb/tb_proyecto_4.sv con PROGRAMA, SERIE, PERIODO_NS, NTICKS y el archivo de salida cambiados
+Series sinteticas: ref/series.py FAMILIA --n 20000 --semilla 1
+Demora: 2032 s con 4 procesos
+
+PASS practica_0p1ms: periodo 100000 ns, 20000 ticks, precios 72 a 190, Peor caso precio->decision: 439 ciclos (disponibles: 2262), 4/4, 20000 filas identicas a la referencia, 00 x 3 7f x 3170 bf x 16827 , ordenes 630, patrimonio 26070
+PASS practica_1ms: periodo 1000000 ns, 20000 ticks, precios 72 a 190, Peor caso precio->decision: 439 ciclos (disponibles: 24762), 4/4, 20000 filas identicas a la referencia, 00 x 2 7f x 3104 bf x 16894 , ordenes 594, patrimonio 25031
+PASS sintetica_modelo: periodo 100000 ns, 20000 ticks, precios 76 a 163, Peor caso precio->decision: 439 ciclos (disponibles: 2262), 4/4, 20000 filas identicas a la referencia, 00 x 3 7f x 2607 bf x 17390 , ordenes 325, patrimonio 11208
+PASS sintetica_remuestreo: periodo 100000 ns, 20000 ticks, precios 71 a 198, Peor caso precio->decision: 439 ciclos (disponibles: 2262), 4/4, 20000 filas identicas a la referencia, 00 x 3 7f x 4518 bf x 15479 , ordenes 655, patrimonio 24926
+PASS sintetica_tendencia: periodo 100000 ns, 20000 ticks, precios 17 a 255, Peor caso precio->decision: 439 ciclos (disponibles: 2262), 4/4, 20000 filas identicas a la referencia, 00 x 3 7f x 1580 bf x 18417 , ordenes 185, patrimonio 13079
+PASS sintetica_saltos: periodo 100000 ns, 20000 ticks, precios 1 a 220, Peor caso precio->decision: 439 ciclos (disponibles: 2262), 4/4, 20000 filas identicas a la referencia, 00 x 3 7f x 5321 bf x 14676 , ordenes 5069, patrimonio 312660
+PASS sintetica_cambio_de_caracter: periodo 100000 ns, 20000 ticks, precios 72 a 255, Peor caso precio->decision: 439 ciclos (disponibles: 2262), 4/4, 20000 filas identicas a la referencia, 00 x 3 7f x 3461 bf x 16536 , ordenes 521, patrimonio 13255
+PASS sintetica_volatil: periodo 100000 ns, 20000 ticks, precios 1 a 255, Peor caso precio->decision: 439 ciclos (disponibles: 2262), 4/4, 20000 filas identicas a la referencia, 00 x 3 7f x 7933 bf x 12064 , ordenes 6521, patrimonio 374864
+PASS sintetica_borde_alto: periodo 100000 ns, 20000 ticks, precios 240 a 255, Peor caso precio->decision: 439 ciclos (disponibles: 2262), 4/4, 20000 filas identicas a la referencia, 00 x 3 7f x 5137 bf x 14860 , ordenes 6681, patrimonio 614131
+PASS sintetica_plana: periodo 100000 ns, 20000 ticks, precios 10 a 10, Peor caso precio->decision: 383 ciclos (disponibles: 2262), 4/4, 20000 filas identicas a la referencia, 00 x 3 bf x 19997 , ordenes 0, patrimonio 10000
+PASS practica_10ms: periodo 10000000 ns, 20000 ticks, precios 72 a 190, Peor caso precio->decision: 439 ciclos (disponibles: 249762), 4/4, 20000 filas identicas a la referencia, 00 x 2 7f x 3104 bf x 16894 , ordenes 594, patrimonio 25031
+
+Casos: 11. PASS: 11. Ticks comparados: 220000.
