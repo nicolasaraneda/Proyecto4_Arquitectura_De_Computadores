@@ -1,0 +1,51 @@
+Pruebas de humo del Espino barrel
+Generado por tools/barrel/humo.sh (make barrel-humo). No editar a mano.
+
+Herramientas:
+  Yosys 0.68+195 (git sha1 435977e97-dirty, Release, Clang /usr/bin/clang++ 21.1.8)
+  "nextpnr-ice40" -- Next Generation Place and Route (Version nextpnr-0.11.1-19-g8dbcee5c)
+  Icarus Verilog version 14.0 (devel) (s20260301-403-g5ab23063f-dirty)
+Commit de partida: 1d4a82f (rama p1-barrel)
+
+1. hilos_distintos.s: cuatro hilos independientes
+PASS hilos_distintos, resultados en memoria y modelo de costo: 4 comprobaciones del testbench
+     PASS 11 de 11 palabras de memoria con el valor esperado
+PASS hilos_distintos, hilo 0 contra el Espino base desde la direccion 0: rf: 204 eventos iguales, bus: 2 eventos iguales
+PASS hilos_distintos, hilo 1 contra el Espino base desde la direccion 4: rf: 125 eventos iguales, bus: 2 eventos iguales
+PASS hilos_distintos, hilo 2 contra el Espino base desde la direccion 8: rf: 20 eventos iguales, bus: 17 eventos iguales
+PASS hilos_distintos, hilo 3 contra el Espino base desde la direccion 12: rf: 141 eventos iguales, bus: 5 eventos iguales
+
+2. cooperacion.s: tres hilos publican y el hilo 0 junta
+PASS cooperacion, LEDs 1111 y display 60: 5 comprobaciones del testbench
+
+3. mix_clase7_x4.s: el mismo lazo en los cuatro hilos, cada uno con sus datos
+PASS mix_clase7_x4, modelo de costo: 3 comprobaciones del testbench
+PASS mix_clase7_x4, hilo 0 contra el Espino base: rf: 1191 eventos iguales, bus: 509 eventos iguales
+PASS mix_clase7_x4, hilo 1 contra el Espino base: rf: 1191 eventos iguales, bus: 509 eventos iguales
+PASS mix_clase7_x4, hilo 2 contra el Espino base: rf: 1191 eventos iguales, bus: 509 eventos iguales
+PASS mix_clase7_x4, hilo 3 contra el Espino base: rf: 1191 eventos iguales, bus: 509 eventos iguales
+
+4. hazard_test.s y hazard_review.s (sin modificar) en cada hilo, los otros tres en un lazo vacio
+PASS hazard_test en el hilo 0, LEDs 1111: 4 comprobaciones del testbench
+PASS hazard_test en el hilo 0 contra el Espino base: rf: 348 eventos iguales, bus: 63 eventos iguales, io: 2 eventos iguales
+PASS hazard_test en el hilo 1, LEDs 1111: 4 comprobaciones del testbench
+PASS hazard_test en el hilo 1 contra el Espino base: rf: 348 eventos iguales, bus: 63 eventos iguales, io: 2 eventos iguales
+PASS hazard_test en el hilo 2, LEDs 1111: 4 comprobaciones del testbench
+PASS hazard_test en el hilo 2 contra el Espino base: rf: 348 eventos iguales, bus: 63 eventos iguales, io: 2 eventos iguales
+PASS hazard_test en el hilo 3, LEDs 1111: 4 comprobaciones del testbench
+PASS hazard_test en el hilo 3 contra el Espino base: rf: 348 eventos iguales, bus: 63 eventos iguales, io: 2 eventos iguales
+PASS hazard_review en el hilo 0, LEDs 1111: 4 comprobaciones del testbench
+PASS hazard_review en el hilo 0 contra el Espino base: rf: 271 eventos iguales, bus: 66 eventos iguales, io: 2 eventos iguales
+PASS hazard_review en el hilo 1, LEDs 1111: 4 comprobaciones del testbench
+PASS hazard_review en el hilo 1 contra el Espino base: rf: 271 eventos iguales, bus: 66 eventos iguales, io: 2 eventos iguales
+PASS hazard_review en el hilo 2, LEDs 1111: 4 comprobaciones del testbench
+PASS hazard_review en el hilo 2 contra el Espino base: rf: 271 eventos iguales, bus: 66 eventos iguales, io: 2 eventos iguales
+PASS hazard_review en el hilo 3, LEDs 1111: 4 comprobaciones del testbench
+PASS hazard_review en el hilo 3 contra el Espino base: rf: 271 eventos iguales, bus: 66 eventos iguales, io: 2 eventos iguales
+
+5. Controles negativos: tres errores puestos a proposito en el core deben hacer fallar las pruebas
+PASS MUTA_CONTEXTO detectada por: hilos_distintos hazard_test
+PASS MUTA_BOFF detectada por: hilos_distintos hazard_test
+PASS MUTA_ARRANQUE detectada por: hilos_distintos
+
+RESULTADO: todas las pruebas de humo pasan

@@ -1,0 +1,62 @@
+Recursos y frecuencia maxima: Espino base, pipeline de 3 etapas y barrel
+Generado por tools/barrel/medir_recursos.sh (make barrel-recursos). No editar a mano.
+
+Herramientas:
+  Yosys 0.68+195 (git sha1 435977e97-dirty, Release, Clang /usr/bin/clang++ 21.1.8)
+  "nextpnr-ice40" -- Next Generation Place and Route (Version nextpnr-0.11.1-19-g8dbcee5c)
+
+Flujo: tools/medir_variante.sh, nextpnr-ice40 --hx1k --package vq100 --freq 25, goboard.pcf, semillas 1 a 10.
+SoC completo: core, memoria, esclavo SPI, perifericos y contador de reset.
+
+1. Los tres cores, medidos en la misma corrida
+
+  Variante                                       Celdas     % Libres  LUT4 BRAM  Fmax min  mediana     max  Cierran a 25 MHz
+  Espino base (sin definiciones)                   1086   85%    194   917   12     42.75    44.48   47.64  10 de 10
+  Pipeline de 3 etapas (-DESPINO_SEGMENTADO)        993   78%    287   801   12     51.59    53.48   54.95  10 de 10
+  Barrel de 4 hilos (-DESPINO_BARREL)               933   73%    347   762   12     52.62    55.65   59.18  10 de 10
+
+  Barrel contra el base:       -153 celdas, +0 BRAM, mediana de fmax +11.17 MHz
+  Barrel contra el segmentado: -60 celdas, +0 BRAM, mediana de fmax +2.17 MHz
+  Libres con el barrel:        347 celdas de 1280 y 4 BRAM de 16
+  Margen de timing del barrel: periodo minimo 19.0 ns de 40 disponibles en la peor semilla
+
+  Frecuencia maxima por semilla (MHz):
+  semilla                                             1      2      3      4      5      6      7      8      9     10
+  Espino base (sin definiciones)                  47.64  44.08  45.96  44.08  42.75  44.10  46.81  45.13  43.85  44.85
+  Pipeline de 3 etapas (-DESPINO_SEGMENTADO)      53.91  51.59  54.07  54.67  53.54  53.20  53.42  53.09  54.95  53.01
+  Barrel de 4 hilos (-DESPINO_BARREL)             59.18  57.23  55.59  57.60  54.63  55.72  55.70  54.44  55.38  52.62
+
+2. Cuanto cambia cada recorte o agregado sobre el barrel
+
+  Variante del barrel                                  Celdas  Dif. Libres BRAM  Fmax min  mediana     max  Cierran
+  barrel (referencia)                                     933          347   12     52.62    55.65   59.18  10 de 10
+  contador de programa de 32 bits (en vez de 11)         1143  +210    137   12     55.41    59.67   61.10  10 de 10
+  contador de reset de 4 bits (en vez de 12)              921   -12    359   12     53.23    55.64   60.20  10 de 10
+  memoria sin emulacion de lectura durante escritura      796  -137    484   12     55.28    56.80   59.46  10 de 10
+
+  Una diferencia menor que unas 10 celdas esta dentro del ruido de la sintesis (decision T6).
+
+3. La memoria sin emulacion de lectura durante escritura, en los tres cores
+
+  Yosys agrega a pochoco_ram registros y multiplexores para que, si se lee y se escribe la misma
+  palabra en el mismo flanco, la lectura entregue el dato viejo, que es lo que dice el Verilog y
+  que la BRAM del iCE40 no garantiza. Con el atributo (* no_rw_check *) en el arreglo no los agrega.
+
+  Core                     Celdas  sin emulacion  Recupera  Libres  Fmax min  mediana     max  Cierran
+  Espino base                1086            916       170     364     45.48    46.75   48.84  10 de 10
+  Pipeline de 3 etapas        993            887       106     393     46.25    49.00   50.95  10 de 10
+  Barrel de 4 hilos           933            796       137     484     55.28    56.80   59.46  10 de 10
+
+  No esta aplicado en rtl/. Cambia lo que pasa en la placa en un solo caso: leer y escribir
+  la misma palabra de la memoria en el mismo flanco. Ver docs/espino_barrel.md.
+
+4. Otros recursos del barrel (semilla 1): 27 pines de 72, 2 buffers globales de 8
+
+5. Celdas que trabajan en el flanco de bajada (del conteo final de Yosys de cada variante)
+
+  Espino base (sin definiciones)                 BRAM con reloj invertido:  0   flip-flops de flanco de bajada:  0
+  Pipeline de 3 etapas (-DESPINO_SEGMENTADO)     BRAM con reloj invertido:  4   flip-flops de flanco de bajada:  0
+  Barrel de 4 hilos (-DESPINO_BARREL)            BRAM con reloj invertido:  0   flip-flops de flanco de bajada:  0
+
+  El barrel y el base usan un solo flanco. El pipeline de 3 etapas lee la memoria de instrucciones
+  en el flanco de bajada y tiene rutas de medio ciclo (docs/espino_segmentado.md, seccion 8).

@@ -1,0 +1,61 @@
+Latencia de max_media (sw/trade.s) por tick: Espino base, pipeline de 3 etapas y barrel
+Generado por tools/barrel/medir_ticks.sh (make barrel-ticks). No editar a mano.
+
+Herramientas:
+  Yosys 0.68+195 (git sha1 435977e97-dirty, Release, Clang /usr/bin/clang++ 21.1.8)
+  "nextpnr-ice40" -- Next Generation Place and Route (Version nextpnr-0.11.1-19-g8dbcee5c)
+  Icarus Verilog version 14.0 (devel) (s20260301-403-g5ab23063f-dirty)
+Commit de partida: 1d4a82f (rama p1-barrel)
+
+1. 200 ticks de la serie de practica, timing del testbench oficial, periodo de 0,1 ms
+
+  Core                                Respuesta: IC  ciclos prom.   peor  Tick completo: IC  ciclos prom.   peor
+  Espino base                                 19.51         41.02     44              28.51         63.02     66
+  Pipeline de 3 etapas                        19.22         22.03     26              28.22         34.03     38
+  Barrel, max_media en el hilo 0              19.02         75.06     83              28.02        115.06    123
+
+  Ticks medidos: 198 (los dos primeros precios llegan durante el reset, igual que en el testbench oficial).
+  En el barrel el IC es el del hilo 0. Cada instrucción suya ocupa 4 ciclos.
+
+2. Barrido de la fase del sondeo: 12 corridas de 40 ticks, el inicio se corre un ciclo cada vez
+
+  Core                               Respuesta, peor caso por fase                         maximo
+  Espino base                         44  43  44  49  48  47  46  45  44  43  44  49           49
+  Pipeline de 3 etapas                26  25  24  24  27  26  25  24  24  27  26  25           27
+  Barrel, max_media en el hilo 0      83  82  81  80  79  78  77  88  87  86  85  84           88
+
+3. Contra el presupuesto de cada ronda (peor caso con el barrido de la fase)
+
+  Core                                peor caso    ronda 1 (10 ms)     ronda 2 (1 ms)   ronda 3 (0,1 ms)
+  Espino base                                49            0.020 %            0.198 %            2.166 %
+  Pipeline de 3 etapas                       27            0.011 %            0.109 %            1.194 %
+  Barrel, max_media en el hilo 0             88            0.035 %            0.355 %            3.890 %
+
+  Respuesta promedio del barrel contra el base: 1.83 veces mas lenta. Contra el segmentado: 3.41 veces.
+  Ciclos libres por tick en la ronda 3 con el barrel: 2174 de 2262 en el hilo gestor,
+  o sea unas 543 instrucciones por hilo y por tick antes de pasarse del plazo.
+
+4. Salida de tb_barrel_ticks, 200 ticks
+
+  Programa:                 build/barrel/sw/trade_h0.hex
+  Ticks:                    200 con periodo de 100000 ns
+  Hilo gestor:              0
+  Instrucciones (IC):       495996 de los cuatro hilos, 123999 del hilo gestor
+  Ciclos:                   495996
+  CPI agregado:             1.0000
+  CPI del hilo gestor:      4.0000
+    loads:                  40144
+    stores:                 396
+    branches tomados:       39549
+    branches no tomados:    198
+    jal y jalr:             372196
+    otras:                  43513
+  Modelo barrel: ciclos = IC de los cuatro hilos = 4 x IC del gestor: 495996 y 495996 (diferencia con lo medido: 0 y 0)
+  Por tick, 198 ticks medidos, T = 100000 ns, presupuesto 2262 ciclos:
+    (IC del hilo gestor; el CPI es ciclos / IC del gestor)
+    respuesta, promedio          IC   19.02   ciclos   75.06   CPI 3.947   tiempo   3.002 us   ( 3.002 % de T)
+    respuesta, peor caso         IC   21.00   ciclos   83.00   CPI 3.952   tiempo   3.320 us   ( 3.320 % de T)
+    tick completo, promedio      IC   28.02   ciclos  115.06   CPI 4.107   tiempo   4.602 us   ( 4.602 % de T)
+    tick completo, peor caso     IC   30.00   ciclos  123.00   CPI 4.100   tiempo   4.920 us   ( 4.920 % de T)
+    IC de los cuatro hilos por tick: respuesta 75.06, tick completo 114.06
+  PASS el modelo de costo coincide con lo medido

@@ -1,0 +1,25 @@
+Cada hilo del barrel contra el Espino base por trazas en modo funcional (Icarus, programas aleatorios)
+Generado por tools/barrel/verif_trazas.sh (make barrel-trazas). No editar a mano.
+
+Herramientas:
+  Yosys 0.68+195 (git sha1 435977e97-dirty, Release, Clang /usr/bin/clang++ 21.1.8)
+  "nextpnr-ice40" -- Next Generation Place and Route (Version nextpnr-0.11.1-19-g8dbcee5c)
+  Icarus Verilog version 14.0 (devel) (s20260301-403-g5ab23063f-dirty)
+Commit de partida: 1d4a82f (rama p1-barrel)
+
+Ciclos por corrida: 24000 en el barrel (6000 instrucciones por hilo) y 18100 en el Espino base.
+Trazas del base: tb/core_trace_tb.v. Comparacion: tb/comparar_trazas.py --modo funcional. Los dos sin modificar.
+
+Corridas del barrel: 60 (12 semillas: 4 con un hilo activo y 1 con los cuatro, por semilla).
+Eventos iguales entre cada hilo del barrel y el Espino base, sumados sobre las corridas:
+   hilo   escrituras al banco   accesos al bus
+   0                 103945            42938
+   1                 105248            43163
+   2                 103230            41045
+   3                 105159            42517
+   total             417582           169663
+Cambios de LEDs y display iguales (corridas de un hilo): 1760.
+Valores desconocidos (X) que llegaron al banco o al bus en el barrel: 0.
+Ademas, en cada corrida tb_barrel.sv comprueba el modelo de costo: una instruccion por ciclo en total y una cada 4 ciclos por hilo.
+
+RESULTADO: PASS, las trazas de cada hilo son equivalentes a las del Espino base

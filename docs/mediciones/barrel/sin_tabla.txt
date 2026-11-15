@@ -1,0 +1,32 @@
+El barrel con un programa sin la tabla de arranque
+Generado por tools/barrel/sin_tabla.sh (make barrel-sin-tabla). No editar a mano.
+
+Herramientas:
+  Yosys 0.68+195 (git sha1 435977e97-dirty, Release, Clang /usr/bin/clang++ 21.1.8)
+  "nextpnr-ice40" -- Next Generation Place and Route (Version nextpnr-0.11.1-19-g8dbcee5c)
+  Icarus Verilog version 14.0 (devel) (s20260301-403-g5ab23063f-dirty)
+Commit de partida: 1d4a82f (rama p1-barrel)
+
+Copia parametrizada de tb/tb_proyecto_4.sv, 2000 ticks, periodo 100000 ns. Referencia: ref/trader.py.
+
+--- sw/trade.s con la tabla (tools/barrel/tabla.py), hilo 0 ---
+  Patrimonio final:          9661
+  Peor caso precio->decision: 83 ciclos (disponibles: 2262)
+  PASS MISO sin valores X
+  PASS el programa escribe DECISION
+  PASS el programa lee todos los precios
+  PASS la decision llega antes del siguiente tick
+  Testbenchs aprobados: 4/4
+  Filas de decisiones.csv distintas a la referencia: 0 de 2000
+
+--- sw/trade.hex tal como esta, sin tabla ---
+  Patrimonio final:          10000
+  Peor caso precio->decision: 0 ciclos (disponibles: 2262)
+  PASS MISO sin valores X
+  FAIL el programa escribe DECISION
+  FAIL el programa lee todos los precios
+  PASS la decision llega antes del siguiente tick
+  Testbenchs aprobados: 2/4
+  Filas de decisiones.csv distintas a la referencia: 1997 de 2000
+
+RESULTADO: como se esperaba, con la tabla funciona y sin la tabla NO. El programa del Espino base no se puede cargar tal cual en el barrel.

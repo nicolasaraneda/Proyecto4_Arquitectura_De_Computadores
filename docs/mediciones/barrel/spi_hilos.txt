@@ -1,0 +1,27 @@
+max_media (sw/trade.s) en cada hilo del barrel, con la maestra SPI del testbench oficial
+Generado por tools/barrel/verif_spi.sh (make barrel-spi). No editar a mano.
+
+Herramientas:
+  Yosys 0.68+195 (git sha1 435977e97-dirty, Release, Clang /usr/bin/clang++ 21.1.8)
+  "nextpnr-ice40" -- Next Generation Place and Route (Version nextpnr-0.11.1-19-g8dbcee5c)
+  Icarus Verilog version 14.0 (devel) (s20260301-403-g5ab23063f-dirty)
+Commit de partida: 1d4a82f (rama p1-barrel)
+  Verilator 5.053 devel rev v5.052-22-g7cf8c5cca (mod)
+
+Testbench: copia parametrizada de tb/tb_proyecto_4.sv, periodo 100000 ns (ronda 3), serie tb/practica.csv.
+Referencia: ref/trader.py con los mismos ticks. Se exige 4/4 y decisiones.csv identico byte a byte.
+
+PASS trade.s en el hilo 0, los otros tres en un lazo vacio: 4/4, 20000 filas identicas a ref/trader.py, patrimonio 26070, peor caso 83 ciclos (disponibles: 2262)
+PASS trade.s en el hilo 1, los otros tres en un lazo vacio: 4/4, 20000 filas identicas a ref/trader.py, patrimonio 26070, peor caso 84 ciclos (disponibles: 2262)
+PASS trade.s en el hilo 2, los otros tres en un lazo vacio: 4/4, 20000 filas identicas a ref/trader.py, patrimonio 26070, peor caso 85 ciclos (disponibles: 2262)
+PASS trade.s en el hilo 3, los otros tres en un lazo vacio: 4/4, 20000 filas identicas a ref/trader.py, patrimonio 26070, peor caso 86 ciclos (disponibles: 2262)
+PASS trade.s en el hilo 0, los otros tres con programas aleatorios (semilla 1): 4/4, 5000 filas identicas a ref/trader.py, patrimonio 10258, peor caso 83 ciclos (disponibles: 2262)
+PASS trade.s en el hilo 0, los otros tres con programas aleatorios (semilla 2): 4/4, 5000 filas identicas a ref/trader.py, patrimonio 10258, peor caso 83 ciclos (disponibles: 2262)
+PASS trade.s en el hilo 1, los otros tres con programas aleatorios (semilla 1): 4/4, 5000 filas identicas a ref/trader.py, patrimonio 10258, peor caso 84 ciclos (disponibles: 2262)
+PASS trade.s en el hilo 1, los otros tres con programas aleatorios (semilla 2): 4/4, 5000 filas identicas a ref/trader.py, patrimonio 10258, peor caso 84 ciclos (disponibles: 2262)
+PASS trade.s en el hilo 2, los otros tres con programas aleatorios (semilla 1): 4/4, 5000 filas identicas a ref/trader.py, patrimonio 10258, peor caso 85 ciclos (disponibles: 2262)
+PASS trade.s en el hilo 2, los otros tres con programas aleatorios (semilla 2): 4/4, 5000 filas identicas a ref/trader.py, patrimonio 10258, peor caso 85 ciclos (disponibles: 2262)
+PASS trade.s en el hilo 3, los otros tres con programas aleatorios (semilla 1): 4/4, 5000 filas identicas a ref/trader.py, patrimonio 10258, peor caso 86 ciclos (disponibles: 2262)
+PASS trade.s en el hilo 3, los otros tres con programas aleatorios (semilla 2): 4/4, 5000 filas identicas a ref/trader.py, patrimonio 10258, peor caso 86 ciclos (disponibles: 2262)
+
+RESULTADO: PASS, cada hilo decide igual que la referencia, solo o con los otros tres ocupados

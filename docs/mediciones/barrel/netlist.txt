@@ -1,0 +1,13 @@
+Simulacion de la netlist sintetizada del SoC barrel (Yosys synth_ice40, modelos de cells_sim.v)
+Generado por tools/barrel/netlist.sh (make barrel-netlist). No editar a mano.
+
+Herramientas:
+  Yosys 0.68+195 (git sha1 435977e97-dirty, Release, Clang /usr/bin/clang++ 21.1.8)
+  "nextpnr-ice40" -- Next Generation Place and Route (Version nextpnr-0.11.1-19-g8dbcee5c)
+  Icarus Verilog version 14.0 (devel) (s20260301-403-g5ab23063f-dirty)
+Commit de partida: f717cb8 (rama p1-barrel)
+
+PASS cooperacion_ramdirecta: LEDs = 1111, display = 1111101 0111111
+PASS hazard_test_h2_ramdirecta: LEDs = 1111, display = 1001111 1111111
+PASS hazard_test_hilo2: LEDs = 1111, display = 1001111 1111111
+PASS cooperacion: LEDs = 1111, display = 1111101 0111111

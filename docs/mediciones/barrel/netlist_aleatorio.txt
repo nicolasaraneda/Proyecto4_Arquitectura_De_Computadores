@@ -1,0 +1,21 @@
+Netlist sintetizada del SoC barrel contra su RTL: traza de los pines con programas aleatorios de cuatro hilos
+Generado por tools/barrel/netlist_aleatorio.sh (make barrel-netlist-aleatorio). No editar a mano.
+
+Herramientas:
+  Yosys 0.68+195 (git sha1 435977e97-dirty, Release, Clang /usr/bin/clang++ 21.1.8)
+  "nextpnr-ice40" -- Next Generation Place and Route (Version nextpnr-0.11.1-19-g8dbcee5c)
+  Icarus Verilog version 14.0 (devel) (s20260301-403-g5ab23063f-dirty)
+Commit de partida: 1a91d97 (rama p1-barrel)
+
+Ciclos por corrida: 34000 (los primeros 4095 son el reset de encendido). Simulador: Icarus.
+
+PASS separado, semilla 1: trazas identicas, 94 bytes recibidos por SPI (34 valores distintos) y 1236 cambios de LEDs o display, sin X en los pines
+PASS compartido, semilla 1: trazas identicas, 94 bytes recibidos por SPI (76 valores distintos) y 1335 cambios de LEDs o display, sin X en los pines
+PASS separado, semilla 2: trazas identicas, 94 bytes recibidos por SPI (35 valores distintos) y 619 cambios de LEDs o display, sin X en los pines
+PASS compartido, semilla 2: trazas identicas, 94 bytes recibidos por SPI (35 valores distintos) y 619 cambios de LEDs o display, sin X en los pines
+PASS separado, semilla 3: trazas identicas, 94 bytes recibidos por SPI (1 valores distintos) y 994 cambios de LEDs o display, sin X en los pines
+PASS compartido, semilla 3: trazas identicas, 94 bytes recibidos por SPI (1 valores distintos) y 904 cambios de LEDs o display, sin X en los pines
+PASS separado, semilla 4: trazas identicas, 94 bytes recibidos por SPI (17 valores distintos) y 434 cambios de LEDs o display, sin X en los pines
+PASS compartido, semilla 4: trazas identicas, 94 bytes recibidos por SPI (17 valores distintos) y 434 cambios de LEDs o display, sin X en los pines
+
+RESULTADO: PASS, 7327 eventos de pines identicos entre el RTL y la netlist
