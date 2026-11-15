@@ -18,11 +18,11 @@ Archivos relacionados:
 
 En cada tick la maestra manda un precio `p` entre 1 y 255. El programa mantiene una media exponencial del precio y compara el precio con esa media:
 
-- si el precio está más de 4 unidades bajo la media, quiere estar adentro (con acciones);
+- si el precio está más de 3 unidades bajo la media, quiere estar adentro (con acciones);
 - si el precio volvió a quedar sobre la media, quiere estar afuera (con caja);
 - si no pasa ninguna de las dos cosas, se queda como estaba.
 
-Esa es la regla base de reversión a la media. La idea es que la serie de práctica tiende a volver a su nivel reciente: razón de varianza 0,77 a 10 ticks y 0,53 a 100 ticks, en los 20 bloques de 1000 ticks (`make hallazgos`). Comprar cuando el precio cayó respecto a su media y vender cuando la recupera gana justo cuando eso se cumple.
+Es `max_media`, la regla base de reversión a la media con el umbral de entrada en 3 unidades en vez de 4 (decisión T51). Hasta el 15/11 el programa usaba 4 unidades; el único cambio en el código es la constante `UMBRAL_COMPRA`, de -128 a -96, así que todo lo que sigue sobre estructura, ciclos y mediciones por tick vale igual para las dos. La idea es que la serie de práctica tiende a volver a su nivel reciente: razón de varianza 0,77 a 10 ticks y 0,53 a 100 ticks, en los 20 bloques de 1000 ticks (`make hallazgos`). Comprar cuando el precio cayó respecto a su media y vender cuando la recupera gana justo cuando eso se cumple.
 
 ### Cómo decide la cantidad
 
@@ -33,7 +33,7 @@ No decide una cantidad variable. La orden es siempre por 63 acciones, el máximo
 
 La maestra recorta la compra a lo que alcanza con la caja y la venta a las acciones que se tienen, y una orden que queda en cero no se ejecuta ni paga comisión (tarea `ejecutar` de `tb/tb_proyecto_4.sv`). Por eso repetir "comprar 63" tick tras tick no cuesta nada una vez que la caja se acabó. El programa expresa una posición objetivo (todo adentro o todo afuera) y la maestra hace el resto. Esto tiene dos ventajas: el programa no necesita llevar la contabilidad, y no hay forma de que su contabilidad se desincronice de la oficial.
 
-El límite de 63 acciones por orden hace que entrar o salir tome varios ticks. En la serie de práctica el precio va de 72 a 190 (media 128): con la caja inicial de 10 000 se compran unas 80 acciones, o sea dos órdenes en dos ticks seguidos y dos comisiones. Cuando el patrimonio crece hacen falta más: al final de la serie de práctica se llegan a tener 339 acciones, que son seis órdenes para entrar y seis para salir. En total la regla base entra 75 veces y ejecuta 388 órdenes. Este costo de entrada es un dato para el frente del algoritmo.
+El límite de 63 acciones por orden hace que entrar o salir tome varios ticks. En la serie de práctica el precio va de 72 a 190 (media 128): con la caja inicial de 10 000 se compran unas 80 acciones, o sea dos órdenes en dos ticks seguidos y dos comisiones. Cuando el patrimonio crece hacen falta más: al final de la serie de práctica se llegan a tener 339 acciones, que son seis órdenes para entrar y seis para salir. En total `max_media` entra 123 veces y ejecuta 624 órdenes (la regla base entraba 75 veces, con 388 órdenes). Este costo de entrada es un dato para el frente del algoritmo.
 
 ## 2. Punto fijo
 
@@ -56,7 +56,7 @@ El desplazamiento es aritmético: redondea hacia abajo también cuando `32 p - S
 
 | Condición | En unidades de precio | En la escala del programa |
 |-----------|-----------------------|---------------------------|
-| Entrar | p < media - 4 | `dev < -128` |
+| Entrar | p < media - 3 | `dev < -96` (la regla base usaba `dev < -128`) |
 | Salir | p > media | `dev > 0`, o sea `dev >= 1` |
 
 ## 3. Operaciones que Espino no tiene
@@ -86,7 +86,7 @@ El costo de esta parte es 6 instrucciones y 13 ciclos por tick. Es el candidato 
 **Decidir sin saltos.** Las dos comparaciones se hacen con `slti`, que deja 0 o 1 en un registro, y la posición se actualiza con `or` y `and`:
 
 ```
-entrar   = (dev < -128)           slti x7, x6, -128
+entrar   = (dev < -96)            slti x7, x6, -96
 no_salir = (dev < 1)              slti x9, x6, 1
 pos      = (pos | entrar) & no_salir
 ```

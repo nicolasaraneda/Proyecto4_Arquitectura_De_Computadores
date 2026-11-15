@@ -97,7 +97,7 @@ class NoOperar:
         return market.MANTENER
 
 
-FABRICAS = {"base": trader.ReglaBase, "sma64": SumaMovil, "comprar63": Comprar63, "nada": NoOperar,
+FABRICAS = {"base": trader.ReglaBase, "oficial": trader.Oficial, "sma64": SumaMovil, "comprar63": Comprar63, "nada": NoOperar,
             "trader": candidatos.Trader}
 
 
@@ -268,9 +268,9 @@ def meseta(cjs, pool):
                 b = resumen(evaluar(nombre, bloques, pool), bloques)
                 r = resumen(evaluar(nombre, remu, pool), remu)
                 tabla[(k, entra, sale)] = (b, r)
-                marca = "  <- regla base" if (k, entra, sale) == (trader.K, trader.ENTRA, trader.SALE) else ""
+                marca = "  <- regla base" if (k, entra, sale) == (trader.K, trader.ENTRA_BASE, trader.SALE) else ""
                 print(f"{k:2d} {entra:5d} {sale:4d} | {b['media']:13.0f} {b['peor']:6d} | {r['media']:16.0f} {r['p5']:6d}{marca}")
-    centro = (trader.K, trader.ENTRA, trader.SALE)
+    centro = (trader.K, trader.ENTRA_BASE, trader.SALE)
     vecinos = [c for c in tabla if sum(abs(a - b) for a, b in zip(c, centro)) == 1]
     cb, cr = tabla[centro]
     print(f"\nCentro {centro}: bloques {cb['media']:.0f}, remuestreo {cr['media']:.0f}")
@@ -285,7 +285,7 @@ def verificar_binario(cjs):
     """sw/trade.hex en el gemelo contra ref/trader.py, en todas las series del protocolo."""
     import gemelo
     todas = [s for _, lista in cjs for s in lista]
-    ref = [evaluar_serie(("base", s)) for s in todas]
+    ref = [evaluar_serie(("oficial", s)) for s in todas]
     fallas = 0
     for periodo, nombre in ((100000, "0,1 ms"), (1000000, "1 ms"), (10000000, "10 ms")):
         res = gemelo.correr_lote(todas, periodo_ns=periodo)

@@ -3,12 +3,13 @@
 # Grupo: Nicolás Araneda, Vicente Calderón y Santiago Muñoz.
 # Arquitectura de Computadores, Universidad de los Andes, 2026-2.
 #
-# Variante: solo software. Referencia bit a bit: ref/trader.py (ReglaBase).
+# Variante: solo software. Referencia bit a bit: ref/trader.py (MaxMedia).
 #
-# Algoritmo (regla base, reversion a la media):
+# Algoritmo: max_media (decision T50), la regla base de reversion a la media
+# con el umbral de entrada en 3 unidades en vez de 4:
 #   S   = 32 * media exponencial del precio, con alfa = 1/32
 #   dev = 32 p - S                desviacion del precio respecto a la media
-#   si dev < -128  -> entrar      (precio mas de 4 unidades bajo la media)
+#   si dev < -96   -> entrar      (precio mas de 3 unidades bajo la media)
 #   si dev > 0     -> salir       (precio recupero la media)
 #   si no          -> mantener la posicion anterior
 #   DECISION = "comprar 63" si se quiere estar adentro, "vender 63" si no.
@@ -60,7 +61,7 @@
 .equ OFF_PRICE,     4          # precio recibido (1 a 255)
 .equ OFF_DECISION,  8          # byte que la maestra lee en la proxima transaccion
 
-.equ UMBRAL_COMPRA, -128       # entra si dev < -(4 * 32)
+.equ UMBRAL_COMPRA, -96        # entra si dev < -(3 * 32). La regla base usaba -128
 .equ UMBRAL_VENTA,  1          # sale si dev >= 1, o sea dev > 0 * 32
 .equ VENDER_63,     0xBF       # accion 10, cantidad 63
 .equ COMPRAR_MENOS_VENDER, -64 # 0x7F - 0xBF: lo que se suma para pasar a "comprar 63"

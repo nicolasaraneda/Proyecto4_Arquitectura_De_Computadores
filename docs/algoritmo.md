@@ -451,6 +451,10 @@ La alternativa razonable es **`guardia`**. Cuesta 1 % de media frente a `max_med
 
 `guardia_tope` no se recomienda con este perfil. El piso que pone solo importa en escenarios en que comprar y mantener también se hunde, y cuesta mucho si la serie oculta es más volátil.
 
+### 7.6 Lo que se eligió
+
+Desde el 15/11 `sw/trade.s` y `ref/trader.py` corren `max_media` (decisiones T50 y T51). La regla base se conserva en `ref/trader.py` como `ReglaBase`, porque es la referencia contra la que el protocolo compara a los candidatos. Al cambiar, `max_media` sigue sin cumplir formalmente el criterio de aceptación del protocolo (falla por 26 puntos en la media de los 10 bloques, dentro del ruido, y por las familias de estrés) y en la serie completa de práctica queda en 25 973 contra 27 062. Lo que la respalda son los remuestreos, las familias plausibles y los puntos esperados del torneo medidos en `factibilidad/retorno/` (+0,04 sobre la regla base a 2 000 ticks). La tabla del punto 3.1 sale de `make tabla-3-1`.
+
 ## 8. Lo que no se sabe
 
 - **Si las series ocultas salen del mismo generador.** Toda la tabla supone que sí, o algo parecido. Sigue siendo la pregunta más importante para el ayudante.

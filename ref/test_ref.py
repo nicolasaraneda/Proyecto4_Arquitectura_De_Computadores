@@ -107,10 +107,11 @@ class ReglaBaseTests(unittest.TestCase):
 
     def test_decision_exhaustiva(self):
         """Para todo dev posible y las dos posiciones, el byte es el de la fórmula directa."""
-        for dev in range(-8128, 8129):
+        for umbral in (-128, -96):      # regla base y max_media
+          for dev in range(-8128, 8129):
             for pos in (0, 1):
-                esperado = 1 if dev < -128 else (0 if dev > 0 else pos)
-                compra = 1 if dev < -128 else 0
+                esperado = 1 if dev < umbral else (0 if dev > 0 else pos)
+                compra = 1 if dev < umbral else 0
                 no_vende = 1 if dev < 1 else 0
                 nuevo = (pos | compra) & no_vende
                 self.assertEqual(nuevo, esperado)
@@ -132,8 +133,18 @@ class ReglaBaseTests(unittest.TestCase):
                                      f"k={k} entra={entra} sale={sale}")
 
     def test_serie_de_practica(self):
-        m = trader.correr(market.leer_serie(SERIE))
+        p = market.leer_serie(SERIE)
+        m = trader.correr(p, trader.ReglaBase())
         self.assertEqual((m.w, m.ordenes, m.comisiones, m.max_dd), (27062, 388, 1940, 2929))
+        m = trader.correr(p)      # la oficial: max_media
+        self.assertEqual((m.w, m.ordenes, m.comisiones, m.max_dd), (25973, 624, 3120, 6295))
+
+    def test_oficial_es_max_media(self):
+        """La oficial es la regla base con entrada a 3 unidades, igual al candidato max_media."""
+        r = trader.Oficial()
+        self.assertEqual((r.k, r.umbral_compra, r.umbral_venta), (5, -96, 1))
+        b = trader.ReglaBase()
+        self.assertEqual((b.k, b.umbral_compra, b.umbral_venta), (5, -128, 1))
 
 
 class ResetTests(unittest.TestCase):

@@ -4,12 +4,18 @@
 Grupo: Nicolás Araneda, Vicente Calderón y Santiago Muñoz.
 Arquitectura de Computadores, Universidad de los Andes, 2026-2.
 
-Regla base (reversión a la media):
+Estrategia oficial: `max_media` (decisión T50). Es la regla base con el
+umbral de entrada en 3 unidades en vez de 4 (E = 96 en la notación de
+ref/candidatos.py). La regla base se conserva como `ReglaBase` porque es la
+referencia contra la que el protocolo compara a los candidatos.
+
+Regla de reversión a la media (la misma aritmética para las dos):
 
   - Se lleva una media exponencial del precio con alfa = 1/32, guardada
     multiplicada por 32 (S = 32 * media, punto fijo con 5 bits de fracción).
   - Con cada precio p se calcula la desviación dev = 32 p - S.
-  - Si dev < -128 (el precio está más de 4 unidades bajo la media) se entra.
+  - Si dev < -32 * ENTRA se entra: -96 en `max_media` (3 unidades bajo la
+    media) y -128 en la regla base (4 unidades).
   - Si dev > 0 (el precio recuperó la media) se sale.
   - Si no pasa ninguna de las dos cosas se mantiene la posición anterior.
   - La orden es siempre por 63 acciones: "comprar 63" si se quiere estar
@@ -42,7 +48,8 @@ import sys
 import market
 
 K = 5                    # alfa = 1 / 2^K
-ENTRA = 4                # entra si el precio está más de ENTRA unidades bajo la media
+ENTRA_BASE = 4           # regla base: entra si el precio está más de 4 unidades bajo la media
+ENTRA = 3                # max_media, la que corre en sw/trade.s: 3 unidades
 SALE = 0                 # sale si el precio está más de SALE unidades sobre la media
 
 
@@ -53,7 +60,7 @@ class ReglaBase:
     El primer precio inicializa la media: S = 2^k * p.
     """
 
-    def __init__(self, k=K, entra=ENTRA, sale=SALE):
+    def __init__(self, k=K, entra=ENTRA_BASE, sale=SALE):
         if not 1 <= k <= 8:
             raise ValueError("k debe estar entre 1 y 8 para que el desplazamiento salga de un byte")
         if entra + sale < 0:
@@ -78,6 +85,17 @@ class ReglaBase:
         # media: S + ((2^k p - S) >> k), sin desplazar números negativos
         self.S = self.S + p - (((self.S + (1 << k) - 1) << (8 - k)) >> 8)
         return decision
+
+
+class MaxMedia(ReglaBase):
+    """`max_media`: la regla base con entrada a 3 unidades. Es la de sw/trade.s."""
+
+    def __init__(self, k=K, entra=ENTRA, sale=SALE):
+        super().__init__(k, entra, sale)
+
+
+# La estrategia que corre en sw/trade.s y contra la que se compara el RTL
+Oficial = MaxMedia
 
 
 def ticks_perdidos(periodo_ns, por_bits=12, inicio_ns=4000):
@@ -119,19 +137,21 @@ def decisiones(precios, estrategia, perdidos=0):
 def correr(precios, estrategia=None, perdidos=0, caja0=market.CAJA0, comision=market.COMISION, filas=None):
     """Corre la estrategia sobre la serie. Devuelve el Mercado final."""
     if estrategia is None:
-        estrategia = ReglaBase()
+        estrategia = Oficial()
     return market.simular(precios, decisiones(precios, estrategia, perdidos), caja0, comision, filas)
 
 
 def tabla_3_1(precios, perdidos=0):
     """Tabla del punto 3.1: el algoritmo contra no operar y comprar y mantener."""
+    base = correr(precios, ReglaBase(), perdidos=perdidos)
     m = correr(precios, perdidos=perdidos)
     byh = market.simular(precios, [market.MANTENER] + [market.COMPRAR_63] * (len(precios) - 1))
     filas = [
         ("no operar", market.CAJA0, 0, 0, 0),
         ("comprar y mantener (testbench)", market.comprar_y_mantener(precios), 1, market.COMISION, None),
         ("comprar 63 siempre (trade.s del tramo 1)", byh.w, byh.ordenes, byh.comisiones, byh.max_dd),
-        ("regla base (trade.s)", m.w, m.ordenes, m.comisiones, m.max_dd),
+        ("regla base (trade.s hasta el 15/11)", base.w, base.ordenes, base.comisiones, base.max_dd),
+        ("max_media (trade.s)", m.w, m.ordenes, m.comisiones, m.max_dd),
     ]
     print(f"{'estrategia':42s} {'patrimonio':>10s} {'ordenes':>8s} {'comisiones':>10s} {'perdida max':>11s}")
     for nombre, w, ordenes, comisiones, dd in filas:
