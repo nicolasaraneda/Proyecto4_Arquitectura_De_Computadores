@@ -19,7 +19,13 @@
 //   2  Pipeline de 3 etapas, con el programa en una ROM combinacional
 //      (módulo pochoco_rom, generado con tools/pochoasm.py --rom). Se elige
 //      con -DESPINO_ROM y hay que agregar el archivo de la ROM a las fuentes.
-`ifdef ESPINO_ROM
+//   3  Espino barrel: 4 hilos que rotan por un pipeline uniforme de 4 etapas
+//      (docs/espino_barrel.md). Se elige con -DESPINO_BARREL. El core es otro
+//      módulo, espino_barrel_core, con las mismas interfaces. El programa tiene
+//      que empezar con la tabla de arranque: el hilo t parte en la dirección 4 t.
+`ifdef ESPINO_BARREL
+  `define ESPINO_PIPELINE_DEF 3
+`elsif ESPINO_ROM
   `define ESPINO_PIPELINE_DEF 2
 `elsif ESPINO_SEGMENTADO
   `define ESPINO_PIPELINE_DEF 1
@@ -33,7 +39,8 @@ module pochoco_soc #(
   parameter PorBits    = 12,               // el reset dura 2^PorBits - 1 ciclos
   parameter Pipeline   = `ESPINO_PIPELINE_DEF,
   // Bits del contador de programa. El core base conserva los 32 originales.
-  // El segmentado usa el ancho real de la memoria (11 bits con 512 palabras).
+  // El segmentado y el barrel usan el ancho real de la memoria (11 bits con
+  // 512 palabras).
   parameter PcW        = (Pipeline != 0) ? $clog2(NumWords) + 2 : 32
 ) (
   input  wire       i_Clk,
@@ -76,6 +83,26 @@ module pochoco_soc #(
   wire [3:0]  data_be;
   wire [31:0] data_addr, data_wdata, data_rdata;
 
+`ifdef ESPINO_BARREL
+  // hilo_x: hilo de la instrucción que usa el bus de datos en este ciclo. El
+  // SoC no lo usa: los periféricos y el esclavo SPI no saben de hilos.
+  wire [1:0] hilo_x;
+  espino_barrel_core #(.BootAddr(32'h0000_0000), .PcW(PcW)) u_core (
+    .clk_i         (clk),
+    .rst_ni        (rst_ni),
+    .hilo_x_o      (hilo_x),
+    .instr_req_o   (instr_req),
+    .instr_addr_o  (instr_addr),
+    .instr_rdata_i (instr_rdata),
+    .data_req_o    (data_req),
+    .data_we_o     (data_we),
+    .data_be_o     (data_be),
+    .data_addr_o   (data_addr),
+    .data_wdata_o  (data_wdata),
+    .data_rdata_i  (data_rdata)
+  );
+  wire _unused_barrel = &{1'b0, hilo_x, instr_next};
+`else
   espino_core #(.BootAddr(32'h0000_0000), .Pipeline(Pipeline), .PcW(PcW)) u_core (
     .clk_i         (clk),
     .rst_ni        (rst_ni),
@@ -90,6 +117,7 @@ module pochoco_soc #(
     .data_wdata_o  (data_wdata),
     .data_rdata_i  (data_rdata)
   );
+`endif
 
   wire is_mmio, spi_sel, per_sel;
   assign is_mmio = data_addr[31];
@@ -116,7 +144,8 @@ module pochoco_soc #(
   assign data_rdata = rd_is_per ? per_rdata :
                       rd_is_spi ? spi_rdata : ram_b_rdata;
 
-  pochoco_ram #(.NumWords(NumWords), .MemFile(MemFile), .FetchMode(Pipeline)) u_ram (
+  // El barrel busca como el core base: BRAM leída en el flanco de subida
+  pochoco_ram #(.NumWords(NumWords), .MemFile(MemFile), .FetchMode((Pipeline == 3) ? 0 : Pipeline)) u_ram (
     .clk_i     (clk),
     .a_req_i   (instr_req),
     .a_addr_i  (instr_addr),

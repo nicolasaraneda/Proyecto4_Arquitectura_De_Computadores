@@ -412,5 +412,99 @@ formal-base:
 check-seg: formal-base cpi-seg riesgos paralelo equiv-gemelo-seg timing-seg
 	DEFS="$(SEG_DEFS)" SIM=verilator tools/equiv.sh seg_v_r3 100000 20000
 
+# === Espino barrel: 4 hilos por un pipeline de 4 etapas (docs/espino_barrel.md) ===
+# El core por defecto sigue siendo el Espino base. Estos objetivos compilan la
+# variante barrel (-DESPINO_BARREL). Sus programas empiezan con la tabla de
+# arranque (el hilo t parte en la dirección 4 t); tools/barrel/tabla.py la
+# antepone a un programa de un hilo, como sw/trade.s. Los scripts están en
+# tools/barrel/, los testbenches en tb/barrel/, los programas de prueba en
+# sw/barrel/ y las salidas quedan en docs/mediciones/barrel/.
+#
+# Puerta de simulación con un programa de un hilo (docs/puertas.md):
+#   barrel-oficial       criterio 1: testbench oficial sin modificar, 4/4
+#   barrel-timing        criterio 3: 25 MHz en 10 de 10 semillas
+#   barrel-verif         criterio 5: cada hilo contra el Espino base, instrucción
+#                        por instrucción. Campaña lineal (más de 5 millones de
+#                        instrucciones, más de 90 % distintas) y campaña de
+#                        lazos. Unos 6 minutos con 12 procesos.
+#   barrel-mutaciones    criterio 5: 21 errores puestos a propósito, todos detectados
+# Aislamiento entre hilos y memoria compartida:
+#   barrel-formal        propiedades de estructura con SymbiYosys (10 segundos)
+#   barrel-aislamiento   cuatro hilos a la vez, cada uno idéntico a su corrida
+#                        solo en el Espino base, y las propiedades formales
+#   barrel-compartida    cuatro hilos sobre la misma zona de memoria contra el
+#                        modelo de turnos, con su control negativo
+# Mediciones y pruebas complementarias:
+#   barrel-humo, barrel-cpi, barrel-ticks, barrel-equiv, barrel-equiv-icarus,
+#   barrel-spi, barrel-trazas, barrel-netlist, barrel-netlist-aleatorio,
+#   barrel-sin-tabla, barrel-recursos, barrel-bitstream, barrel-icebram
+# check-barrel es lo que corre la integración continua en cada push.
+# barrel-completo es la ejecución manual con todo lo demás.
+.PHONY: barrel-oficial barrel-timing barrel-verif barrel-verif-corta barrel-mutaciones barrel-formal \
+        barrel-aislamiento barrel-compartida barrel-humo barrel-cpi barrel-ticks barrel-equiv \
+        barrel-equiv-icarus barrel-equiv-ronda1 barrel-spi barrel-trazas barrel-netlist \
+        barrel-netlist-aleatorio barrel-sin-tabla barrel-recursos barrel-bitstream barrel-icebram \
+        check-barrel barrel-completo
+
+BARREL_JOBS ?= 12
+HEX_BARREL  := $(BUILD)/barrel/sw/trade_h0.hex
+
+# sw/trade.s en el hilo 0, con la tabla de arranque delante
+$(HEX_BARREL): sw/trade.s tools/barrel/tabla.py $(ASMDEP)
+	mkdir -p $(dir $@)
+	$(PYTHON) tools/barrel/tabla.py 0 sw/trade.s > $(basename $@).s
+	$(PYTHON) $(ASM) $(basename $@).s -o $@ > /dev/null
+
+barrel-oficial:
+	tools/barrel/oficial.sh
+barrel-timing: $(HEX_BARREL)
+	DEFS=-DESPINO_BARREL HEX=$(HEX_BARREL) EXIGIR=1 tools/medir_variante.sh barrel 10 > docs/mediciones/barrel/timing.txt; \
+	  r=$$?; cat docs/mediciones/barrel/timing.txt; exit $$r
+barrel-verif:
+	PUERTA=1 JOBS=$(BARREL_JOBS) tools/barrel/verif.sh
+barrel-verif-corta:
+	ESCALA=0.03 JOBS=4 SALIDA=$(BUILD)/barrel/verif_corta.txt tools/barrel/verif.sh
+barrel-mutaciones:
+	JOBS=$(BARREL_JOBS) tools/barrel/mutaciones.sh
+barrel-formal:
+	tools/barrel/formal.sh
+barrel-aislamiento: barrel-formal
+	GRUPOS="B C T L M" ESCALA=0.25 JOBS=$(BARREL_JOBS) SALIDA=docs/mediciones/barrel/aislamiento.txt tools/barrel/verif.sh
+barrel-compartida:
+	GRUPOS="D N K J P" ESCALA=0.25 JOBS=$(BARREL_JOBS) SALIDA=docs/mediciones/barrel/compartida.txt tools/barrel/verif.sh
+
+barrel-humo:
+	tools/barrel/humo.sh
+barrel-cpi:
+	tools/barrel/medir_cpi.sh
+barrel-ticks:
+	tools/barrel/medir_ticks.sh
+barrel-equiv:
+	tools/barrel/equiv_ref.sh
+barrel-equiv-ronda1:
+	RONDA1=1 tools/barrel/equiv_ref.sh
+barrel-equiv-icarus:
+	tools/barrel/equiv_icarus.sh
+barrel-spi:
+	tools/barrel/verif_spi.sh
+barrel-trazas:
+	tools/barrel/verif_trazas.sh 12
+barrel-netlist:
+	tools/barrel/netlist.sh
+barrel-netlist-aleatorio:
+	tools/barrel/netlist_aleatorio.sh 4
+barrel-sin-tabla:
+	tools/barrel/sin_tabla.sh
+barrel-recursos:
+	tools/barrel/medir_recursos.sh 10
+barrel-bitstream:
+	tools/barrel/bitstream.sh
+barrel-icebram:
+	tools/barrel/icebram_prueba.sh
+
+check-barrel: barrel-formal barrel-humo barrel-verif-corta barrel-oficial barrel-equiv barrel-timing
+barrel-completo: barrel-verif barrel-mutaciones barrel-aislamiento barrel-compartida barrel-trazas barrel-spi \
+                 barrel-cpi barrel-ticks barrel-netlist barrel-netlist-aleatorio barrel-sin-tabla
+
 clean:
 	rm -rf $(BUILD) decisiones.csv
