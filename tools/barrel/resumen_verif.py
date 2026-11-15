@@ -4,7 +4,7 @@
 Grupo: Nicolás Araneda, Vicente Calderón y Santiago Muñoz.
 Arquitectura de Computadores, Universidad de los Andes, 2026-2.
 
-    python3 resumen_verif.py CARPETA corridas.txt [CLAVES_UNICAS [PUERTA]]
+    python3 resumen_verif.py CARPETA corridas.txt [CLAVES_UNICAS [PUERTA [XD]]]
 
 corridas.txt tiene una línea "GRUPO SEMILLA HILO" por corrida y el log de cada
 una está en CARPETA/GRUPO/GRUPO_sSEMILLA_hHILO.log. Lee de cada log las líneas
@@ -18,6 +18,12 @@ CLAVES_UNICAS es la cantidad de instrucciones distintas de la campaña lineal
 tools/barrel/verif.sh. Con PUERTA = 1 se exige además el criterio 5 de la
 puerta de simulación: al menos 5 millones de instrucciones en la campaña
 lineal y más de 90 % de ellas distintas.
+
+XD es la máscara de la extensión de la ISA en custom-0 con que se compiló el
+barrel (0 sin extensión). Con un valor distinto de 0 se suman además las
+líneas "XD t: ..." del testbench: cuántas instrucciones emad, devk y mulstep
+se compararon contra la especificación y cuántas palabras de custom-0 sin
+efecto. Se exige que cada instrucción presente se haya ejecutado.
 """
 import re
 import sys
@@ -55,12 +61,14 @@ TITULOS = {
          "   un lazo vacio.",
 }
 LINEAL = "LMPQ"
+REFERENCIA = ["el Espino base", "el Espino base con la especificacion de la extension"]
 META_INSTR = 5_000_000
 META_DIST = 0.90
 CAMPOS = ["instr", "rf", "stores", "loads", "saltos", "mmio", "spi", "bandera", "lazo", "dist"]
 RE_HILO = re.compile(r"^HILO (\d): (\d+) instrucciones comparadas \((\d+) escrituras de registro, (\d+) stores, (\d+) loads, "
                      r"(\d+) saltos, (\d+) accesos a SPI y perifericos, de ellos (\d+) al SPI, (\d+) lecturas de STATUS con precio nuevo, "
                      r"(\d+) de lazo vacio, (\d+) distintas")
+RE_XD = re.compile(r"^XD (\d): (\d+) emad, (\d+) devk, (\d+) mulstep, (\d+) palabras de custom-0 sin efecto")
 RE_PASS = re.compile(r"^PASS verif: (\d+) instrucciones.*memoria final: (\d+) palabras iguales y (\d+) sin comparar.*"
                      r"testbench: (\d+); ciclos del barrel: (\d+)")
 
@@ -73,6 +81,8 @@ def main():
     carpeta, lista = sys.argv[1], sys.argv[2]
     unicas = int(sys.argv[3]) if len(sys.argv) > 3 else 0
     puerta = len(sys.argv) > 4 and sys.argv[4] == "1"
+    xd = int(sys.argv[5]) if len(sys.argv) > 5 else 0
+    xd_lin, xd_lazos = [0, 0, 0, 0], [0, 0, 0, 0]     # emad, devk, mulstep y custom-0 sin efecto
     lin_hilo = [0, 0, 0, 0]              # campaña lineal: instrucciones de programa, por hilo
     lin_dist = lin_corridas = lin_rf = lin_loads = lin_stores = lin_saltos = lin_mmio = lin_spi = 0
     lin_precios = lin_bandera = lin_ocioso = lin_fuera = 0
@@ -104,7 +114,12 @@ def main():
                 texto = ""
             m = None
             filas = []
+            xd_corrida = [0, 0, 0, 0]
             for linea in texto.splitlines():
+                mx = RE_XD.match(linea)
+                if mx:
+                    for k in range(4):
+                        xd_corrida[k] += int(mx.group(2 + k))
                 mh = RE_HILO.match(linea)
                 if mh:
                     filas.append([int(x) for x in mh.groups()])
@@ -116,6 +131,9 @@ def main():
                 fallas.append((s, t, primera))
                 continue
             pasan += 1
+            if g not in "WK":
+                for k in range(4):
+                    (xd_lin if g in LINEAL else xd_lazos)[k] += xd_corrida[k]
             mem_ok += int(m.group(2)); mem_vuelo += int(m.group(3)); precios += int(m.group(4)); ciclos += int(m.group(5))
             for f in filas:
                 h = f[0]
@@ -200,6 +218,12 @@ def main():
               f"{miles(lin_saltos)} son saltos, {miles(lin_mmio)} acceden al SPI o a los perifericos ({miles(lin_spi)} al SPI).")
         print(f"   Precios nuevos puestos por el testbench: {miles(lin_precios)}. Lecturas de STATUS con la bandera de precio nuevo: {miles(lin_bandera)}.")
         print(f"   Programas que salieron de la memoria: {lin_fuera}. Instrucciones de lazo vacio comparadas aparte: {miles(lin_ocioso)}.")
+        if xd:
+            print(f"   Extension de la ISA, comparadas contra la especificacion: {miles(xd_lin[0])} emad, {miles(xd_lin[1])} devk y "
+                  f"{miles(xd_lin[2])} mulstep. Palabras de custom-0 que no son una instruccion y no hicieron nada: {miles(xd_lin[3])}.")
+            if any((xd >> k) & 1 and xd_lin[k] == 0 for k in range(3)):
+                mal += 1
+                print("   FAIL: una instruccion de la extension presente en el core no se ejecuto nunca")
         if puerta:
             ok = lin >= META_INSTR and unicas > META_DIST * lin
             print(f"   Criterio 5 de la puerta (al menos {miles(META_INSTR)} instrucciones y mas de {100 * META_DIST:.0f} % distintas): "
@@ -208,7 +232,7 @@ def main():
                 mal += 1
         print()
     if not sum(total_hilo):
-        print("RESULTADO: PASS, cero diferencias entre cada hilo del barrel y el Espino base" if mal == 0
+        print("RESULTADO: PASS, cero diferencias entre cada hilo del barrel y " + REFERENCIA[xd != 0] if mal == 0
               else f"RESULTADO: FAIL ({mal} problemas)")
         sys.exit(0 if mal == 0 else 1)
     print("CAMPANA DE LAZOS: instrucciones de programa comparadas una por una, por hilo, con el barrel tal como se sintetiza")
@@ -222,12 +246,18 @@ def main():
           f"{miles(total_saltos)} son saltos, {miles(total_mmio)} acceden al SPI o a los perifericos ({miles(total_spi)} al SPI).")
     print(f"   Precios nuevos puestos por el testbench: {miles(total_precios)}. Lecturas de STATUS con la bandera de precio nuevo: {miles(total_bandera)}.")
     print(f"   Instrucciones de lazo vacio comparadas aparte: {miles(sum(total_ocioso))}.")
+    if xd:
+        print(f"   Extension de la ISA, comparadas contra la especificacion: {miles(xd_lazos[0])} emad, {miles(xd_lazos[1])} devk y "
+              f"{miles(xd_lazos[2])} mulstep. Palabras de custom-0 que no son una instruccion y no hicieron nada: {miles(xd_lazos[3])}.")
+        if any((xd >> k) & 1 and xd_lazos[k] == 0 for k in range(3)):
+            mal += 1
+            print("   FAIL: una instruccion de la extension presente en el core no se ejecuto nunca")
     if sum(total_w):
         print(f"Ademas, con el contador de programa de 32 bits (grupo W): {miles(total_w[0])}, {miles(total_w[1])}, "
               f"{miles(total_w[2])} y {miles(total_w[3])} por hilo, {miles(sum(total_w))} en total.")
     print()
     if mal == 0:
-        print("RESULTADO: PASS, cero diferencias entre cada hilo del barrel y el Espino base")
+        print("RESULTADO: PASS, cero diferencias entre cada hilo del barrel y " + REFERENCIA[xd != 0])
     else:
         print(f"RESULTADO: FAIL ({mal} corridas con problemas)")
     sys.exit(0 if mal == 0 else 1)

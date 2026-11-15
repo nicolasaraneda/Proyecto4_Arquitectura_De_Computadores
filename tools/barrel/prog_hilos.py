@@ -63,6 +63,13 @@ con ese generador:
     que a los demás y además una de cada siete operaciones entre registros
     mezcla uno de los dos en un registro cualquiera.
 
+Con --xd MASCARA el cuerpo incluye además instrucciones de la extensión de la
+ISA en custom-0 (docs/extension_isa.md; 1 emad, 2 devk, 4 mulstep): sueltas,
+con el destino igual a un operando, el par devk y emad de la media, productos
+completos de ocho pasos de mulstep, y palabras que casi son una instrucción
+(otro funct7 u otro funct3) y que no deben hacer nada. Sin la opción los
+programas son los mismos de siempre, byte a byte.
+
 Con --lineal el cuerpo de cada hilo se ejecuta una sola vez y termina en un
 lazo vacío (un salto a sí mismo), donde tb/barrel/tb_verif.sv da por terminada
 la corrida (+fin_lazo=1). Es el generador de la campaña del criterio 5 de la
@@ -89,7 +96,19 @@ NDATOS = 16                      # palabras de cada zona de datos
 FIN = 0x800                      # la memoria tiene 512 palabras
 
 
-def cuerpo(rng, t, n, spi, periph, jalr_libre, lineal=False):
+XD_F = {"emad": (0b100, 5), "devk": (0b101, 5), "mulstep": (0b010, 0)}     # funct3 y funct7
+XD_BIT = {"emad": 1, "devk": 2, "mulstep": 4}
+
+
+def xd_word(nombre, rd, rs1, rs2, f7=None):
+    """Palabra de una instrucción de la extensión en custom-0. Se codifica aquí
+    y no con el ensamblador, para que la verificación del core no dependa de él."""
+    f3, f7n = XD_F[nombre]
+    w = ((f7n if f7 is None else f7) << 25) | (rs2 << 20) | (rs1 << 15) | (f3 << 12) | (rd << 7) | 0x0B
+    return f".word {w}"
+
+
+def cuerpo(rng, t, n, spi, periph, jalr_libre, lineal=False, xd=0):
     """Devuelve las líneas del hilo t: entrada, valores iniciales y cuerpo.
 
     En tools/prog_aleatorio.py un salto puede caer justo en un jalr, sin pasar
@@ -107,7 +126,10 @@ def cuerpo(rng, t, n, spi, periph, jalr_libre, lineal=False):
 
     pesos = {"alu_r": 22, "alu_i": 22, "shift": 5, "lui": 5, "load": 12, "store": 11,
              "spi": spi, "periph": periph, "branch": 10, "jal": 2, "jalr": 2, "rara": 4,
-             "lazo": 3 if lineal and not jalr_libre else 0}
+             "lazo": 3 if lineal and not jalr_libre else 0,
+             "xd": 14 if xd else 0, "xd_casi": 3 if xd else 0}
+    xd_nombres = [k for k in XD_F if xd & XD_BIT[k]]
+    nrd = lambda: rng.choice([0] + list(range(1, 11)) * 4)
     tipos = [k for k, v in pesos.items() if v > 0]
     ini = [f"    li   x15, zona{t}",
            "    li   x14, 0x80010000",
@@ -150,6 +172,39 @@ def cuerpo(rng, t, n, spi, periph, jalr_libre, lineal=False):
                 c.append(f"{rng.choice(SHIFT_R)} {rd()}, {rs()}, {rs()}")
             else:
                 c.append(f"{rng.choice(SHIFT_I)} {rd()}, {rs()}, {rng.randint(0, 31)}")
+        elif tipo == "xd":
+            # Instrucciones de la extensión que el core tiene (docs/extension_isa.md)
+            forma = rng.random()
+            nombre = rng.choice(xd_nombres)
+            if forma < 0.15 and "mulstep" in xd_nombres and len(c) + 8 <= n \
+                    and not any(len(c) < d <= len(c) + 7 for d in destinos):
+                # Un producto completo: ocho pasos sobre el mismo registro
+                r, m = rng.randint(1, 10), rng.randint(0, 15)
+                c.extend(xd_word("mulstep", r, r, m) for _ in range(8))
+            elif forma < 0.30 and "devk" in xd_nombres and "emad" in xd_nombres and len(c) + 2 <= n:
+                # El par de la media: desviación y paso, como en el programa
+                p, s_, d = rng.randint(0, 15), rng.randint(1, 10), rng.randint(1, 10)
+                c.append(xd_word("devk", d, p, s_))
+                c.append(xd_word("emad", s_, d, s_))
+            elif forma < 0.45:
+                r = rng.randint(1, 10)           # rd igual a un operando
+                c.append(xd_word(nombre, r, r, rng.randint(0, 15)) if rng.random() < 0.5
+                         else xd_word(nombre, r, rng.randint(0, 15), r))
+            else:
+                c.append(xd_word(nombre, nrd(), rng.randint(0, 15), rng.randint(0, 15)))
+        elif tipo == "xd_casi":
+            # Palabras de custom-0 que casi son una instrucción: no deben hacer nada
+            nombre = rng.choice(list(XD_F))
+            f3, f7 = XD_F[nombre]
+            f7m = rng.choice([f7 ^ (1 << rng.randint(0, 6)), f7 ^ rng.randint(1, 127), 4, 6, 0, 5, 0x25, 0x45])
+            if f7m == f7:
+                f7m ^= 1
+            if rng.random() < 0.75:
+                c.append(xd_word(nombre, rng.randint(1, 10), rng.randint(0, 15), rng.randint(0, 15), f7m))
+            else:                                # funct3 sin instrucción, con un funct7 válido
+                w = (rng.choice([0, 5]) << 25) | (rng.randint(0, 15) << 20) | (rng.randint(0, 15) << 15) \
+                    | (rng.choice([0, 1, 3, 6, 7]) << 12) | (rng.randint(1, 10) << 7) | 0x0B
+                c.append(f".word {w}")
         elif tipo == "lui":
             c.append(f"{rng.choice(['lui', 'auipc'])} {rd()}, {rng.getrandbits(20)}")
         elif tipo == "load":
@@ -203,9 +258,15 @@ def cuerpo(rng, t, n, spi, periph, jalr_libre, lineal=False):
         else:
             r_d, r_s = rng.choice(range(1, 11)), rng.randint(0, 15)
             alto = rng.getrandbits(25) << 7
+            # Con la extensión, una palabra al azar de custom-0 puede resultar
+            # una instrucción de verdad (una de cada 340, más o menos). Su
+            # destino se limita entonces a x1 a x10, como en todo el cuerpo:
+            # si escribiera x13, x14 o x15 cambiaría una dirección base y los
+            # stores siguientes caerían en el código de otro hilo.
+            alto_c0 = (alto & ~0xF80) | (r_d << 7) if xd else alto
             destinos.add(len(c) + 2)          # por si el branch con funct3 inválido salta (desplazamiento 8)
             c.append(rng.choice([
-                f".word {alto | 0x0B}",                                   # custom-0: no hace nada
+                f".word {alto_c0 | 0x0B}",                                # custom-0: no hace nada (sin la extensión)
                 f".word {(alto & ~0x7000) | 0x0F}",                       # misc-mem
                 f".word {0x00000073 | (rng.getrandbits(1) << 20)}",       # ecall, ebreak
                 f".word {(rng.randint(0, 4 * NDATOS - 1) << 20) | (15 << 15) | (rng.choice([3, 6, 7]) << 12) | (r_d << 7) | 0x03}",  # load con funct3 inválido
@@ -220,7 +281,7 @@ def cuerpo(rng, t, n, spi, periph, jalr_libre, lineal=False):
     return out
 
 
-def generar(semilla, n, modo, hilo_spi, trade=None, peso_spi=7, peso_periph=3, jalr_libre=False, lineal=False):
+def generar(semilla, n, modo, hilo_spi, trade=None, peso_spi=7, peso_periph=3, jalr_libre=False, lineal=False, xd=0):
     rng = random.Random(semilla)
     zonas = 1 if modo == "compartido" else 4
     base = 0x600 if modo == "trade" else FIN - 4 * NDATOS * zonas
@@ -244,7 +305,7 @@ def generar(semilla, n, modo, hilo_spi, trade=None, peso_spi=7, peso_periph=3, j
             spi = 2 * peso_spi if t == hilo_spi else 0
         else:
             spi = peso_spi
-        out += cuerpo(rng, t, n, spi, peso_periph, jalr_libre or modo == "compartido", lineal)
+        out += cuerpo(rng, t, n, spi, peso_periph, jalr_libre or modo == "compartido", lineal, xd)
     out.append(f".org {base}")
     for _ in range(zonas * NDATOS // 4):
         out.append("    .word " + ", ".join(str(rng.getrandbits(32)) for _ in range(4)))
@@ -268,13 +329,15 @@ def main():
     ap.add_argument("--peso-spi", type=int, default=7, help="peso de los accesos al SPI en la mezcla (por defecto 7 de 100)")
     ap.add_argument("--peso-periph", type=int, default=3, help="peso de los accesos a los periféricos (por defecto 3 de 100)")
     ap.add_argument("--lineal", action="store_true", help="cada cuerpo se ejecuta una vez y termina en un lazo vacio")
+    ap.add_argument("--xd", type=int, default=0, choices=range(8), metavar="MASCARA",
+                    help="incluye instrucciones de la extension en custom-0: 1 emad, 2 devk, 4 mulstep (se suman)")
     a = ap.parse_args()
     if a.lineal and a.modo == "trade":
         ap.error("--lineal no aplica al modo trade")
     if not 1 <= a.n <= (300 if a.modo == "uno" else 90):
         ap.error("-n debe estar entre 1 y 90 (300 en el modo uno)")
     with open(a.salida, "w", encoding="utf-8", newline="\n") as f:
-        f.write(generar(a.semilla, a.n, a.modo, a.hilo_spi, a.trade, a.peso_spi, a.peso_periph, a.jalr_libre, a.lineal))
+        f.write(generar(a.semilla, a.n, a.modo, a.hilo_spi, a.trade, a.peso_spi, a.peso_periph, a.jalr_libre, a.lineal, a.xd))
 
 
 if __name__ == "__main__":

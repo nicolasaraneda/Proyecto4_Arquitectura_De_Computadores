@@ -1,0 +1,92 @@
+Controles negativos de la verificacion por simulacion de la extension de la ISA
+Generado por tools/xd/mutaciones.sh (make xd-mutaciones). No editar a mano.
+
+Herramientas:
+  Yosys 0.68+195 (git sha1 435977e97-dirty, Release, Clang /usr/bin/clang++ 21.1.8)
+  "nextpnr-ice40" -- Next Generation Place and Route (Version nextpnr-0.11.1-19-g8dbcee5c)
+  Icarus Verilog version 14.0 (devel) (s20260301-403-g5ab23063f-dirty)
+Commit de partida: 0fb8ae8 (rama p2-extension)
+  Verilator 5.053 devel rev v5.052-22-g7cf8c5cca (mod)
+
+Sin mutacion: las seis comparaciones deben pasar
+   PASS U: 12000 instrucciones comparadas una por una (hilos: 3000 3000 3000 3000)
+   PASS B: 12000 instrucciones comparadas una por una (hilos: 3000 3000 3000 3000)
+   PASS C: 12000 instrucciones comparadas una por una (hilos: 3000 3000 3000 3000)
+   PASS D: 12000 instrucciones comparadas una por una (hilos: 3000 3000 3000 3000)
+   PASS L: 388 instrucciones comparadas una por una (hilos: 97 97 97 97)
+   PASS P: 378 instrucciones comparadas una por una (hilos: 95 95 94 94)
+
+PASS MUTA_XD_K: detectada por 5 de las 6 comparaciones
+      espino_xd_dec no revisa k: emad y devk con cualquier k se ejecutan con k = 5
+      U: hilo 2, instruccion 117: escritura al banco de registros
+      B: hilo 1, instruccion 55: escritura al banco de registros
+      C: no la detecta
+      D: hilo 1, instruccion 55: escritura al banco de registros
+      L: hilo 0, instruccion 99: escritura al banco de registros
+      P: hilo 3, instruccion 88: escritura al banco de registros
+PASS MUTA_XD_F7MUL: detectada por 6 de las 6 comparaciones
+      espino_xd_dec no revisa funct7 en mulstep
+      U: hilo 2, instruccion 47: escritura al banco de registros
+      B: hilo 0, instruccion 47: escritura al banco de registros
+      C: hilo 0, instruccion 45: escritura al banco de registros
+      D: hilo 0, instruccion 47: escritura al banco de registros
+      L: hilo 1, instruccion 51: escritura al banco de registros
+      P: hilo 1, instruccion 43: escritura al banco de registros
+PASS MUTA_XD_SRL: detectada por 6 de las 6 comparaciones
+      espino_xd_opa: el desplazamiento a la derecha de emad es logico
+      U: hilo 2, instruccion 49: escritura al banco de registros
+      B: hilo 3, instruccion 30: escritura al banco de registros
+      C: hilo 2, instruccion 41: escritura al banco de registros
+      D: hilo 3, instruccion 30: escritura al banco de registros
+      L: hilo 3, instruccion 37: escritura al banco de registros
+      P: hilo 2, instruccion 51: escritura al banco de registros
+PASS MUTA_XD_K4: detectada por 6 de las 6 comparaciones
+      espino_xd_opa: devk desplaza 4 en vez de 5
+      U: hilo 2, instruccion 35: escritura al banco de registros
+      B: hilo 0, instruccion 35: escritura al banco de registros
+      C: hilo 2, instruccion 29: escritura al banco de registros
+      D: hilo 0, instruccion 35: escritura al banco de registros
+      L: hilo 0, instruccion 31: escritura al banco de registros
+      P: hilo 1, instruccion 35: escritura al banco de registros
+PASS MUTA_XD_BCERO: detectada por 6 de las 6 comparaciones
+      espino_xd_opa: mulstep suma rs2 siempre
+      U: hilo 2, instruccion 51: escritura al banco de registros
+      B: hilo 0, instruccion 54: escritura al banco de registros
+      C: hilo 0, instruccion 52: escritura al banco de registros
+      D: hilo 0, instruccion 51: escritura al banco de registros
+      L: hilo 0, instruccion 76: escritura al banco de registros
+      P: hilo 2, instruccion 44: escritura al banco de registros
+PASS MUTA_XD_WE: detectada por 6 de las 6 comparaciones
+      core: las instrucciones nuevas no escriben rd
+      U: hilo 2, instruccion 25: escritura al banco de registros
+      B: hilo 0, instruccion 25: escritura al banco de registros
+      C: hilo 2, instruccion 29: escritura al banco de registros
+      D: hilo 0, instruccion 25: escritura al banco de registros
+      L: hilo 0, instruccion 31: escritura al banco de registros
+      P: hilo 1, instruccion 35: escritura al banco de registros
+PASS MUTA_XD_HILO: detectada por 6 de las 6 comparaciones
+      core: espino_xd_opa recibe el funct3 de la instruccion que sale de la memoria (de otro hilo)
+      U: hilo 2, instruccion 35: escritura al banco de registros
+      B: hilo 1, instruccion 34: escritura al banco de registros
+      C: hilo 2, instruccion 29: escritura al banco de registros
+      D: hilo 1, instruccion 34: escritura al banco de registros
+      L: hilo 0, instruccion 31: escritura al banco de registros
+      P: hilo 1, instruccion 35: escritura al banco de registros
+PASS MUTA_XD_ANULA: detectada por 6 de las 6 comparaciones
+      core: el operando B se anula con rs1[31] = 0 en cualquier instruccion, no solo en mulstep
+      U: hilo 2, instruccion 20: escritura al banco de registros
+      B: hilo 0, instruccion 20: escritura al banco de registros
+      C: hilo 3, instruccion 19: escritura al banco de registros
+      D: hilo 0, instruccion 20: escritura al banco de registros
+      L: hilo 1, instruccion 27: escritura al banco de registros
+      P: hilo 3, instruccion 28: escritura al banco de registros
+PASS MUTA_XD_SUMA: detectada por 6 de las 6 comparaciones
+      core: devk suma en vez de restar
+      U: hilo 2, instruccion 39: escritura al banco de registros
+      B: hilo 2, instruccion 38: escritura al banco de registros
+      C: hilo 2, instruccion 29: escritura al banco de registros
+      D: hilo 2, instruccion 38: escritura al banco de registros
+      L: hilo 0, instruccion 31: escritura al banco de registros
+      P: hilo 1, instruccion 35: escritura al banco de registros
+
+RESULTADO: PASS, 9 de 9 mutaciones detectadas y el core sin mutar pasa

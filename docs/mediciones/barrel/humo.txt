@@ -5,7 +5,7 @@ Herramientas:
   Yosys 0.68+195 (git sha1 435977e97-dirty, Release, Clang /usr/bin/clang++ 21.1.8)
   "nextpnr-ice40" -- Next Generation Place and Route (Version nextpnr-0.11.1-19-g8dbcee5c)
   Icarus Verilog version 14.0 (devel) (s20260301-403-g5ab23063f-dirty)
-Commit de partida: e118269 (rama p1-barrel)
+Commit de partida: 0fb8ae8 (rama p2-extension)
 
 1. hilos_distintos.s: cuatro hilos independientes
 PASS hilos_distintos, resultados en memoria y modelo de costo: 4 comprobaciones del testbench

@@ -79,10 +79,25 @@
 #            con 0.1 es una corrida corta de unos segundos)
 #   JOBS     simulaciones en paralelo (por defecto 5)
 #   SALIDA   archivo de resultado (por defecto docs/mediciones/barrel/verificacion.txt)
+#   XD       máscara de la extensión de la ISA en custom-0 (1 emad, 2 devk,
+#            4 mulstep; por defecto 0). Con un valor distinto de 0 el barrel se
+#            compila con esas instrucciones, los programas de
+#            tools/barrel/prog_hilos.py las incluyen (--xd) y la referencia es el
+#            Espino base más la especificación de la extensión (encabezado de
+#            tb/barrel/tb_verif.sv). Lo usa tools/xd/verif.sh, que además fija
+#            DIR_VERIF y SALIDA para no pisar los resultados del barrel solo.
+#   DIR_VERIF  carpeta de trabajo (por defecto build/barrel/verif)
 set -uo pipefail
 source "$(dirname "$0")/comun.sh"
 
-O=$B/verif
+O=${DIR_VERIF:-$B/verif}
+XD=${XD:-0}
+XD_DEFS_VERIF=""
+[ $((XD & 1)) != 0 ] && XD_DEFS_VERIF="$XD_DEFS_VERIF -DESPINO_XD_EMAD"
+[ $((XD & 2)) != 0 ] && XD_DEFS_VERIF="$XD_DEFS_VERIF -DESPINO_XD_DEVK"
+[ $((XD & 4)) != 0 ] && XD_DEFS_VERIF="$XD_DEFS_VERIF -DESPINO_XD_MULSTEP"
+GEN_XD=""
+[ "$XD" != 0 ] && GEN_XD="--xd $XD"
 JOBS=${JOBS:-5}
 ESCALA=${ESCALA:-1}
 SALIDA=${SALIDA:-$M/verificacion.txt}
@@ -107,8 +122,8 @@ INSTR_L=3000                        # tope por hilo, por si un programa no llega
 ZONA_COMP=1984                      # 0x7C0: comienzo de la zona de datos en el modo compartido
 INSTR_P=400                         # en el grupo P un jalr libre puede dejar a un hilo dando vueltas
 
-compilar_verif "$O" &
-compilar_verif "$O/pc32" rtl/espino_core/espino_barrel_core.v rtl/espino_core/espino_barrel_regfile.v rtl/pochoco_soc.v -DPCW_BARREL=32 &
+compilar_verif "$O" "$CORE_V" "$RF_V" "$SOC_V" $XD_DEFS_VERIF &
+compilar_verif "$O/pc32" "$CORE_V" "$RF_V" "$SOC_V" -DPCW_BARREL=32 $XD_DEFS_VERIF &
 wait
 for d in "$O" "$O/pc32"; do
   if [ ! -x "$d/obj/sim" ] || grep -q "^%Error" "$d/verilator.log"; then
@@ -124,35 +139,35 @@ una() {
     A|W) $PYTHON tools/prog_aleatorio.py "$s" -o "$n.base.s" && $PYTHON $T/tabla.py "$t" "$n.base.s" > "$n.s"
        args="+instrucciones=$INSTR_A +precio_cada=97 +hilo_spi=$t"
        [ "$g" = W ] && sim=$O/pc32/obj/sim ;;
-    U) $PYTHON $T/prog_hilos.py "$s" --modo uno --hilo-spi "$t" -n 300 -o "$n.s"
+    U) $PYTHON $T/prog_hilos.py $GEN_XD "$s" --modo uno --hilo-spi "$t" -n 300 -o "$n.s"
        args="+instrucciones=$INSTR_A +precio_cada=97 +hilo_spi=$t" ;;
     H) local p=hazard_test; [ "$s" = 2 ] && p=hazard_review
        $PYTHON $T/tabla.py "$t" sw/$p.s > "$n.s"
        args="+instrucciones=$INSTR_H" ;;
-    B) $PYTHON $T/prog_hilos.py "$s" --modo separado -o "$n.s"
+    B) $PYTHON $T/prog_hilos.py $GEN_XD "$s" --modo separado -o "$n.s"
        args="+instrucciones=$INSTR_B" ;;
-    C) $PYTHON $T/prog_hilos.py "$s" --modo spi1 --hilo-spi "$t" -o "$n.s"
+    C) $PYTHON $T/prog_hilos.py $GEN_XD "$s" --modo spi1 --hilo-spi "$t" -o "$n.s"
        args="+instrucciones=$INSTR_C +precio_cada=29 +hilo_spi=$t" ;;
-    T) $PYTHON $T/prog_hilos.py "$s" --modo trade --hilo-spi "$t" --trade sw/trade.s -n 90 -o "$n.s"
+    T) $PYTHON $T/prog_hilos.py $GEN_XD "$s" --modo trade --hilo-spi "$t" --trade sw/trade.s -n 90 -o "$n.s"
        args="+instrucciones=$INSTR_T +precio_cada=61 +hilo_spi=$t" ;;
-    D) $PYTHON $T/prog_hilos.py "$s" --modo compartido -o "$n.s"
+    D) $PYTHON $T/prog_hilos.py $GEN_XD "$s" --modo compartido -o "$n.s"
        args="+instrucciones=$INSTR_D +compartida=1 +limite_codigo=$ZONA_COMP" ;;
-    N) $PYTHON $T/prog_hilos.py "$s" --modo compartido -o "$n.s"
+    N) $PYTHON $T/prog_hilos.py $GEN_XD "$s" --modo compartido -o "$n.s"
        args="+instrucciones=$INSTR_D +compartida=0" ;;
-    J) $PYTHON $T/prog_hilos.py "$s" --modo separado --jalr-libre -o "$n.s"
+    J) $PYTHON $T/prog_hilos.py $GEN_XD "$s" --modo separado --jalr-libre -o "$n.s"
        args="+instrucciones=$INSTR_B +compartida=0" ;;
-    K) $PYTHON $T/prog_hilos.py "$s" --modo separado --jalr-libre -o "$n.s"
+    K) $PYTHON $T/prog_hilos.py $GEN_XD "$s" --modo separado --jalr-libre -o "$n.s"
        args="+instrucciones=$INSTR_B +compartida=1 +limite_codigo=1792" ;;   # 0x700: zonas del modo separado
     # En la campaña lineal cada corrida usa una semilla del generador que no
     # se repite en otro grupo ni con otro hilo: con la misma semilla dos
     # programas empiezan igual y esas instrucciones no contarían como distintas
-    L) $PYTHON $T/prog_hilos.py "$s" --modo separado --lineal -o "$n.s"
+    L) $PYTHON $T/prog_hilos.py $GEN_XD "$s" --modo separado --lineal -o "$n.s"
        args="+instrucciones=$INSTR_L +fin_lazo=1 +claves=$n.claves" ;;
-    M) $PYTHON $T/prog_hilos.py "$((1000000 * (t + 1) + s))" --modo spi1 --hilo-spi "$t" --lineal -o "$n.s"
+    M) $PYTHON $T/prog_hilos.py $GEN_XD "$((1000000 * (t + 1) + s))" --modo spi1 --hilo-spi "$t" --lineal -o "$n.s"
        args="+instrucciones=$INSTR_L +fin_lazo=1 +precio_cada=11 +hilo_spi=$t +claves=$n.claves" ;;
-    P) $PYTHON $T/prog_hilos.py "$((5000000 + s))" --modo compartido --lineal -o "$n.s"
+    P) $PYTHON $T/prog_hilos.py $GEN_XD "$((5000000 + s))" --modo compartido --lineal -o "$n.s"
        args="+instrucciones=$INSTR_P +fin_lazo=1 +compartida=1 +limite_codigo=$ZONA_COMP +claves=$n.claves" ;;
-    Q) $PYTHON $T/prog_hilos.py "$((1000000 * (t + 6) + s))" --modo uno --hilo-spi "$t" -n 300 --lineal -o "$n.s"
+    Q) $PYTHON $T/prog_hilos.py $GEN_XD "$((1000000 * (t + 6) + s))" --modo uno --hilo-spi "$t" -n 300 --lineal -o "$n.s"
        args="+instrucciones=$INSTR_L +fin_lazo=1 +precio_cada=31 +hilo_spi=$t +claves=$n.claves" ;;
   esac
   $PYTHON tools/pochoasm.py --allow-shifts "$n.s" -o "$n.hex" > /dev/null 2> "$n.asm.log" \
@@ -163,7 +178,7 @@ una() {
   return 0
 }
 export -f una
-export O T TB SW FO PYTHON INSTR_A INSTR_B INSTR_C INSTR_T INSTR_D INSTR_H INSTR_L INSTR_P ZONA_COMP
+export O T TB SW FO PYTHON GEN_XD INSTR_A INSTR_B INSTR_C INSTR_T INSTR_D INSTR_H INSTR_L INSTR_P ZONA_COMP
 
 : > "$O/corridas.txt"
 lista() {   # lista GRUPO SEMILLAS HILOS...: agrega las corridas del grupo
@@ -205,13 +220,19 @@ if [ "$CAMPANA" != lazos ]; then
 fi
 
 {
-echo "Verificacion del Espino barrel contra el Espino base, instruccion por instruccion"
-echo "Generado por tools/barrel/verif.sh (make barrel-verif). No editar a mano."
+if [ "$XD" != 0 ]; then
+  echo "Verificacion del Espino barrel con la extension de la ISA (mascara $XD:$XD_DEFS_VERIF)"
+  echo "contra el Espino base mas la especificacion de la extension, instruccion por instruccion"
+  echo "Generado por tools/xd/verif.sh (make xd-verif). No editar a mano."
+else
+  echo "Verificacion del Espino barrel contra el Espino base, instruccion por instruccion"
+  echo "Generado por tools/barrel/verif.sh (make barrel-verif). No editar a mano."
+fi
 echo
 versiones
 echo "  $(verilator --version)"
 echo
-$PYTHON $T/resumen_verif.py "$O" "$O/corridas.txt" "$UNICAS" "$PUERTA"
+$PYTHON $T/resumen_verif.py "$O" "$O/corridas.txt" "$UNICAS" "$PUERTA" "$XD"
 rc=$?
 echo
 echo "Tiempo de las simulaciones: $((fin - inicio)) s con $JOBS procesos."

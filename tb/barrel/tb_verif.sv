@@ -84,6 +84,21 @@
 // lazo vacío), una por línea, para que tools/barrel/verif.sh cuente las
 // distintas de toda la campaña y no solo las de cada corrida.
 //
+// Extensión de la ISA en custom-0 (docs/extension_isa.md). Si el barrel se
+// compila con -DESPINO_XD (o con -DESPINO_XD_EMAD, -DESPINO_XD_DEVK o
+// -DESPINO_XD_MULSTEP), la referencia de cada hilo pasa a ser "el Espino base
+// más la especificación de la extensión". El Espino base trata esas palabras
+// como ilegales y no hace nada con ellas. Cuando completa una que la
+// especificación reconoce, el testbench calcula el resultado con la fórmula
+// de la especificación (funciones xd_cual y xd_spec, escritas aquí y no
+// tomadas del RTL), usando los valores de rs1 y rs2 del banco del Espino
+// base, y lo escribe en rd directamente en las cuatro BRAM de ese banco. La
+// instrucción siguiente del Espino base ya lee el valor nuevo. Así un mismo
+// programa mezcla instrucciones de RV32E y de la extensión, con resultados
+// de unas que alimentan a las otras, y todo lo demás de la comparación sigue
+// igual. Una palabra de custom-0 que no es una de las instrucciones
+// presentes tiene que seguir sin hacer nada en los dos lados.
+//
 // Uso (tools/barrel/verif.sh), con Verilator:
 //   sim +hex=programa.hex +instrucciones=50000 [+compartida=1]
 //       [+precio_cada=97 +hilo_spi=2] [+fin_lazo=1] [+claves=archivo.txt]
@@ -95,7 +110,55 @@
   `define PCW_BARREL 11
 `endif
 
+// Subconjunto de la extensión con que se compiló el barrel
+`ifdef ESPINO_XD
+  `define TB_XD_MASCARA 3'b111
+`else
+  `ifdef ESPINO_XD_EMAD
+    `define TB_XD_B0 1'b1
+  `else
+    `define TB_XD_B0 1'b0
+  `endif
+  `ifdef ESPINO_XD_DEVK
+    `define TB_XD_B1 1'b1
+  `else
+    `define TB_XD_B1 1'b0
+  `endif
+  `ifdef ESPINO_XD_MULSTEP
+    `define TB_XD_B2 1'b1
+  `else
+    `define TB_XD_B2 1'b0
+  `endif
+  `define TB_XD_MASCARA {`TB_XD_B2, `TB_XD_B1, `TB_XD_B0}
+`endif
+
 module tb_verif;
+
+  // Extensión en custom-0: bit 0 emad, bit 1 devk, bit 2 mulstep
+  localparam logic [2:0] XD = `TB_XD_MASCARA;
+
+  // Especificación de la extensión (docs/extension_isa.md), escrita aparte
+  // del RTL. xd_cual: 1 emad, 2 devk, 3 mulstep, 0 si la palabra no es una
+  // instrucción presente.
+  function automatic int xd_cual(input logic [31:0] i);
+    if (i[6:0] != 7'b0001011) return 0;
+    if (XD[0] && i[14:12] == 3'b100 && i[31:25] == 7'b0000101) return 1;
+    if (XD[1] && i[14:12] == 3'b101 && i[31:25] == 7'b0000101) return 2;
+    if (XD[2] && i[14:12] == 3'b010 && i[31:25] == 7'b0000000) return 3;
+    return 0;
+  endfunction
+
+  function automatic logic [31:0] xd_spec(input int cual, input logic [31:0] rs1, input logic [31:0] rs2);
+    logic signed [31:0] s;
+    s = rs1;
+    case (cual)
+      1:       return rs2 + 32'(s >>> 5);
+      2:       return (rs1 << 5) - rs2;
+      default: return (rs1 << 1) + (rs1[31] ? rs2 : 32'b0);
+    endcase
+  endfunction
+
+  longint n_xd [4][4];              // por hilo: custom-0 sin efecto, emad, devk y mulstep
 
   localparam int COLA = 16;
   // Bits del contador de programa del barrel. El Espino base tiene 32. Con 11
@@ -204,6 +267,20 @@ module tb_verif;
         e.regs_a[32*r +: 32] = {SOC.u_core.u_rf.u_bankA.u_hi.memory[r], SOC.u_core.u_rf.u_bankA.u_lo.memory[r]}; \
         e.regs_b[32*r +: 32] = {SOC.u_core.u_rf.u_bankB.u_hi.memory[r], SOC.u_core.u_rf.u_bankB.u_lo.memory[r]}; \
       end \
+      xc = xd_cual(e.instr); \
+      if (xc != 0) begin \
+        if (e.rf_we || e.acc) error("el Espino base hizo algo con una palabra de custom-0"); \
+        xr = xd_spec(xc, e.regs_a[32*e.instr[18:15] +: 32], e.regs_a[32*e.instr[23:20] +: 32]); \
+        if (e.instr[10:7] != 4'd0) begin \
+          e.rf_we = 1'b1; e.rf_wa = e.instr[10:7]; e.rf_wd = xr; \
+          SOC.u_core.u_rf.u_bankA.u_hi.memory[e.instr[10:7]] = xr[31:16]; \
+          SOC.u_core.u_rf.u_bankA.u_lo.memory[e.instr[10:7]] = xr[15:0]; \
+          SOC.u_core.u_rf.u_bankB.u_hi.memory[e.instr[10:7]] = xr[31:16]; \
+          SOC.u_core.u_rf.u_bankB.u_lo.memory[e.instr[10:7]] = xr[15:0]; \
+          e.regs_a[32*e.instr[10:7] +: 32] = xr; \
+          e.regs_b[32*e.instr[10:7] +: 32] = xr; \
+        end \
+      end \
       e.mem_word = SOC.u_ram.mem[e.addr[10:2]]; \
       e.mmio     = `MMIO_DE(SOC, e.addr); \
       if (nuevo_precio) begin SOC.u_spi.price_q = precio_de(n_b[t] + 1); SOC.u_spi.new_price_q = 1'b1; end \
@@ -212,6 +289,8 @@ module tb_verif;
   task automatic flanco_base(input int t, output bit completo);
     ev_t e;
     bit  commit, nuevo_precio;
+    int  xc;
+    logic [31:0] xr;
     e = '0;
     case (t)
       0: `BASE_ANTES(b0)
@@ -372,6 +451,7 @@ module tb_verif;
       if (ea.instr[6:0] == 7'h63 || ea.instr[6:0] == 7'h6f || ea.instr[6:0] == 7'h67) n_salto[t]++;
       // Lazo vacío: un jal x0 a sí mismo (hilo ocioso o programa que terminó)
       if (ea.instr == 32'h0000_006f) n_lazo[t]++;
+      if (ea.instr[6:0] == 7'b0001011) n_xd[t][xd_cual(ea.instr)]++;
       // Instrucciones distintas: mismo contador de programa con otro valor
       // escrito u otro acceso al bus cuenta como distinta. Un programa que
       // repite siempre los mismos valores suma poco aquí aunque corra mucho.
@@ -465,6 +545,7 @@ module tb_verif;
       n_d[t] = 0; n_b[t] = 0; n_cmp[t] = 0; x_d[t] = 0; ciclos_b[t] = 0;
       n_rf[t] = 0; n_st[t] = 0; n_ld[t] = 0; n_salto[t] = 0; n_mmio[t] = 0; n_spi[t] = 0; n_bandera[t] = 0; n_lazo[t] = 0; n_dist[t] = 0;
       listo[t] = 0; fuera[t] = 0; en_lazo[t] = 0; ba_acc[t] = 0; ba_n[t] = 0;
+      for (int k = 0; k < 4; k++) n_xd[t][k] = 0;
     end
 
     // Reset de encendido: los cinco SoC a la vez, hasta que todos lo sueltan
@@ -515,6 +596,9 @@ module tb_verif;
       $display("HILO %0d: %0d instrucciones comparadas (%0d escrituras de registro, %0d stores, %0d loads, %0d saltos, %0d accesos a SPI y perifericos, de ellos %0d al SPI, %0d lecturas de STATUS con precio nuevo, %0d de lazo vacio, %0d distintas)%s",
                t, n_cmp[t], n_rf[t], n_st[t], n_ld[t], n_salto[t], n_mmio[t], n_spi[t], n_bandera[t], n_lazo[t], n_dist[t],
                fuera[t] ? " FUERA: el programa salio de la memoria" : "");
+    if (XD != 3'b000)
+      for (int t = 0; t < 4; t++)
+        $display("XD %0d: %0d emad, %0d devk, %0d mulstep, %0d palabras de custom-0 sin efecto", t, n_xd[t][1], n_xd[t][2], n_xd[t][3], n_xd[t][0]);
     $display("PASS verif: %0d instrucciones comparadas una por una (hilos: %0d %0d %0d %0d); memoria final: %0d palabras iguales y %0d sin comparar por stores en vuelo; precios nuevos puestos por el testbench: %0d; ciclos del barrel: %0d",
              n_cmp[0] + n_cmp[1] + n_cmp[2] + n_cmp[3], n_cmp[0], n_cmp[1], n_cmp[2], n_cmp[3],
              iguales, en_vuelo, precios, ciclo);
