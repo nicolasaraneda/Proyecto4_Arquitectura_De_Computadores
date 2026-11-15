@@ -1,0 +1,40 @@
+Barrel con la extension de la ISA en custom-0: celdas, BRAM y frecuencia maxima
+Generado por tools/xd/timing.sh (make xd-timing). No editar a mano.
+
+Herramientas:
+  Yosys 0.68+195 (git sha1 435977e97-dirty, Release, Clang /usr/bin/clang++ 21.1.8)
+  "nextpnr-ice40" -- Next Generation Place and Route (Version nextpnr-0.11.1-19-g8dbcee5c)
+  Icarus Verilog version 14.0 (devel) (s20260301-403-g5ab23063f-dirty)
+Commit de partida: 0fb8ae8 (rama p2-extension)
+
+nextpnr-ice40 --hx1k --package vq100 --freq 25, 10 semillas. La FPGA tiene 1280 celdas y 16 BRAM.
+xd_ref es el barrel sin la extension. xd_M lleva el subconjunto de mascara M:
+  xd_1  emad (-DESPINO_XD_EMAD)
+  xd_2  devk (-DESPINO_XD_DEVK)
+  xd_3  emad_devk (-DESPINO_XD_EMAD,-DESPINO_XD_DEVK)
+  xd_4  mulstep (-DESPINO_XD_MULSTEP)
+  xd_5  emad_mulstep (-DESPINO_XD_EMAD,-DESPINO_XD_MULSTEP)
+  xd_6  devk_mulstep (-DESPINO_XD_DEVK,-DESPINO_XD_MULSTEP)
+  xd_7  todo (-DESPINO_XD)
+
+xd_ref                 celdas  938 de 1280, BRAM 12 de 16, LUT4  767, fmax min  52.11 mediana  55.94 max  59.82 MHz, cierran a 25 MHz 10 de 10
+xd_1                   celdas  966 de 1280, BRAM 12 de 16, LUT4  793, fmax min  50.68 mediana  54.05 max  55.74 MHz, cierran a 25 MHz 10 de 10
+xd_2                   celdas  961 de 1280, BRAM 12 de 16, LUT4  789, fmax min  51.08 mediana  54.60 max  56.01 MHz, cierran a 25 MHz 10 de 10
+xd_3                   celdas  990 de 1280, BRAM 12 de 16, LUT4  816, fmax min  48.92 mediana  51.08 max  54.05 MHz, cierran a 25 MHz 10 de 10
+xd_4                   celdas  954 de 1280, BRAM 12 de 16, LUT4  782, fmax min  50.89 mediana  54.22 max  56.10 MHz, cierran a 25 MHz 10 de 10
+xd_5                   celdas  990 de 1280, BRAM 12 de 16, LUT4  816, fmax min  48.23 mediana  49.80 max  51.91 MHz, cierran a 25 MHz 10 de 10
+xd_6                   celdas 1002 de 1280, BRAM 12 de 16, LUT4  828, fmax min  50.73 mediana  52.49 max  55.44 MHz, cierran a 25 MHz 10 de 10
+xd_7                   celdas 1034 de 1280, BRAM 12 de 16, LUT4  859, fmax min  48.33 mediana  49.33 max  51.94 MHz, cierran a 25 MHz 10 de 10
+
+Variante   Celdas  Agrega  Libres  BRAM  Fmax minima  Mediana  Maxima  Cierran
+xd_ref        938             342    12        52.11    55.94   59.82  10 de 10
+xd_1          966     +28     314    12        50.68    54.05   55.74  10 de 10
+xd_2          961     +23     319    12        51.08    54.60   56.01  10 de 10
+xd_3          990     +52     290    12        48.92    51.08   54.05  10 de 10
+xd_4          954     +16     326    12        50.89    54.22   56.10  10 de 10
+xd_5          990     +52     290    12        48.23    49.80   51.91  10 de 10
+xd_6         1002     +64     278    12        50.73    52.49   55.44  10 de 10
+xd_7         1034     +96     246    12        48.33    49.33   51.94  10 de 10
+
+El conteo de celdas de un mismo circuito se mueve unas 10 celdas entre sintesis
+(decision T6): una diferencia menor que eso no se puede atribuir a un cambio.

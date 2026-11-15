@@ -25,6 +25,30 @@
 //      que empezar con la tabla de arranque: el hilo t parte en la dirección 4 t.
 `ifdef ESPINO_BARREL
   `define ESPINO_PIPELINE_DEF 3
+  // Extensión de la ISA en custom-0 sobre el barrel (docs/extension_isa.md).
+  // -DESPINO_XD incluye las tres instrucciones. Para un subconjunto se usan
+  // -DESPINO_XD_EMAD, -DESPINO_XD_DEVK y -DESPINO_XD_MULSTEP. Sin ninguna, el
+  // barrel no tiene la extensión.
+  `ifdef ESPINO_XD
+    `define ESPINO_XD_EMAD
+    `define ESPINO_XD_DEVK
+    `define ESPINO_XD_MULSTEP
+  `endif
+  `ifdef ESPINO_XD_EMAD
+    `define ESPINO_XD_B0 1'b1
+  `else
+    `define ESPINO_XD_B0 1'b0
+  `endif
+  `ifdef ESPINO_XD_DEVK
+    `define ESPINO_XD_B1 1'b1
+  `else
+    `define ESPINO_XD_B1 1'b0
+  `endif
+  `ifdef ESPINO_XD_MULSTEP
+    `define ESPINO_XD_B2 1'b1
+  `else
+    `define ESPINO_XD_B2 1'b0
+  `endif
 `elsif ESPINO_ROM
   `define ESPINO_PIPELINE_DEF 2
 `elsif ESPINO_SEGMENTADO
@@ -87,7 +111,8 @@ module pochoco_soc #(
   // hilo_x: hilo de la instrucción que usa el bus de datos en este ciclo. El
   // SoC no lo usa: los periféricos y el esclavo SPI no saben de hilos.
   wire [1:0] hilo_x;
-  espino_barrel_core #(.BootAddr(32'h0000_0000), .PcW(PcW)) u_core (
+  espino_barrel_core #(.BootAddr(32'h0000_0000), .PcW(PcW),
+                       .Xd({`ESPINO_XD_B2, `ESPINO_XD_B1, `ESPINO_XD_B0})) u_core (
     .clk_i         (clk),
     .rst_ni        (rst_ni),
     .hilo_x_o      (hilo_x),

@@ -1,0 +1,20 @@
+Testbench de los modulos de la extension de la ISA (espino_xd_dec y espino_xd_opa) contra ref/xd.py
+Generado por tools/xd/tb_modulos.sh (make xd-tb). No editar a mano.
+
+Herramientas:
+  Yosys 0.68+195 (git sha1 435977e97-dirty, Release, Clang /usr/bin/clang++ 21.1.8)
+  "nextpnr-ice40" -- Next Generation Place and Route (Version nextpnr-0.11.1-19-g8dbcee5c)
+  Icarus Verilog version 14.0 (devel) (s20260301-403-g5ab23063f-dirty)
+Commit de partida: 0fb8ae8 (rama p2-extension)
+
+PASS ref/xd.py: 720304 comprobaciones
+PASS tb_xd_mod: 49152 comprobaciones del decodificador y 1200000 resultados iguales al modelo (300000 vectores por 4 subconjuntos cada uno)
+
+Controles negativos (errores puestos a proposito en espino_xd.v):
+  PASS MUTA_XD_K: detectada (744 errores)
+  PASS MUTA_XD_F7MUL: detectada (1524 errores)
+  PASS MUTA_XD_SRL: detectada (184332 errores)
+  PASS MUTA_XD_K4: detectada (383824 errores)
+  PASS MUTA_XD_BCERO: detectada (211656 errores)
+
+RESULTADO: PASS, los modulos coinciden con el modelo y 5 de 5 mutaciones se detectan

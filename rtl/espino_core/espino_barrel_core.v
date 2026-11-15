@@ -37,6 +37,21 @@
 // El camino de datos de la etapa X (multiplexores de operandos, destino del
 // salto, enlace) es el de espino_id_stage.v, copiado.
 //
+// Extensión de la ISA en custom-0 (docs/extension_isa.md, espino_xd.v). El
+// parámetro Xd es una máscara con las instrucciones presentes: bit 0 emad,
+// bit 1 devk y bit 2 mulstep. Con Xd = 0, que es el valor por defecto, el core
+// es el de siempre y custom-0 es una instrucción ilegal que no hace nada. Las
+// tres instrucciones usan el sumador de la ALU y no cambian nada del control
+// del pipeline:
+//   - En R, espino_xd_dec reconoce la codificación. Si es una de las tres, la
+//     decodificación que se registra hacia X pide la selección 3 del operando
+//     A (que el Espino no usa), rs2 como operando B, suma (resta en devk) y
+//     escritura de rd.
+//   - En X, espino_xd_opa entrega el operando A desplazado. Mira el funct3 de
+//     la instrucción que está en X (instr_x), no el de la que sale de la
+//     memoria en ese ciclo, que es de otro hilo. En mulstep el operando B se
+//     anula cuando rs1[31] vale 0.
+//
 // Arranque: el hilo t parte en BootAddr + BootPaso t. Con BootPaso = 4 (el
 // valor por defecto) el programa empieza con una tabla de cuatro saltos, uno
 // por hilo. Con BootPaso = 0 los cuatro hilos parten en BootAddr y el programa
@@ -54,7 +69,8 @@
 module espino_barrel_core #(
   parameter [31:0]  BootAddr = 32'h0000_0000,
   parameter integer BootPaso = 4,     // distancia entre las entradas de dos hilos
-  parameter integer PcW      = 11
+  parameter integer PcW      = 11,
+  parameter [2:0]   Xd       = 3'b000  // extensión: bit 0 emad, bit 1 devk, bit 2 mulstep
 ) (
   input  wire        clk_i,
   input  wire        rst_ni,
@@ -77,7 +93,11 @@ module espino_barrel_core #(
 
   localparam [1:0] OP_A_PC   = 2'd1;
   localparam [1:0] OP_A_ZERO = 2'd2;
+  localparam [1:0] OP_A_XD   = 2'd3;   // operando A desplazado (espino_xd_opa)
+  localparam       OP_B_REG  = 1'b0;
   localparam       OP_B_IMM  = 1'b1;
+  localparam [3:0] ALU_ADD   = 4'd0;
+  localparam [3:0] ALU_SUB   = 4'd1;
   localparam [1:0] WD_LSU    = 2'd1;
   localparam [1:0] WD_PC4    = 2'd2;
 
@@ -151,6 +171,41 @@ module espino_barrel_core #(
     .lsu_sign_o     (lsu_sign_d)
   );
 
+  // Extensión en custom-0. Para el decodificador del Espino esas palabras son
+  // ilegales (no escriben, no piden el bus y no saltan). Si espino_xd_dec
+  // reconoce una de las tres instrucciones, lo que se registra hacia X es una
+  // suma o una resta con el operando A desplazado y la escritura de rd.
+  wire        xd_emad_d, xd_devk_d, xd_mulstep_d;
+  generate
+    if (Xd != 3'b000) begin : g_xd_dec
+      espino_xd_dec #(.Xd(Xd)) u_xd_dec (
+        .instr_i   (instr_rdata_i),
+        .emad_o    (xd_emad_d),
+        .devk_o    (xd_devk_d),
+        .mulstep_o (xd_mulstep_d)
+      );
+    end else begin : g_sin_xd_dec
+      assign xd_emad_d    = 1'b0;
+      assign xd_devk_d    = 1'b0;
+      assign xd_mulstep_d = 1'b0;
+    end
+  endgenerate
+  wire        xd_d           = xd_emad_d | xd_devk_d | xd_mulstep_d;
+`ifdef MUTA_XD_SUMA
+  // MUTACIÓN (solo para las pruebas): devk suma en vez de restar.
+  wire [3:0]  alu_operator_r = xd_d ? ALU_ADD : alu_operator_d;
+`else
+  wire [3:0]  alu_operator_r = xd_d ? (xd_devk_d ? ALU_SUB : ALU_ADD) : alu_operator_d;
+`endif
+  wire [1:0]  alu_op_a_sel_r = xd_d ? OP_A_XD  : alu_op_a_sel_d;
+  wire        alu_op_b_sel_r = xd_d ? OP_B_REG : alu_op_b_sel_d;
+`ifdef MUTA_XD_WE
+  // MUTACIÓN (solo para las pruebas): las instrucciones nuevas no escriben rd.
+  wire        rf_we_r        = rf_we_d;
+`else
+  wire        rf_we_r        = rf_we_d | xd_d;
+`endif
+
   wire [31:0] rf_rdata_a, rf_rdata_b;
   wire [31:0] rf_wdata;
   reg         rf_we_m;
@@ -189,9 +244,9 @@ module espino_barrel_core #(
 
   always @(posedge clk_i) begin
     instr_x        <= instr_rdata_i;
-    alu_operator_x <= alu_operator_d;
-    alu_op_a_sel_x <= alu_op_a_sel_d;
-    alu_op_b_sel_x <= alu_op_b_sel_d;
+    alu_operator_x <= alu_operator_r;
+    alu_op_a_sel_x <= alu_op_a_sel_r;
+    alu_op_b_sel_x <= alu_op_b_sel_r;
     imm_operand_x  <= imm_operand_d;
     imm_target_x   <= imm_target_d[PcW-1:0];
     rf_wd_sel_x    <= rf_wd_sel_d;
@@ -203,16 +258,51 @@ module espino_barrel_core #(
   // ---------------------------------------------------------------------------
   // X: ejecución
   // ---------------------------------------------------------------------------
+  // Operando A desplazado de la extensión. El funct3 es el de la instrucción
+  // que está en X.
+  wire [31:0] xd_a;
+  wire        xd_b_cero;
+  generate
+    if (Xd != 3'b000) begin : g_xd_opa
+      espino_xd_opa #(.Xd(Xd)) u_xd_opa (
+        .rs1_i    (rf_rdata_a),
+`ifdef MUTA_XD_HILO
+        // MUTACIÓN (solo para las pruebas): mira el funct3 de la instrucción
+        // que sale de la memoria en este ciclo, que es de otro hilo.
+        .funct3_i (instr_rdata_i[14:12]),
+`else
+        .funct3_i (instr_x[14:12]),
+`endif
+        .a_o      (xd_a),
+        .b_cero_o (xd_b_cero)
+      );
+    end else begin : g_sin_xd_opa
+      assign xd_a      = rf_rdata_a;
+      assign xd_b_cero = 1'b0;
+    end
+  endgenerate
+
   reg  [31:0] operand_a;
   wire [31:0] operand_b;
   always @* begin
     case (alu_op_a_sel_x)
       OP_A_PC:   operand_a = pc_x;       // extiende con ceros
       OP_A_ZERO: operand_a = 32'b0;
+      OP_A_XD:   operand_a = xd_a;       // sin la extensión esta selección no ocurre
       default:   operand_a = rf_rdata_a;
     endcase
   end
-  assign operand_b = (alu_op_b_sel_x == OP_B_IMM) ? imm_operand_x : rf_rdata_b;
+  // En mulstep el operando B vale cero cuando el bit que sale del
+  // multiplicador (rs1[31]) es 0
+`ifdef MUTA_XD_ANULA
+  // MUTACIÓN (solo para las pruebas): el operando B se anula en cualquier
+  // instrucción cuyo rs1 tenga el bit 31 en 0, no solo en las de la extensión.
+  wire        xd_anula = xd_b_cero;
+`else
+  wire        xd_anula = (alu_op_a_sel_x == OP_A_XD) & xd_b_cero;
+`endif
+  assign operand_b = (alu_op_b_sel_x == OP_B_IMM) ? imm_operand_x :
+                     xd_anula                     ? 32'b0         : rf_rdata_b;
 
   wire [31:0] alu_result;
   wire        alu_cmp_result;
@@ -340,13 +430,13 @@ module espino_barrel_core #(
 `ifdef MUTA_ARRANQUE
       // MUTACIÓN (solo para las pruebas): la burbuja del arranque no se
       // anula y el hilo 3 ejecuta la instrucción que la BRAM leyó en el reset.
-      rf_we_x     <= rf_we_d;
+      rf_we_x     <= rf_we_r;
       lsu_req_x   <= lsu_req_d;
       is_branch_x <= is_branch_d;
       is_jal_x    <= is_jal_d;
       is_jalr_x   <= is_jalr_d;
 `else
-      rf_we_x     <= rf_we_d     & valid_r;
+      rf_we_x     <= rf_we_r     & valid_r;
       lsu_req_x   <= lsu_req_d   & valid_r;
       is_branch_x <= is_branch_d & valid_r;
       is_jal_x    <= is_jal_d    & valid_r;

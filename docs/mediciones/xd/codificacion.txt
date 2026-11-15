@@ -1,0 +1,29 @@
+Extension de la ISA en custom-0: codificacion y ejemplos
+Generado por ref/xd.py --tabla (make xd-tabla). No editar a mano.
+
+Formato R, opcode custom-0 = 0001011 (0x0B):
+  bits 31:25 funct7 | 24:20 rs2 | 19:15 rs1 | 14:12 funct3 | 11:7 rd | 6:0 opcode
+
+Instruccion            funct3  funct7   Resultado
+emad rd, rs1, rs2, 5   100     0000101  rd = rs2 + (rs1 >>> 5)
+devk rd, rs1, rs2, 5   101     0000101  rd = (rs1 << 5) - rs2
+mulstep rd, rs1, rs2   010     0000000  rd = (rs1 << 1) + (rs1[31] ? rs2 : 0)
+
+Ejemplos:
+  emad x3, x6, x3, 5   .word 0x0a33418b   rs1 = 0xffffffc0 (-64), rs2 = 0x00000cc0 (3264)  ->  rd = 0x00000cbe (3262)
+  emad x3, x6, x3, 5   .word 0x0a33418b   rs1 = 0x00000064 (100), rs2 = 0x00000cc0 (3264)  ->  rd = 0x00000cc3 (3267)
+  devk x6, x5, x3, 5   .word 0x0a32d30b   rs1 = 0x00000064 (100), rs2 = 0x00000cc0 (3264)  ->  rd = 0xffffffc0 (-64)
+  devk x6, x5, x3, 5   .word 0x0a32d30b   rs1 = 0x00000069 (105), rs2 = 0x00000cc0 (3264)  ->  rd = 0x00000060 (96)
+  mulstep x7, x7, x8   .word 0x0083a38b   rs1 = 0xc0000000 (-1073741824), rs2 = 0x000003e8 (1000)  ->  rd = 0x800003e8 (-2147482648)
+  mulstep x7, x7, x8   .word 0x0083a38b   rs1 = 0x40000000 (1073741824), rs2 = 0x000003e8 (1000)  ->  rd = 0x80000000 (-2147483648)
+
+Ocho pasos de mulstep con rs1 = 63 << 24 y rs2 = 255:
+  paso 1: 0x7e000000
+  paso 2: 0xfc000000
+  paso 3: 0xf80000ff
+  paso 4: 0xf00002fd
+  paso 5: 0xe00006f9
+  paso 6: 0xc0000ef1
+  paso 7: 0x80001ee1
+  paso 8: 0x00003ec1
+  resultado: 16065 = 63 * 255
