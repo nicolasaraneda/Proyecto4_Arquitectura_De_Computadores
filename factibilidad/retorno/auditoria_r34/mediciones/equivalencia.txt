@@ -1,0 +1,29 @@
+Estrategias reescritas en la auditoria contra las del arnes: patrimonio final y ordenes de cada serie
+36 archivos de series (semilla 0 a los dos largos, parte de la semilla 3, bloques y practica)
+propia           en el arnes                                                        series distintas sobre 2^31
+ejec_a           ejec:m=8                                                            46061         0          0
+ejec_b           ejec:m=8,m2=24,e2=32                                                46061         0          0
+kalman           cand:kalman                                                         46061         0          0
+aprendiz         cand:aprendiz                                                       46061         0          0
+aprendiz_rapido  cand:aprendiz_rapido                                                46061         0          0
+fondo_rec        cand:fondo_rec                                                      46061         0          0
+rec_e            cand:rec_e                                                          46061         0          0
+completo         cand:completo                                                       46061         0          0
+completo_s       cand:completo_s                                                     46061         0          0
+fondo_min        cand:fondo_min                                                      46061         0          0
+min_e            cand:min_e                                                          46061         0          0
+completo_min     cand:completo_min                                                   46061         0          0
+mm_c9000         (sin par en el arnes: no se compara)                            
+ea_c9000         (sin par en el arnes: no se compara)                            
+mm_c12000        (sin par en el arnes: no se compara)                            
+ea_c12000        (sin par en el arnes: no se compara)                            
+mm_c20000        (sin par en el arnes: no se compara)                            
+ea_c20000        (sin par en el arnes: no se compara)                            
+mm_k0            (sin par en el arnes: no se compara)                            
+ea_k0            (sin par en el arnes: no se compara)                            
+lim126           lim:L=126                                                           46061         0          0
+lim252           lim:L=252                                                           46061         0          0
+lim2m            lim:L=0                                                             46061         0        633
+limsin           (sin par en el arnes: no se compara)                            
+
+PASS: 15 estrategias con par en el arnes, 690915 corridas de series comparadas, 0 distintas

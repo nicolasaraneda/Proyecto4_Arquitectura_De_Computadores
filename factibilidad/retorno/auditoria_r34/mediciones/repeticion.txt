@@ -1,0 +1,28 @@
+== r3_ejecucion: make arnes validar cota descomposicion practica
+   make arnes          ok
+   make validar        ok
+   make cota           ok
+   make descomposicion ok
+   make practica       ok
+   18 archivos identicos, 0 distintos (la carpeta tiene 18)
+== r4b_fondo: make arnes prueba cota tablas bytes
+   make arnes          ok
+   make prueba         ok
+   make cota           ok
+   make tablas         ok
+   make bytes          ok
+   19 archivos identicos, 0 distintos (la carpeta tiene 19)
+== r4c_aprendizaje: make arnes causal equivalencia tamanos
+   make arnes          ok
+   make causal         ok
+   make equivalencia   ok
+   make tamanos        ok
+   37 archivos identicos, 0 distintos (la carpeta tiene 37)
+== r4_final: make arnes prueba campos tablas
+   make arnes          ok
+   make prueba         ok
+   make campos         ok
+   make tablas         ok
+   25 archivos identicos, 0 distintos (la carpeta tiene 25)
+
+PASS: 99 archivos de mediciones comparados despues de repetir, todos identicos

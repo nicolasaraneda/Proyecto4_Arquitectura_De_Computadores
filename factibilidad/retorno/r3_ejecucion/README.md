@@ -86,6 +86,7 @@ Rondas de 20 000 ticks, conjunto evidencia:
 - **A 20 000 ticks es la misma tasa compuesta.** +15,5 % de media geométrica en 10 tramos es +1,45 % por cada 2000 ticks (calculado a partir de la cifra medida). La vista de parada confirma el signo y el tamaño en puntos.
 - **Sin límite, la media de patrimonio con todas las series no sirve.** En las pocas series que bajan a precios de 1 a 5, una orden sin límite compra miles de acciones, el patrimonio se multiplica por miles y llega a desbordar los 32 bits (en el estrés a 20 000 ticks el percentil 5 sale negativo). Por eso la tabla usa el remuestreo, las series interiores (precio siempre entre 21 y 249), la media geométrica y los puntos, que no tienen ese problema. `mediciones/cota.txt` trae todas las vistas.
 - La cota es de la ejecución de esta señal. No dice nada de cambiar la señal.
+- **Notas de la auditoría (sección 17).** "Sin límite" es en realidad un límite de 2^21 acciones por orden (`cota/lim.c`). En las vistas de estas tablas da lo mismo que no tener ningún límite: con otra implementación, +120,1 ± 8,1 de patrimonio en el remuestreo y los mismos puntos en los dos casos. Solo cambia la media con todas las series, que ya estaba descartada. Y la cota no es un máximo de lo que se puede ganar con la ejecución: es lo que daría esta misma forma de operar con una maestra que no existe. En puntos tampoco crece siempre con el límite, como ya muestra la tabla de arriba: a 20 000 ticks con parada el límite de 252 da +0,045 y +0,084 y quitarlo da +0,042 y +0,081 (con las interiores quedan iguales dentro del error). Sirve para saber de qué tamaño es el efecto, no como techo.
 
 ## 6. Paso 2: de qué está hecho el costo de la ejecución actual
 
@@ -350,10 +351,10 @@ No existe en assembly. Las cifras de esta sección son un conteo a mano sobre la
 | B: comparación de dev con -(E + e2) | 5 más en todos | 94 en el peor | |
 
 - **Peor tick: unas 90 instrucciones** contra 27. El conteo de `factibilidad/d_isa` para una contabilidad completa, con valorización del patrimonio, es 143 solo con RV32E. Las dos caben: en el core base son 200 a 340 ciclos de los 2 262 de la ronda más rápida (con el CPI de 2,15 a 2,35 medido en `trade.s`), y en el barrel 90 a 143 de las 540 instrucciones que tiene cada hilo por tick.
-- **El cociente y el producto aparecen en el 1 % de los ticks** (0,8 a 1,0 %). El tick promedio queda en unas 40 instrucciones.
+- **El cociente y el producto aparecen en el 1 % de los ticks** (0,8 a 1,0 %). El tick promedio queda en unas 40 instrucciones. Esas cifras son del remuestreo y de la familia `modelo`. La auditoría las midió sobre el conjunto evidencia completo: 0,55 % de los ticks con cociente y 0,54 % con producto en rondas de 2000 ticks (1,09 % entre los dos) y 0,50 % y 0,49 % en rondas de 20 000.
 - **No justifica `mulstep` (+42 celdas) ni `divstep` (+108 celdas).** Bajarían el peor tick a unas 55 instrucciones, pero ese tick ocurre 20 veces por ronda y ya cabe con un margen de 7 veces. No hay nada que comprar con esas celdas.
 - **Memoria** (estimado): 2 palabras de estado (caja y acciones; caben en registros, RV32E tiene 7 libres en `trade.s`) y entre 60 y 75 palabras de programa más, sobre las 40 que usa hoy, de 512.
-- El programa actual no tiene saltos que dependan del precio (decisión T12). Con contabilidad el camino del tick depende de si hubo orden y de si fue recortada. Se puede hacer sin saltos, pagando siempre el peor caso (unas 90 instrucciones por tick).
+- El programa actual no tiene saltos que dependan del precio (decisión T12). Con contabilidad el camino del tick depende de si hubo orden y de si fue recortada. Se puede hacer sin saltos, pagando siempre el peor caso (unas 90 instrucciones por tick). Nota de la auditoría: esa cifra queda corta. Sin saltos hay que calcular en todos los ticks el cociente y también el producto, que con saltos nunca caen en el mismo tick. Sumando los caminos de la tabla son entre 145 y 190 instrucciones (estimado), unos 320 a 420 ciclos de los 2 262. Sigue cabiendo.
 
 ## 9. Validación
 
@@ -411,7 +412,7 @@ Es la regla que ya está en `sw/trade.s`, con una condición más. El resultado 
 
 ## 14. Qué falta y qué no se verificó
 
-- Las semillas reservadas no se usaron. El veredicto es de la semilla 0.
+- Las semillas reservadas no se usaron en este estudio. El veredicto de este documento es de la semilla 0. Después, el estudio de cierre (`../r4_final`) evaluó las dos candidatas una vez con la semilla reservada 3 y confirmó las cifras: A pasa en los cinco campos de rivales y B pasa contra `max_media` y no contra A (sección 17).
 - No existe el programa en assembly ni la referencia en `ref/trader.py`. No se corrió en el gemelo digital ni en el RTL.
 - No se midió qué pasa si se pierde un tick a mitad de ronda ni si una ronda parte con el espejo en posición abierta (se midió el espejo con otra caja, que es el efecto principal).
 - No se probó un detector de ronda nueva ni un espejo que se proteja solo.
@@ -439,8 +440,8 @@ Tiene que estar en el bitstream que se pruebe con la maestra real el 26/11.
 | Pieza | Veredicto | Razón |
 |-------|-----------|-------|
 | Regla actual de entrada y salida (repetir "comprar 63" y "vender 63") | **Competencia**, se mantiene | Ninguna forma de escalonar, limitar o anticipar la supera |
-| `ejec:m=8` (no mandar compras de menos de 8 acciones) | **Pasa el criterio de algoritmo** con la semilla 0, pendiente de la reservada. Competencia solo si se confirman caja, comisión y reset por ronda; si no, exhibición | +0,007 puntos (H3a), percentil 5 no baja, 9 de 9 combinaciones, parada confirma. No agrega hardware. Riesgo de 3 a 30 % si el espejo parte bajo |
-| `ejec:m=8,m2=24,e2=32` (además, el resto mediano solo más abajo) | **Pasa el criterio de algoritmo** con la semilla 0, pendiente de la reservada. Mismas condiciones | +0,012 puntos (H3a). Dos parámetros más y una celda negativa en el estrés interior a 20 000 ticks |
+| `ejec:m=8` (no mandar compras de menos de 8 acciones) | **Pasa el criterio de algoritmo** con la semilla 0 y, en el estudio de cierre, con la reservada (sección 17). Competencia solo si se confirman caja, comisión y reset por ronda; si no, exhibición | +0,007 puntos (H3a), percentil 5 no baja, 9 de 9 combinaciones, parada confirma. No agrega hardware. Riesgo de 3 a 30 % si el espejo parte bajo |
+| `ejec:m=8,m2=24,e2=32` (además, el resto mediano solo más abajo) | **Pasa el criterio de algoritmo** contra `max_media` con la semilla 0 y con la reservada. Contra la candidata A no pasa (sección 17). Mismas condiciones | +0,012 puntos (H3a). Dos parámetros más y una celda negativa en el estrés interior a 20 000 ticks |
 | Tope en K órdenes o en una fracción del patrimonio | Descartada | Baja los puntos esperados |
 | Entrada escalonada o anticipada | Descartada | El signo no se repite entre remuestreo y plausibles |
 | Tamaño según la profundidad (completar más abajo) | Descartada | Baja el patrimonio y los puntos |
@@ -449,3 +450,36 @@ Tiene que estar en el bitstream que se pruebe con la maestra real el 26/11.
 | `mulstep` y `divstep` para la contabilidad | No se justifican | El peor tick cabe en software con margen de 7 veces y ocurre en el 1 % de los ticks |
 
 Elegir es decisión de Nicolás. Este estudio no tocó `ref/trader.py`, `sw/trade.s` ni ningún archivo fuera de esta carpeta.
+
+## 17. Auditoría
+
+Revisión independiente hecha el 15/11 junto con la de los estudios del fondo, del aprendizaje y del cierre. Todo está en `../auditoria_r34/` y se corre con `make todo` desde ahí. Aquí va lo que toca a este estudio.
+
+### 17.1 Qué se revisó y qué dio
+
+| Punto | Cómo | Resultado |
+|-------|------|-----------|
+| Información del futuro | Comando `causal` y una perturbación propia de los precios futuros (63 cortes por serie, cinco formas de perturbar) más una prueba de martingala, para `ejec:m=8`, la candidata B y una variante de cada familia (`K`, `F`, `eo`, `ec`, `xc`, `nr`, `nt`, `mv`) | 0 fallas. El espejo se calcula con precios ya recibidos y con las decisiones propias |
+| `ejec.c` | La regla con espejo se escribió de nuevo a partir de este README, con otra contabilidad y sin usar el núcleo | `ejec:m=8` y `ejec:m=8,m2=24,e2=32`: 46 061 series de 36 archivos (todas las familias de la semilla 0 a los dos largos, parte de la semilla 3, bloques y práctica), 0 distintas. En la práctica completa, 26 567 con 606 órdenes y 26 683 con 596 |
+| Criterio de corte | Torneo con el valor esperado exacto, tres vistas, cinco campos, semillas 0 y 3 | A contra `max_media`, campo mixto, semilla 0 / semilla 3: +0,0075 ± 0,0002 / +0,0074 ± 0,0002 con H3a y +0,0269 ± 0,0006 / +0,0272 ± 0,0006 con H3b a 2000 ticks; +0,0066 / +0,0064 y +0,0476 / +0,0478 a 20 000 con parada. Positivo con más de 15 errores en los cinco campos. El percentil 5 de tres rondas sube |
+| Cota | La regla con un límite por orden hipotético, escrita de nuevo, contra el binario de la cota y contra las cifras de la sección 5 | 126, 252 y 2^21 acciones por orden: 46 061 series cada una, 0 distintas sin contar las que desbordan 32 bits. Las cifras de la sección 5 se reproducen: +103,1 ± 5,0, +116,5 ± 6,1 y +120,1 ± 8,1 de patrimonio; +0,0357 y +0,0730 puntos sin límite |
+| Robustez | Espejo propio separado de la cuenta real | Caja real 9 000: +0,7 y +6. 12 000: -21 y -640. 20 000: -657 y -7 723. Comisión real 0: -13 y -986. Iguales a la sección 8.5 |
+| Aritmética | Lectura de `ejec.c` y contadores de la estrategia sobre el conjunto evidencia | Solo `63 p`, `8 p`, un cociente menor que 63 y un producto de 6 por 8 bits, como dice la sección 8.6. Ningún tick con el espejo distinto de la cuenta real |
+| Repetición | `make validar`, `make cota`, `make descomposicion` y `make practica` de esta carpeta, con el binario recompilado contra el núcleo actual | Los 18 archivos de `mediciones/` quedan idénticos |
+
+### 17.2 Correcciones y precisiones
+
+1. **Sección 5, "sin límite".** Son 2^21 acciones por orden. Con la regla sin ningún límite las cifras de la sección son las mismas; solo cambia la media con todas las series, que ya estaba descartada.
+2. **Sección 5, "cuánto se gana como máximo".** La cota no es un máximo: es lo que daría esta forma de operar con una maestra sin límite, y en puntos no crece siempre con el límite. Sirve para saber el tamaño del efecto.
+3. **Sección 8.6, frecuencia.** Sobre el conjunto evidencia completo el cociente y el producto aparecen en el 1,09 % de los ticks a 2000 y en el 0,98 % a 20 000, no en "0,8 a 1,0 %", que era del remuestreo y de la familia `modelo`.
+4. **Sección 8.6, versión sin saltos.** No son unas 90 instrucciones sino entre 145 y 190 (estimado), porque sin saltos el cociente y el producto se calculan en el mismo tick. Cabe igual.
+5. **Secciones 14 y 16, semilla reservada.** El estudio de cierre evaluó A y B una vez con la semilla 3. A pasa en los cinco campos. B pasa contra `max_media` y no contra A, porque pierde con H3b en rondas largas (-0,009 con el campo mixto). Esa pérdida es desempate contra el rival idéntico, el mismo efecto de la sección 8.3: con H3a sola B queda sobre A en todo lo evaluado (+0,003 a +0,030). Elegir A es una decisión de prudencia.
+
+Ninguna cifra de las tablas cambió y ninguna medición se volvió a generar.
+
+### 17.3 Lo que no se cubrió
+
+- Las 61 variantes del barrido no se volvieron a correr.
+- La descomposición por clase de orden y el camino del precio (sección 6) no se recalcularon por otro camino: se repitió `make descomposicion` y da lo mismo.
+- El control del desempate con E = 112 (sección 8.3) no se rehízo.
+- Las instrucciones por tick siguen siendo un conteo a mano.

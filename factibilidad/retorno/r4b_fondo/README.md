@@ -149,6 +149,7 @@ Qué dice la cota:
 3. **Los gestores de reversión diversifican poco entre sí**: correlaciones de 0,76 a 0,98 con `max_media`. El único que no está correlacionado es comprar y mantener (0,11), y pierde 1209 de patrimonio medio contra `max_media`.
 4. **La mejor mezcla fija es `max_media` sola en tres de los cuatro conjuntos**, en los dos largos. Solo el conjunto 3 deja algo: +0,005 con H3a y +0,019 con H3b. Y esa cifra es ideal: supone que una cuenta con la cuarta parte del capital paga la cuarta parte de la comisión. La sección 6 muestra que con la comisión real desaparece.
 5. **En las series de estrés la mezcla sí ayuda** (`mediciones/cota_n2000_estres.txt`): con 4/8, 2/8, 2/8 del conjunto 1, +0,018 ± 0,004 y +0,049 ± 0,004 en puntos y +0,234 ± 0,019 en el percentil 5 de tres rondas. Es el argumento del fondo como seguro.
+6. **Notas de la auditoría (sección 17).** El oráculo y la mezcla fija se recalcularon con otro evaluador y coinciden. Dos precisiones. La mezcla 3/8, 3/8, 2/8 es la mejor por H3a; por H3b la mejor es 0/8, 5/8, 3/8, con +0,023 a 2000 ticks y +0,031 a 20 000 con las interiores. Y la tabla de 20 000 ticks es solo de las series interiores: con la vista de parada la mezcla 3/8, 3/8, 2/8 da -0,006 ± 0,001 con H3a y +0,011 ± 0,002 con H3b, la mejor mezcla por H3a pasa a ser `max_media` sola y la mejor por H3b (2/8, 5/8, 1/8) da +0,015. Sin el filtro de interiores hay todavía menos para ganar.
 
 ## 6. Exploración a 2000 ticks
 
@@ -328,7 +329,7 @@ Deja en `build/` el archivo `decisiones_NOMBRE.csv` (mismo formato que el `decis
 | `fondo_rec` | 25 141 | 594 | `beb4a4fe480edddc8a2b781c945a1ca1` |
 | `fondo_min` | 26 388 | 614 | `4ce5af5bf2106e7820a14164199158e5` |
 
-En `fondo_rec` el 99,9 % de los bytes son `bf`, `7f` o `00`: de 20 000 ticks, 14 753, 3 036 y 2 186. Las órdenes parciales son 25 bytes. El `correr` del arnés acepta `--perdidos 2` para modelar los dos precios que se pierden en el reset del testbench oficial.
+En `fondo_rec` el 99,9 % de los bytes son `bf`, `7f` o `00`: de 20 000 ticks, 14 753, 3 036 y 2 186. Las órdenes parciales son 25 bytes. Eso cuenta los bytes con una cantidad parcial, no las veces que hay que calcularla: el supervisor tiene un objetivo parcial, con sus productos y su comparación contra la banda, en 2 300 de los 20 000 ticks de la serie de práctica, y en el 11 % de los ticks en el conjunto evidencia (225 por ronda de 2000 ticks, medido en la auditoría). El camino caro de la sección 10.2 no es un caso raro. El `correr` del arnés acepta `--perdidos 2` para modelar los dos precios que se pierden en el reset del testbench oficial.
 
 ## 11. Cuántas variantes se probaron
 
@@ -339,7 +340,7 @@ En `fondo_rec` el 99,9 % de los bytes son `bf`, `7f` o `00`: de 20 000 ticks, 14
 
 ## 12. Qué falta y qué no se verificó
 
-- **No se usó ninguna semilla reservada.** Todo es de la semilla 0. Como nada pasa con la semilla de exploración, la semilla reservada solo confirmaría un negativo.
+- **No se usó ninguna semilla reservada.** Todo es de la semilla 0. Como nada pasa con la semilla de exploración, la semilla reservada solo confirmaría un negativo. Así fue: el estudio de cierre (`../r4_final`) evaluó `fondo_rec` y `fondo_min` una vez con la semilla reservada 3 y ninguno pasa (sección 17).
 - **Las instrucciones, la memoria y el tiempo de respuesta son estimaciones.** No hay assembly ni simulación en el barrel.
 - **El veredicto oficial se corrió con el campo mixto y G = 10.** La sensibilidad al campo sale del comando `hipotesis` (ingenuo y fuerte con G = 10, en `mediciones/tablas.md`), no de las 9 combinaciones de `pruebas/veredictos.py`.
 - **El cuarto gestor experimental** solo se probó como mecanismo.
@@ -386,3 +387,32 @@ Además depende de que el barrel (pieza A) sea el core de la edición que se pru
 | `fondo_rec` | Exhibición, si se quiere mostrar contabilidad y posiciones parciales | -0,004 y +0,006 a 2000 ticks, 6,5 días y la memoria casi llena |
 
 La estrategia de competencia sigue siendo `max_media` sola. Si Nicolás quiere el fondo de todos modos, la recomendación es `fondo_min` en la edición de exhibición, con el supervisor esperando a los gestores en el mismo tick.
+
+## 17. Auditoría
+
+Revisión independiente hecha el 15/11 junto con la de los estudios de ejecución, de aprendizaje y de cierre. Todo está en `../auditoria_r34/` y se corre con `make todo` desde ahí. Aquí va lo que toca a este estudio.
+
+### 17.1 Qué se revisó y qué dio
+
+| Punto | Cómo | Resultado |
+|-------|------|-----------|
+| Información del futuro | Lectura de `fondo.c` y dos pruebas: el comando `causal` y una perturbación propia de los precios futuros (63 cortes por serie, entre ellos los bordes de las ventanas de 512 ticks) más una prueba de martingala, para las 5 configuraciones con nombre y 8 variantes: líder acumulado, líder con ventana, pesos aprendidos con ventana de 64 ticks, puntaje por acción, ancla, voto con histéresis y banda 0 | 0 fallas. Cada gestor ejecuta en su cuenta en papel su decisión anterior al precio que acaba de llegar y después decide; el puntaje por acción solo suma el cambio de precio si la acción ya estaba ejecutada; nada queda entre rondas |
+| Supervisor | Escrito de nuevo a partir de la sección 4.2, con otra contabilidad y sin usar el núcleo: pesos fijos con banda, voto, pesos aprendidos y puntaje por acción | `fondo_rec` y `fondo_min`: 46 061 series de 36 archivos cada uno, 0 distintas. En la práctica completa, 25 141 con 594 órdenes para `fondo_rec` |
+| Cifras | Torneo con el valor esperado exacto, semillas 0 y 3 | `fondo_rec` contra `max_media`, campo mixto, semilla 0 / semilla 3: -0,0037 ± 0,0009 / -0,0052 ± 0,0009 con H3a y +0,0055 ± 0,0015 / +0,0052 ± 0,0015 con H3b a 2000 ticks; -0,0086 / -0,0078 y +0,0059 / +0,0066 a 20 000 con parada. `fondo_min`: +0,0002 / -0,0003 a 2000 ticks y -0,0195 / -0,0198 con H3a a 20 000 con parada. Son las cifras de este documento |
+| Cotas | Oráculo de selección y mezcla fija recalculados con el Kalman reescrito | Conjunto 1: +0,3417 ± 0,0050 y +0,3315 ± 0,0045. Conjunto 3: +0,1523 y +0,1855 a 2000 ticks, +0,0793 y +0,1049 a 20 000 con interiores. Conjunto 4: +0,1676 y +0,2013. Mezcla 3/8, 3/8, 2/8: +0,0049 ± 0,0014 y +0,0191 ± 0,0020. Coinciden con la sección 5. El conjunto 2 no se recalculó |
+| Repetición | `make prueba`, `make cota`, `make tablas` y `make bytes` de esta carpeta, con el binario recompilado contra el núcleo actual | Los 19 archivos de `mediciones/` quedan idénticos |
+
+### 17.2 Precisiones
+
+1. **Sección 5, mezcla fija.** La mezcla 3/8, 3/8, 2/8 es la mejor por H3a. Por H3b la mejor es 0/8, 5/8, 3/8 (+0,023 a 2000 ticks). A 20 000 ticks la tabla es de las series interiores: con parada esa mezcla da -0,006 ± 0,001 con H3a y +0,011 ± 0,002 con H3b, y la mejor por H3a es `max_media` sola. Sin el filtro de interiores hay menos para ganar todavía.
+2. **Sección 10.4, órdenes parciales.** Los 25 bytes con cantidad parcial no dicen cada cuánto corre el camino caro. El supervisor calcula un objetivo parcial en el 11 % de los ticks (225 por ronda de 2000 ticks y 2 250 por ronda de 20 000 en el conjunto evidencia).
+3. **Sección 12, semilla reservada.** El estudio de cierre evaluó `fondo_rec` y `fondo_min` una vez con la semilla 3. Ninguno pasa.
+4. Las cotas no se presentan como alcanzables: el texto dice que el oráculo no se puede cobrar y que la mezcla es ideal. Bien.
+
+Ninguna cifra de las tablas cambió y ninguna medición se volvió a generar.
+
+### 17.3 Lo que no se cubrió
+
+- Las 88 variantes de la exploración no se volvieron a correr. De las configuraciones con nombre se reescribieron `fondo_rec` y `fondo_min`; `fondo_ancla` y las dos con desfase de un tick, no.
+- La persistencia del líder y las correlaciones de la sección 5 no se recalcularon.
+- Las instrucciones, la memoria y los días siguen siendo estimaciones.

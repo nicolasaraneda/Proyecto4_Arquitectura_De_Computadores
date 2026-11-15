@@ -1,0 +1,30 @@
+1. Salidas con el torneo.c anterior (9b82e81) y con el actual, comparadas byte a byte
+   torneo.c anterior: 8cc3c3094b7637e911337ae45bc9af5c   actual: c5f0dff73b4432a389cbec3322cb6700
+   01_rivales.txt                                   6432 bytes  574698666fda534e  identica
+   02_hipotesis_n2000_ingenuo_G15.txt              98222 bytes  16eca58a1653f3fa  identica
+   03_hipotesis_n2000_s1_fuerte.txt                98235 bytes  85c351a8cf048d02  identica
+   04_hipotesis_n20000_int.txt                     98272 bytes  dae8dea6326873c1  identica
+   05_hipotesis_n20000_par_fuerte.txt              43553 bytes  20564fb8fc0f306a  identica
+   06_hipotesis_n2000_externas_G5.txt              48679 bytes  e6dc0bbfc07440ea  identica
+   07_veredicto_completo.txt                        7839 bytes  0d9936fe4e7963a9  identica
+   08_veredicto_ejec_ingenuo_G5.txt                 6846 bytes  bfc817e031a0395a  identica
+   09_veredicto_min_contra_ejec_fuerte.txt          3035 bytes  1a575f00216d6365  identica
+   10_veredicto_activo_s1.txt                       2990 bytes  8c8a2a5026f3e42b  identica
+   11_frontera_s1.txt                              15197 bytes  46a445275d581fe5  identica
+
+2. Salidas versionadas del arnes, generadas de nuevo con el binario actual (sin reescribir ../mediciones)
+   hipotesis_s0.txt                               294703 bytes  83b8ee2bad2b07c6  identica (la versionada esta igual al repositorio)
+   rivales.txt                                      6432 bytes  574698666fda534e  identica (la versionada esta igual al repositorio)
+
+3. Que cambio en el nucleo respecto del repositorio (9b82e81)
+   nucleo.h     sin cambios
+   nucleo.c     sin cambios
+   e_param.c    sin cambios
+   e_rivales.c  sin cambios
+   torneo.h     sin cambios
+   main.c       sin cambios
+   nucleo.mk    sin cambios
+   torneo.c     +52 -2
+   huella del nucleo (nucleo.h, nucleo.c, e_param.c, e_rivales.c): 76399e005fd4ed8
+
+SIN_CAMBIOS: OK

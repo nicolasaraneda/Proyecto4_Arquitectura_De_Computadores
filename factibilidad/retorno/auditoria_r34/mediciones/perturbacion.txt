@@ -1,0 +1,66 @@
+Perturbacion propia de los precios futuros: 59 estrategias, 6 series de 8192 ticks, 63 cortes por serie
+Fallas por prueba: repeticion tras otra ronda, futuro al azar, futuro parecido, solo precio de ejecucion, serie cortada.
+Martingala: 4000 series de 2000 ticks sin sesgo y sin comision; media del patrimonio final menos 10000 y su error.
+
+estrategia                                                                                 rep  azar lento  ejec corte pruebas        mart       ee       z  juicio
+cand:max_media                                                                               0     0     0     0     0    1518       +5.82    19.84   +0.29  ok
+ejec:m=8                                                                                     0     0     0     0     0    1518       +5.84    19.74   +0.30  ok
+ejec:m=8,m2=24,e2=32                                                                         0     0     0     0     0    1518       +5.63    19.26   +0.29  ok
+ejec:K=2                                                                                     0     0     0     0     0    1518       +4.86    19.79   +0.25  ok
+ejec:F=12                                                                                    0     0     0     0     0    1518       +3.73    18.38   +0.20  ok
+ejec:eo=16                                                                                   0     0     0     0     0    1518      +10.70    20.67   +0.52  ok
+ejec:ec=1,eo=16                                                                              0     0     0     0     0    1518      +14.27    21.27   +0.67  ok
+ejec:xc=1,xo=16                                                                              0     0     0     0     0    1518       +1.30    18.93   +0.07  ok
+ejec:nr=1                                                                                    0     0     0     0     0    1518       +5.76    19.83   +0.29  ok
+ejec:nt=3                                                                                    0     0     0     0     0    1518       +5.49    19.83   +0.28  ok
+ejec:mv=8                                                                                    0     0     0     0     0    1518       +6.89    19.86   +0.35  ok
+cand:fondo_rec                                                                               0     0     0     0     0    1518       +8.09    19.97   +0.41  ok
+cand:fondo_rec_ant                                                                           0     0     0     0     0    1518      +10.99    20.01   +0.55  ok
+cand:fondo_ancla                                                                             0     0     0     0     0    1518       +3.01    18.24   +0.16  ok
+cand:fondo_min                                                                               0     0     0     0     0    1518       +5.66    19.84   +0.29  ok
+cand:fondo_min_ant                                                                           0     0     0     0     0    1518       +7.72    19.86   +0.39  ok
+fondo:c=1,m=1,v=0,mg=6                                                                       0     0     0     0     0    1518       -0.90    26.22   -0.03  ok
+fondo:c=3,m=1,v=9,mg=6                                                                       0     0     0     0     0    1518      +19.28    20.92   +0.92  ok
+fondo:c=2,m=1,v=6,mg=8                                                                       0     0     0     0     0    1518      -32.09    29.44   -1.09  ok
+fondo:c=5,m=1,v=6,mg=6,pp=1                                                                  0     0     0     0     0    1518       +9.84    20.20   +0.49  ok
+fondo:c=3,w0=6,w1=5,w2=5,m=2,v=6,mg=8,d=6,ps=2                                               0     0     0     0     0    1518      +11.73    20.15   +0.58  ok
+fondo:c=1,w0=10,w1=2,w2=4,m=2,v=9,mg=6,d=4,fj=4,b=1                                          0     0     0     0     0    1518       -2.72    19.77   -0.14  ok
+fondo:c=3,w0=6,w1=5,w2=5,vt=11,vs=0                                                          0     0     0     0     0    1518       +7.61    21.01   +0.36  ok
+fondo:c=3,w0=8,w1=4,w2=4,b=0                                                                 0     0     0     0     0    1518       +8.61    19.93   +0.43  ok
+cand:aprendiz                                                                                0     0     0     0     0    1518       +7.25    19.80   +0.37  ok
+cand:aprendiz_rapido                                                                         0     0     0     0     0    1518       +8.24    19.22   +0.43  ok
+cand:espera                                                                                  0     0     0     0     0    1518      +10.65    19.32   +0.55  ok
+cand:aprendiz_patron                                                                         0     0     0     0     0    1518       +4.25    19.78   +0.21  ok
+cand:aprendiz_puro                                                                           0     0     0     0     0    1518       -4.91    28.41   -0.17  ok
+tabla:ka=6,h=16                                                                              0     0     0     0     0    1518       -2.08    22.01   -0.09  ok
+tabla:ka=8,h=4                                                                               0     0     0     0     0    1518      +15.61    17.69   +0.88  ok
+tabla:ka=6,h=32                                                                              0     0     0     0     0    1518      -20.66    23.65   -0.87  ok
+tabla:ka=8,h=126                                                                             0     0     0     0     0    1518      +31.34    23.32   +1.34  ok
+tabla:modo=1,bits=4,h=16                                                                     0     0     0     0     0    1518       +5.82    19.84   +0.29  ok
+tabla:banda=1,ka=8,h=16,lim=2                                                                0     0     0     0     0    1518      +15.79    18.40   +0.86  ok
+tabla:ter=1,ka=8,h=8                                                                         0     0     0     0     0    1518      +10.56    18.82   +0.56  ok
+tabla:ter=2,ka=8,h=16                                                                        0     0     0     0     0    1518      +12.17    18.38   +0.66  ok
+tabla:filas=2,ka=8,h=16                                                                      0     0     0     0     0    1518      +10.31    19.35   +0.53  ok
+tabla:ka=6,h=16,dir=1                                                                        0     0     0     0     0    1518       -0.07    21.55   -0.00  ok
+patron:tipo=0,H=8,sim=2,bits=2,h=1                                                           0     0     0     0     0    1518      -18.08    27.72   -0.65  ok
+patron:tipo=3,H=12,sim=2,bits=2,h=16                                                         0     0     0     0     0    1518       -7.42    27.50   -0.27  ok
+mm_patron:tipo=0,H=6,sim=3,bits=2,h=4,fe=1,fs=1,maxp=4                                       0     0     0     0     0    1518       +9.02    19.82   +0.46  ok
+cand:ejec_a                                                                                  0     0     0     0     0    1518       +5.84    19.74   +0.30  ok
+cand:ejec_b                                                                                  0     0     0     0     0    1518       +5.63    19.26   +0.29  ok
+cand:espera_e                                                                                0     0     0     0     0    1518      +10.55    19.25   +0.55  ok
+cand:rec_e                                                                                   0     0     0     0     0    1518       +7.74    19.88   +0.39  ok
+cand:min_e                                                                                   0     0     0     0     0    1518       +5.51    19.77   +0.28  ok
+cand:completo                                                                                0     0     0     0     0    1518       +7.34    19.82   +0.37  ok
+cand:completo_s                                                                              0     0     0     0     0    1518       +7.95    19.92   +0.40  ok
+cand:completo_esp                                                                            0     0     0     0     0    1518       +8.48    19.75   +0.43  ok
+cand:completo_ap                                                                             0     0     0     0     0    1518       +9.69    19.81   +0.49  ok
+cand:completo_ancla                                                                          0     0     0     0     0    1518       +3.38    18.23   +0.19  ok
+cand:completo_min                                                                            0     0     0     0     0    1518       +5.84    19.75   +0.30  ok
+fondoc:c=5,x=cand:aprendiz_rapido,w0=4,w1=4,w2=4,w3=4,m=2,v=6,mg=7,d=4,pp=1,vt=8,em=8        0     0     0     0     0    1518      +18.32    19.49   +0.94  ok
+fondoc:c=3,x=tabla:ka~6/h~16,w0=4,w1=4,w2=4,w3=4,m=1,v=6,mg=8,b=1,em=8                       0     0     0     0     0    1518      -13.00    22.33   -0.58  ok
+filtro:x=tabla:ka~6/h~16,m=8                                                                 0     0     0     0     0    1518       -1.50    21.76   -0.07  ok
+tramposa                                                                                     0   272   121   296   105    1518   +40188.92    36.70 +1095.15  falla (control: correcto)
+tramposa_lenta                                                                               0    12     0     1     1    1518      +17.00    19.78   +0.86  falla (control: correcto)
+memoriosa                                                                                    6   294   291   292   291    1518      +10.40    15.83   +0.66  falla (control: correcto)
+
+PASS: 56 estrategias auditadas, 85008 comparaciones de decisiones, mayor |z| de martingala 1.34, 3 de 3 controles negativos detectados

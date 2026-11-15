@@ -1,0 +1,89 @@
+1. Fuentes que fijan las candidatas (ultima modificacion)
+   r3_ejecucion/ejec.c                14/11_12:43:25
+   r4b_fondo/fondo.c                  14/11_12:27:25
+   r4c_aprendizaje/e_tabla.c          14/11_12:40:01
+   r4c_aprendizaje/e_patron.c         14/11_12:20:07
+   r4c_aprendizaje/pred.h             14/11_12:19:41
+   r4c_aprendizaje/aprendiz.c         14/11_12:50:53
+   nucleo/e_param.c                   13/11_20:39:53
+   nucleo/e_rivales.c                 13/11_20:39:53
+   nucleo/nucleo.c                    14/11_01:20:03
+   nucleo/torneo.c                    14/11_21:07:57
+   r4_final/fondoc.c                  14/11_21:09:28
+   r4_final/final.c                   14/11_21:10:07
+
+2. Semilla 3: series, lista y corrida
+   primera serie generada (remuestreo_s3_n2000.bin)           14/11_21:06:08
+   ultima serie generada (borde_alto_s3_n20000.bin)           14/11_21:07:13
+   tablas de la exploracion con la semilla 0 (bitacora)       21:29
+   expectativa escrita (titulo en AVANCE.md)                  14/11, 21:31
+   inicio de la corrida (reservada_usada.txt)                 14/11/2026 21:38
+   primera salida con la semilla 3 (hipotesis_final_s3_n2000) 14/11_21:38:24
+   ultima salida de evaluacion con la semilla 3               14/11_21:48:33
+   registro de la corrida (build/final_s3.log)                14/11_21:50:11
+   Fuentes modificados DESPUES del inicio de la corrida con la semilla 3 (21:38):
+     r4_final/tablas.py                 14/11_22:13:38
+     r4_final/lista_final.txt           14/11_21:57:50
+
+3. La lista final: huella de la original contra la anotada antes de la corrida
+   md5 de build/lista_final_original.txt: 3a940a4958f7a18fc118a287618d32c3
+   md5 anotado en reservada_usada.txt:    3a940a4958f7a18fc118a287618d32c3
+   lineas que cambian entre la original y la actual: 1; de ellas, lineas que no son comentario: 0
+   candidatas y duelos de la original, sin comentarios:
+     ejec_a;fondo_rec;completo;espera;ejec_b;aprendiz;rec_e;completo_ancla;fondo_min;completo_min;base;completo contra ejec_a;rec_e contra ejec_a;completo_min contra ejec_a;fondo_rec contra ejec_a;ejec_b contra ejec_a;
+   candidatas que de verdad se corrieron con la semilla 3 (build/final_s3.log):
+     ejec_a fondo_rec completo espera ejec_b aprendiz rec_e completo_ancla fondo_min completo_min base 
+
+4. Otros usos de la semilla 3 en los estudios de retorno
+   archivos con _s3 fuera de build/series y de r4_final:
+   (fin de la lista)
+   resultados guardados del arnes con la semilla 3 (build/resultados):
+     0
+   scripts de los estudios 3, 4B y 4C que nombran la semilla 3:
+   (fin de la lista)
+   scripts que se niegan a usar semillas reservadas:
+     r4b_fondo/explorar.py:8:# semillas 2 y 3 son reservadas y este script se niega a usarlas.
+     r4b_fondo/explorar.py:305:    assert SEMILLA not in (2, 3), "las semillas 2 y 3 son reservadas"
+     r4_final/correr.py:9:    python3 correr.py --semilla 3 --lista final           la semilla reservada: UNA vez
+     r4_final/correr.py:31:una marca en mediciones/reservada_usada.txt: si la marca existe, el programa
+     r4_final/correr.py:32:se niega a correr de nuevo salvo con --repetir, que sirve para reproducir las
+     r4_final/correr.py:77:        # Los resultados de la semilla reservada se guardan en la carpeta de este estudio.
+     r4_final/correr.py:140:    ap.add_argument("--repetir", action="store_true", help="volver a correr la semilla reservada para reproducir sus cifras")
+     r4_final/correr.py:143:        sys.exit("este estudio solo usa las semillas 0 (exploracion) y 3 (reservada)")
+     r4_final/correr.py:145:        sys.exit("la semilla 3 es la reservada: solo se corre con la lista final")
+     r4_final/correr.py:153:        marca = os.path.join(M, "reservada_usada.txt")
+     r4_final/correr.py:155:            if os.path.exists(marca) and not a.repetir:
+     r4_final/correr.py:156:                sys.exit("la semilla 3 ya se uso (mediciones/reservada_usada.txt). Con --repetir se reproducen las cifras.")
+
+5. Cuantas variantes se probaron
+   estudio 3 (ejecucion): 38 en variantes.txt (una es el control) y 24 en variantes2.txt
+   estudio 4B (fondo): variantes fondo:... distintas en mediciones/exploracion_n2000_*: 88; configuraciones con nombre en finales_n2000: 5; a 20 000 ticks: 22
+   estudio 4C (aprendizaje), de mediciones/barrido_cuenta.txt:
+     Variantes evaluadas en el barrido (semilla 0)
+       tabla_ka_h         2000 ticks, todas        21
+       tabla_c            2000 ticks, todas        15
+       tabla_umbral       2000 ticks, todas        20
+       tabla_forma        2000 ticks, todas        26
+       tabla_contador     2000 ticks, todas        29
+       tabla_banda        2000 ticks, todas        41
+       signo              2000 ticks, todas        17
+       redondeo           2000 ticks, todas         8
+       espera             2000 ticks, todas        12
+       patron             2000 ticks, todas        24
+       filtro             2000 ticks, todas        40
+   estudio de cierre: 11 alias propios en final.c; configuraciones de la exploracion:
+     7:    python3 correr.py --semilla 0 --lista exploracion     todas las configuraciones (semilla de exploración)
+     53:EXPLORACION = ["base", "kalman", "ejec_a", "ejec_b", "espera", "aprendiz", "aprendiz_patron", "espera_e",
+     103:def copiar_de_exploracion(lista):
+     108:            origen = os.path.join(TSV, f"exploracion_s0_{vista}_{campo}.tsv")
+     110:                sys.exit(f"falta {origen}: correr antes --semilla 0 --lista exploracion")
+
+6. Las candidatas finales ya estaban fijadas por sus estudios antes de que existiera la semilla 3
+   r3: mediciones/finales_veredictos.txt (ejec:m=8 y la B)            14/11_17:31:37
+   r4b: mediciones/veredicto_fondo_rec.txt                            14/11_12:43:54
+   r4c: mediciones/cuarto_gestor_n2000.txt (pesos 6/3/3/4)            14/11_17:42:59
+   especificaciones en esas salidas:
+     ejec:m=8
+     ejec:m=8,m2=24,e2=32
+     fondo:c=3,w0=8,w1=4,w2=4,b=4"
+     fondo:c=3,x=cand:{g},w0=6,w1=3,w2=3,w3=4,b=4"
