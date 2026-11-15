@@ -1,0 +1,43 @@
+== 1. Causalidad ==
+  fondo:c=1                                                    ok
+PASS: 1 estrategias, 78 comparaciones, 0 fallas
+  fondo:c=1,w0=12,w1=2,w2=2,b=1                                ok
+PASS: 1 estrategias, 78 comparaciones, 0 fallas
+  fondo:c=2,m=1,v=9,mg=6                                       ok
+PASS: 1 estrategias, 78 comparaciones, 0 fallas
+  fondo:c=3,m=2,w0=12,w1=2,w2=2,v=8,mg=7,d=4                   ok
+PASS: 1 estrategias, 78 comparaciones, 0 fallas
+  fondo:c=1,m=1,v=0,mg=5,pp=1,df=1                             ok
+PASS: 1 estrategias, 78 comparaciones, 0 fallas
+  fondo:c=4,w0=8,w1=4,w2=4,vt=8,df=1                           ok
+PASS: 1 estrategias, 78 comparaciones, 0 fallas
+  fondo:c=1,x=cand:activo,w0=8,w1=2,w2=2,w3=4                  ok
+PASS: 1 estrategias, 78 comparaciones, 0 fallas
+== 2. Identidad: todo el peso en un gestor ==
+  ok    fondo:c=1,w0=16 = max_media (20000 filas identicas)
+  ok    fondo:c=1,w0=0,w1=16 = prudente (20000 filas identicas)
+  ok    fondo:c=1,w0=0,w2=16 = byh:q=63,rep=1 (20000 filas identicas)
+  ok    fondo:c=2,w0=0,w1=16 = guardia (20000 filas identicas)
+  ok    fondo:c=3,w0=0,w1=16 = kalman (20000 filas identicas)
+  ok    fondo:c=3,w0=0,w2=16 = activo (20000 filas identicas)
+  ok    fondo:c=4,w0=0,w1=16 = base (20000 filas identicas)
+  ok    fondo:c=1,x=cand:kalman,w0=0,w3=16 = kalman (20000 filas identicas)
+== 3. Desfase de un tick ==
+  ok     fondo con df=1: byte leido en t igual al de max_media en t-1, 19998 filas, 0 distintas (t=1 lee bf)
+== 4. Espejo de la cuenta real (contador 3 = ticks con diferencia) ==
+  ok    remuestreo_s0_n2000 fondo:c=1,w0=12,w1=2,w2=2,b=1 series 5000, ticks con objetivo parcial 9554505, ticks con el espejo distinto 0
+  ok    remuestreo_s0_n2000 fondo:c=2,m=2,w0=10,w1=4,w2=2,v=8,mg=7,d=4,b=0,df=1 series 5000, ticks con objetivo parcial 6488220, ticks con el espejo distinto 0
+  ok    remuestreo_s0_n2000 fondo:c=3,w0=8,w1=4,w2=4,b=2 series 5000, ticks con objetivo parcial 1180162, ticks con el espejo distinto 0
+  ok    modelo_s0_n2000 fondo:c=1,w0=12,w1=2,w2=2,b=1 series 2500, ticks con objetivo parcial 4802311, ticks con el espejo distinto 0
+  ok    modelo_s0_n2000 fondo:c=2,m=2,w0=10,w1=4,w2=2,v=8,mg=7,d=4,b=0,df=1 series 2500, ticks con objetivo parcial 3617662, ticks con el espejo distinto 0
+  ok    modelo_s0_n2000 fondo:c=3,w0=8,w1=4,w2=4,b=2 series 2500, ticks con objetivo parcial 579095, ticks con el espejo distinto 0
+  ok    saltos_s0_n2000 fondo:c=1,w0=12,w1=2,w2=2,b=1 series 1000, ticks con objetivo parcial 1686643, ticks con el espejo distinto 0
+  ok    saltos_s0_n2000 fondo:c=2,m=2,w0=10,w1=4,w2=2,v=8,mg=7,d=4,b=0,df=1 series 1000, ticks con objetivo parcial 1537004, ticks con el espejo distinto 0
+  ok    saltos_s0_n2000 fondo:c=3,w0=8,w1=4,w2=4,b=2 series 1000, ticks con objetivo parcial 172922, ticks con el espejo distinto 0
+  ok    borde_bajo_s0_n2000 fondo:c=1,w0=12,w1=2,w2=2,b=1 series 200, ticks con objetivo parcial 399877, ticks con el espejo distinto 0
+  ok    borde_bajo_s0_n2000 fondo:c=2,m=2,w0=10,w1=4,w2=2,v=8,mg=7,d=4,b=0,df=1 series 200, ticks con objetivo parcial 272164, ticks con el espejo distinto 0
+  ok    borde_bajo_s0_n2000 fondo:c=3,w0=8,w1=4,w2=4,b=2 series 200, ticks con objetivo parcial 65486, ticks con el espejo distinto 0
+  ok    borde_alto_s0_n2000 fondo:c=1,w0=12,w1=2,w2=2,b=1 series 200, ticks con objetivo parcial 386844, ticks con el espejo distinto 0
+  ok    borde_alto_s0_n2000 fondo:c=2,m=2,w0=10,w1=4,w2=2,v=8,mg=7,d=4,b=0,df=1 series 200, ticks con objetivo parcial 85129, ticks con el espejo distinto 0
+  ok    borde_alto_s0_n2000 fondo:c=3,w0=8,w1=4,w2=4,b=2 series 200, ticks con objetivo parcial 39732, ticks con el espejo distinto 0
+PASS: todas las comprobaciones

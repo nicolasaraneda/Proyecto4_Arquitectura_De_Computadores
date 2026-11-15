@@ -1,0 +1,140 @@
+=== Cota a posteriori: conjunto evidencia, 20000 ticks, semilla 0, 4021 series interiores (precio siempre entre 21 y 249) ===
+
+--- 1. Correlacion entre los patrimonios finales de los gestores (Pearson, serie a serie) ---
+           max_media  prudente   guardia    kalman    activo      base       byh
+max_media      1.000     0.758     0.926     0.982     0.899     0.931    -0.030
+prudente       0.758     1.000     0.675     0.760     0.648     0.825    -0.107
+guardia        0.926     0.675     1.000     0.903     0.846     0.834    -0.024
+kalman         0.982     0.760     0.903     1.000     0.899     0.927    -0.039
+activo         0.899     0.648     0.846     0.899     1.000     0.819     0.025
+base           0.931     0.825     0.834     0.927     0.819     1.000    -0.050
+byh           -0.030    -0.107    -0.024    -0.039     0.025    -0.050     1.000
+
+Correlacion del exceso sobre max_media (W_k - W_max_media) con el de los demas, y media del exceso
+            prudente   guardia    kalman    activo      base       byh     media
+prudente       1.000     0.565    -0.039    -0.225     0.755     0.847     -8671
+guardia        0.565     1.000    -0.145    -0.074     0.332     0.672     -3593
+kalman        -0.039    -0.145     1.000     0.211     0.065    -0.120      +442
+activo        -0.225    -0.074     0.211     1.000    -0.210    -0.165     +2129
+base           0.755     0.332     0.065    -0.210     1.000     0.629     -3278
+byh            0.847     0.672    -0.120    -0.165     0.629     1.000    -16571
+
+--- Conjunto de gestores 1: max_media, prudente, byh ---
+Mejor gestor de la serie: max_media 79.7 %, prudente 14.1 %, byh 6.2 %
+                                   | H1 media     dif  +-ee      p5 |    H3a     dif  +-ee |    H3b     dif  +-ee |   dp5 a  +-ee |   dp5 b  +-ee
+max_media                          |    26534      +0     0   10987 |  1.855  +0.000 0.000 |  1.821  +0.000 0.000 |  +0.000 0.000 |  +0.000 0.000
+prudente                           |    17863   -8671   224    9784 |  1.436  -0.418 0.006 |  1.631  -0.190 0.004 |  -0.569 0.020 |  -0.317 0.028
+byh                                |     9963  -16571   330    3675 |  0.929  -0.926 0.009 |  1.228  -0.593 0.008 |  -1.128 0.020 |  -0.850 0.027
+ORACULO (mejor de los tres)        |    27259    +726    36   12155 |  1.900  +0.046 0.002 |  1.874  +0.053 0.003 |  +0.107 0.014 |  +0.133 0.021
+peor de los tres                   |     9300  -17234   323    3675 |  0.845  -1.009 0.007 |  1.139  -0.682 0.006 |  -1.142 0.019 |  -0.911 0.027
+mejor H3a: 8/8 0/8 0/8             |    26534      +0     0   10987 |  1.855  +0.000 0.000 |  1.821  +0.000 0.000 |  +0.000 0.000 |  +0.000 0.000
+mejor H3b: 8/8 0/8 0/8             |    26534      +0     0   10987 |  1.855  +0.000 0.000 |  1.821  +0.000 0.000 |  +0.000 0.000 |  +0.000 0.000
+mejor p5 H3a: 8/8 0/8 0/8          |    26534      +0     0   10987 |  1.855  +0.000 0.000 |  1.821  +0.000 0.000 |  +0.000 0.000 |  +0.000 0.000
+mejor p5 H3b: 8/8 0/8 0/8          |    26534      +0     0   10987 |  1.855  +0.000 0.000 |  1.821  +0.000 0.000 |  +0.000 0.000 |  +0.000 0.000
+Mezclas con max_media en 6/8 y 4/8 (para ver la pendiente):
+mezcla 4/8 0/8 4/8                 |    18248   -8285   165    9391 |  1.477  -0.377 0.004 |  1.662  -0.159 0.003 |  -0.423 0.015 |  -0.272 0.030
+mezcla 4/8 1/8 3/8                 |    19236   -7298   148   10018 |  1.537  -0.318 0.003 |  1.678  -0.143 0.003 |  -0.343 0.015 |  -0.228 0.030
+mezcla 4/8 2/8 2/8                 |    20223   -6310   133   10491 |  1.592  -0.263 0.003 |  1.692  -0.129 0.002 |  -0.276 0.014 |  -0.194 0.026
+mezcla 4/8 3/8 1/8                 |    21211   -5323   121   10678 |  1.640  -0.215 0.003 |  1.707  -0.114 0.002 |  -0.232 0.014 |  -0.183 0.021
+mezcla 4/8 4/8 0/8                 |    22198   -4335   112   10799 |  1.679  -0.176 0.003 |  1.726  -0.095 0.002 |  -0.203 0.014 |  -0.161 0.028
+mezcla 6/8 0/8 2/8                 |    22391   -4143    82   10515 |  1.686  -0.168 0.002 |  1.723  -0.098 0.002 |  -0.168 0.013 |  -0.150 0.029
+mezcla 6/8 1/8 1/8                 |    23379   -3155    67   10815 |  1.735  -0.120 0.001 |  1.737  -0.084 0.002 |  -0.112 0.011 |  -0.122 0.025
+mezcla 6/8 2/8 0/8                 |    24366   -2168    56   10927 |  1.775  -0.080 0.001 |  1.760  -0.060 0.002 |  -0.082 0.011 |  -0.117 0.020
+Persistencia (lider a mitad de ronda contra el mejor de la segunda mitad), filas = lider en la primera mitad:
+  max_media  lidera la 1a mitad en  66.4 %: en la 2a mitad gana max_media 65.6 %, prudente 17.8 %, byh 16.6 %
+  prudente   lidera la 1a mitad en  19.2 %: en la 2a mitad gana max_media 64.7 %, prudente 18.9 %, byh 16.3 %
+  byh        lidera la 1a mitad en  14.4 %: en la 2a mitad gana max_media 65.9 %, prudente 24.3 %, byh  9.8 %
+  el lider de la 1a mitad es el mejor de la 2a en 48.6 % de las series
+  rendimiento de la 2a mitad: lider de la 1a 1.5139, max_media 1.6455, diferencia -0.1315 +- 0.0060
+  correlacion entre la ventaja de prudente sobre max_media en la 1a mitad y en la 2a: +0.051
+seguir al lider desde la mitad     |    24864   -1670    82    8363 |  1.717  -0.140 0.005 |  1.718  -0.105 0.005 |  -0.291 0.026 |  -0.250 0.029
+
+--- Conjunto de gestores 2: max_media, guardia, byh ---
+Mejor gestor de la serie: max_media 75.2 %, guardia 18.3 %, byh 6.6 %
+                                   | H1 media     dif  +-ee      p5 |    H3a     dif  +-ee |    H3b     dif  +-ee |   dp5 a  +-ee |   dp5 b  +-ee
+max_media                          |    26534      +0     0   10987 |  1.856  +0.000 0.000 |  1.821  +0.000 0.000 |  +0.000 0.000 |  +0.000 0.000
+guardia                            |    22941   -3593   129   10156 |  1.688  -0.168 0.003 |  1.727  -0.093 0.003 |  -0.238 0.017 |  -0.183 0.026
+byh                                |     9963  -16571   330    3675 |  0.929  -0.927 0.009 |  1.229  -0.592 0.008 |  -1.128 0.021 |  -0.833 0.024
+ORACULO (mejor de los tres)        |    27143    +610    28   11823 |  1.892  +0.036 0.002 |  1.868  +0.047 0.002 |  +0.081 0.014 |  +0.106 0.020
+peor de los tres                   |     9623  -16910   325    3672 |  0.883  -0.973 0.008 |  1.177  -0.644 0.006 |  -1.134 0.020 |  -0.867 0.028
+mejor H3a: 8/8 0/8 0/8             |    26534      +0     0   10987 |  1.856  +0.000 0.000 |  1.821  +0.000 0.000 |  +0.000 0.000 |  +0.000 0.000
+mejor H3b: 8/8 0/8 0/8             |    26534      +0     0   10987 |  1.856  +0.000 0.000 |  1.821  +0.000 0.000 |  +0.000 0.000 |  +0.000 0.000
+mejor p5 H3a: 8/8 0/8 0/8          |    26534      +0     0   10987 |  1.856  +0.000 0.000 |  1.821  +0.000 0.000 |  +0.000 0.000 |  +0.000 0.000
+mejor p5 H3b: 8/8 0/8 0/8          |    26534      +0     0   10987 |  1.856  +0.000 0.000 |  1.821  +0.000 0.000 |  +0.000 0.000 |  +0.000 0.000
+Mezclas con max_media en 6/8 y 4/8 (para ver la pendiente):
+mezcla 4/8 0/8 4/8                 |    18248   -8285   165    9391 |  1.478  -0.378 0.004 |  1.662  -0.159 0.003 |  -0.422 0.018 |  -0.283 0.032
+mezcla 4/8 1/8 3/8                 |    19871   -6663   135    9992 |  1.567  -0.288 0.003 |  1.686  -0.134 0.003 |  -0.310 0.016 |  -0.228 0.026
+mezcla 4/8 2/8 2/8                 |    21493   -5041   107   10401 |  1.648  -0.208 0.002 |  1.710  -0.111 0.002 |  -0.219 0.015 |  -0.172 0.024
+mezcla 4/8 3/8 1/8                 |    23115   -3419    82   10619 |  1.719  -0.136 0.002 |  1.733  -0.088 0.002 |  -0.149 0.013 |  -0.172 0.028
+mezcla 4/8 4/8 0/8                 |    24737   -1797    65   10697 |  1.778  -0.077 0.002 |  1.763  -0.057 0.002 |  -0.099 0.013 |  -0.106 0.022
+mezcla 6/8 0/8 2/8                 |    22391   -4143    82   10515 |  1.688  -0.168 0.002 |  1.724  -0.097 0.002 |  -0.163 0.013 |  -0.172 0.027
+mezcla 6/8 1/8 1/8                 |    24013   -2520    53   10752 |  1.759  -0.097 0.001 |  1.745  -0.076 0.002 |  -0.094 0.010 |  -0.117 0.022
+mezcla 6/8 2/8 0/8                 |    25635    -898    32   10874 |  1.819  -0.037 0.001 |  1.776  -0.044 0.001 |  -0.045 0.010 |  -0.106 0.022
+Persistencia (lider a mitad de ronda contra el mejor de la segunda mitad), filas = lider en la primera mitad:
+  max_media  lidera la 1a mitad en  63.0 %: en la 2a mitad gana max_media 60.5 %, guardia 23.3 %, byh 16.3 %
+  guardia    lidera la 1a mitad en  21.7 %: en la 2a mitad gana max_media 61.8 %, guardia 18.8 %, byh 19.5 %
+  byh        lidera la 1a mitad en  15.3 %: en la 2a mitad gana max_media 70.7 %, guardia 19.2 %, byh 10.1 %
+  el lider de la 1a mitad es el mejor de la 2a en 43.7 % de las series
+  rendimiento de la 2a mitad: lider de la 1a 1.5480, max_media 1.6455, diferencia -0.0975 +- 0.0048
+  correlacion entre la ventaja de guardia sobre max_media en la 1a mitad y en la 2a: +0.067
+seguir al lider desde la mitad     |    25276   -1258    61    8202 |  1.735  -0.119 0.005 |  1.719  -0.101 0.005 |  -0.259 0.022 |  -0.244 0.028
+
+--- Conjunto de gestores 3: max_media, kalman, activo ---
+Mejor gestor de la serie: max_media 20.1 %, kalman 27.7 %, activo 52.2 %
+                                   | H1 media     dif  +-ee      p5 |    H3a     dif  +-ee |    H3b     dif  +-ee |   dp5 a  +-ee |   dp5 b  +-ee
+max_media                          |    26534      +0     0   10987 |  1.854  +0.000 0.000 |  1.821  +0.000 0.000 |  +0.000 0.000 |  +0.000 0.000
+kalman                             |    26976    +442    63   11118 |  1.841  -0.013 0.002 |  1.832  +0.011 0.002 |  -0.001 0.014 |  -0.011 0.029
+activo                             |    28663   +2129   176   11007 |  1.809  -0.046 0.004 |  1.837  +0.015 0.003 |  -0.072 0.021 |  -0.022 0.027
+ORACULO (mejor de los tres)        |    31589   +5055   142   12654 |  1.934  +0.079 0.002 |  1.926  +0.104 0.002 |  +0.185 0.016 |  +0.228 0.022
+peor de los tres                   |    23724   -2810    75   10130 |  1.714  -0.141 0.003 |  1.729  -0.092 0.002 |  -0.198 0.017 |  -0.172 0.022
+mejor H3a: 3/8 3/8 2/8             |    27232    +698    54   11432 |  1.862  +0.008 0.001 |  1.848  +0.027 0.002 |  +0.042 0.013 |  +0.033 0.022
+mejor H3b: 0/8 5/8 3/8             |    27609   +1075    84   11604 |  1.859  +0.004 0.002 |  1.852  +0.031 0.002 |  +0.044 0.016 |  +0.044 0.025
+mejor p5 H3a: 2/8 3/8 3/8          |    27498    +964    75   11535 |  1.859  +0.005 0.002 |  1.850  +0.029 0.002 |  +0.047 0.015 |  +0.033 0.025
+mejor p5 H3b: 0/8 5/8 3/8          |    27609   +1075    84   11604 |  1.859  +0.004 0.002 |  1.852  +0.031 0.002 |  +0.044 0.016 |  +0.044 0.025
+Mezclas con max_media en 6/8 y 4/8 (para ver la pendiente):
+mezcla 4/8 0/8 4/8                 |    27598   +1065    88   11496 |  1.851  -0.004 0.002 |  1.846  +0.025 0.002 |  +0.037 0.016 |  +0.033 0.025
+mezcla 4/8 1/8 3/8                 |    27388    +854    68   11510 |  1.858  +0.003 0.002 |  1.847  +0.025 0.002 |  +0.045 0.015 |  +0.033 0.023
+mezcla 4/8 2/8 2/8                 |    27177    +643    50   11412 |  1.862  +0.007 0.001 |  1.846  +0.025 0.002 |  +0.042 0.013 |  +0.033 0.023
+mezcla 4/8 3/8 1/8                 |    26966    +432    36   11275 |  1.861  +0.006 0.001 |  1.844  +0.023 0.002 |  +0.035 0.011 |  +0.022 0.022
+mezcla 4/8 4/8 0/8                 |    26755    +221    32   11108 |  1.851  -0.004 0.001 |  1.831  +0.010 0.002 |  +0.008 0.011 |  -0.000 0.026
+mezcla 6/8 0/8 2/8                 |    27066    +532    44   11354 |  1.859  +0.004 0.001 |  1.842  +0.021 0.002 |  +0.039 0.012 |  +0.033 0.024
+mezcla 6/8 1/8 1/8                 |    26855    +321    25   11217 |  1.860  +0.006 0.001 |  1.841  +0.019 0.001 |  +0.029 0.010 |  +0.022 0.023
+mezcla 6/8 2/8 0/8                 |    26644    +111    16   11070 |  1.853  -0.001 0.000 |  1.829  +0.008 0.001 |  +0.007 0.008 |  +0.011 0.025
+Persistencia (lider a mitad de ronda contra el mejor de la segunda mitad), filas = lider en la primera mitad:
+  max_media  lidera la 1a mitad en  23.5 %: en la 2a mitad gana max_media 23.5 %, kalman 27.9 %, activo 48.6 %
+  kalman     lidera la 1a mitad en  27.9 %: en la 2a mitad gana max_media 23.4 %, kalman 30.2 %, activo 46.4 %
+  activo     lidera la 1a mitad en  48.6 %: en la 2a mitad gana max_media 20.8 %, kalman 25.1 %, activo 54.1 %
+  el lider de la 1a mitad es el mejor de la 2a en 40.3 % de las series
+  rendimiento de la 2a mitad: lider de la 1a 1.6909, max_media 1.6455, diferencia +0.0455 +- 0.0046
+  correlacion entre la ventaja de kalman sobre max_media en la 1a mitad y en la 2a: -0.030
+seguir al lider desde la mitad     |    27202    +668    76   11086 |  1.843  -0.010 0.002 |  1.832  +0.010 0.002 |  -0.003 0.015 |  -0.006 0.025
+
+--- Conjunto de gestores 4: max_media, base, prudente ---
+Mejor gestor de la serie: max_media 66.3 %, base 21.8 %, prudente 11.9 %
+                                   | H1 media     dif  +-ee      p5 |    H3a     dif  +-ee |    H3b     dif  +-ee |   dp5 a  +-ee |   dp5 b  +-ee
+max_media                          |    26534      +0     0   10987 |  1.854  +0.000 0.000 |  1.819  +0.000 0.000 |  +0.000 0.000 |  +0.000 0.000
+base                               |    23256   -3278   124   10435 |  1.731  -0.123 0.004 |  1.741  -0.078 0.003 |  -0.172 0.017 |  -0.128 0.022
+prudente                           |    17863   -8671   224    9784 |  1.438  -0.417 0.006 |  1.630  -0.189 0.004 |  -0.573 0.019 |  -0.328 0.027
+ORACULO (mejor de los tres)        |    27683   +1149    46   11878 |  1.905  +0.050 0.002 |  1.878  +0.059 0.002 |  +0.102 0.013 |  +0.133 0.021
+peor de los tres                   |    17060   -9473   215    9392 |  1.396  -0.458 0.005 |  1.580  -0.239 0.003 |  -0.597 0.018 |  -0.383 0.024
+mejor H3a: 8/8 0/8 0/8             |    26534      +0     0   10987 |  1.854  +0.000 0.000 |  1.819  +0.000 0.000 |  +0.000 0.000 |  +0.000 0.000
+mejor H3b: 8/8 0/8 0/8             |    26534      +0     0   10987 |  1.854  +0.000 0.000 |  1.819  +0.000 0.000 |  +0.000 0.000 |  +0.000 0.000
+mejor p5 H3a: 8/8 0/8 0/8          |    26534      +0     0   10987 |  1.854  +0.000 0.000 |  1.819  +0.000 0.000 |  +0.000 0.000 |  +0.000 0.000
+mejor p5 H3b: 8/8 0/8 0/8          |    26534      +0     0   10987 |  1.854  +0.000 0.000 |  1.819  +0.000 0.000 |  +0.000 0.000 |  +0.000 0.000
+Mezclas con max_media en 6/8 y 4/8 (para ver la pendiente):
+mezcla 4/8 0/8 4/8                 |    22198   -4335   112   10799 |  1.679  -0.175 0.003 |  1.723  -0.096 0.002 |  -0.206 0.014 |  -0.172 0.027
+mezcla 4/8 1/8 3/8                 |    22872   -3661    96   10873 |  1.714  -0.141 0.002 |  1.735  -0.083 0.002 |  -0.155 0.013 |  -0.139 0.026
+mezcla 4/8 2/8 2/8                 |    23547   -2987    82   10919 |  1.746  -0.109 0.002 |  1.748  -0.071 0.002 |  -0.113 0.013 |  -0.117 0.022
+mezcla 4/8 3/8 1/8                 |    24221   -2313    70   10905 |  1.774  -0.080 0.002 |  1.766  -0.053 0.002 |  -0.077 0.012 |  -0.094 0.026
+mezcla 4/8 4/8 0/8                 |    24895   -1639    62   10928 |  1.798  -0.056 0.002 |  1.785  -0.034 0.002 |  -0.045 0.012 |  -0.061 0.025
+mezcla 6/8 0/8 2/8                 |    24366   -2168    56   10927 |  1.774  -0.080 0.001 |  1.757  -0.062 0.002 |  -0.082 0.012 |  -0.117 0.022
+mezcla 6/8 1/8 1/8                 |    25040   -1494    41   11005 |  1.803  -0.051 0.001 |  1.771  -0.048 0.001 |  -0.044 0.012 |  -0.094 0.023
+mezcla 6/8 2/8 0/8                 |    25714    -819    31   10971 |  1.828  -0.027 0.001 |  1.791  -0.028 0.001 |  -0.013 0.010 |  -0.050 0.022
+Persistencia (lider a mitad de ronda contra el mejor de la segunda mitad), filas = lider en la primera mitad:
+  max_media  lidera la 1a mitad en  57.8 %: en la 2a mitad gana max_media 59.2 %, base 24.7 %, prudente 16.1 %
+  base       lidera la 1a mitad en  25.7 %: en la 2a mitad gana max_media 60.7 %, base 23.1 %, prudente 16.2 %
+  prudente   lidera la 1a mitad en  16.5 %: en la 2a mitad gana max_media 56.5 %, base 27.7 %, prudente 15.8 %
+  el lider de la 1a mitad es el mejor de la 2a en 42.8 % de las series
+  rendimiento de la 2a mitad: lider de la 1a 1.5614, max_media 1.6455, diferencia -0.0841 +- 0.0047
+  correlacion entre la ventaja de base sobre max_media en la 1a mitad y en la 2a: -0.041
+seguir al lider desde la mitad     |    25357   -1177    71   10512 |  1.795  -0.060 0.003 |  1.777  -0.042 0.002 |  -0.090 0.016 |  -0.094 0.024
