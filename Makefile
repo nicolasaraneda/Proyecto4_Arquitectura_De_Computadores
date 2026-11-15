@@ -217,6 +217,11 @@ guardar-bitstream: $(BIN)
 	cp $(BIN) bitstreams/$(NOMBRE).bin
 	cd bitstreams && sha256sum *.bin > SHA256SUMS && cat SHA256SUMS
 
+# Reconstruye R0 desde las fuentes de su commit y comprueba que es, bit a bit,
+# el de bitstreams/ (tools/reproducir_r0.sh). Unos 2 minutos.
+r0-reproducir:
+	tools/reproducir_r0.sh
+
 # Programar la placa (lo ejecuta una persona, con la Go Board conectada)
 prog: $(BIN)
 	iceprog $(BIN)

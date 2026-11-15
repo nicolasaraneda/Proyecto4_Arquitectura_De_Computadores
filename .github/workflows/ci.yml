@@ -111,13 +111,17 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0     # la prueba formal compara contra el core del commit de P1
+          fetch-depth: 0     # la prueba formal compara contra el core del commit de P1,
+                             # y R0 se reconstruye desde el suyo
 
       - name: Instalar OSS CAD Suite
         uses: YosysHQ/setup-oss-cad-suite@v4
         with:
           version: '2026-09-06'
           github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: R0 se reproduce bit a bit desde su commit
+        run: make r0-reproducir
 
       - name: Extensión de la ISA (módulos, formal, comparación corta, oficial 4/4, equivalencia y timing en 10 semillas)
         run: make check-xd BARREL_JOBS=4

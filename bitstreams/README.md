@@ -39,3 +39,5 @@ cp build/pochoco_soc_seg.bin bitstreams/segmentado_v1.bin
 Herramientas: OSS CAD Suite del 2026-09-06 (Yosys 0.68+195, nextpnr 0.11.1-19-g8dbcee5c).
 
 `competencia_v1.bin` se generó en el commit `7138393`. Desde que el core segmentado comparte archivos con el base, `make bin` produce un bitstream con la misma lógica (1083 celdas, `make formal-base`, `make cosim`) pero con otra ubicación, porque cambiaron nombres internos, y por lo tanto con otro hash. El archivo de esta carpeta es el que se construyó y se simuló entonces, y no se ha vuelto a generar. Para reproducir su hash hay que construir desde ese commit.
+
+`r0_base_max_media.bin` se generó en el commit `1d4a82f` y le pasa lo mismo desde que entraron el barrel y la extensión de la ISA: `make bin` en un commit posterior da la misma lógica con otra ubicación y otro hash. Para no depender de volver a ese commit a mano, `make r0-reproducir` extrae sus fuentes con `git archive`, las construye en `build/r0/` y compara el resultado con el archivo guardado y con `SHA256SUMS`. Corre en la integración continua, así que el hash también se comprueba en una máquina que no es la nuestra.
