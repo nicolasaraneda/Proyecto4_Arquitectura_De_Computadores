@@ -1,0 +1,15 @@
+Serie tb/practica.csv: 20000 ticks, precios iniciales que el programa no ve: 0
+estrategia                                 patrimonio  ordenes comisiones perdida max
+no operar                                       10000        0          0           0
+comprar y mantener (testbench)                   6497        1          5            
+comprar 63 siempre (trade.s del tramo 1)         6636        2         10        7906
+regla base (trade.s hasta el 15/11)             27062      388       1940        2929
+max_media (trade.s)                             25973      624       3120        6295
+
+Serie tb/practica.csv: 2000 ticks, precios iniciales que el programa no ve: 2
+estrategia                                 patrimonio  ordenes comisiones perdida max
+no operar                                       10000        0          0           0
+comprar y mantener (testbench)                   6695        1          5            
+comprar 63 siempre (trade.s del tramo 1)         6837        2         10        4690
+regla base (trade.s hasta el 15/11)              9617       52        260        2082
+max_media (trade.s)                              9661       74        370        1846

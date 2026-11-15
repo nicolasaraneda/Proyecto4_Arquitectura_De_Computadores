@@ -67,6 +67,12 @@ jobs:
       - name: Equivalencia con la referencia (20 000 ticks, gemelo y Verilator)
         run: make -j4 equiv
 
+      - name: Peor caso de respuesta en las 8 fases del sondeo (puerta, criterio 4)
+        run: make fases
+
+      - name: Tabla del punto 3.1 al día
+        run: make tabla-3-1 && git diff --exit-code docs/mediciones/tabla_3_1.txt
+
       - name: Gemelo digital contra el RTL
         run: make cosim
 

@@ -50,7 +50,7 @@ FREQ ?= 25
         equiv-icarus equiv-completo equiv-gemelo-20k \
         equiv-series equiv-gemelo gemelo cosim protocolo \
         tb-mv2x2 costo-mv2x2 \
-        sim-bitstream guardar-bitstream medir-base hallazgos clean
+        sim-bitstream guardar-bitstream medir-base hallazgos clean tabla-3-1 fases estres
 
 # Objetivo por defecto: todo lo verificable sin la placa
 all: check
@@ -168,6 +168,23 @@ cpi: $(HEX) | $(BUILD)
 # Resultado en docs/mediciones/ticks_software.txt.
 medir-ticks: $(HEX)
 	tools/medir_ticks.sh software
+
+# Tabla del punto 3.1 del enunciado: la estrategia de trade.s (max_media)
+# contra la regla base, no operar y comprar y mantener, en la serie completa y
+# en los primeros 2000 ticks con el período de la ronda 3.
+tabla-3-1:
+	{ $(PYTHON) ref/trader.py tb/practica.csv; echo; \
+	  $(PYTHON) ref/trader.py tb/practica.csv --nticks 2000 --periodo-ns 100000; } | tee docs/mediciones/tabla_3_1.txt
+
+# Puerta de simulación, criterios 4 y 7 (docs/puertas.md): barrido de las 8
+# fases del sondeo y matriz de estrés de la maestra SPI, con tb/tb_estres.sv y
+# Verilator. Unos 2 minutos con 16 núcleos. Con DEFS=-DESPINO_SEGMENTADO
+# ETQ=seg se corre sobre el segmentado.
+ETQ ?= base
+fases: $(HEX)
+	$(PYTHON) tools/estres.py --solo fases --etiqueta $(ETQ)
+estres: $(HEX)
+	$(PYTHON) tools/estres.py --etiqueta $(ETQ) | tee docs/mediciones/estres_$(ETQ).txt
 
 # Lo que corre la integración continua en cada push
 check: test-asm test-ref test-candidatos check-hex tb
@@ -288,7 +305,7 @@ hallazgos:
 # El core por defecto sigue siendo el Espino base. Estos objetivos compilan la
 # variante segmentada (-DESPINO_SEGMENTADO) o la de ROM combinacional
 # (-DESPINO_ROM) y repiten sobre ellas las pruebas del core base.
-.PHONY: tb-seg equiv-seg equiv-gemelo-seg cosim-seg cpi-seg riesgos paralelo paralelo-largo \
+.PHONY: tb-seg equiv-seg equiv-gemelo-seg cosim-seg cpi-seg riesgos paralelo paralelo-largo paralelo-largo-original \
         mutaciones timing-seg synth-seg pnr-seg bin-seg sim-bitstream-seg medir-espino \
         check-seg equiv-rom medir-ticks-seg formal-base equiv-seg-icarus
 
@@ -342,6 +359,9 @@ paralelo:
 	tools/paralelo.sh 4 25000
 paralelo-largo:
 	ETQ=largo tools/paralelo.sh 16 100000 | tee docs/mediciones/paralelo_largo.txt
+# Lo mismo con el generador anterior al 15/11, para medir cuánto cubría (T52)
+paralelo-largo-original:
+	ORIGINAL=1 ETQ=largo_original tools/paralelo.sh 16 100000 | tee docs/mediciones/paralelo_largo_original.txt
 
 # Controles negativos: cinco errores puestos a propósito en el core segmentado
 # deben ser detectados por riesgos y por paralelo (unos 2 minutos)
