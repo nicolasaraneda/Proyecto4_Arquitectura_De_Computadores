@@ -2,6 +2,62 @@
 
 Se actualiza al cerrar cada tramo de trabajo. La versión anterior queda en el historial de git.
 
+## Tramo 9: paquete P2, extensión de la ISA sobre el barrel (15/11)
+
+Rama `p2-extension`, desde `p1-barrel`. Bitácora: `docs/bitacora/p2.md`. Especificación y documento de estudio: `docs/extension_isa.md`. Decisiones T58 a T61.
+
+### Qué quedó hecho
+
+- **Tres instrucciones en custom-0 sobre el barrel**: `emad` (`rd = rs2 + (rs1 >>> 5)`), `devk` (`rd = (rs1 << 5) - rs2`) y `mulstep` (`rd = (rs1 << 1) + (rs1[31] ? rs2 : 0)`). Usan el sumador de la ALU con el operando A desplazado: sin sumador nuevo, sin estado y sin cambios en el control del pipeline. Se eligen al compilar (`-DESPINO_XD`, o una definición por instrucción). Sin definiciones el barrel es el de P1.
+- **El decodificador, la ALU y la unidad de carga del Espino no se tocaron** (T59). Toda palabra de custom-0 que no sea una de las tres codificaciones exactas sigue siendo ilegal y sin efecto, incluido k distinto de 5.
+- **Especificación** con codificación, semántica y ejemplo de cada instrucción, y **modelo ejecutable** `ref/xd.py`.
+- **Ensamblador**: los tres mnemónicos, la directiva `.extension xd`, la opción `--xd`, rechazo de k distinto de 5, desensamblador y 37 tests nuevos (T61).
+- **Prueba formal** de cada instrucción contra su especificación sobre el core, y del resto del core contra el de P1 (`make xd-formal`).
+- **Verificación por simulación**: la campaña de P1 con la referencia ampliada a "Espino base más especificación" (T60), mutaciones, testbench de los dos módulos solos y un programa de punta a punta (`sw/xd/trade_xd.s`).
+- **Integración continua**: trabajo nuevo `extension` con `make check-xd`. `make xd-completo` queda en la ejecución manual.
+
+### Qué se midió
+
+Los dos criterios del paquete:
+
+| Criterio | Resultado |
+|----------|-----------|
+| Timing en 10 de 10 semillas | Los 7 subconjuntos cierran 10 de 10. Las tres instrucciones: 1034 celdas (+96), 12 BRAM, mínima 48,33 MHz, mediana 49,33, máxima 51,94. `emad` y `devk`: 990 celdas (+52), mínima 48,92 MHz |
+| Equivalencia formal contra la especificación | X1 a X5 probadas por inducción en los 7 subconjuntos, para cualquier programa y cualquier operando. Core con `Xd = 0` equivalente al de P1 en 1890 puntos, y con cada subconjunto cuando custom-0 se reemplaza por nop. 9 de 9 mutaciones con contraejemplo |
+
+Además, con las tres instrucciones:
+
+| Prueba | Resultado |
+|--------|-----------|
+| Criterio 1 de la puerta | Testbench oficial sin modificar: 4/4 con `sw/trade.s` (83 ciclos) y con `sw/xd/trade_xd.s` (63 ciclos), decisiones idénticas a las del base |
+| Criterio 5 de la puerta | 7 966 640 instrucciones en 20 600 programas, 93,15 % distintas en toda la campaña, cero diferencias. 1 030 081 son de la extensión. Campaña de lazos: 8 968 323, con 1 815 513 de la extensión. 9 de 9 mutaciones detectadas |
+| Parte del criterio 2 | 20 000 ticks idénticos a `ref/trader.py` a 0,1 ms y a 1 ms, con los dos programas (patrimonio 26 070) |
+| Módulos solos | 49 152 comprobaciones del decodificador y 1 200 000 resultados iguales al modelo, 5 de 5 mutaciones |
+| Ensamblador | 124 tests (antes 87) |
+
+### Hallazgos
+
+1. **Un error de integración, encontrado por la primera corrida de la comparación**: las instrucciones nuevas no escribían `rd`. Corregido antes de medir nada.
+2. **Un error en una propiedad formal, encontrado por una mutación**: el desplazamiento aritmético de `emad` escrito dentro de una suma se evalúa sin signo en Verilog. El RTL estaba bien. Queda como ejemplo de por qué cada prueba lleva controles negativos.
+3. **Un hueco del generador, encontrado por la campaña completa**: 2 corridas de 20 600. Una palabra de custom-0 al azar resultó ser un `mulstep` que pisó la base del SPI y los stores cayeron en el código de otro hilo. Corregido y campaña repetida completa.
+4. **El costo de la extensión es el multiplexor del operando A**: 16 a 28 celdas una instrucción sola, 96 las tres. Revisar la codificación completa cuesta lo que el ruido del conteo.
+
+### Qué falta
+
+- **Con qué subconjunto se compila R1** (T58). `emad` y `devk` entran seguro. `mulstep` solo si `sw/fondo.s` lleva la contabilidad. Es decisión de Nicolás al cerrar P3.
+- **`sw/fondo.s` con las instrucciones** (P3). Regla para ese programa: empieza con `.extension xd`, y el puntaje en papel de los gestores tiene que llevarse en treintaidosavos, porque con k fijo en 5 no hay forma barata de calcular 16 p.
+- **El gemelo no modela el barrel ni la extensión** (P4). `ref/xd.py` tiene las tres funciones listas para usarlas ahí.
+- **La extensión solo existe en el barrel.** La tabla de variantes de P7 pide el base y el segmentado con y sin extensión: esas mediciones están en la factibilidad (rama `factibilidad-fondo`, `d_isa/`), con otra integración.
+- **Criterios 4, 6, 7 y 8 de la puerta** con el programa que compite (P3 a P5).
+- **Valor por defecto del SoC** para que el comando del testbench oficial compile lo que compite (T55, P5).
+- **Nada probado en la placa.**
+
+### Qué conviene atacar después y por qué
+
+1. **P3, `sw/fondo.s`.** Es el camino crítico hacia R1 y la fecha de corte del 22/11. El hardware que necesita ya está verificado.
+2. **P4 en paralelo**, el gemelo del barrel con la extensión: sin él la equivalencia larga del fondo depende de Verilator.
+3. **Preguntas al ayudante**: si un Espino multihilo con instrucciones en custom-0 sigue siendo Espino. Todo lo de P1 a P5 depende de esa respuesta.
+
 ## Tramo 8: paquete P1, barrel en main (15/11)
 
 Rama `p1-barrel`. Bitácora: `docs/bitacora/p1.md`. Documento de estudio: `docs/espino_barrel.md`. Decisiones T55 a T57.

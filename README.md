@@ -111,6 +111,7 @@ Cada una tiene su documento de estudio, su prueba y el número que la respalda.
 | Producto 2x2 en punto fijo (diseño y costo) | Instrucción propuesta `kal2`: un paso del filtro de Kalman de dos estados como producto de matriz 2x2 por vector, con el estado empaquetado en dos carriles de 16 bits. No está en el SoC. | `make tb-mv2x2` y `make costo-mv2x2` | Tres implementaciones idénticas al modelo en 20 000 vectores por matriz. Coeficientes fijos: 251 LUT con los coeficientes calibrados, agrega 328 celdas al SoC y no cabe. Multiplicadores reales: 3094 LUT en la FPGA, 124 000 um² en GF180. | `docs/producto_2x2.md` |
 | Espino segmentado | Pipeline de 3 etapas: la memoria de instrucciones se lee en el flanco de bajada y el banco de registros adelanta el dato recién escrito. Es el mismo Espino, elegido al compilar con `-DESPINO_SEGMENTADO`. El core por defecto sigue siendo el base. | `make check-seg`, `make paralelo-largo`, `make mutaciones`, `make cosim-seg` y `make equiv-seg` | CPI con el mix de la clase 7: 1,350 contra 2,350 del base (la clase estimó 1,5). Respuesta de `trade.s`: 22 ciclos en promedio contra 41. 994 celdas contra 1083. Cierra a 25 MHz en 10 de 10 semillas, con 51,1 MHz en la peor. 3,2 millones de instrucciones aleatorias comparadas una por una con el base, 628 583 distintas (corrida del 15/11 con el generador corregido, T52). | `docs/espino_segmentado.md` |
 | Espino barrel | Cuatro hilos por un pipeline de 4 etapas, con los cuatro contextos en las BRAM del banco de registros. Sin adelantamiento ni burbujas. Se elige con `-DESPINO_BARREL`. Es el core del diseño que compite (decisión T50). | `make check-barrel`, `make barrel-verif` y `make barrel-mutaciones` | CPI 1,000 agregado y 4,000 por hilo. 933 celdas contra 1086 del base, 52,6 MHz en la peor de 10 semillas. 7,9 millones de instrucciones comparadas una por una con el base, 91,96 % distintas, cero diferencias. 21 de 21 errores puestos a propósito detectados. Testbench oficial 4/4, con respuesta en 83 ciclos de 2262. | `docs/espino_barrel.md` |
+| Extensión de la ISA | Tres instrucciones en custom-0 sobre el barrel: `emad`, `devk` y `mulstep`. Usan el sumador de la ALU con el operando desplazado. Se eligen con `-DESPINO_XD`. | `make check-xd`, `make xd-verif` y `make xd-mutaciones` | 96 celdas, 48,3 MHz en la peor de 10 semillas. Cada instrucción probada formalmente contra su especificación. 8,0 millones de instrucciones comparadas con el base más la especificación, cero diferencias. La regla con `devk` y `emad` responde en 63 ciclos contra 83. | `docs/extension_isa.md` |
 
 ### Espino barrel
 
@@ -124,6 +125,19 @@ Tercer core, elegido al compilar con `-DESPINO_BARREL`: cuatro hilos que rotan p
 | `make barrel-aislamiento` y `make barrel-compartida` | Cuatro hilos a la vez: cada uno idéntico a su corrida solo, y cuatro hilos sobre la misma memoria contra un modelo por turnos. |
 | `make barrel-recursos`, `make barrel-cpi` y `make barrel-ticks` | Celdas, frecuencia máxima, CPI y latencia por tick del base, el segmentado y el barrel en la misma corrida. |
 | `make barrel-completo` | Todo lo anterior y las pruebas de netlist y de trazas. |
+
+### Extensión de la ISA
+
+Tres instrucciones propias en el opcode custom-0, solo en el Espino barrel: `emad rd, rs1, rs2, 5` (`rd = rs2 + (rs1 >>> 5)`), `devk rd, rs1, rs2, 5` (`rd = (rs1 << 5) - rs2`) y `mulstep rd, rs1, rs2` (`rd = (rs1 << 1) + (rs1[31] ? rs2 : 0)`). Se compilan con `-DESPINO_BARREL -DESPINO_XD`. En el ensamblador se habilitan con la directiva `.extension xd`. La especificación está en `docs/extension_isa.md`.
+
+| Comando | Qué hace |
+|---------|----------|
+| `make check-xd` | Lo que corre la integración continua: módulos contra el modelo, prueba formal, comparación corta, testbench oficial con 4/4, 20 000 ticks contra la referencia y timing en 10 semillas. |
+| `make xd-formal` | Cada instrucción contra su especificación sobre el core (SymbiYosys) y el core con la extensión contra el core sin ella. |
+| `make xd-verif` | Cada hilo contra el Espino base más la especificación, instrucción por instrucción. |
+| `make xd-mutaciones` | 9 errores puestos a propósito. La comparación anterior tiene que detectarlos todos. |
+| `make xd-timing` | Celdas y frecuencia máxima de los 7 subconjuntos, en 10 semillas. |
+| `make xd-oficial` | Testbench oficial y serie completa, con `sw/trade.s` y con la misma regla escrita con `devk` y `emad` (`sw/xd/trade_xd.s`). |
 
 ### Espino segmentado
 
@@ -173,7 +187,7 @@ Extrae la copia sin cambios del repositorio base (etiqueta `base-curso`) y mide 
 | `ref/`     | Referencia del algoritmo en Python, mercado de la maestra, series de prueba, protocolo de evaluación y gemelo digital. |
 | `tools/`   | Ensamblador, generador de programas aleatorios y scripts de equivalencia, co-simulación y medición. |
 | `bitstreams/` | Bitstreams de competencia, con su hash. |
-| `formal/`  | Verificación formal: la equivalencia del Espino base con el del repositorio del curso (`formal/base_sin_cambios/`) y las propiedades de estructura del barrel (`formal/barrel/`). |
+| `formal/`  | Verificación formal: la equivalencia del Espino base con el del repositorio del curso (`formal/base_sin_cambios/`) y las propiedades de estructura del barrel (`formal/barrel/`) y las de la extensión de la ISA contra su especificación (`formal/xd/`). |
 | `docs/`    | Enunciado, estado, decisiones, documentación y mediciones. |
 | `informe/` | Informe en LaTeX (todavía vacío). |
 

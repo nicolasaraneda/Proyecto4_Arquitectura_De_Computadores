@@ -56,3 +56,17 @@ Medido el 15/11 (paquete P1). No es un peldaño de la escalera: es el core de R1
 Medido además, sin que el paquete lo pidiera: los 20 000 ticks idénticos a la referencia a 0,1 ms y a 1 ms con Verilator (parte del criterio 2), peor caso de 88 ciclos barriendo la fase del sondeo con el método del prototipo (criterio 4, falta repetirlo con `make fases`) y 500 ticks del bitstream ruteado idénticos a la referencia (criterio 8, que pide 2 000).
 
 Los criterios 2, 4, 6, 7 y 8 se cierran con el programa que compite, en P3 a P5.
+
+## Espino barrel con la extensión de la ISA
+
+Medido el 15/11 (paquete P2). Tampoco es un peldaño: es el core de R1 y R2 con `emad`, `devk` y `mulstep` (`-DESPINO_BARREL -DESPINO_XD`), todavía sin la tabla y sin `sw/fondo.s`. El paquete pedía el timing y la equivalencia formal de cada instrucción contra su especificación. Detalle en `docs/extension_isa.md` y salidas en `docs/mediciones/xd/`.
+
+| N.º | Resultado | Comando |
+|-----|-----------|---------|
+| 1 | 4/4 con `tb/tb_proyecto_4.sv` sin modificar, con `sw/trade.s` (83 ciclos) y con `sw/xd/trade_xd.s`, que usa `devk` y `emad` (63 ciclos). `decisiones.csv` idéntico al del Espino base | `make xd-oficial` |
+| 3 | 10 de 10 semillas en los 7 subconjuntos. Las tres instrucciones: 1034 celdas de 1280 y 12 BRAM de 16. Frecuencia máxima mínima 48,33 MHz, mediana 49,33 y máxima 51,94 | `make xd-timing` |
+| 5 | 7 966 640 instrucciones en 20 600 programas, 93,15 % distintas en toda la campaña, cero diferencias con el Espino base más la especificación. 1 030 081 son de la extensión. 9 de 9 mutaciones detectadas | `make xd-verif` y `make xd-mutaciones` |
+| Formal | Cada instrucción contra su especificación en los 7 subconjuntos, y el core con la extensión equivalente al de P1 para programas sin custom-0. 9 de 9 mutaciones con contraejemplo | `make xd-formal` |
+
+Para el criterio 5, la referencia de las instrucciones nuevas es la fórmula de la especificación escrita en el testbench (decisión T60).
+

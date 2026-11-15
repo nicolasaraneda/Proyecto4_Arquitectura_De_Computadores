@@ -508,3 +508,52 @@ barrel-completo: barrel-verif barrel-mutaciones barrel-aislamiento barrel-compar
 
 clean:
 	rm -rf $(BUILD) decisiones.csv
+
+# ---------------------------------------------------------------------------
+# Extensión de la ISA en custom-0 sobre el Espino barrel (docs/extension_isa.md)
+# ---------------------------------------------------------------------------
+# Tres instrucciones (emad, devk y mulstep), elegibles al compilar con
+# -DESPINO_XD o con -DESPINO_XD_EMAD, -DESPINO_XD_DEVK y -DESPINO_XD_MULSTEP.
+# Scripts en tools/xd, testbenches en tb/xd, propiedades en formal/xd, programa
+# de prueba en sw/xd y salidas en docs/mediciones/xd.
+#   xd-tabla         codificación y ejemplos, desde el modelo ref/xd.py
+#   xd-tb            los dos módulos solos contra el modelo, con mutaciones
+#   xd-formal        cada instrucción contra su especificación (SymbiYosys), el
+#                    core con la extensión contra el de P1 (equiv_*) y mutaciones
+#   xd-timing        25 MHz en 10 de 10 semillas, los 7 subconjuntos
+#   xd-verif         cada hilo contra el Espino base más la especificación,
+#                    instrucción por instrucción: campaña completa, con el
+#                    criterio 5 de la puerta
+#   xd-verif-corta   lo mismo con la décima parte de los programas
+#   xd-mutaciones    controles negativos de esa comparación
+#   xd-oficial       testbench oficial sin modificar (4/4) y 20 000 ticks contra
+#                    la referencia, con sw/trade.s y con sw/xd/trade_xd.s
+# check-xd es lo que corre la integración continua en cada push.
+# xd-completo es la ejecución manual con lo demás.
+.PHONY: xd-tabla xd-tb xd-formal xd-timing xd-verif xd-verif-corta xd-mutaciones xd-oficial xd-timing-todo check-xd xd-completo
+
+xd-tabla:
+	@mkdir -p docs/mediciones/xd
+	python3 ref/xd.py --tabla | tee docs/mediciones/xd/codificacion.txt
+xd-tb:
+	tools/xd/tb_modulos.sh
+xd-formal:
+	tools/xd/formal.sh
+xd-timing:
+	tools/xd/timing.sh 10
+xd-verif:
+	PUERTA=1 JOBS=$(BARREL_JOBS) tools/xd/verif.sh
+xd-verif-corta:
+	ESCALA=0.1 JOBS=$(BARREL_JOBS) SALIDA=build/xd/verificacion_corta.txt tools/xd/verif.sh
+xd-mutaciones:
+	JOBS=$(BARREL_JOBS) tools/xd/mutaciones.sh
+xd-oficial:
+	tools/xd/oficial.sh
+
+# En la integración continua el timing se mide solo con las tres instrucciones
+# (la tabla de los 7 subconjuntos es make xd-timing, 6 minutos)
+xd-timing-todo:
+	MASCARAS=7 SALIDA=build/xd/timing_todo.txt tools/xd/timing.sh 10
+
+check-xd: xd-tb xd-formal xd-verif-corta xd-oficial xd-timing-todo
+xd-completo: xd-verif xd-mutaciones

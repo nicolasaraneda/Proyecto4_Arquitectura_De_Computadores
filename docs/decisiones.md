@@ -379,3 +379,34 @@ Hay tres hechos que estas decisiones no cambian y con los que se planifica:
 - **Resultado.** 7 948 558 instrucciones, 7 309 470 distintas (91,96 %), cero diferencias. La campaña de lazos de la factibilidad se conserva como complemento: 8 966 903 instrucciones, 43 % distintas dentro de su corrida. Las 21 mutaciones se detectan también con los programas lineales.
 - **Qué se pierde.** Un programa lineal dura unas 100 instrucciones por hilo, así que no ejercita estados que tardan miles de instrucciones en aparecer. Para eso queda la campaña de lazos. El margen sobre el 90 % es chico (1,96 puntos): lo que se repite son las instrucciones fijas del comienzo de cada hilo.
 - **Lo que encontró.** Dos programas de 4 500 en que un hilo terminaba ejecutando la zona de datos compartida. Era un hueco del método y no un error del core (detalle en `docs/espino_barrel.md`, sección 8.2).
+
+### T58. La extensión lleva tres instrucciones elegibles por separado; cuáles compiten se fija con `sw/fondo.s` (15/11)
+
+- **Decisión.** El paquete P2 deja en `rtl/` `emad`, `devk` y `mulstep`, cada una con su definición (`-DESPINO_XD_EMAD`, `-DESPINO_XD_DEVK`, `-DESPINO_XD_MULSTEP`; `-DESPINO_XD` las tres), y mide y verifica los 7 subconjuntos. No se trajo ninguna otra instrucción de la factibilidad.
+- **Razón.** El plan pide que al bitstream entren solo las instrucciones que `sw/fondo.s` usa de verdad, y ese programa es del paquete P3. `emad` y `devk` las usan los cuatro hilos. `mulstep` solo tiene uso si el supervisor lleva la contabilidad de la cuenta, que el fondo mínimo no necesita para decidir. Con los 7 subconjuntos ya probados, sacar `mulstep` es quitar una definición y no repetir el paquete.
+- **Alternativas.** (a) Solo `emad` y `devk`: si P3 necesitara el producto habría que reabrir P2. (b) Las tres siempre: deja en el bitstream una instrucción que puede quedar sin uso, contra lo que pide el plan.
+- **Qué se pierde.** Nada medible: las tres juntas cuestan 96 celdas y `emad` con `devk` 52.
+- **Queda por decidir, y es de Nicolás.** Con qué subconjunto se compila R1. Recomendación: el que use `sw/fondo.s` al cerrar P3. Si no lleva contabilidad, `-DESPINO_XD_EMAD -DESPINO_XD_DEVK` (990 celdas, 48,92 MHz de mínima).
+
+### T59. La extensión va fuera del decodificador del Espino y las codificaciones que no existen son ilegales (15/11)
+
+- **Decisión.** `rtl/espino_core/espino_decoder.v`, `espino_alu.v` y `espino_load_store_unit.v` no se tocan. Un módulo aparte (`espino_xd_dec`) reconoce las tres codificaciones y el core barrel corrige cuatro señales de lo que se registra hacia la etapa X. El módulo revisa los 7 bits de `funct7`: `emad` y `devk` con k distinto de 5, y `mulstep` con `funct7` distinto de cero, son instrucciones ilegales sin efecto.
+- **Razón.** El decodificador lo comparten el base y el segmentado, y R0 ya pasó su puerta con ese archivo. Y una especificación que dice "con otro k el resultado es el de k = 5" no se puede defender: en el prototipo el hardware ignoraba el campo k.
+- **Alternativas.** La integración del prototipo, con parámetros nuevos dentro del decodificador y k sin revisar.
+- **Qué se pierde.** Unas 6 celdas contra el prototipo (+96 contra +90, dentro del ruido del conteo) y 0,4 MHz de mínima (48,3 contra 48,7).
+- **Comprobación.** Con `Xd = 0` el core es formalmente equivalente al del commit de P1 (`make xd-formal`, parte B1).
+
+### T60. La referencia de la extensión es el Espino base más la especificación escrita en el testbench (15/11)
+
+- **Decisión.** `tb/barrel/tb_verif.sv` sigue comparando cada hilo contra un Espino base. Cuando el base completa una palabra que la especificación reconoce, el testbench calcula el resultado con la fórmula y lo escribe en el banco de registros de la referencia. `tools/barrel/prog_hilos.py --xd` genera las instrucciones, codificadas por el generador y no por el ensamblador.
+- **Razón.** El cierre de P1 dejó planteado contra qué comparar instrucciones que el base no ejecuta. Así se reutiliza toda la campaña de P1 (los mismos grupos, la memoria compartida, los precios por el SPI) con programas que mezclan RV32E y la extensión, y la configuración que compite vuelve a pasar el criterio 5.
+- **Alternativas.** (a) El método del prototipo: una lista de escrituras predicha por el modelo en Python, que solo sirve para programas sin saltos. (b) Reemplazar custom-0 por nop y comparar solo RV32E: no prueba las instrucciones.
+- **Qué se pierde.** La referencia ya no es RTL del curso sin tocar para esas instrucciones: es una fórmula de tres líneas en el testbench. Por eso la misma especificación se prueba además formalmente (`make xd-formal`) y contra el modelo en Python (`make xd-tb`), escrita por separado en los tres lugares.
+- **Lo que encontró.** El generador podía producir por azar un `mulstep` que pisaba la dirección base del SPI (2 corridas de 20 600). Detalle en `docs/extension_isa.md`, sección 7.2.
+
+### T61. El ensamblador exige declarar la extensión y rechaza k distinto de 5 (15/11)
+
+- **Decisión.** `emad`, `devk` y `mulstep` solo se aceptan con la directiva `.extension xd` en el fuente o con la opción `--xd`. Un k distinto de 5 es un error.
+- **Razón.** El comando del encabezado del testbench oficial ensambla sin opciones, así que la habilitación tiene que poder ir dentro del fuente. Y un programa con estas instrucciones cargado en el base o en el segmentado no falla: simplemente no las ejecuta. El error tiene que aparecer al ensamblar.
+- **Qué se pierde.** Una línea más en cada programa que use la extensión.
+
