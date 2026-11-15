@@ -40,6 +40,11 @@ def main(argv=None):
         help="permite sll/srl/sra/slli/srli/srai (la ALU los ejecuta como ADD en este core; usar bajo tu propio riesgo)",
     )
     parser.add_argument(
+        "--xd",
+        action="store_true",
+        help="habilita la extensión xd en custom-0 (emad, devk, mulstep), igual que la directiva .extension xd; solo el Espino barrel compilado con la extensión las ejecuta",
+    )
+    parser.add_argument(
         "--vh",
         metavar="SALIDA.vh",
         help="escribe además la imagen del programa como include de Verilog (PROG_WORDS y prog_word)",
@@ -75,7 +80,7 @@ def main(argv=None):
     output_path = Path(args.output) if args.output else input_path.with_suffix(".hex")
 
     try:
-        words = assemble_file(input_path, output_path, allow_shifts=args.allow_shifts, defines=defines)
+        words = assemble_file(input_path, output_path, allow_shifts=args.allow_shifts, defines=defines, xd=args.xd)
     except AssemblerError as e:
         print(f"error: {e}", file=sys.stderr)
         return 1

@@ -41,6 +41,7 @@ OPCODE_JAL = 0b1101111
 OPCODE_JALR = 0b1100111
 OPCODE_LUI = 0b0110111
 OPCODE_AUIPC = 0b0010111
+OPCODE_CUSTOM0 = 0b0001011
 
 # mnemonic -> (funct7, funct3), opcode OPCODE_R
 R_TYPE = {
@@ -78,6 +79,24 @@ SHIFT_I_TYPE = {
 }
 
 ALL_SHIFT_MNEMONICS = set(SHIFT_R_TYPE) | set(SHIFT_I_TYPE)
+
+# Extensión propia "xd" en custom-0 (especificación: docs/extension_isa.md).
+# Formato R. En emad y devk el funct7 es 00kkkkk, con k en los bits 4:0; el
+# hardware solo implementa k = 5, y cualquier otro valor es instrucción ilegal.
+# mnemonic -> funct3, opcode OPCODE_CUSTOM0, sintaxis "rd, rs1, rs2, k"
+XD_K_TYPE = {
+    "emad": 0b100,  # rd = rs2 + (rs1 >>> k)
+    "devk": 0b101,  # rd = (rs1 << k) - rs2
+}
+XD_K_FIJO = 5
+
+# mnemonic -> (funct7, funct3), opcode OPCODE_CUSTOM0, sintaxis "rd, rs1, rs2"
+XD_R_TYPE = {
+    "mulstep": (0b0000000, 0b010),  # rd = (rs1 << 1) + (rs1[31] ? rs2 : 0)
+}
+
+ALL_XD_MNEMONICS = set(XD_K_TYPE) | set(XD_R_TYPE)
+EXTENSION_XD = "xd"
 
 # mnemonic -> funct3, opcode OPCODE_LOAD
 LOADS = {

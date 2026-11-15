@@ -14,6 +14,7 @@ from isa import (
     LOADS,
     OPCODE_AUIPC,
     OPCODE_BRANCH,
+    OPCODE_CUSTOM0,
     OPCODE_I_ARITH,
     OPCODE_JAL,
     OPCODE_JALR,
@@ -25,6 +26,9 @@ from isa import (
     SHIFT_I_TYPE,
     SHIFT_R_TYPE,
     STORES,
+    XD_K_FIJO,
+    XD_K_TYPE,
+    XD_R_TYPE,
     field_funct3,
     field_funct7,
     field_opcode,
@@ -45,6 +49,8 @@ _REV_SHIFT_I = {v: k for k, v in SHIFT_I_TYPE.items()}
 _REV_LOADS = {v: k for k, v in LOADS.items()}
 _REV_STORES = {v: k for k, v in STORES.items()}
 _REV_BRANCHES = {v: k for k, v in BRANCHES.items()}
+_REV_XD_K = {v: k for k, v in XD_K_TYPE.items()}
+_REV_XD_R = {v: k for k, v in XD_R_TYPE.items()}
 
 
 def _label(addr):
@@ -104,6 +110,16 @@ def decode_one(word, addr, allow_shifts=False):
     if opcode == OPCODE_AUIPC:
         imm20 = imm_u(word)
         return f"auipc x{rd}, {hex(imm20)}"
+
+    if opcode == OPCODE_CUSTOM0:
+        # Solo las tres formas exactas de la extensión xd. Cualquier otra
+        # palabra custom-0 es instrucción ilegal para el core y se informa
+        # como desconocida, igual que el resto.
+        if funct3 in _REV_XD_K and funct7 == XD_K_FIJO:
+            return f"{_REV_XD_K[funct3]} x{rd}, x{rs1}, x{rs2}, {funct7}"
+        if (funct7, funct3) in _REV_XD_R:
+            return f"{_REV_XD_R[(funct7, funct3)]} x{rd}, x{rs1}, x{rs2}"
+        raise ValueError(f"custom-0 desconocido en 0x{addr:04x}: funct7={funct7:#09b} funct3={funct3:#05b}")
 
     raise ValueError(f"opcode desconocido en 0x{addr:04x}: {opcode:#09b}")
 

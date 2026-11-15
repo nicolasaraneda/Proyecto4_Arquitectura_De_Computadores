@@ -10,12 +10,12 @@ Está escrito en Python 3 sin dependencias y no invoca ninguna herramienta exter
 
 Para comprobar que el ensamblador es correcto, el repositorio base trae tres programas de ejemplo con su `.hex` ya generado (`blink`, `7seg` y `buttons_leds`). `tools/asm/tests/test_golden.py` los ensambla y verifica que salen idénticos, palabra por palabra, a los originales.
 
-Las instrucciones propias de la extensión de la ISA (espacio custom-0) se agregarán a este ensamblador cuando se definan, y este documento se actualizará con su codificación.
+Las instrucciones propias de la extensión de la ISA (`emad`, `devk` y `mulstep`, en el espacio custom-0) también se ensamblan aquí. Están apagadas por defecto y se describen en la sección 10.
 
 ## 2. Uso
 
 ```
-python3 tools/pochoasm.py ENTRADA.s [-o SALIDA.hex] [-D NOMBRE=VALOR ...] [--allow-shifts] [--vh SALIDA.vh] [--rom SALIDA.v]
+python3 tools/pochoasm.py ENTRADA.s [-o SALIDA.hex] [-D NOMBRE=VALOR ...] [--allow-shifts] [--xd] [--vh SALIDA.vh] [--rom SALIDA.v]
 ```
 
 | Opción                  | Efecto                                                                                     |
@@ -24,6 +24,7 @@ python3 tools/pochoasm.py ENTRADA.s [-o SALIDA.hex] [-D NOMBRE=VALOR ...] [--all
 | `-o`, `--output`        | Archivo `.hex` de salida. Por defecto, la entrada con extensión `.hex`.                    |
 | `-D`, `--define`        | `NOMBRE=VALOR`: fija una constante y pisa el `.equ` del mismo nombre. Se puede repetir.    |
 | `--allow-shifts`        | Acepta `sll`, `srl`, `sra`, `slli`, `srli` y `srai`.                                       |
+| `--xd`                  | Habilita la extensión xd (`emad`, `devk`, `mulstep`), igual que la directiva `.extension xd`. Ver la sección 10. |
 | `--vh SALIDA.vh`        | Escribe además el programa como include de Verilog: `PROG_WORDS` y la función `prog_word(idx)`. |
 | `--rom SALIDA.v`        | Escribe además el módulo `pochoco_rom`, una ROM combinacional con el programa (un `case` por dirección). |
 
@@ -72,6 +73,7 @@ Pedir `x16` o superior es un **error** ("x16 no existe: RV32E solo tiene x0-x15"
 | `.equ NOMBRE, valor`         | Define una constante. El valor es un literal u otra constante ya definida. No ocupa memoria.    |
 | `.word v1, v2, ...`          | Emite una o más palabras de 32 bits literales. El valor puede ser un literal, una constante o una etiqueta. |
 | `.org dirección`             | Avanza hasta esa dirección de byte rellenando con palabras en cero. La dirección debe ser múltiplo de 4, no puede ser menor que la actual ni pasar de 0x800. |
+| `.extension xd`              | Habilita las instrucciones de la extensión xd desde esa línea en adelante. No ocupa memoria. Cualquier otro nombre es error. Ver la sección 10. |
 | `.section`, `.text`, `.global` | Se aceptan e ignoran. Existen para que el mismo archivo se lea bien con otras herramientas.   |
 
 Cualquier otra directiva es un error. Un `.equ` con un nombre repetido también es error, salvo que el nombre venga fijado por `-D`, caso en que el `.equ` del archivo se ignora. Las constantes deben definirse antes de usarse.
@@ -172,14 +174,15 @@ Las instrucciones base de RV32I que el assembler codifica, listadas abajo. No ha
 | B       | `beq`, `bne`, `blt`, `bge`, `bltu`, `bgeu`                           |
 | U       | `lui`, `auipc`                                                       |
 | J       | `jal`                                                                |
+| R en custom-0 (requiere `.extension xd` o `--xd`) | `emad`, `devk`, `mulstep`  |
 
 Más las pseudo-instrucciones de la sección 6.
 
 ## 8. Validaciones y suite de tests
 
-El assembler rechaza con un mensaje de error, indicando el número de línea, los casos siguientes: registro fuera de x0 a x15 o desconocido, shift sin `--allow-shifts`, mnemónico o directiva desconocidos, etiqueta o constante repetida o no definida, inmediato fuera de rango, número incorrecto de operandos, operando de memoria mal formado, salto a dirección impar o fuera de alcance, y programa de más de 512 palabras.
+El assembler rechaza con un mensaje de error, indicando el número de línea, los casos siguientes: registro fuera de x0 a x15 o desconocido, shift sin `--allow-shifts`, instrucción de la extensión sin habilitar o con `k` distinto de 5, extensión desconocida, mnemónico o directiva desconocidos, etiqueta o constante repetida o no definida, inmediato fuera de rango, número incorrecto de operandos, operando de memoria mal formado, salto a dirección impar o fuera de alcance, y programa de más de 512 palabras.
 
-La suite se corre con `make test-asm` y tiene **87 tests**, repartidos así:
+La suite se corre con `make test-asm` y tiene **124 tests**, repartidos así:
 
 | Archivo                          | Tests | Qué verifica                                                                                                  |
 |----------------------------------|-------|---------------------------------------------------------------------------------------------------------------|
@@ -192,7 +195,8 @@ La suite se corre con `make test-asm` y tiene **87 tests**, repartidos así:
 | `tests/test_roundtrip.py`        | 5     | Ensamblar, desensamblar con `tools/asm/disasm.py` y volver a ensamblar da lo mismo, para todas las instrucciones y para los tres ejemplos. Detecta errores de codificación que la comparación con archivos de referencia no ve. |
 | `tests/test_org.py`              | 9     | `.org`: relleno con ceros, relleno hasta las 512 palabras, etiquetas después del relleno y los cuatro errores (retroceder, dirección impar, fuera de la RAM, código después de llenar la RAM). |
 | `tests/test_image.py`            | 5     | Las salidas `--vh` y `--rom` contienen las mismas palabras que el `.hex`, en el mismo orden, con el desensamblado como comentario. |
-| **Total**                        | **87**|                                                                                                               |
+| `tests/test_xd.py`               | 37    | La extensión xd: las tres palabras de referencia, las 16 x 16 x 16 combinaciones de registros de cada instrucción con ida y vuelta por el desensamblador, rechazo de `k` distinto de 5, `k` por `.equ` y por `-D`, las dos formas de habilitarla, los errores de la directiva, las salidas `--vh` y `--rom`, y que `sw/trade.s` sigue dando `sw/trade.hex` byte a byte. |
+| **Total**                        | **124**|                                                                                                               |
 
 ## 9. Ejemplo completo de traducción: `sw x9, OFF_LEDS(x2)`
 
@@ -249,3 +253,84 @@ $ python3 tools/pochoasm.py build/ejemplo.s -o build/ejemplo.hex && cat build/ej
 build/ejemplo.s -> build/ejemplo.hex (1 palabras, 4 bytes)
 00912223
 ```
+
+## 10. Extensión xd: instrucciones propias en custom-0
+
+El grupo agregó tres instrucciones al Espino barrel, en el opcode custom-0 de RISC-V (`0001011`, 0x0B), que el estándar reserva para extensiones propias. La especificación completa, con la semántica exacta y el hardware que las ejecuta, está en `docs/extension_isa.md`. Esta sección cubre solo lo que hace el ensamblador con ellas.
+
+### Sintaxis y codificación
+
+Las tres usan el formato R, con los mismos campos y las mismas posiciones que `add`. Los registros son los de RV32E (`x0` a `x15` o sus nombres ABI).
+
+| Sintaxis                | funct3 | funct7    | Semántica                                |
+|-------------------------|--------|-----------|------------------------------------------|
+| `emad rd, rs1, rs2, k`  | `100`  | `00kkkkk` | `rd = rs2 + (rs1 >>> k)`                 |
+| `devk rd, rs1, rs2, k`  | `101`  | `00kkkkk` | `rd = (rs1 << k) - rs2`                  |
+| `mulstep rd, rs1, rs2`  | `010`  | `0000000` | `rd = (rs1 << 1) + (rs1[31] ? rs2 : 0)`  |
+
+```
+ 31        25 24  20 19  15 14  12 11   7 6      0
++------------+------+------+------+------+--------+
+|   funct7   | rs2  | rs1  |funct3|  rd  | opcode |
++------------+------+------+------+------+--------+
+```
+
+En `emad` y `devk` el cuarto operando, `k`, va en los bits 4 a 0 del funct7 (bits 29 a 25 de la palabra), y los bits 6 y 5 del funct7 son cero. `k` puede ser un literal o una constante de `.equ` o de `-D`, y se resuelve igual que cualquier inmediato.
+
+Ejemplo, `emad x3, x6, x3, 5`:
+
+| Campo    | Bits    | Valor          | Binario   |
+|----------|---------|----------------|-----------|
+| `funct7` | 31 a 25 | `k = 5`        | `0000101` |
+| `rs2`    | 24 a 20 | `x3`           | `00011`   |
+| `rs1`    | 19 a 15 | `x6`           | `00110`   |
+| `funct3` | 14 a 12 | `emad`         | `100`     |
+| `rd`     | 11 a 7  | `x3`           | `00011`   |
+| `opcode` | 6 a 0   | custom-0       | `0001011` |
+
+El resultado es `0x0a33418b`. Las tres palabras de referencia, que `tests/test_xd.py` verifica, son:
+
+| Instrucción            | Palabra      |
+|------------------------|--------------|
+| `emad x3, x6, x3, 5`   | `0x0a33418b` |
+| `devk x6, x5, x3, 5`   | `0x0a32d30b` |
+| `mulstep x7, x7, x8`   | `0x0083a38b` |
+
+### Solo k = 5
+
+El hardware no tiene un desplazador variable: `k` está cableado en 5, y una palabra con otro valor en ese campo es una instrucción ilegal para el core. Por eso el ensamblador rechaza cualquier `k` distinto de 5 en `emad` y `devk`, en vez de emitir una palabra que el core no ejecutaría. El operando se escribe igual, y no se deja implícito, para que el fuente diga qué desplazamiento se está usando y para que la codificación no cambie si algún día el hardware admite otros valores.
+
+### Cómo se habilita
+
+Las tres instrucciones están apagadas por defecto. La razón es la misma que con los shifts: el Espino base y el segmentado tratan una palabra custom-0 como instrucción ilegal y no hacen nada con ella, sin avisar. Un programa que las usara y se cargara en uno de esos cores ensamblaría sin errores y correría mal. Solo el Espino barrel compilado con la extensión las ejecuta.
+
+Hay dos formas equivalentes de habilitarlas:
+
+- La directiva `.extension xd` en el fuente. Debe aparecer antes del primer uso, rige desde esa línea en adelante y no ocupa memoria. Es la forma preferida, porque deja escrito en el propio programa que necesita la extensión, y el comando para ensamblarlo no cambia.
+- La opción `--xd` en la línea de comandos, que equivale a tener la directiva en la primera línea.
+
+Usar ambas a la vez, o repetir la directiva, no es error. Habilitar la extensión no cambia la codificación de ninguna otra instrucción: `sw/trade.s` produce el mismo `sw/trade.hex` con y sin `--xd`.
+
+```bash
+python3 tools/pochoasm.py sw/fondo.s -o sw/fondo.hex          # con .extension xd en el fuente
+python3 tools/pochoasm.py build/prueba.s -o build/prueba.hex --xd
+```
+
+### Errores
+
+Todos llevan el número de línea, como el resto.
+
+| Caso                                              | Mensaje                                                                 |
+|---------------------------------------------------|-------------------------------------------------------------------------|
+| Uso sin habilitar, o directiva después del uso    | `'emad': instrucción de la extensión xd (custom-0) sin habilitar: agrega '.extension xd' antes del primer uso o usa --xd. Solo el Espino barrel compilado con la extensión la ejecuta; el base y el segmentado la tratan como instrucción ilegal` |
+| `k` distinto de 5 en `emad` o `devk`              | `'emad': k = 4 no está permitido: el core tiene k cableado en 5`         |
+| `.extension` con otro nombre                      | `extensión desconocida: 'otra' (la única disponible es 'xd')`            |
+| `.extension` sin nombre o con más de uno          | `.extension requiere un nombre de extensión`                             |
+| Número incorrecto de operandos                    | `'emad' espera 4 operando(s), recibió 3` (3 operandos en `mulstep`)      |
+| Registro `x16` o superior                         | `x16 no existe: RV32E solo tiene x0-x15`                                 |
+
+### Desensamblador y salidas en Verilog
+
+`tools/asm/disasm.py` reconoce las tres instrucciones y entrega el mismo texto que se escribió (`emad x3, x6, x3, 5`), así que la prueba de ida y vuelta de la sección 8 también las cubre. Como el texto desensamblado no trae la directiva, para volver a ensamblarlo hay que usar `--xd`.
+
+Una palabra con opcode custom-0 que no sea exactamente una de las tres formas válidas (otro funct3, `k` distinto de 5 o bits 6 y 5 del funct7 distintos de cero en `emad` y `devk`, funct7 distinto de cero en `mulstep`) se trata como cualquier otra palabra desconocida, porque para el core es una instrucción ilegal. En las salidas `--vh` y `--rom` eso significa que el comentario de esa dirección muestra `.word 0x...` en lugar de un mnemónico. Esas dos salidas no vuelven a ensamblar nada: solo usan el desensamblador para los comentarios, y funcionan igual con programas que usan la extensión.

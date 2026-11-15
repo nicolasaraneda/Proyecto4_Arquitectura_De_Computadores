@@ -14,11 +14,14 @@ from errors import AssemblerError
 from isa import (
     ABI_NAMES,
     ALL_SHIFT_MNEMONICS,
+    ALL_XD_MNEMONICS,
     BRANCHES,
+    EXTENSION_XD,
     I_ARITH,
     LOADS,
     OPCODE_AUIPC,
     OPCODE_BRANCH,
+    OPCODE_CUSTOM0,
     OPCODE_I_ARITH,
     OPCODE_JAL,
     OPCODE_JALR,
@@ -30,6 +33,9 @@ from isa import (
     SHIFT_I_TYPE,
     SHIFT_R_TYPE,
     STORES,
+    XD_K_FIJO,
+    XD_K_TYPE,
+    XD_R_TYPE,
     encode_b,
     encode_i,
     encode_j,
@@ -204,12 +210,17 @@ def li_encode(rd, value, lineno):
 
 
 class Assembler:
-    def __init__(self, allow_shifts=False, defines=None):
+    def __init__(self, allow_shifts=False, defines=None, xd=False):
         self.allow_shifts = allow_shifts
         self.defines = dict(defines) if defines else {}
+        self.xd = xd
+        self._xd_on = xd
 
     def assemble(self, text):
         lines = parse_lines(text)
+        # La extensión parte como la pidió la línea de comandos (--xd) y la
+        # directiva .extension xd la enciende desde esa línea en adelante.
+        self._xd_on = self.xd
         symtab = dict(self.defines)
         sized = []
         addr = 0
@@ -233,6 +244,9 @@ class Assembler:
                     size = self._org_size(ln, symtab, addr)
                     if size == 0:
                         continue
+                elif ln.name == ".extension":
+                    self._handle_extension(ln)
+                    continue
                 elif ln.name in (".section", ".text", ".global"):
                     continue
                 else:
@@ -307,6 +321,17 @@ class Assembler:
         value = resolve_value(val_tok, symtab, ln.lineno, "constante")
         self._define_symbol(symtab, name, value, ln.lineno, "constante")
 
+    def _handle_extension(self, ln):
+        if len(ln.operands) != 1:
+            raise AssemblerError(ln.lineno, ".extension requiere un nombre de extensión")
+        name = ln.operands[0].lower()
+        if name != EXTENSION_XD:
+            raise AssemblerError(
+                ln.lineno,
+                f"extensión desconocida: '{ln.operands[0]}' (la única disponible es '{EXTENSION_XD}')",
+            )
+        self._xd_on = True
+
     # -- pass 1: sizing ----------------------------------------------------
 
     def _instruction_size(self, ln, symtab):
@@ -317,6 +342,17 @@ class Assembler:
                 raise AssemblerError(
                     ln.lineno,
                     f"'{m}': los shifts ejecutan como ADD en este core (usa --allow-shifts si sabes lo que haces)",
+                )
+            return 4
+
+        if m in ALL_XD_MNEMONICS:
+            if not self._xd_on:
+                raise AssemblerError(
+                    ln.lineno,
+                    f"'{m}': instrucción de la extensión xd (custom-0) sin habilitar: "
+                    "agrega '.extension xd' antes del primer uso o usa --xd. "
+                    "Solo el Espino barrel compilado con la extensión la ejecuta; "
+                    "el base y el segmentado la tratan como instrucción ilegal",
                 )
             return 4
 
@@ -366,6 +402,23 @@ class Assembler:
             rd, rs1, rs2 = (self._reg(o, lineno) for o in ops)
             funct7, funct3 = SHIFT_R_TYPE[m]
             return [encode_r(OPCODE_R, rd, funct3, rs1, rs2, funct7)]
+
+        if m in XD_K_TYPE:
+            self._check_arity(ln, 4)
+            rd, rs1, rs2 = (self._reg(o, lineno) for o in ops[:3])
+            k = self._imm(ops[3], symtab, lineno)
+            if k != XD_K_FIJO:
+                raise AssemblerError(
+                    lineno,
+                    f"'{m}': k = {k} no está permitido: el core tiene k cableado en {XD_K_FIJO}",
+                )
+            return [encode_r(OPCODE_CUSTOM0, rd, XD_K_TYPE[m], rs1, rs2, k)]
+
+        if m in XD_R_TYPE:
+            self._check_arity(ln, 3)
+            rd, rs1, rs2 = (self._reg(o, lineno) for o in ops)
+            funct7, funct3 = XD_R_TYPE[m]
+            return [encode_r(OPCODE_CUSTOM0, rd, funct3, rs1, rs2, funct7)]
 
         if m in I_ARITH:
             self._check_arity(ln, 3)
@@ -498,8 +551,8 @@ class Assembler:
         raise AssemblerError(lineno, f"mnemónico desconocido: '{m}'")
 
 
-def assemble_text(text, allow_shifts=False, defines=None):
-    return Assembler(allow_shifts=allow_shifts, defines=defines).assemble(text)
+def assemble_text(text, allow_shifts=False, defines=None, xd=False):
+    return Assembler(allow_shifts=allow_shifts, defines=defines, xd=xd).assemble(text)
 
 
 def format_hex(words):
@@ -508,10 +561,10 @@ def format_hex(words):
     return "\n".join(f"{w & 0xFFFFFFFF:08x}" for w in words) + "\n"
 
 
-def assemble_file(input_path, output_path, allow_shifts=False, defines=None):
+def assemble_file(input_path, output_path, allow_shifts=False, defines=None, xd=False):
     with open(input_path, "r", encoding="utf-8") as f:
         text = f.read()
-    words = assemble_text(text, allow_shifts=allow_shifts, defines=defines)
+    words = assemble_text(text, allow_shifts=allow_shifts, defines=defines, xd=xd)
     with open(output_path, "w", encoding="utf-8", newline="\n") as f:
         f.write(format_hex(words))
     return words
@@ -613,10 +666,10 @@ def format_verilog_rom(words, source_name="", allow_shifts=False):
     return "\n".join(lines)
 
 
-def assemble_file(input_path, output_path, allow_shifts=False, defines=None):
+def assemble_file(input_path, output_path, allow_shifts=False, defines=None, xd=False):
     with open(input_path, "r", encoding="utf-8") as f:
         text = f.read()
-    words = assemble_text(text, allow_shifts=allow_shifts, defines=defines)
+    words = assemble_text(text, allow_shifts=allow_shifts, defines=defines, xd=xd)
     with open(output_path, "w", encoding="utf-8", newline="\n") as f:
         f.write(format_hex(words))
     return words
