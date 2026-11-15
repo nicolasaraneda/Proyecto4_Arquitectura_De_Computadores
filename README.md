@@ -87,13 +87,14 @@ make test-ref                                            # pruebas del mercado y
 - `ref/market.py` es el mercado de la maestra, portado de la tarea `ejecutar` del testbench. `python3 ref/market.py validar decisiones.csv` rehace la contabilidad de una corrida del testbench y exige que coincida fila por fila.
 - `ref/p4_baseline.py` y `ref/hallazgos.py` (`make hallazgos`) son el punto de partida y el análisis estadístico de la serie de práctica.
 
-Resultado de la regla base sobre la serie de práctica completa (20 000 ticks, viendo todos los precios):
+Resultado sobre la serie de práctica completa (20 000 ticks, viendo todos los precios). Desde el 15/11 `trade.s` corre `max_media`, la regla base con el umbral de entrada en 3 unidades (decisión T51). En la serie completa de práctica rinde menos que la regla base; se eligió por los remuestreos y las familias plausibles, donde gana 0,7 % y 1,4 %, y por los puntos esperados del torneo (`docs/algoritmo.md`, sección 7, y la decisión T47). La tabla sale de `make tabla-3-1` (`docs/mediciones/tabla_3_1.txt`).
 
 | Estrategia | Patrimonio final | Órdenes | Comisiones | Pérdida máxima |
 |------------|------------------|---------|------------|----------------|
 | No operar | 10 000 | 0 | 0 | 0 |
 | Comprar y mantener | 6 497 | 1 | 5 | |
-| Regla base (`trade.s`) | 27 062 | 388 | 1 940 | 2 929 |
+| Regla base (`trade.s` hasta el 15/11) | 27 062 | 388 | 1 940 | 2 929 |
+| `max_media` (`trade.s`) | 25 973 | 624 | 3 120 | 6 295 |
 
 ## Piezas avanzadas
 
@@ -103,11 +104,12 @@ Cada una tiene su documento de estudio, su prueba y el número que la respalda.
 |-------|--------|-------------------------|------------------------|-----------|
 | Gemelo digital | Simulador en C del SoC con exactitud de ciclo. Corre el mismo `trade.hex` del bitstream. | `make cosim` | Traza idéntica al RTL en 8 configuraciones, más de un millón de eventos. 20 000 ticks a 10 ms en 0,02 s (Verilator: 22 minutos). | `docs/gemelo.md` |
 | Protocolo de evaluación | 10 bloques de práctica, 1000 remuestreos y 14 familias sintéticas calibradas (plausibles y de estrés), con criterio de aceptación. | `make protocolo` y `make equiv-gemelo` | Regla base: media 10 772 y percentil 5 de 8 914 en los remuestreos. El binario coincide con la referencia en 23 millones de ticks. | `docs/protocolo.md` |
-| Modelo del generador y candidatos | Modelo de nivel, transitoria y redondeo ajustado a la serie de práctica; política óptima; guardia de régimen y tope de pérdida; candidatos sobre la frontera entre media y percentil 5. El algoritmo de la placa sigue siendo la regla base hasta elegir. | `make algoritmo` y `make test-candidatos` | Techo del modelo: 8,4 % por ronda. Mejor candidato: 0,7 % sobre la regla base en remuestreos y 1,4 % en las familias plausibles, con semilla reservada. | `docs/algoritmo.md` |
+| Modelo del generador y candidatos | Modelo de nivel, transitoria y redondeo ajustado a la serie de práctica; política óptima; guardia de régimen y tope de pérdida; candidatos sobre la frontera entre media y percentil 5. El algoritmo de la placa es `max_media` desde el 15/11. | `make algoritmo` y `make test-candidatos` | Techo del modelo: 8,4 % por ronda. Mejor candidato: 0,7 % sobre la regla base en remuestreos y 1,4 % en las familias plausibles, con semilla reservada. | `docs/algoritmo.md` |
+| Puerta de simulación y matriz de estrés | Ocho criterios que un bitstream debe pasar antes de ir a la placa. Una maestra SPI configurable recorre las 8 fases del sondeo, SCLK de 100 kHz a 4 MHz, tiempos de `CS_n`, reset a mitad de una transacción, rondas seguidas sin reset y series pegadas en los bordes. | `make fases` y `make estres` | R0 la pasó completa: peor caso 49 ciclos en todas las fases contra un límite de 1131, y 60 de 60 casos de estrés con todos los bytes iguales a la referencia. | `docs/puertas.md` |
 | Simulación del bitstream | Simula lo que se graba en la placa, reconstruido desde el `.asc`. | `make sim-bitstream` | 2000 ticks idénticos a la referencia. | `docs/decisiones.md`, T15 |
 | Programas aleatorios | Generador de programas para comparar dos modelos del SoC. | `make cosim` | 469 343 escrituras de registro y de memoria comparadas con 4 semillas. | `docs/gemelo.md`, sección 3 |
 | Producto 2x2 en punto fijo (diseño y costo) | Instrucción propuesta `kal2`: un paso del filtro de Kalman de dos estados como producto de matriz 2x2 por vector, con el estado empaquetado en dos carriles de 16 bits. No está en el SoC. | `make tb-mv2x2` y `make costo-mv2x2` | Tres implementaciones idénticas al modelo en 20 000 vectores por matriz. Coeficientes fijos: 251 LUT con los coeficientes calibrados, agrega 328 celdas al SoC y no cabe. Multiplicadores reales: 3094 LUT en la FPGA, 124 000 um² en GF180. | `docs/producto_2x2.md` |
-| Espino segmentado | Pipeline de 3 etapas: la memoria de instrucciones se lee en el flanco de bajada y el banco de registros adelanta el dato recién escrito. Es el mismo Espino, elegido al compilar con `-DESPINO_SEGMENTADO`. El core por defecto sigue siendo el base. | `make check-seg`, `make paralelo-largo`, `make mutaciones`, `make cosim-seg` y `make equiv-seg` | CPI con el mix de la clase 7: 1,350 contra 2,350 del base (la clase estimó 1,5). Respuesta de `trade.s`: 22 ciclos en promedio contra 41. 994 celdas contra 1083. Cierra a 25 MHz en 10 de 10 semillas, con 51,1 MHz en la peor. 2,9 millones de instrucciones aleatorias comparadas una por una con el base. | `docs/espino_segmentado.md` |
+| Espino segmentado | Pipeline de 3 etapas: la memoria de instrucciones se lee en el flanco de bajada y el banco de registros adelanta el dato recién escrito. Es el mismo Espino, elegido al compilar con `-DESPINO_SEGMENTADO`. El core por defecto sigue siendo el base. | `make check-seg`, `make paralelo-largo`, `make mutaciones`, `make cosim-seg` y `make equiv-seg` | CPI con el mix de la clase 7: 1,350 contra 2,350 del base (la clase estimó 1,5). Respuesta de `trade.s`: 22 ciclos en promedio contra 41. 994 celdas contra 1083. Cierra a 25 MHz en 10 de 10 semillas, con 51,1 MHz en la peor. 3,2 millones de instrucciones aleatorias comparadas una por una con el base, 628 583 distintas (corrida del 15/11 con el generador corregido, T52). | `docs/espino_segmentado.md` |
 
 ### Espino segmentado
 

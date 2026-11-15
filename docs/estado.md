@@ -2,6 +2,51 @@
 
 Se actualiza al cerrar cada tramo de trabajo. La versión anterior queda en el historial de git.
 
+## Tramo 7: paquete P0, orden y respaldo (15/11)
+
+Rama `p0-respaldo`. Primer paquete del plan vigente desde el 15/11 (decisión T50: compite el fondo en un chip, con una escalera de bitstreams R0, R1 y R2). El tramo 6, la factibilidad, está en la rama `factibilidad-fondo` y no se integra a `main`: los paquetes siguientes traen de ahí lo que necesiten. Bitácora: `docs/bitacora/p0.md`.
+
+### Qué quedó hecho
+
+- **Calendario en `main`** (T44): el commit pasó tal cual.
+- **`max_media` en `sw/trade.s` y `ref/trader.py`** (T51). Cambia una constante, de -128 a -96. `ReglaBase` queda en la referencia como comparador del protocolo; `MaxMedia` es la oficial.
+- **Tabla del punto 3.1** (`make tabla-3-1`, `docs/mediciones/tabla_3_1.txt`), revisada en la integración continua.
+- **R0, `bitstreams/r0_base_max_media.bin`**, con su hash en `SHA256SUMS` (T54).
+- **Puerta de simulación escrita como procedimiento** (`docs/puertas.md`): un comando por criterio. Para los criterios 4 y 7 se hizo una maestra configurable, `tb/tb_estres.sv` con `tools/estres.py` (`make fases`, `make estres`, T53). `make fases` corre en la integración continua.
+- **Generador de programas aleatorios corregido** (T52) y verificación larga del segmentado repetida. `tb/tb_paralelo.sv` cuenta las instrucciones distintas. `--original` reproduce los programas viejos para medir la diferencia.
+
+### Qué se midió
+
+R0 pasó la puerta de simulación completa:
+
+| Criterio | Resultado |
+|----------|-----------|
+| 1. Testbench oficial | 4/4, peor caso 44 ciclos de 2262 |
+| 2. Equivalencia | Cero diferencias: 20 000 ticks a 0,1 ms (gemelo, Verilator e Icarus), 1 ms y 10 ms (gemelo y Verilator), 13 familias por el RTL, 3810 series en el gemelo a los tres períodos |
+| 3. Timing | 10 de 10 semillas. 1083 celdas, 12 BRAM. Mínima 42,43 MHz, mediana 43,74, máxima 45,08 |
+| 4. Fases | Peor caso 49 ciclos en las 8 fases, límite 1131 |
+| 5. Core | Es el core base: `make formal-base` y `make cosim` |
+| 6. Degradación | No aplica, un hilo |
+| 7. Estrés | 60 casos en el rango pedido, todos pasan. SCLK funciona hasta 4 MHz |
+| 8. Bitstream ruteado | 2 000 ticks idénticos a la referencia, patrimonio 9 661 |
+
+Algoritmo, sobre la serie de práctica: `max_media` da 25 973 en la serie completa (regla base 27 062) y 9 661 en los primeros 2 000 ticks a 0,1 ms (regla base 9 617). En el testbench con los 20 000 ticks, 26 070 a los tres períodos.
+
+Generador: la verificación larga del 13/11 comparaba 1 300 756 instrucciones, pero solo 4 644 eran distintas (0,4 %). La de hoy compara 1 600 000 por configuración, 628 583 distintas (39,3 %), con cero diferencias. Las 5 mutaciones del segmentado las detectan los programas de riesgos y 4 de 4 programas aleatorios cada una.
+
+### Qué falta
+
+- **Puertas de placa y de maestra para R0.** La de placa necesita la autoprueba de P6. La de maestra es el 26/11.
+- **R0 no tiene telemetría** en los 7 segmentos ni en los LED: el programa no los toca.
+- **El criterio 5 de la puerta para el barrel pide más de 90 % de instrucciones distintas.** Con la definición actual el techo práctico ronda 40 a 50 %: las comparaciones dan 0 o 1 y las constantes se repiten. P1 tiene que elegir otra definición (por ejemplo, el estado de los operandos) o un generador distinto, y decirlo antes de medir.
+- **`docs/estado.md` de `main` no tiene el tramo 6**, que vive en la rama de la factibilidad.
+
+### Qué conviene atacar después y por qué
+
+1. **P1, barrel en `main`.** Es el camino crítico hacia R1 y la fecha de corte del 22/11. Lo primero es resolver la definición de "instrucción distinta" del criterio 5.
+2. **P9 en paralelo.** La defensa necesita la respuesta a por qué la tabla del punto 3.1 baja de 27 062 a 25 973 con el algoritmo nuevo (T51).
+3. **Preguntas al ayudante** (sección 16.8 del plan): sobre todo si un Espino multihilo con custom-0 sigue siendo Espino. Si la respuesta es no, R0 compite y P1 a P5 pasan a la edición de exhibición.
+
 ## Tramos 4 y 5: integración continua y frente C, producto 2x2 (13/11)
 
 Los frentes A (algoritmo) y B (Espino segmentado) se trabajan en paralelo, cada uno en su rama. Esta sección cubre lo que se hizo aparte de ellos.
