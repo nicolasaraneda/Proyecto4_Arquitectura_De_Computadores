@@ -1,0 +1,47 @@
+Prueba formal de la extension de la ISA en custom-0 (SymbiYosys y Yosys)
+Generado por tools/xd/formal.sh (make xd-formal). No editar a mano.
+
+Herramientas:
+  Yosys 0.68+195 (git sha1 435977e97-dirty, Release, Clang /usr/bin/clang++ 21.1.8)
+  "nextpnr-ice40" -- Next Generation Place and Route (Version nextpnr-0.11.1-19-g8dbcee5c)
+  Icarus Verilog version 14.0 (devel) (s20260301-403-g5ab23063f-dirty)
+Commit de partida: 0fb8ae8 (rama p2-extension)
+  SBY v0.68
+
+A. Cada instruccion contra su especificacion, sobre el core barrel
+   Propiedades: formal/xd/propiedades_xd.vh (X1 a X5, 24 afirmaciones) y formal/barrel/propiedades.vh
+   (P1 a P11, 24 afirmaciones). Entradas libres: la instruccion que entrega la memoria, el dato del
+   bus y lo que entrega el banco de registros. Induccion de profundidad 10.
+   PASS Xd = 1 (emad): X1 a X5 y P1 a P8 probadas para cualquier programa; cobertura alcanzada
+   PASS Xd = 2 (devk): X1 a X5 y P1 a P8 probadas para cualquier programa; cobertura alcanzada
+   PASS Xd = 3 (emad devk): X1 a X5 y P1 a P8 probadas para cualquier programa; cobertura alcanzada
+   PASS Xd = 4 (mulstep): X1 a X5 y P1 a P8 probadas para cualquier programa; cobertura alcanzada
+   PASS Xd = 5 (emad mulstep): X1 a X5 y P1 a P8 probadas para cualquier programa; cobertura alcanzada
+   PASS Xd = 6 (devk mulstep): X1 a X5 y P1 a P8 probadas para cualquier programa; cobertura alcanzada
+   PASS Xd = 7 (todo): X1 a X5 y P1 a P8 probadas para cualquier programa; cobertura alcanzada
+   PASS Xd = 7: tarea de arranque del barrel (make barrel-formal) con la extension
+   PASS Xd = 7: tarea de operandos del barrel (make barrel-formal) con la extension
+
+B. El core con la extension contra el core del paquete P1 (commit 0fb8ae8), con equiv_make, equiv_simple y equiv_induct
+   PASS B1. Xd = 0: equivalente al core de P1, 1890 puntos de comparacion, todos probados
+   PASS B2. Xd = 1 con custom-0 reemplazado por nop en los dos lados: equivalente, 1890 puntos, todos probados
+   PASS B2. Xd = 2 con custom-0 reemplazado por nop en los dos lados: equivalente, 1890 puntos, todos probados
+   PASS B2. Xd = 3 con custom-0 reemplazado por nop en los dos lados: equivalente, 1890 puntos, todos probados
+   PASS B2. Xd = 4 con custom-0 reemplazado por nop en los dos lados: equivalente, 1890 puntos, todos probados
+   PASS B2. Xd = 5 con custom-0 reemplazado por nop en los dos lados: equivalente, 1890 puntos, todos probados
+   PASS B2. Xd = 6 con custom-0 reemplazado por nop en los dos lados: equivalente, 1890 puntos, todos probados
+   PASS B2. Xd = 7 con custom-0 reemplazado por nop en los dos lados: equivalente, 1890 puntos, todos probados
+   PASS B3. Control: Xd = 7 sin el reemplazo NO es equivalente al core de P1 (6 puntos sin probar), como debe ser
+
+C. Controles negativos: la parte A (Xd = 7) con un error puesto a proposito en el RTL
+   PASS MUTA_XD_K: contraejemplo (694.9-694.40)
+   PASS MUTA_XD_F7MUL: contraejemplo (694.9-694.40)
+   PASS MUTA_XD_SRL: contraejemplo (674.9-674.39)
+   PASS MUTA_XD_K4: contraejemplo (674.9-674.39)
+   PASS MUTA_XD_BCERO: contraejemplo (674.9-674.39)
+   PASS MUTA_XD_WE: contraejemplo (676.9-676.25)
+   PASS MUTA_XD_HILO: contraejemplo (674.9-674.39)
+   PASS MUTA_XD_ANULA: contraejemplo (695.9-695.86)
+   PASS MUTA_XD_SUMA: contraejemplo (674.9-674.39)
+
+RESULTADO: PASS, las tres instrucciones cumplen su especificacion en los 7 subconjuntos, el resto del core no cambia y 9 de 9 mutaciones dan contraejemplo
