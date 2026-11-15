@@ -221,7 +221,7 @@ Toda la verificación corre con `make` y compara contra algo independiente: el E
 | `make equiv-seg-icarus` y `make equiv-r3` | Los 20 000 ticks con Icarus, el simulador del testbench oficial, con el segmentado y con el base (ejecución manual, 13 minutos cada una) | Idénticos a la referencia, 4/4, patrimonio 26 795 |
 | `make equiv-rom` | Lo mismo con la ROM combinacional, 20 000 ticks | Idénticos |
 | `make riesgos` | `hazard_test.s`, `hazard_review.s` y `hazard_cycles.s` del Proyecto 3 en el base, el segmentado y el de ROM | Ver abajo |
-| `make paralelo-largo` | Base y segmentado corriendo a la vez 16 programas aleatorios | 1 300 756 instrucciones comparadas una por una (contador de 11 bits) y 1 600 000 (contador de 32 bits), cero diferencias |
+| `make paralelo-largo` | Base y segmentado corriendo a la vez 16 programas aleatorios | 1 600 000 instrucciones comparadas una por una con cada contador (11 y 32 bits), 628 583 distintas (39,3 %), cero diferencias. Corrida del 15/11 con el generador corregido (T52). La del 13/11 informaba 1 300 756 y 1 600 000, pero solo 4 644 y 5 306 eran distintas (0,4 %): el generador anterior caía en un punto fijo |
 | `make cosim-seg` | RTL del segmentado contra el gemelo digital con `--pipeline`, ciclo a ciclo | 1 007 124 eventos de `trade.hex` idénticos, 846 705 escrituras de 4 programas aleatorios, 20 000 ticks del testbench y 19 998 mediciones por tick |
 | `make mutaciones` | Cinco errores puestos a propósito | Los cinco detectados por `riesgos` y por `paralelo` |
 | `make timing-seg` | Cierre de timing en 10 semillas | 10 de 10 a 25 MHz |
@@ -266,7 +266,7 @@ Se evaluó y no se hizo en este tramo. Qué faltaría:
 - Excluir los chequeos de los shifts: la ALU de Espino no los implementa y los ejecuta como una suma, así que fallarían por diseño. También los de excepciones, que Espino no tiene.
 - Restringir los índices de registro a 16: riscv-formal está pensado para 32 registros y Espino es RV32E.
 
-Estimamos un día de trabajo. Lo que se hizo cubre lo mismo por otro camino: 2,9 millones de instrucciones aleatorias comparadas contra el Espino base con el estado completo del banco, y controles negativos. Una prueba formal acotada agregaría la garantía para todas las secuencias de pocas instrucciones.
+Estimamos un día de trabajo. Lo que se hizo cubre lo mismo por otro camino: 3,2 millones de instrucciones aleatorias (628 583 distintas) comparadas contra el Espino base con el estado completo del banco, y controles negativos. Hasta el 15/11 esta cifra decía 2,9 millones, pero con el generador anterior solo unas 10 000 eran distintas (T52). Una prueba formal acotada agregaría la garantía para todas las secuencias de pocas instrucciones.
 
 ## 10. Mediciones
 

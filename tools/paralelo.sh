@@ -21,6 +21,8 @@
 #   ETQ    sufijo de la carpeta de salida
 #   JOBS   simulaciones en paralelo (por defecto 8)
 #   PRIMERA  primera semilla (por defecto 1)
+#   ORIGINAL 1 para usar el generador anterior al 15/11 (T49, T52), que cae en un
+#          punto fijo. Sirve para medir cuánto cubría la verificación vieja.
 set -uo pipefail
 
 SEMILLAS=${1:-4}
@@ -29,6 +31,8 @@ MUTA=${MUTA:-}
 ETQ=${ETQ:-}
 JOBS=${JOBS:-8}
 PRIMERA=${PRIMERA:-1}
+ORIGINAL=${ORIGINAL:-0}
+GENOPT=""; [ "$ORIGINAL" = 1 ] && GENOPT="--original"
 PYTHON=${PYTHON:-python3}
 if [ -z "${PCW:-}" ]; then
   PCW=11 "$0" "$@" || exit 1
@@ -47,19 +51,20 @@ fi
 
 una() {   # una SEMILLA
   local s=$1
-  $PYTHON tools/prog_aleatorio.py "$s" -o "$D/prog_$s.s" \
+  $PYTHON tools/prog_aleatorio.py $GENOPT "$s" -o "$D/prog_$s.s" \
     && $PYTHON tools/pochoasm.py --allow-shifts "$D/prog_$s.s" -o "$D/prog_$s.hex" > /dev/null \
     && "$D/obj/sim" "+hex=$D/prog_$s.hex" "+instrucciones=$INSTR" > "$D/sim_$s.log" 2>&1
 }
-export -f una; export D INSTR PYTHON
+export -f una; export D INSTR PYTHON GENOPT
 seq "$PRIMERA" $((PRIMERA + SEMILLAS - 1)) | xargs -P "$JOBS" -I{} bash -c "una {}"
 
-total=0; rf=0; st=0; ld=0; sal=0; fallas=0; fuera=0
+total=0; rf=0; st=0; ld=0; sal=0; fallas=0; fuera=0; dist=0
 for s in $(seq "$PRIMERA" $((PRIMERA + SEMILLAS - 1))); do
   if grep -q "^PASS paralelo" "$D/sim_$s.log"; then
     set -- $(grep "^PASS paralelo" "$D/sim_$s.log" | sed -E 's/[^0-9 ]//g')
     total=$((total + $1)); rf=$((rf + $2)); st=$((st + $3)); ld=$((ld + $4)); sal=$((sal + $5))
     if grep -q "FUERA" "$D/sim_$s.log"; then fuera=$((fuera + 1)); fi
+    dist=$((dist + $(grep "^DISTINTAS" "$D/sim_$s.log" | awk '{print $2}')))
   else
     fallas=$((fallas + 1))
     echo "FAIL paralelo, semilla $s: $(grep -m1 -A2 FAIL "$D/sim_$s.log" | tr '\n' ' ')"
@@ -69,4 +74,4 @@ done
 if [ "$fallas" -ne 0 ]; then
   echo "FAIL paralelo: $fallas de $SEMILLAS programas difieren"; exit 1
 fi
-echo "PASS paralelo (contador de programa de $PCW bits): $SEMILLAS programas aleatorios, $total instrucciones comparadas una por una entre el Espino base y el segmentado ($rf escrituras de registro, $st stores, $ld loads, $sal saltos), con el banco de registros completo en cada una. Programas que salieron de la memoria: $fuera"
+echo "PASS paralelo (contador de programa de $PCW bits): $SEMILLAS programas aleatorios, $total instrucciones comparadas una por una entre el Espino base y el segmentado ($rf escrituras de registro, $st stores, $ld loads, $sal saltos), con el banco de registros completo en cada una. Instrucciones distintas: $dist ($((100 * dist / (total > 0 ? total : 1))) %). Programas que salieron de la memoria: $fuera"

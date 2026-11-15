@@ -27,7 +27,7 @@ mkdir -p "$D" docs/mediciones
 
 # --- Programas ------------------------------------------------------------------
 $PYTHON tools/pochoasm.py sw/mix_clase7.s -o "$D/mix_clase7.hex" > /dev/null
-$PYTHON tools/prog_aleatorio.py 1 -o "$D/aleatorio.s"
+$PYTHON tools/prog_aleatorio.py --original 1 -o "$D/aleatorio.s"   # el de las cifras publicadas (T49)
 $PYTHON tools/pochoasm.py --allow-shifts "$D/aleatorio.s" -o "$D/aleatorio.hex" > /dev/null
 mkdir -p build/rom
 $PYTHON tools/pochoasm.py sw/trade.s -o build/rom/trade.hex --rom build/rom/pochoco_rom.v > /dev/null

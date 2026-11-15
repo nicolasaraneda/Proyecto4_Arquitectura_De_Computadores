@@ -85,6 +85,11 @@ module tb_paralelo;
   longint n_a = 0, n_b = 0;          // instrucciones anotadas y completas (con su foto del banco)
   longint n_cmp = 0;                 // instrucciones comparadas
   longint n_rf = 0, n_st = 0, n_ld = 0, n_salto = 0;
+  // Instrucciones distintas (T49): mismo contador de programa con otro valor
+  // escrito u otro store cuenta como distinta. Un programa que repite siempre
+  // los mismos valores suma poco aquí aunque corra mucho.
+  longint n_dist = 0;
+  bit visto [longint unsigned];
   bit     pend_a = 0, pend_b = 0;    // falta la foto del estado de la última instrucción
   ev_t    ult_a, ult_b;
   longint objetivo = 100000;
@@ -188,6 +193,13 @@ module tb_paralelo;
       if (ea.st)    n_st++;
       if (ea.instr[6:0] == 7'h03) n_ld++;
       if (ea.instr[6:0] == 7'h63 || ea.instr[6:0] == 7'h6f || ea.instr[6:0] == 7'h67) n_salto++;
+      begin
+        longint unsigned k;
+        k = 64'(ea.pc) * 64'h9E37_79B9_7F4A_7C15;
+        k = (k ^ 64'(ea.rf_wd) ^ (ea.rf_we ? 64'h1_0000_0000 : 64'h0)) * 64'hBF58_476D_1CE4_E5B9;
+        k = (k ^ {ea.st_addr, ea.st_data} ^ 64'(ea.mem_word)) * 64'h94D0_49BB_1331_11EB;
+        if (!visto.exists(k)) begin visto[k] = 1; n_dist++; end
+      end
       n_cmp++;
       sin_avance = 0;
     end
@@ -242,6 +254,7 @@ module tb_paralelo;
                store_extra ? "no comparada entera (habia un store en vuelo)" : "identica en las 512 palabras",
                ciclos_a, ciclos_b,
                fuera ? " FUERA: el programa salio de la memoria y la comparacion termino ahi" : "");
+      $display("DISTINTAS %0d de %0d", n_dist, n_cmp);
     end
     $finish;
   end

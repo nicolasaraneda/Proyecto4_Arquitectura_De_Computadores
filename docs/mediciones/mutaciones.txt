@@ -21,7 +21,7 @@ PASS sin mutacion: riesgos y ejecucion en paralelo pasan
   detectada por las pruebas de riesgos: 8 comprobaciones fallan
     hazard_test: funcional (base contra segmentado): DIFIEREN (rf) en el evento 250: ref='rf x5 = 00000001' act='rf x5 = 00000006'
     hazard_review: funcional (base contra segmentado): DIFIEREN (rf) en el evento 225: ref='rf x5 = 00000000' act='rf x5 = 000000f6'
-  detectada por la ejecucion en paralelo: 3 de 4 programas aleatorios difieren
+  detectada por la ejecucion en paralelo: 4 de 4 programas aleatorios difieren
 == MUTA_SQUASH ==
   detectada por las pruebas de riesgos: 4 comprobaciones fallan
     hazard_test: funcional (base contra segmentado): DIFIEREN (rf) en el evento 180: ref='rf x14 = 0000001f' act='rf x14 = 00000082'
