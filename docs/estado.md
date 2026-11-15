@@ -2,6 +2,50 @@
 
 Se actualiza al cerrar cada tramo de trabajo. La versión anterior queda en el historial de git.
 
+## Tramo 8: paquete P1, barrel en main (15/11)
+
+Rama `p1-barrel`. Bitácora: `docs/bitacora/p1.md`. Documento de estudio: `docs/espino_barrel.md`. Decisiones T55 a T57.
+
+### Qué quedó hecho
+
+- **El Espino barrel está en `rtl/`**, elegible con `-DESPINO_BARREL` (T55). El core es el de la factibilidad sin cambios de lógica. El base y el segmentado no cambian: `make formal-base` y `make tb` pasan.
+- **Suite de verificación en el repositorio**: scripts en `tools/barrel/`, testbenches en `tb/barrel/`, programas en `sw/barrel/`, propiedades en `formal/barrel/`, salidas en `docs/mediciones/barrel/`. `make check-barrel` corre en la integración continua en cada push y `make barrel-completo` queda como ejecución manual.
+- **Generador de programas lineales** (`tools/barrel/prog_hilos.py --lineal`) para el criterio 5, con las instrucciones distintas contadas sobre toda la campaña (T57).
+- **Pruebas de aislamiento y de memoria compartida**: `make barrel-aislamiento` y `make barrel-compartida`.
+- **`docs/espino_barrel.md`**: etapas, por qué no hay riesgos, latencia por hilo, recursos, verificación, riesgos y preguntas de defensa.
+
+### Qué se midió
+
+Criterios 1, 3 y 5 de la puerta de simulación con `sw/trade.s` en el hilo 0:
+
+| Criterio | Resultado |
+|----------|-----------|
+| 1. Testbench oficial sin modificar | 4/4, peor caso 83 ciclos de 2262, `decisiones.csv` idéntico al del base |
+| 3. Timing | 10 de 10 semillas. 933 celdas, 12 BRAM. Mínima 52,62 MHz, mediana 55,65, máxima 59,18 |
+| 5. Core contra el base | 7 948 558 instrucciones en 20 600 programas, 91,96 % distintas en toda la campaña, cero diferencias. 21 de 21 mutaciones detectadas, cada una por las 7 comparaciones |
+
+Además: 8 966 903 instrucciones en la campaña de lazos de la factibilidad, repetida. 24 afirmaciones formales de estructura probadas y 9 de 9 mutaciones con contraejemplo. Los 20 000 ticks idénticos a la referencia a 0,1 ms y a 1 ms. `sw/trade.s` en cada uno de los cuatro hilos, 12 de 12 casos idénticos. CPI 1,000 agregado y 4,000 por hilo. Respuesta en 75,1 ciclos en promedio y 88 en el peor caso barriendo la fase. Netlist contra RTL, bitstream ruteado y cambio de programa con `icebram`, todos en verde.
+
+### Hallazgos
+
+1. **La primera campaña completa falló en 2 programas de 4 500 del grupo de memoria compartida.** Un `jalr` con base cualquiera llevaba a un hilo a ejecutar la zona de datos que los otros escriben. Son dos diferencias conocidas con el base (código que se modifica y contador de 11 bits en la última palabra), no un error del core. Se cerró el hueco en el testbench y la campaña se repitió completa. Queda como regla para `sw/fondo.s`: ningún `jalr` con una base que venga de datos.
+2. **El margen del criterio 5 es chico**: 91,96 % contra 90 %. Lo que se repite son las instrucciones fijas del comienzo de cada hilo.
+3. **Las cifras del base se movieron 3 celdas** (1086 contra 1083 de P0) al agregar archivos a `rtl/espino_core/`. Es ruido de la síntesis (T6); el RTL del base es equivalente al del curso.
+
+### Qué falta
+
+- **Corridas largas del barrel no repetidas en este paquete**: los 20 000 ticks con Icarus (`make barrel-equiv-icarus`) y a 10 ms (`make barrel-equiv-ronda1`). Pasaron en la factibilidad con el mismo RTL y la regla anterior.
+- **`make fases` y `make estres` sobre el barrel** (criterios 4 y 7): `tools/estres.py` necesita el programa con tabla. El 88 de peor caso sale del barrido del prototipo, no de `make fases`.
+- **El gemelo no modela el barrel** (P4).
+- **Qué compila el comando del testbench oficial.** Sin definiciones sigue dando el base con `sw/trade.hex`. Si R1 o R2 compiten habrá que cambiar los valores por defecto (T55). Es decisión de Nicolás, en P5.
+- **Tabla de arranque dentro de `sw/trade.s`** (T56): propuesta, sin decidir.
+
+### Qué conviene atacar después y por qué
+
+1. **P2, extensión sobre el barrel.** Sigue en el camino crítico hacia R1. La suite de P1 ya sirve para verificarla: la comparación contra el base necesita que el base no ejecute las instrucciones nuevas, así que P2 tiene que definir contra qué se comparan (su especificación, con formal).
+2. **P4 en paralelo**: el gemelo del barrel desbloquea `make equiv-gemelo` y la matriz de estrés para el fondo.
+3. **Preguntas al ayudante**, sobre todo si un Espino multihilo sigue siendo Espino. Todo lo de P1 a P5 depende de esa respuesta.
+
 ## Tramo 7: paquete P0, orden y respaldo (15/11)
 
 Rama `p0-respaldo`. Primer paquete del plan vigente desde el 15/11 (decisión T50: compite el fondo en un chip, con una escalera de bitstreams R0, R1 y R2). El tramo 6, la factibilidad, está en la rama `factibilidad-fondo` y no se integra a `main`: los paquetes siguientes traen de ahí lo que necesiten. Bitácora: `docs/bitacora/p0.md`.

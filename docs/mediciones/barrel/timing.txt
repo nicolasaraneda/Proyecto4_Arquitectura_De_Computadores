@@ -1,0 +1,1 @@
+barrel                 celdas  933 de 1280, BRAM 12 de 16, LUT4  762, fmax min  52.62 mediana  55.65 max  59.18 MHz, cierran a 25 MHz 10 de 10

@@ -5,7 +5,7 @@ Herramientas:
   Yosys 0.68+195 (git sha1 435977e97-dirty, Release, Clang /usr/bin/clang++ 21.1.8)
   "nextpnr-ice40" -- Next Generation Place and Route (Version nextpnr-0.11.1-19-g8dbcee5c)
   Icarus Verilog version 14.0 (devel) (s20260301-403-g5ab23063f-dirty)
-Commit de partida: 1d4a82f (rama p1-barrel)
+Commit de partida: e118269 (rama p1-barrel)
 tb/tb_proyecto_4.sv: sin cambios respecto del repositorio (sha256 f83486755fe2b3de...)
 
 --- Core barrel, max_media en el hilo 0 (sw/trade.s con la tabla de arranque) ---

@@ -110,6 +110,20 @@ Cada una tiene su documento de estudio, su prueba y el número que la respalda.
 | Programas aleatorios | Generador de programas para comparar dos modelos del SoC. | `make cosim` | 469 343 escrituras de registro y de memoria comparadas con 4 semillas. | `docs/gemelo.md`, sección 3 |
 | Producto 2x2 en punto fijo (diseño y costo) | Instrucción propuesta `kal2`: un paso del filtro de Kalman de dos estados como producto de matriz 2x2 por vector, con el estado empaquetado en dos carriles de 16 bits. No está en el SoC. | `make tb-mv2x2` y `make costo-mv2x2` | Tres implementaciones idénticas al modelo en 20 000 vectores por matriz. Coeficientes fijos: 251 LUT con los coeficientes calibrados, agrega 328 celdas al SoC y no cabe. Multiplicadores reales: 3094 LUT en la FPGA, 124 000 um² en GF180. | `docs/producto_2x2.md` |
 | Espino segmentado | Pipeline de 3 etapas: la memoria de instrucciones se lee en el flanco de bajada y el banco de registros adelanta el dato recién escrito. Es el mismo Espino, elegido al compilar con `-DESPINO_SEGMENTADO`. El core por defecto sigue siendo el base. | `make check-seg`, `make paralelo-largo`, `make mutaciones`, `make cosim-seg` y `make equiv-seg` | CPI con el mix de la clase 7: 1,350 contra 2,350 del base (la clase estimó 1,5). Respuesta de `trade.s`: 22 ciclos en promedio contra 41. 994 celdas contra 1083. Cierra a 25 MHz en 10 de 10 semillas, con 51,1 MHz en la peor. 3,2 millones de instrucciones aleatorias comparadas una por una con el base, 628 583 distintas (corrida del 15/11 con el generador corregido, T52). | `docs/espino_segmentado.md` |
+| Espino barrel | Cuatro hilos por un pipeline de 4 etapas, con los cuatro contextos en las BRAM del banco de registros. Sin adelantamiento ni burbujas. Se elige con `-DESPINO_BARREL`. Es el core del diseño que compite (decisión T50). | `make check-barrel`, `make barrel-verif` y `make barrel-mutaciones` | CPI 1,000 agregado y 4,000 por hilo. 933 celdas contra 1086 del base, 52,6 MHz en la peor de 10 semillas. 7,9 millones de instrucciones comparadas una por una con el base, 91,96 % distintas, cero diferencias. 21 de 21 errores puestos a propósito detectados. Testbench oficial 4/4, con respuesta en 83 ciclos de 2262. | `docs/espino_barrel.md` |
+
+### Espino barrel
+
+Tercer core, elegido al compilar con `-DESPINO_BARREL`: cuatro hilos que rotan por un pipeline uniforme de cuatro etapas, con los cuatro contextos en las mismas BRAM del banco de registros. No necesita adelantamiento, burbujas ni anulaciones. Viene del tramo de factibilidad (rama `factibilidad-fondo`). Los programas para este core empiezan con una tabla de cuatro saltos, uno por hilo; `tools/barrel/tabla.py` la antepone a un programa de un hilo.
+
+| Comando | Qué hace |
+|---------|----------|
+| `make check-barrel` | Lo que corre la integración continua: propiedades formales, pruebas de humo, comparación corta contra el base, testbench oficial con 4/4, los 20 000 ticks contra la referencia y timing en 10 semillas. |
+| `make barrel-verif` | Cada hilo contra el Espino base, instrucción por instrucción: 20 600 programas que se ejecutan una vez y 748 que repiten su cuerpo. |
+| `make barrel-mutaciones` | 21 errores puestos a propósito. La comparación anterior tiene que detectarlos todos. |
+| `make barrel-aislamiento` y `make barrel-compartida` | Cuatro hilos a la vez: cada uno idéntico a su corrida solo, y cuatro hilos sobre la misma memoria contra un modelo por turnos. |
+| `make barrel-recursos`, `make barrel-cpi` y `make barrel-ticks` | Celdas, frecuencia máxima, CPI y latencia por tick del base, el segmentado y el barrel en la misma corrida. |
+| `make barrel-completo` | Todo lo anterior y las pruebas de netlist y de trazas. |
 
 ### Espino segmentado
 
@@ -159,7 +173,7 @@ Extrae la copia sin cambios del repositorio base (etiqueta `base-curso`) y mide 
 | `ref/`     | Referencia del algoritmo en Python, mercado de la maestra, series de prueba, protocolo de evaluación y gemelo digital. |
 | `tools/`   | Ensamblador, generador de programas aleatorios y scripts de equivalencia, co-simulación y medición. |
 | `bitstreams/` | Bitstreams de competencia, con su hash. |
-| `formal/`  | Verificación formal. Por ahora, la equivalencia del Espino base con el del repositorio del curso (`formal/base_sin_cambios/`). |
+| `formal/`  | Verificación formal: la equivalencia del Espino base con el del repositorio del curso (`formal/base_sin_cambios/`) y las propiedades de estructura del barrel (`formal/barrel/`). |
 | `docs/`    | Enunciado, estado, decisiones, documentación y mediciones. |
 | `informe/` | Informe en LaTeX (todavía vacío). |
 

@@ -8,6 +8,9 @@
 # la medición de CPI y la síntesis completa hasta el bitstream. Después se
 # repite lo esencial con el core segmentado (make check-seg): prueba formal de
 # que el core base no cambió, modelo de costo, riesgos, ejecución en paralelo,
+# equivalencia de los 20 000 ticks y cierre de timing en 10 semillas. Y con el
+# Espino barrel (make check-barrel): propiedades formales, pruebas de humo,
+# comparación corta de cada hilo contra el Espino base, testbench oficial,
 # equivalencia de los 20 000 ticks y cierre de timing en 10 semillas.
 # Usa la misma versión de OSS CAD Suite que usamos en el desarrollo.
 #
@@ -92,6 +95,10 @@ jobs:
       - name: Core segmentado (modelo de costo, riesgos, paralelo, equivalencia y timing en 10 semillas)
         run: make check-seg
 
+      # --- Espino barrel (4 hilos, pipeline de 4 etapas) ---
+      - name: Core barrel (formal, humo, comparación corta contra el base, oficial 4/4, equivalencia y timing en 10 semillas)
+        run: make check-barrel
+
   # Ejecución manual: la corrida completa con el simulador del testbench oficial
   equiv-icarus:
     if: github.event_name == 'workflow_dispatch' && inputs.icarus_completo
@@ -135,3 +142,22 @@ jobs:
 
       - name: Equivalencia con la referencia, core segmentado y ROM
         run: make equiv-seg equiv-rom
+
+
+  # Ejecución manual: verificación completa del core barrel (criterio 5 de la
+  # puerta de simulación y pruebas complementarias)
+  barrel-completo:
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Instalar OSS CAD Suite
+        uses: YosysHQ/setup-oss-cad-suite@v4
+        with:
+          version: '2026-09-06'
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Cada hilo contra el Espino base, mutaciones, aislamiento, memoria compartida y mediciones
+        run: make barrel-completo BARREL_JOBS=4
