@@ -612,3 +612,41 @@ check-fondo: test-fondo fondo-oficial
 	CORTA=1 JOBS=$(FONDO_JOBS) SALIDA=$(BUILD)/fondo/degradacion_corta.txt tools/fondo/degradacion.sh
 	JOBS=$(FONDO_JOBS) SALIDA=$(BUILD)/fondo/controles_corta.txt tools/fondo/controles.sh
 fondo-completo: test-fondo fondo-oficial fondo-equiv fondo-series fondo-fases fondo-degradacion fondo-controles fondo-ticks fondo-timing
+
+# --- Gemelo del barrel (paquete P4, docs/gemelo.md sección 7) -----------------
+# cosim-barrel: traza, ticks y decisiones del RTL (tb/barrel/tb_gemelo.sv)
+#   contra el gemelo en 21 configuraciones, controles negativos y gemelo con y
+#   sin atajo. Unos 6 minutos. La versión corta corre en la integración continua.
+# fondo-gemelo-series: 1 051 series a los tres períodos contra ref/fondo.py.
+# fondo-estres / fondo-estres-gemelo: matriz de estrés (criterio 7) del fondo,
+#   por el RTL y por el gemelo.
+.PHONY: cosim-barrel cosim-barrel-corta fondo-gemelo-series fondo-estres fondo-estres-gemelo
+FONDO_MINIMOS := 33500,38300
+cosim-barrel:
+	$(PYTHON) tools/gemelo_barrel.py --jobs $(FONDO_JOBS)
+cosim-barrel-corta:
+	$(PYTHON) tools/gemelo_barrel.py --corta --jobs $(FONDO_JOBS)
+fondo-gemelo-series: $(GEMELO)
+	$(PYTHON) tools/fondo/gemelo_series.py --practica
+fondo-estres: fondo-hex
+	DEFS="$(FONDO_DEFS)" $(PYTHON) tools/estres.py --ref fondo --hex $(BUILD)/fondo/fondo.hex --etiqueta fondo \
+	  --solo estres --periodos-minimos $(FONDO_MINIMOS) > docs/mediciones/fondo/estres_rtl.txt; \
+	  r=$$?; cat docs/mediciones/fondo/estres_rtl.txt; exit $$r
+fondo-estres-gemelo: fondo-hex
+	$(PYTHON) tools/estres.py --ref fondo --motor gemelo --gemelo-opts "--barrel --xd 3" --hex $(BUILD)/fondo/fondo.hex \
+	  --etiqueta fondo_gemelo --solo estres --periodos-minimos $(FONDO_MINIMOS) > docs/mediciones/fondo/estres_gemelo.txt; \
+	  r=$$?; cat docs/mediciones/fondo/estres_gemelo.txt; exit $$r
+
+# --- Autoprueba en placa (paquete P6, docs/autoprueba.md) ---------------------
+# autoprueba-r0: firma esperada (gemelo y referencia), bitstream, simulación del
+#   RTL con los tres botones y del bitstream ruteado con SW3. Unos 20 minutos.
+#   Deja build/autoprueba/r0/autoprueba_r0.bin y docs/mediciones/autoprueba_r0.txt.
+.PHONY: autoprueba-r0 autoprueba-r0-firma
+autoprueba-r0:
+	$(PYTHON) tools/autoprueba.py todo r0
+autoprueba-r0-firma:
+	$(PYTHON) tools/autoprueba.py firma r0
+# Exploración: SCLK mínimo a 0,1 ms y período mínimo a 1 MHz, R0 y R1, con el gemelo
+.PHONY: fondo-sclk-minimo
+fondo-sclk-minimo: fondo-hex
+	$(PYTHON) tools/fondo/sclk_minimo.py

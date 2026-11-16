@@ -455,3 +455,43 @@ Hay tres hechos que estas decisiones no cambian y con los que se planifica:
 - **Decisión.** Los casos del criterio 6 son `sw/fondo.s` con instrucciones insertadas en la rutina de los gestores (`tools/fondo/variante.py`): un lazo infinito, un salto que omite el store del voto o un lazo de retardo. El supervisor no se toca. La decisión esperada sale de `ref/fondo.py` con la falla descrita como "el voto del gestor K no llega entre los ticks N y M".
 - **Razón.** Un gestor colgado de verdad sigue ocupando su turno en el barrel y sigue leyendo la memoria: es lo que pasaría en la placa. Forzar señales en el simulador prueba otra cosa.
 - **Qué se pierde.** No se prueban atrasos cercanos al plazo (entre 200 y 600 ciclos), donde el resultado depende del ciclo exacto y la referencia no lo modela.
+
+Las decisiones T80 a T85 son de los paquetes P4 y P6, trabajados en paralelo con P5 en otra rama. Los números T69 a T79 quedan para P5.
+
+### T80. El gemelo modela el barrel por calendario de etapas, con un atajo por estado periódico (15/11)
+
+- **Decisión.** En modo `--barrel` el gemelo no simula el pipeline: ejecuta cada instrucción entera en el ciclo en que su hilo está en la etapa X (x0 + t + 4n), busca la siguiente dos ciclos después con la memoria de antes de las escrituras de ese flanco, y anota la escritura al banco un ciclo después. El atajo del sondeo saca una foto del estado de los cuatro hilos cada vez que el hilo 0 va a leer STATUS en su lazo; si se repite sin otros accesos al SPI, salta por períodos completos hasta la lectura que ve el precio.
+- **Razón.** La rotación del barrel es fija y no hay riesgos entre hilos, así que el calendario es exacto. La foto no depende de `sw/fondo.s`: sirve para cualquier programa que quede en un ciclo mientras espera, y si no queda, no salta.
+- **Alternativas.** (a) Simular las cuatro etapas registro por registro: más código, el mismo resultado. (b) Reconocer el lazo de los gestores como el del supervisor: ata el gemelo al programa y no sirve para los programas aleatorios ni para el gestor colgado.
+- **Qué se pierde.** Nada medible: con y sin atajo los resultados son idénticos a los tres períodos, y la ronda de 10 ms del fondo pasa de 76 s (sin atajo) a 0,14 s.
+
+### T81. Las variables de ronda de los testbenches se asignan aparte (15/11)
+
+- **Decisión.** En `tb/tb_estres.sv`, `tb/fondo/tb_fondo.sv` y `tb/barrel/tb_gemelo.sv`, `int r = (ronda_ticks > 0) ? n / ronda_ticks : 0;` dentro del `for` pasa a ser `int r;` y una asignación. Se repitió la matriz de estrés de R0 y se corrió la del fondo con el arreglo.
+- **Razón.** Una variable declarada con valor inicial dentro de un bloque `initial` es estática en SystemVerilog: el valor inicial se asigna una sola vez. `r` quedaba en 0 y todas las rondas usaban el período de la primera. Lo encontró la validación del gemelo, que tenía la semántica correcta y no coincidía con el RTL en las rondas seguidas. Es el mismo error que P3 encontró en `tb_fondo.sv` con otra variable.
+- **Qué cambió.** Los casos `rondas_*` de R0 vuelven a pasar, ahora con los períodos que dicen (`docs/mediciones/estres_base.txt`): las cifras no se mueven porque la respuesta de R0 no depende del período. Lo que antes estaba afirmado sin probar era que el programa sigue funcionando cuando el período cambia sin reset.
+
+### T82. La matriz de estrés del fondo es la de R0 con la referencia del fondo, por el RTL y por el gemelo (15/11)
+
+- **Decisión.** `tools/estres.py` acepta `--ref fondo` (bytes esperados de `ref/fondo.py`) y `--motor gemelo`. El criterio 7 del fondo se corre con los mismos 60 casos que R0, por el RTL (`make fondo-estres`) y por el gemelo (`make fondo-estres-gemelo`). Los dos casos de período cercano al mínimo se fijan por programa: para el fondo, 33,5 us y 38,3 us (presupuesto de 600 y 720 ciclos) en vez de 11,5 us y 13,5 us (50 y 100 ciclos, que solo tienen sentido para R0).
+- **Razón.** Una sola matriz para todos los peldaños hace comparables los resultados. Correrla por los dos motores es otra validación del gemelo: dan las mismas 60 líneas, con los mismos promedios y peores casos.
+- **Qué se pierde.** Nada. La matriz por el RTL demora unos minutos; por el gemelo, 3 segundos.
+
+### T83. La autoprueba vive fuera de `rtl/*.v` y deja sin conectar la telemetría del SoC (15/11)
+
+- **Decisión.** El top de la autoprueba está en `rtl/autoprueba/`, instancia `pochoco_soc` sin cambios y deja sus LED y 7 segmentos sin conectar. Los botones del SoC van a 0.
+- **Razón.** `rtl/*.v` es la lista de fuentes del comando del testbench oficial y de la síntesis de R0: un archivo más ahí cambia los nombres internos de Yosys y el hash del bitstream (T62). Los LED y los 7 segmentos de la placa los necesita la autoprueba para mostrar la firma. El plan permite sacar la telemetría de esta versión si no cabe; aquí además se necesitan los pines.
+- **Qué se pierde.** La autoprueba no muestra la telemetría de `sw/fondo.s`. El SoC de la autoprueba no es el mismo bitstream que compite: es el mismo RTL, sintetizado junto a otra lógica.
+
+### T84. Maestra interna mínima: SCLK de 781 kHz, caminata de a 1 y CRC bit a bit (15/11)
+
+- **Decisión.** La maestra interna arma la transacción con un contador de 9 bits (medio período de SCLK de 16 ciclos, así que el nivel y el número de bit son bits del contador), genera los precios con una caminata de +1 o -1 según un LFSR de 16 bits, calcula la firma CRC-16 bit a bit al leer MISO, y lleva el período con un contador descendente que se carga con una de tres constantes.
+- **Razón.** R0 ocupa 1083 celdas. La primera versión, con los tiempos del oficial (SCLK de 1 MHz, medio período de 12,5 ciclos redondeado a 13), contadores de fase y de bit, CRC byte a byte y pasos de -2 a +2, costaba 233 LUT y el total llegaba a 1340 de 1280 celdas. La versión actual entra: 1269 celdas, 44,05 MHz.
+- **Alternativas.** (a) Sacar los 7 segmentos y mostrar solo un LED de coincide: pierde la firma, que es lo que permite comparar a mano. (b) Una maestra más lenta todavía: no ahorra celdas, el costo está en los contadores y la firma.
+- **Qué se pierde.** La transacción no es la del oficial: 781 kHz y 12,16 us en vez de 1 MHz y 9,5 us. Para lo que prueba la autoprueba (que la FPGA toma las mismas decisiones a tiempo) no importa, y los tiempos del oficial ya están en la matriz de estrés. Quedan 11 celdas libres: cualquier cambio en R0 o en la maestra puede dejar de caber.
+
+### T85. La firma esperada va dentro del bitstream, y se calcula de dos formas (15/11)
+
+- **Decisión.** `tools/autoprueba.py` calcula la firma con el gemelo a los tres períodos y con la referencia del algoritmo, exige que las cuatro coincidan y la fija como parámetro del top. Al terminar, LED3 indica que coincide y LED4 que no. Los 7 segmentos muestran la firma de todos modos.
+- **Razón.** Con un LED la prueba en la placa no depende de leer bien cuatro dígitos. Que la firma sea la misma a los tres períodos prueba que el programa responde siempre antes del tick siguiente.
+- **Qué se pierde.** Hay que reconstruir el bitstream si cambia el programa o la serie. Un bitstream de autoprueba no es de competencia y nunca se lleva el 1/12.

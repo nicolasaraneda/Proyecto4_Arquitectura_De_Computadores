@@ -2,6 +2,70 @@
 
 Se actualiza al cerrar cada tramo de trabajo. La versión anterior queda en el historial de git.
 
+## Tramo 11: paquetes P4, gemelo del barrel, y P6, autoprueba de R0 (15/11)
+
+Rama `p4-gemelo`, desde `p3-fondo` (`05b3b7e`), en un worktree aparte (`.claude/worktrees/p4-gemelo`) mientras otra sesión trabaja P5 en la carpeta principal. Bitácoras: `docs/bitacora/p4.md` y `docs/bitacora/p6.md`. Documentos de estudio: `docs/gemelo.md` (sección 7, nueva) y `docs/autoprueba.md`. Decisiones T80 a T85 (T69 a T79 quedan para P5).
+
+### Qué quedó hecho
+
+- **Gemelo del barrel y de la extensión** (`build/gemelo --barrel --xd 3`): calendario fijo de etapas, cada instrucción entera en su ciclo X, y un atajo general por estado periódico de los cuatro hilos (T80). Agrega rondas seguidas sin reset, la convención de CS de `tb_estres.sv` y la salida de bytes por serie.
+- **Validación contra el RTL** (`make cosim-barrel`, `tb/barrel/tb_gemelo.sv`): 21 configuraciones con traza, mediciones por tick y `decisiones.csv` idénticos byte a byte.
+- **Matriz de estrés del fondo** (criterio 7) por el RTL y por el gemelo, reutilizando la de R0 con `--ref fondo` (T82).
+- **Series sintéticas del fondo a los tres períodos** en el gemelo (`make fondo-gemelo-series`).
+- **Error en tres testbenches corregido** (T81): las rondas seguidas de `tb_estres.sv` y `tb_fondo.sv` no cambiaban de período.
+- **Autoprueba en placa de R0** (`make autoprueba-r0`): top con el SoC sin cambios, maestra SPI interna con una caminata del LFSR y firma CRC-16, firma esperada dentro del bitstream (T83 a T85). Comandos para la placa en `docs/autoprueba.md`, sección 5.
+
+### Qué se midió
+
+P4:
+
+| Prueba | Resultado |
+|--------|-----------|
+| Traza contra el RTL | 21 de 21 configuraciones idénticas, 18,3 millones de eventos: el fondo con el timing oficial, fases que se recorren solas, SCLK de 500 y 100 kHz, reset de 63 ciclos, tiempos que no son múltiplos de 40 ns, 8 programas aleatorios de cuatro hilos (con 2 y 3 instrucciones de la extensión y en un core sin ella), `sw/trade.s` en un hilo, tres fallas de gestor, rondas seguidas a 10, 1 y 0,1 ms, reset con la maestra transmitiendo y series pegadas en 1 y 255. Controles negativos (`--borde 0`, máscara equivocada) detectados |
+| Atajo | Con y sin atajo idénticos en la práctica completa a los tres períodos. La ronda de 10 ms del fondo: 0,14 s con atajo, 76 s sin atajo, 35 minutos con Verilator |
+| Series | 1 051 series (las 1 050 de P3 más la práctica) a 0,1, 1 y 10 ms: 6,36 millones de ticks idénticos a `ref/fondo.py`, en 64 s de gemelo |
+| Criterio 7 | 59 de 60 casos, por el RTL y por el gemelo con las mismas 60 líneas. Falla SCLK de 100 kHz a 0,1 ms (ver abajo) |
+| Exploración | R1 responde a tiempo a 0,1 ms desde SCLK de 115 kHz (R0 desde 100 kHz). Con SCLK de 1 MHz, período mínimo de 26,66 us para R1 (3,75 veces la ronda 3) y 11,34 us para R0 (8,82 veces) |
+| Regresión | Con el gemelo modificado siguen en verde `make cosim`, `make cosim-seg`, `make equiv-gemelo` (3810 series) y `make equiv-gemelo-20k` |
+
+P6:
+
+| Prueba | Resultado |
+|--------|-----------|
+| Firma esperada | `a23c`, igual en el gemelo a 10 ms, 1 ms y 0,1 ms y en `ref/trader.py` |
+| RTL por los pines | SW3, SW2 y SW1: firma `a23c` con LED2 y LED3 en los tres (197, 1 997 y 19 988 ms simulados) |
+| Control negativo | Con el umbral de la regla base el gemelo predice `f8cf`; la autoprueba muestra `f8cf` y enciende LED4 |
+| Bitstream ruteado | SW3: firma `a23c` con LED2 y LED3 |
+| Recursos | 1269 de 1280 celdas, 12 BRAM, 44,05 MHz. Quedan 11 celdas |
+
+### Hallazgos
+
+1. **R1 no cumple una celda del criterio 7.** Con SCLK de 100 kHz y período de 0,1 ms la transacción dura 90,5 us y deja 237 ciclos de presupuesto. El fondo responde en 234 ciclos en promedio y 474 en el peor caso. Los bytes de la serie de práctica salen iguales a la referencia, porque los ticks lentos (fronteras de ventana) no coinciden con cambios de posición, pero no hay garantía: una decisión que llega después de que baja CS_n se lee un tick más tarde. Desde 115 kHz cumple. No se puede arreglar sin cambiar el fondo: su respuesta promedio ya está en el límite.
+2. **Las rondas seguidas nunca se habían probado con períodos distintos** (T81). Lo encontró la validación del gemelo. R0 y el fondo siguen pasando ahora que se prueban de verdad.
+3. **La autoprueba casi no cabe junto a R0**: la primera versión llegaba a 1340 celdas. La versión mínima deja 11 libres.
+4. **Matrices de estrés idénticas por el RTL y por el gemelo**, con los mismos promedios y peores casos en los 60 casos: es una segunda validación del gemelo, independiente de la traza.
+
+### Decisión pendiente de Nicolás
+
+La celda (SCLK 100 kHz, T = 0,1 ms) de R1. Opciones:
+
+- **(a) Aceptarla como límite documentado de R1** (recomendada). El criterio 7 queda en 59 de 60 para R1, con la cifra de 115 kHz en el árbol de decisión del 1/12: si la maestra usa SCLK bajo 115 kHz en la ronda 3, compite R0. La combinación es improbable: con 100 kHz la transacción ocupa el 90 % del período de la ronda 3.
+- (b) Cambiar el fondo para responder antes (por ejemplo, decidir sin esperar los votos cuando el período medido es corto): es otra versión del programa, con su propia equivalencia, y mueve la fecha de corte.
+- (c) Redefinir la celda como 100 kHz a 1 ms, donde R1 pasa: cambia la puerta en vez del diseño.
+
+### Qué falta
+
+- **P6 para R1 y R2.** Necesitan lo que deja P5: la tabla en BRAM, el vigilante y la imagen múltiple. Con eso es una línea en `PELDANOS` de `tools/autoprueba.py`. Con R1 habrá más celdas libres (990 contra 1083).
+- **La puerta de placa de R0**: programar la autoprueba y anotar lo que muestra (comandos en `docs/autoprueba.md`, sección 5).
+- **Repetir la equivalencia larga de P3 a 1 ms y 10 ms con el gemelo** cuando cambie `sw/fondo.s` (P5 moverá la tabla): ahora toma un minuto.
+- La integración continua: agregar `make cosim-barrel-corta` y `make fondo-gemelo-series` al trabajo del fondo.
+
+### Qué conviene atacar después y por qué
+
+1. **La decisión sobre la celda de 100 kHz**, antes de cerrar P5: define si R1 llega al 22/11 con la puerta de simulación completa.
+2. **P5** (en curso en la otra sesión). Al cerrarse, la autoprueba de R1 y R2 y la repetición del criterio 7 con el hardware final son media hora cada una con lo que dejó este tramo.
+3. **Programar la autoprueba de R0 en la placa** cuanto antes: es la primera vez que algo del proyecto corre en la FPGA, y si hay un problema de placa conviene saberlo antes del 26/11.
+
 ## Tramo 10: integración en `main` y paquete P3, fondo de competencia (15/11)
 
 Rama `p3-fondo`, desde `main`. Bitácora: `docs/bitacora/p3.md`. Documento de estudio: `docs/fondo.md`. Decisiones T62 a T68 y la decisión de Nicolás sobre T58.

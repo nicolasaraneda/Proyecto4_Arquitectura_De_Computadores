@@ -37,10 +37,10 @@ Medido el 15/11 (paquete P0). Los registros completos están en `docs/mediciones
 | 4 | Peor caso 49 ciclos en las 8 fases (y en las 8 fases desplazadas 13 ns, y con un período de 2501 ciclos que las recorre todas), contra el límite de 1131 |
 | 5 | El core de R0 es el base. `make formal-base` prueba que sus etapas IF e ID son las del repositorio del curso, y `make cosim` valida el gemelo contra el RTL con programas del generador corregido |
 | 6 | No aplica: un solo hilo |
-| 7 | 60 casos en el rango pedido, todos pasan (`docs/mediciones/estres_base.txt`). SCLK funciona hasta 4 MHz; a 5 MHz no (exploración, decisión T53) |
+| 7 | 60 casos en el rango pedido, todos pasan (`docs/mediciones/estres_base.txt`). SCLK funciona hasta 4 MHz; a 5 MHz no (exploración, decisión T53). Repetido el 15/11 en P4 después de corregir `tb_estres.sv`, cuyas rondas seguidas no cambiaban de período (T81): siguen pasando los 60 |
 | 8 | 2 000 ticks a 0,1 ms del `.asc` ruteado idénticos a la referencia |
 
-R0 pasó la puerta de simulación. Le faltan la de placa (la corre Nicolás con la autoprueba de P6) y la de la maestra real el 26/11.
+R0 pasó la puerta de simulación. Le faltan la de placa (la corre Nicolás con la autoprueba de P6, `docs/autoprueba.md`, sección 5) y la de la maestra real el 26/11.
 
 
 ## Espino barrel con un programa de un hilo
@@ -77,12 +77,12 @@ Medido el 15/11 (paquete P3). Es el hardware de R1 sin la tabla en BRAM (`-DESPI
 | N.º | Resultado | Comando |
 |-----|-----------|---------|
 | 1 | 4/4 con `tb/tb_proyecto_4.sv` sin modificar. Peor caso 435 ciclos de 2262. `decisiones.csv` idéntico byte a byte al de `ref/fondo.py` | `make fondo-oficial` |
-| 2 | Cero diferencias con `ref/fondo.py`. Serie de práctica completa a 0,1 ms, 1 ms y 10 ms con la copia parametrizada del oficial (4/4 en las tres) y con `tb/fondo/tb_fondo.sv`. Una serie de 20 000 ticks de cada una de las 15 familias. 1 050 series sintéticas de 2000 ticks a 0,1 ms (2,1 millones de ticks). Con `tb_fondo.sv` se compara además el estado interno en cada decisión, la telemetría y el protocolo | `make fondo-equiv-ronda1` y `make fondo-series` |
+| 2 | Cero diferencias con `ref/fondo.py`. Serie de práctica completa a 0,1 ms, 1 ms y 10 ms con la copia parametrizada del oficial (4/4 en las tres) y con `tb/fondo/tb_fondo.sv`. Una serie de 20 000 ticks de cada una de las 15 familias. 1 050 series sintéticas de 2000 ticks a 0,1 ms (2,1 millones de ticks). Con `tb_fondo.sv` se compara además el estado interno en cada decisión, la telemetría y el protocolo. En P4, con el gemelo: las mismas 1 050 series más la práctica a los tres períodos, 6,36 millones de ticks | `make fondo-equiv-ronda1`, `make fondo-series` y `make fondo-gemelo-series` |
 | 3 | 10 de 10 semillas. 990 celdas de 1280 y 12 BRAM de 16. Frecuencia máxima mínima 48,92 MHz, mediana 51,08 y máxima 54,05 | `make fondo-timing` |
 | 4 | Peor caso 480 ciclos con el programa sano (72 fases de un ciclo y un período de 2501 ciclos que las recorre todas) y 564 con gestores colgados y el plazo agotado, contra el límite de 1131 | `make fondo-fases` |
 | 5 | El core es el de P2: `make xd-verif` y `make xd-mutaciones` cubren el subconjunto `emad` y `devk` dentro de sus 7 966 640 instrucciones. No se repitió con la máscara exacta: ver la nota | |
 | 6 | 30 corridas de 20 000 ticks: cada gestor en lazo infinito desde el arranque y desde el tick 1500, dos y tres colgados, un voto que no llega (en un tick, en una frontera y en un tramo), y un voto atrasado dentro y fuera del plazo. La decisión es la esperada en todas y el peor caso son 671 ciclos de 1131. 15 de 15 controles negativos detectados | `make fondo-degradacion` y `make fondo-controles` |
-| 7 | Pendiente (P4, con el gemelo del barrel) | |
+| 7 | 59 de 60 casos, por el RTL y por el gemelo con resultados idénticos caso por caso. Falla SCLK de 100 kHz con período de 0,1 ms: la transacción dura 90,5 us, el presupuesto es de 237 ciclos y el fondo responde en hasta 474 (bytes iguales a la referencia en esa serie, pero sin la garantía de tiempo). Desde 115 kHz responde a tiempo. Pendiente de decisión de Nicolás (P4) | `make fondo-estres`, `make fondo-estres-gemelo` y `make fondo-sclk-minimo` |
 | 8 | Pendiente (P5, con el bitstream de R1) | |
 
 Nota sobre el criterio 5. Pide la verificación del core "en la configuración exacta que compite". La campaña de P2 se corrió con las tres instrucciones (`-DESPINO_XD`), y la prueba formal y el timing con los 7 subconjuntos. Para R1 falta repetir la campaña de simulación con la máscara de `emad` y `devk` (`XD=3`) y con la tabla de P5 puesta: conviene hacerlo una sola vez, al cerrar P5, sobre el hardware definitivo.

@@ -145,6 +145,12 @@ jobs:
       - name: Fondo (referencia, oficial 4/4, equivalencia, series, fases y degradación en versión corta)
         run: make check-fondo FONDO_JOBS=4
 
+      - name: Gemelo del barrel contra el RTL (6 configuraciones, controles negativos)
+        run: make cosim-barrel-corta FONDO_JOBS=4
+
+      - name: El fondo en el gemelo contra su referencia (1 051 series a los tres períodos)
+        run: make fondo-gemelo-series
+
   # Ejecución manual: la corrida completa con el simulador del testbench oficial
   equiv-icarus:
     if: github.event_name == 'workflow_dispatch' && inputs.icarus_completo
