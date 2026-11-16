@@ -23,6 +23,9 @@ SRC := $(filter-out rtl/00_%,$(wildcard rtl/*.v rtl/espino_core/*.v))
 # Programa. $readmemh lo deja dentro del bitstream al sintetizar, así que el
 # .hex es prerrequisito de la síntesis.
 PYTHON ?= python3
+# Herramientas de OSS CAD Suite: tienen que estar en el PATH, o en la carpeta
+# OSS_CAD_SUITE (make ... OSS_CAD_SUITE=/ruta/a/oss-cad-suite)
+export PATH := $(if $(OSS_CAD_SUITE),$(OSS_CAD_SUITE)/bin:)$(PATH)
 ASM    := tools/pochoasm.py
 ASMDEP := $(ASM) $(wildcard tools/asm/*.py)
 HEX    := sw/trade.hex

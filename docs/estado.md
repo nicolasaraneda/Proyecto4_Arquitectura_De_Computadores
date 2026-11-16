@@ -71,7 +71,7 @@ Rama `integra-p4`, desde `main` (`5ea436b`, con P5). Bitácora: `docs/bitacora/p
 
 ## Tramo 12: paquetes P4, gemelo del barrel, y P6, autoprueba de R0 (15/11)
 
-Rama `p4-gemelo`, desde `p3-fondo` (`05b3b7e`), en un worktree aparte (`.claude/worktrees/p4-gemelo`) mientras otra sesión trabaja P5 en la carpeta principal. Bitácoras: `docs/bitacora/p4.md` y `docs/bitacora/p6.md`. Documentos de estudio: `docs/gemelo.md` (sección 7, nueva) y `docs/autoprueba.md`. Decisiones T80 a T85 (T69 a T79 quedan para P5).
+Rama `p4-gemelo`, desde `p3-fondo` (`05b3b7e`), en paralelo con P5. Bitácoras: `docs/bitacora/p4.md` y `docs/bitacora/p6.md`. Documentos de estudio: `docs/gemelo.md` (sección 7, nueva) y `docs/autoprueba.md`. Decisiones T80 a T85 (T69 a T79 quedan para P5).
 
 ### Qué quedó hecho
 

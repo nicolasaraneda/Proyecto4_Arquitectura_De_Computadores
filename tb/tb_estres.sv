@@ -1,5 +1,5 @@
 // tb_estres.sv: maestra SPI configurable para la matriz de estrés y el barrido
-// de fases de la puerta de simulación (CLAUDE.md, sección 16.4, criterios 4 y 7).
+// de fases de la puerta de simulación (plan del proyecto, sección 16.4, criterios 4 y 7).
 //
 // Grupo: Nicolás Araneda, Vicente Calderón y Santiago Muñoz.
 // Arquitectura de Computadores, Universidad de los Andes, 2026-2.
