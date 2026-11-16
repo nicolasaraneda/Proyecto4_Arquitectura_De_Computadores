@@ -1,0 +1,35 @@
+Recursos y frecuencia maxima de las variantes de co-diseno
+Generado por tools/p7/recursos.sh (make p7-recursos). No editar a mano.
+
+Herramientas:
+  Yosys 0.68+195 (git sha1 435977e97-dirty, Release, Clang /usr/bin/clang++ 21.1.8)
+  "nextpnr-ice40" -- Next Generation Place and Route (Version nextpnr-0.11.1-19-g8dbcee5c)
+  Verilator 5.053 devel rev v5.052-22-g7cf8c5cca (mod)
+  cc (Ubuntu 15.2.0-16ubuntu1) 15.2.0
+Commit de partida: cb5571a (rama p7-codiseno)
+Huella de las fuentes: 2a48cb214e0c99c6
+
+Flujo: tools/medir_variante.sh, yosys synth_ice40 y nextpnr-ice40 --hx1k --package vq100 --freq 25,
+goboard.pcf, semillas 1 a 10. SoC completo con el programa de cada variante dentro.
+
+variante r0         definiciones [] programa sw/trade.hex
+variante seg        definiciones [-DESPINO_SEGMENTADO] programa sw/trade.hex
+variante barrel     definiciones [-DESPINO_BARREL] programa build/p7/sw/trade_h0.hex
+variante barrel_xd  definiciones [-DESPINO_BARREL -DESPINO_XD_EMAD -DESPINO_XD_DEVK] programa build/p7/sw/trade_xd_h0.hex
+variante r1         definiciones [-DESPINO_BARREL -DESPINO_XD_EMAD -DESPINO_XD_DEVK -DESPINO_TABLA] programa build/p7/sw/fondo.hex
+variante r2         definiciones [-DESPINO_BARREL -DESPINO_XD_EMAD -DESPINO_XD_DEVK -DESPINO_TABLA -DESPINO_VIGILANTE] programa build/p7/sw/fondo.hex
+
+p7_r0                  celdas 1091 de 1280, BRAM 12 de 16, LUT4  921, fmax min  41.93 mediana  44.09 max  47.49 MHz, cierran a 25 MHz 10 de 10
+p7_seg                 celdas  990 de 1280, BRAM 12 de 16, LUT4  798, fmax min  45.34 mediana  47.20 max  50.64 MHz, cierran a 25 MHz 10 de 10
+p7_barrel              celdas  932 de 1280, BRAM 12 de 16, LUT4  761, fmax min  53.45 mediana  56.32 max  60.69 MHz, cierran a 25 MHz 10 de 10
+p7_barrel_xd           celdas  991 de 1280, BRAM 12 de 16, LUT4  817, fmax min  48.59 mediana  51.61 max  56.13 MHz, cierran a 25 MHz 10 de 10
+p7_r1                  celdas 1029 de 1280, BRAM 13 de 16, LUT4  854, fmax min  51.59 mediana  52.57 max  53.69 MHz, cierran a 25 MHz 10 de 10
+p7_r2                  celdas 1045 de 1280, BRAM 13 de 16, LUT4  868, fmax min  47.86 mediana  50.33 max  54.26 MHz, cierran a 25 MHz 10 de 10
+
+Frecuencia maxima por semilla (MHz), semillas 1 a 10:
+  r0         44.53 43.88 43.70 47.49 43.08 41.93 45.64 42.49 44.76 44.29 
+  seg        45.34 47.29 46.18 47.75 47.11 47.31 46.80 48.96 46.41 50.64 
+  barrel     56.33 56.31 57.03 55.52 56.48 56.51 55.80 53.45 60.69 56.12 
+  barrel_xd  51.79 49.88 49.55 56.13 50.73 52.69 48.59 54.34 51.42 53.69 
+  r1         52.44 52.27 52.46 53.69 53.11 52.73 52.68 53.19 51.59 52.46 
+  r2         52.53 50.23 50.90 49.88 51.92 47.86 50.42 49.52 54.26 48.89 

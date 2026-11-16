@@ -1,0 +1,27 @@
+El testbench oficial frente al reloj interno doblado: efecto de la fase (Espino base, 200 ticks)
+Copias parametrizadas de tb/tb_proyecto_4.sv. Cambian solo NTICKS y el instante de la primera transacción.
+
+== primera transacción a los 4000 ns
+  Peor caso precio->decision: 22 ciclos (disponibles: 2262)
+  PASS MISO sin valores X
+  PASS el programa escribe DECISION
+  PASS el programa lee todos los precios
+  PASS la decision llega antes del siguiente tick
+  Testbenchs aprobados: 4/4
+  MONITOR byte_done: 199 reales, 199 vistos con el reloj de 25 MHz
+  MONITOR escrituras de DECISION: 199 reales, 199 vistas con el reloj de 25 MHz
+  MONITOR respuesta en ciclos del reloj interno: promedio 40.99, peor caso 44, 199 respuestas
+  decisiones.csv idéntico a ref/trader.py (200 filas): el SoC decide bien en los dos casos
+
+== primera transacción a los 4020 ns
+  Peor caso precio->decision: 0 ciclos (disponibles: 2262)
+  PASS MISO sin valores X
+  FAIL el programa escribe DECISION
+  PASS el programa lee todos los precios
+  PASS la decision llega antes del siguiente tick
+  Testbenchs aprobados: 3/4
+  MONITOR byte_done: 199 reales, 0 vistos con el reloj de 25 MHz
+  MONITOR escrituras de DECISION: 199 reales, 199 vistas con el reloj de 25 MHz
+  MONITOR respuesta en ciclos del reloj interno: promedio 39.99, peor caso 43, 199 respuestas
+  decisiones.csv idéntico a ref/trader.py (200 filas): el SoC decide bien en los dos casos
+

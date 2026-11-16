@@ -1,0 +1,26 @@
+Confirmacion con el RTL de los ciclos por tick del gemelo
+Generado por tools/p7/rtl.sh (make p7-rtl). No editar a mano.
+
+Herramientas:
+  Yosys 0.68+195 (git sha1 435977e97-dirty, Release, Clang /usr/bin/clang++ 21.1.8)
+  "nextpnr-ice40" -- Next Generation Place and Route (Version nextpnr-0.11.1-19-g8dbcee5c)
+  Verilator 5.053 devel rev v5.052-22-g7cf8c5cca (mod)
+  cc (Ubuntu 15.2.0-16ubuntu1) 15.2.0
+Commit de partida: cb5571a (rama p7-codiseno)
+
+1. tb/tb_cpi.sv con Verilator contra build/gemelo, serie de practica completa a 0,1 ms (sw/trade.hex)
+PASS r0: 19998 filas por tick identicas byte a byte (ciclo del precio, respuesta, tick completo e IC)
+    RTL r0:   respuesta, promedio          IC   19.50   ciclos   41.00   CPI 2.103   tiempo   1.640 us   ( 1.640 % de T)
+    RTL r0:   respuesta, peor caso         IC   21.00   ciclos   44.00   CPI 2.095   tiempo   1.760 us   ( 1.760 % de T)
+    RTL r0:   tick completo, promedio      IC   28.50   ciclos   63.00   CPI 2.211   tiempo   2.520 us   ( 2.520 % de T)
+    RTL r0:   tick completo, peor caso     IC   30.00   ciclos   66.00   CPI 2.200   tiempo   2.640 us   ( 2.640 % de T)
+PASS seg: 19998 filas por tick identicas byte a byte (ciclo del precio, respuesta, tick completo e IC)
+    RTL seg:   respuesta, promedio          IC   19.20   ciclos   22.00   CPI 1.146   tiempo   0.880 us   ( 0.880 % de T)
+    RTL seg:   respuesta, peor caso         IC   22.00   ciclos   26.00   CPI 1.182   tiempo   1.040 us   ( 1.040 % de T)
+    RTL seg:   tick completo, promedio      IC   28.20   ciclos   34.00   CPI 1.206   tiempo   1.360 us   ( 1.360 % de T)
+    RTL seg:   tick completo, peor caso     IC   31.00   ciclos   38.00   CPI 1.226   tiempo   1.520 us   ( 1.520 % de T)
+
+2. R1 y R2: medicion del RTL de P5 (tools/fondo/ticks.sh) contra el gemelo, ronda 3
+   gemelo R1: respuesta promedio y peor, tick completo promedio y peor: 223.01 443 281.01 475
+PASS r1: RTL 223.01 443 281.01 475 , igual al gemelo (docs/mediciones/fondo/r1/ticks.txt, mismo sha256 de programa y tabla)
+PASS r2: RTL 223.01 443 281.01 475 , igual al gemelo (docs/mediciones/fondo/r2/ticks.txt, mismo sha256 de programa y tabla)
