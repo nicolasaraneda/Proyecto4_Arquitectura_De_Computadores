@@ -69,6 +69,32 @@ Rama `integra-p4`, desde `main` (`5ea436b`, con P5). Bitácora: `docs/bitacora/p
 | `make fondo-sclk-minimo` | R1 responde a tiempo a 0,1 ms desde 110 kHz (antes 115). Período mínimo a 1 MHz: 26,94 us |
 | `make test-ref`, `make equiv-gemelo` | En verde |
 
+### Punto 1, cierre
+
+La integración continua de `integra-p4` quedó en verde en sus tres trabajos (corrida 43890444405) y `main` avanzó a `cb5571a`.
+
+### Punto 3: paquete P8, anticipación
+
+Rama `p8-anticipacion`. Bitácora: `docs/bitacora/p8.md`. Documento de estudio: `docs/contingencia.md`. Decisiones T120 a T124.
+
+- **Matriz de estrés de R0, R1 y R2.** La de la puerta (por el RTL) ya estaba: R0 60 de 60, R1 y R2 56 de 56. P8 agrega, en el gemelo, período de 10 ms a 11,5 us, SCLK de 100 kHz a 1 MHz en cada período, rondas de 500 a 200 000 ticks, y comisión de 0 a 50 con caja de 1 000 a 100 000 (`make p8-matriz`, 10 s). Todas las celdas con al menos 600 ciclos entre transacciones pasan.
+- **Medidor del SPI de la maestra** (`bitstreams/medidor_spi.bin`, `make medidor`): sin el SoC, mide período de SCLK, período entre precios, duración de `CS_n`, tiempo libre mínimo y cantidad de precios, y los muestra en los 7 segmentos. 66 comprobaciones por los pines del bitstream ruteado, 4 de 4 mutaciones detectadas, 611 celdas, 10 de 10 semillas.
+- **Kit de contingencia**: molde de R0 (`make r0-molde`, reproduce R0 byte por byte con `icebram`), `tools/retune.py` (control en la integración continua: con las reglas publicadas reproduce R0, R1 y R2 byte por byte) y juegos preconstruidos para comisión de 20 y 50 (`make contingencia`).
+- **`docs/checklist_26nov.md`** (con la medición del SCLK en las tres rondas), **`docs/checklist_1dic.md`** (con el acceso del profesor y los ayudantes al repositorio privado) y **`docs/arbol_decision.md`** (con la regla de 115 kHz).
+- Hallazgo: con caja de 1 000 y comisión de 20 o más, `max_media` pierde contra comprar y mantener en los 10 bloques de la práctica; `retune` elige entonces casi no operar.
+
+### Punto 4: el diseño por defecto, preparado
+
+`make peldano-fijar PELDANO=r1` (no ejecutado): crea `rtl/00_peldano.v` con las definiciones del peldaño, pasa el programa de R0 a `sw/max_media.s` y hace de `sw/trade.s` una copia de `sw/fondo.s`. Ningún flujo propio lee `rtl/00_*` (se cambió la lista de fuentes de 13 scripts y del `Makefile`), así que solo el comando oficial ve el cambio. `make peldano-oficial` (en la integración continua) corre el comando oficial tal cual: hoy R0, 4/4 y `decisiones.csv` idéntico a la referencia. `make peldano-probar PELDANO=r1` hace el cambio en una copia y lo prueba. Documento: `docs/peldano.md`.
+
+### Punto 5: paquete P7, co-diseño
+
+Rama `p7-codiseno`, integrada en `p8-anticipacion`. Documento de estudio: `docs/codiseno.md`. Decisiones T100 a T106. Seis variantes medidas (`make p7`, `docs/mediciones/p7/`): todas cierran a 25 MHz en 10 de 10 semillas. Respuesta peor: R0 44 ciclos, segmentado 26, barrel en un hilo 83, barrel con la extensión 63, R1 443. Amdahl predicho contra medido: segmentado 1,843 contra 1,864; barrel y extensión exactos. Escalera de la clase con los pasos 0, 2, barrel y R1 medidos y el resto estimados. Roofline: todos los kernels a la derecha del quiebre (0,62 a 1 Op/B), limitados por cómputo. ASIC (de la factibilidad): 136 MOPS/W y 2,80 uJ por decisión en el base. PLL: el VQ100 no lo tiene; el duplicador cierra 1 de 10 semillas. Hallazgo sin investigar: la frecuencia mínima del segmentado bajó de 51,59 a 45,34 MHz desde P1 (su core no cambió; sí `pochoco_soc.v`).
+
+### Puntos 6 y 7: README e informe
+
+Bitácora: `docs/bitacora/p9_entrega.md`. README según la regla del enunciado, con una sección corta por pieza (comandos detallados en `docs/comandos.md`). Informe en `informe/informe.tex`: 3.1, 3.2 y 3.3 en orden, todas las cifras desde `make report`, con el texto y las cifras del peldaño que compite. No hay LaTeX local: el PDF lo compila el trabajo `informe` de la integración continua.
+
 ## Tramo 12: paquetes P4, gemelo del barrel, y P6, autoprueba de R0 (15/11)
 
 Rama `p4-gemelo`, desde `p3-fondo` (`05b3b7e`), en paralelo con P5. Bitácoras: `docs/bitacora/p4.md` y `docs/bitacora/p6.md`. Documentos de estudio: `docs/gemelo.md` (sección 7, nueva) y `docs/autoprueba.md`. Decisiones T80 a T85 (T69 a T79 quedan para P5).
