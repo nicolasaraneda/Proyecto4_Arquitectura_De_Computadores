@@ -8,10 +8,12 @@ Documento de estudio del paquete P6: un bitstream que prueba en la Go Board, sin
 | Archivo | Qué es |
 |---------|--------|
 | `rtl/autoprueba/autoprueba_top.v` | El top: el SoC sin cambios, la maestra interna y los indicadores |
-| `tb/autoprueba/tb_autoprueba.sv` | Testbench por los pines, para el RTL y para el bitstream ruteado |
-| `tools/autoprueba.py` | Firma esperada, bitstream y simulaciones (`make autoprueba-r0`) |
-| `docs/mediciones/autoprueba_r0.txt` | Resultado de R0 |
-| `bitstreams/autoprueba_r0.bin` | El bitstream de R0, con su hash en `bitstreams/SHA256SUMS` |
+| `rtl/autoprueba/testigo_top.v` | Imagen 1 de las pruebas de R2: lo que se ve si hubo relevo (sección 8) |
+| `tb/autoprueba/tb_autoprueba.sv`, `tb_testigo.sv` | Testbenches por los pines, para el RTL y para el bitstream ruteado |
+| `tools/autoprueba.py` | Firma esperada, bitstream y simulaciones (`make autoprueba-r0`, `-r1`, `-r2`) |
+| `tools/medir_relevo.py` | Medición del tiempo del relevo en la placa por la UART (sección 10) |
+| `docs/mediciones/autoprueba_r0.txt`, `_r1.txt`, `_r2.txt`, `relevo_placa.txt` | Resultados |
+| `bitstreams/autoprueba_r0.bin`, `autoprueba_r1.bin`, `autoprueba_r2_multi.bin`, `relevo_r2_multi.bin` | Los bitstreams, con su hash en `bitstreams/SHA256SUMS` |
 
 ## 1. Para qué sirve
 
@@ -99,7 +101,7 @@ El testbench hace lo que haría una persona: espera medio milisegundo, aprieta e
 
 Estos los corre Nicolás (el plan no permite que una sesión ejecute `iceprog`). Desde la raíz del repositorio, en WSL:
 
-1. **Comprobar el archivo.** `cd bitstreams && sha256sum -c SHA256SUMS && cd ..`. Debe decir `autoprueba_r0.bin: OK`: es el bitstream que pasó todo lo de la sección 4, y su sha256 (`901c0eac...`) está también en `docs/mediciones/autoprueba_r0.txt`. Para reconstruirlo desde las fuentes: `make autoprueba-r0` (unos 20 minutos, la mitad es la simulación de 10 ms); deja `build/autoprueba/r0/autoprueba_r0.bin` con el mismo hash.
+1. **Comprobar el archivo.** `cd bitstreams && sha256sum -c SHA256SUMS && cd ..`. Debe decir `autoprueba_r0.bin: OK`: es el bitstream que pasó todo lo de la sección 4, y su sha256 (`901c0eac...`) está también en `docs/mediciones/autoprueba_r0.txt`. `make autoprueba-r0` lo reconstruye desde las fuentes (unos 20 minutos), pero desde que P5 cambió `rtl/*.v` sale con la misma lógica en otra ubicación y otro hash, como le pasó a R0 de competencia (T62). Vale el archivo guardado.
 2. **Conectar la placa a WSL**, si `iceprog` no la encuentra. En una PowerShell de Windows como administrador: `usbipd list` muestra los dispositivos USB; la Go Board aparece como un FTDI (0403:6010). `usbipd bind --busid X-Y` la comparte (una sola vez), y `usbipd attach --wsl --busid X-Y` la pasa a WSL (cada vez que se conecta). En WSL, `lsusb` debe mostrar el FTDI.
 3. **Programar.** `iceprog bitstreams/autoprueba_r0.bin`. Escribe la flash de la placa y la FPGA se configura sola al terminar. Debe terminar con "VERIFY OK" y "cdone: high". Al quedar configurada: los cuatro LED apagados y los 7 segmentos en "FF" (el valor inicial de la firma).
 4. **Ronda 3 (0,1 ms).** Apretar SW3. En 0,2 s LED2 y LED3 quedan encendidos y los 7 segmentos muestran "3C". Con SW4 apretado deben mostrar "A2".
@@ -108,6 +110,8 @@ Estos los corre Nicolás (el plan no permite que una sesión ejecute `iceprog`).
 7. **Volver al bitstream de competencia**, cuando se termine: `iceprog bitstreams/r0_base_max_media.bin`. La flash queda con la autoprueba hasta que se grabe otra cosa.
 
 Qué anotar: para cada período, los LED encendidos y los cuatro dígitos (sin y con SW4). Con eso basta para cerrar la puerta de placa de R0.
+
+**Lo que falta de R0 (16/11).** Nicolás vio "3C" con LED2 y LED3 en los tres períodos, pero no apretó SW4. Falta eso: en cualquiera de los tres períodos, después de que se encienden LED2 y LED3, mantener SW4 apretado. **Los 7 segmentos deben mostrar "A2"** (la firma completa es `a23c`: "A2" es el byte alto y "3C" el bajo). Al soltar SW4 vuelve "3C". Si con SW4 se ve otra cosa, anotarla: el byte bajo coincidió, así que lo más probable es que SW4 no se lea o que los dígitos estén en otro orden, no que el SoC haya decidido distinto (LED3 ya dice que los 16 bits coinciden).
 
 Si algo no sale así:
 
@@ -123,10 +127,10 @@ Si algo no sale así:
 | Peldaño | Hardware y programa | Estado |
 |---------|---------------------|--------|
 | R0 | Core base con `sw/trade.s` (`max_media`) | Construido y simulado (sección 4) |
-| R1 | Barrel con `emad` y `devk`, `sw/fondo.s` con la tabla en BRAM | Espera a P5: la tabla en BRAM y la versión final del programa |
-| R2 | R1 con el vigilante y la imagen múltiple | Espera a P5. La autoprueba tiene que probar también que el vigilante no dispara |
+| R1 | Barrel con `emad` y `devk`, `sw/fondo.s` con la tabla en BRAM | Construido y simulado (sección 8). Comandos en la sección 9 |
+| R2 | R1 con el vigilante y la imagen múltiple | Construido y simulado, con la prueba de media hora y el relevo con una falla inyectada (secciones 8 y 9) |
 
-Para agregar un peldaño basta una línea en `PELDANOS` de `tools/autoprueba.py`: definiciones del RTL, programa, opciones del gemelo y referencia.
+Para agregar un peldaño basta una entrada en `PELDANOS` de `tools/autoprueba.py`: definiciones del RTL, programa, opciones del gemelo, referencia, tabla, semilla y modo continuo.
 
 ## 7. Preguntas
 
@@ -137,3 +141,138 @@ Para agregar un peldaño basta una línea en `PELDANOS` de `tools/autoprueba.py`
 **¿Qué prueba y qué no?** Prueba que la FPGA configurada con nuestro SoC y nuestro programa toma las mismas 2000 decisiones que la referencia, a tiempo, en los tres períodos. No prueba la entrada asíncrona desde una maestra externa ni los cables: eso es el 26/11.
 
 **¿No es trampa que la firma esperada esté dentro del bitstream?** No es la edición de competencia: es un bitstream de prueba, que no se lleva a la competencia. Y la firma también se muestra, así que se puede comparar a mano con la que da el gemelo.
+
+## 8. R1 y R2
+
+### 8.1 Qué cambia respecto de R0
+
+El top y la maestra son los mismos. Todo lo nuevo son parámetros, con el valor de R0 por defecto:
+
+| Parámetro o pieza | R0 | R1 | R2 | Para qué |
+|-------------------|----|----|----|----------|
+| Definiciones del SoC | ninguna | `-DESPINO_BARREL -DESPINO_XD_EMAD -DESPINO_XD_DEVK -DESPINO_TABLA` | las de R1 y `-DESPINO_VIGILANTE` | El hardware del peldaño, como en `docs/tabla_vigilante.md` |
+| Programa y tabla | `sw/trade.s` | `sw/fondo.s` y `sw/fondo_tabla.hex` | igual que R1 | `TablaFile` llega a la BRAM de la tabla |
+| `SEMILLA` del LFSR | 0xACE1 | 0x3CA1 | 0x3CA1 | Con la caminata de R0 el fondo decide igual que `max_media` y no se vería un gestor colgado (T87) |
+| `CONTINUO` | 0 | 0 | 1 | En R2 la maestra sigue mandando precios después de la firma, para la prueba de media hora (T90) |
+| Eco de la UART y MISO del PMOD en 0 | sí | sí | sí | Para medir el relevo (sección 10). No usa lógica |
+
+La caminata de 0x3CA1 va de 87 a 152. En ella el fondo cambia de decisión 44 veces y difiere de `max_media` en 51 ticks. Por eso la firma dice algo de los gestores:
+
+| Lo que corre en la FPGA | Firma |
+|-------------------------|-------|
+| El fondo completo (lo esperado) | `15d7` |
+| `max_media` sola, o el fondo con cualquiera de los tres gestores colgado | `7d4f` |
+| El fondo con `G1_ENTRA` en -64 en la tabla (control negativo, T88) | `6f2a` |
+
+Para R2 se arman además dos imágenes múltiples con `icemulti -p0`, revisadas con `tools/ver_multi.py`. En las dos la imagen 1 es la **testigo** (`rtl/autoprueba/testigo_top.v`, T89): los cuatro LED encendidos, "--" en los 7 segmentos y, con SW4 apretado, los minutos desde que arrancó (en decimal, hasta 99). No tiene SoC ni vigilante, así que no hay un segundo relevo.
+
+| Archivo | Imagen 0 | Imagen 1 | Para qué |
+|---------|----------|----------|----------|
+| `autoprueba_r2_multi.bin` | Autoprueba de R2, `sw/fondo.s` sano, modo continuo | testigo | Puerta de placa (a) y (b): la firma y la media hora sin relevo |
+| `relevo_r2_multi.bin` | Autoprueba de R2 con el supervisor colgado en el tick 100 (`cuelgue_sup:100` de `tools/fondo/variante.py`) | testigo | Puerta de placa (c): el relevo ocurre. Y la medición de su tiempo |
+| `relevo_r2_multi_sin_dormir.bin` | Las mismas dos, empaquetadas con `icepack -s` | | Solo si el relevo no termina con el anterior (T91) |
+
+La imagen con el supervisor colgado sale de la misma síntesis que la autoprueba de R2 con otro programa: el `.asc` es idéntico salvo el contenido de las BRAM.
+
+### 8.2 Verificación
+
+`make autoprueba-r1` y `make autoprueba-r2` (`docs/mediciones/autoprueba_r1.txt` y `autoprueba_r2.txt`):
+
+TABLA_VERIFICACION
+
+### 8.3 Recursos
+
+| Bitstream | Celdas | BRAM | Frecuencia máxima (semilla por defecto) |
+|-----------|--------|------|------------------------------------------|
+| Autoprueba de R0 (el guardado) | 1269 de 1280 | 12 | 44,05 MHz |
+RECURSOS
+
+Cabe todo: no hubo que sacar nada de la autoprueba. R1 sin la autoprueba ocupa 1029 celdas y R2 1045 (`docs/tabla_vigilante.md`); la maestra, el CRC y los indicadores agregan unas 160.
+
+## 9. Comandos para la placa: R1 y R2
+
+Los corre Nicolás. Desde la raíz del repositorio, en WSL, con la placa conectada como en la sección 5 (paso 2, `usbipd`). Cada vez que se desconecta y se conecta el USB, la FPGA se vuelve a configurar desde la flash con la imagen 0, y hay que repetir `usbipd attach` solo si se va a usar `iceprog` o la UART.
+
+### 9.1 Comprobar los archivos
+
+```bash
+cd bitstreams && sha256sum -c SHA256SUMS && cd ..
+```
+
+Todas las líneas deben decir `OK`, en particular `autoprueba_r1.bin`, `autoprueba_r2_multi.bin`, `relevo_r2_multi.bin` y `relevo_r2_multi_sin_dormir.bin`. Los hashes están también en `docs/mediciones/autoprueba_r1.txt` y `autoprueba_r2.txt`.
+
+### 9.2 R1: la firma a los tres períodos
+
+1. **Programar.** `iceprog bitstreams/autoprueba_r1.bin`. Debe terminar con "VERIFY OK" y "cdone: high". Al quedar configurada: los cuatro LED apagados y "FF" en los 7 segmentos.
+2. **Ronda 3 (0,1 ms).** Apretar SW3 un instante. En 0,2 s se encienden LED2 y LED3, y los 7 segmentos muestran **"D7"**. Mantener SW4 apretado: deben mostrar **"15"**. Al soltar vuelve "D7".
+3. **Ronda 2 (1 ms).** Desconectar y conectar el USB. Apretar SW2. En 2 s, lo mismo: LED2 y LED3, "D7", y "15" con SW4.
+4. **Ronda 1 (10 ms).** Desconectar y conectar. Apretar SW1. LED1 parpadea unos 20 s (cambia cada 0,64 s) y después LED2 y LED3, "D7" y "15".
+
+Anotar en cada período los LED encendidos y los cuatro dígitos. Si los tres dan `15d7` con LED3, R1 pasa la puerta de placa.
+
+### 9.3 R2: la firma y la media hora sin relevo
+
+1. **Programar.** `iceprog -b bitstreams/autoprueba_r2_multi.bin`. El `-b` borra la flash entera antes de escribir: el archivo tiene dos imágenes y ocupa más de 32 kB, y si la flash borra en sectores de 32 kB el borrado por bloques de `iceprog` dejaría parte sin borrar (`docs/tabla_vigilante.md`, sección 6). Debe terminar con "VERIFY OK" y "cdone: high". Al quedar configurada: los cuatro LED apagados y "FF", igual que R1. Si en cambio se ven los cuatro LED encendidos y "--", arrancó la imagen 1: anotarlo y no seguir.
+2. **(a) La firma.** Repetir los pasos 2 a 4 de R1 (SW3, SW2 y SW1, desconectando entre uno y otro). Se debe ver lo mismo: LED2 y LED3, "D7", y "15" con SW4. La diferencia es que LED1 no se apaga al terminar, porque la maestra sigue mandando precios: con SW3 parece encendido a media luz (cambia cada 6,4 ms) y con SW1 sigue parpadeando cada 0,64 s.
+3. **(b) Media hora.** Desconectar y conectar. Anotar la hora. Apretar SW3. Comprobar que a los 0,2 s se ven LED2 y LED3 y "D7" (LED1 a media luz). Dejar la placa así 30 minutos sin tocarla. A la media hora debe verse exactamente lo mismo: LED2 y LED3 encendidos, LED1 a media luz, "D7", y "15" con SW4. En ese tiempo la maestra mandó 18 millones de precios y el vigilante los contó todos.
+   - Si en algún momento se ven los cuatro LED encendidos y "--", el vigilante disparó en funcionamiento normal y **R2 no pasa la puerta**. Mantener SW4 apretado: muestra los minutos que lleva la testigo. El disparo ocurrió esa cantidad de minutos antes de mirar. Anotar los dos datos.
+
+### 9.4 R2: el relevo con la falla inyectada
+
+1. **Programar.** `iceprog -b bitstreams/relevo_r2_multi.bin`. "VERIFY OK", "cdone: high", y la placa queda con los LED apagados y "FF".
+2. **(c) Inyectar la falla.** Apretar SW3. El supervisor se cuelga con el precio 100, el vigilante cuenta cinco precios sin respuesta y pide el relevo 10,3 ms después de apretar. Los 7 segmentos se apagan un instante (unos 53 ms según la hoja de datos, casi no se nota) y aparece la testigo: **los cuatro LED encendidos y "--"**. Con SW4, "00" (cero minutos).
+3. Desconectar y conectar, y repetir con SW1: ahora LED1 se enciende y alrededor de 1 s después (el precio 100 llega al segundo) aparece la testigo.
+
+Si aparece la testigo, el relevo funciona en la placa: el vigilante dentro del bitstream disparó, `SB_WARMBOOT` cargó la imagen del vector 01 y esa imagen arrancó.
+
+### 9.5 Si algo no sale así
+
+| Se ve | Qué significa | Qué hacer |
+|-------|---------------|-----------|
+| R1 o R2: LED4 en vez de LED3, con "4F" ("7D" con SW4) | La firma es `7d4f`: la FPGA decidió como `max_media` sola. Los votos de los gestores no cuentan: algún gestor no vota, o la tabla no es la esperada | Anotar el período. Si pasa a los tres, avisar: es una falla del fondo en la FPGA que la simulación no vio |
+| R1 o R2: LED4 con otros dígitos | Alguna decisión fue distinta o llegó tarde | Anotar los cuatro dígitos y el período. Si falla solo a 0,1 ms es de tiempo; si a los tres, de lógica o de memoria |
+| R2 (9.3): la testigo (cuatro LED, "--") sin haber inyectado nada | El vigilante disparó con el programa sano | Anotar los minutos con SW4 y la hora. R2 no pasa la puerta; R1 sigue siendo candidato |
+| R2 (9.3 o 9.4): al configurar ya aparece la testigo | La imagen 0 no cargó o el vector de encendido apunta mal | Volver a programar con `-b`; si se repite, avisar |
+| 9.4: a los 0,2 s se encienden LED2 y LED4 y no aparece la testigo | El vigilante no disparó, o `SB_WARMBOOT` no hizo nada | Avisar. El vigilante dentro del bitstream sí disparó en la simulación desde el `.asc` |
+| 9.4: los 7 segmentos se apagan y no vuelven | El relevo empezó pero la imagen 1 no terminó de cargar. Lo más probable es que la flash haya quedado dormida | Desconectar y conectar (vuelve "FF"), programar `iceprog -b bitstreams/relevo_r2_multi_sin_dormir.bin` y repetir 9.4. Si así funciona, avisar: `r2_multi.bin` de competencia hay que empaquetarlo con `icepack -s` |
+| 9.4: los 7 segmentos se apagan y vuelve "FF" con los LED apagados | El relevo cargó la imagen 0 en vez de la 1 | Avisar: el vector 01 no es el que se usa |
+| Apenas se configura ya corre, sin apretar nada | Los botones se leen al revés de lo supuesto | Avisar, como en R0 |
+
+### 9.6 Volver al bitstream de competencia
+
+`iceprog bitstreams/r1_fondo.bin` para R1, o `iceprog -b bitstreams/r2_multi.bin` para R2 con R0 de respaldo. La flash queda con la autoprueba hasta que se grabe otra cosa.
+
+## 10. Medir el tiempo del relevo
+
+La hoja de datos da 53 ms típicos para configurar la HX1K desde la flash, sin máximo, y nunca se midió. Es lo que más pesa en cuántos ticks pierde R2 si dispara: el vigilante gasta 5 y el reset de R0 0,164 ms. La FPGA pierde todo su estado al reconfigurarse, así que la medición tiene que ser externa. `relevo_r2_multi.bin` está preparado para tres formas, de la más exacta a la más simple. Las tres miden lo mismo: el tiempo en que los pines quedan sueltos, desde que sube BOOT hasta que arranca la testigo (T92).
+
+### 10.1 Por la UART (eco)
+
+Las dos imágenes conectan el pin de recepción de la UART con el de transmisión. El script manda bytes sin pausa y cuenta los que no vuelven; a 115 200 baudios cada uno es 86,8 us.
+
+1. Programar `relevo_r2_multi.bin` (9.4, paso 1), o desconectar y conectar para partir de la imagen 0 si ya está programado.
+2. `ls /dev/ttyUSB*`. La Go Board aparece como dos puertos: el segundo (normalmente `/dev/ttyUSB1`) es la UART. Si no aparece ninguno, falta `usbipd attach`.
+3. `python3 tools/medir_relevo.py /dev/ttyUSB1 --segundos 20`. Cuando diga "Apriete SW3 una vez ahora", apretar SW3 una vez. A los 20 s imprime los huecos, la línea `RESULTADO: tiempo de reconfiguracion = ... ms` y la traducción a ticks de cada ronda. Copiar todo.
+4. Repetir dos veces más desde el paso 1. Las tres deben dar casi lo mismo.
+
+Si dice "Permission denied", el usuario no tiene permiso sobre el puerto (en Ubuntu se agrega al grupo `dialout`). Si la línea "Envio" da menos de 99 %, el computador dejó pausas y el resultado es un mínimo. Si no hay hueco, el relevo ocurrió antes de que partiera el script o no ocurrió.
+
+### 10.2 Con la cámara
+
+Filmar la placa en cámara lenta (240 cuadros por segundo) y apretar SW3. En el video: los 7 segmentos muestran dígitos (la firma parcial cambia muy rápido y se ve casi todo encendido), después **todo apagado** y después "--". Contar los cuadros completamente apagados: `tiempo ≈ cuadros × 4,17 ms`, con una resolución de unos 4 ms. Los LED pueden quedar con un brillo débil durante el relevo por el pull-up del pin; conviene mirar los 7 segmentos, que son activos en bajo y se apagan del todo.
+
+### 10.3 Con un analizador lógico u osciloscopio
+
+El pin de MISO del PMOD (pin 63 de la FPGA, el mismo que usa la maestra real) está en 0 en las dos imágenes. Durante el relevo queda suelto y el pull-up interno lo sube: el ancho del pulso en alto es el tiempo buscado. Disparar con el flanco de subida y apretar SW3.
+
+### 10.4 Qué hacer con el número
+
+`python3 tools/medir_relevo.py --traducir 53` (con el valor medido en ms) lo traduce a ticks sin decisión nueva en cada ronda, con el mismo modelo que la simulación del relevo (`tools/vigilante/relevo_ref.py`). Con la hoja de datos (`docs/mediciones/relevo_placa.txt`):
+
+| Tiempo de reconfiguración | Ronda 1 (10 ms) | Ronda 2 (1 ms) | Ronda 3 (0,1 ms) |
+|---------------------------|-----------------|----------------|------------------|
+| 35,2 ms (cota inferior: leer el bitstream a 7,5 MHz) | 8 | 40 | 358 |
+| 53 ms (típico de la hoja de datos) | 10 | 58 | 536 |
+| 106 ms (el doble) | 15 | 111 | 1066 |
+
+La cuenta es: 5 ticks del vigilante, más el tiempo de reconfiguración y los 0,164 ms del reset de R0 divididos por el período, más el primer precio que R0 alcanza a responder. Durante la reconfiguración la maestra lee 0xFF, que es mantener. El número medido reemplaza a los 53 ms en `tools/vigilante/relevo.sh` (`T_RECONF`) y en el árbol de decisión del 1/12.
