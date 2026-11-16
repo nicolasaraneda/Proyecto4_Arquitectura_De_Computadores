@@ -540,3 +540,41 @@ Las decisiones T80 a T85 son de los paquetes P4 y P6, trabajados en paralelo con
 - **Decisión.** `make fondo-estres` es la matriz de P5 (`tools/fondo/estres.py`, con `tb/fondo/tb_fondo.sv`, T73), que es la del criterio 7 de R1 y R2. La de P4 (T82, los 60 casos de R0 con la referencia del fondo) pasa a llamarse `make fondo-estres-rtl60` por el RTL y `make fondo-estres-gemelo` por el gemelo, siempre con el hardware de R1. El gemelo aprende la tabla de parámetros (`--tabla sw/fondo_tabla.hex`) y las herramientas de P4 corren con el programa de P5. Las salidas de P4 hechas con el programa de P3 se movieron a `docs/mediciones/fondo/p3/`.
 - **Razón.** Las dos matrices miden casi lo mismo. La de P5 compara además el estado interno, la telemetría y el protocolo, y es la que ya está en `docs/puertas.md`. La de P4 sigue sirviendo para lo que la hizo valiosa: dos motores que tienen que dar las mismas líneas.
 - **Qué se pierde.** Nada. El gemelo no modela el vigilante, así que todo lo que corre en el gemelo es R1; en R2 el vigilante no se dispara en ninguna corrida sana (T71, T73).
+
+### T87. La autoprueba de R1 y R2 usa otra caminata, con semilla 0x3CA1 (16/11)
+
+- **Decisión.** La maestra interna de R1 y R2 parte el LFSR en 0x3CA1. R0 sigue con 0xACE1. La semilla es un parámetro del top (`SEMILLA`) y no cuesta celdas.
+- **Razón.** Con la caminata de 0xACE1 el fondo decide exactamente igual que `max_media` en los 2000 ticks, así que su firma habría sido `a23c`, la de R0. Con un gestor colgado el supervisor decide solo, que también es `max_media`: la autoprueba no lo habría visto. De 677 semillas probadas, solo 10 dan alguna diferencia entre el fondo y `max_media` en 2000 ticks de pasos de a 1. Con 0x3CA1 hay 51 ticks distintos, y cualquiera de los tres gestores colgado cambia 51 bytes y la firma (`7d4f` en vez de `15d7`).
+- **Alternativas.** (a) Más ticks: las diferencias aparecen después del primer ajuste de pesos, y la ronda de 10 ms ya dura 20 s. (b) Pasos más grandes en la caminata: cuesta celdas en la maestra y R0 ya está grabado con la de ahora.
+- **Qué se pierde.** La firma de R1 no se compara con la de R0: son series distintas. La serie sigue siendo poco exigente para el fondo; lo que prueba la autoprueba es que la FPGA hace lo mismo que el gemelo, no que el fondo gane.
+
+### T88. El control negativo de R1 y R2 cambia la tabla, no el programa (16/11)
+
+- **Decisión.** El control negativo de R1 y R2 es la misma autoprueba con otra tabla de parámetros: `G1_ENTRA` en -64 en vez de -96, con el mismo programa. El gemelo (con esa tabla) y `ref/fondo.py` (con ese parámetro) predicen `6f2a`, y la autoprueba tiene que terminar con LED4 y mostrar `6f2a`.
+- **Razón.** Muestra que el SoC lee sus umbrales de la BRAM de la tabla, que es lo nuevo de R1. Se probó primero `G3_ENTRA` en -80, pero esa tabla da `7d4f`, la misma firma que `max_media` sola o un gestor colgado: en la placa no se podría distinguir un control de una falla. `G1_ENTRA` en -64 cambia 93 bytes y da una firma que no se confunde con nada.
+- **Qué se pierde.** Nada.
+
+### T89. La imagen 1 de las pruebas de R2 en la placa es una imagen testigo, no R0 (16/11)
+
+- **Decisión.** Las dos imágenes múltiples de la puerta de placa de R2 (`autoprueba_r2_multi.bin` y `relevo_r2_multi.bin`) llevan como imagen 1 un diseño de 83 celdas (`rtl/autoprueba/testigo_top.v`): los cuatro LED encendidos, "--" en los 7 segmentos, los minutos desde que arrancó con SW4, eco de la UART y MISO del PMOD en 0. El bitstream de competencia (`r2_multi.bin`) sigue con R0 como imagen 1.
+- **Razón.** Lo que hay que ver en la placa es si hubo relevo. La testigo no se parece a nada que muestre la autoprueba (que siempre muestra dos dígitos hexadecimales), dice cuántos minutos lleva corriendo y permite medir el tiempo del relevo por la UART. R0 sin la maestra conectada muestra su telemetría inicial, que se puede confundir con la autoprueba recién configurada.
+- **Qué se pierde.** Estas pruebas no muestran que R0 arranque después de un warm boot. El mecanismo es el mismo (los vectores de `icemulti` son iguales y todos los bitstreams de la HX1K miden 32 220 bytes, así que demoran lo mismo en cargarse), y R0 es el archivo guardado que ya pasó su puerta. Si se quiere ver con R0, `r2_multi.bin` con la maestra real el 26/11.
+
+### T90. La media hora sin disparo se prueba con la maestra interna en modo continuo (16/11)
+
+- **Decisión.** En la autoprueba de R2 la maestra no se detiene al terminar los 2000 precios de la firma: sigue con la misma caminata y el mismo período, y la firma queda fija (`CONTINUO = 1`). La prueba de media hora es dejar la placa corriendo después de la firma y comprobar que no aparece la testigo. En simulación, el RTL sigue 2 s más después de la firma en cada período sin disparo, y el gemelo corre la caminata de la media hora completa (18 millones de precios a 0,1 ms) y mide el peor caso de respuesta.
+- **Razón.** El vigilante cuenta precios. Sin precios no hay nada que probar, y la maestra real no está disponible. A 0,1 ms la media hora son 18 millones de precios, unas 9 000 veces la ronda 3.
+- **Qué se pierde.** Después de los 2000 precios la placa no compara las decisiones con nada: solo el relevo diría que algo falló. La caminata es la de la autoprueba, no una serie de mercado.
+
+### T91. La falla se inyecta con una imagen 0 aparte, con el supervisor colgado, y se entrega también sin la orden de dormir la flash (16/11)
+
+- **Decisión.** `relevo_r2_multi.bin` tiene como imagen 0 la autoprueba de R2 con el programa `cuelgue_sup:100` de `tools/fondo/variante.py` (el mismo de las pruebas de P5) y como imagen 1 la testigo. Se arma igual que la autoprueba de R2: sale con la misma ubicación y el mismo ruteo, solo cambia el contenido de las BRAM. Se entrega además `relevo_r2_multi_sin_dormir.bin`, las mismas dos imágenes empaquetadas con `icepack -s`.
+- **Razón.** No hay que tocar el SoC ni `sw/fondo.s`. El supervisor colgado es la falla dura para la que existe el vigilante. La variante sin dormir es para diagnosticar en el momento: por defecto `icepack` deja la flash en reposo profundo al terminar de configurar, y la hoja de datos no dice explícitamente que un warm boot la despierte (lo anotó la factibilidad). Si el relevo no ocurre con el archivo normal y sí con el otro, el bitstream de competencia hay que empaquetarlo con `-s`.
+- **Qué se pierde.** Nada: son bitstreams de prueba.
+
+### T92. El tiempo del relevo se mide por el eco de la UART, con la cámara y el PMOD como alternativas (16/11)
+
+- **Decisión.** Las dos imágenes de `relevo_r2_multi.bin` conectan el pin de recepción de la UART con el de transmisión, sin lógica. `tools/medir_relevo.py` manda bytes sin pausa a 115 200 baudios y cuenta cuáles no vuelven: son el tiempo en que la FPGA tuvo los pines sueltos. Como alternativas: filmar los 7 segmentos (apagados durante la reconfiguración) a 240 cuadros por segundo, o mirar el pin de MISO del PMOD con un analizador lógico (las dos imágenes lo mantienen en 0; suelto, el pull-up lo sube). El eco y MISO en 0 quedaron en el top de la autoprueba de todos los peldaños.
+- **Razón.** El eco no necesita un transmisor en la FPGA y no depende de cuándo el conversor USB entrega los bytes al computador: lo que se cuenta es cuáles faltan. La resolución es un byte, 86,8 us, menos de un tick de la ronda 3. La propuesta de factibilidad (ping-pong de dos imágenes que se alternan solas y promedio de muchas mediciones con la hora de llegada de un byte) necesita un transmisor y no usa el SoC de R2.
+- **Alternativas.** (a) La imagen 0 manda bytes hasta el disparo y la imagen 1 desde que arranca: necesita dos transmisores y la hora de llegada al computador tiene el atraso del conversor (hasta 16 ms). (b) Solo la cámara: 4 ms de resolución.
+- **Qué se pierde.** Una medición por encendido: para repetirla hay que desconectar y conectar la placa. Si el computador no manda sin pausas, el hueco medido es un mínimo; el script lo comprueba con la duración del envío.
