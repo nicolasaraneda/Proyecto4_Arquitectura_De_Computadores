@@ -2,6 +2,59 @@
 
 Se actualiza al cerrar cada tramo de trabajo. La versión anterior queda en el historial de git.
 
+## Tramo 11: paquete P5, tabla, vigilante y warmboot (15/11)
+
+Rama `p5-tabla-vigilante`, desde `main`. Bitácora: `docs/bitacora/p5.md`. Documento de estudio: `docs/tabla_vigilante.md`. Decisiones T69 a T74, y la razón de Nicolás para T58 ("no quiero piezas sin uso en el chip que compite"). El paquete P4 (gemelo del barrel) no está hecho: toda la puerta de este paquete corrió por el RTL con Verilator y por el `.asc` con Icarus.
+
+### Qué quedó hecho
+
+- **Tabla de parámetros** en una BRAM de solo lectura (`rtl/pochoco_tabla.v`, `-DESPINO_TABLA`). `sw/fondo.s` lee de ahí sus 20 constantes y ya no toma ningún valor inicial de su imagen.
+- **Cambio de tabla y de programa con `icebram`**, probado de punta a punta: 0,32 s para generar la tabla, reemplazarla y empaquetar. Los cambios se hacen desde un molde, que queda guardado en `bitstreams/moldes/`.
+- **Vigilante** (`rtl/vigilante.v`, `-DESPINO_VIGILANTE`) con `SB_WARMBOOT`: al quinto precio seguido sin escritura en `DECISION` pide la imagen de respaldo. Con su testbench, sus propiedades formales y el relevo de punta a punta con las dos imágenes en un mismo testbench.
+- **Bitstreams**: `bitstreams/r1_fondo.bin` (R1), `bitstreams/r2_fondo_vigilante.bin` (R2, una imagen) y `bitstreams/r2_multi.bin` (R2 con R0 de respaldo, hecho con `icemulti`), con sus hashes.
+- **Criterio 5 repetido con la máscara exacta** (solo `emad` y `devk`) sobre el SoC de R1 y sobre el de R2, como pidió Nicolás.
+- **Integración continua**: el trabajo `fondo` corre `make check-fondo` en R1 y en R2 y `make check-vigilante`.
+
+### Qué se midió
+
+| | R1 | R2 |
+|-|----|----|
+| Celdas y BRAM | 1029 de 1280 y 13 de 16 | 1045 y 13 |
+| Timing, 10 semillas | 10 de 10, mínima 51,59 MHz | 10 de 10, mínima 47,86 MHz |
+| Testbench oficial | 4/4, 443 ciclos | 4/4, 443 ciclos |
+| Equivalencia | Práctica a los tres períodos, 15 familias y 1 050 series: cero diferencias | Igual |
+| Peor caso barriendo la fase | 444 sano, 568 con el plazo agotado, límite 1131 | Igual |
+| Core en la configuración exacta | 7 974 963 instrucciones, 92,80 % distintas, cero diferencias; 6 de 6 y 21 de 21 mutaciones | Igual |
+| Degradación | 30 de 30, peor caso 679 | Igual |
+| Estrés | 56 de 56 | 56 de 56 |
+| Bitstream desde el `.asc` | 2000 ticks idénticos en dos series | Igual, sin disparo |
+
+**R1 y R2 pasan los ocho criterios de la puerta de simulación.** En R2 el vigilante no se disparó en ninguna corrida sana y su cuenta nunca pasó de 1; el disparo necesita 5.
+
+Relevo (R2 con el supervisor colgado a propósito): `BOOT` sube al terminar la quinta transacción sin respuesta, con `CS_n` en alto, igual en el RTL y dentro del bitstream. A 0,1 ms la maestra pasa 536 ticks sin decisión nueva (530 leyendo `0xFF`, que es mantener), con los 53 ms de reconfiguración de la hoja de datos.
+
+### Hallazgos
+
+1. **La tabla salía en cero en el bitstream.** Yosys descartaba el archivo de la tabla porque el módulo antes dejaba la memoria en cero con un lazo. La simulación del RTL no lo veía. Lo delató `icebram`. Corregido, y todo se repitió después. Es la razón concreta de por qué se simula el bitstream y no solo el RTL.
+2. **`icebram` no puede tocar el bitstream final**: no logra ubicar la tabla de verdad. Por eso los moldes se guardan.
+3. **SCLK de 100 kHz con período de 0,1 ms no le alcanza al fondo**: quedan 237 ciclos y necesita hasta 444. R0 sí cabe. A 1 ms funciona.
+4. **Una mutación del barrel había quedado desactualizada** con el cambio del SoC (la del multiplexor de lectura): no compilaba. Se actualizó y las 21 se detectan.
+5. **El relevo cuesta posición**: la imagen de respaldo parte de cero y su primera decisión suele ser vender.
+
+### Qué falta
+
+- **P4, el gemelo del barrel.** Sigue pendiente. Las series sintéticas no se corrieron a 1 ms ni a 10 ms.
+- **Placa y maestra real.** Nada se ha probado en la placa. El tiempo de reconfiguración y el nivel de MISO durante el relevo no están medidos: de eso depende lo que pierde R2 al disparar.
+- **Preguntas al ayudante**: si se puede reconfigurar la FPGA durante una ronda (si no, R2 no compite), si un Espino multihilo con custom-0 sigue siendo Espino (si no, compite R0), y qué SCLK usa la maestra.
+- **Autoprueba en placa** (P6) para R0, R1 y R2.
+- **Kit de contingencia** (P8): el cambio de tabla ya está probado; falta `tools/retune.py` y el árbol de decisión. Un bitstream cambiado hay que simularlo desde su `.asc`, unos 40 minutos.
+
+### Qué conviene atacar después
+
+1. **P6, la autoprueba en placa.** R0, R1 y R2 ya tienen bitstream y puerta de simulación. Lo que sigue en su camino es la placa, y es lo que se puede hacer antes del 26/11.
+2. **P4, el gemelo**, en paralelo: acorta las corridas largas y da la firma esperada que P6 necesita.
+3. **Las preguntas al ayudante**, sobre todo la de reconfigurar durante una ronda: decide entre R1 y R2.
+
 ## Tramo 10: integración en `main` y paquete P3, fondo de competencia (15/11)
 
 Rama `p3-fondo`, desde `main`. Bitácora: `docs/bitacora/p3.md`. Documento de estudio: `docs/fondo.md`. Decisiones T62 a T68 y la decisión de Nicolás sobre T58.
@@ -61,7 +114,6 @@ Controles negativos: 15 errores puestos a propósito en el programa, 15 detectad
 - **Criterio 7** (estrés: SCLK, `CS_n`, reset con la maestra transmitiendo, rondas seguidas sin reset, serie pegada en 1 y en 255) y las series sintéticas a 1 ms y 10 ms: P4, con el gemelo del barrel. El testbench del fondo ya acepta esos parámetros.
 - **Criterio 8** y los bitstreams R1 y R2: P5.
 - **La tabla en su BRAM**: P5. Hoy está en la memoria de datos.
-- **La razón de la decisión sobre T58** quedó sin escribir: el mensaje la traía como campo por completar.
 - **Borde del plazo**: atrasos de un gestor entre 200 y 600 ciclos no se probaron contra la referencia, porque el resultado depende del ciclo exacto.
 - Nada se ha probado en la placa.
 

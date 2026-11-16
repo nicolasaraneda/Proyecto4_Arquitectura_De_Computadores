@@ -7,8 +7,8 @@ Un bitstream sube a la escalera solo si pasa tres puertas, en orden: simulación
 | Peldaño | Hardware | Programa | Archivo |
 |---------|----------|----------|---------|
 | R0 | Espino base, sin hardware agregado | `sw/trade.s` con `max_media` | `bitstreams/r0_base_max_media.bin` |
-| R1 | Espino barrel con `emad` y `devk` y la tabla, sin vigilante | `sw/fondo.s` | Pendiente (P5). El hardware sin la tabla dedicada ya pasó los criterios 1, 2, 3, 4, 5 y 6 con `sw/fondo.s` (P1 a P3) |
-| R2 | R1 con vigilante y dos imágenes | `sw/fondo.s` e imagen de respaldo | Pendiente (P5) |
+| R1 | Espino barrel con `emad` y `devk` y la tabla, sin vigilante | `sw/fondo.s` | `bitstreams/r1_fondo.bin` |
+| R2 | R1 con vigilante y dos imágenes | `sw/fondo.s`, y R0 como imagen de respaldo | `bitstreams/r2_multi.bin` |
 
 ## Puerta de simulación
 
@@ -70,21 +70,37 @@ Medido el 15/11 (paquete P2). Tampoco es un peldaño: es el core de R1 y R2 con 
 
 Para el criterio 5, la referencia de las instrucciones nuevas es la fórmula de la especificación escrita en el testbench (decisión T60).
 
-## El fondo en un chip: barrel con `emad` y `devk` y `sw/fondo.s`
+## R1 y R2: el fondo en un chip
 
-Medido el 15/11 (paquete P3). Es el hardware de R1 sin la tabla en BRAM (`-DESPINO_BARREL -DESPINO_XD_EMAD -DESPINO_XD_DEVK`, decisión de Nicolás sobre T58) con el programa de competencia. La tabla de parámetros va por ahora en la memoria de datos (T65). El paquete pedía los criterios 1, 2, 4 y 6. Detalle en `docs/fondo.md` y salidas en `docs/mediciones/fondo/`.
+Medido el 15/11 (paquete P5). R1 es el barrel con `emad`, `devk` y la tabla de parámetros en su BRAM (`-DESPINO_BARREL -DESPINO_XD_EMAD -DESPINO_XD_DEVK -DESPINO_TABLA`). R2 agrega el vigilante y `SB_WARMBOOT` (`-DESPINO_VIGILANTE`) y se graba como imagen múltiple con R0 de respaldo. El programa de los dos es `sw/fondo.s`. Detalle en `docs/fondo.md` y `docs/tabla_vigilante.md`; salidas en `docs/mediciones/fondo/r1/`, `r2/` y `bitstreams.txt`, y en `docs/mediciones/vigilante/`.
 
-| N.º | Resultado | Comando |
-|-----|-----------|---------|
-| 1 | 4/4 con `tb/tb_proyecto_4.sv` sin modificar. Peor caso 435 ciclos de 2262. `decisiones.csv` idéntico byte a byte al de `ref/fondo.py` | `make fondo-oficial` |
-| 2 | Cero diferencias con `ref/fondo.py`. Serie de práctica completa a 0,1 ms, 1 ms y 10 ms con la copia parametrizada del oficial (4/4 en las tres) y con `tb/fondo/tb_fondo.sv`. Una serie de 20 000 ticks de cada una de las 15 familias. 1 050 series sintéticas de 2000 ticks a 0,1 ms (2,1 millones de ticks). Con `tb_fondo.sv` se compara además el estado interno en cada decisión, la telemetría y el protocolo | `make fondo-equiv-ronda1` y `make fondo-series` |
-| 3 | 10 de 10 semillas. 990 celdas de 1280 y 12 BRAM de 16. Frecuencia máxima mínima 48,92 MHz, mediana 51,08 y máxima 54,05 | `make fondo-timing` |
-| 4 | Peor caso 480 ciclos con el programa sano (72 fases de un ciclo y un período de 2501 ciclos que las recorre todas) y 564 con gestores colgados y el plazo agotado, contra el límite de 1131 | `make fondo-fases` |
-| 5 | El core es el de P2: `make xd-verif` y `make xd-mutaciones` cubren el subconjunto `emad` y `devk` dentro de sus 7 966 640 instrucciones. No se repitió con la máscara exacta: ver la nota | |
-| 6 | 30 corridas de 20 000 ticks: cada gestor en lazo infinito desde el arranque y desde el tick 1500, dos y tres colgados, un voto que no llega (en un tick, en una frontera y en un tramo), y un voto atrasado dentro y fuera del plazo. La decisión es la esperada en todas y el peor caso son 671 ciclos de 1131. 15 de 15 controles negativos detectados | `make fondo-degradacion` y `make fondo-controles` |
-| 7 | Pendiente (P4, con el gemelo del barrel) | |
-| 8 | Pendiente (P5, con el bitstream de R1) | |
+| N.º | Criterio | R1 | R2 |
+|-----|----------|----|----|
+| 1 | Testbench oficial sin modificar | 4/4, peor caso 443 ciclos de 2262, `decisiones.csv` idéntico al de `ref/fondo.py` | Igual |
+| 2 | Equivalencia con la referencia | Cero diferencias: práctica completa a 0,1 ms, 1 ms y 10 ms (4/4 en las tres), una serie de 20 000 ticks de cada una de las 15 familias y 1 050 series sintéticas (2,1 millones de ticks) | Igual |
+| 3 | Timing en 10 semillas | 10 de 10. 1029 celdas, 13 BRAM, mínima 51,59 MHz, mediana 52,57 | 10 de 10. 1045 celdas, 13 BRAM, mínima 47,86 MHz, mediana 50,33 |
+| 4 | Peor caso barriendo la fase | 444 ciclos sano y 568 con el plazo agotado, contra 1131 | Igual |
+| 5 | Core en la configuración exacta | 7 974 963 instrucciones en 20 600 programas, 92,80 % distintas, cero diferencias con el Espino base más la especificación. 6 de 6 mutaciones de la extensión que aplican, 21 de 21 del barrel, y prueba formal de que las 3 de `mulstep` no cambian el core | Igual |
+| 6 | Degradación | 30 de 30 corridas, peor caso 679 ciclos. 15 de 15 controles negativos | Igual |
+| 7 | Estrés | 56 de 56 casos | 56 de 56, sin disparo del vigilante |
+| 8 | Bitstream simulado desde el `.asc` | 2000 ticks idénticos en dos series | 2000 ticks idénticos en dos series, sin disparo |
 
-Nota sobre el criterio 5. Pide la verificación del core "en la configuración exacta que compite". La campaña de P2 se corrió con las tres instrucciones (`-DESPINO_XD`), y la prueba formal y el timing con los 7 subconjuntos. Para R1 falta repetir la campaña de simulación con la máscara de `emad` y `devk` (`XD=3`) y con la tabla de P5 puesta: conviene hacerlo una sola vez, al cerrar P5, sobre el hardware definitivo.
+Comandos: `make fondo-puerta HW=r1` (criterios 1, 2, 3, 4, 6 y 7), `make fondo-criterio5 HW=r1` y `make fondo-bitstreams` (criterio 8 de los dos peldaños). Con `HW=r2` para R2.
 
-Cómo se comprueba el criterio 6. Cada caso es `sw/fondo.s` con instrucciones insertadas en la rutina de los gestores (`tools/fondo/variante.py`); el supervisor no se toca. La decisión esperada sale de `ref/fondo.py` con la falla descrita como "el voto del gestor K no llega entre los ticks N y M" (decisión T68).
+**R1 y R2 pasaron la puerta de simulación.** Les faltan la de placa (autoprueba de P6) y la de la maestra real el 26/11.
+
+Lo propio de R2:
+
+- El vigilante no se disparó en ninguna corrida sana, y su cuenta nunca pasó de 1 (el disparo necesita 5).
+- Con el supervisor colgado a propósito, `BOOT` sube al terminar la quinta transacción sin respuesta, con `CS_n` en alto y `S1 S0 = 01`, en el RTL y dentro del bitstream simulado desde su `.asc`.
+- El relevo completo (R2, reconfiguración y R0) coincide byte por byte con lo esperado en 130 simulaciones (`make vig-relevo`). A 0,1 ms son 536 ticks sin decisión nueva, con los 53 ms de la hoja de datos, que no están medidos en la placa.
+- La imagen múltiple tiene los vectores de arranque correctos y las dos imágenes copiadas sin cambios (`tools/ver_multi.py`).
+
+Notas:
+
+- **Criterio 7.** El gemelo del barrel (P4) no existe todavía: la matriz corrió por el RTL con Verilator, con los casos de R0. SCLK de 100 kHz con período de 0,1 ms queda fuera, porque deja 237 ciclos entre transacciones y el fondo necesita hasta 444. Con período de 1 ms pasa. R0 sí cabe en esa combinación (decisión T73).
+- **Criterio 5.** De las 9 mutaciones de la extensión, 3 tocan solo lógica de `mulstep`, que R1 y R2 no tienen. En vez de correrlas se probó formalmente que no cambian el core (decisión T74).
+- **Criterio 2.** Las series sintéticas se corrieron a 0,1 ms. A 1 ms y 10 ms solo la serie de práctica.
+- **Un bitstream cambiado con `icebram`** (otra tabla u otro programa) no hereda esta puerta: hay que simularlo desde su `.asc` antes de grabarlo.
+
+Las mediciones del paquete P3, con la tabla todavía en la memoria de datos, quedaron en `docs/mediciones/fondo/p3/`.

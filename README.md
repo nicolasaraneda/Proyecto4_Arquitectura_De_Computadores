@@ -112,7 +112,8 @@ Cada una tiene su documento de estudio, su prueba y el número que la respalda.
 | Espino segmentado | Pipeline de 3 etapas: la memoria de instrucciones se lee en el flanco de bajada y el banco de registros adelanta el dato recién escrito. Es el mismo Espino, elegido al compilar con `-DESPINO_SEGMENTADO`. El core por defecto sigue siendo el base. | `make check-seg`, `make paralelo-largo`, `make mutaciones`, `make cosim-seg` y `make equiv-seg` | CPI con el mix de la clase 7: 1,350 contra 2,350 del base (la clase estimó 1,5). Respuesta de `trade.s`: 22 ciclos en promedio contra 41. 994 celdas contra 1083. Cierra a 25 MHz en 10 de 10 semillas, con 51,1 MHz en la peor. 3,2 millones de instrucciones aleatorias comparadas una por una con el base, 628 583 distintas (corrida del 15/11 con el generador corregido, T52). | `docs/espino_segmentado.md` |
 | Espino barrel | Cuatro hilos por un pipeline de 4 etapas, con los cuatro contextos en las BRAM del banco de registros. Sin adelantamiento ni burbujas. Se elige con `-DESPINO_BARREL`. Es el core del diseño que compite (decisión T50). | `make check-barrel`, `make barrel-verif` y `make barrel-mutaciones` | CPI 1,000 agregado y 4,000 por hilo. 933 celdas contra 1086 del base, 52,6 MHz en la peor de 10 semillas. 7,9 millones de instrucciones comparadas una por una con el base, 91,96 % distintas, cero diferencias. 21 de 21 errores puestos a propósito detectados. Testbench oficial 4/4, con respuesta en 83 ciclos de 2262. | `docs/espino_barrel.md` |
 | Extensión de la ISA | Tres instrucciones en custom-0 sobre el barrel: `emad`, `devk` y `mulstep`. Usan el sumador de la ALU con el operando desplazado. Se eligen con `-DESPINO_XD`. | `make check-xd`, `make xd-verif` y `make xd-mutaciones` | 96 celdas, 48,3 MHz en la peor de 10 semillas. Cada instrucción probada formalmente contra su especificación. 8,0 millones de instrucciones comparadas con el base más la especificación, cero diferencias. La regla con `devk` y `emad` responde en 63 ciclos contra 83. | `docs/extension_isa.md` |
-| Fondo en un chip | `sw/fondo.s`: un supervisor y tres gestores, uno por hilo del barrel. Cada gestor corre una banda de la regla de reversión y vota por memoria compartida; el supervisor combina los votos con pesos que se ajustan y escribe `DECISION`. Si un voto no llega a tiempo decide sin él, y sin ninguno decide como `sw/trade.s`. | `make check-fondo`, `make fondo-series` y `make fondo-degradacion` | 226 de 512 palabras. 4/4 en el testbench oficial. Idéntico a su referencia en 1 050 series y en la práctica a los tres períodos. Peor caso 480 ciclos de 2262, y 671 con fallas puestas a propósito. 15 de 15 controles negativos detectados. | `docs/fondo.md` |
+| Fondo en un chip | `sw/fondo.s`: un supervisor y tres gestores, uno por hilo del barrel. Cada gestor corre una banda de la regla de reversión y vota por memoria compartida; el supervisor combina los votos con pesos que se ajustan y escribe `DECISION`. Si un voto no llega a tiempo decide sin él, y sin ninguno decide como `sw/trade.s`. | `make check-fondo`, `make fondo-puerta` y `make fondo-bitstreams` | 213 de 512 palabras. 4/4 en el testbench oficial. Idéntico a su referencia en 1 050 series y en la práctica a los tres períodos. Peor caso 444 ciclos de 2262, y 679 con fallas puestas a propósito. 15 de 15 controles negativos detectados. | `docs/fondo.md` |
+| Tabla de parámetros, vigilante y relevo | Las 20 constantes del fondo en una BRAM de solo lectura, que se cambia con `icebram` sin sintetizar. Un vigilante que, al quinto precio sin respuesta, reconfigura la FPGA con la imagen de respaldo (`SB_WARMBOOT`). Imagen múltiple con R2 y R0. | `make check-vigilante`, `make fondo-bitstreams` y `make fondo-criterio5` | R1: 1029 celdas, 51,6 MHz en la peor semilla. R2: 1045 celdas, 47,9 MHz. Cambio de tabla en 0,32 s. El vigilante no se dispara en ninguna corrida sana y dispara en la transacción esperada con el supervisor colgado. | `docs/tabla_vigilante.md` |
 
 ### Espino barrel
 
@@ -142,7 +143,7 @@ Tres instrucciones propias en el opcode custom-0, solo en el Espino barrel: `ema
 
 ### Fondo en un chip
 
-`sw/fondo.s` es el programa del diseño integrado. Corre en el barrel con `emad` y `devk` (`-DESPINO_BARREL -DESPINO_XD_EMAD -DESPINO_XD_DEVK`). El hilo 0 lee el precio, lo publica con su número de tick, recoge los votos de los hilos 1 a 3 y escribe `DECISION`. Su referencia es `ref/fondo.py`. El protocolo entre hilos, la degradación y las mediciones por tick están en `docs/fondo.md`.
+`sw/fondo.s` es el programa del diseño integrado. Corre en el barrel con `emad`, `devk` y la tabla de parámetros (`-DESPINO_BARREL -DESPINO_XD_EMAD -DESPINO_XD_DEVK -DESPINO_TABLA`, el peldaño R1), y con el vigilante además (`-DESPINO_VIGILANTE`, el peldaño R2). Los objetivos de abajo aceptan `HW=r1` (por defecto) o `HW=r2`. El hilo 0 lee el precio, lo publica con su número de tick, recoge los votos de los hilos 1 a 3 y escribe `DECISION`. Su referencia es `ref/fondo.py`. El protocolo entre hilos, la degradación y las mediciones por tick están en `docs/fondo.md`.
 
 | Comando | Qué hace |
 |---------|----------|
@@ -153,7 +154,19 @@ Tres instrucciones propias en el opcode custom-0, solo en el Espino barrel: `ema
 | `make fondo-fases` | Peor caso de la respuesta barriendo la fase de llegada del precio. |
 | `make fondo-degradacion` | Un gestor colgado, un voto que no llega y un voto atrasado: la decisión sigue saliendo a tiempo y es la esperada. |
 | `make fondo-controles` | 15 errores puestos a propósito en el programa. Las pruebas tienen que detectarlos todos. |
+| `make fondo-estres` | Matriz de estrés: SCLK, tiempos de `CS_n`, reset con la maestra transmitiendo, rondas seguidas y series pegadas en los bordes. |
 | `make fondo-ticks` y `make fondo-timing` | Instrucciones, ciclos y tiempo por tick y por hilo; celdas y frecuencia en 10 semillas. |
+| `make fondo-puerta` | Los criterios 1, 2, 3, 4, 6 y 7 de la puerta de simulación del peldaño, en versión completa. |
+
+### Tabla de parámetros, vigilante y relevo
+
+`rtl/pochoco_tabla.v` es una BRAM de solo lectura con las constantes del algoritmo. `rtl/vigilante.v` pide la reconfiguración de la FPGA con la imagen de respaldo si el programa deja de escribir `DECISION`. Los bitstreams R1 y R2, la imagen múltiple y los moldes para `icebram` están en `bitstreams/`. Todo está explicado en `docs/tabla_vigilante.md`.
+
+| Comando | Qué hace |
+|---------|----------|
+| `make check-vigilante` | Testbench del vigilante, sus propiedades formales y el relevo de punta a punta con las dos imágenes en un mismo testbench. |
+| `make fondo-bitstreams` | Construye R1 y R2, los simula desde su `.asc` contra la referencia, cambia la tabla y el programa con `icebram`, comprueba el disparo del vigilante dentro del bitstream y arma la imagen múltiple con `icemulti`. |
+| `make fondo-criterio5` | La campaña del core contra el Espino base y las mutaciones, con la máscara exacta de la extensión y el SoC del peldaño. |
 
 ### Espino segmentado
 

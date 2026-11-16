@@ -2,7 +2,9 @@
 
 Grupo: Nicolás Araneda, Vicente Calderón y Santiago Muñoz. Arquitectura de Computadores, Universidad de los Andes, 2026-2.
 
-Documento de estudio del programa de competencia del diseño integrado (peldaño R1 de `docs/puertas.md`). Parte de lo básico y llega al detalle. Todos los números salen de un script de `tools/fondo/` y su salida está guardada en `docs/mediciones/fondo/`. La última sección dice con qué comando se obtiene cada uno.
+Documento de estudio del programa de competencia del diseño integrado (peldaños R1 y R2 de `docs/puertas.md`). Parte de lo básico y llega al detalle. Todos los números salen de un script de `tools/fondo/` y su salida está guardada en `docs/mediciones/fondo/`. La última sección dice con qué comando se obtiene cada uno.
+
+Las mediciones son las del peldaño R1 (paquete P5): el barrel con `emad`, `devk` y la tabla de parámetros en su BRAM (`docs/tabla_vigilante.md`). En R2, que agrega el vigilante, el programa es el mismo y los ciclos medidos son iguales; sus salidas están en `docs/mediciones/fondo/r2/`. Las del paquete P3, con la tabla todavía en la memoria de datos, quedaron en `docs/mediciones/fondo/p3/`.
 
 ## 1. Resumen
 
@@ -10,22 +12,24 @@ Documento de estudio del programa de competencia del diseño integrado (peldaño
 
 Si un gestor no responde a tiempo, el supervisor decide sin él. Si no responde ninguno, decide solo, y lo que escribe es exactamente lo que escribiría `sw/trade.s`.
 
-| Medición | Resultado | Salida |
-|----------|-----------|--------|
-| Hardware | Espino barrel con `emad` y `devk`: 990 de 1280 celdas, 12 de 16 BRAM, 10 de 10 semillas a 25 MHz, mínima 48,92 MHz | `timing.txt` |
-| Tamaño | 193 palabras de programa, 20 de tabla y 13 de estado: 226 de 512 (44,1 %) | `tamano.txt` |
-| Testbench oficial sin modificar (Icarus, 2000 ticks) | 4/4, peor caso 435 ciclos de 2262, y `decisiones.csv` idéntico byte a byte al de `ref/fondo.py` | `oficial.txt` |
+| Medición (R1) | Resultado | Salida en `docs/mediciones/fondo/r1/` |
+|---------------|-----------|----------------------------------------|
+| Hardware | 1029 de 1280 celdas, 13 de 16 BRAM, 10 de 10 semillas a 25 MHz, mínima 51,59 MHz | `timing.txt` |
+| Tamaño | 200 palabras de programa y 13 de estado: 213 de 512 (41,6 %). La tabla está en su BRAM | `tamano.txt` |
+| Testbench oficial sin modificar (Icarus, 2000 ticks) | 4/4, y `decisiones.csv` idéntico byte a byte al de `ref/fondo.py` | `oficial.txt` |
 | Serie de práctica, 20 000 ticks, a 0,1 ms, 1 ms y 10 ms | 4/4 y decisiones idénticas a la referencia en los tres períodos | `equiv.txt` |
 | Una serie de 20 000 ticks de cada familia (15) | Bytes, estado interno, telemetría y protocolo idénticos | `equiv.txt` |
 | Lote de series sintéticas por el RTL | 1 050 series de 2000 ticks (70 por familia): 2,1 millones de ticks, cero diferencias | `series.txt` |
-| Respuesta, de `byte_done` a `DECISION` | 235,37 ciclos en promedio (9,41 us) | `ticks.txt` |
-| Peor caso barriendo la fase (72 fases y un período de 2501 ciclos) | 480 ciclos con el programa sano: 21,2 % del presupuesto de la ronda 3 | `fases.txt` |
-| Peor caso con gestores colgados (plazo agotado, 48 corridas) | 564 ciclos: 24,9 %. El límite de la puerta es 1131 | `fases.txt` |
-| Degradación | 30 corridas de 20 000 ticks con un gestor colgado, un voto que no llega o un voto atrasado: decisión esperada en todas, peor caso 671 ciclos | `degradacion.txt` |
-| Controles negativos | 15 errores puestos a propósito en el programa, 15 detectados | `controles.txt` |
-| Instrucciones por tick | Supervisor 71,59 en promedio y 125 como máximo. Cada gestor 25, siempre | `ticks.txt` |
+| Respuesta, de `byte_done` a `DECISION` | 223,01 ciclos en promedio (8,92 us) | `ticks.txt` |
+| Peor caso barriendo la fase (72 fases y un período de 2501 ciclos) | 444 ciclos con el programa sano: 19,6 % del presupuesto de la ronda 3 | `fases.txt` |
+| Peor caso con gestores colgados (plazo agotado, 48 corridas) | 568 ciclos: 25,1 %. El límite de la puerta es 1131 | `fases.txt` |
+| Degradación | 30 corridas de 20 000 ticks con un gestor colgado, un voto que no llega o un voto atrasado: decisión esperada en todas, peor caso 679 ciclos | `degradacion.txt` |
+| Matriz de estrés | 56 de 56 casos: SCLK, tiempos de `CS_n`, reset con la maestra transmitiendo, rondas seguidas y series pegadas en 1 y en 255 | `estres.txt` |
+| Controles negativos | 15 errores puestos a propósito, 15 detectados | `controles.txt` |
+| Instrucciones por tick | Supervisor 68,59 en promedio y 116 como máximo. Cada gestor 25, siempre | `ticks.txt` |
+| Bitstream simulado desde su `.asc` | 2000 ticks idénticos a la referencia en dos series | `../bitstreams.txt` |
 
-Criterios de la puerta de simulación que pedía el paquete: 1, 2, 4 y 6, los cuatro cumplidos. También el 3 (timing). Detalle en `docs/puertas.md`.
+R1 y R2 cumplen los ocho criterios de la puerta de simulación. Detalle en `docs/puertas.md`.
 
 ## 2. Qué calcula
 
@@ -60,7 +64,7 @@ Los tres usan la regla de `sw/trade.s` (`docs/trade_s.md`): `dev = 32 p - S`, y 
 | `REF1`, `REF2`, `REF3` | `0x7D0` a `0x7D8` | Supervisor | En la frontera de ventana | Supervisor | Puntaje de cada gestor al empezar la ventana |
 | `DES_k` | `0x7DC`, `0x7E4`, `0x7EC` | Gestor k | Una vez por tick, antes que `EST_k` | Supervisor, solo en la frontera | Puntaje en papel del gestor |
 | `EST_k` | `0x7E0`, `0x7E8`, `0x7F0` | Gestor k | Una vez por tick, lo último que publica | Supervisor | El voto: número del tick que el gestor procesó en los bits 31:8 y su posición en el bit 0 |
-| Tabla de parámetros | `0x770` a `0x7BC` | Nadie | | Los cuatro hilos | Sección 5 |
+| Tabla de parámetros | `0x8002_0000`, en su BRAM | Nadie: no tiene puerto de escritura | | Los cuatro hilos | Sección 5 |
 
 Cada palabra tiene un solo hilo que la escribe. El único hilo que toca el esclavo SPI y el periférico de la placa es el supervisor. El testbench vigila las dos cosas en todas las corridas: cualquier store fuera de esta tabla, o hecho por un hilo que no es el dueño, cuenta como violación (sección 7).
 
@@ -131,33 +135,32 @@ El argumento se apoya en tres hechos del barrel (`docs/espino_barrel.md`):
 | No hay lectura, modificación y escritura repartidas entre hilos | Los pesos y los puntajes de referencia solo los usa el supervisor |
 | No hay bloqueo mutuo | El supervisor no espera a nadie más que el plazo. El gestor solo espera a `PUB` |
 
-Con los tres gestores sanos, **la decisión no depende de cuántos ciclos demora cada hilo**, solo de los valores. Por eso la referencia en Python no modela ciclos y coincide byte a byte. La excepción es el borde del plazo: un voto que llega justo cuando vence puede entrar o no según el ciclo. Con los gestores sanos el lazo da a lo más 4 vueltas de las 8 (sección 8).
+Con los tres gestores sanos, **la decisión no depende de cuántos ciclos demora cada hilo**, solo de los valores. Por eso la referencia en Python no modela ciclos y coincide byte a byte. La excepción es el borde del plazo: un voto que llega justo cuando vence puede entrar o no según el ciclo. Con los gestores sanos el lazo da a lo más 3 vueltas de las 8 (sección 9).
 
 A diferencia de la factibilidad, el supervisor ya no espera a un gestor atrasado más de un tick. Un gestor cuya vuelta completa dure más que el período se salta precios y su media deja de ser la de la referencia. Los gestores de este programa son de tiempo constante (25 instrucciones por tick, sin saltos que dependan del precio), así que eso solo pasa con una falla.
 
 ## 4. El programa
 
-`sw/fondo.s`, por bloque (`docs/mediciones/fondo/tamano.txt`):
+`sw/fondo.s`, por bloque (`docs/mediciones/fondo/r1/tamano.txt`):
 
 | Bloque | Palabras |
 |--------|----------|
 | Tabla de arranque (el hilo t parte en la dirección 4 t) | 4 |
-| Supervisor: inicio y primer precio | 16 |
+| Supervisor: inicio y primer precio | 17 |
 | Supervisor: sondeo del SPI y publicación | 7 |
-| Supervisor: `max_media` propia | 10 |
+| Supervisor: `max_media` propia | 11 |
 | Supervisor: lectura de votos con plazo | 12 |
 | Supervisor: degradación (plazo vencido) | 12 |
 | Supervisor: voto y `DECISION` | 15 |
 | Supervisor: telemetría | 25 |
-| Supervisor: frontera de ventana (pesos) | 45 |
-| Entradas de los tres gestores | 12 |
+| Supervisor: frontera de ventana (pesos) | 47 |
+| Entradas de los tres gestores | 15 |
 | Rutina común de los gestores | 35 |
-| **Programa** | **193** |
-| Tabla de parámetros (solo lectura) | 20 |
+| **Programa** | **200** |
 | Estado compartido (parte en cero) | 13 |
-| **Total** | **226 de 512 (44,1 %)** |
+| **Total** | **213 de 512 (41,6 %)** |
 
-Entre el programa y la tabla quedan 283 palabras libres. El de la factibilidad ocupaba 251: sin el espejo de la cuenta (75 palabras) y con la extensión sobra espacio para la degradación, la telemetría y la tabla.
+Quedan 296 palabras libres. La tabla de parámetros no ocupa esta memoria. El programa de la factibilidad ocupaba 251: sin el espejo de la cuenta (75 palabras) y con la extensión sobra espacio para la degradación y la telemetría.
 
 Cómo se resolvió lo que el Espino no tiene (la ALU no desplaza y no hay producto ni división):
 
@@ -167,29 +170,32 @@ Cómo se resolvió lo que el Espino no tiene (la ALU no desplaza y no hay produc
 - **El puntaje no multiplica.** 32 p ya está calculado, y "tenía la acción" se aplica como máscara (`sub x7, x0, x12` y `and`).
 - **El voto no multiplica.** Cada peso se suma o no con una máscara hecha del voto.
 - **La frontera de ventana** elige al mejor y al peor con comparaciones y guarda el desplazamiento del peso de cada uno (0, 4 u 8), así que el ajuste es un load y un store por peso, y el tope y el piso se leen de la tabla con el mismo desplazamiento.
+- **La base de la tabla va en `x1`.** El supervisor la carga una vez por tick, después de publicar el precio, y la conserva hasta el voto. Después `x1` vuelve a ser un temporal.
 
 Un gestor ejecuta 25 instrucciones por tick: 23 hasta publicar su voto y 2 después (actualizar la media y volver al lazo). En la factibilidad, sin la extensión, eran 35.
 
 ## 5. Tabla de parámetros
 
-El programa no trae ninguna constante del algoritmo en sus instrucciones. Todas salen de 20 palabras en `0x770`, en el mismo orden que `PARAMETROS` de `ref/fondo.py` (`python3 ref/fondo.py --tabla` las imprime):
+El programa no trae ninguna constante del algoritmo en sus instrucciones. Todas salen de 20 valores de 16 bits en la BRAM de la tabla (`rtl/pochoco_tabla.v`, `0x8002_0000`), en el mismo orden que `PARAMETROS` de `ref/fondo.py` (`python3 ref/fondo.py --tabla` los imprime). El contenido es `sw/fondo_tabla.hex`.
 
-| Dirección | Nombre | Valor | Qué es |
-|-----------|--------|-------|--------|
-| `0x770`, `0x774` | `S_ENTRA`, `S_SALE` | -96, 1 | `max_media` del supervisor: entra si `dev < -96`, sale si `dev >= 1` |
-| `0x778`, `0x77C` | `G1_ENTRA`, `G1_SALE` | -96, 1 | Gestor 1 |
-| `0x780`, `0x784` | `G2_ENTRA`, `G2_SALE` | -128, 1 | Gestor 2 |
-| `0x788`, `0x78C` | `G3_ENTRA`, `G3_SALE` | -64, 17 | Gestor 3 |
-| `0x790` a `0x798` | `W1_INI` a `W3_INI` | 6, 5, 5 | Pesos iniciales, en dieciseisavos |
-| `0x79C` a `0x7A4` | `W1_MAX` a `W3_MAX` | 10, 9, 9 | Tope de cada peso |
-| `0x7A8` a `0x7B0` | `W1_MIN` a `W3_MIN` | 2, 1, 1 | Piso de cada peso |
-| `0x7B4` | `VENTANA` | 512 | Ticks entre ajustes de los pesos |
-| `0x7B8` | `UMBRAL` | 8 | Compra si los pesos adentro suman esto o más |
-| `0x7BC` | `PLAZO` | 8 | Vueltas del lazo de lectura de votos. Tiene que ser 1 o más |
+| Desplazamiento | Nombre | Valor | Qué es |
+|----------------|--------|-------|--------|
+| 0, 4 | `S_ENTRA`, `S_SALE` | -96, 1 | `max_media` del supervisor: entra si `dev < -96`, sale si `dev >= 1` |
+| 8, 12 | `G1_ENTRA`, `G1_SALE` | -96, 1 | Gestor 1 |
+| 16, 20 | `G2_ENTRA`, `G2_SALE` | -128, 1 | Gestor 2 |
+| 24, 28 | `G3_ENTRA`, `G3_SALE` | -64, 17 | Gestor 3 |
+| 32 a 40 | `W1_INI` a `W3_INI` | 6, 5, 5 | Pesos iniciales, en dieciseisavos |
+| 44 a 52 | `W1_MAX` a `W3_MAX` | 10, 9, 9 | Tope de cada peso |
+| 56 a 64 | `W1_MIN` a `W3_MIN` | 2, 1, 1 | Piso de cada peso |
+| 68 | `VENTANA` | 512 | Ticks entre ajustes de los pesos |
+| 72 | `UMBRAL` | 8 | Compra si los pesos adentro suman esto o más |
+| 76 | `PLAZO` | 8 | Vueltas del lazo de lectura de votos. Tiene que ser 1 o más |
 
-Los umbrales están en unidades de `dev`, que es el precio por 32. La tabla es de solo lectura: el programa nunca escribe ahí, y el testbench lo vigila. Hoy vive al final de la memoria de datos. El paquete P5 la pasa a una BRAM propia para poder cambiarla con `icebram` sin tocar el programa (decisión T65).
+Los umbrales están en unidades de `dev`, que es el precio por 32. Cada valor tiene que caber en 16 bits con signo: `ref/fondo.py` se niega a generar una tabla que no cumpla, o con `PLAZO` en cero.
 
-El único estado inicial que el programa toma de la imagen de memoria es esta tabla. Los pesos vigentes los copia el supervisor al arrancar y todo lo demás parte en cero.
+La tabla es de solo lectura: el módulo no tiene puerto de escritura, y el testbench cuenta cualquier store a esa dirección como violación. Se cambia dentro de un bitstream ya construido con `icebram`, sin sintetizar ni ensamblar (`docs/tabla_vigilante.md`, sección 3).
+
+El programa no toma ningún valor inicial de su imagen de memoria. Los pesos vigentes los copia el supervisor de la tabla al arrancar y todo lo demás parte en cero.
 
 ## 6. Telemetría
 
@@ -222,7 +228,7 @@ Cómo se compara el RTL con ella. `tb/fondo/tb_fondo.sv` es la maestra SPI de `t
 3. **Telemetría.** A lo más un store al periférico por tick, y los LED y los segmentos con el valor esperado.
 4. **Protocolo.** Llegaron todos los precios, cada uno tuvo una sola escritura en `DECISION`, MISO sin X, ninguna palabra escrita por un hilo que no es su dueño, y peor caso bajo el límite.
 
-Resultados (`docs/mediciones/fondo/equiv.txt` y `series.txt`):
+Resultados (`docs/mediciones/fondo/r1/equiv.txt` y `series.txt`; los de R2 son iguales):
 
 | Prueba | Resultado |
 |--------|-----------|
@@ -235,25 +241,25 @@ Resultados (`docs/mediciones/fondo/equiv.txt` y `series.txt`):
 
 El patrimonio de la práctica cambia entre 0,1 ms y 1 ms porque el programa deja de ver 2 precios o 1 durante el reset, igual que con `sw/trade.s`.
 
-El gemelo digital todavía no modela el barrel (paquete P4), así que todo esto corre por el RTL con Verilator. Las series sintéticas no se corrieron a 1 ms ni a 10 ms (decisión T67).
+El gemelo digital todavía no modela el barrel (paquete P4), así que todo esto corre por el RTL con Verilator. Las series sintéticas no se corrieron a 1 ms ni a 10 ms (decisión T67). El criterio 8, el bitstream simulado desde su `.asc`, está en `docs/tabla_vigilante.md`, sección 6.
 
 ## 8. Mediciones por tick
 
-`docs/mediciones/fondo/ticks.txt`. Serie de práctica completa con el timing del testbench oficial. Una ventana va de un `byte_done` al siguiente. "Trabajo" son las instrucciones fuera de los lazos de sondeo (`STATUS` para el supervisor, `PUB` para los gestores), más la vuelta del lazo que encuentra el dato.
+`docs/mediciones/fondo/r1/ticks.txt`. Serie de práctica completa con el timing del testbench oficial. Una ventana va de un `byte_done` al siguiente. "Trabajo" son las instrucciones fuera de los lazos de sondeo (`STATUS` para el supervisor, `PUB` para los gestores), más la vuelta del lazo que encuentra el dato.
 
 ### 8.1 Instrucciones, ciclos y CPI por hilo (ronda 3, 19 996 ticks)
 
 | Hilo | IC mínimo | IC promedio | IC máximo | Ciclos promedio | Ciclos máximo | CPI |
 |------|-----------|-------------|-----------|-----------------|---------------|-----|
-| 0, supervisor | 61 | 71,59 | 125 | 286,37 | 500 | 4,000 |
+| 0, supervisor | 62 | 68,59 | 116 | 274,37 | 464 | 4,000 |
 | 1, gestor `max_media` | 25 | 25,00 | 25 | 100,00 | 100 | 4,000 |
 | 2, gestor `base` | 25 | 25,00 | 25 | 100,00 | 100 | 4,000 |
 | 3, gestor `activo` | 25 | 25,00 | 25 | 100,00 | 100 | 4,000 |
-| Los cuatro, agregado | 136 | 146,59 | 200 | 146,59 | 200 | 1,000 |
+| Los cuatro, agregado | 137 | 143,59 | 191 | 143,59 | 191 | 1,000 |
 
 En el barrel cada hilo completa una instrucción cada 4 ciclos, sin excepciones: no hay esperas por loads ni penalización por saltos. El CPI es 4 por hilo y 1 agregado, por construcción, y los ciclos de un hilo son 4 veces su IC. En la fila agregada los ciclos son los del core entero, que ejecuta una instrucción por ciclo.
 
-Los gestores no tienen saltos que dependan del precio: su peor caso es su promedio. El supervisor varía por dos razones: cuántas vueltas da el lazo de lectura de votos (2 o 3 en un tick común) y si el tick es de frontera (hasta 45 instrucciones más y una vuelta más del lazo).
+Los gestores no tienen saltos que dependan del precio: su peor caso es su promedio. El supervisor varía por dos razones: cuántas vueltas da el lazo de lectura de votos (2 o 3) y si el tick es de frontera (hasta 47 instrucciones más).
 
 En términos de la ley de hierro (Tiempo = IC × CPI × Tclk), contra `max_media` en un hilo del mismo barrel: el IC del camino de la respuesta sube, el CPI por hilo sigue en 4 y el reloj no cambia. Lo que el barrel aporta es que las 75 instrucciones de los tres gestores se ejecutan mientras el supervisor hace las suyas: en el camino de la respuesta cuestan lo que 23 de un solo hilo.
 
@@ -263,60 +269,61 @@ Ciclos desde `byte_done`, que es desde donde mide el testbench oficial. Ciclo de
 
 | Hito | Mínimo | Promedio | Máximo | Tiempo promedio | Tiempo máximo |
 |------|--------|----------|--------|-----------------|---------------|
-| El supervisor publica `PUB` | 27 | 31,00 | 35 | 1,24 us | 1,40 us |
-| Llega el último voto | 118 | 123,33 | 126 | 4,93 us | 5,04 us |
-| `DECISION`, todos los ticks | 215 | 235,37 | 475 | 9,41 us | 19,00 us |
-| `DECISION`, ticks comunes (19 957) | 215 | 235,00 | 267 | 9,40 us | 10,68 us |
-| `DECISION`, ticks con frontera (39) | 375 | 421,67 | 475 | 16,87 us | 19,00 us |
-| El supervisor vuelve a sondear (tick completo) | 247 | 293,37 | 507 | 11,73 us | 20,28 us |
+| El supervisor publica `PUB` | 27 | 30,64 | 35 | 1,23 us | 1,40 us |
+| Llega el último voto | 122 | 124,36 | 130 | 4,97 us | 5,20 us |
+| `DECISION`, todos los ticks | 219 | 223,01 | 443 | 8,92 us | 17,72 us |
+| `DECISION`, ticks comunes | 219 | 222,64 | 227 | 8,91 us | 9,08 us |
+| `DECISION`, ticks con frontera (39) | 379 | 413,36 | 443 | 16,53 us | 17,72 us |
 
-El programa escribe `DECISION` exactamente una vez en cada tick. A 1 ms (3000 ticks) la respuesta es 243,34 ciclos en promedio y 471 en el peor caso: el programa no mide el período y solo cambia en qué fase llega el precio.
+El programa escribe `DECISION` exactamente una vez en cada tick. A 1 ms (3000 ticks) la respuesta es 221,91 ciclos en promedio y 435 en el peor caso: el programa no mide el período y solo cambia en qué fase llega el precio.
 
 ### 8.3 Contra el período de cada ronda
 
-Con el peor caso medido barriendo la fase (480 ciclos, sección 9):
+Con el peor caso medido barriendo la fase (444 ciclos, sección 9):
 
 | Ronda | Período | Presupuesto (ciclos) | Peor caso | Uso | Holgura |
 |-------|---------|----------------------|-----------|-----|---------|
-| 1 | 10 ms | 249 762 | 480 | 0,19 % | 99,81 % |
-| 2 | 1 ms | 24 762 | 480 | 1,94 % | 98,06 % |
-| 3 | 0,1 ms | 2 262 | 480 | 21,22 % | 78,78 % |
+| 1 | 10 ms | 249 762 | 444 | 0,18 % | 99,82 % |
+| 2 | 1 ms | 24 762 | 444 | 1,79 % | 98,21 % |
+| 3 | 0,1 ms | 2 262 | 444 | 19,63 % | 80,37 % |
 
-Ocupación: los cuatro hilos hacen 146,59 instrucciones de trabajo por tick. A 0,1 ms el core tiene 2500 turnos por tick, así que la ocupación es 5,86 %. A 1 ms, 0,59 %. El barrel está casi siempre sondeando.
+Ocupación: los cuatro hilos hacen 143,59 instrucciones de trabajo por tick. A 0,1 ms el core tiene 2500 turnos por tick, así que la ocupación es 5,74 %. El barrel está casi siempre sondeando.
 
 ### 8.4 Contra la factibilidad y contra `max_media` sola
 
-| | Factibilidad (`fondo_min`, sin extensión, con espejo) | Este programa | `max_media` sola (`sw/trade.s`) en el hilo 0 del barrel |
-|-|--------------------------------------------------------|---------------|-------------------------------------------|
+| | Factibilidad (`fondo_min`, sin extensión, con espejo) | Este programa en R1 | `max_media` sola (`sw/trade.s`) en el hilo 0 del barrel |
+|-|--------------------------------------------------------|---------------------|-------------------------------------------|
 | Instrucciones por gestor y por tick | 35 | 25 | no aplica |
-| Respuesta promedio | 227,36 ciclos | 235,37 | 75,06 (`docs/mediciones/barrel/ticks.txt`) |
-| Peor caso barriendo la fase | 440 | 480 | 88 |
-| Memoria | 251 palabras | 226 | 40 |
+| Respuesta promedio | 227,36 ciclos | 223,01 | 75,06 (`docs/mediciones/barrel/ticks.txt`) |
+| Peor caso barriendo la fase | 440 | 444 | 88 |
+| Memoria | 251 palabras | 213 | 40 |
 | Decide si un gestor se cuelga | No | Sí | no aplica |
 
-La respuesta no bajó respecto de la factibilidad aunque los gestores son más cortos, porque el lazo de lectura con plazo lee los tres votos en cada vuelta (48 ciclos) en vez de esperar a cada gestor con un lazo de 12, y porque el supervisor lee 5 parámetros de la tabla por tick. Es el costo de la degradación y de la tabla. El fondo responde 3 veces más lento que `max_media` sola en el mismo core en promedio (235 ciclos contra 75) y 5 veces en el peor caso (480 contra 88). Sobra plazo, pero es lo que cuesta esperar a tres hilos que avanzan una instrucción cada 4 ciclos.
+La respuesta quedó donde estaba en la factibilidad aunque los gestores son más cortos: lo que se ganó con la extensión se gasta en el lazo de lectura con plazo, que lee los tres votos en cada vuelta (48 ciclos), y en leer los parámetros de la tabla. Es el costo de la degradación y de la tabla. El fondo responde 3 veces más lento que `max_media` sola en el mismo core en promedio (223 ciclos contra 75) y 5 veces en el peor caso (444 contra 88). Sobra plazo, pero es lo que cuesta esperar a tres hilos que avanzan una instrucción cada 4 ciclos.
+
+Un detalle que muestra cuánto pesa la fase: respecto de P3, el supervisor ejecuta una instrucción más antes de leer los votos (cargar la base de la tabla), y la respuesta promedio bajó de 235 a 223 ciclos. Esos 4 ciclos corren la primera lectura lo justo para que los tres votos estén casi siempre en la segunda o tercera vuelta, y ya nunca en la cuarta.
 
 ## 9. Peor caso barriendo la fase
 
-`docs/mediciones/fondo/fases.txt`. El peor caso depende de en qué punto de sus lazos está cada hilo cuando llega el precio. El lazo de sondeo del supervisor dura 12 ciclos, el de los gestores 8 y la rotación de hilos 4: el patrón se repite cada 24 ciclos. Se corrió el inicio de la serie de a un ciclo:
+`docs/mediciones/fondo/r1/fases.txt`. El peor caso depende de en qué punto de sus lazos está cada hilo cuando llega el precio. El lazo de sondeo del supervisor dura 12 ciclos, el de los gestores 8 y la rotación de hilos 4: el patrón se repite cada 24 ciclos. Se corrió el inicio de la serie de a un ciclo:
 
 | Corridas | Resultado | Peor caso |
 |----------|-----------|-----------|
-| 48 fases de un ciclo, programa sano, 1100 ticks cada una | 48 de 48 iguales a la referencia | entre 429 y 480 ciclos |
-| 24 fases corridas 13 ns (el precio no llega alineado con el reloj) | 24 de 24 | entre 429 y 480 |
-| Período de 2501 ciclos, 20 000 ticks (recorre todas las fases en una corrida) | igual a la referencia | 474 |
-| Gestor 3 colgado, 24 fases | 24 de 24 | entre 545 y 556 |
-| Los tres gestores colgados, 24 fases | 24 de 24, y bytes iguales a `max_media` sola | entre 557 y 564 |
+| 48 fases de un ciclo, programa sano, 1100 ticks cada una | 48 de 48 iguales a la referencia | entre 433 y 444 ciclos |
+| 24 fases corridas 13 ns (el precio no llega alineado con el reloj) | 24 de 24 | entre 433 y 444 |
+| Período de 2501 ciclos, 20 000 ticks (recorre todas las fases en una corrida) | igual a la referencia | 442 |
+| Gestor 3 colgado, 24 fases | 24 de 24 | entre 553 y 560 |
+| Los tres gestores colgados, 24 fases | 24 de 24, y bytes iguales a `max_media` sola | entre 557 y 568 |
 
-**Peor caso sano: 480 ciclos. Peor caso con el plazo agotado: 564 ciclos**, contra el límite de 1131 (la mitad del presupuesto de la ronda 3). El peor caso de todo lo medido son 671 ciclos, con un gestor atrasado 200 ciclos a propósito (sección 10): el supervisor lo espera casi hasta el plazo y después todavía decide.
+**Peor caso sano: 444 ciclos. Peor caso con el plazo agotado: 568 ciclos**, contra el límite de 1131 (la mitad del presupuesto de la ronda 3). El peor caso de todo lo medido son 679 ciclos, con un gestor atrasado 200 ciclos a propósito (sección 10): el supervisor lo espera casi hasta el plazo y después todavía decide.
 
-Cota por conteo de instrucciones (hecha a mano, no sale de un script): hasta `PUB` pasan a lo más 36 ciclos; la `max_media` propia son 10 instrucciones (40 ciclos); el plazo son 8 vueltas de 48 ciclos (384); el reemplazo de votos y la frontera no ocurren en el mismo tick, y el más largo de los dos es la frontera, con 45 instrucciones más una vuelta del lazo (228); el voto son 15 instrucciones (60). La suma es 748 ciclos. Es una cota razonada, no demostrada, y queda bajo 1131.
+Cota por conteo de instrucciones (hecha a mano, no sale de un script): hasta `PUB` pasan a lo más 36 ciclos; la `max_media` propia son 11 instrucciones (44 ciclos); el plazo son 8 vueltas de 48 ciclos (384); el reemplazo de votos y la frontera no ocurren en el mismo tick, y el más largo de los dos es la frontera, con 47 instrucciones más una vuelta del lazo (236); el voto son 15 instrucciones (60). La suma es 760 ciclos. Es una cota razonada, no demostrada, y queda bajo 1131.
 
-Cuántas vueltas da el lazo de lectura con los gestores sanos, en las 1 123 corridas sanas de las secciones 7 y 9: 2 o 3 en un tick común y hasta 4 en un tick de frontera (la frontera vuelve a entrar al lazo). El plazo es 8. En ninguna corrida sana venció.
+Cuántas vueltas da el lazo de lectura con los gestores sanos, en las 1 122 corridas sanas del lote de series y de este barrido: nunca más de 3. El plazo es 8. En ninguna corrida sana venció.
 
 ## 10. Degradación
 
-`docs/mediciones/fondo/degradacion.txt`. Cada caso es `sw/fondo.s` con instrucciones insertadas en la rutina de los gestores (`tools/fondo/variante.py`, marcas `#@` del programa). El supervisor no se toca. La decisión esperada sale de `ref/fondo.py` con la misma falla, descrita como "el voto del gestor K no llega entre los ticks N y M" (decisión T68). Cada caso corre 20 000 ticks sobre dos series: la de práctica y una de reversión.
+`docs/mediciones/fondo/r1/degradacion.txt`. Cada caso es `sw/fondo.s` con instrucciones insertadas en la rutina de los gestores (`tools/fondo/variante.py`, marcas `#@` del programa). El supervisor no se toca. La decisión esperada sale de `ref/fondo.py` con la misma falla, descrita como "el voto del gestor K no llega entre los ticks N y M" (decisión T68). Cada caso corre 20 000 ticks sobre dos series: la de práctica y una de reversión.
 
 | Falla | Casos | Qué se comprobó |
 |-------|-------|-----------------|
@@ -324,7 +331,7 @@ Cuántas vueltas da el lazo de lectura con los gestores sanos, en las 1 123 corr
 | Un voto que no llega | El gestor 1 en un tick, el gestor 2 en un tick de frontera, el gestor 3 durante 1601 ticks | El plazo vence solo en esos ticks. En la frontera sin voto no se tocan los pesos. Al volver el voto, el fondo sigue como la referencia |
 | Un voto atrasado | 160 y 200 ciclos (cabe en el plazo), 1000 ciclos siempre y 1200 ciclos durante 1401 ticks (no cabe) | Si cabe, ninguna decisión cambia y la respuesta crece lo que se atrasó el gestor. Si no cabe, se decide sin ese voto |
 
-Las 30 corridas pasan: bytes, estado, ticks con plazo vencido, telemetría y protocolo iguales a lo esperado, y **peor caso 671 ciclos**.
+Las 30 corridas pasan: bytes, estado, ticks con plazo vencido, telemetría y protocolo iguales a lo esperado, y **peor caso 679 ciclos**.
 
 Por qué dos series. En la serie de práctica el fondo sano, el fondo con fallas y `max_media` sola escriben los mismos 20 000 bytes, así que ahí la prueba solo distingue los casos por el estado interno. En la de reversión el fondo sano y `max_media` difieren en 1816 bytes, y los casos con fallas parciales difieren de los dos (por ejemplo 276 del sano y 1540 de `max_media` con el gestor 3 sin voto entre los ticks 1000 y 2600). La última columna de cada línea de `degradacion.txt` lo informa.
 
@@ -332,7 +339,7 @@ Lo que no se probó: atrasos entre 200 y 600 ciclos, donde el voto llega cerca d
 
 ## 11. Controles negativos
 
-`docs/mediciones/fondo/controles.txt`. Para saber que las comparaciones de las secciones 7 a 10 ven lo que dicen ver, `tools/fondo/controles.py` arma 15 versiones del programa con un error puesto a propósito y `make fondo-controles` exige que la comparación falle en todas:
+`docs/mediciones/fondo/r1/controles.txt`. Para saber que las comparaciones de las secciones 7 a 10 ven lo que dicen ver, `tools/fondo/controles.py` arma 15 casos con un error puesto a propósito (13 en el programa y 2 en la tabla, que se carga cambiada) y `make fondo-controles` exige que la comparación falle en todas:
 
 | Error | Lo detecta |
 |-------|-----------|
@@ -361,16 +368,17 @@ Lo que no se probó: atrasos entre 200 y 600 ciclos, donde el voto llega cerca d
 | "La decisión se debe calcular en el Espino Core en la placa. El core debe leer el precio y escribir la decisión." | Sí, con una duda | Todo el cálculo son instrucciones ejecutadas por el core: un hilo lee `PRICE` y escribe `DECISION`, y los otros tres calculan y le entregan su voto por memoria. No hay hardware que decida. La duda es si un Espino multihilo con dos instrucciones propias sigue siendo Espino: es una pregunta pendiente para el ayudante |
 | No usar información externa a la serie ni guardar series de precios | Sí | El programa guarda una media por gestor y una del supervisor, tres puntajes, tres pesos y el último precio por 32. No guarda precios pasados |
 | Mismo programa para todas las series | Sí | No mide el período ni cambia de modo |
-| Todo hardware agregado con su testbench | Sí | El hardware es el de los paquetes P1 y P2, con sus pruebas. Este paquete no agrega hardware |
+| Todo hardware agregado con su testbench | Sí | El barrel, la extensión, la tabla y el vigilante tienen cada uno sus pruebas (`docs/espino_barrel.md`, `docs/extension_isa.md` y `docs/tabla_vigilante.md`) |
 | El testbench oficial no se modifica | Sí | Entrega 4/4 sin tocarlo |
 | Regla propia: nada derivado punto a punto de la serie de práctica | Sí | La tabla tiene 20 constantes: umbrales de tres candidatos del frente del algoritmo, pesos iniciales, ventana, margen implícito de 1/32 y plazo |
 
 ## 13. Límites y lo que falta
 
 - **El algoritmo no suma puntos.** Es la decisión T50, tomada a sabiendas: según la factibilidad el fondo empata con `max_media` a 2000 ticks y pierde 0,005 puntos a 20 000. En la serie de práctica escribe los mismos bytes que `max_media`.
-- **Placa y maestra real.** Todo es simulación. No se construyó un bitstream con este programa: R1 y R2 son del paquete P5.
-- **Gemelo digital.** No modela el barrel (paquete P4). Las series sintéticas a 1 ms y a 10 ms, la matriz de estrés (criterio 7) y la simulación del bitstream ruteado (criterio 8) quedan para P4 y P5.
-- **Rondas seguidas sin reset.** El programa no se reinicia entre rondas: medias, puntajes y pesos siguen desde donde quedaron. La referencia evalúa cada ronda desde cero. No se midió: es parte del criterio 7.
+- **Placa y maestra real.** Todo es simulación, incluida la de los bitstreams R1 y R2 desde su `.asc`. Faltan la puerta de placa y la de la maestra.
+- **Gemelo digital.** No modela el barrel (paquete P4). Las series sintéticas no se corrieron a 1 ms ni a 10 ms.
+- **SCLK lento con el período más corto.** Con SCLK de 100 kHz y período de 0,1 ms quedan 237 ciclos entre transacciones y el fondo necesita hasta 444. A 1 ms funciona (`docs/tabla_vigilante.md`, sección 8).
+- **Rondas seguidas sin reset.** El programa no se reinicia entre rondas: medias, puntajes y pesos siguen desde donde quedaron. La matriz de estrés lo ejercita con tres rondas seguidas a períodos distintos y la referencia corrida de corrido: coincide. Lo que no se sabe es si la maestra real reinicia su cuenta entre rondas, que es una pregunta pendiente.
 - **Borde del plazo.** Cerca del plazo la decisión depende del ciclo en que llega el voto (sección 10).
 - **Vuelta del contador de ticks.** A los 16,7 millones de ticks un gestor que nunca votó contaría como "afuera" durante un tick (sección 3.3). No se ejercitó.
 - **Un gestor más lento que el período se salta precios.** El supervisor ya no lo espera. No pasa con gestores sanos (25 instrucciones de 625 turnos por tick a 0,1 ms).
@@ -381,9 +389,11 @@ Lo que no se probó: atrasos entre 200 y 600 ciclos, donde el voto llega cerca d
 
 Desde la raíz del repositorio. Los scripts agregan OSS CAD Suite al `PATH`.
 
-| Comando | Qué hace | Salida en `docs/mediciones/fondo/` | Demora |
-|---------|----------|-------------------------------------|--------|
-| `make test-fondo` | Pruebas de la referencia | | 3 s |
+Todos los objetivos aceptan `HW=r1` (por defecto) o `HW=r2`.
+
+| Comando | Qué hace | Salida en `docs/mediciones/fondo/r1/` | Demora |
+|---------|----------|----------------------------------------|--------|
+| `make test-fondo` y `make check-tabla` | Pruebas de la referencia y de que la tabla guardada es la de la referencia | | 3 s |
 | `make fondo-oficial` | Testbench oficial sin modificar, Icarus | `oficial.txt` | 5 min |
 | `make fondo-equiv` | Práctica a 0,1 ms y 1 ms y una serie por familia | `equiv.txt` | 3 min |
 | `make fondo-equiv-ronda1` | Lo mismo más el período de 10 ms | `equiv.txt` | 35 min |
@@ -392,11 +402,13 @@ Desde la raíz del repositorio. Los scripts agregan OSS CAD Suite al `PATH`.
 | `make fondo-fases` | Peor caso barriendo la fase | `fases.txt` | 2 min |
 | `make fondo-degradacion` | 30 corridas con fallas | `degradacion.txt` | 3 min |
 | `make fondo-controles` | 15 controles negativos | `controles.txt` | 1 min |
+| `make fondo-estres` | Matriz de estrés | `estres.txt` | 3 min |
 | `make fondo-ticks` | Mediciones por tick y tamaño | `ticks.txt`, `tamano.txt` | 1 min |
-| `make check-fondo` | Versiones cortas de todo lo anterior. Corre en la integración continua | `build/fondo/` | 10 min |
-| `make fondo-completo` | Todo, en versión completa | | |
+| `make fondo-puerta` | Todo lo anterior, en versión completa | | 50 min |
+| `make fondo-bitstreams` y `make fondo-criterio5` | Criterios 8 y 5 (`docs/tabla_vigilante.md`) | | |
+| `make check-fondo` | Versiones cortas. Corre en la integración continua, una vez por peldaño | `build/fondo/r1/` | 10 min |
 
-Para correr un caso a mano: `source tools/fondo/comun.sh; ensamblar_fondo; compilar_sim; caso build/fondo/prueba sw/fondo.s tb/practica.csv 2000 100000 4000 --medir; cat build/fondo/prueba/resultado.txt`.
+Para correr un caso a mano: `source tools/fondo/comun.sh; ensamblar_fondo; compilar_sim; caso build/fondo/r1/prueba sw/fondo.s tb/practica.csv 2000 100000 4000 --medir; cat build/fondo/r1/prueba/resultado.txt`.
 
 ## 15. Preguntas para estudiar
 

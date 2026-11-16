@@ -386,7 +386,7 @@ Hay tres hechos que estas decisiones no cambian y con los que se planifica:
 - **Razón.** El plan pide que al bitstream entren solo las instrucciones que `sw/fondo.s` usa de verdad, y ese programa es del paquete P3. `emad` y `devk` las usan los cuatro hilos. `mulstep` solo tiene uso si el supervisor lleva la contabilidad de la cuenta, que el fondo mínimo no necesita para decidir. Con los 7 subconjuntos ya probados, sacar `mulstep` es quitar una definición y no repetir el paquete.
 - **Alternativas.** (a) Solo `emad` y `devk`: si P3 necesitara el producto habría que reabrir P2. (b) Las tres siempre: deja en el bitstream una instrucción que puede quedar sin uso, contra lo que pide el plan.
 - **Qué se pierde.** Nada medible: las tres juntas cuestan 96 celdas y `emad` con `devk` 52.
-- **Decidido por Nicolás (15/11).** "R1 se compila solo con emad y devk. mulstep queda para la edición de exhibición y el ASIC." La razón no quedó escrita: el mensaje traía el campo sin completar, y aquí no se inventa una. El fondo de P3 se escribió con esa restricción (T63).
+- **Decidido por Nicolás (15/11).** "R1 se compila solo con emad y devk. mulstep queda para la edición de exhibición y el ASIC." Razón, textual: "no quiero piezas sin uso en el chip que compite". El fondo de P3 se escribió con esa restricción (T63).
 
 ### T59. La extensión va fuera del decodificador del Espino y las codificaciones que no existen son ilegales (15/11)
 
@@ -455,3 +455,42 @@ Hay tres hechos que estas decisiones no cambian y con los que se planifica:
 - **Decisión.** Los casos del criterio 6 son `sw/fondo.s` con instrucciones insertadas en la rutina de los gestores (`tools/fondo/variante.py`): un lazo infinito, un salto que omite el store del voto o un lazo de retardo. El supervisor no se toca. La decisión esperada sale de `ref/fondo.py` con la falla descrita como "el voto del gestor K no llega entre los ticks N y M".
 - **Razón.** Un gestor colgado de verdad sigue ocupando su turno en el barrel y sigue leyendo la memoria: es lo que pasaría en la placa. Forzar señales en el simulador prueba otra cosa.
 - **Qué se pierde.** No se prueban atrasos cercanos al plazo (entre 200 y 600 ciclos), donde el resultado depende del ciclo exacto y la referencia no lo modela.
+
+### T69. La tabla de parámetros es una BRAM de solo lectura, sin puerto de escritura (15/11)
+
+- **Decisión.** `rtl/pochoco_tabla.v` es una BRAM de 256 valores de 16 bits en `0x8002_0000` que el core solo lee. `lw` entrega el valor con extensión de signo. Un store a esa dirección no hace nada. El programa lee de ahí en todos los ticks, con la base en un registro.
+- **Razón.** La especificación pide los parámetros en una tabla de solo lectura en competencia. El prototipo de la factibilidad era de lectura y escritura. Sin puerto de escritura el programa no puede corromperla ni por error, y el módulo es más chico. Leerla en cada tick, y no copiarla a la memoria de datos al arrancar, mantiene una sola copia de cada constante.
+- **Alternativas.** (a) Copiar la tabla a la memoria de datos al arrancar: el programa no cambia, pero la copia sí se puede pisar, y hay una carrera en el arranque entre el supervisor que copia y los gestores que leen. (b) Dejarla en la memoria de datos, como en P3: cambiarla con `icebram` obliga a tocar la memoria del programa.
+- **Qué se pierde.** 39 celdas y 1 BRAM, y una instrucción más por tick en el supervisor.
+- **Lo que encontró.** La primera versión salía con la BRAM en cero en el bitstream: Yosys descarta el `$readmemh` si antes hay un lazo que deja la memoria en cero. Ninguna prueba del RTL lo veía. Detalle en `docs/tabla_vigilante.md`, sección 2.4.
+
+### T70. Los cambios con `icebram` se hacen siempre desde un molde, que se guarda (15/11)
+
+- **Decisión.** Junto a R1 y R2 se guardan sus moldes en `bitstreams/moldes/`: el `.asc` de cada uno con el programa y la tabla reemplazados por un patrón al azar, y los patrones. Los bitstreams de R1 y R2 son la síntesis directa, y se comprobó que el molde con `icebram` da el mismo `.asc`.
+- **Razón.** `icebram` ubica una memoria por su contenido, y la tabla de verdad (236 valores en cero) no es distinguible: se niega a trabajar sobre el bitstream final. Y volver a sintetizar el día de la competencia puede dar otra ubicación, que ya no sería el hardware probado con la maestra.
+- **Qué se pierde.** 190 KB más en el repositorio. Un bitstream cambiado hay que simularlo desde su `.asc` antes de grabarlo, unos 40 minutos.
+
+### T71. Vigilante con K = 4 y tres salidas nuevas en el esclavo SPI (15/11)
+
+- **Decisión.** `rtl/vigilante.v` es el de la factibilidad, sin cambios en la lógica, con `VigN = 4`: dispara al quinto precio seguido sin escritura en `DECISION`. `rtl/pochoco_spi_slave.v` saca `byte_done`, la escritura en `DECISION` y `CS_n` sincronizado por tres salidas nuevas. No se conectó el disparo manual por interruptor.
+- **Razón.** En todas las corridas sanas de R2, incluida la matriz de estrés, la cuenta del vigilante nunca pasó de 1, así que cualquier K de 2 o más cumple lo que pide el plan. 4 deja margen y gasta 5 ticks de los 536 del relevo. Las salidas del esclavo son la forma más chica de darle al vigilante las señales que necesita: no cambian su lógica ni los nombres que mira el testbench oficial. El disparo manual quedó fuera porque el uso de los interruptores durante la competencia es una pregunta pendiente para el ayudante.
+- **Alternativas.** Derivar `byte_done` fuera del esclavo: habría que duplicar su sincronizador y su contador de bits.
+- **Qué se pierde.** 16 celdas y unos 4 MHz de frecuencia mínima respecto de R1.
+
+### T72. La imagen de respaldo de R2 es R0, el mismo archivo (15/11)
+
+- **Decisión.** `bitstreams/r2_multi.bin` es `icemulti -p0` con R2 en la imagen 0 y `bitstreams/r0_base_max_media.bin` en la imagen 1, copiado sin cambios (se comprueba su sha256 dentro del archivo múltiple).
+- **Razón.** R0 ya pasó su puerta de simulación completa y es el respaldo de toda la escalera. Usar el mismo archivo evita tener un segundo bitstream del core base que probar. No tiene vigilante, así que no puede haber un ciclo de reinicios.
+- **Qué se pierde.** Después de un relevo, `max_media` parte de cero: sin media previa y sin posición.
+
+### T73. Criterio 7 con el RTL y con casos propios del fondo (15/11)
+
+- **Decisión.** La matriz de estrés de R1 y R2 usa los casos de R0 (`tools/estres.py`) con el testbench del fondo y Verilator. Los casos que dejan menos de 600 ciclos entre transacciones se informan como exploración, y se agregaron SCLK de 100 y 200 kHz con período de 1 ms.
+- **Razón.** El gemelo del barrel (P4) no existe todavía y la puerta de R1 y R2 es de este paquete. El fondo responde en 220 a 444 ciclos y R0 en menos de 50: SCLK de 100 kHz con período de 0,1 ms deja 237 ciclos, donde R0 cabe y el fondo no.
+- **Qué se pierde.** Una combinación que R0 soporta y el fondo no. Si la maestra real usara SCLK de 100 kHz en la ronda de 0,1 ms, R1 respondería con un tick de atraso según la medición del testbench (en la simulación los bytes igual coinciden). Es un dato para la prueba del 26/11.
+
+### T74. Criterio 5 repetido con la máscara exacta sobre el SoC de cada peldaño (15/11)
+
+- **Decisión.** `make fondo-criterio5` repite la campaña del core y las mutaciones con la máscara 3 (`emad` y `devk`), agregando las definiciones de la tabla y del vigilante a los dos SoC de la comparación. De las 9 mutaciones de la extensión se corren las 6 que tocan lógica presente; para las 3 de `mulstep` se comprueba que el netlist sintetizado no cambia.
+- **Razón.** El criterio pide la configuración exacta que compite. Una mutación sobre lógica que no existe no se puede detectar ni hace falta: lo que hay que mostrar es que de verdad no existe.
+- **Qué se pierde.** Nada: las pruebas son las de P1 y P2 sin cambios.
