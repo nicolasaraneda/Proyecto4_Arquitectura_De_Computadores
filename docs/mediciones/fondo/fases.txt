@@ -1,0 +1,21 @@
+Peor caso de la respuesta del fondo barriendo la fase de llegada del precio
+Generado por tools/fondo/fases.sh (make fondo-fases). No editar a mano.
+
+Herramientas:
+  Yosys 0.68+195 (git sha1 435977e97-dirty, Release, Clang /usr/bin/clang++ 21.1.8)
+  "nextpnr-ice40" -- Next Generation Place and Route (Version nextpnr-0.11.1-19-g8dbcee5c)
+  Icarus Verilog version 14.0 (devel) (s20260301-403-g5ab23063f-dirty)
+Commit de partida: 8e0e773 (rama p3-fondo)
+  Verilator 5.053 devel rev v5.052-22-g7cf8c5cca (mod)
+Hardware: pochoco_soc con -DESPINO_BARREL -DESPINO_XD_EMAD -DESPINO_XD_DEVK
+Programa: sw/fondo.s (sha256 9992ac3e67399b1d...), referencia ref/fondo.py
+
+PASS programa sano, 48 fases de un ciclo, 1100 ticks: 48 de 48 corridas iguales a la referencia, peor caso por corrida entre 429 y 480 ciclos (limite 1131)
+PASS programa sano, 24 fases corridas 13 ns: 24 de 24 corridas iguales a la referencia, peor caso por corrida entre 429 y 480 ciclos (limite 1131)
+PASS programa sano, periodo de 2501 ciclos, 20000 ticks: 1 de 1 corridas iguales a la referencia, peor caso por corrida entre 474 y 474 ciclos (limite 1131)
+PASS gestor 3 colgado, 24 fases: 24 de 24 corridas iguales a la referencia, peor caso por corrida entre 545 y 556 ciclos (limite 1131)
+PASS los tres gestores colgados, 24 fases: 24 de 24 corridas iguales a la referencia, peor caso por corrida entre 557 y 564 ciclos (limite 1131)
+
+Peor caso con el programa sano: 480 ciclos (21.22 % del presupuesto de la ronda 3, 2262 ciclos)
+Peor caso con gestores colgados (plazo agotado): 564 ciclos (24.93 %)
+PASS: el peor caso, 564 ciclos, es menor que 1131 (holgura de 75.06 %)

@@ -1,0 +1,71 @@
+Mediciones por tick del fondo en un chip
+Generado por tools/fondo/ticks.sh (make fondo-ticks). No editar a mano.
+
+Herramientas:
+  Yosys 0.68+195 (git sha1 435977e97-dirty, Release, Clang /usr/bin/clang++ 21.1.8)
+  "nextpnr-ice40" -- Next Generation Place and Route (Version nextpnr-0.11.1-19-g8dbcee5c)
+  Icarus Verilog version 14.0 (devel) (s20260301-403-g5ab23063f-dirty)
+Commit de partida: 8e0e773 (rama p3-fondo)
+  Verilator 5.053 devel rev v5.052-22-g7cf8c5cca (mod)
+Hardware: pochoco_soc con -DESPINO_BARREL -DESPINO_XD_EMAD -DESPINO_XD_DEVK
+Programa: sw/fondo.s (sha256 9992ac3e67399b1d...), referencia ref/fondo.py
+
+=== Ronda 3: periodo de 0,1 ms, 20 000 ticks de la serie de practica ===
+PASS ronda3: 20000 bytes, 19998 ticks de estado, patrimonio 26070, 630 ordenes, pesos 7/6/3 (20 cambios), 0 ticks por plazo, peor caso 475 de 2262 ciclos, hasta 4 vueltas de lectura
+
+  Ticks medidos: 19996 (39 con frontera de ventana). Ciclo de 40 ns.
+
+  Instrucciones de trabajo por tick y por hilo (fuera de los lazos de sondeo, mas la vuelta que encuentra el dato)
+    hilo                      minimo  promedio  maximo  ciclos prom.  ciclos max.    CPI
+    0, supervisor                 61     71.59     125        286.37          500  4.000
+    1, gestor max_media           25     25.00      25        100.00          100  4.000
+    2, gestor base                25     25.00      25        100.00          100  4.000
+    3, gestor activo              25     25.00      25        100.00          100  4.000
+    los cuatro (agregado)        136    146.59     200        146.59          200  1.000
+    Cada hilo ejecuta una instruccion cada 4 ciclos: CPI 4 por hilo y 1 agregado, por construccion.
+
+  Ciclos desde que llega el precio (byte_done)
+    hito                                          minimo  promedio  maximo  tiempo prom.  tiempo max.
+    el supervisor publica PUB                         27     31.00      35       1.24 us      1.40 us
+    llega el ultimo voto                             118    123.33     126       4.93 us      5.04 us
+    DECISION (respuesta), todos los ticks            215    235.37     475       9.41 us     19.00 us
+    DECISION, ticks comunes                          215    235.00     267       9.40 us     10.68 us
+    DECISION, ticks con frontera                     375    421.67     475      16.87 us     19.00 us
+    el supervisor vuelve a sondear (tick completo)     247    293.37     507      11.73 us     20.28 us
+
+  Peor caso de la respuesta contra el presupuesto de cada ronda
+    ronda 1 (10 ms)   presupuesto  249762 ciclos, uso   0.190 %, holgura  99.81 %
+    ronda 2 (1 ms)    presupuesto   24762 ciclos, uso   1.918 %, holgura  98.08 %
+    ronda 3 (0,1 ms)  presupuesto    2262 ciclos, uso  20.999 %, holgura  79.00 %
+
+  Ocupacion a este periodo: 146.59 instrucciones de trabajo de 2500 turnos por tick (5.86 %)
+
+=== Ronda 2: periodo de 1 ms, 3000 ticks de la serie de practica ===
+PASS ronda2: 3000 bytes, 2999 ticks de estado, patrimonio 9904, 92 ordenes, pesos 6/6/4 (3 cambios), 0 ticks por plazo, peor caso 471 de 24762 ciclos, hasta 4 vueltas de lectura
+
+  Ticks medidos: 2997 (5 con frontera de ventana). Ciclo de 40 ns.
+
+  Instrucciones de trabajo por tick y por hilo (fuera de los lazos de sondeo, mas la vuelta que encuentra el dato)
+    hilo                      minimo  promedio  maximo  ciclos prom.  ciclos max.    CPI
+    0, supervisor                 61     73.58     125        294.33          500  4.000
+    1, gestor max_media           25     25.00      25        100.00          100  4.000
+    2, gestor base                25     25.00      25        100.00          100  4.000
+    3, gestor activo              25     25.00      25        100.00          100  4.000
+    los cuatro (agregado)        136    148.58     200        148.58          200  1.000
+    Cada hilo ejecuta una instruccion cada 4 ciclos: CPI 4 por hilo y 1 agregado, por construccion.
+
+  Ciclos desde que llega el precio (byte_done)
+    hito                                          minimo  promedio  maximo  tiempo prom.  tiempo max.
+    el supervisor publica PUB                         27     31.00      35       1.24 us      1.40 us
+    llega el ultimo voto                             118    124.00     130       4.96 us      5.20 us
+    DECISION (respuesta), todos los ticks            215    243.34     471       9.73 us     18.84 us
+    DECISION, ticks comunes                          215    243.00     271       9.72 us     10.84 us
+    DECISION, ticks con frontera                     427    447.80     471      17.91 us     18.84 us
+    el supervisor vuelve a sondear (tick completo)     251    301.34     503      12.05 us     20.12 us
+
+  Peor caso de la respuesta contra el presupuesto de cada ronda
+    ronda 1 (10 ms)   presupuesto  249762 ciclos, uso   0.189 %, holgura  99.81 %
+    ronda 2 (1 ms)    presupuesto   24762 ciclos, uso   1.902 %, holgura  98.10 %
+    ronda 3 (0,1 ms)  presupuesto    2262 ciclos, uso  20.822 %, holgura  79.18 %
+
+  Ocupacion a este periodo: 148.58 instrucciones de trabajo de 25000 turnos por tick (0.59 %)

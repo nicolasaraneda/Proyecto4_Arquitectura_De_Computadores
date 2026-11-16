@@ -562,3 +562,53 @@ xd-timing-todo:
 
 check-xd: xd-tb xd-formal xd-verif-corta xd-oficial xd-timing-todo
 xd-completo: xd-verif xd-mutaciones
+
+# --- Fondo en un chip: sw/fondo.s sobre el barrel con emad y devk (docs/fondo.md) ---
+# Cada objetivo deja su salida en docs/mediciones/fondo/. Los de check-fondo
+# son las versiones cortas, que corren en la integración continua y dejan su
+# salida en build/fondo/.
+.PHONY: test-fondo fondo-hex fondo-oficial fondo-equiv fondo-equiv-ronda1 fondo-series fondo-fases \
+        fondo-degradacion fondo-controles fondo-ticks fondo-timing check-fondo fondo-completo
+FONDO_DEFS := -DESPINO_BARREL -DESPINO_XD_EMAD -DESPINO_XD_DEVK
+FONDO_JOBS ?= 6
+
+test-fondo:
+	$(PYTHON) ref/test_fondo.py
+fondo-hex:
+	mkdir -p $(BUILD)/fondo
+	$(PYTHON) $(ASM) sw/fondo.s -o $(BUILD)/fondo/fondo.hex
+# Criterio 1: testbench oficial sin modificar (Icarus, unos 5 minutos)
+fondo-oficial:
+	tools/fondo/oficial.sh
+# Criterio 2: 20 000 ticks a 0,1 ms y 1 ms y una serie de cada familia; 10 ms aparte (35 minutos)
+fondo-equiv:
+	JOBS=$(FONDO_JOBS) tools/fondo/equiv.sh
+fondo-equiv-ronda1:
+	RONDA1=1 JOBS=$(FONDO_JOBS) tools/fondo/equiv.sh
+# Criterio 2: 1 050 series sintéticas de 2000 ticks por el RTL
+fondo-series:
+	JOBS=$(FONDO_JOBS) tools/fondo/series.sh
+# Criterio 3: timing en 10 semillas del hardware exacto, con el programa cargado
+fondo-timing: fondo-hex
+	DEFS="$(FONDO_DEFS)" HEX=$(BUILD)/fondo/fondo.hex EXIGIR=1 tools/medir_variante.sh fondo 10 > docs/mediciones/fondo/timing.txt; \
+	  r=$$?; cat docs/mediciones/fondo/timing.txt; exit $$r
+# Criterio 4: peor caso barriendo la fase
+fondo-fases:
+	JOBS=$(FONDO_JOBS) tools/fondo/fases.sh
+# Criterio 6: degradación
+fondo-degradacion:
+	JOBS=$(FONDO_JOBS) tools/fondo/degradacion.sh
+# Controles negativos: errores puestos a propósito que las pruebas deben detectar
+fondo-controles:
+	JOBS=$(FONDO_JOBS) tools/fondo/controles.sh
+# Punto 3.2 del enunciado: mediciones por tick
+fondo-ticks:
+	tools/fondo/ticks.sh
+
+check-fondo: test-fondo fondo-oficial
+	CORTA=1 JOBS=$(FONDO_JOBS) SALIDA=$(BUILD)/fondo/equiv_corta.txt tools/fondo/equiv.sh
+	POR_FAMILIA=4 JOBS=$(FONDO_JOBS) SALIDA=$(BUILD)/fondo/series_corta.txt tools/fondo/series.sh
+	CORTA=1 JOBS=$(FONDO_JOBS) SALIDA=$(BUILD)/fondo/fases_corta.txt tools/fondo/fases.sh
+	CORTA=1 JOBS=$(FONDO_JOBS) SALIDA=$(BUILD)/fondo/degradacion_corta.txt tools/fondo/degradacion.sh
+	JOBS=$(FONDO_JOBS) SALIDA=$(BUILD)/fondo/controles_corta.txt tools/fondo/controles.sh
+fondo-completo: test-fondo fondo-oficial fondo-equiv fondo-series fondo-fases fondo-degradacion fondo-controles fondo-ticks fondo-timing
