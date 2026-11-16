@@ -1,0 +1,17 @@
+Autoprueba del peldano r0 (todo), commit d95a85d
+Generado por tools/autoprueba.py todo r0. No editar a mano.
+
+Serie: caminata aleatoria del LFSR, 2000 precios, entre 105 y 151, sha256 d15b1333e41b2c3a...
+Referencia ref/trader.py: firma a23c, 57 cambios de byte, patrimonio 13409 con 112 ordenes
+PASS gemelo con SW1 (10 ms): firma a23c, bytes identicos a la referencia, peor caso 43 de 249696 ciclos
+PASS gemelo con SW2 (1 ms): firma a23c, bytes identicos a la referencia, peor caso 43 de 24696 ciclos
+PASS gemelo con SW3 (0,1 ms): firma a23c, bytes identicos a la referencia, peor caso 43 de 2196 ciclos
+PASS bitstream build/autoprueba/r0/autoprueba_r0.bin: 1269 de 1280 celdas, 12 de 16 BRAM, frecuencia maxima 44.05 MHz, firma esperada a23c adentro
+     sha256 901c0eacd319608e44b47bb6b788e59260b7bf6ec9969c4590cf7bdf797b6f33
+PASS RTL con SW3 (0,1 ms): RESULTADO boton=3 firma=a23c esperada=a23c LED=0110 duracion_ms=197 PASS
+PASS RTL con SW2 (1 ms): RESULTADO boton=2 firma=a23c esperada=a23c LED=0110 duracion_ms=1997 PASS
+PASS RTL con SW1 (10 ms): RESULTADO boton=1 firma=a23c esperada=a23c LED=0110 duracion_ms=19988 PASS
+PASS control negativo (UMBRAL_COMPRA=-128): el gemelo da f8cf y la autoprueba lo rechaza con LED4: RESULTADO boton=3 firma=f8cf esperada=a23c LED=1010 duracion_ms=197 FAIL
+PASS bitstream ruteado con SW3 (0,1 ms): RESULTADO boton=3 firma=a23c esperada=a23c LED=0110 duracion_ms=197 PASS
+
+PASS
