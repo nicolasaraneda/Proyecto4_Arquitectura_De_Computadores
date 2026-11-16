@@ -178,16 +178,27 @@ La imagen con el supervisor colgado sale de la misma síntesis que la autoprueba
 
 `make autoprueba-r1` y `make autoprueba-r2` (`docs/mediciones/autoprueba_r1.txt` y `autoprueba_r2.txt`):
 
-TABLA_VERIFICACION
+| Prueba | R1 | R2 |
+|--------|----|----|
+| Firma esperada | `15d7` en el gemelo a 10 ms, 1 ms y 0,1 ms y en `ref/fondo.py`, bytes idénticos. Peor caso de respuesta 438 ciclos | Igual (el gemelo modela R1; el vigilante no cambia las decisiones) |
+| RTL con SW3, SW2 y SW1 (Verilator, por los pines) | Firma `15d7` con LED2 y LED3 en los tres: 197, 1 997 y 19 988 ms simulados | Lo mismo, y después 2 s más en modo continuo: la firma no cambia, LED1 sigue cambiando (312, 31 y 3 veces) y `SB_WARMBOOT` no sube en ninguna de las tres corridas |
+| Control negativo (otra tabla, T88) | `G1_ENTRA` en -64: el gemelo y `ref/fondo.py` dan `6f2a`, la autoprueba muestra `6f2a` y enciende LED4 | Igual |
+| Supervisor colgado en el tick 100 | | Con SW3, SW2 y SW1, BOOT sube con S1 S0 = 01 al terminar la transacción 103 (la quinta sin respuesta, 99 + 4), 12 320 ns después del comienzo del tick: con CS_n ya en alto y lejos de la transacción siguiente. Es lo que predice `tools/vigilante/relevo_ref.py` |
+| Bitstream ruteado (icebox_vlog y Verilator) | SW3: firma `15d7`, LED2 y LED3 | SW3: firma `15d7`, 2 s en modo continuo sin disparo. La imagen con la falla: BOOT en el mismo instante que el RTL. La testigo: LED, "--", "00" con SW4, eco y MISO |
+| Testigo en RTL (minuto de 1000 ciclos) | | LED, "--", y con SW4 "00", "01", "02" y "99" al pasar 122 minutos (se detiene) |
+| Media hora en el gemelo (T90) | | La caminata de la media hora completa: 180 000, 1 800 000 y 18 000 000 precios, entre 1 y 255 (toca los dos topes). Peor caso de respuesta 442 ciclos, con 2 196 disponibles a 0,1 ms: todo precio se responde antes del siguiente, así que la cuenta del vigilante no pasa de 1 |
+| Imágenes múltiples | | `tools/ver_multi.py`: encendido y S1 S0 = 00, 10 y 11 apuntan a la imagen 0, 01 a la testigo; las dos copiadas sin cambios; 64 600 de 131 072 bytes |
 
 ### 8.3 Recursos
 
 | Bitstream | Celdas | BRAM | Frecuencia máxima (semilla por defecto) |
 |-----------|--------|------|------------------------------------------|
 | Autoprueba de R0 (el guardado) | 1269 de 1280 | 12 | 44,05 MHz |
-RECURSOS
+| Autoprueba de R1 | 1191 de 1280 | 13 | 50,81 MHz |
+| Autoprueba de R2 (y la imagen con la falla, que tiene la misma ubicación) | 1203 de 1280 | 13 | 50,96 MHz |
+| Testigo | 83 de 1280 | 0 | 141,92 MHz |
 
-Cabe todo: no hubo que sacar nada de la autoprueba. R1 sin la autoprueba ocupa 1029 celdas y R2 1045 (`docs/tabla_vigilante.md`); la maestra, el CRC y los indicadores agregan unas 160.
+Cabe todo: no hubo que sacar nada de la autoprueba. R1 sin la autoprueba ocupa 1029 celdas y R2 1045 (`docs/tabla_vigilante.md`); la maestra, el CRC y los indicadores agregan 162 y 158. La regresión de R0 con el top nuevo da 1250 celdas y 47,12 MHz, con la firma `a23c` por el RTL y por el bitstream ruteado.
 
 ## 9. Comandos para la placa: R1 y R2
 
