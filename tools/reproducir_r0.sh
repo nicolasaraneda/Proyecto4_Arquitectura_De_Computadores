@@ -29,7 +29,7 @@
 # Uso: tools/reproducir_r0.sh   (o make r0-reproducir). Demora unos 2 minutos.
 set -euo pipefail
 cd "$(dirname "$0")/.."
-export PATH=$HOME/herramientas/oss-cad-suite/bin:$PATH
+[ -n "${OSS_CAD_SUITE:-}" ] && export PATH="$OSS_CAD_SUITE/bin:$PATH"   # si no, las herramientas tienen que estar en el PATH
 
 COMMIT_R0=1d4a82f440e5aff9761cfea75c1623243ea53561
 NOMBRE=r0_base_max_media.bin

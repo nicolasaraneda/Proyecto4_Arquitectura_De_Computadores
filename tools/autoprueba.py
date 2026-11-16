@@ -44,7 +44,8 @@ import sys
 
 RAIZ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(RAIZ, "ref"))
-os.environ["PATH"] = os.path.expanduser("~/herramientas/oss-cad-suite/bin") + os.pathsep + os.environ["PATH"]
+if os.environ.get("OSS_CAD_SUITE"):   # si no, las herramientas tienen que estar en el PATH
+    os.environ["PATH"] = os.path.join(os.environ["OSS_CAD_SUITE"], "bin") + os.pathsep + os.environ["PATH"]
 
 import fondo     # noqa: E402
 import market    # noqa: E402

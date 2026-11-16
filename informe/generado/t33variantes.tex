@@ -1,0 +1,14 @@
+% Generado por tools/report.py (make report). No editar a mano.
+\begin{tabular}{lrrrrrrrrrrr}
+\toprule
+Variante & Celdas / LUT4 / BRAM & $f_{\max}$ mín. / med. (MHz) & Resp. prom. / peor & Tick prom. / peor & Ciclos kernel & CPI kernel & Ops/tick & MOPS & $P_{peak}$ & Speedup resp. & \% ronda 3 \\
+\midrule
+R0: base, \texttt{trade.s} & 1091 / 921 / 12 & 41{,}93 / 44{,}09 & 41{,}0 / 44 & 63{,}0 / 66 & 51{,}0 & 2{,}125 & 8 & 3{,}92 & 12{,}50 & 1{,}00 & 1{,}95 \\
+Segmentado, \texttt{trade.s} & 990 / 798 / 12 & 45{,}34 / 47{,}20 & 22{,}0 / 26 & 34{,}0 / 38 & 27{,}0 & 1{,}125 & 8 & 7{,}41 & 25{,}00 & 1{,}86 & 1{,}15 \\
+Barrel, 1 hilo & 932 / 761 / 12 & 53{,}45 / 56{,}32 & 75{,}0 / 83 & 115{,}0 / 123 & 96{,}0 & 4{,}000 & 8 & 2{,}08 & 6{,}25 & 0{,}55 & 3{,}67 \\
+Barrel + extensión, 1 hilo & 991 / 817 / 12 & 48{,}59 / 51{,}61 & 55{,}0 / 63 & 67{,}0 / 75 & 48{,}0 & 4{,}000 & 8 & 4{,}17 & 12{,}50 & 0{,}74 & 2{,}79 \\
+R1: barrel + ext. + tabla, fondo & 1029 / 854 / 13 & 51{,}59 / 52{,}57 & 223{,}0 / 443 & 281{,}0 / 475 & 262{,}4 & 4{,}000 & 56 & 5{,}34 & 50{,}00 & 0{,}18 & 19{,}58 \\
+R2: R1 + vigilante & 1045 / 868 / 13 & 47{,}86 / 50{,}33 & 223{,}0 / 443 & 281{,}0 / 475 & 262{,}4 & 4{,}000 & 56 & 5{,}34 & 50{,}00 & 0{,}18 & 19{,}58 \\
+\bottomrule
+\end{tabular}
+\par\smallskip{\footnotesize Recursos: 10 semillas de nextpnr a 25 MHz (todas cierran). Ciclos: práctica a 0,1 ms, en ciclos de 40 ns. Kernel: de leer \texttt{PRICE} a volver al sondeo. Operación útil: las 8 operaciones de \texttt{max\_media} por tick (56 en el fondo, T100). MOPS = operaciones útiles $\times$ 25 MHz / ciclos del kernel. Fuente: \texttt{docs/mediciones/p7/variantes.txt} (\texttt{make p7-variantes}).}

@@ -21,7 +21,7 @@
 
 RAIZ=$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)
 cd "$RAIZ"
-export PATH=$HOME/herramientas/oss-cad-suite/bin:$PATH
+[ -n "${OSS_CAD_SUITE:-}" ] && export PATH="$OSS_CAD_SUITE/bin:$PATH"   # si no, las herramientas tienen que estar en el PATH
 
 T=tools/barrel
 TB=tb/barrel

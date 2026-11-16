@@ -323,7 +323,7 @@ En términos de la ley de hierro: IC no cambia, Tclk no cambia, y el CPI baja de
 ## 11. Cómo reproducir
 
 ```bash
-export PATH=$HOME/herramientas/oss-cad-suite/bin:$PATH
+export PATH=<carpeta de OSS CAD Suite>/bin:$PATH
 make formal-base       # prueba formal de que el Espino base no cambió
 make tb-seg            # copia del testbench oficial con el core segmentado
 make cpi-seg           # CPI y modelo de costo
