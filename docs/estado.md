@@ -2,6 +2,10 @@
 
 Se actualiza al cerrar cada tramo de trabajo. La versión anterior queda en el historial de git.
 
+## Kit de defensa (16/11)
+
+Rama `defensa`, desde `p8-anticipacion` (`9ad1c40`). Bitácora: `docs/bitacora/defensa.md`. Quedó `docs/defensa/`: un documento de estudio por pieza (Espino base, segmentado, barrel, extensión, fondo, tabla y vigilante, algoritmo y verificación), un banco de 155 preguntas con `archivo:línea` comprobado (24 marcadas como incómodas), la hoja de cifras con su fuente, un resumen de una página y el plan de estudio para los tres hasta el 1/12, con repasos cruzados el 18, 21, 24 y 28/11 y el ensayo con preguntas al azar el 30/11. Solo documentación: no cambió código. La bitácora anota nueve diferencias entre documentos ajenos (cifras de R0 y del segmentado según la corrida, documentos que todavía dicen que el gemelo no modela el barrel, una cifra de P3 en `docs/fondo.md`, dos archivos citados que no están donde se dice), sin corregirlas. Falta: agregar al banco lo que salga del 26/11 y ajustar el plan si compite R0.
+
 ## Paquete P7: co-diseño para la pauta (16/11)
 
 Rama `p7-codiseno`, desde `integra-p4` (`cb5571a`). Bitácora: `docs/bitacora/p7.md`. Documento de estudio: `docs/codiseno.md`. Decisiones T100 a T106.

@@ -65,7 +65,7 @@ Dato: `ref/trader.py:74`, `docs/trade_s.md`, sección 1.
 
 **12. [I] ¿Por qué reversión y no tendencia?**
 La razón de varianza es menor que 1 a 10, 50 y 100 ticks (0,77, 0,62 y 0,53) en los 20 bloques de 1000 ticks, la autocorrelación de los cambios es -0,11, y seguir tendencia termina con mediana 5 566 en 336 configuraciones. Las familias sintéticas confirman el riesgo: sin reversión no se gana y con tendencia se pierde.
-Dato: `docs/estado.md:767` a `:773`.
+Dato: `ref/hallazgos.py:42` y `:55`, resultados en `docs/estado.md`, tramo 1 (tabla de hallazgos).
 
 **13. [A] ¿Qué es la razón de varianza?**
 La varianza del cambio a k ticks dividida por k veces la varianza del cambio a 1 tick. En un paseo aleatorio vale 1; menor que 1 indica que los movimientos se deshacen.
@@ -301,7 +301,7 @@ Dato: `docs/decisiones.md:261`, `docs/espino_segmentado.md:206`.
 
 **68. [I] ¿Por qué la frecuencia del segmentado bajó de 51 a 45 MHz?**
 Sin cambios en su core, al cambiar `pochoco_soc.v` en P2 y P5. Sigue cerrando 10 de 10 con holgura. Está anotado como no investigado.
-Dato: `docs/estado.md:35`.
+Dato: `docs/mediciones/espino_segmentado.txt:15`, `docs/mediciones/p7/variantes.txt:11`.
 
 **69. [B] ¿Cómo verificaron el segmentado?**
 Formal del base sin cambios, ejecución en paralelo contra el base (1,6 millones de instrucciones por configuración, 39 % distintas), programas de riesgos del Proyecto 3, cosimulación con el gemelo y 5 de 5 mutaciones.
@@ -457,7 +457,7 @@ Dato: `sw/fondo.s:230` a `:241`, `rtl/vigilante.v:81`.
 
 **104. [I] ¿Qué aportan los otros tres hilos si deciden igual que `max_media`?**
 En la serie de práctica, nada en los bytes: escriben los mismos 20 000. Con pesos 6/5/5 la banda del medio define la mayoría; lo que los separa es el ajuste de pesos. En otras series difieren: 1816 bytes en una de reversión. Lo que aportan es co-diseño: 56 operaciones útiles por tick en vez de 8.
-Dato: `docs/estado.md:237`, `docs/fondo.md:336`.
+Dato: `docs/fondo.md:377` y `:336`.
 
 **105. [A] ¿Por qué el supervisor calcula `max_media` si el gestor 1 ya la calcula?**
 La del gestor 1 llega por memoria y puede no llegar. La del supervisor está en sus registros: es la única que no depende de otro hilo.
@@ -597,7 +597,7 @@ Dato: `tools/autoprueba.py:60`, `docs/decisiones.md:532`.
 
 **137. [I] ¿Qué no está probado?**
 Nada se ha probado en la placa todavía. Falta la puerta de placa de los tres peldaños (la autoprueba de R0 está lista; la de R1 y R2 pendiente), el relevo de R2 en la placa, el tiempo real de reconfiguración, y la maestra real el 26/11.
-Dato: `docs/puertas.md:43` y `:90`, `docs/estado.md:125`.
+Dato: `docs/puertas.md:43` y `:90`, `docs/autoprueba.md:126` y `:127`.
 
 ---
 

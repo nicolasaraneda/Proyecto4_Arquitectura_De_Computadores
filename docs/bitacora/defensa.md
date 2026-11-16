@@ -36,4 +36,25 @@ Se anotan con los dos lugares. Ninguna cambia una conclusión.
 
 ## Avance
 
-(se completa al cerrar cada archivo)
+- `espino_base.md`, `segmentado.md`, `barrel.md`: hechos y empujados.
+- `extension.md`, `fondo.md`, `tabla_vigilante.md`: hechos y empujados.
+- `algoritmo.md`, `verificacion.md`: hechos y empujados.
+- `cifras.md`: hecho. Cuando dos mediciones del mismo diseño difieren por ruido de síntesis (R0 1083 y 1091 celdas; segmentado 51,13 y 45,34 MHz) se dan las dos con su fuente.
+- `preguntas.md`: 155 preguntas (53 [B], 78 [A], 24 [I]) en 12 secciones, cada una con `archivo:línea`.
+- `resumen.md`, `plan_estudio.md` y `README.md`: hechos.
+
+### Comprobación de las referencias
+
+Un script en el área temporal (no versionado) extrae cada `` `archivo:línea` `` y cada rango `` `:N` `` de `docs/defensa/*.md`, comprueba que el archivo exista y que la línea no esté vacía, e imprime la línea para revisarla a mano. Última corrida: 0 errores. Se corrigieron en el camino: `rtl/pochoco_soc.v:125` (vacía, pasó a `:124`), `tools/asm/isa.py:90` (era la llave, pasó a `:91`), `sw/fondo.s:191` (era el `beqz`, pasó a `:192`, el `lw` de `PRICE`), y dos citas de `docs/contingencia.md` y `docs/tabla_vigilante.md` que apuntaban a la línea vecina.
+
+Ninguna referencia apunta a una línea de `docs/estado.md`: ese archivo crece por arriba en cada tramo y las líneas se corren (pasó al agregar el párrafo de este kit). Se citan sus secciones, o el script o la medición de donde sale la cifra.
+
+### Decisiones propias del kit
+
+- **Ajuste al reparto propuesto**: `sw/trade.s` pasa a Vicente (cierra los puntos 3.1, 3.2 y 3.3 en una persona) y `sw/fondo.s` entero a Santiago, que además acompaña a Nicolás el 26/11 (`plan_estudio.md`, sección 2).
+- **Las [I] se responden con lo aceptado a sabiendas**, citando la decisión (T50, T51, T58, T124) en vez de defender que no hubo costo.
+
+### Lo que no se hizo
+
+- Diagramas nuevos de la arquitectura y del flujo de un tick: se usan los de `docs/espino_barrel.md` (sección 3.2), `docs/espino_segmentado.md` (sección 4), `docs/fondo.md` (sección 3.2) y `docs/pochoco_soc.svg`.
+- Un documento por bloque de `sw/trade.s`: lo cubre `docs/trade_s.md`, al que apuntan `espino_base.md` (sección 5) y la sección 3 del banco.

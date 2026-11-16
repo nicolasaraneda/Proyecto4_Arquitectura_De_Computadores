@@ -1,0 +1,50 @@
+# Resumen para ponerse al día
+
+Grupo: Nicolás Araneda, Vicente Calderón y Santiago Muñoz.
+
+Una página, al 16/11. Para Vicente y Santiago: qué compite, por qué, qué está probado, qué falta y qué leer primero. Las cifras con su fuente están en `docs/defensa/cifras.md`.
+
+## Qué compite y por qué
+
+**El algoritmo** es `max_media`: reversión a la media. Una media exponencial del precio (alfa 1/32); si el precio cae más de 3 unidades bajo la media, "comprar 63"; si vuelve sobre la media, "vender 63"; si no, mantener. Siempre 63 porque la maestra recorta las órdenes y una orden en cero no paga comisión: el programa expresa una posición objetivo y no lleva contabilidad. La serie de práctica revierte (razón de varianza 0,53 a 100 ticks), seguir tendencia pierde, y `max_media` le gana a la regla base anterior 0,7 % en remuestreos y 1,4 % en series sintéticas plausibles, evaluado con una semilla reservada. En la serie completa de práctica da 25 973 (comprar y mantener: 6 497).
+
+**El hardware** es una escalera de tres bitstreams (decisión T50, "opción b, tomemos riesgos"):
+
+| Peldaño | Qué es | Celdas | Respuesta peor caso | Para qué |
+|---------|--------|--------|---------------------|----------|
+| R0 | Espino base del curso con `sw/trade.s` (`max_media`) | 1083 | 49 ciclos | Respaldo de todo. No depende de nada |
+| R1 | Espino **barrel** de 4 hilos con dos instrucciones propias (`emad`, `devk`) y una tabla de parámetros en BRAM, corriendo `sw/fondo.s`: un supervisor y tres gestores que votan | 1029 | 444 ciclos (19,6 % de la ronda 3) | El diseño elegido |
+| R2 | R1 con un **vigilante** que, si el supervisor deja de escribir `DECISION` 5 precios seguidos, reconfigura la FPGA con R0 | 1045 | igual | Si el ayudante permite reconfigurar durante una ronda |
+
+La parte incómoda, que hay que decir sin rodeos: **el fondo no suma puntos** frente a `max_media` sola (+0,007 a 2 000 ticks, -0,005 a 20 000, medido en la factibilidad). En la serie de práctica escribe los mismos bytes. Compite por lo que representa como co-diseño: procesador rediseñado, extensión de la ISA usada de verdad, cuatro reglas en paralelo y todo medido. El riesgo lo acota la escalera: el árbol de decisión (`docs/arbol_decision.md`) dice cuándo competir con R0.
+
+## Las piezas, en una línea cada una
+
+- **Espino base**: CPI 2 (3 en loads y saltos tomados) porque el banco de registros es BRAM con lectura registrada.
+- **Segmentado** (no compite): pipeline de 3 etapas, CPI 1,350 con el mix de la clase contra 1,5 estimado. El más rápido por hilo.
+- **Barrel**: 4 hilos por 4 etapas, CPI 1 agregado y 4 por hilo, sin riesgos de datos ni de control. Más lento por hilo, pero el patrimonio no depende de la latencia mientras la decisión llegue antes del tick.
+- **Extensión**: `emad` y `devk` en custom-0, un desplazamiento fijo de 5 más una suma: el estimador pasa de 14 instrucciones a 2. 52 celdas.
+- **Fondo**: el supervisor (hilo 0) es el único que habla con la maestra; los gestores votan por memoria compartida con el número de tick; si un gestor se cuelga, el supervisor decide con su propia `max_media`.
+- **Tabla y vigilante**: la tabla se cambia con `icebram` en 0,32 s sin volver a sintetizar; el vigilante dispara al quinto precio sin respuesta.
+- **Verificación**: tres modelos separados (referencia en Python, RTL y gemelo digital en C) comparados byte a byte y ciclo a ciclo, con errores puestos a propósito para probar que las pruebas detectan.
+
+## Qué está probado y qué falta
+
+| Puerta | R0 | R1 | R2 |
+|--------|----|----|----|
+| Simulación (8 criterios) | Pasó | Pasó | Pasó |
+| Placa (autoprueba con firma) | Bitstream listo, falta grabarlo | Pendiente | Pendiente, más el relevo con falla inyectada |
+| Maestra real (26/11) | Pendiente | Pendiente | Pendiente |
+
+Pendiente además: las respuestas del ayudante que pueden cambiar el peldaño (si un Espino multihilo con custom-0 sigue siendo Espino, si se puede reconfigurar durante una ronda, qué SCLK usa la maestra), el tiempo real de reconfiguración (53 ms es de la hoja de datos) y el informe. **Nada se ha probado todavía en la placa.**
+
+Fechas: 22/11 corte del diseño integrado; 25/11 congelamiento del hardware; **26/11 maestra**; 29/11 congelamiento total; 30/11 ensayo general; **1/12** entrega a las 10:00 y competencia y defensa a las 10:30.
+
+## Qué leer primero
+
+1. Este archivo y `docs/defensa/cifras.md` (media hora).
+2. `docs/defensa/espino_base.md` y `docs/trade_s.md`: el punto de partida que todos tienen que dominar.
+3. `docs/defensa/algoritmo.md`: por qué reversión, por qué `max_media`, cómo se evitó el sobreajuste.
+4. `docs/defensa/barrel.md` y `docs/defensa/fondo.md`: lo que compite.
+5. `docs/arbol_decision.md`: una página, qué se graba el 1/12.
+6. Después, el documento de la pieza propia (`docs/defensa/plan_estudio.md`) y las preguntas **[B]** e **[I]** de `docs/defensa/preguntas.md`.
