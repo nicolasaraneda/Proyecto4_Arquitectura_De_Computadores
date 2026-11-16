@@ -1,21 +1,22 @@
 Prueba de 'fijar r1' en una copia (build/peldano/r1), sin tocar este arbol:
 Peldano por defecto: r1 (-DESPINO_BARREL -DESPINO_XD_EMAD -DESPINO_XD_DEVK -DESPINO_TABLA)
   rtl/00_peldano.v creado; sw/trade.s es copia de sw/fondo.s; el programa de R0 es sw/max_media.s
-  Referencias al programa de R0 actualizadas en 55 archivos:
+  Referencias al programa de R0 actualizadas en 56 archivos:
     Makefile (12)
     tools/estres.py (2)
     tools/cosim.sh (9)
     tools/pochoasm.py (2)
     tools/gemelo_barrel.py (1)
-    tools/equiv_gemelo.sh (2)
+    tools/equiv_gemelo.sh (3)
     tools/medir_espino.sh (3)
     tools/costo_mv2x2.py (1)
+    tools/medir_ticks.sh (1)
     tools/reproducir_r0.sh (2)
     tools/report.py (2)
-    tools/equiv.sh (1)
+    tools/equiv.sh (2)
     tools/retune.py (2)
     tools/autoprueba.py (3)
-    tools/medir_variante.sh (1)
+    tools/medir_variante.sh (2)
     tools/p8/matriz.py (1)
     tools/p8/r0_molde.sh (5)
     tools/xd/oficial.sh (5)
@@ -70,23 +71,10 @@ Comando del encabezado de tb/tb_proyecto_4.sv, sin definiciones:
 PASS: el comando oficial da 4/4 con el diseno por defecto
 PASS make test-ref despues de fijar
 PASS make tb despues de fijar
-FAIL make tb-param despues de fijar
-  make[1]: Entering directory '/home/nicolasaraneda/proyectos/Proyecto4_Arquitectura_De_Computadores/.claude/worktrees/p4-gemelo/build/peldano/r1'
-  tools/equiv.sh param 100000 2000 tb/practica.csv
-  FAIL param: periodo 100000 ns, 2000 ticks, tb/practica.csv, Peor caso precio->decision: 0 ciclos (disponibles: 2262): el testbench no entrega 4/4
-  Peor caso precio->decision: 0 ciclos (disponibles: 2262)
-  Detalle por tick en decisiones.csv
-  PASS MISO sin valores X
-  FAIL el programa escribe DECISION
-  FAIL el programa lee todos los precios
-  PASS la decision llega antes del siguiente tick
-  Testbenchs aprobados: 2/4
-  build/equiv/param/tb_p4.sv:149: $finish called at 200004000000 (1ps)
-  make[1]: Leaving directory '/home/nicolasaraneda/proyectos/Proyecto4_Arquitectura_De_Computadores/.claude/worktrees/p4-gemelo/build/peldano/r1'
-  make[1]: *** [Makefile:97: tb-param] Error 1
+PASS make tb-param despues de fijar
 PASS make equiv-gemelo despues de fijar
 PASS make fondo-oficial despues de fijar
 PASS make retune-control despues de fijar
 PASS make check-tabla despues de fijar
 PASS make test-fondo despues de fijar
-FAIL: fijar r1 deja el comando oficial en 4/4 con R1 y 8 objetivos propios en verde
+PASS: fijar r1 deja el comando oficial en 4/4 con R1 y 8 objetivos propios en verde
