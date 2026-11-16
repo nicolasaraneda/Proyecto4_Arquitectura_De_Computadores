@@ -583,7 +583,7 @@ test-fondo:
 	$(PYTHON) ref/test_fondo.py
 # sw/fondo_tabla.hex es el contenido de la BRAM de la tabla: sale de ref/fondo.py
 check-tabla:
-	@$(PYTHON) ref/fondo.py --tabla-hex $(BUILD)/fondo_tabla.hex && cmp $(BUILD)/fondo_tabla.hex sw/fondo_tabla.hex \
+	@mkdir -p $(BUILD) && $(PYTHON) ref/fondo.py --tabla-hex $(BUILD)/fondo_tabla.hex && cmp $(BUILD)/fondo_tabla.hex sw/fondo_tabla.hex \
 	  && echo "PASS sw/fondo_tabla.hex corresponde a ref/fondo.py"
 fondo-hex:
 	mkdir -p $(BUILD)/fondo
