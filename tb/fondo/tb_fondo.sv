@@ -284,7 +284,8 @@ module tb_fondo;
     #(inicio_ns);
 
     for (int n = 0; n < ntick; n++) begin
-      int r = (ronda_ticks > 0) ? n / ronda_ticks : 0;
+      int r;   // sin valor inicial: con valor inicial seria estatica y quedaria en 0
+      r = (ronda_ticks > 0) ? n / ronda_ticks : 0;
       per = (r == 0) ? periodo_ns : (r == 1) ? periodo2_ns : periodo3_ns;
       if (ronda_ticks > 0 && n > 0 && n % ronda_ticks == 0) #(pausa_ns);
       tick_tx = n;

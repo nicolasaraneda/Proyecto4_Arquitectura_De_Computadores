@@ -1,4 +1,4 @@
-Variante base (DEFS=''), programa sw/trade.hex, commit 5e963c0
+Variante base (DEFS=''), programa sw/trade.hex, commit 05b3b7e
 
 == fases: 17 casos
 PASS fase_0: perdidos en reset 2, respuestas 1998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 41.0 peor 44 de 2262
@@ -76,7 +76,7 @@ PASS familia_borde_alto: perdidos en reset 2, respuestas 1998, bytes distintos 0
 PASS familia_saltos: perdidos en reset 2, respuestas 1998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 41.0 peor 44 de 2262
 PASS familia_tendencia: perdidos en reset 2, respuestas 1998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 41.0 peor 44 de 2262
 PASS familia_paseo: perdidos en reset 2, respuestas 1998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 41.0 peor 44 de 2262
-PASS rondas_10ms_1ms_01ms: perdidos en reset 1, respuestas 599, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 41.0 peor 44 de 249762
+PASS rondas_10ms_1ms_01ms: perdidos en reset 1, respuestas 599, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 41.0 peor 44 de 2262
 PASS rondas_01ms_1ms_10ms: perdidos en reset 2, respuestas 598, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 41.0 peor 44 de 2262
 PASS rondas_3x2000_01ms: perdidos en reset 2, respuestas 5998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 41.0 peor 44 de 2262
 PASS periodo_11500ns: perdidos en reset 14, respuestas 1986, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 40.5 peor 44 de 50
