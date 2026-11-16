@@ -1,0 +1,49 @@
+retune: comision 50, caja 10000, rondas de 2000 ticks
+Generado por tools/retune.py. Patrimonio final dividido por la caja inicial.
+
+Series: 90 (10 bloques de la practica y 80 de las familias plausibles)
+entra  sale   media      p5 peor bloque  ordenes
+   16     4  1.0339  1.0000      0.9600      1.8 <- elegido
+   16     3  1.0321  1.0000      0.9463      1.8
+   16     2  1.0299  1.0000      0.9963      1.8
+   16    -1  1.0280  1.0000      1.0000      2.0
+   10     4  1.0278  0.9302      0.9600      5.5
+   16     1  1.0273  1.0000      0.9900      1.8
+   16     0  1.0253  1.0000      1.0000      1.8
+    7     4  1.0182  0.8028      0.8978     10.2
+    3     0  0.8705  0.5879      0.7027     53.6 <- actual
+
+Umbrales elegidos: entra 16, sale 4
+  UMBRAL_COMPRA = -512, UMBRAL_VENTA = 129
+
+Bitstreams con icebram sobre los moldes: 0.31 s
+
+Equivalencia rapida en el gemelo (0,1 ms):
+  PASS R0 practica: bytes iguales, respuestas 1998, peor caso 44 ciclos de 2262
+  PASS R0 modelo: bytes iguales, respuestas 1998, peor caso 44 ciclos de 2262
+  PASS R0 modelo_vecino: bytes iguales, respuestas 1998, peor caso 44 ciclos de 2262
+  PASS R0 dos_componentes: bytes iguales, respuestas 1998, peor caso 44 ciclos de 2262
+  PASS R0 cambio_volatilidad: bytes iguales, respuestas 1998, peor caso 44 ciclos de 2262
+  PASS R1 practica: bytes iguales, respuestas 1998, peor caso 379 ciclos de 2262
+  PASS R1 modelo: bytes iguales, respuestas 1998, peor caso 379 ciclos de 2262
+  PASS R1 modelo_vecino: bytes iguales, respuestas 1998, peor caso 379 ciclos de 2262
+  PASS R1 dos_componentes: bytes iguales, respuestas 1998, peor caso 379 ciclos de 2262
+  PASS R1 cambio_volatilidad: bytes iguales, respuestas 1998, peor caso 379 ciclos de 2262
+Simulacion de los .asc por los pines (practica, 2000 ticks, 0,1 ms):
+  PASS r0.asc
+  PASS r1.asc
+  PASS r2.asc
+
+Archivos (sha256):
+  build/retune/c50_k10000_n2000/r0.bin  bd244a036e56afed4dfbe526d07d20d67234c640794ade11a1d3b99bd4053738
+  build/retune/c50_k10000_n2000/r1.bin  a7a00d2b2a499d81a38586b3f50b2b4ea51a881aff14683efb15344adee1c570
+  build/retune/c50_k10000_n2000/r2.bin  a1ffb24aac9eb40efd6ee80136e40e12b7ae726b96d3b44ea09d1ddec59491ef
+  build/retune/c50_k10000_n2000/r2_multi.bin  7144bd30df62677fa65712396538769b296edf057746162d4833f358bca1e2c1
+
+Para grabar el peldano elegido (lo hace Nicolas):
+  iceprog build/retune/c50_k10000_n2000/r1.bin          # R1
+  iceprog build/retune/c50_k10000_n2000/r2_multi.bin    # R2 con R0 de respaldo
+  iceprog build/retune/c50_k10000_n2000/r0.bin          # R0
+
+Tiempo total: 689 s
+PASS
