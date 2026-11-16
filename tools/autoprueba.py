@@ -94,12 +94,14 @@ PELDANOS = {
 }
 # Control negativo: algo que la autoprueba tiene que rechazar (LED4). Para R0,
 # el umbral de la regla base en el programa. Para R1 y R2, la misma tabla con
-# un umbral del gestor 3 cambiado (el programa no cambia): muestra que el SoC
-# usa la tabla de la BRAM.
+# el umbral de entrada del gestor 1 cambiado (el programa no cambia): muestra
+# que el SoC usa la tabla de la BRAM. Se eligió ese umbral porque da una firma
+# distinta de la de max_media sola (7d4f), que es la que se vería con un gestor
+# colgado (T88).
 CONTROL = {
     "r0": dict(asm=["-D", "UMBRAL_COMPRA=-128"], texto="UMBRAL_COMPRA=-128 en sw/trade.s"),
-    "r1": dict(param={"G3_ENTRA": -80}, texto="G3_ENTRA=-80 en la tabla (era -64)"),
-    "r2": dict(param={"G3_ENTRA": -80}, texto="G3_ENTRA=-80 en la tabla (era -64)"),
+    "r1": dict(param={"G1_ENTRA": -64}, texto="G1_ENTRA=-64 en la tabla (era -96)"),
+    "r2": dict(param={"G1_ENTRA": -64}, texto="G1_ENTRA=-64 en la tabla (era -96)"),
 }
 FALLA_TICK = 100             # cuelgue_sup:100 en la prueba del relevo
 VIG_N = 4                    # rtl/pochoco_soc.v, parámetro VigN
@@ -181,9 +183,13 @@ def firma(peldano, informe):
     hexfile, serie = preparar(peldano)
     pd = PELDANOS[peldano]
     d = carpeta(peldano)
-    r = sh(["cc", "-O2", "-o", "build/gemelo", "ref/gemelo/gemelo.c"])
+    # Se compila aparte y se reemplaza de una vez: otra corrida (de otro
+    # peldaño) puede estar usando build/gemelo en este momento
+    tmp = f"build/gemelo.{os.getpid()}"
+    r = sh(["cc", "-O2", "-o", tmp, "ref/gemelo/gemelo.c"])
     if r.returncode != 0:
         raise SystemExit("FAIL: el gemelo no compila")
+    os.replace(os.path.join(RAIZ, tmp), os.path.join(RAIZ, "build/gemelo"))
     firmas = {}
     for boton, ciclos in PERIODOS.items():
         csv = f"{d}/gemelo_{boton}.csv"
