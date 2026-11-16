@@ -704,3 +704,23 @@ autoprueba-r0:
 	$(PYTHON) tools/autoprueba.py todo r0
 autoprueba-r0-firma:
 	$(PYTHON) tools/autoprueba.py firma r0
+# autoprueba-r1 / autoprueba-r2: lo mismo para R1 y R2 (docs/autoprueba.md,
+#   sección 8), con el control negativo de otra tabla. R2 además: modo continuo
+#   sin disparo del vigilante, supervisor colgado con disparo, imagen testigo,
+#   las dos imágenes múltiples y media hora de la caminata en el gemelo. Unos
+#   25 minutos. Deja docs/mediciones/autoprueba_r1.txt y autoprueba_r2.txt.
+# relevo-placa: tiempo esperado del relevo y prueba sin placa de
+#   tools/medir_relevo.py (docs/mediciones/relevo_placa.txt).
+.PHONY: autoprueba-r1 autoprueba-r1-firma autoprueba-r2 autoprueba-r2-firma relevo-placa
+autoprueba-r1:
+	$(PYTHON) tools/autoprueba.py todo r1
+autoprueba-r1-firma:
+	$(PYTHON) tools/autoprueba.py firma r1
+autoprueba-r2:
+	$(PYTHON) tools/autoprueba.py todo r2
+autoprueba-r2-firma:
+	$(PYTHON) tools/autoprueba.py firma r2
+relevo-placa:
+	$(PYTHON) tools/medir_relevo.py --esperado > docs/mediciones/relevo_placa.txt; \
+	  $(PYTHON) tools/medir_relevo.py --prueba >> docs/mediciones/relevo_placa.txt; r=$$?; \
+	  cat docs/mediciones/relevo_placa.txt; exit $$r
