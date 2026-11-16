@@ -264,7 +264,7 @@ def main(argv=None):
         lin.append(f"  {d}/{r}.bin  {sha(f'{d}/{r}.bin')}")
     lin += ["", "Para grabar el peldano elegido (lo hace Nicolas):",
             f"  iceprog {d}/r1.bin          # R1",
-            f"  iceprog {d}/r2_multi.bin    # R2 con R0 de respaldo",
+            f"  iceprog -b {d}/r2_multi.bin # R2 con R0 de respaldo (imagen multiple: -b borra la flash entera)",
             f"  iceprog {d}/r0.bin          # R0",
             "", f"Tiempo total: {time.time() - t0:.0f} s", f"{'PASS' if ok and control_ok else 'FAIL'}"]
     texto = "\n".join(lin) + "\n"

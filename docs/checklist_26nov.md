@@ -17,8 +17,11 @@ Puerta de maestra (plan del proyecto, sección 16.4): cada peldaño tiene que co
    | `r0_base_max_media.bin` | R0 |
    | `r1_fondo.bin` | R1 |
    | `r2_multi.bin` | R2 con R0 de respaldo (imagen múltiple) |
-   | `autoprueba_r0.bin`, `autoprueba_r1.bin`, `autoprueba_r2*.bin` | Si algo falla, separar placa de maestra (`docs/autoprueba.md`) |
-   | `relevo_*.bin` (P6) | Relevo de R2 con la falla inyectada, si el ayudante lo permite |
+   | `r2_falla_multi.bin` | R2 con el supervisor colgado y R0 de respaldo: el relevo con la maestra real (sección 5) |
+   | `autoprueba_r0.bin`, `autoprueba_r1.bin`, `autoprueba_r2_multi.bin` | Si algo falla, separar placa de maestra (`docs/autoprueba.md`, sección 9). Deberían haberse probado antes del 26 |
+   | `relevo_r2_multi.bin` y `relevo_r2_multi_sin_dormir.bin` | Tiempo del relevo en la placa, sin maestra (`docs/autoprueba.md`, sección 10) |
+
+   Las imágenes múltiples (`*_multi.bin`) se graban con `iceprog -b`.
 
 3. Notebook con WSL, `usbipd` y OSS CAD Suite (`iceprog --help` responde). Cable USB de la Go Board, 4 cables hembra-hembra para el PMOD más uno de tierra, y el teléfono con cámara lenta (para el relevo).
 4. Las preguntas para el ayudante impresas (sección 6).
@@ -67,7 +70,7 @@ Para cada peldaño, las tres rondas. Antes de cada peldaño se anota el sha256 q
 
 1. **R0.** `iceprog bitstreams/r0_base_max_media.bin`. Rondas 1, 2 y 3. Anotar el patrimonio final que muestra la maestra en cada ronda y si en algún tick nuestro grupo quedó sin operar cuando los demás operaban.
 2. **R1.** `iceprog bitstreams/r1_fondo.bin`. Lo mismo. Mirar además la telemetría: el LED de latido cambia con cada precio, los otros tres LED son los votos de los gestores y los 7 segmentos muestran la posición objetivo.
-3. **R2.** `iceprog bitstreams/r2_multi.bin`. Lo mismo. En funcionamiento normal **no debe cambiar a R0**: si la telemetría de R1 desaparece a mitad de una ronda, el vigilante se disparó; anotar en qué ronda y en qué momento.
+3. **R2.** `iceprog -b bitstreams/r2_multi.bin` (con `-b`: la imagen múltiple ocupa más de 32 kB y hay que borrar la flash entera, T91 y `docs/tabla_vigilante.md`). Lo mismo. En funcionamiento normal **no debe cambiar a R0**: si la telemetría de R1 desaparece a mitad de una ronda, el vigilante se disparó; anotar en qué ronda y en qué momento.
 
 Si la serie de la maestra es conocida (por ejemplo, la de práctica), el patrimonio de cada ronda se compara con el del gemelo:
 
@@ -84,11 +87,11 @@ Si la serie no es conocida: en las series de práctica R0 y R1 escriben los mism
 
 ## 5. Relevo de R2 con la falla inyectada (solo si el ayudante permite reconfigurar)
 
-Con el bitstream de relevo del paquete P6 (`docs/autoprueba.md`, sección del relevo): la imagen 0 deja de responder a propósito, el vigilante dispara y la placa pasa a R0.
+`bitstreams/r2_falla_multi.bin` es R2 con el supervisor colgado a propósito en el tick 100 y R0 de respaldo: a los 100 precios deja de escribir `DECISION`, el vigilante dispara al quinto precio sin respuesta y la placa pasa a R0. Su `.asc` es el mismo que la puerta de simulación de R2 probó por los pines (`make r2-falla`).
 
-1. Grabarlo y correr la ronda 3.
-2. Filmar la placa en cámara lenta y anotar cuántos ticks quedó nuestro grupo sin decisión nueva según la maestra. La predicción, con los 53 ms de la hoja de datos, es de unos 536 ticks a 0,1 ms (los 5 sin respuesta que esperan al vigilante y 531 de reconfiguración), unos 58 a 1 ms y unos 10 a 10 ms.
-3. Anotar qué hace la maestra mientras la FPGA se reconfigura (MISO queda con pull-up: se espera que lea `0xFF`, que es mantener).
+1. `iceprog -b bitstreams/r2_falla_multi.bin` y correr la ronda 3.
+2. Anotar cuántos ticks quedó nuestro grupo sin decisión nueva según la maestra, y filmar la placa en cámara lenta. La predicción, con los 53 ms de la hoja de datos, es de unos 536 ticks a 0,1 ms (5 sin respuesta que esperan al vigilante y 531 de reconfiguración), unos 58 a 1 ms y unos 10 a 10 ms. Si antes se midió el tiempo del relevo en la placa (`docs/autoprueba.md`, sección 10), `python3 tools/medir_relevo.py --traducir MS` da la predicción con ese tiempo.
+3. Anotar qué hace la maestra mientras la FPGA se reconfigura (MISO queda con pull-up: se espera que lea `0xFF`, que es mantener) y que, después, R0 opere normalmente.
 
 Si el ayudante no permite reconfigurar, R2 no compite (árbol, regla 5) y esta prueba se salta.
 

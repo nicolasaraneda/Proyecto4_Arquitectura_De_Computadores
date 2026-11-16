@@ -1,0 +1,44 @@
+Tiempo esperado del relevo por warm boot (Go Board, iCE40 HX1K). Generado por tools/medir_relevo.py --esperado (make relevo-placa).
+
+- Hoja de datos DS1040, tCONFIG de la HX1K desde la flash: 53 ms tipico con el oscilador de
+  configuracion en frecuencia baja, que es lo que escribe icepack (tools/ver_multi.py lo lee en los
+  vectores de arranque). No da maximo. Se supone que un warm boot demora lo mismo.
+- Cota inferior: leer el bitstream (257760 bits) a 7,5 MHz toma 34.4 ms, mas 0,8 ms de
+  borrado de la memoria de configuracion.
+- Despues, la imagen R0 pasa 4095 ciclos en reset: 0.164 ms.
+- Antes, el vigilante espera el quinto precio sin respuesta y el fin de esa transaccion.
+
+Lo que miden la camara (7 segmentos apagados), el eco de la UART y el pin de MISO del PMOD es
+el tiempo en que los pines quedan sueltos: desde que BOOT sube hasta que la imagen 1 arranca. Es el
+T_RECONF de tools/vigilante/relevo.sh. El reset de R0 y los 5 precios se suman al traducir.
+
+Tiempo de reconfiguracion: 35.17 ms. Se le suman el reset de la imagen 1 (4095 ciclos = 0.164 ms) y los 5 precios que cuenta el vigilante.
+  ronda 1 (10 ms): 8 ticks sin decision nueva desde el precio colgado (3 leyendo 0xFF, que es mantener)
+  ronda 2 (1 ms): 40 ticks sin decision nueva desde el precio colgado (35 leyendo 0xFF, que es mantener)
+  ronda 3 (0,1 ms): 358 ticks sin decision nueva desde el precio colgado (351 leyendo 0xFF, que es mantener)
+
+Tiempo de reconfiguracion: 53.00 ms. Se le suman el reset de la imagen 1 (4095 ciclos = 0.164 ms) y los 5 precios que cuenta el vigilante.
+  ronda 1 (10 ms): 10 ticks sin decision nueva desde el precio colgado (5 leyendo 0xFF, que es mantener)
+  ronda 2 (1 ms): 58 ticks sin decision nueva desde el precio colgado (53 leyendo 0xFF, que es mantener)
+  ronda 3 (0,1 ms): 536 ticks sin decision nueva desde el precio colgado (530 leyendo 0xFF, que es mantener)
+
+Tiempo de reconfiguracion: 106.00 ms. Se le suman el reset de la imagen 1 (4095 ciclos = 0.164 ms) y los 5 precios que cuenta el vigilante.
+  ronda 1 (10 ms): 15 ticks sin decision nueva desde el precio colgado (10 leyendo 0xFF, que es mantener)
+  ronda 2 (1 ms): 111 ticks sin decision nueva desde el precio colgado (106 leyendo 0xFF, que es mantener)
+  ronda 3 (0,1 ms): 1066 ticks sin decision nueva desde el precio colgado (1060 leyendo 0xFF, que es mantener)
+
+En bitstreams/relevo_r2_multi.bin el supervisor se cuelga con el precio 100 y BOOT sube al
+terminar la transaccion 103 (la placa no pierde precios): 10,3 ms despues de apretar SW3,
+103 ms con SW2 y 1,03 s con SW1 (docs/mediciones/autoprueba_r2.txt).
+
+PASS hueco de 611 bytes (53.04 ms) con 0 bytes basura al volver: el analisis encuentra 611 bytes
+PASS hueco de 611 bytes (53.04 ms) con 3 bytes basura al volver: el analisis encuentra 611 bytes
+PASS hueco de 150 bytes (13.02 ms) con 5 bytes basura al volver: el analisis encuentra 150 bytes
+PASS hueco de 1500 bytes (130.21 ms) con 2 bytes basura al volver: el analisis encuentra 1500 bytes
+PASS hueco de 288 bytes (25.00 ms) con 1 bytes basura al volver: el analisis encuentra 288 bytes
+PASS comienzo tardio y un byte cambiado: un solo hueco de 600 bytes
+PASS informe con un hueco de 611 bytes: 52.95 ms (611 bytes son 53.04 ms)
+PASS 53 ms en la ronda 1 (10 ms): 10 ticks sin decision nueva, 5 con 0xFF (la simulacion del relevo da 10)
+PASS 53 ms en la ronda 2 (1 ms): 58 ticks sin decision nueva, 53 con 0xFF (la simulacion del relevo da 58)
+PASS 53 ms en la ronda 3 (0,1 ms): 536 ticks sin decision nueva, 530 con 0xFF (la simulacion del relevo da 536)
+RESULTADO prueba PASS

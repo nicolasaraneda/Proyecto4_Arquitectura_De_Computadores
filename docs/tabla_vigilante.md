@@ -159,7 +159,7 @@ Lo que se comprobó sobre los bitstreams, no sobre el RTL:
 - **El vigilante dentro del bitstream.** Con el programa del supervisor colgado en el tick 100 puesto con `icebram` en el molde de R2, `BOOT` sube con `S1 S0 = 01` y `CS_n` en alto al terminar la transacción 105, la quinta sin respuesta. Es el mismo instante que en el RTL (sección 5).
 - **La imagen múltiple.** `icemulti -p0` con R2 y `bitstreams/r0_base_max_media.bin`. `tools/ver_multi.py` decodifica los cinco vectores de arranque: el de encendido y los de `S1 S0` = 00, 10 y 11 apuntan a R2, y el de 01 apunta a R0. Las dos imágenes están copiadas sin un bit de diferencia (R0 conserva su sha256). Ocupa 64 600 bytes de los 131 072 de la flash de la Go Board.
 
-Para grabar (lo hace una persona, con la Go Board conectada; se entrega en detalle con la autoprueba de P6): `iceprog bitstreams/r1_fondo.bin` para R1, o `iceprog bitstreams/r2_multi.bin` para R2 con su respaldo.
+Para grabar (lo hace una persona, con la Go Board conectada; el detalle está en `docs/autoprueba.md`, sección 9): `iceprog bitstreams/r1_fondo.bin` para R1, o `iceprog -b bitstreams/r2_multi.bin` para R2 con su respaldo. El `-b` borra la flash entera antes de escribir: el archivo de dos imágenes ocupa más de 32 kB y, si la flash de la placa borra en sectores de 32 kB, el borrado por bloques de `iceprog` dejaría la segunda mitad sin borrar (lo advirtió la factibilidad del warm boot).
 
 ## 7. La puerta de simulación de R1 y R2
 

@@ -12,6 +12,6 @@ Bitstreams ya construidos y simulados para el caso en que el 1/12 anuncien una c
 
 Con comisión de 0 a 10 (y con 20 y caja de 100 000) no hay que cambiar nada: `retune` deja los umbrales actuales.
 
-Cada carpeta trae `r0.bin` (R0), `r1.bin` (R1) y `r2_multi.bin` (R2 con su R0 de respaldo), más la tabla y el programa que se pusieron con `icebram`. Antes de grabar: `cd bitstreams/contingencia/e7_s4 && sha256sum -c SHA256SUMS`. Se graba igual que los de `bitstreams/`, por ejemplo `iceprog bitstreams/contingencia/e7_s4/r1.bin`.
+Cada carpeta trae `r0.bin` (R0), `r1.bin` (R1) y `r2_multi.bin` (R2 con su R0 de respaldo), más la tabla y el programa que se pusieron con `icebram`. Antes de grabar: `cd bitstreams/contingencia/e7_s4 && sha256sum -c SHA256SUMS`. Se graba igual que los de `bitstreams/`, por ejemplo `iceprog bitstreams/contingencia/e7_s4/r1.bin`; `r2_multi.bin` con `iceprog -b`.
 
 Estos bitstreams no pasaron por la maestra real. Su hardware sí (es el de R0, R1 y R2); lo que cambia es el contenido de dos BRAM.

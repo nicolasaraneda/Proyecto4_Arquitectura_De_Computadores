@@ -796,3 +796,29 @@ informe: $(GEMELO) fondo-hex
 	@if command -v latexmk > /dev/null; then \
 	  cd informe && latexmk -pdf -interaction=nonstopmode -halt-on-error informe.tex > /dev/null && echo "informe/informe.pdf listo"; \
 	else echo "No hay LaTeX en esta maquina: el PDF lo compila la integracion continua (trabajo informe)"; fi
+
+# autoprueba-r1 / autoprueba-r2: lo mismo para R1 y R2 (docs/autoprueba.md,
+#   sección 8), con el control negativo de otra tabla. R2 además: modo continuo
+#   sin disparo del vigilante, supervisor colgado con disparo, imagen testigo,
+#   las dos imágenes múltiples y media hora de la caminata en el gemelo. Unos
+#   25 minutos. Deja docs/mediciones/autoprueba_r1.txt y autoprueba_r2.txt.
+# relevo-placa: tiempo esperado del relevo y prueba sin placa de
+#   tools/medir_relevo.py (docs/mediciones/relevo_placa.txt).
+.PHONY: autoprueba-r1 autoprueba-r1-firma autoprueba-r2 autoprueba-r2-firma relevo-placa
+autoprueba-r1:
+	$(PYTHON) tools/autoprueba.py todo r1
+autoprueba-r1-firma:
+	$(PYTHON) tools/autoprueba.py firma r1
+autoprueba-r2:
+	$(PYTHON) tools/autoprueba.py todo r2
+autoprueba-r2-firma:
+	$(PYTHON) tools/autoprueba.py firma r2
+relevo-placa:
+	$(PYTHON) tools/medir_relevo.py --esperado > docs/mediciones/relevo_placa.txt; \
+	  $(PYTHON) tools/medir_relevo.py --prueba >> docs/mediciones/relevo_placa.txt; r=$$?; \
+	  cat docs/mediciones/relevo_placa.txt; exit $$r
+# r2-falla: R2 con el supervisor colgado y R0 de respaldo, para ver el relevo con
+#   la maestra real (bitstreams/r2_falla_multi.bin).
+.PHONY: r2-falla
+r2-falla:
+	tools/p8/r2_falla.sh

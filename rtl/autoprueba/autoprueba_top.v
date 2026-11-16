@@ -46,9 +46,28 @@
 //   t = 288                 última bajada de SCLK
 //   t = 304                 sube CS_n
 // En el gemelo: --cs-setup-ns 1280 --sclk-medio-ns 640 --cs-hold-ns 640.
+//
+// Para R1 y R2 (docs/autoprueba.md, sección 8):
+//   TablaFile  contenido de la tabla de parámetros del SoC (con -DESPINO_TABLA).
+//              El control negativo de R1 cambia solo este archivo.
+//   CONTINUO   1: al terminar los NTICKS precios la maestra sigue mandando la
+//              misma caminata, sin fin, y la firma queda fija. Sirve para la
+//              prueba de media hora de R2: el vigilante tiene precios que
+//              contar todo el tiempo. LED1 sigue parpadeando.
+//   SEMILLA    valor inicial del LFSR. R0 usa 0xACE1; R1 y R2 usan 0x3CA1,
+//              porque con la caminata de 0xACE1 el fondo decide igual que
+//              max_media en los 2000 ticks y la firma no vería un gestor
+//              colgado (decisión T87).
+// Además, en todos los peldaños, el pin de transmisión de la UART repite el de
+// recepción (eco, sin lógica) y el pin de MISO del PMOD queda en 0. Los dos
+// sirven para medir en la placa cuánto dura el relevo por warm boot: durante
+// la reconfiguración los pines quedan sueltos (tools/medir_relevo.py).
 
 module autoprueba_top #(
   parameter        MemFile        = "sw/trade.hex",
+  parameter        TablaFile      = "sw/fondo_tabla.hex",
+  parameter integer CONTINUO      = 0,
+  parameter [15:0] SEMILLA        = 16'hACE1,
   parameter integer NTICKS        = 2000,
   parameter [15:0] FIRMA_ESPERADA = 16'h0000,
   parameter integer P1            = 250000,     // 10 ms en ciclos de 40 ns
@@ -61,15 +80,22 @@ module autoprueba_top #(
   output wire       o_Segment1_A, o_Segment1_B, o_Segment1_C, o_Segment1_D,
   output wire       o_Segment1_E, o_Segment1_F, o_Segment1_G,
   output wire       o_Segment2_A, o_Segment2_B, o_Segment2_C, o_Segment2_D,
-  output wire       o_Segment2_E, o_Segment2_F, o_Segment2_G
+  output wire       o_Segment2_E, o_Segment2_F, o_Segment2_G,
+  input  wire       i_UART_RX,
+  output wire       o_UART_TX,
+  output wire       o_SPI_MISO
 );
 
   wire clk = i_Clk;
 
+  // Eco de la UART y MISO del PMOD en 0: solo para medir el relevo (arriba)
+  assign o_UART_TX  = i_UART_RX;
+  assign o_SPI_MISO = 1'b0;
+
   // --- El SoC que compite, sin cambios ------------------------------------------
   wire sclk, mosi, cs_n, miso;
 
-  pochoco_soc #(.MemFile(MemFile)) u_soc (
+  pochoco_soc #(.MemFile(MemFile), .TablaFile(TablaFile)) u_soc (
     .i_Clk(clk), .o_LED(), .i_Switch(4'b0000),
     .o_Segment1_A(), .o_Segment1_B(), .o_Segment1_C(), .o_Segment1_D(),
     .o_Segment1_E(), .o_Segment1_F(), .o_Segment1_G(),
@@ -82,7 +108,7 @@ module autoprueba_top #(
   wire [15:0] firma;
   wire [10:0] ticks;
 
-  autoprueba_maestra #(.NTICKS(NTICKS), .P1(P1), .P2(P2), .P3(P3)) u_maestra (
+  autoprueba_maestra #(.NTICKS(NTICKS), .CONTINUO(CONTINUO), .SEMILLA(SEMILLA), .P1(P1), .P2(P2), .P3(P3)) u_maestra (
     .clk_i   (clk),
     .elige_i (i_Switch[2:0]),
     .sclk_o  (sclk),
@@ -142,14 +168,18 @@ endmodule
 // Maestra SPI interna con la caminata aleatoria y la firma.
 //
 // Precio del tick 0: 128. Al cerrar cada tick el LFSR de 16 bits
-// (x^16 + x^14 + x^13 + x^11 + 1, semilla 0xACE1) avanza un paso y su bit
+// (x^16 + x^14 + x^13 + x^11 + 1, semilla SEMILLA) avanza un paso y su bit
 // nuevo da el cambio de precio del tick siguiente: 1 sube 1 y 0 baja 1, sin
 // pasar de 255 ni bajar de 1. Firma: CRC-16/CCITT (polinomio 0x1021, valor
 // inicial 0xFFFF) de los NTICKS bytes leídos por MISO, en orden y con el bit
 // más significativo primero. Se calcula bit a bit, al leer cada bit, que da lo
 // mismo que byte a byte. tools/autoprueba.py implementa lo mismo en Python.
+// Con CONTINUO = 1 la maestra no se detiene al terminar: sigue con la misma
+// caminata y el mismo período, y la firma ya no cambia.
 module autoprueba_maestra #(
   parameter integer NTICKS = 2000,
+  parameter integer CONTINUO = 0,
+  parameter [15:0]  SEMILLA  = 16'hACE1,
   parameter integer P1     = 250000,
   parameter integer P2     = 25000,
   parameter integer P3     = 2500
@@ -169,7 +199,7 @@ module autoprueba_maestra #(
   reg  [1:0]  sel = 2'd0;          // período elegido: 0 10 ms, 1 1 ms, 2 0,1 ms
   reg  [17:0] resto = 18'd0;       // ciclos que faltan para el próximo tick
   reg  [8:0]  t = 9'd511;          // ciclos desde el inicio del tick (se detiene en 511)
-  reg  [15:0] lfsr = 16'hACE1;
+  reg  [15:0] lfsr = SEMILLA;
   reg  [7:0]  tx = 8'd128;         // precio del tick; rota durante la transacción
 
   wire        inicio = corre_o && (resto == 18'd0);
@@ -201,7 +231,7 @@ module autoprueba_maestra #(
       end
       if (t[4:0] == 5'd16 && en_bit) begin
         sclk_o  <= 1'b1;
-        firma_o <= {firma_o[14:0], 1'b0} ^ (fb ? 16'h1021 : 16'h0000);
+        if (!listo_o) firma_o <= {firma_o[14:0], 1'b0} ^ (fb ? 16'h1021 : 16'h0000);
       end
       if (t == 9'd304) begin
         cs_n_o  <= 1'b1;
@@ -211,7 +241,7 @@ module autoprueba_maestra #(
         if (lfsr_n) tx <= (tx == 8'd255) ? tx : tx + 8'd1;
         else        tx <= (tx == 8'd1)   ? tx : tx - 8'd1;
         if (ticks_o == NTICKS - 1) begin
-          corre_o <= 1'b0;
+          if (CONTINUO == 0) corre_o <= 1'b0;
           listo_o <= 1'b1;
         end
       end

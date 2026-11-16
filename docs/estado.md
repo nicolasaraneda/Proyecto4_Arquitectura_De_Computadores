@@ -73,6 +73,34 @@ Rama `integra-p4`, desde `main` (`5ea436b`, con P5). Bitácora: `docs/bitacora/p
 
 La integración continua de `integra-p4` quedó en verde en sus tres trabajos (corrida 43890444405) y `main` avanzó a `cb5571a`.
 
+### Punto 2: P6 para R1 y R2, autoprueba, puerta de placa de R2 y medición del relevo
+
+Rama `p6-r1r2`, desde `integra-p4` (`cb5571a`). Bitácora: `docs/bitacora/p6.md`, sección "R1 y R2". Documento: `docs/autoprueba.md`, secciones 8 a 10. Decisiones T87 a T92.
+
+- **Autoprueba de R1 y R2** (`make autoprueba-r1`, `make autoprueba-r2`). Firma esperada `15d7`, igual en el gemelo a los tres períodos y en `ref/fondo.py`. Usa otra caminata (semilla 0x3CA1, T87): con la de R0 el fondo decide igual que `max_media` en los 2000 ticks y un gestor colgado no cambiaba la firma. Con la nueva, `max_media` sola o un gestor colgado dan `7d4f`.
+- **Puerta de placa de R2**: `autoprueba_r2_multi.bin` (firma y media hora con la maestra en modo continuo; si el vigilante dispara aparece la imagen testigo) y `relevo_r2_multi.bin` (supervisor colgado en el tick 100; tiene que aparecer la testigo). La testigo muestra los minutos desde el relevo con SW4.
+- **Medición del relevo**: eco de la UART en las dos imágenes y `tools/medir_relevo.py` (resolución de 0,09 ms), cámara a 240 cuadros por segundo o el pin de MISO del PMOD con un analizador. `--traducir` pasa el tiempo medido a ticks por ronda.
+- **Comandos para la placa**, uno por uno, en `docs/autoprueba.md`, sección 9, incluida la mitad alta de la firma de R0 con SW4 ("A2"), que faltaba.
+
+| Prueba | R1 | R2 |
+|--------|----|----|
+| Firma esperada (gemelo a los tres períodos y referencia) | `15d7` | `15d7` |
+| RTL por los pines, SW3, SW2 y SW1 | PASS | PASS, más 2 s en modo continuo sin disparo |
+| Control negativo con otra tabla | `6f2a` con LED4 | Igual |
+| Supervisor colgado en el tick 100 | | BOOT con S1 S0 = 01 en la transacción 103, a los tres períodos y en el bitstream ruteado |
+| Bitstream ruteado, SW3 | PASS | PASS, sin disparo; testigo PASS |
+| Media hora en el gemelo | | 18 millones de precios a 0,1 ms, peor caso 442 de 2 196 ciclos |
+| Recursos | 1191 celdas, 13 BRAM, 50,81 MHz | 1203 celdas, 13 BRAM, 50,96 MHz; testigo 83 celdas |
+
+Hallazgos:
+
+1. **Con la caminata de R0 la autoprueba no habría visto un gestor colgado** en R1 (T87). De 677 semillas, solo 10 hacen que el fondo y `max_media` difieran en 2000 ticks de pasos de a 1.
+2. **`r2_multi.bin` hay que grabarlo con `iceprog -b`**: ocupa más de 32 kB y, si la flash borra en sectores de 32 kB, el borrado por bloques de `iceprog` no alcanza. `docs/tabla_vigilante.md` decía `iceprog` sin `-b`; se corrigió.
+3. **La autoprueba de R0 ya no se reconstruye con el mismo hash** desde que P5 cambió `rtl/*.v` (1261 celdas antes de este paquete, 1250 con el top nuevo). Vale el archivo guardado, el que vio Nicolás.
+4. No se encontraron errores en el RTL ni en los programas.
+
+Qué falta: correr en la placa las secciones 9 y 10 de `docs/autoprueba.md` y anotar lo que se ve; con el tiempo medido, repetir `make vig-relevo` con ese `T_RECONF`.
+
 ### Punto 3: paquete P8, anticipación
 
 Rama `p8-anticipacion`. Bitácora: `docs/bitacora/p8.md`. Documento de estudio: `docs/contingencia.md`. Decisiones T120 a T124.

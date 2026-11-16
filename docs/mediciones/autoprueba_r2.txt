@@ -1,0 +1,85 @@
+Autoprueba del peldano r2 (todo), commit 665ac58
+Generado por tools/autoprueba.py todo r2. No editar a mano.
+
+Serie: caminata aleatoria del LFSR con semilla 0x3CA1, 2000 precios, entre 87 y 152, sha256 8e4c1d5e3bbed54d...
+Referencia ref/fondo.py: firma 15d7, 44 cambios de byte, patrimonio 7678 con 87 ordenes
+     max_media sola (el supervisor sin votos) daria 7d4f: 51 bytes distintos
+     con el gestor 1 colgado desde el tick 1 daria 7d4f: 51 bytes distintos
+     con el gestor 2 colgado desde el tick 1 daria 7d4f: 51 bytes distintos
+     con el gestor 3 colgado desde el tick 1 daria 7d4f: 51 bytes distintos
+PASS gemelo con SW1 (10 ms): firma 15d7, bytes identicos a la referencia, peor caso 438 de 249696 ciclos
+PASS gemelo con SW2 (1 ms): firma 15d7, bytes identicos a la referencia, peor caso 438 de 24696 ciclos
+PASS gemelo con SW3 (0,1 ms): firma 15d7, bytes identicos a la referencia, peor caso 438 de 2196 ciclos
+PASS bitstream build/autoprueba/r2/autoprueba_r2.bin: 1203 de 1280 celdas, 13 de 16 BRAM, frecuencia maxima 50.96 MHz, firma esperada 15d7 adentro
+     sha256 1f832babd52f1df53a4e10beee9d3c2222c35412d907b9720c52212eb9375af1
+PASS bitstream build/autoprueba/r2/falla_r2.bin: 1203 de 1280 celdas, 13 de 16 BRAM, frecuencia maxima 50.96 MHz, firma esperada 15d7 adentro
+     sha256 38301f5f2b5039f195a3691b5981e2ddb1ec8cb05c9c6ee4e22b3d9cf24af75f
+PASS bitstream build/autoprueba/r2/testigo.bin: 83 de 1280 celdas, 0 de 16 BRAM, frecuencia maxima 141.92 MHz
+     sha256 74b7e391c715f5ff30da897e4bdce108930d99ddd8a68ff846e18502f572478a
+PASS imagen multiple build/autoprueba/r2/autoprueba_r2_multi.bin: imagen 0 autoprueba_r2.bin, imagen 1 testigo.bin (icemulti -p0, tools/ver_multi.py)
+       archivo: build/autoprueba/r2/autoprueba_r2_multi.bin
+       tamaño: 64600 bytes de 131072 (49.3 %), sobran 66472
+       sha256: 28969997280b5d047c03c5ba14c0a66475072f76f5c3e046d38a035717b46ebf
+       vector 0 (encendido ) -> 0x0000A0   modo 0x00, oscilador de configuración en frecuencia baja, warm boot habilitado
+       vector 1 (S1 S0 = 00) -> 0x0000A0   modo 0x00, oscilador de configuración en frecuencia baja, warm boot habilitado
+       vector 2 (S1 S0 = 01) -> 0x007E7C   modo 0x00, oscilador de configuración en frecuencia baja, warm boot habilitado
+       vector 3 (S1 S0 = 10) -> 0x0000A0   modo 0x00, oscilador de configuración en frecuencia baja, warm boot habilitado
+       vector 4 (S1 S0 = 11) -> 0x0000A0   modo 0x00, oscilador de configuración en frecuencia baja, warm boot habilitado
+       imágenes distintas: 2, en 0x0000A0, 0x007E7C
+       imagen 0: build/autoprueba/r2/autoprueba_r2.bin, 32220 bytes, sha256 1f832babd52f1df53a4e10beee9d3c2222c35412d907b9720c52212eb9375af1, copia idéntica
+       imagen 1: build/autoprueba/r2/testigo.bin, 32220 bytes, sha256 74b7e391c715f5ff30da897e4bdce108930d99ddd8a68ff846e18502f572478a, copia idéntica
+       RESULTADO: correcto
+     sha256 28969997280b5d047c03c5ba14c0a66475072f76f5c3e046d38a035717b46ebf
+PASS imagen multiple build/autoprueba/r2/relevo_r2_multi.bin: imagen 0 falla_r2.bin, imagen 1 testigo.bin (icemulti -p0, tools/ver_multi.py)
+       archivo: build/autoprueba/r2/relevo_r2_multi.bin
+       tamaño: 64600 bytes de 131072 (49.3 %), sobran 66472
+       sha256: ef3e0e746dee8bbd031c7a07dbbba988449d08dfa64105f0df27cf473a1a969d
+       vector 0 (encendido ) -> 0x0000A0   modo 0x00, oscilador de configuración en frecuencia baja, warm boot habilitado
+       vector 1 (S1 S0 = 00) -> 0x0000A0   modo 0x00, oscilador de configuración en frecuencia baja, warm boot habilitado
+       vector 2 (S1 S0 = 01) -> 0x007E7C   modo 0x00, oscilador de configuración en frecuencia baja, warm boot habilitado
+       vector 3 (S1 S0 = 10) -> 0x0000A0   modo 0x00, oscilador de configuración en frecuencia baja, warm boot habilitado
+       vector 4 (S1 S0 = 11) -> 0x0000A0   modo 0x00, oscilador de configuración en frecuencia baja, warm boot habilitado
+       imágenes distintas: 2, en 0x0000A0, 0x007E7C
+       imagen 0: build/autoprueba/r2/falla_r2.bin, 32220 bytes, sha256 38301f5f2b5039f195a3691b5981e2ddb1ec8cb05c9c6ee4e22b3d9cf24af75f, copia idéntica
+       imagen 1: build/autoprueba/r2/testigo.bin, 32220 bytes, sha256 74b7e391c715f5ff30da897e4bdce108930d99ddd8a68ff846e18502f572478a, copia idéntica
+       RESULTADO: correcto
+     sha256 ef3e0e746dee8bbd031c7a07dbbba988449d08dfa64105f0df27cf473a1a969d
+PASS imagen multiple build/autoprueba/r2/relevo_r2_multi_sin_dormir.bin: imagen 0 falla_r2_sin_dormir.bin, imagen 1 testigo_sin_dormir.bin (icemulti -p0, tools/ver_multi.py)
+       archivo: build/autoprueba/r2/relevo_r2_multi_sin_dormir.bin
+       tamaño: 64600 bytes de 131072 (49.3 %), sobran 66472
+       sha256: e1ad5d5e84a22702831445ec10cae20a487ce069c0d9ecf2045ca7c992b3f53f
+       vector 0 (encendido ) -> 0x0000A0   modo 0x00, oscilador de configuración en frecuencia baja, warm boot habilitado
+       vector 1 (S1 S0 = 00) -> 0x0000A0   modo 0x00, oscilador de configuración en frecuencia baja, warm boot habilitado
+       vector 2 (S1 S0 = 01) -> 0x007E7C   modo 0x00, oscilador de configuración en frecuencia baja, warm boot habilitado
+       vector 3 (S1 S0 = 10) -> 0x0000A0   modo 0x00, oscilador de configuración en frecuencia baja, warm boot habilitado
+       vector 4 (S1 S0 = 11) -> 0x0000A0   modo 0x00, oscilador de configuración en frecuencia baja, warm boot habilitado
+       imágenes distintas: 2, en 0x0000A0, 0x007E7C
+       imagen 0: build/autoprueba/r2/falla_r2_sin_dormir.bin, 32220 bytes, sha256 7b946bc0cad3b45a042e1a69ffc60c6125954511e2c3ec1e82e78c6d35a97fbc, copia idéntica
+       imagen 1: build/autoprueba/r2/testigo_sin_dormir.bin, 32220 bytes, sha256 2dada5a3a30574bbe28a616b1bcadf28701236d1b795baeaf1efe3793234f541, copia idéntica
+       RESULTADO: correcto
+     sha256 e1ad5d5e84a22702831445ec10cae20a487ce069c0d9ecf2045ca7c992b3f53f
+PASS RTL con SW3 (0,1 ms): RESULTADO boton=3 firma=15d7 esperada=15d7 LED=0111 duracion_ms=197 PASS
+     CONTINUO boton=3 ms=2000 cambios_led1=312 firma=15d7 LED=0111 PASS
+     WARMBOOT nunca: SB_WARMBOOT no se dispara en toda la corrida
+PASS RTL con SW2 (1 ms): RESULTADO boton=2 firma=15d7 esperada=15d7 LED=0111 duracion_ms=1997 PASS
+     CONTINUO boton=2 ms=2000 cambios_led1=31 firma=15d7 LED=0110 PASS
+     WARMBOOT nunca: SB_WARMBOOT no se dispara en toda la corrida
+PASS RTL con SW1 (10 ms): RESULTADO boton=1 firma=15d7 esperada=15d7 LED=0111 duracion_ms=19988 PASS
+     CONTINUO boton=1 ms=2000 cambios_led1=3 firma=15d7 LED=0110 PASS
+     WARMBOOT nunca: SB_WARMBOOT no se dispara en toda la corrida
+PASS RTL de la imagen testigo (minuto de 1000 ciclos): los cuatro LED encendidos (1111); los 7 segmentos muestran --; con SW4 muestran 00 al arrancar; eco de la UART y MISO del PMOD en 0; con SW4 muestran 01 después de un minuto; con SW4 muestran 02 después de dos minutos; con SW4 muestran 99 después de 122 minutos (se detiene); al soltar SW4 vuelve a --
+PASS control negativo (G1_ENTRA=-64 en la tabla (era -96)): el gemelo da 6f2a; ref/fondo.py con ese parametro da 6f2a, y la autoprueba lo rechaza con LED4: RESULTADO boton=3 firma=6f2a esperada=15d7 LED=1011 duracion_ms=197 FAIL
+PASS RTL con el supervisor colgado en el tick 100, SW3 (0,1 ms): BOOT sube en t = 10813180 ns con S1 S0 = 01: transaccion 103 (se esperaba 103 = 99 + 4), 12320 ns despues del comienzo del tick, cuando CS_n ya subio (12 200 ns) y antes de la transaccion siguiente
+PASS RTL con el supervisor colgado en el tick 100, SW2 (1 ms): BOOT sube en t = 103513180 ns con S1 S0 = 01: transaccion 103 (se esperaba 103 = 99 + 4), 12320 ns despues del comienzo del tick, cuando CS_n ya subio (12 200 ns) y antes de la transaccion siguiente
+PASS RTL con el supervisor colgado en el tick 100, SW1 (10 ms): BOOT sube en t = 1030513180 ns con S1 S0 = 01: transaccion 103 (se esperaba 103 = 99 + 4), 12320 ns despues del comienzo del tick, cuando CS_n ya subio (12 200 ns) y antes de la transaccion siguiente
+PASS bitstream ruteado con SW3 (0,1 ms): RESULTADO boton=3 firma=15d7 esperada=15d7 LED=0111 duracion_ms=197 PASS
+     CONTINUO boton=3 ms=2000 cambios_led1=312 firma=15d7 LED=0111 PASS
+     WARMBOOT nunca: SB_WARMBOOT no se dispara
+PASS bitstream ruteado de la imagen con el supervisor colgado, SW3: BOOT sube en t = 10813180 ns con S1 S0 = 01: transaccion 103 (se esperaba 103 = 99 + 4), 12320 ns despues del comienzo del tick, cuando CS_n ya subio (12 200 ns) y antes de la transaccion siguiente
+PASS bitstream ruteado de la imagen testigo: los cuatro LED encendidos (1111); los 7 segmentos muestran --; con SW4 muestran 00 al arrancar; eco de la UART y MISO del PMOD en 0
+PASS gemelo, media hora con SW1 (10 ms): 180000 precios (entre 1 y 255), peor caso precio->decision 442 de 249696 ciclos
+PASS gemelo, media hora con SW2 (1 ms): 1800000 precios (entre 1 y 255), peor caso precio->decision 442 de 24696 ciclos
+PASS gemelo, media hora con SW3 (0,1 ms): 18000000 precios (entre 1 y 255), peor caso precio->decision 442 de 2196 ciclos
+     Todo precio se responde antes de que llegue el siguiente: la cuenta del vigilante vuelve a 0 en cada tick y no llega a 5
+
+PASS

@@ -93,7 +93,8 @@ Los bitstreams ya probados están en `bitstreams/`, con su hash, el commit del q
 
 ```bash
 cd bitstreams && sha256sum -c SHA256SUMS && cd ..   # todos deben decir OK
-iceprog bitstreams/r1_fondo.bin                     # o r0_base_max_media.bin, o r2_multi.bin
+iceprog bitstreams/r1_fondo.bin                     # o r0_base_max_media.bin
+iceprog -b bitstreams/r2_multi.bin                  # imagen múltiple: -b borra la flash entera
 ```
 
 `iceprog` escribe la flash de la Go Board, conectada por USB, y termina con "VERIFY OK". En WSL la placa se pasa con `usbipd` (`docs/autoprueba.md`, sección 5).

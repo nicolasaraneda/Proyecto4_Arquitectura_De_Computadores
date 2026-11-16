@@ -56,7 +56,7 @@ Hacerlo público no es la opción: a las 10:00 los demás grupos todavía no han
 | Respaldo 2 | `r0_base_max_media.bin` | Si todo lo demás falla. Ya pasó la puerta de simulación, la de placa y (el 26/11) la de maestra |
 | Contingencia | `bitstreams/contingencia/` | Solo si anuncian otra comisión (árbol, sección 2) |
 
-Se graba con `iceprog bitstreams/ARCHIVO.bin` (Nicolás, con la placa conectada a WSL por `usbipd`). Al terminar debe decir "VERIFY OK".
+Se graba con `iceprog bitstreams/ARCHIVO.bin` (Nicolás, con la placa conectada a WSL por `usbipd`); las imágenes múltiples (`r2_multi.bin` y las `*_multi.bin`) con `iceprog -b`, que borra la flash entera. Al terminar debe decir "VERIFY OK".
 
 ## 4. Durante la competencia
 
