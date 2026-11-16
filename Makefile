@@ -829,3 +829,8 @@ relevo-placa:
 .PHONY: r2-falla
 r2-falla:
 	tools/p8/r2_falla.sh
+
+# Edición de exhibición con las tres instrucciones (docs/mediciones/p9/exhibicion.txt)
+.PHONY: exhibicion
+exhibicion:
+	tools/p9/exhibicion.sh

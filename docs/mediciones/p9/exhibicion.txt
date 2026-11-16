@@ -1,0 +1,19 @@
+Edicion de exhibicion: R2 con las tres instrucciones de la extension (emad, devk y mulstep)
+Generado por tools/p9/exhibicion.sh (make exhibicion). No editar a mano.
+
+Herramientas: Yosys 0.68+195 (git sha1 435977e97-dirty, Release, Clang /usr/bin/clang++ 21.1.8); "nextpnr-ice40" -- Next Generation Place and Route (Version nextpnr-0.11.1-19-g8dbcee5c)
+Commit de partida: f203235. Programa: sw/fondo.s (sha256 19773517830a2e16...)
+
+== 1. Recursos y frecuencia, 10 semillas, el mismo programa
+exhib_r2               celdas 1045 de 1280, BRAM 13 de 16, LUT4  868, fmax min  47.86 mediana  50.33 max  54.26 MHz, cierran a 25 MHz 10 de 10
+exhib_xd3              celdas 1073 de 1280, BRAM 13 de 16, LUT4  895, fmax min  48.57 mediana  51.11 max  52.09 MHz, cierran a 25 MHz 10 de 10
+
+== 2. Testbench oficial sin modificar, con -DESPINO_BARREL -DESPINO_XD -DESPINO_TABLA -DESPINO_VIGILANTE
+  Patrimonio final:          9661
+  Peor caso precio->decision: 443 ciclos (disponibles: 2262)
+  Testbenchs aprobados: 4/4
+PASS: 4/4
+PASS: decisiones.csv identico a ref/fondo.py
+
+Los ciclos por tick son los de R2: el programa no usa mulstep y el core es el mismo (la prueba formal de P2
+muestra que mulstep no cambia las otras instrucciones, make xd-formal).
