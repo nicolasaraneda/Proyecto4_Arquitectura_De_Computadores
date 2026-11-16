@@ -190,6 +190,17 @@ El core segmentado no reemplaza al base: se compila aparte y todas las pruebas s
 | `make medir-espino` | Recursos, frecuencia máxima, CPI, MIPS y Ops/s del base y del segmentado. Resultado en `docs/mediciones/espino_segmentado.txt`. |
 | `make bin-seg` y `make sim-bitstream-seg` | Bitstream del core segmentado y su simulación desde el `.asc`. |
 
+### Co-diseño: variantes, Amdahl, escalera y roofline (punto 3.3)
+
+Las seis variantes (R0, segmentado, barrel en un hilo, barrel con la extensión, R1 y R2) medidas con las definiciones de la clase 7: celdas, BRAM, frecuencia máxima en 10 semillas, ciclos por tick, CPI, Ops/s de operaciones útiles, speedup medido contra el predicho por Amdahl, la escalera de la clase y el roofline, la edición ASIC (Ops/W y energía por decisión) y los resultados negativos del PLL y del duplicador de reloj. Todo está explicado en `docs/codiseno.md` y queda en `docs/mediciones/p7/`, con CSV, una figura (`roofline.svg` y `roofline.tex`) y `cifras.tex` para el informe.
+
+| Comando | Qué hace |
+|---------|----------|
+| `make p7` | Todo: síntesis de las seis variantes, gemelo, confirmación con el RTL, PLL y duplicador. Unos 25 minutos. |
+| `make p7-rapido` | Tablas, figuras, CSV y macros desde las mediciones guardadas, sin sintetizar. Segundos. |
+| `make p7-variantes` | La tabla de variantes con sus mediciones. |
+| `make p7-amdahl` | El perfil del tick (con `build/gemelo --perfil`) y Amdahl, predicho contra medido. |
+
 ## Cómo sintetizar y programar la placa
 
 ```bash

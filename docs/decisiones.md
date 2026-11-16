@@ -540,3 +540,46 @@ Las decisiones T80 a T85 son de los paquetes P4 y P6, trabajados en paralelo con
 - **Decisión.** `make fondo-estres` es la matriz de P5 (`tools/fondo/estres.py`, con `tb/fondo/tb_fondo.sv`, T73), que es la del criterio 7 de R1 y R2. La de P4 (T82, los 60 casos de R0 con la referencia del fondo) pasa a llamarse `make fondo-estres-rtl60` por el RTL y `make fondo-estres-gemelo` por el gemelo, siempre con el hardware de R1. El gemelo aprende la tabla de parámetros (`--tabla sw/fondo_tabla.hex`) y las herramientas de P4 corren con el programa de P5. Las salidas de P4 hechas con el programa de P3 se movieron a `docs/mediciones/fondo/p3/`.
 - **Razón.** Las dos matrices miden casi lo mismo. La de P5 compara además el estado interno, la telemetría y el protocolo, y es la que ya está en `docs/puertas.md`. La de P4 sigue sirviendo para lo que la hizo valiosa: dos motores que tienen que dar las mismas líneas.
 - **Qué se pierde.** Nada. El gemelo no modela el vigilante, así que todo lo que corre en el gemelo es R1; en R2 el vigilante no se dispara en ninguna corrida sana (T71, T73).
+
+### T100. Operación útil del kernel: 8 por tick en `max_media` y 56 en el fondo (16/11)
+
+- **Decisión.** Para Ops/s, el roofline y Ops/W se cuentan las operaciones de la regla escrita en su forma matemática (`ref/trader.py`): 4 para actualizar la media (32 p, dev = 32 p - S, dev >>> 5 y la suma) y 4 para decidir (dos comparaciones, el or y el and de la posición). En el fondo, 4 reglas de 8, 3 puntajes de 6 y 6 de la combinación: 56. `emad` y `devk` valen 2 cada una, como el MAC de la clase. Los ciclos del kernel van de la lectura de PRICE al salto de vuelta al sondeo, sin la espera. Los bytes son los de los loads y stores del kernel, contando una vez por tick cada lectura de un lazo que espera un dato.
+- **Razón.** Es la regla de la clase (solo cuenta el trabajo útil) aplicada a nuestro kernel, y no depende de cómo lo escriba cada variante: `sw/trade.s` y `sw/xd/trade_xd.s` hacen las mismas 8 operaciones con 24 y 12 instrucciones. La factibilidad usaba 6 de forma provisoria (sin la suma de la media ni el and).
+- **Alternativas.** (a) Contar instrucciones (MIPS): la clase lo prohíbe entre ISAs distintas, y la extensión es otra ISA. (b) Incluir la espera en los ciclos del kernel: todas las variantes darían casi lo mismo a 0,1 ms, porque el 98 % del tick es sondeo.
+- **Qué se pierde.** La cuenta es nuestra. Si el ayudante usa otra, las tablas se regeneran cambiando dos constantes de `tools/p7/tablas.py`.
+
+### T101. El Espino base y el segmentado con la extensión no se construyen: van predichos con Amdahl (16/11)
+
+- **Decisión.** La tabla de variantes los lista como "no existe en el RTL" y da su respuesta y su kernel predichos con el perfil de `sw/xd/trade_xd.s` y el modelo de costo medido de cada core.
+- **Razón.** `emad` y `devk` están en `espino_xd.v`, conectado solo al core barrel. Llevarlas al base o al segmentado obliga a tocar `espino_core.v`, que es el RTL de R0 y pasó la puerta de simulación. En las variantes medidas del mismo tipo (barrel con y sin extensión) la predicción acierta al ciclo.
+- **Qué se pierde.** Dos filas sin medición. No se sabe cuántas celdas costaría la extensión en el base, donde la ALU es otra.
+
+### T102. El perfil sale de una opción del gemelo, y las fases se leen del programa (16/11)
+
+- **Decisión.** `build/gemelo --perfil` cuenta instrucciones y ciclos por hilo y por dirección; con esa opción el atajo del sondeo se apaga. `tools/p7/fuentes.py` ensambla el programa con `tools/pochoasm.py` y asigna cada dirección a una fase recorriendo el lazo principal de `sw/trade.s` o las secciones numeradas de `sw/fondo.s`. La detección del sondeo es la respuesta medida menos las fases anteriores a la escritura.
+- **Razón.** El enunciado pide medir qué parte consume más ciclos. La traza del gemelo y la de `tb/tb_cpi.sv` no traen el contador de programa, y agregarlo al testbench cambia un archivo que usan otras pruebas. La opción solo cuenta: `make cosim` y `make cosim-barrel-corta` siguen en verde.
+- **Qué se pierde.** El perfil no sale del RTL. Los ciclos totales que lo validan sí (T103).
+
+### T103. Los ciclos de la tabla salen del gemelo y el RTL confirma R0, el segmentado, R1 y R2 (16/11)
+
+- **Decisión.** `make p7-rtl` corre `tb/tb_cpi.sv` con Verilator para R0 y el segmentado y exige la fila por tick idéntica byte a byte a la del gemelo. Para R1 y R2 compara con la medición del RTL de P5, si su encabezado trae el sha256 del programa y de la tabla actuales. R2 lleva los ciclos de R1.
+- **Razón.** El gemelo está validado contra el RTL en todas estas variantes y corre en segundos. La medición de P5 son 35 minutos de Verilator por peldaño y lo que mide no cambió. El vigilante de R2 solo observa: su medición del RTL da los mismos ciclos que R1.
+- **Qué se pierde.** El barrel de un hilo y el barrel con la extensión no se repiten por el RTL en P7; los cubre `make cosim-barrel` (21 configuraciones, entre ellas `sw/trade.s` en un hilo y programas con la extensión).
+
+### T104. El PLL se prueba también en un encapsulado que lo tiene, y el duplicador se reproduce desde su rama (16/11)
+
+- **Decisión.** `make p7-pll` repite el intento del PLL sobre R0 y R1 en el VQ100 (falla) y además en un HX1K TQ144 hipotético, sin pines, para saber si el diseño cerraría a 50 MHz. `make p7-doble` extrae la rama `factibilidad-fondo` en `build/p7/` y corre ahí el experimento del duplicador, comparando sus salidas con las guardadas.
+- **Razón.** El enunciado pide, si se sube la frecuencia, mostrar que nextpnr cierra y recalcular el presupuesto. En el VQ100 no se puede ni ubicar el PLL; el TQ144 responde la pregunta que queda (R1 sí cerraría, R0 no). El duplicador tiene su propio RTL, que no compite: traerlo a `rtl/` cambiaría la lista de fuentes del oficial.
+- **Qué se pierde.** El TQ144 no es la placa. `make p7-doble` necesita que la rama exista en el clon.
+
+### T105. Amdahl se aplica por fase del tick, en dos ventanas: la respuesta y el kernel (16/11)
+
+- **Decisión.** S = 1 / Σ (f_i / F_i) con una fracción por fase. F_i predicho sale de aplicar el modelo de costo de la variante nueva a las instrucciones de la fase; la detección se escala con la vuelta del sondeo. Se informa sobre la respuesta (lo que mide el testbench oficial) y sobre el kernel (lo que dan los MOPS), con la estimación de la clase 7 y con el costo medido.
+- **Razón.** Con una sola fracción (f de la media) no se puede predecir el segmentado ni el barrel, que cambian el costo de todas las instrucciones. Por fase, la diferencia entre predicho y medido queda localizada: es la detección del sondeo y el costo del salto tomado.
+- **Qué se pierde.** La predicción usa los conteos medidos del programa: no predice cambios de programa, salvo los de la extensión, cuyo programa sí se midió.
+
+### T106. Ops/W y energía de la edición ASIC con la potencia del flujo de la factibilidad (16/11)
+
+- **Decisión.** Se copian a `docs/mediciones/asic/` las tablas de potencia y de corridas de la pieza G, sin cambios y con su procedencia, y `tools/p7/tablas.py` calcula Ops/s, Ops/W y energía con la definición de T100. Ops/W usa la potencia de la ventana de cálculo; la energía por decisión, la de la ronda 3 (calculada) y las de las rondas 1 y 2 (estimadas sumando sondeo).
+- **Razón.** El encargo pide los números del ASIC sin correr LibreLane. La placa no tiene medidor.
+- **Qué se pierde.** Solo hay base y segmentado. El barrel, la extensión y el fondo no tienen Ops/W.

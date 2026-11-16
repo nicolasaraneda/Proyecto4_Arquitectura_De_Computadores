@@ -2,6 +2,49 @@
 
 Se actualiza al cerrar cada tramo de trabajo. La versión anterior queda en el historial de git.
 
+## Paquete P7: co-diseño para la pauta (16/11)
+
+Rama `p7-codiseno`, desde `integra-p4` (`cb5571a`). Bitácora: `docs/bitacora/p7.md`. Documento de estudio: `docs/codiseno.md`. Decisiones T100 a T106.
+
+### Qué quedó hecho
+
+- **Tabla de variantes del punto 3.3** (`make p7-variantes`): R0, segmentado, barrel en un hilo, barrel con la extensión, R1 y R2, medidas en la misma corrida. El base y el segmentado con la extensión no existen en el RTL y van predichos (T101).
+- **Perfil del tick** con una opción nueva del gemelo (`--perfil`, T102) y **Amdahl por fase**, predicho contra medido (`make p7-amdahl`, T105).
+- **Escalera de la clase 7** con cada peldaño medido o marcado como estimado, y **roofline** en SVG y TikZ con sus datos en CSV.
+- **Edición ASIC**: mediciones de la factibilidad traídas a `docs/mediciones/asic/` con su procedencia; Ops/s, Ops/W y energía por decisión calculados con la definición de T100 (T106).
+- **PLL y duplicador** reproducidos con su evidencia y el presupuesto recalculado (T104).
+- `make p7` (todo) y `make p7-rapido` (tablas, figuras, CSV y `cifras.tex` con 282 macros, sin sintetizar).
+
+### Qué se midió
+
+| Variante | Celdas | Fmax mín. | Respuesta prom. / peor | MOPS logrado | Speedup de la respuesta |
+|---|---|---|---|---|---|
+| R0 | 1091 | 41,93 | 41,00 / 44 | 3,92 | 1,00 |
+| Segmentado | 990 | 45,34 | 22,00 / 26 | 7,41 | 1,86 |
+| Barrel, un hilo | 932 | 53,45 | 75,00 / 83 | 2,08 | 0,55 |
+| Barrel con extensión | 991 | 48,59 | 55,00 / 63 | 4,17 | 0,75 |
+| R1 y R2 | 1029 y 1045 | 51,59 y 47,86 | 223,01 / 443 | 5,34 (56 ops por tick) | 0,18 |
+
+- Amdahl: barrel y extensión predichos al ciclo; segmentado 1,843 predicho contra 1,864 medido (con la estimación de la clase, 1,745).
+- RTL: R0 y segmentado, 19 998 filas por tick idénticas al gemelo; R1 y R2 iguales a la medición del RTL de P5.
+- PLL: no se ubica en el VQ100; en un TQ144 hipotético R1 cerraría a 50 MHz en 10 de 10. Duplicador: reproducido byte a byte, 1 de 10 semillas con oscilador real.
+- ASIC (base y segmentado): 136 y 271 MOPS/W del kernel, 2,80 y 2,63 uJ por decisión en la ronda 3.
+
+### Hallazgos
+
+1. **La frecuencia del segmentado bajó** de 51,59 MHz de mínima (P1) a 45,34 sin cambios en su core: cambió `pochoco_soc.v` en P2 y P5. Sigue cerrando 10 de 10. No investigado.
+2. **El 98 % del tick a 0,1 ms es sondeo**, y en el ASIC la energía por decisión es mil veces el costo marginal de decidir.
+
+### Qué falta
+
+- Compilar `roofline.tex` y `cifras.tex` en el informe: no hay LaTeX en esta máquina.
+- Confirmar con el ayudante la definición de operación útil (pregunta 3 de la pieza G).
+
+### Qué conviene atacar después y por qué
+
+1. **Integrar `p7-codiseno`** en `main` cuando la otra sesión cierre T87 a T99: solo agrega archivos, la opción del gemelo y objetivos al Makefile.
+2. **El informe (P9)** puede citar todo con `\input{cifras.tex}`.
+
 ## Tramo 13: trabajo autónomo del 16/11
 
 Nicolás dejó una lista de diez puntos para trabajar sin él. Cada punto se cierra aquí con lo hecho, lo medido y lo que falta. Las decisiones que necesitan su opinión van en `docs/pendientes_nicolas.md`.
