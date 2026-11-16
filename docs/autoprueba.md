@@ -38,7 +38,7 @@ No reemplaza a la prueba con la maestra: la autoprueba genera los precios dentro
 
 - **El SoC**: `pochoco_soc` tal cual, con el programa del peldaño. Sus salidas de LED y 7 segmentos quedan sin conectar, así que la síntesis elimina los registros que las manejan: la telemetría de `sw/fondo.s` no se ve en esta versión. Sus botones se leen en 0, como en el testbench.
 - **La maestra interna** manda un precio por período y lee el byte de DECISION, con una transacción SPI modo 0 como la del testbench oficial.
-- **Los precios**: una caminata aleatoria. Parte en 128 y en cada tick sube o baja 1 según el bit nuevo de un LFSR de 16 bits (x^16 + x^14 + x^13 + x^11 + 1, semilla 0xACE1), sin salir de 1 a 255. Con 2000 ticks va de 105 a 151 y `max_media` cambia de decisión 57 veces: se ejercita el algoritmo, no solo la comunicación.
+- **Los precios**: una caminata aleatoria. Parte en 128 y en cada tick sube o baja 1 según el bit nuevo de un LFSR de 16 bits (x^16 + x^14 + x^13 + x^11 + 1, semilla 0xACE1 en R0 y 0x3CA1 en R1 y R2, sección 8), sin salir de 1 a 255. Con 2000 ticks y la semilla de R0 va de 105 a 151 y `max_media` cambia de decisión 57 veces: se ejercita el algoritmo, no solo la comunicación.
 - **La firma**: CRC-16/CCITT (polinomio 0x1021, valor inicial 0xFFFF) de los 2000 bytes leídos por MISO, bit a bit en el orden en que llegan. Un solo bit distinto en cualquier byte cambia la firma.
 - **La firma esperada** va dentro del bitstream como parámetro. Al terminar, un LED dice si coinciden.
 
@@ -236,7 +236,6 @@ Si aparece la testigo, el relevo funciona en la placa: el vigilante dentro del b
 | 9.4: a los 0,2 s se encienden LED2 y LED4 y no aparece la testigo | El vigilante no disparó, o `SB_WARMBOOT` no hizo nada | Avisar. El vigilante dentro del bitstream sí disparó en la simulación desde el `.asc` |
 | 9.4: los 7 segmentos se apagan y no vuelven | El relevo empezó pero la imagen 1 no terminó de cargar. Lo más probable es que la flash haya quedado dormida | Desconectar y conectar (vuelve "FF"), programar `iceprog -b bitstreams/relevo_r2_multi_sin_dormir.bin` y repetir 9.4. Si así funciona, avisar: `r2_multi.bin` de competencia hay que empaquetarlo con `icepack -s` |
 | 9.4: los 7 segmentos se apagan y vuelve "FF" con los LED apagados | El relevo cargó la imagen 0 en vez de la 1 | Avisar: el vector 01 no es el que se usa |
-| Apenas se configura ya corre, sin apretar nada | Los botones se leen al revés de lo supuesto | Avisar, como en R0 |
 
 ### 9.6 Volver al bitstream de competencia
 

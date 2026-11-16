@@ -340,8 +340,10 @@ def control(peldano, informe):
     sim = compilar_rtl(peldano, hexfile, "obj_control", tabla)
     lin, _ = correr(sim, f"{d}/control_3.log", "+BOTON=3", f"+FIRMA={esperada:04x}")
     res = lin["RESULTADO"] or "sin salida"
-    ok = (res.endswith("FAIL") and "LED=1010" in res and f_control >= 0 and f"firma={f_control:04x}" in res
-          and f_control != esperada)
+    # LED4 y LED2, y no LED3. En modo continuo LED1 sigue parpadeando
+    leds = r"LED=101[01]" if pd["continuo"] else r"LED=1010"
+    ok = (res.endswith("FAIL") and re.search(leds, res) is not None and f_control >= 0
+          and f"firma={f_control:04x}" in res and f_control != esperada)
     informe.append(f"{'PASS' if ok else 'FAIL'} control negativo ({c['texto']}): el gemelo da "
                    f"{f_control:04x}{nota}, y la autoprueba lo rechaza con LED4: {res}")
     return ok
