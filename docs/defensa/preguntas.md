@@ -593,7 +593,7 @@ Dato: `docs/decisiones.md:349`, `docs/puertas.md:85`.
 
 **136. [A] ¿Qué es la autoprueba en placa?**
 El SoC del peldaño con una maestra SPI dentro de la FPGA que manda 2000 precios de una caminata aleatoria a los tres períodos y muestra una firma CRC-16 de las decisiones. La firma esperada de R0 es `a23c`, igual en gemelo, referencia, RTL y bitstream.
-Dato: `tools/autoprueba.py:60`, `docs/decisiones.md:532`.
+Dato: `tools/autoprueba.py:61`, `docs/decisiones.md:532`.
 
 **137. [I] ¿Qué no está probado?**
 Nada se ha probado en la placa todavía. Falta la puerta de placa de los tres peldaños (la autoprueba de R0 está lista; la de R1 y R2 pendiente), el relevo de R2 en la placa, el tiempo real de reconfiguración, y la maestra real el 26/11.

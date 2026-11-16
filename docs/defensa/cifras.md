@@ -107,6 +107,6 @@ Uso del presupuesto de la ronda 3 en el peor caso: R0 2,2 % (49 ciclos); **R1 19
 | Mutaciones detectadas | Barrel 21/21; extensión 9/9; segmentado 5/5; fondo 15/15; vigilante 4/4 | `docs/defensa/verificacion.md`, sección 7 |
 | Series del fondo idénticas a la referencia | 1 050 por el RTL; 1 051 a los tres períodos en el gemelo (6,36 millones de ticks) | `docs/puertas.md` |
 | Gemelo contra RTL | Base: 8 configuraciones; barrel: 21 configuraciones y 18,3 millones de eventos | `docs/gemelo.md` |
-| Gemelo contra Verilator, 20 000 ticks a 10 ms | R0: 0,02 s contra 22 min; fondo: 0,14 s contra 35 min | `README.md`, tabla de piezas |
+| Gemelo contra Verilator, 20 000 ticks a 10 ms | R0: 0,02 s contra 22 min; fondo: 0,14 s contra 35 min | `docs/gemelo.md:25` y `:197` |
 | Degradación | 30 de 30 corridas, peor caso 679 ciclos | `docs/mediciones/fondo/r1/degradacion.txt` |
 | Matriz de estrés de la puerta | R0 60 de 60; R1 y R2 56 de 56 | `docs/puertas.md` |

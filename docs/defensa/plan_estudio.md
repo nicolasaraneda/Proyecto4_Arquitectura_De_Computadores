@@ -72,7 +72,7 @@ Simula la defensa. Unos 45 minutos.
 
 Criterio para dar el ensayo por bueno: ninguna [I] mal respondida, y a lo más 3 incompletas en total. Si no se cumple, se repite la segunda vuelta el 1/12 temprano, antes de la entrega.
 
-Durante la defensa: tener abiertos `README.md`, `docs/puertas.md`, `docs/arbol_decision.md`, `docs/defensa/cifras.md` y el informe (`docs/checklist_1dic.md`, sección 5). Si preguntan por un número, el comando que lo produce está en el README, en la sección de la pieza.
+Durante la defensa: tener abiertos `README.md`, `docs/puertas.md`, `docs/arbol_decision.md`, `docs/defensa/cifras.md` y el informe (`docs/checklist_1dic.md`, sección 5). Si preguntan por un número, el comando que lo produce está en el README (una sección por pieza) y en `docs/comandos.md`.
 
 ## 6. Si cambia lo que compite
 

@@ -24,8 +24,8 @@ Reglas: cada cifra con su fuente en `docs/mediciones/` o en un documento del rep
 
 Se anotan con los dos lugares. Ninguna cambia una conclusión.
 
-1. Celdas y frecuencia de R0: 1083 celdas y 42,43 MHz en `docs/puertas.md` (criterio 3 de R0) y `docs/tabla_vigilante.md` (sección 1), contra 1091 y 41,93 MHz en `docs/mediciones/p7/variantes.txt` y `docs/codiseno.md` (sección 1), y 1086 en `README.md` (fila del barrel) y `docs/espino_barrel.md` (sección 6). Es el mismo RTL; la diferencia es el ruido de la síntesis de T6, pero los documentos no lo dicen igual.
-2. Frecuencia mínima del segmentado: 51,1 MHz en `README.md` y `docs/espino_segmentado.md` (sección 1) y 51,59 en `docs/espino_barrel.md` (sección 6), contra 45,34 en `docs/mediciones/p7/variantes.txt` (hallazgo 1 de P7, no investigado).
+1. Celdas y frecuencia de R0: 1083 celdas y 42,43 MHz en `docs/puertas.md` (criterio 3 de R0) y `docs/tabla_vigilante.md` (sección 1), contra 1091 y 41,93 MHz en `docs/mediciones/p7/variantes.txt` y `docs/codiseno.md` (sección 1), y 1086 en `docs/espino_barrel.md` (sección 6). Es el mismo RTL; la diferencia es el ruido de la síntesis de T6, pero los documentos no lo dicen igual.
+2. Frecuencia mínima del segmentado: 51,1 MHz en `docs/espino_segmentado.md` (sección 1) y 51,59 en `docs/espino_barrel.md` (sección 6), contra 45,34 en `docs/mediciones/p7/variantes.txt` (hallazgo 1 de P7, no investigado).
 3. Patrimonio de la equivalencia de `sw/trade.s` en el testbench con 20 000 ticks: `docs/trade_s.md` (sección 5) dice 26 795 a 0,1 ms y 27 306 a 1 ms, que son de la regla base; `docs/decisiones.md` (T51) y `docs/puertas.md` dicen 26 070 a los tres períodos con `max_media`.
 4. Estado del algoritmo: `docs/algoritmo.md`, párrafo "Estado" del comienzo, dice que la regla base sigue siendo el algoritmo de `sw/trade.s`; la sección 7.6 del mismo documento y T51 dicen que desde el 15/11 es `max_media`.
 5. Gemelo y barrel: `docs/fondo.md` (secciones 7 y 13), `docs/tabla_vigilante.md` (sección 8), `docs/espino_barrel.md` (sección 8.5) y `docs/extension_isa.md` (sección 7.3) dicen que el gemelo no modela el barrel; `docs/gemelo.md` (sección 7) y el tramo 12 de `docs/estado.md` dicen que sí desde P4.
@@ -35,6 +35,8 @@ Se anotan con los dos lugares. Ninguna cambia una conclusión.
 9. `docs/peldano.md` cita `docs/mediciones/peldano_probar_r1.txt`, que no existe en esta rama. `docs/gemelo.md`, sección 7.5, cita `docs/mediciones/fondo/gemelo_series.txt`; el archivo está en `docs/mediciones/fondo/r1/gemelo_series.txt`.
 
 ## Avance
+
+- Se integró `origin/p8-anticipacion` (informe, README nuevo, `docs/comandos.md`) en la rama: las referencias se volvieron a comprobar; cambió `tools/autoprueba.py:60` a `:61` y la cita del README en `cifras.md` pasó a `docs/gemelo.md`, porque el README nuevo ya no trae esa tabla.
 
 - `espino_base.md`, `segmentado.md`, `barrel.md`: hechos y empujados.
 - `extension.md`, `fondo.md`, `tabla_vigilante.md`: hechos y empujados.

@@ -36,7 +36,7 @@ La parte incómoda, que hay que decir sin rodeos: **el fondo no suma puntos** fr
 | Placa (autoprueba con firma) | Bitstream listo, falta grabarlo | Pendiente | Pendiente, más el relevo con falla inyectada |
 | Maestra real (26/11) | Pendiente | Pendiente | Pendiente |
 
-Pendiente además: las respuestas del ayudante que pueden cambiar el peldaño (si un Espino multihilo con custom-0 sigue siendo Espino, si se puede reconfigurar durante una ronda, qué SCLK usa la maestra), el tiempo real de reconfiguración (53 ms es de la hoja de datos) y el informe. **Nada se ha probado todavía en la placa.**
+Pendiente además: las respuestas del ayudante que pueden cambiar el peldaño (si un Espino multihilo con custom-0 sigue siendo Espino, si se puede reconfigurar durante una ronda, qué SCLK usa la maestra), el tiempo real de reconfiguración (53 ms es de la hoja de datos) y la revisión del informe (`informe/informe.tex`, con las cifras que genera `make report`). **Nada se ha probado todavía en la placa.**
 
 Fechas: 22/11 corte del diseño integrado; 25/11 congelamiento del hardware; **26/11 maestra**; 29/11 congelamiento total; 30/11 ensayo general; **1/12** entrega a las 10:00 y competencia y defensa a las 10:30.
 
