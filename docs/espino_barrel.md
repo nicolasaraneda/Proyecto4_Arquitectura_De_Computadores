@@ -330,7 +330,7 @@ Un detalle del método. Con profundidad de inducción 6 la mutación `ctx_escrit
 | Regla | Cumple | Comentario |
 |-------|--------|------------|
 | La decisión la calcula el Espino. El core lee el precio y escribe la decisión | Sí | El barrel es el procesador, no un acelerador. Un hilo lee `PRICE` y escribe `DECISION` con instrucciones de la ISA |
-| El RTL se puede modificar mientras el procesador siga siendo Espino | Sí, con una duda | ISA, decodificador, ALU, unidad de carga y bus son los del Espino, sin modificar. Cambia la microarquitectura. La duda es si un Espino con cuatro contextos cuenta como Espino para quien evalúa: es una de las preguntas al ayudante, y si la respuesta es no, compite R0 |
+| El RTL se puede modificar mientras el procesador siga siendo Espino | Sí | ISA, decodificador, ALU, unidad de carga y bus son los del Espino, sin modificar. Cambia la microarquitectura. El profesor lo confirmó en persona el 16/11: se puede modificar lo que uno quiera, y el Espino multihilo está bien (T126) |
 | Todo hardware agregado va con su testbench | Sí | `tb/barrel/` |
 | El mismo programa en las tres rondas | Sí | |
 | No se guarda la serie | Sí | El core no guarda nada de la serie |

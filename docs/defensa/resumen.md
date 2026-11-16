@@ -14,7 +14,7 @@ Una página, al 16/11. Para Vicente y Santiago: qué compite, por qué, qué est
 |---------|--------|--------|---------------------|----------|
 | R0 | Espino base del curso con `sw/trade.s` (`max_media`) | 1083 | 49 ciclos | Respaldo de todo. No depende de nada |
 | R1 | Espino **barrel** de 4 hilos con dos instrucciones propias (`emad`, `devk`) y una tabla de parámetros en BRAM, corriendo `sw/fondo.s`: un supervisor y tres gestores que votan | 1029 | 444 ciclos (19,6 % de la ronda 3) | El diseño elegido |
-| R2 | R1 con un **vigilante** que, si el supervisor deja de escribir `DECISION` 5 precios seguidos, reconfigura la FPGA con R0 | 1045 | igual | Si el ayudante permite reconfigurar durante una ronda |
+| R2 | R1 con un **vigilante** que, si el supervisor deja de escribir `DECISION` 5 precios seguidos, reconfigura la FPGA con R0 | 1045 | igual | Si pasa la placa y la maestra; reconfigurar está cubierto por la respuesta general del profesor (T126) |
 
 La parte incómoda, que hay que decir sin rodeos: **el fondo no suma puntos** frente a `max_media` sola (+0,007 a 2 000 ticks, -0,005 a 20 000, medido en la factibilidad). En la serie de práctica escribe los mismos bytes. Compite por lo que representa como co-diseño: procesador rediseñado, extensión de la ISA usada de verdad, cuatro reglas en paralelo y todo medido. El riesgo lo acota la escalera: el árbol de decisión (`docs/arbol_decision.md`) dice cuándo competir con R0.
 
@@ -36,7 +36,7 @@ La parte incómoda, que hay que decir sin rodeos: **el fondo no suma puntos** fr
 | Placa (autoprueba con firma) | Bitstream listo, falta grabarlo | Pendiente | Pendiente, más el relevo con falla inyectada |
 | Maestra real (26/11) | Pendiente | Pendiente | Pendiente |
 
-Pendiente además: las respuestas del ayudante que pueden cambiar el peldaño (si un Espino multihilo con custom-0 sigue siendo Espino, si se puede reconfigurar durante una ronda, qué SCLK usa la maestra), el tiempo real de reconfiguración (53 ms es de la hoja de datos) y la revisión del informe (`informe/informe.tex`, con las cifras que genera `make report`). **Nada se ha probado todavía en la placa.**
+El 16/11 el profesor confirmó que se puede modificar lo que uno quiera y que el Espino multihilo es válido; la reconfiguración durante una ronda queda cubierta por esa respuesta general, sin confirmación específica (T126). Pendiente además: qué SCLK usa la maestra, el tiempo real de reconfiguración (53 ms es de la hoja de datos) y la revisión del informe (`informe/informe.tex`, con las cifras que genera `make report`). **Nada se ha probado todavía en la placa.**
 
 Fechas: 22/11 corte del diseño integrado; 25/11 congelamiento del hardware; **26/11 maestra**; 29/11 congelamiento total; 30/11 ensayo general; **1/12** entrega a las 10:00 y competencia y defensa a las 10:30.
 

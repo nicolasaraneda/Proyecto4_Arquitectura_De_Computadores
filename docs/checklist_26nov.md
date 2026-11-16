@@ -85,7 +85,7 @@ con el período de cada ronda (10 000 000, 1 000 000 y 100 000 ns) y el SCLK med
 
 Si la serie no es conocida: en las series de práctica R0 y R1 escriben los mismos bytes, así que en una serie parecida sus patrimonios deben ser parecidos. Una diferencia grande entre R0 y R1 en la misma ronda se anota y se revisa con el gemelo esa noche.
 
-## 5. Relevo de R2 con la falla inyectada (solo si el ayudante permite reconfigurar)
+## 5. Relevo de R2 con la falla inyectada
 
 `bitstreams/r2_falla_multi.bin` es R2 con el supervisor colgado a propósito en el tick 100 y R0 de respaldo: a los 100 precios deja de escribir `DECISION`, el vigilante dispara al quinto precio sin respuesta y la placa pasa a R0. Su `.asc` es el mismo que la puerta de simulación de R2 probó por los pines (`make r2-falla`).
 
@@ -93,7 +93,7 @@ Si la serie no es conocida: en las series de práctica R0 y R1 escriben los mism
 2. Anotar cuántos ticks quedó nuestro grupo sin decisión nueva según la maestra, y filmar la placa en cámara lenta. La predicción, con los 53 ms de la hoja de datos, es de unos 536 ticks a 0,1 ms (5 sin respuesta que esperan al vigilante y 531 de reconfiguración), unos 58 a 1 ms y unos 10 a 10 ms. Si antes se midió el tiempo del relevo en la placa (`docs/autoprueba.md`, sección 10), `python3 tools/medir_relevo.py --traducir MS` da la predicción con ese tiempo.
 3. Anotar qué hace la maestra mientras la FPGA se reconfigura (MISO queda con pull-up: se espera que lea `0xFF`, que es mantener) y que, después, R0 opere normalmente.
 
-Si el ayudante no permite reconfigurar, R2 no compite (árbol, regla 5) y esta prueba se salta.
+Reconfigurar durante una ronda está cubierto por la respuesta general del profesor del 16/11 (cualquier decisión de diseño es válida), sin una confirmación específica (T126). Solo si el ayudante lo prohíbe de forma explícita, R2 no compite (árbol, regla 5) y esta prueba se salta.
 
 ## 6. Preguntas para el ayudante
 
@@ -103,8 +103,8 @@ Se hacen ese día, con la maestra delante. Cada respuesta va a la plantilla.
 2. Si la maestra usa el timing del testbench (SCLK de 1 MHz, 1 us antes del primer bit). Ya medido con el medidor: confirmarlo.
 3. Si caja 10 000 y comisión 5 son definitivas.
 4. Si la placa se reinicia entre rondas.
-5. Si un Espino multihilo con instrucciones en custom-0 sigue siendo Espino (si no, compite R0).
-6. Si se puede reconfigurar la FPGA durante una ronda (si no, R2 no compite).
+5. Ya no se pregunta: el profesor confirmó el 16/11 que el Espino multihilo es válido (T126).
+6. Opcional: que el ayudante confirme que se puede reconfigurar la FPGA durante una ronda. Ya está cubierto por la respuesta general del profesor (T126); solo un no explícito deja fuera a R2.
 7. Si las series ocultas salen del mismo generador que la de práctica.
 8. Si se pueden usar los botones de la placa durante la competencia (nuestros diseños no los usan).
 9. Cómo se calcula el puntaje.

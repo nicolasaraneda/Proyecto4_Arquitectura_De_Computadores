@@ -251,7 +251,7 @@ Las demás instrucciones que estudió la factibilidad (`ema`, `srak`, los carril
 | La decisión la calcula el Espino. El hardware agregado acelera partes del algoritmo | Sí | Son tres operaciones aritméticas sin estado. El programa sigue leyendo `PRICE` con `lw`, comparando con `slti` y escribiendo `DECISION` con `sw`. Ninguna recibe un precio y entrega una decisión, y ninguna guarda nada entre ticks |
 | Nada de información externa ni series guardadas | Sí | No hay tablas ni memoria |
 | Hardware agregado con su testbench | Sí | `tb/xd/tb_xd_mod.sv` instancia los dos módulos solos. Además formal y la campaña sobre el SoC |
-| El procesador sigue siendo Espino | Con una duda planteada | Las instrucciones de RV32E no cambian (formal B). Custom-0 es el opcode reservado para esto. Queda preguntar al ayudante si un Espino con instrucciones propias sigue contando como Espino |
+| El procesador sigue siendo Espino | Sí | Las instrucciones de RV32E no cambian (formal B). Custom-0 es el opcode reservado para esto. El profesor confirmó el 16/11 que se puede modificar lo que uno quiera y que cualquier decisión de diseño es válida (T126) |
 | El testbench oficial no se modifica | Sí | 4/4 sin tocarlo |
 
 Riesgos:

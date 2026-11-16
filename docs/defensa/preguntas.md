@@ -20,7 +20,7 @@ Una escalera de tres bitstreams: R0 (Espino base con `max_media`), R1 (Espino ba
 Dato: `docs/puertas.md:7` a `:11`, `docs/decisiones.md:326`.
 
 **2. [B] ¿Cómo se elige el peldaño el día de la competencia?**
-Con un árbol de una página: R0 si el ayudante dice que el barrel no es Espino, si R1 falla con la maestra, si el SCLK de la ronda 3 es menor que 115 kHz o el período menor que 27 us; R2 si se permite reconfigurar durante una ronda y pasó sus puertas; si no, R1.
+Con un árbol de una página: R0 si R1 falla con la maestra, si el SCLK de la ronda 3 es menor que 115 kHz o el período menor que 27 us; R2 si pasó sus puertas y nadie prohibió reconfigurar durante una ronda; si no, R1. Que el barrel sea Espino ya no es una condición: lo confirmó el profesor el 16/11.
 Dato: `docs/arbol_decision.md:11` a `:16`.
 
 **3. [I] ¿Por qué compiten con un diseño que, según ustedes mismos, no suma puntos?**
@@ -48,8 +48,8 @@ Sin definiciones compila R0. Si compite R1 o R2, `make peldano-fijar` agrega `rt
 Dato: `docs/peldano.md`, sección "Cómo se hace".
 
 **9. [I] ¿Un Espino de cuatro hilos con instrucciones propias sigue siendo Espino?**
-Misma ISA RV32E, mismo decodificador, ALU, LSU y bus, sin modificar; cambia la microarquitectura, y la extensión usa custom-0, que RISC-V reserva para esto. Pero no lo decidimos nosotros: es una pregunta al ayudante, y si dice que no, compite R0 sin discusión.
-Dato: `docs/arbol_decision.md:11`, `docs/espino_barrel.md`, sección 9.
+Sí. El profesor Jorge Gómez nos confirmó en persona el 16/11 que se puede modificar lo que uno quiera y que cualquier decisión de diseño es válida; le describimos el Espino multihilo y dijo que estaba perfecto. Además, técnicamente: misma ISA RV32E, mismo decodificador, ALU, LSU y bus, sin modificar; cambia la microarquitectura, y la extensión usa custom-0, que RISC-V reserva para esto.
+Dato: `docs/decisiones.md`, T126; `docs/arbol_decision.md:11`; `docs/espino_barrel.md`, sección 9.
 
 **10. [B] ¿El hardware agregado decide?**
 No. La decisión la calcula el core con instrucciones: un hilo lee `PRICE` y escribe `DECISION`. `emad` y `devk` son aritmética sin estado, la tabla es memoria de solo lectura y el vigilante solo cuenta precios.
@@ -543,8 +543,8 @@ Dato: `docs/tabla_vigilante.md:126`.
 Para que no pueda haber un ciclo de reinicios, y porque es R0 tal cual, el mismo archivo que pasó su puerta.
 Dato: `docs/decisiones.md:480`.
 
-**125. [I] ¿Y si el ayudante no permite reconfigurar durante una ronda?**
-R2 no compite y el titular es R1. El supervisor colgado queda sin defensa en vivo; entre rondas se graba R0.
+**125. [I] ¿Está permitido reconfigurar la FPGA durante una ronda?**
+No lo preguntamos en particular. El profesor nos dijo el 16/11 que cualquier decisión de diseño es válida, y lo tomamos como cubierto por esa respuesta general, sin confirmación específica; está escrito así en T126. Si el ayudante lo prohibiera de forma explícita, R2 no compite y el titular es R1: el supervisor colgado queda sin defensa en vivo y entre rondas se graba R0.
 Dato: `docs/arbol_decision.md:15` y `:16`.
 
 ---
@@ -672,8 +672,8 @@ Medir el SPI con el medidor, después los peldaños del más seguro al más arri
 Dato: `docs/checklist_26nov.md:40`, `:64` y `:85`.
 
 **154. [I] ¿Qué preguntas pendientes pueden cambiar todo?**
-Si un Espino multihilo con custom-0 sigue siendo Espino (si no, R0), si se puede reconfigurar durante una ronda (si no, R1), y si las series ocultas salen del mismo generador.
-Dato: `docs/checklist_26nov.md:95`.
+Ya ninguna sobre el diseño: el profesor confirmó el 16/11 que el Espino multihilo es válido, y la reconfiguración durante una ronda quedó cubierta por esa respuesta general, sin confirmación específica (T126). Quedan las de la competencia: qué SCLK y cuántos precios usa la maestra, si las series ocultas salen del mismo generador y cómo se calcula el puntaje.
+Dato: `docs/decisiones.md`, T126; `docs/checklist_26nov.md:98` a `:109`.
 
 **155. [A] ¿Cómo se sabe que un bitstream hecho con `icebram` es correcto?**
 Por el control: con los parámetros de siempre, `icebram` sobre el molde da los bitstreams guardados byte por byte. Y cada juego nuevo se simula por los pines antes de guardarse (unos 40 minutos).

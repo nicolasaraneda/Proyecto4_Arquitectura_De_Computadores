@@ -98,7 +98,7 @@ Lo que hay que saber decir:
 
 - **El relevo cuesta posición.** `max_media` parte sin media y sin posición, y su primera decisión suele ser vender: si el fondo estaba adentro, R0 liquida.
 - **Lo que la simulación no demuestra:** cuánto dura de verdad la reconfiguración, qué nivel tiene MISO mientras tanto, y que `SB_WARMBOOT` cargue la imagen correcta (su modelo de simulación está vacío). Eso es de la puerta de placa: el relevo tiene que ocurrir al inyectar la falla y no ocurrir en media hora de funcionamiento normal.
-- **R2 compite solo si el ayudante permite reconfigurar durante una ronda** (`docs/arbol_decision.md`, regla 5). Si no, compite R1.
+- **Reconfigurar durante una ronda está cubierto por la respuesta general del profesor** del 16/11, sin confirmación específica (T126). Solo si el ayudante lo prohíbe de forma explícita, R2 no compite y compite R1 (`docs/arbol_decision.md`, regla 5).
 
 ## 6. La imagen múltiple
 

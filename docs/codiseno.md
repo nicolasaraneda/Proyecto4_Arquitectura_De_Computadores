@@ -345,7 +345,7 @@ La edición ASIC (pieza G de la factibilidad, LibreLane con GF180MCU) existe par
 
 ## 11. La variante elegida y por qué
 
-**Compite R1** (y R2 si el ayudante permite reconfigurar durante una ronda), por la decisión T50 de Nicolás: "opción b, tomemos riesgos". La tabla muestra con honestidad lo que eso significa:
+**Compite R1** (y R2 si pasa la placa y la maestra; reconfigurar durante una ronda está cubierto por la respuesta general del profesor, T126), por la decisión T50 de Nicolás: "opción b, tomemos riesgos". La tabla muestra con honestidad lo que eso significa:
 
 - **No es la más rápida por hilo.** El segmentado responde en 22 ciclos y R1 en 223 en promedio. Si la métrica fuera la latencia del kernel de una regla, ganaría el segmentado, y con la extensión ganaría todavía más (17 ciclos predichos).
 - **Hace más trabajo útil por segundo.** 56 operaciones por tick contra 8, 5,34 MOPS contra 3,92 de R0 y 7,41 del segmentado con una sola regla. Es la única variante que usa los cuatro hilos del barrel y las instrucciones de dos operaciones.

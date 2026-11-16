@@ -365,7 +365,7 @@ Lo que no se probó: atrasos entre 200 y 600 ciclos, donde el voto llega cerca d
 
 | Regla | Cumple | Comentario |
 |-------|--------|------------|
-| "La decisión se debe calcular en el Espino Core en la placa. El core debe leer el precio y escribir la decisión." | Sí, con una duda | Todo el cálculo son instrucciones ejecutadas por el core: un hilo lee `PRICE` y escribe `DECISION`, y los otros tres calculan y le entregan su voto por memoria. No hay hardware que decida. La duda es si un Espino multihilo con dos instrucciones propias sigue siendo Espino: es una pregunta pendiente para el ayudante |
+| "La decisión se debe calcular en el Espino Core en la placa. El core debe leer el precio y escribir la decisión." | Sí | Todo el cálculo son instrucciones ejecutadas por el core: un hilo lee `PRICE` y escribe `DECISION`, y los otros tres calculan y le entregan su voto por memoria. No hay hardware que decida. El profesor confirmó el 16/11 que el Espino multihilo es válido (T126) |
 | No usar información externa a la serie ni guardar series de precios | Sí | El programa guarda una media por gestor y una del supervisor, tres puntajes, tres pesos y el último precio por 32. No guarda precios pasados |
 | Mismo programa para todas las series | Sí | No mide el período ni cambia de modo |
 | Todo hardware agregado con su testbench | Sí | El barrel, la extensión, la tabla y el vigilante tienen cada uno sus pruebas (`docs/espino_barrel.md`, `docs/extension_isa.md` y `docs/tabla_vigilante.md`) |

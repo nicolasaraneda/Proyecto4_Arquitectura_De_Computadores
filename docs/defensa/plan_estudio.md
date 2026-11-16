@@ -54,7 +54,7 @@ Cada sesión de repaso cruzado dura una hora: cada uno pregunta al otro sobre **
 | Sáb 21/11 | **Repaso 2**: secciones 2, 6 y 8 del banco, preguntadas cruzado (Nicolás pregunta algoritmo a Santiago, Santiago pregunta barrel a Vicente, Vicente pregunta fondo a Nicolás) |
 | Mar 24/11 | **Repaso 3**: secciones 5, 7, 9 y 10, cruzado. Todas las [I] del banco, una vez cada una, con los tres presentes |
 | Jue 26/11 | Maestra (Nicolás y Santiago). En la noche, Santiago anota en la plantilla del checklist lo visto y lo que respondió el ayudante |
-| Vie 27/11 | Se agregan al banco las preguntas que salgan del 26/11 (resultado de cada peldaño, SCLK medido, decisión del ayudante sobre el barrel y el warm boot). Se ajusta la sección 6 de este plan si compite R0 |
+| Vie 27/11 | Se agregan al banco las preguntas que salgan del 26/11 (resultado de cada peldaño, SCLK medido, lo que diga el ayudante sobre el warm boot, si dice algo). Se ajusta la sección 6 de este plan si compite R0 |
 | Sáb 28/11 | **Repaso 4**: secciones 3, 11 y 12, cruzado. Repaso de `cifras.md` con tarjetas: uno dice la cifra, otro dice de dónde sale |
 | Dom 29/11 | Congelamiento. Cada uno relee las preguntas que anotó como falladas en los repasos |
 | **Lun 30/11** | **Ensayo general** (sección 5) |
@@ -78,7 +78,7 @@ Durante la defensa: tener abiertos `README.md`, `docs/puertas.md`, `docs/arbol_d
 
 | Si... | Cambia en la defensa |
 |-------|----------------------|
-| Compite R0 (corte del 22/11, ayudante dice que el barrel no es Espino, R1 falla con la maestra o SCLK bajo 115 kHz) | El barrel, la extensión, el fondo y el vigilante pasan a ser la edición de exhibición, con todo lo medido. Las preguntas de las secciones 6 a 9 siguen valiendo para el punto 3.3 del informe. Santiago pasa a ser dueño también de `sw/trade.s` en la operación del día |
+| Compite R0 (corte del 22/11, R1 falla con la maestra o SCLK bajo 115 kHz) | El barrel, la extensión, el fondo y el vigilante pasan a ser la edición de exhibición, con todo lo medido. Las preguntas de las secciones 6 a 9 siguen valiendo para el punto 3.3 del informe. Santiago pasa a ser dueño también de `sw/trade.s` en la operación del día |
 | Compite R1 (no se permite reconfigurar) | Las preguntas del vigilante pasan a ser de exhibición; la [I] 125 es la respuesta |
 | Compite R2 | Sin cambios. Agregar el resultado del relevo en la placa |
 

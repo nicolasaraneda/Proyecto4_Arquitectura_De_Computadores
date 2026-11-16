@@ -186,7 +186,7 @@ Fuera de la puerta, en dos casos de exploración con períodos de 11,5 y 13,5 us
 
 - **Nada se ha probado en la placa.** La puerta de placa (autoprueba de P6) y la de la maestra real siguen pendientes para R1 y R2.
 - **El tiempo de reconfiguración y el nivel de MISO durante el relevo no están medidos.** De eso depende cuántos ticks se pierden y si la maestra de verdad lee mantener.
-- **Si el ayudante no permite reconfigurar durante una ronda, R2 no compite** y el titular es R1. Es una de las preguntas pendientes.
+- **Reconfigurar durante una ronda está cubierto por la respuesta general del profesor** (16/11: cualquier decisión de diseño es válida), sin confirmación específica (T126). Si el ayudante lo prohibiera de forma explícita, R2 no compite y el titular es R1.
 - **El vigilante no cubre un programa que escribe basura.** Solo ve que se escribió `DECISION`, no qué se escribió. Es lo que pide la especificación: disparar por falla dura y nunca por una condición del algoritmo.
 - **SCLK de 100 kHz con período de 0,1 ms.** Esa combinación deja 237 ciclos entre transacciones y el fondo necesita hasta 444 para responder. En la simulación los bytes igual coinciden, porque el esclavo toma el byte al empezar la transacción siguiente, pero el caso queda fuera de la puerta. R0 sí cabe ahí (49 ciclos). A 1 ms el fondo funciona con SCLK de 100 kHz.
 - **Cambiar la tabla exige simular el bitstream nuevo**, unos 40 minutos. No es un cambio de último minuto.
