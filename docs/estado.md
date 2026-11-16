@@ -173,7 +173,8 @@ Rama `defensa`, integrada en `p8-anticipacion`. Bitácora: `docs/bitacora/defens
 
 - Historial: 141 commits en todas las ramas, autor y committer Nicolás Araneda, sin pies de herramientas.
 - Ningún archivo del repositorio menciona herramientas de IA ni rutas locales: los scripts toman OSS CAD Suite de `OSS_CAD_SUITE` o del `PATH`.
-- Ramas borradas en GitHub, todas contenidas en `main`: ver la lista al final de este punto (se completa al borrar).
+- Ramas borradas en GitHub después de avanzar `main`, todas contenidas en él: `ci-rapida`, `defensa`, `frente-c-diseno`, `integra-a`, `integra-b`, `integra-p4`, `p0-respaldo`, `p1-barrel`, `p2-extension`, `p3-fondo`, `p4-gemelo`, `p5-tabla-vigilante`, `p6-r1r2`, `p7-codiseno` y `p8-anticipacion`.
+- Quedan tres ramas que **no** están contenidas en `main` y no se borraron: `factibilidad-fondo` (16 commits propios, la factibilidad que por decisión no se integra), `frente-a` (5) y `frente-b` (9). Ver `docs/pendientes_nicolas.md`.
 
 ## Tramo 12: paquetes P4, gemelo del barrel, y P6, autoprueba de R0 (15/11)
 
