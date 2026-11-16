@@ -209,7 +209,7 @@ Dato: `docs/mediciones/ticks_software.txt`, `docs/trade_s.md`, sección 6.
 
 **47. [A] ¿Por qué hay peor caso si el programa no tiene saltos que dependan del precio?**
 Lo que varía es en qué punto de la vuelta de sondeo (8 ciclos) llega el precio. El testbench tiene un período de 2500 ciclos, no múltiplo de 8, y recorre 4 fases: 38, 40, 42 y 44.
-Dato: `docs/trade_s.md:189`.
+Dato: `docs/trade_s.md:191`.
 
 **48. [A] ¿Por qué ustedes dicen 49 y el testbench 44?**
 Barriendo las 8 fases, el primer precio pasa por `primero` (5 ciclos más) y llega a 49. El testbench cae en una fase favorable.
