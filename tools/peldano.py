@@ -67,6 +67,8 @@ NO_TOCAR = {"tb/tb_proyecto_4.sv", "tools/peldano.py"}
 EXTENSIONES = (".py", ".sh", ".sv", ".v", ".c", ".s", ".mk", ".yml", ".txt", ".sby", ".ys")
 # sw/trade.s o sw/trade.hex que no sea parte de otra ruta ($D/sw/trade.hex, base/sw/...)
 PATRON = re.compile(r"(?<![\w/$.-])sw/trade\.(s|hex)\b")
+# Rutas armadas por partes, que el patrón no ve (se comprueba con make peldano-probar)
+POR_PARTES = [('"sw", "trade.hex"', '"sw", "max_media.hex"'), ('"sw", "trade.s"', '"sw", "max_media.s"')]
 # Pruebas que corre `probar` después de fijar (rápidas; la integración continua corre todo)
 PRUEBAS = ["test-ref", "tb", "equiv-gemelo", "fondo-oficial", "retune-control", "check-tabla", "test-fondo"]
 
@@ -150,10 +152,12 @@ def fijar(peldano, raiz=RAIZ):
             continue
         texto = open(ruta, encoding="utf-8").read()
         nuevo = PATRON.sub(lambda m: f"sw/max_media.{m.group(1)}", texto)
+        for viejo, reemplazo in POR_PARTES:
+            nuevo = nuevo.replace(viejo, reemplazo)
         if nuevo != texto:
             with open(ruta, "w", encoding="utf-8", newline="") as f:
                 f.write(nuevo)
-            cambiados.append(f"{rel} ({len(PATRON.findall(texto))})")
+            cambiados.append(f"{rel} ({len(PATRON.findall(texto)) + sum(texto.count(v) for v, _ in POR_PARTES)})")
     # 3. sw/trade.s es el programa del peldaño
     shutil.copyfile(os.path.join(raiz, "sw/fondo.s"), os.path.join(raiz, "sw/trade.s"))
     r = sh([sys.executable, "tools/pochoasm.py", "sw/trade.s", "-o", "sw/trade.hex"], cwd=raiz)
@@ -195,8 +199,12 @@ def probar(peldano, pruebas):
         print(f"Prueba de 'fijar {peldano}' en una copia ({os.path.relpath(d, RAIZ)}), sin tocar este arbol:")
         ok = fijar(peldano, d)
         for p in pruebas:
-            r = sh(["make", p], cwd=d)
-            bien = r.returncode == 0
+            try:
+                r = sh(["make", p], cwd=d, timeout=1200)
+                bien = r.returncode == 0
+            except subprocess.TimeoutExpired:
+                r = subprocess.CompletedProcess([], 1, "", "no termino en 20 minutos")
+                bien = False
             ok &= bien
             print(f"{'PASS' if bien else 'FAIL'} make {p} despues de fijar")
             if not bien:
