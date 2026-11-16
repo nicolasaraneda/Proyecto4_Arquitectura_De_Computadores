@@ -124,7 +124,7 @@ La guardia como test estadístico no se puede hacer: con 2000 ticks la razón de
 
 ## 9. Preguntas típicas
 
-1. **¿Por qué reversión y no tendencia?** VR menor que 1 en todos los horizontes y en los 20 bloques de 1000 ticks, autocorrelación de -0,11, y seguir tendencia termina con mediana 5 566 en 336 configuraciones (`docs/estado.md:772`).
+1. **¿Por qué reversión y no tendencia?** VR menor que 1 en todos los horizontes y en los 20 bloques de 1000 ticks, autocorrelación de -0,11, y seguir tendencia termina con mediana 5 566 en 336 configuraciones (`docs/estado.md:767` a `:773`).
 2. **¿Cuánta reversión hay de verdad?** Menos de la que parece: la mitad de la caída de VR es redondeo. La otra mitad es una transitoria de 1,2 unidades de desviación estándar con vida media de 17,5 ticks.
 3. **¿Cómo decide la cantidad?** Siempre 63: la maestra recorta, y una orden en cero no paga. El programa expresa una posición objetivo (`sw/trade.s:113` a `:115`).
 4. **¿Por qué la tabla del 3.1 muestra menos con `max_media` que con la regla base?** Porque 27 062 está sesgado por haber elegido los parámetros mirando esa serie. Fuera de muestra `max_media` gana 0,7 % y 1,4 % (T51).
