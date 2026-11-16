@@ -704,3 +704,37 @@ autoprueba-r0:
 	$(PYTHON) tools/autoprueba.py todo r0
 autoprueba-r0-firma:
 	$(PYTHON) tools/autoprueba.py firma r0
+
+# --- Co-diseño para la pauta (paquete P7, docs/codiseno.md) --------------------
+# Tabla de variantes del punto 3.3, perfilado con Amdahl, escalera de la clase 7,
+# roofline, edición ASIC y resultados negativos. Todo queda en docs/mediciones/p7/.
+#   p7-recursos   celdas, LUT4, BRAM y fmax de las seis variantes, 10 semillas
+#                 (unos 4 minutos; no se repite si la huella de las fuentes no cambió)
+#   p7-medir      ciclos por tick a los tres períodos y perfil por dirección, con el gemelo
+#   p7-rtl        confirmación con el RTL: R0 y segmentado tick por tick (Verilator), R1 y R2
+#                 contra la medición del RTL de P5 (unos 3 minutos)
+#   p7-pll        el PLL en el VQ100 y en un TQ144 hipotético (unos 2 minutos)
+#   p7-doble      el duplicador de reloj de la factibilidad, reproducido (unos 15 minutos)
+#   p7-rapido     tablas, figuras, CSV y cifras.tex desde las mediciones guardadas, sin sintetizar
+#   p7-variantes  la tabla de variantes con sus mediciones
+#   p7-amdahl     el perfil y Amdahl con sus mediciones
+#   p7            todo lo anterior
+.PHONY: p7 p7-rapido p7-variantes p7-amdahl p7-recursos p7-medir p7-rtl p7-pll p7-doble
+p7-recursos:
+	tools/p7/recursos.sh 10
+p7-medir: $(GEMELO)
+	$(PYTHON) tools/p7/medir.py
+p7-rtl: p7-medir
+	tools/p7/rtl.sh
+p7-pll:
+	tools/p7/pll.sh 10
+p7-doble:
+	tools/p7/doble_frecuencia.sh
+p7-rapido:
+	$(PYTHON) tools/p7/tablas.py
+p7-variantes: p7-recursos p7-medir p7-rtl
+	$(PYTHON) tools/p7/tablas.py > /dev/null && cat docs/mediciones/p7/variantes.txt
+p7-amdahl: p7-medir
+	$(PYTHON) tools/p7/tablas.py > /dev/null && cat docs/mediciones/p7/perfil.txt docs/mediciones/p7/amdahl.txt
+p7: p7-recursos p7-medir p7-rtl p7-pll p7-doble
+	$(PYTHON) tools/p7/tablas.py

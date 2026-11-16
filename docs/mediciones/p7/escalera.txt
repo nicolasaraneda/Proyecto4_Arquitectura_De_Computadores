@@ -1,0 +1,32 @@
+La escalera de co-diseno de la clase 7, aplicada al kernel de max_media (actualizar la media y decidir)
+Generado por tools/p7/tablas.py (make p7-rapido). No editar a mano.
+
+Formato de la clase: instrucciones por operacion, ciclos por operacion, MOPS (operaciones utiles x 25 MHz
+/ ciclos), speedup contra el paso 0 y costo. La columna 'clase' es la estimacion con el metodo de la clase:
+IC x 2,35 en el Espino base (CPI del mix), IC x 1,5 en el pipeline (CPI estimado) y CPI ideal 1 en los
+pasos 3 y 4. Lo 'medido' sale del perfil del gemelo; lo 'estimado' no esta construido.
+
+  paso  descripcion                                              ops     IC  IC/op  ciclos  cic/op    MOPS      S   clase  celdas  estado
+  0     Espino base, solo software (R0)                            8  24.00  3.000   51.00   6.375   3.922   1.00    7.05    1091  medido
+  1     + extension de la ISA (devk, emad) en el Espino base       8  12.00  1.500   26.00   3.250   7.692   1.96    3.52       -  estimado: modelo de costo medido del base
+  2     pipeline de 3 etapas, solo software                        8  24.00  3.000   27.00   3.375   7.408   1.89    4.50     990  medido
+  1+2   pipeline de 3 etapas + extension                           8  12.00  1.500   14.00   1.750  14.286   3.64    2.25       -  estimado: modelo de costo medido del segmentado
+  2b    barrel, un hilo, solo software                             8  24.00  3.000   96.00  12.000   2.083   0.53       -     932  medido
+  1+2b  barrel, un hilo + extension                                8  12.00  1.500   48.00   6.000   4.167   1.06       -     991  medido
+  2c    barrel, 4 hilos + extension: el fondo (R1)                56 125.59  2.243  262.37   4.685   5.336   1.36       -    1029  medido
+  3     instrucciones a medida (mmpos y mmbyte) sobre el pipeline   8   7.00  0.875    7.00   0.875  28.571   7.29    0.88       -  estimado: CPI ideal 1
+  4     SIMD de 2 carriles de 16 bits: las 4 reglas y el voto     38  10.00  0.263   10.00   0.263  95.000  24.22    0.26       -  estimado: CPI ideal 1
+
+  Paso 3 (estimado): dos instrucciones a medida, como las de Xpulp que fusionan operaciones que siempre van
+  juntas. mmpos rd, rs1: pos = (pos | dev < E) & (dev < X) con los dos umbrales fijos (4 operaciones);
+  mmbyte: de pos al byte 0x7F o 0xBF. El kernel queda en lw, devk, mmpos, mmbyte, sw, emad y j: 7.
+  Paso 4 (estimado): las cuatro reglas del fondo con el mismo precio, empaquetadas de a dos en carriles de
+  16 bits (S necesita 13 bits y dev 14 con signo: no caben 4 carriles de 8). lw, 2 devk.v, 2 mmpos.v, 2
+  emad.v, una instruccion de voto ponderado (6 operaciones), sw y j: 10 instrucciones, 4 x 8 + 6 = 38 ops.
+
+  Comparacion con lo que estimo la clase
+  - paso 0: medido 51.00 ciclos, metodo de la clase 56.40 (+10.6 %).
+  - paso 2: medido 27.00 ciclos, metodo de la clase 36.00 (+33.3 %).
+    El pipeline medido supera la estimacion de la clase porque el salto tomado cuesta 2 ciclos y no 3
+    (docs/espino_segmentado.md). En el Espino base el kernel tiene menos loads y saltos que el mix de la
+    clase: su CPI es 2.125 y no 2,35.

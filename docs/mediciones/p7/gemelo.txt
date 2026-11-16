@@ -4,7 +4,7 @@ Generado por tools/p7/medir.py (make p7-medir). No editar a mano.
 Herramientas:
   cc (Ubuntu 15.2.0-16ubuntu1) 15.2.0
   gemelo ref/gemelo/gemelo.c (sha256 1d3833430f1fbbb5...)
-Commit de partida: cb5571a (rama p7-codiseno)
+Commit de partida: fcc36f9 (rama p7-codiseno)
 Serie tb/practica.csv (sha256 9db90594ce790c7d...), tabla sw/fondo_tabla.hex (sha256 f792588c9cc823cb...)
 
 == variante r0: build/gemelo  --hex sw/trade.hex (sha256 02572d65d5b59ab4...)
