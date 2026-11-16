@@ -174,6 +174,8 @@ Se construyeron, verificaron y midieron cuatro alternativas además de la versi�
 \tablaancha{generado/t33variantes.tex}
 \end{table}
 
+Las frecuencias de la tabla salen de una sola síntesis de cada variante, y eso tiene un límite que medimos. El segmentado daba \cifraFminSegPuno{}~MHz de mínima en P1 y da \cifraFminSeg{}~MHz ahora, sin ningún cambio de lógica: la equivalencia formal entre las dos versiones del SoC pasa, y la diferencia aparece porque Yosys entrega otra netlist equivalente que nextpnr rutea peor. Con exactamente el mismo RTL leído en otro orden, la mediana del segmentado va de \cifraSintMedMin{} a \cifraSintMedMax{}~MHz y la mínima de \cifraSintMinMin{} a \cifraSintMinMax{}~MHz. Por eso no atribuimos al diseño diferencias de frecuencia de unos pocos MHz entre variantes; lo que sí es del diseño es que todas cierran a 25~MHz.
+
 El Espino base y el segmentado con la extensión no se construyeron, porque habría que cambiar el RTL de R0, que ya pasó todas las pruebas; su speedup queda predicho en la tabla~\ref{tab:amdahl}.
 
 \subsection{La escalera de la clase y el roofline}

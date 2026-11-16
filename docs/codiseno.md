@@ -149,7 +149,13 @@ Todas son el mismo `pochoco_soc` con su programa dentro, elegidas al compilar (`
 
 La extensión (`emad` y `devk`) cuesta 59 celdas sobre el barrel y baja la frecuencia mínima de 53,45 a 48,59 MHz: su sumador y su desplazador quedan en la ruta crítica de la ALU. La tabla cuesta una BRAM.
 
-Un hallazgo de esta corrida: el segmentado mide 45,34 MHz de mínima, y en P1 (`docs/mediciones/barrel/recursos.txt`) había medido 51,59. Su RTL no cambió; sí cambió `pochoco_soc.v` (P2 y P5 agregaron la extensión, la tabla y el vigilante detrás de definiciones que el segmentado no usa). Con otra síntesis cambia la ubicación y la ruta del medio ciclo del fetch. Sigue cerrando 10 de 10 a 25 MHz y no compite, así que no se investigó más.
+Un hallazgo de esta corrida: el segmentado mide 45,34 MHz de mínima, y en P1 (`docs/mediciones/barrel/recursos.txt`) había medido 51,59. Se investigó (`make p7-caida-seg`, `docs/mediciones/p7/caida_segmentado.txt`, bitácora `docs/bitacora/caida_segmentado.md`, decisión T127):
+
+- **No es un cambio de lógica.** El salto ocurre en el commit `c293cf4` (tabla y vigilante en `pochoco_soc.v`, detrás de definiciones que el segmentado no usa). La equivalencia formal con Yosys entre el SoC segmentado de P1 y el actual pasa, con control negativo. El programa es el mismo y el método también: con el mismo script se reproducen los dos valores exactos.
+- **Es la síntesis.** El texto nuevo cambia la numeración interna de Yosys y ABC entrega otra netlist equivalente (798 LUT4 en vez de 802) que nextpnr rutea peor: en 40 semillas las distribuciones no se solapan (mediana 53,45 antes y 47,88 después). La ruta crítica es la misma ruta del RTL (banco de registros, ALU y habilitador de `pc_target`), con otra implementación.
+- **Cuánto pesa.** Con exactamente el mismo RTL leído en diez órdenes, la mediana del segmentado va de 47,88 a 53,59 MHz y la mínima de 43,89 a 50,55. Una sola síntesis tiene una incertidumbre de unos 6 MHz en la mediana, que más semillas de nextpnr no reducen.
+
+La tabla usa el valor actual (45,34 de mínima y 47,20 de mediana), medido en la misma corrida que las otras variantes. Diferencias de frecuencia de unos pocos MHz entre variantes de esta tabla (por ejemplo R1 contra R2, o el barrel contra el barrel con la extensión) no se deben atribuir al diseño. Todas cierran a 25 MHz, y el segmentado en 40 de 40 semillas.
 
 **Ciclos por tick.** Con el gemelo (`tools/p7/medir.py`), la serie de práctica completa, timing del testbench oficial. La respuesta va de `byte_done` a la escritura en DECISION, como la mide el oficial. El tick completo, hasta que el programa vuelve a sondear.
 

@@ -2,6 +2,15 @@
 
 Se actualiza al cerrar cada tramo de trabajo. La versión anterior queda en el historial de git.
 
+## Tramo 14: decisiones de Nicolás, ramas archivadas, frecuencia del segmentado y respuesta del profesor (16/11, tarde)
+
+Rama `archivo-ramas`. Decisiones T124 (confirmada), T125, T126 y T127. Bitácora de la investigación: `docs/bitacora/caida_segmentado.md`.
+
+- **Regla del árbol: 115 kHz**, confirmada por Nicolás ("prefiero dejar margen sobre el límite medido"). T124.
+- **Ramas sin integrar.** `frente-a` y `frente-b` no tenían nada fuera de `main`: cada archivo que cambiaron está en `main` con el mismo contenido, y sus decisiones se renumeraron como T25 a T43 al integrarlas. `factibilidad-fondo` tenía la carpeta `factibilidad/`, las decisiones T45 a T49 y la sección del tramo en el estado, y la defensa, `docs/fondo.md`, `docs/extension_isa.md`, `docs/codiseno.md` y `docs/decisiones.md` citan cifras que solo vivían ahí. La carpeta entró a `main` completa y sin integrar, con `factibilidad/cierre.md` y las rutas locales reemplazadas por variables; T45 a T49 están en `docs/decisiones.md`. Cada rama quedó en una etiqueta anotada (`archivo/factibilidad-fondo`, `archivo/frente-a`, `archivo/frente-b`) y se borró de GitHub. `make p7-doble` extrae la etiqueta. T125.
+- **Frecuencia del segmentado.** No es un cambio de diseño. El salto está en `c293cf4` (tabla y vigilante en `pochoco_soc.v`); la equivalencia formal entre el SoC de P1 y el actual pasa, y Yosys entrega otra netlist equivalente que nextpnr rutea peor (mediana 53,45 MHz antes y 47,88 después, 40 semillas, sin solapamiento). El mismo RTL leído en diez órdenes da medianas de 47,88 a 53,59 MHz. La tabla de co-diseño y el informe usan el valor actual (45,34 y 47,20) y dicen que diferencias de unos 6 MHz entre variantes no se atribuyen al diseño; el informe toma esas cifras de `make report`. `make p7-caida-seg`. T127.
+- **Respuesta del profesor.** El 16/11 confirmó en persona que se puede modificar lo que uno quiera y que el Espino multihilo está bien. El barrel puede competir sin depender de una respuesta pendiente; la reconfiguración durante una ronda queda cubierta por la respuesta general, sin confirmación específica. Árbol, checklist del 26/11, banco de preguntas (9, 68, 125 y 154) y documentos de estudio al día. T126.
+
 ## Resumen del trabajo autónomo del 16/11 (para Nicolás)
 
 Los diez puntos de la lista, en orden. El detalle de cada uno está en el tramo 13, más abajo. Las decisiones y acciones que te tocan están en `docs/pendientes_nicolas.md`.
@@ -23,18 +32,17 @@ Los diez puntos de la lista, en orden. El detalle de cada uno está en el tramo 
 
 - **El ASIC del barrel con el fondo (punto 9)**. Exige portar el SoC al flujo del Proyecto 3 (banco de registros de 4 contextos y memorias a flip-flops) y una corrida de LibreLane de más de una hora. No alcanzó con lo anterior cerrado a tiempo.
 - **Dos errores míos, corregidos y probados**: un barrido de `retune` borró la carpeta de una simulación que estaba corriendo (se rehízo entera), y el primer cambio de las listas de fuentes partía el comando de Yosys en la integración continua (se corrigió y se repitió todo).
-- **La frecuencia mínima del segmentado bajó de 51,6 a 45,3 MHz** desde P1 (su core no cambió; sí `pochoco_soc.v`). Sigue cerrando a 25 MHz en 10 de 10 semillas. No se investigó.
+- **La frecuencia mínima del segmentado bajó de 51,6 a 45,3 MHz** desde P1. Investigado en el tramo 14: es de la síntesis, no del diseño (T127).
 - Nada se probó en la placa: eso lo haces tú (`docs/pendientes_nicolas.md`).
 
 ### Pendientes tuyos (detalle en `docs/pendientes_nicolas.md`)
 
-1. Decidir si el árbol usa 115 kHz (recomendado) o 110 kHz, ahora que R1 responde desde 110 kHz.
-2. Usuarios de GitHub de Santiago, del profesor y de los ayudantes, para invitarlos el 29/11.
-3. Confirmar los números del PMOD antes del 26/11.
-4. Correr en la placa la puerta de placa de R0 (SW4: "A2"), R1 y R2, la media hora de R2 y la medición del relevo.
-5. Poner OSS CAD Suite en el `PATH` desde el archivo de inicio de tu shell (los scripts ya no traen la ruta).
-6. Si quieres el PDF en tu máquina, instalar LaTeX (comando con `sudo` en los pendientes).
-7. Después del 26/11: `make peldano-fijar` con el peldaño que compita.
+1. Usuarios de GitHub de Santiago, del profesor y de los ayudantes, para invitarlos el 29/11.
+2. Confirmar los números del PMOD antes del 26/11.
+3. Correr en la placa la puerta de placa de R0 (SW4: "A2"), R1 y R2, la media hora de R2 y la medición del relevo.
+4. Poner OSS CAD Suite en el `PATH` desde el archivo de inicio de tu shell (los scripts ya no traen la ruta).
+5. Si quieres el PDF en tu máquina, instalar LaTeX (comando con `sudo` en los pendientes).
+6. Después del 26/11: `make peldano-fijar` con el peldaño que compita.
 
 ## Kit de defensa (16/11)
 
@@ -70,7 +78,7 @@ Rama `p7-codiseno`, desde `integra-p4` (`cb5571a`). Bitácora: `docs/bitacora/p7
 
 ### Hallazgos
 
-1. **La frecuencia del segmentado bajó** de 51,59 MHz de mínima (P1) a 45,34 sin cambios en su core: cambió `pochoco_soc.v` en P2 y P5. Sigue cerrando 10 de 10. No investigado.
+1. **La frecuencia del segmentado bajó** de 51,59 MHz de mínima (P1) a 45,34 sin cambios en su core: cambió `pochoco_soc.v` en P2 y P5. Sigue cerrando 10 de 10. Investigado después, en el tramo 14: es de la síntesis, no del diseño (T127).
 2. **El 98 % del tick a 0,1 ms es sondeo**, y en el ASIC la energía por decisión es mil veces el costo marginal de decidir.
 
 ### Qué falta
@@ -174,7 +182,7 @@ Rama `defensa`, integrada en `p8-anticipacion`. Bitácora: `docs/bitacora/defens
 - Historial: 141 commits en todas las ramas, autor y committer Nicolás Araneda, sin pies de herramientas.
 - Ningún archivo del repositorio menciona herramientas de IA ni rutas locales: los scripts toman OSS CAD Suite de `OSS_CAD_SUITE` o del `PATH`.
 - Ramas borradas en GitHub después de avanzar `main`, todas contenidas en él: `ci-rapida`, `defensa`, `frente-c-diseno`, `integra-a`, `integra-b`, `integra-p4`, `p0-respaldo`, `p1-barrel`, `p2-extension`, `p3-fondo`, `p4-gemelo`, `p5-tabla-vigilante`, `p6-r1r2`, `p7-codiseno`, `p8-anticipacion` y `r0-reproducible`.
-- Quedan tres ramas que **no** están contenidas en `main` y no se borraron: `factibilidad-fondo` (16 commits propios, la factibilidad que por decisión no se integra), `frente-a` (5) y `frente-b` (9). Ver `docs/pendientes_nicolas.md`.
+- Quedaban tres ramas que **no** estaban contenidas en `main`: `factibilidad-fondo` (16 commits propios), `frente-a` (5) y `frente-b` (9). En el tramo 14 pasaron a etiquetas de archivo y se borraron (T125).
 
 ## Tramo 12: paquetes P4, gemelo del barrel, y P6, autoprueba de R0 (15/11)
 

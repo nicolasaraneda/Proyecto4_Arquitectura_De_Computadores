@@ -300,8 +300,8 @@ Las rutas de medio ciclo: nextpnr las analiza con un reloj de ciclo de trabajo d
 Dato: `docs/decisiones.md:261`, `docs/espino_segmentado.md:206`.
 
 **68. [I] ¿Por qué la frecuencia del segmentado bajó de 51 a 45 MHz?**
-Sin cambios en su core, al cambiar `pochoco_soc.v` en P2 y P5. Sigue cerrando 10 de 10 con holgura. Está anotado como no investigado.
-Dato: `docs/mediciones/espino_segmentado.txt:15`, `docs/mediciones/p7/variantes.txt:11`.
+No cambió el diseño, cambió la síntesis. La equivalencia formal entre el SoC de P1 y el actual pasa; desde el commit `c293cf4`, que agregó la tabla y el vigilante detrás de definiciones que el segmentado no usa, Yosys entrega otra netlist equivalente que nextpnr rutea peor. Con el mismo RTL leído en otro orden la mediana va de 47,88 a 53,59 MHz. Por eso no atribuimos al diseño diferencias de pocos MHz, y en 40 semillas cierra 40 de 40 a 25 MHz.
+Dato: `docs/mediciones/p7/caida_segmentado.txt`, secciones 3 y 4; `docs/decisiones.md`, T127.
 
 **69. [B] ¿Cómo verificaron el segmentado?**
 Formal del base sin cambios, ejecución en paralelo contra el base (1,6 millones de instrucciones por configuración, 39 % distintas), programas de riesgos del Proyecto 3, cosimulación con el gemelo y 5 de 5 mutaciones.

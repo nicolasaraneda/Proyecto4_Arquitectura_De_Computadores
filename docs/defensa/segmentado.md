@@ -68,7 +68,7 @@ Dos detalles que suelen preguntar:
 
 El pipeline cuesta 91 celdas (adelantamiento: 32 flip-flops y 64 LUT). Recortar el contador de programa al ancho real de la memoria (11 bits para 512 palabras) recupera 180. El resultado es más chico que el base y más rápido: la decodificación salió de la ruta crítica. La clase advertía que el multiplexor de adelantamiento podía bajar la frecuencia; medido, queda en la ruta crítica pero la ruta completa es más corta.
 
-La caída de 51,13 a 45,34 MHz de mínima entre P1 y P7 ocurrió sin cambios en el core, al cambiar `rtl/pochoco_soc.v` en P2 y P5. Sigue cerrando 10 de 10. Está anotado como no investigado (`docs/estado.md`, P7, hallazgo 1).
+La caída a 45,34 MHz de mínima (51,59 en P1, `docs/mediciones/barrel/recursos.txt`) no es de diseño. Se investigó (T127, `docs/mediciones/p7/caida_segmentado.txt`): la lógica es la misma (equivalencia formal), pero desde el commit `c293cf4` Yosys entrega otra netlist equivalente que nextpnr rutea peor. Con el mismo RTL leído en otro orden la mediana va de 47,88 a 53,59 MHz. Sigue cerrando 40 de 40 semillas a 25 MHz.
 
 ## 6. Qué mide en `trade.s` y por qué no compite
 

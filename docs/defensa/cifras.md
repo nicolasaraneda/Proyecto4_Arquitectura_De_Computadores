@@ -21,7 +21,7 @@ Una hoja. Cada cifra con su fuente. Si una cifra de aquí no calza con la fuente
 | R0, Espino base con `max_media` | 1083 (P0); 1091 en P7 | 12 | 42,43 MHz (P0); 41,93 en P7 | `docs/puertas.md`; `docs/mediciones/p7/variantes.txt` |
 | R1, barrel con `emad`, `devk` y tabla | 1029 | 13 | 51,59 MHz | `docs/puertas.md` |
 | R2, R1 con vigilante | 1045 | 13 | 47,86 MHz | `docs/puertas.md` |
-| Segmentado (no compite) | 994 (P1); 990 en P7 | 12 | 51,13 (P1); 45,34 en P7 | `docs/mediciones/espino_segmentado.txt`; `docs/mediciones/p7/variantes.txt` |
+| Segmentado (no compite) | 994 (P1); 990 en P7 | 12 | 45,34 en P7 (el valor de la tabla); 51,13 y 51,59 antes. La diferencia es de la síntesis, no del diseño: con el mismo RTL la mediana va de 47,88 a 53,59 (T127) | `docs/mediciones/p7/variantes.txt`; `docs/mediciones/p7/caida_segmentado.txt` |
 | Shifter completo en el base | 1491: no cabe | 12 | | `docs/mediciones/base.txt` |
 | Extensión: `emad` y `devk` / las tres | +52 / +96 celdas | 0 | 48,92 / 48,33 | `docs/mediciones/xd/timing.txt` |
 

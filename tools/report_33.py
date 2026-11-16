@@ -9,6 +9,7 @@ figura del roofline en TikZ. No mide nada.
 """
 import csv
 import os
+import re
 import shutil
 
 RAIZ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -58,6 +59,16 @@ def punto_33(c, peldano, tabla, num, leer):
         c[f"Fmin{sufijo}"] = f(v["fmax_min_mhz"])
         c[f"Mops{sufijo}"] = f(v["mops_logrado"])
         c[f"RespPeor{sufijo}"] = v["resp_peor_ciclos"]
+
+    # Variación de la síntesis: el mismo RTL del segmentado leído en otro orden
+    # (tools/p7/caida_segmentado.sh, make p7-caida-seg)
+    with open(os.path.join(P7, "caida_segmentado.txt"), encoding="utf-8") as fc:
+        texto = fc.read()
+    m = re.search(r"Entre ordenes: medianas de ([0-9.]+) a ([0-9.]+) MHz, minimas de ([0-9.]+) a ([0-9.]+) MHz", texto)
+    c["SintMedMin"], c["SintMedMax"] = f(m.group(1)), f(m.group(2))
+    c["SintMinMin"], c["SintMinMax"] = f(m.group(3)), f(m.group(4))
+    m = re.search(r"^  p1 +e118269 +\d+ +\d+ \| +([0-9.]+)", texto, re.M)
+    c["FminSegPuno"] = f(m.group(1))
 
     # Perfil del tick
     perfil = filas_csv("perfil.csv")

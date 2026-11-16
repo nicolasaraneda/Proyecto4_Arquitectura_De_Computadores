@@ -6,7 +6,7 @@ Herramientas:
   "nextpnr-ice40" -- Next Generation Place and Route (Version nextpnr-0.11.1-19-g8dbcee5c)
   Verilator 5.053 devel rev v5.052-22-g7cf8c5cca (mod)
   cc (Ubuntu 15.2.0-16ubuntu1) 15.2.0
-Commit de partida: df082a7 (rama worktree-agent-a453bbee0696e622f)
+Commit de partida: e4f4a8f (rama archivo-ramas)
 
 Comando en cada commit (script de medicion del commit actual; rtl/, sw/trade.hex y
 goboard.pcf del commit medido, extraidos con git archive):
@@ -37,7 +37,7 @@ Semillas: 1 a 40 en los cuatro commits, 1 a 40 en cada orden de lectura.
   p1       e118269     993   801 |       51.59   53.48  54.95 |       50.25  51.58   53.63  53.59  1.36  56.09  40 de 40
   antes    05b3b7e     994   802 |       52.39   53.03  56.53 |       51.37  52.43   53.45  53.73  1.35  56.96  40 de 40
   salto    c293cf4     990   798 |       45.34   47.20  50.64 |       44.82  46.13   47.88  48.24  1.74  51.17  40 de 40
-  actual   df082a7     990   798 |       45.34   47.20  50.64 |       44.82  46.13   47.88  48.24  1.74  51.17  40 de 40
+  actual   e4f4a8f     990   798 |       45.34   47.20  50.64 |       44.82  46.13   47.88  48.24  1.74  51.17  40 de 40
 
   p1       huella 903141c6e952  commit de P1, el de docs/mediciones/barrel/recursos.txt
   antes    huella 8c3836fd89d6  commit anterior al salto (padre de c293cf4)
@@ -141,7 +141,7 @@ Semillas: 1 a 40 en los cuatro commits, 1 a 40 en cada orden de lectura.
 
 6. Equivalencia formal del SoC segmentado antes y despues del salto
 
-  p1 (e118269) contra actual (df082a7): EQUIVALENTES (Of those cells 2971 are proven and 0 are unproven.)
+  p1 (e118269) contra actual (e4f4a8f): EQUIVALENTES (Of those cells 2971 are proven and 0 are unproven.)
   antes (05b3b7e) contra salto (c293cf4): EQUIVALENTES (Of those cells 2971 are proven and 0 are unproven.)
   control, actual contra una copia con tab_sel activo (tiene que dar DISTINTOS): DISTINTOS (Of those cells 3009 are proven and 1 are unproven.)
 
