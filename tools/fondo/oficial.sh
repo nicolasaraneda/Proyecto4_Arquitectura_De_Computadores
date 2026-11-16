@@ -12,13 +12,14 @@
 # decisiones.csv sea idéntico, byte a byte, al de ref/fondo.py.
 #
 # Uso: tools/fondo/oficial.sh   (o make fondo-oficial). Demora unos 5 minutos.
-# Resultado en docs/mediciones/fondo/oficial.txt.
+# Resultado en docs/mediciones/fondo/HW/oficial.txt (HW es r1 o r2).
 set -uo pipefail
 source "$(dirname "$0")/comun.sh"
 
 d=$BF/oficial
 mkdir -p "$d/sw" "$d/tb"
 ensamblar_fondo sw/fondo.s "$d/sw/trade.hex" || { echo "FAIL: no ensambla"; exit 1; }
+cp "$TABLA_HEX" "$d/sw/fondo_tabla.hex"
 ln -sf "$RAIZ/tb/practica.csv" "$d/tb/practica.csv"
 iverilog -g2012 -s tb_proyecto_4 -o "$d/tb_p4" "$CELLS_SIM" $FONDO_SRC tb/tb_proyecto_4.sv || { echo "FAIL: Icarus no compila"; exit 1; }
 ( cd "$d" && vvp -n tb_p4 > salida.txt )

@@ -1,0 +1,66 @@
+Bitstreams R1 y R2 del fondo en un chip
+Generado por tools/fondo/bitstreams.sh (make fondo-bitstreams). No editar a mano.
+
+Herramientas:
+  Yosys 0.68+195 (git sha1 435977e97-dirty, Release, Clang /usr/bin/clang++ 21.1.8)
+  "nextpnr-ice40" -- Next Generation Place and Route (Version nextpnr-0.11.1-19-g8dbcee5c)
+  Icarus Verilog version 14.0 (devel) (s20260301-403-g5ab23063f-dirty)
+Commit de partida: 05b3b7e (rama p5-tabla-vigilante)
+  Verilator 5.053 devel rev v5.052-22-g7cf8c5cca (mod)
+R1: -DESPINO_BARREL -DESPINO_XD_EMAD -DESPINO_XD_DEVK -DESPINO_TABLA
+R2: -DESPINO_BARREL -DESPINO_XD_EMAD -DESPINO_XD_DEVK -DESPINO_TABLA -DESPINO_VIGILANTE
+Programa: sw/fondo.s (sha256 19773517830a2e16...), tabla sw/fondo_tabla.hex (sha256 f792588c9cc823cb...), referencia ref/fondo.py
+
+nextpnr-ice40 --hx1k --package vq100 --freq 25 --seed 1, goboard.pcf.
+
+1. Sintesis
+  r1: celdas 1029 de 1280, BRAM 13 de 16, frecuencia maxima 52.44 MHz, PASS a 25 MHz, 32220 bytes, sha256 b61c8dc04ebf992e0f8e91b7d149751c707b5e86bb3105b73a1e297e534b6630
+  r2: celdas 1045 de 1280, BRAM 13 de 16, frecuencia maxima 52.53 MHz, PASS a 25 MHz, 32220 bytes, sha256 a9c107a10e932dcf86930df0e2e222eb0f8e46000c60d92e7f8837ea6c823271
+  r1_molde: celdas 1029 de 1280, BRAM 13 de 16, frecuencia maxima 52.44 MHz, PASS a 25 MHz, 32220 bytes, sha256 bd4d6eeb2e3fcf220f4e786d2bfcd5133c26b268b4627233542c3bcf33356ff1
+  r2_molde: celdas 1045 de 1280, BRAM 13 de 16, frecuencia maxima 52.53 MHz, PASS a 25 MHz, 32220 bytes, sha256 d5bebc5c7fac2c7cf0897d85f3d4097e70e0aaa5ec67e7e07a588fc6a73d2cda
+PASS r1: cierra a 25 MHz
+PASS r2: cierra a 25 MHz
+
+2. icebram sobre el molde (programa y tabla), contra la sintesis directa
+PASS r1: el .asc del molde con icebram es identico al de la sintesis directa (0.26 s con icepack)
+PASS r2: el .asc del molde con icebram es identico al de la sintesis directa (0.24 s con icepack)
+
+3. Criterio 8: bitstream simulado desde el .asc por los pines (Icarus, tb/tb_bitstream.sv), periodo de 0,1 ms
+PASS R1, serie de practica: 2000 ticks identicos a la referencia, patrimonio 9661
+PASS R1, serie de reversion: 2000 ticks identicos a la referencia, patrimonio 14473
+PASS R2, serie de practica: 2000 ticks identicos a la referencia, patrimonio 9661
+PASS R2, serie de reversion: 2000 ticks identicos a la referencia, patrimonio 14473
+PASS R2, serie de practica: SB_WARMBOOT no se dispara
+PASS R2, serie de reversion: SB_WARMBOOT no se dispara
+
+4. Cambio de la tabla con icebram, sin sintetizar
+  Parametros cambiados: G3_ENTRA=-80 W1_INI=5 W3_INI=6 W1_MAX=9 W3_MAX=10 W1_MIN=1 W3_MIN=2 VENTANA=256 PLAZO=6
+  Valores de 16 bits distintos entre las dos tablas: 9
+  Sobre el .asc ya construido con la tabla de verdad icebram se niega: Conflicting from pattern for bit slice from_hexfile[255:0][8]!
+  (la tabla de verdad repite bits entre palabras; el cambio se hace siempre desde el molde)
+  Lineas del .asc que cambian respecto de R1: 2
+PASS R1 con la otra tabla, serie de reversion, contra ref/fondo.py con esos parametros: 2000 ticks identicos a la referencia, patrimonio 15011
+  Bytes en que la referencia con la otra tabla difiere de la referencia con la tabla original: 53 de 2000
+  Tiempo de punta a punta (generar la tabla, icebram e icepack): 0.32 s
+  sha256 de r1_otra.bin: 7ddf1a0150ab9fcd8a6c1d1abd5e0a369d6ef396b408ad89165d992e823af2bb
+
+5. Vigilante dentro del bitstream de R2: supervisor colgado en el tick 100 (programa puesto con icebram en el molde de R2)
+  WARMBOOT t_ns=10513580 s1s0=01 cs_n=1
+  BOOT sube durante el periodo de la transaccion 105 (la primera es la 0). El programa no ve las 2 primeras: su tick 100 es la transaccion 101.
+PASS el vigilante pide la imagen 01 con CS_n en alto, al terminar la transaccion 105: la quinta sin respuesta (101 a 105)
+PASS bytes: iguales a la referencia hasta la transaccion 101, y despues se repite el ultimo (bf); en el bitstream simulado no hay reconfiguracion, asi que el byte no cambia
+
+6. Imagen multiple: icemulti -p0, imagen 0 R2 e imagen 1 R0 (bitstreams/r0_base_max_media.bin)
+  archivo: build/fondo/bitstreams/r2_multi.bin
+  tamaño: 64600 bytes de 131072 (49.3 %), sobran 66472
+  sha256: 293653575bba2fcaf60ceca4284f7b85bccf6ea7f068cbf863e9a6e67f8126f2
+  vector 0 (encendido ) -> 0x0000A0   modo 0x00, oscilador de configuración en frecuencia baja, warm boot habilitado
+  vector 1 (S1 S0 = 00) -> 0x0000A0   modo 0x00, oscilador de configuración en frecuencia baja, warm boot habilitado
+  vector 2 (S1 S0 = 01) -> 0x007E7C   modo 0x00, oscilador de configuración en frecuencia baja, warm boot habilitado
+  vector 3 (S1 S0 = 10) -> 0x0000A0   modo 0x00, oscilador de configuración en frecuencia baja, warm boot habilitado
+  vector 4 (S1 S0 = 11) -> 0x0000A0   modo 0x00, oscilador de configuración en frecuencia baja, warm boot habilitado
+  imágenes distintas: 2, en 0x0000A0, 0x007E7C
+  imagen 0: build/fondo/bitstreams/r2.bin, 32220 bytes, sha256 a9c107a10e932dcf86930df0e2e222eb0f8e46000c60d92e7f8837ea6c823271, copia idéntica
+  imagen 1: bitstreams/r0_base_max_media.bin, 32220 bytes, sha256 67f6f1c4986966320596303fc105532e627e22449f36c4b627274d4edb172204, copia idéntica
+  RESULTADO: correcto
+PASS imagen multiple correcta y cabe en la flash de 131072 bytes

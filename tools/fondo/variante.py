@@ -20,6 +20,9 @@ Fallas (K es el gestor: 1, 2 o 3; los ticks se cuentan como el programa, desde
   atraso:K:C         el gestor K demora C ciclos más antes de publicar, en
                      todos los ticks
   atraso:K:C:N:M     lo mismo, solo en los ticks N a M
+  cuelgue_sup:N      el supervisor entra en un lazo infinito al recibir el
+                     precio del tick N, antes de publicarlo: deja de escribir
+                     DECISION. Es la falla dura que debe ver el vigilante
 
 Uso: tools/fondo/variante.py FALLAS [-i sw/fondo.s] -o salida.s
      tools/fondo/variante.py FALLAS --ref      # las --falla para ref/fondo.py
@@ -37,6 +40,9 @@ def leer(texto):
     for parte in texto.split("+"):
         campos = parte.split(":")
         tipo, nums = campos[0], [int(c) for c in campos[1:]]
+        if tipo == "cuelgue_sup" and len(nums) == 1:
+            fallas.append((tipo, nums))
+            continue
         if tipo == "cuelgue" and len(nums) == 2:
             pass
         elif tipo == "sin_voto" and len(nums) == 3:
@@ -61,8 +67,13 @@ def en_rango(i, n, m, sale):
 
 
 def armar(fuente, fallas):
-    antes, voto, despues = [], [], []
+    antes, voto, despues, sup = [], [], [], []
     for i, (tipo, n) in enumerate(fallas):
+        if tipo == "cuelgue_sup":
+            # x3 todavía trae el tick anterior por 256; x9 está libre
+            sup += [f"    li   x9, {(n[0] - 1) * 256}", f"    bne  x3, x9, v{i}_sigue",
+                    f"v{i}_cuelgue:", f"    j    v{i}_cuelgue", f"v{i}_sigue:"]
+            continue
         k = n[0]
         sigue = f"v{i}_sigue"
         if tipo == "cuelgue":
@@ -85,7 +96,7 @@ def armar(fuente, fallas):
                      "    j    v_sin_voto", f"{sigue}:"]
     if any(t == "sin_voto" for t, _ in fallas):
         despues = ["v_sin_voto:"]
-    marcas = {"#@ANTES_DE_PUBLICAR": antes, "#@VOTO": voto, "#@DESPUES_DEL_VOTO": despues}
+    marcas = {"#@ANTES_DE_PUBLICAR": antes, "#@VOTO": voto, "#@DESPUES_DEL_VOTO": despues, "#@SUPERVISOR": sup}
     salida, vistas = [], set()
     for linea in fuente.splitlines():
         salida.append(linea)
@@ -103,6 +114,8 @@ def para_ref(fallas, plazo_ciclos):
     """Las fallas como las entiende ref/fondo.py: desde y hasta qué tick no llega el voto."""
     args = []
     for tipo, n in fallas:
+        if tipo == "cuelgue_sup":
+            continue
         if tipo == "cuelgue":
             args.append(f"{n[0]}:{n[1]}:")
         elif tipo == "sin_voto":

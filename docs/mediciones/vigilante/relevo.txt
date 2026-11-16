@@ -1,0 +1,204 @@
+Relevo de punta a punta: del fondo colgado a la imagen de respaldo (tb/vigilante/tb_relevo.sv)
+Generado por tools/vigilante/relevo.sh (make vig-relevo). No editar a mano.
+
+Herramientas:
+  Yosys 0.68+195 (git sha1 435977e97-dirty, Release, Clang /usr/bin/clang++ 21.1.8)
+  "nextpnr-ice40" -- Next Generation Place and Route (Version nextpnr-0.11.1-19-g8dbcee5c)
+  Icarus Verilog version 14.0 (devel) (s20260301-403-g5ab23063f-dirty)
+Commit de partida: 05b3b7e (rama p5-tabla-vigilante)
+  Verilator 5.053 devel rev v5.052-22-g7cf8c5cca (mod)
+Hardware (r2): pochoco_soc con -DESPINO_BARREL -DESPINO_XD_EMAD -DESPINO_XD_DEVK -DESPINO_TABLA -DESPINO_VIGILANTE
+Programa: sw/fondo.s (sha256 19773517830a2e16...), tabla sw/fondo_tabla.hex (sha256 f792588c9cc823cb...), referencia ref/fondo.py
+
+Imagen 0: copia de rtl/pochoco_soc.v llamada pochoco_soc_r2, con las definiciones de R2 y VigN = 4.
+Imagen 1: pochoco_soc sin definiciones (Espino base) con sw/trade.hex (sha256 02572d65d5b59ab4...).
+Serie: tb/practica.csv. Referencia: tools/vigilante/relevo_ref.py, con ref/fondo.py y ref/trader.py.
+Modelo de la reconfiguracion: desde BOOT y durante T_RECONF el pin MISO vale 1 (pull-up) y
+ningun SoC tiene reloj. T_RECONF = 53 ms es el valor estimado con la hoja de datos, sin medir.
+Las transacciones se cuentan desde 0. La maestra usa los tiempos del testbench oficial.
+
+=== 0. Preparacion ===
+PASS copia: pochoco_soc_r2 difiere de rtl/pochoco_soc.v solo en el nombre del modulo y en las 5 definiciones
+PASS programas: sw/fondo.s y las variantes cuelgue_sup:1, 3 y 100 ensamblan
+PASS respaldo: sw/trade.hex es igual a sw/trade.s recien ensamblado
+PASS testbench: Verilator compila los dos SoC en el mismo testbench
+
+=== 1. Corrida sana ===
+--- fondo sin fallas, 20 000 ticks a 0,1 ms ---
+PASS sana: MISO sin X ni Z en los 160000 bits leídos
+PASS sana: la imagen 0 no ve 2 de los primeros precios (reset de encendido) y recibe desde la transacción 2
+PASS sana: BOOT no sube en 20000 ticks
+PASS sana: la cuenta del vigilante nunca pasa de 1
+PASS sana: una escritura en DECISION por cada uno de los 19998 precios recibidos
+PASS sana: la imagen 1 nunca recibe reloj
+PASS sana: los 20000 bytes coinciden con ref/fondo.py
+  patrimonio final: 26070
+
+=== 2. Relevos con T_RECONF = 53 ms ===
+--- falla en el tick 100, T = 0,1 ms (ronda 3), 800 ticks ---
+PASS f100_r3: MISO sin X ni Z en los 6400 bits leídos
+PASS f100_r3: la imagen 0 no ve 2 de los primeros precios (reset de encendido) y recibe desde la transacción 2
+PASS f100_r3: cuelgue_sup:100: la última escritura de la imagen 0 responde al precio de la transacción 100 y el precio de la 101 queda sin respuesta
+PASS f100_r3: BOOT sube al terminar la transacción 105 = 101 + 4: es el precio número 5 sin respuesta (101 a 105)
+PASS f100_r3: el vigilante cuenta 5 precios sin escritura y ninguno más
+PASS f100_r3: BOOT sube en t = 10513580 ns, 80 ns después de que CS_n sube y 401.08 us después del último bit del precio que cuelga al supervisor
+PASS f100_r3: BOOT sube con CS_n en alto, sin transacción en curso, y pide la imagen 01
+PASS f100_r3: la imagen 1 recibe reloj desde t = 63513600 ns (53.000 ms después de BOOT)
+PASS f100_r3: el reset de la imagen 1 termina en t = 63677380 ns, 4095 ciclos después
+PASS f100_r3: la imagen 1 recibe su primer precio en la transacción 637 y lo responde en 48 ciclos
+PASS f100_r3: la maestra lee 0xFF en 530 ticks (transacciones 106 a 635)
+PASS f100_r3: ningún byte leído con el pin suelto, cortado o con la imagen 1 en reset es una orden
+PASS f100_r3: los 800 bytes coinciden con el esperado
+  bytes del fondo sano: transacciones 0 a 101; byte repetido (bf): 102 a 105
+  pin suelto, byte 0xFF: 530 ticks; transacciones cortadas por el fin de la reconfiguración: ninguna
+  imagen 1 en reset o sin decisión todavía, byte 0x00 en 2 transacciones; bytes de max_media desde la transacción 638: 162
+  ticks sin decisión nueva, desde el precio colgado hasta el primero que responde la imagen 1: 536 (precios 101 a 636; 5 los gasta el vigilante en contar)
+  patrimonio final: 9708 con el relevo; 9213 el fondo sano en los mismos 800 ticks; 9213 max_media sola
+
+--- falla en el tick 100, T = 1 ms (ronda 2), 250 ticks ---
+PASS f100_r2: MISO sin X ni Z en los 2000 bits leídos
+PASS f100_r2: la imagen 0 no ve 1 de los primeros precios (reset de encendido) y recibe desde la transacción 1
+PASS f100_r2: cuelgue_sup:100: la última escritura de la imagen 0 responde al precio de la transacción 99 y el precio de la 100 queda sin respuesta
+PASS f100_r2: BOOT sube al terminar la transacción 104 = 100 + 4: es el precio número 5 sin respuesta (100 a 104)
+PASS f100_r2: el vigilante cuenta 5 precios sin escritura y ninguno más
+PASS f100_r2: BOOT sube en t = 104013580 ns, 80 ns después de que CS_n sube y 4001.08 us después del último bit del precio que cuelga al supervisor
+PASS f100_r2: BOOT sube con CS_n en alto, sin transacción en curso, y pide la imagen 01
+PASS f100_r2: la imagen 1 recibe reloj desde t = 157013600 ns (53.000 ms después de BOOT)
+PASS f100_r2: el reset de la imagen 1 termina en t = 157177380 ns, 4095 ciclos después
+PASS f100_r2: la imagen 1 recibe su primer precio en la transacción 158 y lo responde en 48 ciclos
+PASS f100_r2: la maestra lee 0xFF en 53 ticks (transacciones 105 a 157)
+PASS f100_r2: ningún byte leído con el pin suelto, cortado o con la imagen 1 en reset es una orden
+PASS f100_r2: los 250 bytes coinciden con el esperado
+  bytes del fondo sano: transacciones 0 a 100; byte repetido (bf): 101 a 104
+  pin suelto, byte 0xFF: 53 ticks; transacciones cortadas por el fin de la reconfiguración: ninguna
+  imagen 1 en reset o sin decisión todavía, byte 0x00 en 1 transacciones; bytes de max_media desde la transacción 159: 91
+  ticks sin decisión nueva, desde el precio colgado hasta el primero que responde la imagen 1: 58 (precios 100 a 157; 5 los gasta el vigilante en contar)
+  patrimonio final: 10207 con el relevo; 10280 el fondo sano en los mismos 250 ticks; 10280 max_media sola
+
+--- falla en el tick 100, T = 10 ms (ronda 1), 160 ticks ---
+PASS f100_r1: MISO sin X ni Z en los 1280 bits leídos
+PASS f100_r1: la imagen 0 no ve 1 de los primeros precios (reset de encendido) y recibe desde la transacción 1
+PASS f100_r1: cuelgue_sup:100: la última escritura de la imagen 0 responde al precio de la transacción 99 y el precio de la 100 queda sin respuesta
+PASS f100_r1: BOOT sube al terminar la transacción 104 = 100 + 4: es el precio número 5 sin respuesta (100 a 104)
+PASS f100_r1: el vigilante cuenta 5 precios sin escritura y ninguno más
+PASS f100_r1: BOOT sube en t = 1040013580 ns, 80 ns después de que CS_n sube y 40001.08 us después del último bit del precio que cuelga al supervisor
+PASS f100_r1: BOOT sube con CS_n en alto, sin transacción en curso, y pide la imagen 01
+PASS f100_r1: la imagen 1 recibe reloj desde t = 1093013600 ns (53.000 ms después de BOOT)
+PASS f100_r1: el reset de la imagen 1 termina en t = 1093177380 ns, 4095 ciclos después
+PASS f100_r1: la imagen 1 recibe su primer precio en la transacción 110 y lo responde en 48 ciclos
+PASS f100_r1: la maestra lee 0xFF en 5 ticks (transacciones 105 a 109)
+PASS f100_r1: ningún byte leído con el pin suelto, cortado o con la imagen 1 en reset es una orden
+PASS f100_r1: los 160 bytes coinciden con el esperado
+  bytes del fondo sano: transacciones 0 a 100; byte repetido (bf): 101 a 104
+  pin suelto, byte 0xFF: 5 ticks; transacciones cortadas por el fin de la reconfiguración: ninguna
+  imagen 1 en reset o sin decisión todavía, byte 0x00 en 1 transacciones; bytes de max_media desde la transacción 111: 49
+  ticks sin decisión nueva, desde el precio colgado hasta el primero que responde la imagen 1: 10 (precios 100 a 109; 5 los gasta el vigilante en contar)
+  patrimonio final: 9708 con el relevo; 9708 el fondo sano en los mismos 160 ticks; 9708 max_media sola
+
+--- falla temprana, tick 3, T = 0,1 ms, 700 ticks ---
+PASS f3_r3: MISO sin X ni Z en los 5600 bits leídos
+PASS f3_r3: la imagen 0 no ve 2 de los primeros precios (reset de encendido) y recibe desde la transacción 2
+PASS f3_r3: cuelgue_sup:3: la última escritura de la imagen 0 responde al precio de la transacción 3 y el precio de la 4 queda sin respuesta
+PASS f3_r3: BOOT sube al terminar la transacción 8 = 4 + 4: es el precio número 5 sin respuesta (4 a 8)
+PASS f3_r3: el vigilante cuenta 5 precios sin escritura y ninguno más
+PASS f3_r3: BOOT sube en t = 813580 ns, 80 ns después de que CS_n sube y 401.08 us después del último bit del precio que cuelga al supervisor
+PASS f3_r3: BOOT sube con CS_n en alto, sin transacción en curso, y pide la imagen 01
+PASS f3_r3: la imagen 1 recibe reloj desde t = 53813600 ns (53.000 ms después de BOOT)
+PASS f3_r3: el reset de la imagen 1 termina en t = 53977380 ns, 4095 ciclos después
+PASS f3_r3: la imagen 1 recibe su primer precio en la transacción 540 y lo responde en 48 ciclos
+PASS f3_r3: la maestra lee 0xFF en 530 ticks (transacciones 9 a 538)
+PASS f3_r3: ningún byte leído con el pin suelto, cortado o con la imagen 1 en reset es una orden
+PASS f3_r3: los 700 bytes coinciden con el esperado
+  bytes del fondo sano: transacciones 0 a 4; byte repetido (bf): 5 a 8
+  pin suelto, byte 0xFF: 530 ticks; transacciones cortadas por el fin de la reconfiguración: ninguna
+  imagen 1 en reset o sin decisión todavía, byte 0x00 en 2 transacciones; bytes de max_media desde la transacción 541: 159
+  ticks sin decisión nueva, desde el precio colgado hasta el primero que responde la imagen 1: 536 (precios 4 a 539; 5 los gasta el vigilante en contar)
+  patrimonio final: 10000 con el relevo; 9213 el fondo sano en los mismos 700 ticks; 9213 max_media sola
+
+--- falla en el tick 100, T = 0,1 ms, maestra corrida 10 ns (INICIO_NS = 4010) ---
+PASS f100_r3_10: MISO sin X ni Z en los 6400 bits leídos
+PASS f100_r3_10: la imagen 0 no ve 2 de los primeros precios (reset de encendido) y recibe desde la transacción 2
+PASS f100_r3_10: cuelgue_sup:100: la última escritura de la imagen 0 responde al precio de la transacción 100 y el precio de la 101 queda sin respuesta
+PASS f100_r3_10: BOOT sube al terminar la transacción 105 = 101 + 4: es el precio número 5 sin respuesta (101 a 105)
+PASS f100_r3_10: el vigilante cuenta 5 precios sin escritura y ninguno más
+PASS f100_r3_10: BOOT sube en t = 10513620 ns, 110 ns después de que CS_n sube y 401.11 us después del último bit del precio que cuelga al supervisor
+PASS f100_r3_10: BOOT sube con CS_n en alto, sin transacción en curso, y pide la imagen 01
+PASS f100_r3_10: la imagen 1 recibe reloj desde t = 63513640 ns (53.000 ms después de BOOT)
+PASS f100_r3_10: el reset de la imagen 1 termina en t = 63677420 ns, 4095 ciclos después
+PASS f100_r3_10: la imagen 1 recibe su primer precio en la transacción 637 y lo responde en 48 ciclos
+PASS f100_r3_10: la maestra lee 0xFF en 530 ticks (transacciones 106 a 635)
+PASS f100_r3_10: ningún byte leído con el pin suelto, cortado o con la imagen 1 en reset es una orden
+PASS f100_r3_10: los 800 bytes coinciden con el esperado
+  bytes del fondo sano: transacciones 0 a 101; byte repetido (bf): 102 a 105
+  pin suelto, byte 0xFF: 530 ticks; transacciones cortadas por el fin de la reconfiguración: ninguna
+  imagen 1 en reset o sin decisión todavía, byte 0x00 en 2 transacciones; bytes de max_media desde la transacción 638: 162
+  ticks sin decisión nueva, desde el precio colgado hasta el primero que responde la imagen 1: 536 (precios 101 a 636; 5 los gasta el vigilante en contar)
+  patrimonio final: 9708 con el relevo; 9213 el fondo sano en los mismos 800 ticks; 9213 max_media sola
+
+=== 3. Relevos con T_RECONF = 2 ms ===
+--- falla en el tick 100, T = 0,1 ms, 300 ticks ---
+PASS f100_corto: MISO sin X ni Z en los 2400 bits leídos
+PASS f100_corto: la imagen 0 no ve 2 de los primeros precios (reset de encendido) y recibe desde la transacción 2
+PASS f100_corto: cuelgue_sup:100: la última escritura de la imagen 0 responde al precio de la transacción 100 y el precio de la 101 queda sin respuesta
+PASS f100_corto: BOOT sube al terminar la transacción 105 = 101 + 4: es el precio número 5 sin respuesta (101 a 105)
+PASS f100_corto: el vigilante cuenta 5 precios sin escritura y ninguno más
+PASS f100_corto: BOOT sube en t = 10513580 ns, 80 ns después de que CS_n sube y 401.08 us después del último bit del precio que cuelga al supervisor
+PASS f100_corto: BOOT sube con CS_n en alto, sin transacción en curso, y pide la imagen 01
+PASS f100_corto: la imagen 1 recibe reloj desde t = 12513600 ns (2.000 ms después de BOOT)
+PASS f100_corto: el reset de la imagen 1 termina en t = 12677380 ns, 4095 ciclos después
+PASS f100_corto: la imagen 1 recibe su primer precio en la transacción 127 y lo responde en 48 ciclos
+PASS f100_corto: la maestra lee 0xFF en 20 ticks (transacciones 106 a 125)
+PASS f100_corto: ningún byte leído con el pin suelto, cortado o con la imagen 1 en reset es una orden
+PASS f100_corto: los 300 bytes coinciden con el esperado
+  bytes del fondo sano: transacciones 0 a 101; byte repetido (bf): 102 a 105
+  pin suelto, byte 0xFF: 20 ticks; transacciones cortadas por el fin de la reconfiguración: ninguna
+  imagen 1 en reset o sin decisión todavía, byte 0x00 en 2 transacciones; bytes de max_media desde la transacción 128: 172
+  ticks sin decisión nueva, desde el precio colgado hasta el primero que responde la imagen 1: 26 (precios 101 a 126; 5 los gasta el vigilante en contar)
+  patrimonio final: 9202 con el relevo; 9260 el fondo sano en los mismos 300 ticks; 9260 max_media sola
+
+--- el programa no escribe nunca (falla en el tick 1), T = 0,1 ms, 200 ticks ---
+PASS f1_corto: MISO sin X ni Z en los 1600 bits leídos
+PASS f1_corto: la imagen 0 no ve 2 de los primeros precios (reset de encendido) y recibe desde la transacción 2
+PASS f1_corto: cuelgue_sup:1: la imagen 0 no escribe nunca y el precio de la transacción 2 queda sin respuesta
+PASS f1_corto: BOOT sube al terminar la transacción 6 = 2 + 4: es el precio número 5 sin respuesta (2 a 6)
+PASS f1_corto: el vigilante cuenta 5 precios sin escritura y ninguno más
+PASS f1_corto: BOOT sube en t = 613580 ns, 80 ns después de que CS_n sube y 401.08 us después del último bit del precio que cuelga al supervisor
+PASS f1_corto: BOOT sube con CS_n en alto, sin transacción en curso, y pide la imagen 01
+PASS f1_corto: la imagen 1 recibe reloj desde t = 2613600 ns (2.000 ms después de BOOT)
+PASS f1_corto: el reset de la imagen 1 termina en t = 2777380 ns, 4095 ciclos después
+PASS f1_corto: la imagen 1 recibe su primer precio en la transacción 28 y lo responde en 48 ciclos
+PASS f1_corto: la maestra lee 0xFF en 20 ticks (transacciones 7 a 26)
+PASS f1_corto: ningún byte leído con el pin suelto, cortado o con la imagen 1 en reset es una orden
+PASS f1_corto: los 200 bytes coinciden con el esperado
+  bytes del fondo sano: transacciones 0 a 2; byte repetido (00): 3 a 6
+  pin suelto, byte 0xFF: 20 ticks; transacciones cortadas por el fin de la reconfiguración: ninguna
+  imagen 1 en reset o sin decisión todavía, byte 0x00 en 2 transacciones; bytes de max_media desde la transacción 29: 171
+  ticks sin decisión nueva, desde el precio colgado hasta el primero que responde la imagen 1: 26 (precios 2 a 27; 5 los gasta el vigilante en contar)
+  patrimonio final: 10860 con el relevo; 10013 el fondo sano en los mismos 200 ticks; 10013 max_media sola
+
+=== 4. Barrido del fin de la reconfiguracion dentro de una transaccion ===
+Falla en el tick 3 a 0,1 ms, T_RECONF de 1991340 a 2000840 ns cada 500 ns.
+PASS corte, INICIO_NS = 4000: 20 corridas, todas iguales al esperado byte por byte
+  bytes leidos en la transaccion cortada: 80 c0 e0 f0 f8 fc fe
+  primera transaccion que recibe la imagen 1: 30 (20 corridas)
+PASS corte, INICIO_NS = 4010: 20 corridas, todas iguales al esperado byte por byte
+  bytes leidos en la transaccion cortada: 80 c0 e0 f0 f8 fc fe
+  primera transaccion que recibe la imagen 1: 30 (20 corridas)
+
+=== 5. Barrido del fin del reset de la imagen 1 ===
+Falla en el tick 3 a 0,1 ms, T_RECONF de 2027660 a 2028460 ns cada 20 ns.
+PASS reset, INICIO_NS = 4000: 41 corridas, todas iguales al esperado byte por byte
+  bytes leidos en la transaccion cortada: ninguno
+  primera transaccion que recibe la imagen 1: 30 (21 corridas), 31 (20 corridas)
+PASS reset, INICIO_NS = 4010: 41 corridas, todas iguales al esperado byte por byte
+  bytes leidos en la transaccion cortada: ninguno
+  primera transaccion que recibe la imagen 1: 30 (21 corridas), 31 (20 corridas)
+
+=== 6. Controles negativos de la comparacion ===
+La corrida f100_r3 contra una referencia equivocada a proposito. PASS significa que la comparacion la rechazo.
+PASS neg_vign (referencia con VigN = 5): 9 comprobaciones rechazadas
+PASS neg_falla (referencia con la falla en el tick 101): 9 comprobaciones rechazadas
+PASS neg_byte (un 0xFF de la simulacion cambiado por 0x7F): 3 comprobaciones rechazadas
+
+Tiempo total: 31 s.
+Total: 109 lineas con PASS y 0 con FAIL.

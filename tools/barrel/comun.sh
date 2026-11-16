@@ -82,13 +82,17 @@ soc_barrel() {
 # el RTL del repositorio. Con ellos usa esos tres archivos para el barrel
 # (copias con un error puesto a propósito, tools/barrel/mutaciones.sh); los
 # cuatro SoC de referencia con el Espino base salen siempre de rtl/.
+# VERIF_DEFS (variable de entorno, opcional): definiciones que se agregan a los
+# dos SoC de la comparación, el barrel y el base de referencia. Se usa para
+# repetir la campaña sobre el hardware de R1 y de R2 (-DESPINO_TABLA y
+# -DESPINO_VIGILANTE son del SoC, no del core: tools/fondo/criterio5.sh).
 compilar_verif() {
   local d=$1 core=${2:-$CORE_V} rf=${3:-$RF_V} soc=${4:-$SOC_V}
   shift; shift 2>/dev/null; shift 2>/dev/null; shift 2>/dev/null
   mkdir -p "$d"
   soc_barrel "$soc" "$d/pochoco_soc_barrel.v" || return 1
   verilator --binary --timing -Wno-fatal -Wno-lint -Wno-style --top-module tb_verif ${VERIF_OPT:--O3} \
-    -DNO_ICE40_DEFAULT_ASSIGNMENTS "$@" --Mdir "$d/obj" -o sim \
+    -DNO_ICE40_DEFAULT_ASSIGNMENTS ${VERIF_DEFS:-} "$@" --Mdir "$d/obj" -o sim \
     "$CELLS_SIM" $SRC_SIN_BARREL "$d/pochoco_soc_barrel.v" "$core" "$rf" $TB/tb_verif.sv > "$d/verilator.log" 2>&1
 }
 

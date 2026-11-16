@@ -11,7 +11,7 @@
 # la del programa sin el error con esa misma falla.
 #
 # Uso: tools/fondo/controles.sh   (o make fondo-controles). Variables: NTICKS, JOBS.
-# Resultado en docs/mediciones/fondo/controles.txt.
+# Resultado en docs/mediciones/fondo/HW/controles.txt (HW es r1 o r2).
 set -uo pipefail
 source "$(dirname "$0")/comun.sh"
 
@@ -24,15 +24,19 @@ compilar_sim || exit 1
 REV=$(serie reversion 1 $NT)
 
 $PYTHON $TF/controles.py --lista > "$O/lista.txt"
-while IFS='|' read -r n falla ser desc; do
+while IFS='|' read -r n falla ser param desc; do
   $PYTHON $TF/controles.py "$n" -o "$O/$n.s" || { echo "FAIL: no se pudo armar el control $n"; exit 1; }
-  ref=""
+  ref=""; tab=""
+  if [ -n "$param" ]; then
+    $PYTHON ref/fondo.py --param "$param" --tabla-hex "$O/$n.tabla.hex"
+    tab="TABLA=$O/$n.tabla.hex "
+  fi
   if [ -n "$falla" ]; then
     $PYTHON $TF/variante.py "$falla" -i "$O/$n.s" -o "$O/${n}_f.s" && mv "$O/${n}_f.s" "$O/$n.s"
     ref=$($PYTHON $TF/variante.py "$falla" --ref)
   fi
   s=tb/practica.csv; [ "$ser" = reversion ] && s=$REV
-  echo "caso $O/$n $O/$n.s $s $NT 100000 4000 --limite 1131 $ref"
+  echo "${tab}caso $O/$n $O/$n.s $s $NT 100000 4000 --limite 1131 $ref"
 done < "$O/lista.txt" | en_paralelo
 
 {
@@ -40,7 +44,7 @@ cabecera "Controles negativos de las pruebas del fondo" tools/fondo/controles.sh
 echo "$NT ticks por control. Un control esta bien cuando la comparacion FALLA."
 echo
 total=0; detectados=0
-while IFS='|' read -r n falla ser desc; do
+while IFS='|' read -r n falla ser param desc; do
   total=$((total + 1))
   r=$(cat "$O/$n/resultado.txt")
   if echo "$r" | grep -q "^FAIL"; then

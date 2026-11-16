@@ -11,7 +11,7 @@
 # por bloque.
 #
 # Uso: tools/fondo/ticks.sh   (o make fondo-ticks)
-# Resultado en docs/mediciones/fondo/ticks.txt y tamano.txt.
+# Resultado en docs/mediciones/fondo/HW/ticks.txt (HW es r1 o r2) y tamano.txt.
 set -uo pipefail
 source "$(dirname "$0")/comun.sh"
 

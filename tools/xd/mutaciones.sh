@@ -27,14 +27,22 @@
 set -uo pipefail
 source "$(dirname "$0")/comun.sh"
 
-O=$BX/mutaciones
+# Variables de entorno, para repetir la prueba con otro subconjunto de la
+# extensión (tools/fondo/criterio5.sh): XD (máscara, por defecto 7), NOMBRES
+# (las mutaciones que aplican a ese subconjunto), DIR_MUT y SALIDA.
+XD=${XD:-7}
+XD_DEFS_MUT=""
+[ $((XD & 1)) != 0 ] && XD_DEFS_MUT="$XD_DEFS_MUT -DESPINO_XD_EMAD"
+[ $((XD & 2)) != 0 ] && XD_DEFS_MUT="$XD_DEFS_MUT -DESPINO_XD_DEVK"
+[ $((XD & 4)) != 0 ] && XD_DEFS_MUT="$XD_DEFS_MUT -DESPINO_XD_MULSTEP"
+O=${DIR_MUT:-$BX/mutaciones}
 JOBS=${JOBS:-5}
 INSTR=${INSTR:-3000}
-NOMBRES="MUTA_XD_K MUTA_XD_F7MUL MUTA_XD_SRL MUTA_XD_K4 MUTA_XD_BCERO MUTA_XD_WE MUTA_XD_HILO MUTA_XD_ANULA MUTA_XD_SUMA"
+NOMBRES=${NOMBRES:-"MUTA_XD_K MUTA_XD_F7MUL MUTA_XD_SRL MUTA_XD_K4 MUTA_XD_BCERO MUTA_XD_WE MUTA_XD_HILO MUTA_XD_ANULA MUTA_XD_SUMA"}
 GRUPOS="U B C D L P"
 mkdir -p "$O/prog"
 
-G="$PYTHON $T/prog_hilos.py --xd 7"
+G="$PYTHON $T/prog_hilos.py --xd $XD"
 $G 1 --modo uno --hilo-spi 2 -n 300 -o "$O/prog/U.s"
 $G 1 --modo separado -o "$O/prog/B.s"
 $G 1 --modo spi1 --hilo-spi 1 -o "$O/prog/C.s"
@@ -49,7 +57,7 @@ una() {
   local m=$1 d=$O/$1 def=""
   mkdir -p "$d"
   [ "$m" != referencia ] && def="-D$m"
-  VERIF_OPT="-O1 -CFLAGS -O0" compilar_verif "$d" "$CORE_V" "$RF_V" "$SOC_V" -DESPINO_XD $def
+  VERIF_OPT="-O1 -CFLAGS -O0" compilar_verif "$d" "$CORE_V" "$RF_V" "$SOC_V" $XD_DEFS_MUT $def
   if [ $? -ne 0 ] || [ ! -x "$d/obj/sim" ]; then echo "NO_COMPILA" > "$d/estado.txt"; return 0; fi
   "$d/obj/sim" "+hex=$O/prog/U.hex" "+instrucciones=$INSTR" +precio_cada=97 +hilo_spi=2 > "$d/U.log" 2>&1
   "$d/obj/sim" "+hex=$O/prog/B.hex" "+instrucciones=$INSTR"                              > "$d/B.log" 2>&1
@@ -66,7 +74,7 @@ una() {
   echo "OK" > "$d/estado.txt"
 }
 export -f una compilar_verif soc_barrel
-export O T TB SW FO B PYTHON INSTR CELLS_SIM BASE_SRC SRC_SIN_BARREL CORE_V RF_V SOC_V
+export O T TB SW FO B PYTHON INSTR CELLS_SIM BASE_SRC SRC_SIN_BARREL CORE_V RF_V SOC_V XD_DEFS_MUT
 
 rm -f "$O"/*/estado.txt "$O"/*/?.log
 echo "referencia $NOMBRES" | tr ' ' '\n' | xargs -P "$JOBS" -I{} bash -c 'una {}'
@@ -88,6 +96,8 @@ desc() {
 {
 echo "Controles negativos de la verificacion por simulacion de la extension de la ISA"
 echo "Generado por tools/xd/mutaciones.sh (make xd-mutaciones). No editar a mano."
+echo "Subconjunto de la extension: mascara $XD ($XD_DEFS_MUT ). Mutaciones: $NOMBRES"
+[ -n "${VERIF_DEFS:-}" ] && echo "Definiciones adicionales en los dos SoC de la comparacion: $VERIF_DEFS (corrida de tools/fondo/criterio5.sh)"
 echo
 versiones
 echo "  $(verilator --version)"
@@ -125,6 +135,6 @@ done
 echo
 if [ $fallas = 0 ]; then echo "RESULTADO: PASS, $detectadas de $total mutaciones detectadas y el core sin mutar pasa"
 else echo "RESULTADO: FAIL ($detectadas de $total mutaciones detectadas, $fallas problemas)"; fi
-} | tee "$MX/mutaciones.txt"
+} | tee "${SALIDA:-$MX/mutaciones.txt}"
 
 grep -q "^RESULTADO: PASS" "$MX/mutaciones.txt"

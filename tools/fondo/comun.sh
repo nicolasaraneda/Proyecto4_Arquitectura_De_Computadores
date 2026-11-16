@@ -9,8 +9,10 @@
 # agrega:
 #   TF, BF, MF     carpetas de los scripts, de los productos intermedios
 #                  (build/fondo, ignorada por git) y de las mediciones
-#   FONDO_DEFS     definiciones del hardware en que corre el fondo: el barrel
-#                  con emad y devk, sin mulstep (decisión T58)
+#   HW             peldaño que se prueba: r1 (por defecto) o r2
+#   FONDO_DEFS     definiciones del hardware: el barrel con emad y devk, sin
+#                  mulstep (decisión T58), y la tabla de parámetros en su BRAM.
+#                  Con HW=r2, además el vigilante con SB_WARMBOOT
 #   FONDO_SRC      fuentes del SoC con esas definiciones delante
 #   FONDO_HEX      el programa ensamblado
 #   SIM            el testbench tb/fondo/tb_fondo.sv compilado con Verilator
@@ -18,9 +20,17 @@
 source "$(dirname "${BASH_SOURCE[0]}")/../barrel/comun.sh"
 
 TF=tools/fondo
-BF=build/fondo
-MF=docs/mediciones/fondo
-FONDO_DEFS="-DESPINO_BARREL -DESPINO_XD_EMAD -DESPINO_XD_DEVK"
+HW=${HW:-r1}
+BF=build/fondo/$HW
+MF=docs/mediciones/fondo/$HW
+R1_DEFS="-DESPINO_BARREL -DESPINO_XD_EMAD -DESPINO_XD_DEVK -DESPINO_TABLA"
+R2_DEFS="$R1_DEFS -DESPINO_VIGILANTE"
+case $HW in
+  r1) FONDO_DEFS=$R1_DEFS ;;
+  r2) FONDO_DEFS=$R2_DEFS ;;
+  *)  echo "HW debe ser r1 o r2" >&2; exit 1 ;;
+esac
+TABLA_HEX=sw/fondo_tabla.hex
 FONDO_SRC="$FONDO_DEFS $BASE_SRC"
 FONDO_HEX=$BF/fondo.hex
 SIM=$BF/obj/sim
@@ -58,13 +68,13 @@ caso() {
   mkdir -p "$d"
   local hex=$d/programa.hex
   $PYTHON tools/pochoasm.py "$fuente" -o "$hex" > /dev/null || { echo "FAIL $(basename "$d"): no ensambla" > "$d/resultado.txt"; return 1; }
-  "$SIM" +PROGRAMA="$hex" $(simbolos "$fuente") +SERIE="$ser" +NTICKS="$nt" +PERIODO_NS="$per" +INICIO_NS="$ini" \
+  "$SIM" +PROGRAMA="$hex" +TABLA="${TABLA:-$TABLA_HEX}" $(simbolos "$fuente") +SERIE="$ser" +NTICKS="$nt" +PERIODO_NS="$per" +INICIO_NS="$ini" \
     +SALIDA="$d/salida.csv" +ESTADO="$d/estado.csv" ${PLUS:-} > "$d/tb.log" 2>&1
   $PYTHON $TF/revisar.py "$d" --serie "$ser" --nticks "$nt" --periodo-ns "$per" --inicio-ns "$ini" "$@" > "$d/resultado.txt" 2>&1
 }
 
 # en_paralelo: lee comandos por la entrada estándar y los corre con JOBS procesos
-en_paralelo() { xargs -P "${JOBS:-6}" -I{} bash -c "source $TF/comun.sh; {}"; }
+en_paralelo() { xargs -P "${JOBS:-6}" -I{} bash -c "export HW=$HW; source $TF/comun.sh; {}"; }
 
 # cabecera TITULO SCRIPT OBJETIVO
 cabecera() {
@@ -73,8 +83,8 @@ cabecera() {
   echo
   versiones
   echo "  $(verilator --version)"
-  echo "Hardware: pochoco_soc con $FONDO_DEFS"
-  echo "Programa: sw/fondo.s (sha256 $(sha256sum sw/fondo.s | cut -c1-16)...), referencia ref/fondo.py"
+  echo "Hardware ($HW): pochoco_soc con $FONDO_DEFS"
+  echo "Programa: sw/fondo.s (sha256 $(sha256sum sw/fondo.s | cut -c1-16)...), tabla $TABLA_HEX (sha256 $(sha256sum $TABLA_HEX | cut -c1-16)...), referencia ref/fondo.py"
   echo
 }
 

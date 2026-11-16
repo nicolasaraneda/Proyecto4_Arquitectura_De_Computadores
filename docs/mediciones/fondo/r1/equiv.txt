@@ -1,0 +1,38 @@
+Equivalencia del fondo en un chip con su referencia
+Generado por tools/fondo/equiv.sh (make fondo-equiv). No editar a mano.
+
+Herramientas:
+  Yosys 0.68+195 (git sha1 435977e97-dirty, Release, Clang /usr/bin/clang++ 21.1.8)
+  "nextpnr-ice40" -- Next Generation Place and Route (Version nextpnr-0.11.1-19-g8dbcee5c)
+  Icarus Verilog version 14.0 (devel) (s20260301-403-g5ab23063f-dirty)
+Commit de partida: 05b3b7e (rama p5-tabla-vigilante)
+  Verilator 5.053 devel rev v5.052-22-g7cf8c5cca (mod)
+Hardware (r1): pochoco_soc con -DESPINO_BARREL -DESPINO_XD_EMAD -DESPINO_XD_DEVK -DESPINO_TABLA
+Programa: sw/fondo.s (sha256 19773517830a2e16...), tabla sw/fondo_tabla.hex (sha256 f792588c9cc823cb...), referencia ref/fondo.py
+
+1. Copia parametrizada del testbench oficial (Verilator)
+PASS copia del oficial, practica, periodo 100000 ns, 20000 ticks, Peor caso precio->decision: 443 ciclos (disponibles: 2262), 4/4, 20000 filas identicas, patrimonio 26070
+PASS copia del oficial, practica, periodo 1000000 ns, 20000 ticks, Peor caso precio->decision: 443 ciclos (disponibles: 24762), 4/4, 20000 filas identicas, patrimonio 25031
+PASS copia del oficial, practica, periodo 10000000 ns, 20000 ticks, Peor caso precio->decision: 443 ciclos (disponibles: 249762), 4/4, 20000 filas identicas, patrimonio 25031
+
+2. Bytes, estado interno, telemetria y protocolo (tb/fondo/tb_fondo.sv)
+PASS practica_100000: 20000 bytes, 19998 ticks de estado, patrimonio 26070, 630 ordenes, pesos 7/6/3 (20 cambios), 0 ticks por plazo, peor caso 443 de 2262 ciclos, hasta 3 vueltas de lectura
+PASS practica_1000000: 20000 bytes, 19999 ticks de estado, patrimonio 25031, 594 ordenes, pesos 6/6/4 (21 cambios), 0 ticks por plazo, peor caso 443 de 24762 ciclos, hasta 3 vueltas de lectura
+PASS practica_10000000: 20000 bytes, 19999 ticks de estado, patrimonio 25031, 594 ordenes, pesos 6/6/4 (21 cambios), 0 ticks por plazo, peor caso 443 de 249762 ciclos, hasta 3 vueltas de lectura
+PASS remuestreo: 20000 bytes, 19998 ticks de estado, patrimonio 24926, 655 ordenes, pesos 3/5/8 (19 cambios), 0 ticks por plazo, peor caso 443 de 2262 ciclos, hasta 3 vueltas de lectura
+PASS modelo: 20000 bytes, 19998 ticks de estado, patrimonio 11208, 325 ordenes, pesos 3/4/9 (15 cambios), 0 ticks por plazo, peor caso 439 de 2262 ciclos, hasta 3 vueltas de lectura
+PASS modelo_vecino: 20000 bytes, 19998 ticks de estado, patrimonio 14649, 416 ordenes, pesos 6/1/9 (14 cambios), 0 ticks por plazo, peor caso 443 de 2262 ciclos, hasta 3 vueltas de lectura
+PASS paseo: 20000 bytes, 19998 ticks de estado, patrimonio 5035, 958 ordenes, pesos 7/5/4 (21 cambios), 0 ticks por plazo, peor caso 443 de 2262 ciclos, hasta 3 vueltas de lectura
+PASS tendencia: 20000 bytes, 19998 ticks de estado, patrimonio 13079, 185 ordenes, pesos 6/2/8 (6 cambios), 0 ticks por plazo, peor caso 443 de 2262 ciclos, hasta 3 vueltas de lectura
+PASS reversion: 20000 bytes, 19998 ticks de estado, patrimonio 419913, 5232 ordenes, pesos 6/1/9 (16 cambios), 0 ticks por plazo, peor caso 443 de 2262 ciclos, hasta 3 vueltas de lectura
+PASS dos_componentes: 20000 bytes, 19998 ticks de estado, patrimonio 20962, 785 ordenes, pesos 7/7/2 (26 cambios), 0 ticks por plazo, peor caso 443 de 2262 ciclos, hasta 3 vueltas de lectura
+PASS saltos: 20000 bytes, 19998 ticks de estado, patrimonio 312660, 5069 ordenes, pesos 8/4/4 (31 cambios), 0 ticks por plazo, peor caso 443 de 2262 ciclos, hasta 3 vueltas de lectura
+PASS cambio_volatilidad: 20000 bytes, 19998 ticks de estado, patrimonio 121060, 3325 ordenes, pesos 2/5/9 (30 cambios), 0 ticks por plazo, peor caso 443 de 2262 ciclos, hasta 3 vueltas de lectura
+PASS cambio_de_caracter: 20000 bytes, 19998 ticks de estado, patrimonio 13255, 521 ordenes, pesos 7/3/6 (15 cambios), 0 ticks por plazo, peor caso 443 de 2262 ciclos, hasta 3 vueltas de lectura
+PASS volatil: 20000 bytes, 19998 ticks de estado, patrimonio 374864, 6521 ordenes, pesos 8/5/3 (31 cambios), 0 ticks por plazo, peor caso 443 de 2262 ciclos, hasta 3 vueltas de lectura
+PASS nivel_bajo: 20000 bytes, 19998 ticks de estado, patrimonio 90702, 3291 ordenes, pesos 7/1/8 (27 cambios), 0 ticks por plazo, peor caso 443 de 2262 ciclos, hasta 3 vueltas de lectura
+PASS plana: 20000 bytes, 19998 ticks de estado, patrimonio 10000, 0 ordenes, pesos 6/5/5 (0 cambios), 0 ticks por plazo, peor caso 379 de 2262 ciclos, hasta 3 vueltas de lectura
+PASS borde_bajo: 20000 bytes, 19998 ticks de estado, patrimonio 690969, 9878 ordenes, pesos 5/2/9 (4 cambios), 0 ticks por plazo, peor caso 443 de 2262 ciclos, hasta 3 vueltas de lectura
+PASS borde_alto: 20000 bytes, 19998 ticks de estado, patrimonio 614131, 6681 ordenes, pesos 6/1/9 (7 cambios), 0 ticks por plazo, peor caso 443 de 2262 ciclos, hasta 3 vueltas de lectura
+
+Ticks comparados con tb_fondo.sv en los casos que pasan: 360000

@@ -148,9 +148,12 @@ def main(argv=None):
         vistos = a.nticks - perdidos
         for campo, esperado in (("recibidos", vistos), ("respuestas", vistos), ("sin_respuesta", 0),
                                 ("precios_perdidos", 0), ("bits_x", 0), ("violaciones", 0),
-                                ("dec_distinto_de_1", 0), ("tel_mas_de_1", 0), ("ticks_plazo", f.degradados)):
+                                ("dec_distinto_de_1", 0), ("tel_mas_de_1", 0), ("ticks_plazo", f.degradados),
+                                ("vig_boot", 0)):
             if r[campo] != esperado:
                 errores.append(f"{campo} = {r[campo]} y se esperaba {esperado}")
+        if r["vig_max"] > 1:
+            errores.append(f"el vigilante llego a contar {r['vig_max']} precios sin respuesta")
         if r["peor_caso"] >= limite:
             errores.append(f"peor caso {r['peor_caso']} ciclos, no menor que {limite}")
 

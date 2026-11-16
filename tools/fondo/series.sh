@@ -14,7 +14,7 @@
 #
 # Uso: tools/fondo/series.sh   (o make fondo-series)
 # Variables: POR_FAMILIA (70, o sea 1 050 series), NTICKS (2000), SEMILLA (1), JOBS.
-# Resultado en docs/mediciones/fondo/series.txt. Unos 10 minutos con 6 procesos.
+# Resultado en docs/mediciones/fondo/HW/series.txt (HW es r1 o r2). Unos 10 minutos con 6 procesos.
 set -uo pipefail
 source "$(dirname "$0")/comun.sh"
 

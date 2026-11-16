@@ -24,7 +24,7 @@
 # de holgura: 1131 ciclos.
 #
 # Uso: tools/fondo/fases.sh   (o make fondo-fases). Variables: CORTA=1, JOBS.
-# Resultado en docs/mediciones/fondo/fases.txt.
+# Resultado en docs/mediciones/fondo/HW/fases.txt (HW es r1 o r2).
 set -uo pipefail
 source "$(dirname "$0")/comun.sh"
 

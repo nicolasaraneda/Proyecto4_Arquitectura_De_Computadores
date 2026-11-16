@@ -1,0 +1,20 @@
+Testbench oficial sin modificar con el fondo en un chip
+Generado por tools/fondo/oficial.sh (make fondo-oficial). No editar a mano.
+
+Herramientas:
+  Yosys 0.68+195 (git sha1 435977e97-dirty, Release, Clang /usr/bin/clang++ 21.1.8)
+  "nextpnr-ice40" -- Next Generation Place and Route (Version nextpnr-0.11.1-19-g8dbcee5c)
+  Icarus Verilog version 14.0 (devel) (s20260301-403-g5ab23063f-dirty)
+Commit de partida: 05b3b7e (rama p5-tabla-vigilante)
+  Verilator 5.053 devel rev v5.052-22-g7cf8c5cca (mod)
+Hardware (r1): pochoco_soc con -DESPINO_BARREL -DESPINO_XD_EMAD -DESPINO_XD_DEVK -DESPINO_TABLA
+Programa: sw/fondo.s (sha256 19773517830a2e16...), tabla sw/fondo_tabla.hex (sha256 f792588c9cc823cb...), referencia ref/fondo.py
+
+tb/tb_proyecto_4.sv: sin cambios respecto del repositorio (sha256 f83486755fe2b3de...)
+
+  Patrimonio final:          9661
+  Ordenes ejecutadas:        74
+  Peor caso precio->decision: 443 ciclos (disponibles: 2262)
+  Testbenchs aprobados: 4/4
+PASS: 4/4
+PASS: decisiones.csv identico byte a byte al de ref/fondo.py (2001 lineas, sha256 a14ca64278b7b0d4...)

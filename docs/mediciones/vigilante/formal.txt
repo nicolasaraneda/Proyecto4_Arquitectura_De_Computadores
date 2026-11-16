@@ -1,0 +1,30 @@
+Verificacion formal del vigilante (formal/vigilante/vigilante.sby)
+Generado por tools/vigilante/formal.sh (make vig-formal). No editar a mano.
+
+Herramientas:
+  Yosys 0.68+195 (git sha1 435977e97-dirty, Release, Clang /usr/bin/clang++ 21.1.8)
+  "nextpnr-ice40" -- Next Generation Place and Route (Version nextpnr-0.11.1-19-g8dbcee5c)
+  Icarus Verilog version 14.0 (devel) (s20260301-403-g5ab23063f-dirty)
+Commit de partida: 05b3b7e (rama p5-tabla-vigilante)
+  SBY v0.68
+  Yices 2.7.0
+Modulo: rtl/vigilante.v (sha256 5df9ffc8037de4a5...), con 7 sentencias assert y 2 cover.
+
+Pruebas por induccion (modo prove, profundidad 24):
+PASS prove_n1: successful proof by k-induction.
+PASS prove_n4: successful proof by k-induction.
+PASS prove_n7: successful proof by k-induction.
+
+Alcanzabilidad (modo cover, profundidad 80). Linea 157: el disparo por cuenta,
+sin disparo manual. Linea 158: ocho precios respondidos sin que BOOT suba.
+PASS cover_n1: linea 157 en el paso 5, linea 158 en el paso 18
+PASS cover_n4: linea 157 en el paso 8, linea 158 en el paso 18
+PASS cover_n7: linea 157 en el paso 11, linea 158 en el paso 18
+
+Controles negativos (N = 4). PASS significa que sby rechazo la copia con el error:
+PASS mutacion a (BOOT sube sin esperar a CS_n): sby da FAIL, Assert failed in vigilante: vigilante.v:137.34-137.52
+PASS mutacion b (dispara con N precios en vez de N + 1): sby da FAIL, Assert failed in vigilante: vigilante.v:133.9-133.49
+PASS mutacion c (BOOT vuelve a bajar): sby da FAIL, Assert failed in vigilante: vigilante.v:141.23-141.38
+PASS mutacion d (la escritura simultanea deja la cuenta en 0): sby da FAIL, Assert failed in vigilante: vigilante.v:133.9-133.49
+
+Total: 10 lineas con PASS y 0 con FAIL.

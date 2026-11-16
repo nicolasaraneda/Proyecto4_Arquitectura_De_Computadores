@@ -17,9 +17,12 @@
 # cada instrucción contra su especificación, comparación corta contra el Espino
 # base con la especificación, testbench oficial, equivalencia de los 20 000
 # ticks y cierre de timing en 10 semillas.
-# El fondo en un chip (make check-fondo), también en un trabajo aparte: pruebas
-# de la referencia, testbench oficial con sw/fondo.s, y las versiones cortas de
-# la equivalencia, del lote de series, del barrido de fases y de la degradación.
+# El fondo en un chip (make check-fondo), también en un trabajo aparte y una vez
+# por peldaño (R1 con la tabla de parámetros, R2 con la tabla y el vigilante):
+# pruebas de la referencia, testbench oficial con sw/fondo.s, y las versiones
+# cortas de la equivalencia, del lote de series, del barrido de fases, de la
+# degradación, de los controles negativos y de la matriz de estrés. Después las
+# pruebas del vigilante (make check-vigilante).
 # Usa la misma versión de OSS CAD Suite que usamos en el desarrollo.
 #
 # Los 20 000 ticks con Icarus, el simulador del testbench oficial, no corren
@@ -129,7 +132,7 @@ jobs:
       - name: Extensión de la ISA (módulos, formal, comparación corta, oficial 4/4, equivalencia y timing en 10 semillas)
         run: make check-xd BARREL_JOBS=4
 
-  # Fondo en un chip: sw/fondo.s sobre el barrel con emad y devk
+  # Fondo en un chip: sw/fondo.s en los peldaños R1 y R2, y el vigilante
   fondo:
     runs-on: ubuntu-latest
     timeout-minutes: 60
@@ -142,8 +145,14 @@ jobs:
           version: '2026-09-06'
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Fondo (referencia, oficial 4/4, equivalencia, series, fases y degradación en versión corta)
-        run: make check-fondo FONDO_JOBS=4
+      - name: Fondo en R1 (referencia, tabla, oficial 4/4, equivalencia, series, fases, degradación, controles y estrés)
+        run: make check-fondo HW=r1 FONDO_JOBS=4
+
+      - name: Fondo en R2, con el vigilante (lo mismo; el vigilante no se debe disparar)
+        run: make check-fondo HW=r2 FONDO_JOBS=4
+
+      - name: Vigilante (testbench del módulo, formal y relevo de punta a punta)
+        run: make check-vigilante
 
   # Ejecución manual: la corrida completa con el simulador del testbench oficial
   equiv-icarus:

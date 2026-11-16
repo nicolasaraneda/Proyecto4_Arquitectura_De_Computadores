@@ -1,0 +1,48 @@
+# vigilante.sby: propiedades del vigilante (rtl/vigilante.v) con SymbiYosys.
+#
+# Grupo: Nicolás Araneda, Vicente Calderón y Santiago Muñoz.
+# Arquitectura de Computadores, Universidad de los Andes, 2026-2.
+#
+# Las propiedades están en rtl/vigilante.v, bajo `ifdef FORMAL:
+#   0. Invariante: el contador del módulo y la historia del monitor (un
+#      registro de desplazamiento, otra codificación) cuentan lo mismo, y el
+#      contador nunca pasa de N + 1.
+#   1. BOOT solo sube con CS_n en alto en el ciclo anterior.
+#   2. BOOT solo sube por la cuenta completa o por el disparo manual.
+#   3. BOOT no vuelve a bajar.
+#   4. Sin disparo manual, BOOT solo sube después de N + 1 precios seguidos
+#      sin escritura en DECISION.
+#   5. El destino S1 S0 es constante.
+# Tareas: prueba por inducción (prove) y alcanzabilidad (cover), cada una con
+# N = 1, 4 y 7. El SoC de competencia usa N = 4.
+#
+# Se corre con tools/vigilante/formal.sh (make vig-formal), que copia este
+# archivo a build/vigilante/formal/ y además prueba copias del módulo con un
+# error puesto a propósito. La ruta de [files] es relativa a esa carpeta.
+
+[tasks]
+prove_n1 prove n1
+prove_n4 prove n4
+prove_n7 prove n7
+cover_n1 cover n1
+cover_n4 cover n4
+cover_n7 cover n7
+
+[options]
+prove: mode prove
+prove: depth 24
+cover: mode cover
+cover: depth 80
+
+[engines]
+smtbmc yices
+
+[script]
+read_verilog -formal vigilante.v
+n1: chparam -set N 1 vigilante
+n4: chparam -set N 4 vigilante
+n7: chparam -set N 7 vigilante
+prep -top vigilante
+
+[files]
+../../../rtl/vigilante.v

@@ -38,7 +38,7 @@
 set -uo pipefail
 source "$(dirname "$0")/comun.sh"
 
-O=$B/mutaciones
+O=${DIR_MUT:-$B/mutaciones}
 JOBS=${JOBS:-5}
 INSTR=${INSTR:-3000}
 mkdir -p "$O/prog"
@@ -109,6 +109,7 @@ detalle() {
 {
 echo "Controles negativos de la verificacion del Espino barrel"
 echo "Generado por tools/barrel/mutaciones.sh (make barrel-mutaciones). No editar a mano."
+[ -n "${VERIF_DEFS:-}" ] && echo "Definiciones adicionales en los dos SoC de la comparacion: $VERIF_DEFS (corrida de tools/fondo/criterio5.sh)"
 echo
 versiones
 echo "  $(verilator --version)"
@@ -162,6 +163,6 @@ printf '%s' "$resumen"
 echo
 if [ $fallas = 0 ]; then echo "RESULTADO: PASS, $detectadas de $total mutaciones detectadas y el barrel sin mutar pasa"
 else echo "RESULTADO: FAIL ($detectadas de $total mutaciones detectadas, $fallas problemas)"; fi
-} | tee "$M/mutaciones.txt"
+} | tee "${SALIDA:-$M/mutaciones.txt}"
 
 grep -q "^RESULTADO: PASS" "$M/mutaciones.txt"

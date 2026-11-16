@@ -75,7 +75,7 @@ def main(argv):
     if argv[2] == "--plusargs":
         print(" ".join(f"+{arg}={e.simbolos[nombre]}" for nombre, arg in PLUSARGS))
     elif argv[2] == "--tamano":
-        tabla = e.simbolos["TABLA"] // 4
+        tabla = e.simbolos["PUB"] // 4
         fin = max(i for i, w in enumerate(palabras[:tabla]) if w) + 1
         marcas = {"Supervisor: max_media propia": e.etiquetas["s_publica"] + 12,
                   "Supervisor: telemetría": e.etiquetas["s_voto"] + 14 * 4}
@@ -84,15 +84,13 @@ def main(argv):
         inicio.append(fin * 4)
         for (nombre, _), a, b in zip(BLOQUES, inicio, inicio[1:]):
             print(f"  {nombre:45s} {(b - a) // 4:4d}")
-        datos = sum(1 for w in palabras[tabla:] if w is not None and tabla * 4 < e.simbolos["PUB"])
-        n_tabla = (e.simbolos["PUB"] - e.simbolos["TABLA"]) // 4
         n_estado = (e.simbolos["G3"] + 8 - e.simbolos["PUB"]) // 4
         print(f"  {'Programa':45s} {fin:4d}")
-        print(f"  {'Tabla de parámetros (solo lectura)':45s} {n_tabla:4d}")
         print(f"  {'Estado compartido (parte en cero)':45s} {n_estado:4d}")
-        print(f"  {'Total':45s} {fin + n_tabla + n_estado:4d} de {len(palabras)} palabras "
-              f"({100.0 * (fin + n_tabla + n_estado) / len(palabras):.1f} %)")
-        print(f"  {'Libres entre el programa y la tabla':45s} {tabla - fin:4d}")
+        print(f"  {'Total':45s} {fin + n_estado:4d} de {len(palabras)} palabras "
+              f"({100.0 * (fin + n_estado) / len(palabras):.1f} %)")
+        print(f"  {'Libres entre el programa y el estado':45s} {tabla - fin:4d}")
+        print("  La tabla de parametros (20 valores de 16 bits) no ocupa esta memoria: esta en su BRAM.")
     else:
         for nombre in argv[2:]:
             print(f"{nombre} {e.simbolos[nombre]}")

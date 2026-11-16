@@ -20,7 +20,7 @@
 # sano y de max_media sola.
 #
 # Uso: tools/fondo/degradacion.sh   (o make fondo-degradacion). CORTA=1, JOBS.
-# Resultado en docs/mediciones/fondo/degradacion.txt.
+# Resultado en docs/mediciones/fondo/HW/degradacion.txt (HW es r1 o r2).
 set -uo pipefail
 source "$(dirname "$0")/comun.sh"
 

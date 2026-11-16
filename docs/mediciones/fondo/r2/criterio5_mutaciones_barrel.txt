@@ -1,0 +1,235 @@
+Controles negativos de la verificacion del Espino barrel
+Generado por tools/barrel/mutaciones.sh (make barrel-mutaciones). No editar a mano.
+Definiciones adicionales en los dos SoC de la comparacion: -DESPINO_XD_EMAD -DESPINO_XD_DEVK -DESPINO_TABLA -DESPINO_VIGILANTE (corrida de tools/fondo/criterio5.sh)
+
+Herramientas:
+  Yosys 0.68+195 (git sha1 435977e97-dirty, Release, Clang /usr/bin/clang++ 21.1.8)
+  "nextpnr-ice40" -- Next Generation Place and Route (Version nextpnr-0.11.1-19-g8dbcee5c)
+  Icarus Verilog version 14.0 (devel) (s20260301-403-g5ab23063f-dirty)
+Commit de partida: 05b3b7e (rama p5-tabla-vigilante)
+  Verilator 5.053 devel rev v5.052-22-g7cf8c5cca (mod)
+
+Sin mutacion: las siete comparaciones deben pasar
+   PASS A: 12000 instrucciones comparadas una por una (hilos: 3000 3000 3000 3000)
+   PASS H: 6000 instrucciones comparadas una por una (hilos: 1500 1500 1500 1500)
+   PASS B: 12000 instrucciones comparadas una por una (hilos: 3000 3000 3000 3000)
+   PASS C: 12000 instrucciones comparadas una por una (hilos: 3000 3000 3000 3000)
+   PASS D: 12000 instrucciones comparadas una por una (hilos: 3000 3000 3000 3000)
+   PASS L: 469 instrucciones comparadas una por una (hilos: 118 117 117 117)
+   PASS P: 390 instrucciones comparadas una por una (hilos: 98 98 97 97)
+
+PASS ctx_escritura: detectada por 7 de las 7 comparaciones
+      El resultado se escribe en el contexto del hilo que esta en X, no en el del que esta en M (espino_barrel_core.v)
+      A: hilo 2, instruccion 2: contexto: contenido del banco de registros
+      H: hilo 3, instruccion 2: contexto: contenido del banco de registros
+      B: hilo 0, instruccion 2: contexto: contenido del banco de registros
+      C: hilo 0, instruccion 2: contexto: contenido del banco de registros
+      D: hilo 0, instruccion 2: contexto: contenido del banco de registros
+      L: hilo 0, instruccion 2: contexto: contenido del banco de registros
+      P: hilo 0, instruccion 2: contexto: contenido del banco de registros
+PASS ctx_lectura_rs1: detectada por 7 de las 7 comparaciones
+      rs1 se lee del contexto del hilo que esta en F (espino_barrel_core.v)
+      A: hilo 2, instruccion 8: escritura al banco de registros
+      H: hilo 3, instruccion 7: escritura al banco de registros
+      B: hilo 2, instruccion 6: escritura al banco de registros
+      C: hilo 0, instruccion 8: escritura al banco de registros
+      D: hilo 2, instruccion 6: escritura al banco de registros
+      L: hilo 0, instruccion 3: escritura al banco de registros
+      P: hilo 1, instruccion 3: escritura al banco de registros
+PASS ctx_lectura_rs2: detectada por 7 de las 7 comparaciones
+      rs2 se lee del contexto del hilo que esta en X (espino_barrel_core.v)
+      A: hilo 2, instruccion 19: escritura al banco de registros
+      H: hilo 3, instruccion 10: contador de programa o instruccion
+      B: hilo 0, instruccion 20: escritura al banco de registros
+      C: hilo 0, instruccion 20: escritura al banco de registros
+      D: hilo 0, instruccion 20: escritura al banco de registros
+      L: hilo 0, instruccion 28: escritura al banco de registros
+      P: hilo 1, instruccion 28: escritura al banco de registros
+PASS escritura_sin_hilo: detectada por 7 de las 7 comparaciones
+      La escritura al banco ignora el numero de hilo: todos escriben el contexto 0 (espino_barrel_regfile.v)
+      A: hilo 2, instruccion 2: contexto: contenido del banco de registros
+      H: hilo 3, instruccion 2: contexto: contenido del banco de registros
+      B: hilo 1, instruccion 2: contexto: contenido del banco de registros
+      C: hilo 1, instruccion 2: contexto: contenido del banco de registros
+      D: hilo 1, instruccion 2: contexto: contenido del banco de registros
+      L: hilo 1, instruccion 2: contexto: contenido del banco de registros
+      P: hilo 1, instruccion 2: contexto: contenido del banco de registros
+PASS pc_otro_hilo: detectada por 7 de las 7 comparaciones
+      El hilo que entra a F busca con el proximo contador del hilo que esta en X (espino_barrel_core.v)
+      A: hilo 1, instruccion 1: contador de programa o instruccion
+      H: hilo 1, instruccion 1: contador de programa o instruccion
+      B: hilo 1, instruccion 1: contador de programa o instruccion
+      C: hilo 1, instruccion 1: contador de programa o instruccion
+      D: hilo 1, instruccion 1: contador de programa o instruccion
+      L: hilo 1, instruccion 1: contador de programa o instruccion
+      P: hilo 1, instruccion 1: contador de programa o instruccion
+PASS enlace_otro_hilo: detectada por 7 de las 7 comparaciones
+      El enlace de jal y jalr guarda el contador del hilo que esta en F (espino_barrel_core.v)
+      A: hilo 2, instruccion 39: escritura al banco de registros
+      H: hilo 3, instruccion 223: escritura al banco de registros
+      B: hilo 2, instruccion 45: escritura al banco de registros
+      C: hilo 2, instruccion 42: escritura al banco de registros
+      D: hilo 2, instruccion 45: escritura al banco de registros
+      L: hilo 3, instruccion 36: escritura al banco de registros
+      P: hilo 2, instruccion 41: escritura al banco de registros
+PASS x0: detectada por 7 de las 7 comparaciones
+      Se permite escribir x0 (espino_barrel_core.v)
+      A: hilo 0, instruccion 1: escritura al banco de registros
+      H: hilo 0, instruccion 1: escritura al banco de registros
+      B: hilo 0, instruccion 1: escritura al banco de registros
+      C: hilo 0, instruccion 1: escritura al banco de registros
+      D: hilo 0, instruccion 1: escritura al banco de registros
+      L: hilo 0, instruccion 1: escritura al banco de registros
+      P: hilo 0, instruccion 1: escritura al banco de registros
+PASS rd_otro_hilo: detectada por 7 de las 7 comparaciones
+      El registro destino sale de la instruccion que esta en R (espino_barrel_core.v)
+      A: hilo 2, instruccion 2: escritura al banco de registros
+      H: hilo 3, instruccion 2: escritura al banco de registros
+      B: hilo 3, instruccion 2: escritura al banco de registros
+      C: hilo 3, instruccion 2: escritura al banco de registros
+      D: hilo 3, instruccion 2: escritura al banco de registros
+      L: hilo 0, instruccion 2: escritura al banco de registros
+      P: hilo 0, instruccion 2: escritura al banco de registros
+PASS be_ram: detectada por 7 de las 7 comparaciones
+      Los bytes habilitados llegan rotados a la memoria (pochoco_soc.v)
+      A: hilo 2, instruccion 32: palabra de memoria escrita
+      H: hilo 3, instruccion 239: palabra de memoria escrita
+      B: hilo 0, instruccion 23: palabra de memoria escrita
+      C: hilo 0, instruccion 23: palabra de memoria escrita
+      D: hilo 0, instruccion 23: palabra de memoria escrita
+      L: hilo 0, instruccion 33: palabra de memoria escrita
+      P: hilo 2, instruccion 32: palabra de memoria escrita
+PASS tamano_store: detectada por 7 de las 7 comparaciones
+      El tamano del store sale de la instruccion que esta en R (espino_barrel_core.v)
+      A: hilo 2, instruccion 32: acceso al bus de datos
+      H: hilo 3, instruccion 101: acceso al bus de datos
+      B: hilo 0, instruccion 23: acceso al bus de datos
+      C: hilo 0, instruccion 23: acceso al bus de datos
+      D: hilo 0, instruccion 23: acceso al bus de datos
+      L: hilo 0, instruccion 33: acceso al bus de datos
+      P: hilo 3, instruccion 31: acceso al bus de datos
+PASS desplazamiento_load: detectada por 7 de las 7 comparaciones
+      El dato del load se alinea con la direccion de la instruccion que esta en X (espino_barrel_core.v)
+      A: hilo 2, instruccion 41: escritura al banco de registros
+      H: hilo 3, instruccion 107: escritura al banco de registros
+      B: hilo 2, instruccion 24: escritura al banco de registros
+      C: hilo 0, instruccion 26: escritura al banco de registros
+      D: hilo 2, instruccion 24: escritura al banco de registros
+      L: hilo 3, instruccion 37: escritura al banco de registros
+      P: hilo 0, instruccion 45: escritura al banco de registros
+PASS signo_load: detectada por 7 de las 7 comparaciones
+      La extension de signo del load sale de la instruccion que esta en R (espino_barrel_core.v)
+      A: hilo 2, instruccion 62: escritura al banco de registros
+      H: hilo 3, instruccion 136: escritura al banco de registros
+      B: hilo 2, instruccion 37: escritura al banco de registros
+      C: hilo 0, instruccion 40: escritura al banco de registros
+      D: hilo 1, instruccion 38: escritura al banco de registros
+      L: hilo 3, instruccion 37: escritura al banco de registros
+      P: hilo 0, instruccion 58: escritura al banco de registros
+PASS mux_lectura: detectada por 7 de las 7 comparaciones
+      El multiplexor de lectura (memoria, SPI o perifericos) elige con la direccion de la instruccion que esta en X (pochoco_soc.v)
+      A: hilo 2, instruccion 49: escritura al banco de registros
+      H: hilo 3, instruccion 191: escritura al banco de registros
+      B: hilo 0, instruccion 28: escritura al banco de registros
+      C: hilo 0, instruccion 26: escritura al banco de registros
+      D: hilo 0, instruccion 28: escritura al banco de registros
+      L: hilo 1, instruccion 35: escritura al banco de registros
+      P: hilo 3, instruccion 31: escritura al banco de registros
+PASS peticion_bus: detectada por 7 de las 7 comparaciones
+      La peticion al bus sale con la instruccion que esta en R (espino_barrel_core.v)
+      A: hilo 1, instruccion 32: acceso al bus de datos
+      H: hilo 2, instruccion 78: acceso al bus de datos
+      B: hilo 3, instruccion 22: acceso al bus de datos
+      C: hilo 3, instruccion 22: acceso al bus de datos
+      D: hilo 3, instruccion 22: acceso al bus de datos
+      L: hilo 3, instruccion 30: acceso al bus de datos
+      P: hilo 2, instruccion 31: acceso al bus de datos
+PASS burbuja_salta: detectada por 7 de las 7 comparaciones
+      La burbuja del arranque no anula el jal que quedo a la salida de la memoria (espino_barrel_core.v)
+      A: hilo 3, instruccion 1: contador de programa o instruccion
+      H: hilo 3, instruccion 1: contador de programa o instruccion
+      B: hilo 3, instruccion 1: contador de programa o instruccion
+      C: hilo 3, instruccion 1: contador de programa o instruccion
+      D: hilo 3, instruccion 1: contador de programa o instruccion
+      L: hilo 3, instruccion 1: contador de programa o instruccion
+      P: hilo 3, instruccion 1: contador de programa o instruccion
+PASS hilo_desfasado: detectada por 7 de las 7 comparaciones
+      El contador de hilos sale del reset en 1 (espino_barrel_core.v)
+      A: ciclo 1: el core dice hilo 3 en X y 2 en M, y deberian ser 2 y 1
+      H: ciclo 1: el core dice hilo 3 en X y 2 en M, y deberian ser 2 y 1
+      B: ciclo 1: el core dice hilo 3 en X y 2 en M, y deberian ser 2 y 1
+      C: ciclo 1: el core dice hilo 3 en X y 2 en M, y deberian ser 2 y 1
+      D: ciclo 1: el core dice hilo 3 en X y 2 en M, y deberian ser 2 y 1
+      L: ciclo 1: el core dice hilo 3 en X y 2 en M, y deberian ser 2 y 1
+      P: ciclo 1: el core dice hilo 3 en X y 2 en M, y deberian ser 2 y 1
+PASS jalr_no_salta: detectada por 7 de las 7 comparaciones
+      jalr no salta (espino_barrel_core.v)
+      A: hilo 2, instruccion 134: contador de programa o instruccion
+      H: hilo 3, instruccion 224: contador de programa o instruccion
+      B: hilo 0, instruccion 69: contador de programa o instruccion
+      C: hilo 2, instruccion 43: contador de programa o instruccion
+      D: hilo 0, instruccion 69: contador de programa o instruccion
+      L: hilo 3, instruccion 37: contador de programa o instruccion
+      P: hilo 3, instruccion 39: contador de programa o instruccion
+PASS dato_store: detectada por 7 de las 7 comparaciones
+      El dato del store sale de rs1 en vez de rs2 (espino_barrel_core.v)
+      A: hilo 2, instruccion 32: acceso al bus de datos
+      H: hilo 3, instruccion 78: acceso al bus de datos
+      B: hilo 0, instruccion 23: acceso al bus de datos
+      C: hilo 0, instruccion 23: acceso al bus de datos
+      D: hilo 0, instruccion 23: acceso al bus de datos
+      L: hilo 0, instruccion 33: acceso al bus de datos
+      P: hilo 2, instruccion 32: acceso al bus de datos
+PASS MUTA_CONTEXTO: detectada por 7 de las 7 comparaciones
+      (ifdef del core) El resultado se escribe en el contexto del hilo que esta en X
+      A: hilo 2, instruccion 2: contexto: contenido del banco de registros
+      H: hilo 3, instruccion 2: contexto: contenido del banco de registros
+      B: hilo 0, instruccion 2: contexto: contenido del banco de registros
+      C: hilo 0, instruccion 2: contexto: contenido del banco de registros
+      D: hilo 0, instruccion 2: contexto: contenido del banco de registros
+      L: hilo 0, instruccion 2: contexto: contenido del banco de registros
+      P: hilo 0, instruccion 2: contexto: contenido del banco de registros
+PASS MUTA_BOFF: detectada por 7 de las 7 comparaciones
+      (ifdef del core) El dato del load se alinea con la direccion de la instruccion que esta en X
+      A: hilo 2, instruccion 41: escritura al banco de registros
+      H: hilo 3, instruccion 107: escritura al banco de registros
+      B: hilo 2, instruccion 24: escritura al banco de registros
+      C: hilo 0, instruccion 26: escritura al banco de registros
+      D: hilo 2, instruccion 24: escritura al banco de registros
+      L: hilo 3, instruccion 37: escritura al banco de registros
+      P: hilo 0, instruccion 45: escritura al banco de registros
+PASS MUTA_ARRANQUE: detectada por 7 de las 7 comparaciones
+      (ifdef del core) Las burbujas del arranque no se anulan
+      A: hilo 3, instruccion 1: contador de programa o instruccion
+      H: hilo 3, instruccion 1: contador de programa o instruccion
+      B: hilo 3, instruccion 1: contador de programa o instruccion
+      C: hilo 3, instruccion 1: contador de programa o instruccion
+      D: hilo 3, instruccion 1: contador de programa o instruccion
+      L: hilo 3, instruccion 1: contador de programa o instruccion
+      P: hilo 3, instruccion 1: contador de programa o instruccion
+
+Resumen: mutacion, comparaciones que la detectan e instruccion del hilo en que aparece la primera diferencia
+(la menor y la mayor entre las comparaciones que la detectan)
+   ctx_escritura          7 de 7   2 a 2
+   ctx_lectura_rs1        7 de 7   3 a 8
+   ctx_lectura_rs2        7 de 7   10 a 28
+   escritura_sin_hilo     7 de 7   2 a 2
+   pc_otro_hilo           7 de 7   1 a 1
+   enlace_otro_hilo       7 de 7   36 a 223
+   x0                     7 de 7   1 a 1
+   rd_otro_hilo           7 de 7   2 a 2
+   be_ram                 7 de 7   23 a 239
+   tamano_store           7 de 7   23 a 101
+   desplazamiento_load    7 de 7   24 a 107
+   signo_load             7 de 7   37 a 136
+   mux_lectura            7 de 7   26 a 191
+   peticion_bus           7 de 7   22 a 78
+   burbuja_salta          7 de 7   1 a 1
+   hilo_desfasado         7 de 7   en el ciclo 1
+   jalr_no_salta          7 de 7   37 a 224
+   dato_store             7 de 7   23 a 78
+   MUTA_CONTEXTO          7 de 7   2 a 2
+   MUTA_BOFF              7 de 7   24 a 107
+   MUTA_ARRANQUE          7 de 7   1 a 1
+
+RESULTADO: PASS, 21 de 21 mutaciones detectadas y el barrel sin mutar pasa

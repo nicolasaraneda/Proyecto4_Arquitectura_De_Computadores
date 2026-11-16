@@ -16,7 +16,7 @@
 # Uso: tools/fondo/equiv.sh   (o make fondo-equiv; make fondo-equiv-ronda1)
 # Variables: NTICKS (20000), CORTA=1 (2000 ticks y sin la copia del oficial a
 # 1 ms, para la integración continua), RONDA1=1, JOBS.
-# Resultado en docs/mediciones/fondo/equiv.txt.
+# Resultado en docs/mediciones/fondo/HW/equiv.txt (HW es r1 o r2).
 set -uo pipefail
 source "$(dirname "$0")/comun.sh"
 

@@ -1,0 +1,122 @@
+Testbench unitario del vigilante (tb/vigilante/tb_vigilante.v)
+Generado por tools/vigilante/tb.sh (make vig-tb). No editar a mano.
+
+Herramientas:
+  Yosys 0.68+195 (git sha1 435977e97-dirty, Release, Clang /usr/bin/clang++ 21.1.8)
+  "nextpnr-ice40" -- Next Generation Place and Route (Version nextpnr-0.11.1-19-g8dbcee5c)
+  Icarus Verilog version 14.0 (devel) (s20260301-403-g5ab23063f-dirty)
+Commit de partida: 05b3b7e (rama p5-tabla-vigilante)
+Modulo: rtl/vigilante.v (sha256 5df9ffc8037de4a5...)
+Valores de N: 1 2 4 7 15. El SoC de competencia usa N = 4.
+
+vigilante, N = 1
+PASS N=1 despues del reset BOOT esta en 0 y el destino es 01
+PASS N=1 2000 ticks con respuesta: no dispara
+PASS N=1 N - 1 precios sin respuesta: no dispara
+PASS N=1 el programa vuelve a responder: la cuenta parte de cero
+PASS N=1 otra racha de N - 1 sin respuesta: tampoco dispara
+PASS N=1 N precios sin respuesta: espera al siguiente
+PASS N=1 llega el precio N + 1 con CS_n en bajo: BOOT espera
+PASS N=1 CS_n sube: BOOT sube en el ciclo siguiente
+PASS N=1 una escritura posterior no baja BOOT
+PASS N=1 50 ticks sanos despues del disparo: BOOT sigue en alto
+PASS N=1 respuesta antes de que CS_n suba: no dispara
+PASS N=1 escritura simultanea con el precio: cuenta como respuesta
+PASS N=1 disparo manual con CS_n en bajo: espera
+PASS N=1 disparo manual: BOOT sube cuando CS_n sube
+PASS N=1 disparo manual con CS_n en alto: inmediato
+PASS N=1 el reset borra la cuenta
+PASS N=1 sin precios no dispara, aunque CS_n se mueva
+aleatorio N=1: 400223 ciclos, 214 disparos, 0 diferencias con el modelo
+PASS N=1 BOOT igual al modelo en todos los ciclos, con disparos
+RESUMEN N=1 comprobaciones=18 fallas=0
+
+vigilante, N = 2
+PASS N=2 despues del reset BOOT esta en 0 y el destino es 01
+PASS N=2 2000 ticks con respuesta: no dispara
+PASS N=2 N - 1 precios sin respuesta: no dispara
+PASS N=2 el programa vuelve a responder: la cuenta parte de cero
+PASS N=2 otra racha de N - 1 sin respuesta: tampoco dispara
+PASS N=2 N precios sin respuesta: espera al siguiente
+PASS N=2 llega el precio N + 1 con CS_n en bajo: BOOT espera
+PASS N=2 CS_n sube: BOOT sube en el ciclo siguiente
+PASS N=2 una escritura posterior no baja BOOT
+PASS N=2 50 ticks sanos despues del disparo: BOOT sigue en alto
+PASS N=2 respuesta antes de que CS_n suba: no dispara
+PASS N=2 escritura simultanea con el precio: cuenta como respuesta
+PASS N=2 disparo manual con CS_n en bajo: espera
+PASS N=2 disparo manual: BOOT sube cuando CS_n sube
+PASS N=2 disparo manual con CS_n en alto: inmediato
+PASS N=2 el reset borra la cuenta
+PASS N=2 sin precios no dispara, aunque CS_n se mueva
+aleatorio N=2: 400223 ciclos, 208 disparos, 0 diferencias con el modelo
+PASS N=2 BOOT igual al modelo en todos los ciclos, con disparos
+RESUMEN N=2 comprobaciones=18 fallas=0
+
+vigilante, N = 4
+PASS N=4 despues del reset BOOT esta en 0 y el destino es 01
+PASS N=4 2000 ticks con respuesta: no dispara
+PASS N=4 N - 1 precios sin respuesta: no dispara
+PASS N=4 el programa vuelve a responder: la cuenta parte de cero
+PASS N=4 otra racha de N - 1 sin respuesta: tampoco dispara
+PASS N=4 N precios sin respuesta: espera al siguiente
+PASS N=4 llega el precio N + 1 con CS_n en bajo: BOOT espera
+PASS N=4 CS_n sube: BOOT sube en el ciclo siguiente
+PASS N=4 una escritura posterior no baja BOOT
+PASS N=4 50 ticks sanos despues del disparo: BOOT sigue en alto
+PASS N=4 respuesta antes de que CS_n suba: no dispara
+PASS N=4 escritura simultanea con el precio: cuenta como respuesta
+PASS N=4 disparo manual con CS_n en bajo: espera
+PASS N=4 disparo manual: BOOT sube cuando CS_n sube
+PASS N=4 disparo manual con CS_n en alto: inmediato
+PASS N=4 el reset borra la cuenta
+PASS N=4 sin precios no dispara, aunque CS_n se mueva
+aleatorio N=4: 400223 ciclos, 177 disparos, 0 diferencias con el modelo
+PASS N=4 BOOT igual al modelo en todos los ciclos, con disparos
+RESUMEN N=4 comprobaciones=18 fallas=0
+
+vigilante, N = 7
+PASS N=7 despues del reset BOOT esta en 0 y el destino es 01
+PASS N=7 2000 ticks con respuesta: no dispara
+PASS N=7 N - 1 precios sin respuesta: no dispara
+PASS N=7 el programa vuelve a responder: la cuenta parte de cero
+PASS N=7 otra racha de N - 1 sin respuesta: tampoco dispara
+PASS N=7 N precios sin respuesta: espera al siguiente
+PASS N=7 llega el precio N + 1 con CS_n en bajo: BOOT espera
+PASS N=7 CS_n sube: BOOT sube en el ciclo siguiente
+PASS N=7 una escritura posterior no baja BOOT
+PASS N=7 50 ticks sanos despues del disparo: BOOT sigue en alto
+PASS N=7 respuesta antes de que CS_n suba: no dispara
+PASS N=7 escritura simultanea con el precio: cuenta como respuesta
+PASS N=7 disparo manual con CS_n en bajo: espera
+PASS N=7 disparo manual: BOOT sube cuando CS_n sube
+PASS N=7 disparo manual con CS_n en alto: inmediato
+PASS N=7 el reset borra la cuenta
+PASS N=7 sin precios no dispara, aunque CS_n se mueva
+aleatorio N=7: 400223 ciclos, 111 disparos, 0 diferencias con el modelo
+PASS N=7 BOOT igual al modelo en todos los ciclos, con disparos
+RESUMEN N=7 comprobaciones=18 fallas=0
+
+vigilante, N = 15
+PASS N=15 despues del reset BOOT esta en 0 y el destino es 01
+PASS N=15 2000 ticks con respuesta: no dispara
+PASS N=15 N - 1 precios sin respuesta: no dispara
+PASS N=15 el programa vuelve a responder: la cuenta parte de cero
+PASS N=15 otra racha de N - 1 sin respuesta: tampoco dispara
+PASS N=15 N precios sin respuesta: espera al siguiente
+PASS N=15 llega el precio N + 1 con CS_n en bajo: BOOT espera
+PASS N=15 CS_n sube: BOOT sube en el ciclo siguiente
+PASS N=15 una escritura posterior no baja BOOT
+PASS N=15 50 ticks sanos despues del disparo: BOOT sigue en alto
+PASS N=15 respuesta antes de que CS_n suba: no dispara
+PASS N=15 escritura simultanea con el precio: cuenta como respuesta
+PASS N=15 disparo manual con CS_n en bajo: espera
+PASS N=15 disparo manual: BOOT sube cuando CS_n sube
+PASS N=15 disparo manual con CS_n en alto: inmediato
+PASS N=15 el reset borra la cuenta
+PASS N=15 sin precios no dispara, aunque CS_n se mueva
+aleatorio N=15: 400223 ciclos, 24 disparos, 0 diferencias con el modelo
+PASS N=15 BOOT igual al modelo en todos los ciclos, con disparos
+RESUMEN N=15 comprobaciones=18 fallas=0
+
+Total: 90 comprobaciones con PASS y 0 con FAIL, en 5 valores de N.

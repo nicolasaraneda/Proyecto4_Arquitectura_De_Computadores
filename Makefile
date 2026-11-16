@@ -563,17 +563,28 @@ xd-timing-todo:
 check-xd: xd-tb xd-formal xd-verif-corta xd-oficial xd-timing-todo
 xd-completo: xd-verif xd-mutaciones
 
-# --- Fondo en un chip: sw/fondo.s sobre el barrel con emad y devk (docs/fondo.md) ---
-# Cada objetivo deja su salida en docs/mediciones/fondo/. Los de check-fondo
-# son las versiones cortas, que corren en la integración continua y dejan su
-# salida en build/fondo/.
-.PHONY: test-fondo fondo-hex fondo-oficial fondo-equiv fondo-equiv-ronda1 fondo-series fondo-fases \
-        fondo-degradacion fondo-controles fondo-ticks fondo-timing check-fondo fondo-completo
-FONDO_DEFS := -DESPINO_BARREL -DESPINO_XD_EMAD -DESPINO_XD_DEVK
+# --- Fondo en un chip: sw/fondo.s en los peldaños R1 y R2 (docs/fondo.md) -------
+# R1 es el barrel con emad y devk y la tabla de parámetros en su BRAM. R2 es R1
+# con el vigilante y SB_WARMBOOT (docs/tabla_vigilante.md). El peldaño se elige
+# con HW=r1 (por defecto) o HW=r2. Cada objetivo deja su salida en
+# docs/mediciones/fondo/$(HW)/. Los de check-fondo son las versiones cortas, que
+# corren en la integración continua y dejan su salida en build/fondo/$(HW)/.
+.PHONY: test-fondo check-tabla fondo-hex fondo-oficial fondo-equiv fondo-equiv-ronda1 fondo-series fondo-fases \
+        fondo-degradacion fondo-controles fondo-estres fondo-ticks fondo-timing fondo-bitstreams fondo-criterio5 \
+        check-fondo fondo-puerta fondo-completo vig-tb vig-formal vig-relevo check-vigilante
+HW ?= r1
+export HW
+R1_DEFS := -DESPINO_BARREL -DESPINO_XD_EMAD -DESPINO_XD_DEVK -DESPINO_TABLA
+R2_DEFS := $(R1_DEFS) -DESPINO_VIGILANTE
+FONDO_DEFS := $(if $(filter r2,$(HW)),$(R2_DEFS),$(R1_DEFS))
 FONDO_JOBS ?= 6
 
 test-fondo:
 	$(PYTHON) ref/test_fondo.py
+# sw/fondo_tabla.hex es el contenido de la BRAM de la tabla: sale de ref/fondo.py
+check-tabla:
+	@$(PYTHON) ref/fondo.py --tabla-hex $(BUILD)/fondo_tabla.hex && cmp $(BUILD)/fondo_tabla.hex sw/fondo_tabla.hex \
+	  && echo "PASS sw/fondo_tabla.hex corresponde a ref/fondo.py"
 fondo-hex:
 	mkdir -p $(BUILD)/fondo
 	$(PYTHON) $(ASM) sw/fondo.s -o $(BUILD)/fondo/fondo.hex
@@ -590,8 +601,9 @@ fondo-series:
 	JOBS=$(FONDO_JOBS) tools/fondo/series.sh
 # Criterio 3: timing en 10 semillas del hardware exacto, con el programa cargado
 fondo-timing: fondo-hex
-	DEFS="$(FONDO_DEFS)" HEX=$(BUILD)/fondo/fondo.hex EXIGIR=1 tools/medir_variante.sh fondo 10 > docs/mediciones/fondo/timing.txt; \
-	  r=$$?; cat docs/mediciones/fondo/timing.txt; exit $$r
+	mkdir -p docs/mediciones/fondo/$(HW)
+	DEFS="$(FONDO_DEFS)" HEX=$(BUILD)/fondo/fondo.hex EXIGIR=1 tools/medir_variante.sh fondo_$(HW) 10 > docs/mediciones/fondo/$(HW)/timing.txt; \
+	  r=$$?; cat docs/mediciones/fondo/$(HW)/timing.txt; exit $$r
 # Criterio 4: peor caso barriendo la fase
 fondo-fases:
 	JOBS=$(FONDO_JOBS) tools/fondo/fases.sh
@@ -601,14 +613,48 @@ fondo-degradacion:
 # Controles negativos: errores puestos a propósito que las pruebas deben detectar
 fondo-controles:
 	JOBS=$(FONDO_JOBS) tools/fondo/controles.sh
+# Criterio 7: matriz de estrés
+fondo-estres:
+	JOBS=$(FONDO_JOBS) tools/fondo/estres.sh
 # Punto 3.2 del enunciado: mediciones por tick
 fondo-ticks:
 	tools/fondo/ticks.sh
+# Criterio 8 y kit de icebram: bitstreams R1 y R2 simulados desde el .asc, cambio
+# de tabla y de programa con icebram, vigilante dentro del bitstream e imagen
+# múltiple. Construye los dos peldaños (no usa HW). Unos 25 minutos.
+fondo-bitstreams:
+	tools/fondo/bitstreams.sh
 
-check-fondo: test-fondo fondo-oficial
-	CORTA=1 JOBS=$(FONDO_JOBS) SALIDA=$(BUILD)/fondo/equiv_corta.txt tools/fondo/equiv.sh
-	POR_FAMILIA=4 JOBS=$(FONDO_JOBS) SALIDA=$(BUILD)/fondo/series_corta.txt tools/fondo/series.sh
-	CORTA=1 JOBS=$(FONDO_JOBS) SALIDA=$(BUILD)/fondo/fases_corta.txt tools/fondo/fases.sh
-	CORTA=1 JOBS=$(FONDO_JOBS) SALIDA=$(BUILD)/fondo/degradacion_corta.txt tools/fondo/degradacion.sh
-	JOBS=$(FONDO_JOBS) SALIDA=$(BUILD)/fondo/controles_corta.txt tools/fondo/controles.sh
-fondo-completo: test-fondo fondo-oficial fondo-equiv fondo-series fondo-fases fondo-degradacion fondo-controles fondo-ticks fondo-timing
+# Criterio 5 en la configuración exacta: campaña del core y mutaciones con la
+# máscara de emad y devk sobre el SoC del peldaño. Unos 40 minutos.
+fondo-criterio5:
+	JOBS=$(BARREL_JOBS) tools/fondo/criterio5.sh
+
+# Vigilante (docs/tabla_vigilante.md): testbench del módulo, propiedades formales
+# con SymbiYosys y relevo de punta a punta con las dos imágenes en el mismo
+# testbench (R2 con el supervisor colgado y la imagen de respaldo).
+vig-tb:
+	tools/vigilante/tb.sh
+vig-formal:
+	tools/vigilante/formal.sh
+vig-relevo:
+	tools/vigilante/relevo.sh
+check-vigilante: vig-tb vig-formal vig-relevo
+
+check-fondo: test-fondo check-tabla fondo-oficial
+	CORTA=1 JOBS=$(FONDO_JOBS) SALIDA=$(BUILD)/fondo/$(HW)/equiv_corta.txt tools/fondo/equiv.sh
+	POR_FAMILIA=4 JOBS=$(FONDO_JOBS) SALIDA=$(BUILD)/fondo/$(HW)/series_corta.txt tools/fondo/series.sh
+	CORTA=1 JOBS=$(FONDO_JOBS) SALIDA=$(BUILD)/fondo/$(HW)/fases_corta.txt tools/fondo/fases.sh
+	CORTA=1 JOBS=$(FONDO_JOBS) SALIDA=$(BUILD)/fondo/$(HW)/degradacion_corta.txt tools/fondo/degradacion.sh
+	JOBS=$(FONDO_JOBS) SALIDA=$(BUILD)/fondo/$(HW)/controles_corta.txt tools/fondo/controles.sh
+	JOBS=$(FONDO_JOBS) SALIDA=$(BUILD)/fondo/$(HW)/estres_corta.txt tools/fondo/estres.sh
+# La puerta de simulación completa de un peldaño, salvo los criterios 5 (make
+# fondo-criterio5) y 8 (make fondo-bitstreams)
+fondo-puerta: test-fondo check-tabla fondo-oficial fondo-equiv-ronda1 fondo-series fondo-timing fondo-fases \
+              fondo-degradacion fondo-controles fondo-estres fondo-ticks
+fondo-completo:
+	$(MAKE) fondo-puerta HW=r1
+	$(MAKE) fondo-puerta HW=r2
+	$(MAKE) fondo-bitstreams
+	$(MAKE) fondo-criterio5 HW=r1
+	$(MAKE) fondo-criterio5 HW=r2

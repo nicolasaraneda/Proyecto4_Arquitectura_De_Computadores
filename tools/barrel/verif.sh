@@ -228,6 +228,7 @@ else
   echo "Verificacion del Espino barrel contra el Espino base, instruccion por instruccion"
   echo "Generado por tools/barrel/verif.sh (make barrel-verif). No editar a mano."
 fi
+[ -n "${VERIF_DEFS:-}" ] && echo "Definiciones adicionales en los dos SoC de la comparacion: $VERIF_DEFS (corrida de tools/fondo/criterio5.sh)"
 echo
 versiones
 echo "  $(verilator --version)"

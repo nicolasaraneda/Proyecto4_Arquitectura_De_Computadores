@@ -22,10 +22,15 @@
 //   - Telemetría: escrituras al periférico por tick y valor de los LED y de los
 //     7 segmentos al cerrar el tick.
 //
-// Todo se fija con plusargs, para compilar una sola vez. El programa se carga
-// en la memoria al empezar (+PROGRAMA), no al compilar.
+//   - Vigilante (solo si el SoC se compiló con -DESPINO_VIGILANTE): si pidió
+//     la reconfiguración y cuántos precios seguidos llegó a contar sin
+//     respuesta.
+//
+// Todo se fija con plusargs, para compilar una sola vez por hardware. El
+// programa y la tabla de parámetros se cargan al empezar, no al compilar.
 //
 //   +PROGRAMA=build/fondo/fondo.hex
+//   +TABLA=sw/fondo_tabla.hex   contenido de la BRAM de la tabla
 //   +SERIE=archivo.csv       CSV "tick,precio"
 //   +NTICKS=2000  +PERIODO_NS=100000  +INICIO_NS=4000
 //   +RONDA_TICKS=0 +PAUSA_NS=0 +PERIODO2_NS +PERIODO3_NS   rondas seguidas sin reset
@@ -59,7 +64,7 @@ module tb_fondo;
     .i_SPI_SCLK(sclk), .i_SPI_MOSI(mosi), .i_SPI_CS_n(cs_n), .o_SPI_MISO(miso));
 
   // --- Configuración en tiempo de ejecución ------------------------------------
-  string programa = "build/fondo/fondo.hex", serie = "tb/practica.csv";
+  string programa = "build/fondo/fondo.hex", serie = "tb/practica.csv", tabla = "sw/fondo_tabla.hex";
   string salida = "build/fondo/salida.csv", estado = "";
   int ntick = 2000, ronda_ticks = 0;
   longint pausa_ns = 0, periodo_ns = 100000, periodo2_ns = -1, periodo3_ns = -1;
@@ -110,7 +115,8 @@ module tb_fondo;
   wire [31:0] dwd  = dut.data_wdata;
   wire        wr_dec = dut.u_spi.wr && dut.u_spi.off == 2;
   wire        wr_ram = dreq && dwe && !dad[31];
-  wire        wr_per = dreq && dwe && dad[31] && !dad[16];
+  wire        es_tab = dad[31] && dad[17];
+  wire        wr_per = dreq && dwe && dad[31] && !dad[16] && !es_tab;
   wire [11:0] wa     = {dad[11:2], 2'b00};
 
   // Copia de las palabras compartidas, hecha con los stores que se ven en el bus
@@ -211,7 +217,8 @@ module tb_fondo;
     end
 
     // Copia de las palabras compartidas y vigilancia del protocolo
-    if (xv && dreq && dad[31] && xt != 0) violacion("un gestor toca el SPI o el periferico");
+    if (xv && dreq && dad[31] && !es_tab && xt != 0) violacion("un gestor toca el SPI o el periferico");
+    if (xv && dreq && dwe && es_tab) violacion("store a la tabla de parametros");
     if (xv && wr_ram) begin
       if (wa == d_pub) begin
         if (xt != 0) violacion("PUB escrita por un gestor");
@@ -235,6 +242,15 @@ module tb_fondo;
     ciclo++;
   end
 
+  // --- Vigilante -----------------------------------------------------------------------
+  int vig_boot = 0, vig_max = 0, vig_tick = -1;
+`ifdef ESPINO_VIGILANTE
+  always @(posedge clk) begin
+    if (dut.g_vig.boot && vig_boot == 0) begin vig_boot = 1; vig_tick = tick_tx; end
+    if (dut.g_vig.u_vig.sin_resp > vig_max) vig_max = dut.g_vig.u_vig.sin_resp;
+  end
+`endif
+
   // --- Estímulo ------------------------------------------------------------------------
   logic [7:0] decision;
   int fd;
@@ -242,6 +258,7 @@ module tb_fondo;
 
   initial begin
     void'($value$plusargs("PROGRAMA=%s", programa));
+    void'($value$plusargs("TABLA=%s", tabla));
     void'($value$plusargs("SERIE=%s", serie));
     void'($value$plusargs("SALIDA=%s", salida));
     void'($value$plusargs("ESTADO=%s", estado));
@@ -274,6 +291,7 @@ module tb_fondo;
     dur = cs_setup_ns + 15 * sclk_medio_ns + cs_hold_ns;    // duración de la transacción
 
     $readmemh(programa, dut.u_ram.mem);
+    $readmemh(tabla, dut.g_tabla.u_tabla.mem);
     leer_serie();
     fd = $fopen(salida, "w");
     $fdisplay(fd, "tick,precio,decision");
@@ -300,9 +318,10 @@ module tb_fondo;
     if (abierta) cerrar_tick();
     if (fd_estado != 0) $fclose(fd_estado);
 
-    $display("RESUMEN ticks=%0d recibidos=%0d respuestas=%0d sin_respuesta=%0d precios_perdidos=%0d bits_x=%0d peor_caso=%0d suma_ciclos=%0d presupuesto=%0d violaciones=%0d dec_distinto_de_1=%0d tel_mas_de_1=%0d ticks_plazo=%0d ticks_frontera=%0d max_vueltas=%0d",
+    $display("RESUMEN ticks=%0d recibidos=%0d respuestas=%0d sin_respuesta=%0d precios_perdidos=%0d bits_x=%0d peor_caso=%0d suma_ciclos=%0d presupuesto=%0d violaciones=%0d dec_distinto_de_1=%0d tel_mas_de_1=%0d ticks_plazo=%0d ticks_frontera=%0d max_vueltas=%0d vig_boot=%0d vig_max=%0d vig_tick=%0d",
              ntick, recibidos, respuestas, sin_respuesta, precios_perdidos, bits_x, peor_caso, suma_ciclos, presupuesto_min,
-             violaciones, dec_multiples, tel_multiples, ticks_plazo, ticks_frontera, max_vueltas);
+             violaciones, dec_multiples, tel_multiples, ticks_plazo, ticks_frontera, max_vueltas,
+             vig_boot, vig_max, vig_tick);
     $finish;
   end
 

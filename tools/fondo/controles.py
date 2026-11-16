@@ -6,7 +6,9 @@ comprobar que las pruebas del fondo lo detectan (controles negativos).
 Grupo: Nicolás Araneda, Vicente Calderón y Santiago Muñoz.
 Arquitectura de Computadores, Universidad de los Andes, 2026-2.
 
-Cada control reemplaza un trozo exacto del programa. Si el trozo no aparece
+Cada control reemplaza un trozo exacto del programa, o cambia un valor de la
+tabla de parámetros (los que empiezan con "TABLA:": el programa queda igual y
+lo que se carga distinto es la BRAM de la tabla). Si el trozo no aparece
 una sola vez el script termina con error, para que un cambio en fondo.s no
 deje un control sin efecto sin que nadie lo note.
 
@@ -21,8 +23,7 @@ import sys
 CONTROLES = {
     "umbral_gestor3": (
         "la tabla trae otro umbral de entrada para el gestor 3",
-        "    .word -64, 17              # gestor 3 (activo)",
-        "    .word -96, 17              # gestor 3 (activo)", "", "reversion"),
+        "TABLA:G3_ENTRA=-96", "", "", "reversion"),
     "comision_papel": (
         "el puntaje en papel descuenta la mitad de la comision",
         "    add  x7, x7, x7\n    sub  x13, x13, x7          # la comisión",
@@ -40,7 +41,7 @@ CONTROLES = {
         "    addi x1, x1, 1\n    slt  x9, x9, x1            # 1 si no hay mayoría", "", "reversion"),
     "plazo_corto": (
         "el plazo de la tabla es de una sola vuelta: vence con los gestores sanos",
-        "    .word 8                    # plazo", "    .word 1                    # plazo", "", "practica"),
+        "TABLA:PLAZO=1", "", "", "practica"),
     "sin_reemplazo": (
         "vencido el plazo, el voto viejo del gestor 3 no se reemplaza",
         "    bnez x9, d_4\n    mv   x7, x15\n", "    bnez x9, d_4\n", "cuelgue:3:1", "reversion"),
@@ -84,13 +85,16 @@ def main(argv=None):
     ap.add_argument("-o", "--salida")
     a = ap.parse_args(argv)
     if a.lista:
-        for nombre, (desc, _, _, falla, serie) in CONTROLES.items():
-            print(f"{nombre}|{falla}|{serie}|{desc}")
+        for nombre, (desc, original, _, falla, serie) in CONTROLES.items():
+            param = original[6:] if original.startswith("TABLA:") else ""
+            print(f"{nombre}|{falla}|{serie}|{param}|{desc}")
         return 0
     desc, original, mutado, _, _ = CONTROLES[a.nombre]
     with open(a.entrada, encoding="utf-8") as f:
         texto = f.read()
-    if texto.count(original) != 1:
+    if original.startswith("TABLA:"):
+        original = mutado = ""
+    elif texto.count(original) != 1:
         raise SystemExit(f"control {a.nombre}: el texto a reemplazar aparece {texto.count(original)} veces en {a.entrada}")
     texto = texto.replace(original, mutado)
     with open(a.salida, "w", encoding="utf-8", newline="\n") as f:

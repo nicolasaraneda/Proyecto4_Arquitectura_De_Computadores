@@ -1,0 +1,1 @@
+fondo_r2               celdas 1045 de 1280, BRAM 13 de 16, LUT4  868, fmax min  47.86 mediana  50.33 max  54.26 MHz, cierran a 25 MHz 10 de 10
