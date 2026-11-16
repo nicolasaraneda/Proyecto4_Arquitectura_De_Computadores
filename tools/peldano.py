@@ -66,7 +66,7 @@ ARCHIVOS = ["Makefile", ".github/workflows/ci.yml"]
 NO_TOCAR = {"tb/tb_proyecto_4.sv", "tools/peldano.py"}
 EXTENSIONES = (".py", ".sh", ".sv", ".v", ".c", ".s", ".mk", ".yml", ".txt", ".sby", ".ys")
 # sw/trade.s o sw/trade.hex que no sea parte de otra ruta ($D/sw/trade.hex, base/sw/...)
-PATRON = re.compile(r"(?<![\w/$.-])sw/trade\.(s|hex)\b")
+PATRON = re.compile(r"(?<![\w/$.])sw/trade\.(s|hex)\b")   # también ${HEX:-sw/trade.hex}
 # Rutas armadas por partes, que el patrón no ve (se comprueba con make peldano-probar)
 POR_PARTES = [('"sw", "trade.hex"', '"sw", "max_media.hex"'), ('"sw", "trade.s"', '"sw", "max_media.s"')]
 # Pruebas que corre `probar` después de fijar (rápidas; la integración continua corre todo)
