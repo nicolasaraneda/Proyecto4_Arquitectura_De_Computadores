@@ -190,7 +190,7 @@ Fuera de la puerta, en dos casos de exploración con períodos de 11,5 y 13,5 us
 - **El vigilante no cubre un programa que escribe basura.** Solo ve que se escribió `DECISION`, no qué se escribió. Es lo que pide la especificación: disparar por falla dura y nunca por una condición del algoritmo.
 - **SCLK de 100 kHz con período de 0,1 ms.** Esa combinación deja 237 ciclos entre transacciones y el fondo necesita hasta 444 para responder. En la simulación los bytes igual coinciden, porque el esclavo toma el byte al empezar la transacción siguiente, pero el caso queda fuera de la puerta. R0 sí cabe ahí (49 ciclos). A 1 ms el fondo funciona con SCLK de 100 kHz.
 - **Cambiar la tabla exige simular el bitstream nuevo**, unos 40 minutos. No es un cambio de último minuto.
-- **El gemelo digital no modela el barrel** (paquete P4). Toda la puerta corrió por el RTL con Verilator y por el `.asc` con Icarus.
+- **Esta puerta corrió por el RTL con Verilator y por el `.asc` con Icarus**: el gemelo digital todavía no modelaba el barrel. Desde P4 lo modela, con la tabla (`--tabla`), aunque no el vigilante.
 
 ## 9. Cómo reproducir
 

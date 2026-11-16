@@ -221,11 +221,11 @@ Con y sin atajo las decisiones, las mediciones por tick y los conteos por clase 
 
 Son 21 configuraciones y 18,3 millones de eventos, todos iguales. Dos controles negativos: con `--borde 0` y con la máscara de la extensión equivocada la traza difiere, como debe.
 
-**Lo que encontró la validación.** La primera corrida dio 20 de 21: en las rondas seguidas el RTL nunca cambiaba de período. El error estaba en el testbench, no en el gemelo: `int r = ...;` dentro del `for` de un bloque `initial` es una variable estática en SystemVerilog, se inicializa una sola vez y queda en 0. La misma línea estaba en `tb/tb_estres.sv` y `tb/fondo/tb_fondo.sv`, así que los casos de rondas seguidas de R0 y del fondo habían corrido todas las rondas con el período de la primera (decisión T70). Es el valor de tener dos modelos escritos por separado: cuando no coinciden, alguno está mal, y no siempre es el nuevo.
+**Lo que encontró la validación.** La primera corrida dio 20 de 21: en las rondas seguidas el RTL nunca cambiaba de período. El error estaba en el testbench, no en el gemelo: `int r = ...;` dentro del `for` de un bloque `initial` es una variable estática en SystemVerilog, se inicializa una sola vez y queda en 0. La misma línea estaba en `tb/tb_estres.sv` y `tb/fondo/tb_fondo.sv`, así que los casos de rondas seguidas de R0 y del fondo habían corrido todas las rondas con el período de la primera (decisión T81). Es el valor de tener dos modelos escritos por separado: cuando no coinciden, alguno está mal, y no siempre es el nuevo.
 
 ### 7.5 Para qué se usó
 
-- `make fondo-gemelo-series`: 1 051 series (70 de cada familia más la práctica) a los tres períodos, 6,36 millones de ticks idénticos a `ref/fondo.py`, en un minuto (`docs/mediciones/fondo/gemelo_series.txt`).
+- `make fondo-gemelo-series`: 1 051 series (70 de cada familia más la práctica) a los tres períodos, 6,36 millones de ticks idénticos a `ref/fondo.py`, en un minuto (`docs/mediciones/fondo/r1/gemelo_series.txt`, con el programa de P5 y la tabla en su BRAM).
 - `make fondo-estres-gemelo`: la matriz de estrés del criterio 7 con el fondo (`docs/mediciones/fondo/estres_gemelo.txt`), que también se corre por el RTL con `make fondo-estres`.
 - La firma esperada de la autoprueba en placa (`docs/autoprueba.md`).
 

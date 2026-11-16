@@ -2,7 +2,7 @@
 
 Documento de estudio del frente del algoritmo. Cuenta el camino completo: qué modelo se ajustó a la serie de práctica, cuánto se puede ganar como máximo según ese modelo, qué ideas se probaron (con sus números, ganen o pierdan), cómo quedó la guardia de régimen y el tope de pérdida, y qué candidatos quedan sobre la frontera entre media y percentil 5.
 
-**Estado.** La regla base sigue siendo el algoritmo de `sw/trade.s` y la referencia oficial (`ref/trader.py`). Ningún candidato la ha reemplazado: la elección entre los candidatos de la sección 7 está pendiente.
+**Estado.** Desde el 15/11 `sw/trade.s` y la referencia oficial (`ref/trader.py`) corren `max_media`, la regla base con el umbral de entrada en 3 unidades (decisión T51, sección 7.6). Las secciones 1 a 7.5 cuentan el camino hasta esa elección.
 
 | Archivo | Qué es |
 |---------|--------|

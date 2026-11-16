@@ -318,7 +318,7 @@ Un detalle del método. Con profundidad de inducción 6 la mutación `ctx_escrit
 
 - **La placa y la maestra real.** Todo lo anterior es simulación. Falta la puerta de placa (P6) y la del 26/11.
 - **Prueba formal de lo que calcula cada instrucción.** Las propiedades son de estructura. Que un `add` sume se apoya en la comparación contra el Espino base. No se corrió riscv-formal ni una equivalencia formal contra el base.
-- **El gemelo digital** no modela el barrel todavía (P4).
+- **El gemelo digital** modela el barrel desde P4 (`docs/gemelo.md`, sección 7).
 - **Cuatro hilos accediendo al SPI mientras llegan precios por los pines**, comparados contra el base. Ahí lo que ve cada hilo depende de cuál leyó `PRICE` primero y no hay un Espino base de referencia. Se cubre con el bus quieto, con un solo hilo en el SPI y en la comparación de netlist contra RTL.
 - **Código que se modifica a sí mismo** y programas que escriben sobre el código de otro hilo.
 - **Fuera de la memoria con el contador de 11 bits.** Se compara solo con el de 32 (grupo W).

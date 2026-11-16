@@ -241,7 +241,7 @@ Resultados (`docs/mediciones/fondo/r1/equiv.txt` y `series.txt`; los de R2 son i
 
 El patrimonio de la práctica cambia entre 0,1 ms y 1 ms porque el programa deja de ver 2 precios o 1 durante el reset, igual que con `sw/trade.s`.
 
-El gemelo digital todavía no modela el barrel (paquete P4), así que todo esto corre por el RTL con Verilator. Las series sintéticas no se corrieron a 1 ms ni a 10 ms (decisión T67). El criterio 8, el bitstream simulado desde su `.asc`, está en `docs/tabla_vigilante.md`, sección 6.
+Cuando se midió esto (P3) el gemelo digital todavía no modelaba el barrel, así que todo corre por el RTL con Verilator. Desde P4 el gemelo sí lo modela y repitió las series a 1 ms y 10 ms (`docs/gemelo.md`, sección 7). Las series sintéticas no se corrieron a 1 ms ni a 10 ms (decisión T67). El criterio 8, el bitstream simulado desde su `.asc`, está en `docs/tabla_vigilante.md`, sección 6.
 
 ## 8. Mediciones por tick
 
@@ -376,7 +376,7 @@ Lo que no se probó: atrasos entre 200 y 600 ciclos, donde el voto llega cerca d
 
 - **El algoritmo no suma puntos.** Es la decisión T50, tomada a sabiendas: según la factibilidad el fondo empata con `max_media` a 2000 ticks y pierde 0,005 puntos a 20 000. En la serie de práctica escribe los mismos bytes que `max_media`.
 - **Placa y maestra real.** Todo es simulación, incluida la de los bitstreams R1 y R2 desde su `.asc`. Faltan la puerta de placa y la de la maestra.
-- **Gemelo digital.** No modela el barrel (paquete P4). Las series sintéticas no se corrieron a 1 ms ni a 10 ms.
+- **Gemelo digital.** Desde P4 modela el barrel, la extensión y la tabla; con él se corrieron las series a 1 ms y 10 ms (`docs/mediciones/fondo/r1/gemelo_series.txt`).
 - **SCLK lento con el período más corto.** Con SCLK de 100 kHz y período de 0,1 ms quedan 237 ciclos entre transacciones y el fondo necesita hasta 444. A 1 ms funciona (`docs/tabla_vigilante.md`, sección 8).
 - **Rondas seguidas sin reset.** El programa no se reinicia entre rondas: medias, puntajes y pesos siguen desde donde quedaron. La matriz de estrés lo ejercita con tres rondas seguidas a períodos distintos y la referencia corrida de corrido: coincide. Lo que no se sabe es si la maestra real reinicia su cuenta entre rondas, que es una pregunta pendiente.
 - **Borde del plazo.** Cerca del plazo la decisión depende del ciclo en que llega el voto (sección 10).
@@ -413,7 +413,7 @@ Para correr un caso a mano: `source tools/fondo/comun.sh; ensamblar_fondo; compi
 ## 15. Preguntas para estudiar
 
 1. **¿Por qué el supervisor calcula `max_media` si el gestor 1 ya la calcula?** Porque la del gestor 1 llega por memoria y puede no llegar. La del supervisor está en sus registros: es la única que no depende de otro hilo. `sw/fondo.s`, bloque 3 del supervisor.
-2. **¿Qué pasa si un gestor se cuelga?** Su voto queda con un número de tick viejo. El supervisor lo nota porque la resta contra su tick no da 0 ni 1, espera 8 vueltas, y usa su propia `max_media` en ese lugar. La decisión sale 564 ciclos después del precio en el peor caso medido, y es la de `max_media`. Sección 10.
+2. **¿Qué pasa si un gestor se cuelga?** Su voto queda con un número de tick viejo. El supervisor lo nota porque la resta contra su tick no da 0 ni 1, espera 8 vueltas, y usa su propia `max_media` en ese lugar. La decisión sale 568 ciclos después del precio en el peor caso medido (564 con el programa de P3), y es la de `max_media`. Sección 10.
 3. **¿Cómo sabe el supervisor que un voto es viejo sin un bit de "listo"?** El voto lleva el número del tick que el gestor procesó. Un bit de "listo" habría que borrarlo, y eso serían dos hilos escribiendo la misma palabra. Sección 3.3.
 4. **¿Por qué no hay carreras si cuatro hilos comparten la memoria?** Porque cada palabra la escribe un solo hilo, un store es atómico y el barrel ejecuta una instrucción por ciclo en orden fijo. Sección 3.5.
 5. **¿Por qué el fondo responde más lento que `max_media` sola si usa cuatro hilos?** Porque cada hilo avanza una instrucción cada 4 ciclos y el supervisor tiene que esperar a los otros tres. El barrel reparte el trabajo, no lo acelera para un hilo. Sección 8.4.

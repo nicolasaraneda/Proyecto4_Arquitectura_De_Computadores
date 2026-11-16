@@ -145,6 +145,8 @@ Control negativo: si la referencia no modela los precios que se pierden en el re
 
 ### Por qué el patrimonio no es 27 062
 
+**Nota del 16/11.** Las cifras de patrimonio de esta tabla son de la regla base, que `sw/trade.s` corrió hasta el 15/11. Con `max_media` (T51), el gemelo da 26 070 a 0,1 ms, 1 ms y 10 ms (`build/gemelo --hex sw/trade.hex --periodo-ns N`), idéntico a `ref/trader.py`; la estructura y los ciclos no cambian.
+
 La regla base da 27 062 sobre la serie completa cuando el programa ve todos los precios (`python3 ref/trader.py tb/practica.csv`). En el testbench da 26 795 a 0,1 ms y 27 306 a 1 ms. La diferencia es el reset largo de la placa (decisión T3): dura 4095 ciclos, 164 us, y el testbench manda el primer precio a los 4 us. A 0,1 ms el programa no ve los precios de los ticks 0 y 1, y a 1 ms y 10 ms no ve el del tick 0. La media parte entonces en otro precio y las primeras operaciones cambian.
 
 `ref/trader.py` modela esto con `ticks_perdidos(periodo_ns)`: los primeros precios no se entregan a la estrategia, y la maestra sigue leyendo `0x00` (mantener) hasta que el programa responde al primer precio que sí ve. En la competencia la placa está encendida antes del primer precio y no se pierde ninguno.

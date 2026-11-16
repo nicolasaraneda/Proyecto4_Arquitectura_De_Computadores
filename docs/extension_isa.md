@@ -213,7 +213,7 @@ Cumple el criterio 5 de la puerta de simulación (al menos 5 millones de instruc
 
 ### 7.3 Qué no cubre
 
-- **El gemelo digital no modela el barrel ni la extensión.** Es el paquete P4.
+- **El gemelo digital modela el barrel y la extensión desde P4** (`docs/gemelo.md`, sección 7).
 - **La equivalencia B compara contra el core de P1 con el banco de registros como caja negra.** El banco no cambió (no se tocó su archivo).
 - **La prueba A deja libre lo que entrega el banco.** Que el banco entregue el valor que se escribió antes es del barrel y lo cubren la campaña de simulación y las propiedades P10 y P11.
 - **No hay prueba formal de un producto completo de 8 pasos.** Está probado un paso, que es lo que hace el hardware. El producto se comprueba en el modelo (exhaustivo con 8 por 8 bits) y en la campaña.
