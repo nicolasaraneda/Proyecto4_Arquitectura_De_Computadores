@@ -37,7 +37,7 @@ Las órdenes son idempotentes: la maestra recorta la compra a lo que alcanza y l
 | Paso | Hilo | Dónde |
 |------|------|-------|
 | Tabla de arranque: el hilo t salta a su rutina | todos | `sw/fondo.s:157` a `:160` |
-| Sondea `STATUS` y lee `PRICE` | 0 | `sw/fondo.s:188` a `:191` |
+| Sondea `STATUS` y lee `PRICE` | 0 | `sw/fondo.s:188` a `:192` |
 | `PUB = tick * 256 + precio`, en un solo store | 0 | `sw/fondo.s:197` a `:199` |
 | `max_media` propia: `devk`, dos comparaciones, `or`, `and`, `emad` | 0 | `sw/fondo.s:202` a `:209` |
 | Espera que `PUB` cambie | 1 a 3 | `sw/fondo.s:401` a `:403` |
