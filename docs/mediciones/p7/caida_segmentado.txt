@@ -1,0 +1,218 @@
+Caida de la frecuencia minima del segmentado entre P1 y P7
+Generado por tools/p7/caida_segmentado.sh (make p7-caida-seg). No editar a mano.
+
+Herramientas:
+  Yosys 0.68+195 (git sha1 435977e97-dirty, Release, Clang /usr/bin/clang++ 21.1.8)
+  "nextpnr-ice40" -- Next Generation Place and Route (Version nextpnr-0.11.1-19-g8dbcee5c)
+  Verilator 5.053 devel rev v5.052-22-g7cf8c5cca (mod)
+  cc (Ubuntu 15.2.0-16ubuntu1) 15.2.0
+Commit de partida: df082a7 (rama worktree-agent-a453bbee0696e622f)
+
+Comando en cada commit (script de medicion del commit actual; rtl/, sw/trade.hex y
+goboard.pcf del commit medido, extraidos con git archive):
+  DEFS=-DESPINO_SEGMENTADO HEX=sw/trade.hex tools/medir_variante.sh ETIQUETA N
+yosys synth_ice40 y nextpnr-ice40 --hx1k --package vq100 --freq 25, goboard.pcf.
+Semillas: 1 a 40 en los cuatro commits, 1 a 40 en cada orden de lectura.
+
+1. Netlist del segmentado en cada commit que cambio rtl/, sw/trade.hex, goboard.pcf
+   o tools/medir_variante.sh desde la medicion de P1 (sintesis sola, sin nextpnr)
+
+  commit   fecha        LUT4 CARRY  FF  BRAM  huella netlist  huella trade.hex  asunto
+  e118269  15/11 15:13   801    98 586    12  903141c6e952    02572d65d5b59ab4  Barrel: pruebas de humo, mediciones de CPI, t...
+  7bdc62b  15/11 17:22   802    98 586    12  8c3836fd89d6    02572d65d5b59ab4  Extension de la ISA sobre el barrel: emad, de...
+  f1bbd4e  15/11 23:27   802    98 586    12  8c3836fd89d6    02572d65d5b59ab4  P6: autoprueba en placa de R0, maestra SPI in...
+  c293cf4  16/11 00:09   798    98 586    12  24ad35279dfa    02572d65d5b59ab4  Tabla de parametros en una BRAM de solo lectu...
+  cb5571a  16/11 11:52   798    98 586    12  24ad35279dfa    02572d65d5b59ab4  Integracion de P4 y P6 con P5: el gemelo lee ...
+  578b652  16/11 12:10   798    98 586    12  24ad35279dfa    02572d65d5b59ab4  Autoprueba de R1 y R2: tabla, semilla, modo c...
+  02f2066  16/11 12:21   798    98 586    12  24ad35279dfa    02572d65d5b59ab4  P8: medidor del SPI de la maestra, matriz de ...
+  144456e  16/11 12:37   798    98 586    12  24ad35279dfa    02572d65d5b59ab4  Integracion de P6 (R1 y R2): autoprueba, puer...
+  f203235  16/11 12:48   798    98 586    12  24ad35279dfa    02572d65d5b59ab4  Listas de fuentes sin rtl/00_*: en una sola l...
+
+  La huella de la netlist es el sha256 de tipo, parametros y conexiones de cada celda,
+  sin atributos. Commits con la misma huella dan la misma frecuencia en cada semilla.
+
+2. Frecuencia maxima (MHz) del segmentado, semillas 1 a 10 y 1 a 40
+
+  corrida  commit   celdas  LUT4 | 1 a 10: min mediana    max | 1 a 40: min    p10 mediana  media  desv    max  cierran
+  p1       e118269     993   801 |       51.59   53.48  54.95 |       50.25  51.58   53.63  53.59  1.36  56.09  40 de 40
+  antes    05b3b7e     994   802 |       52.39   53.03  56.53 |       51.37  52.43   53.45  53.73  1.35  56.96  40 de 40
+  salto    c293cf4     990   798 |       45.34   47.20  50.64 |       44.82  46.13   47.88  48.24  1.74  51.17  40 de 40
+  actual   df082a7     990   798 |       45.34   47.20  50.64 |       44.82  46.13   47.88  48.24  1.74  51.17  40 de 40
+
+  p1       huella 903141c6e952  commit de P1, el de docs/mediciones/barrel/recursos.txt
+  antes    huella 8c3836fd89d6  commit anterior al salto (padre de c293cf4)
+  salto    huella 24ad35279dfa  tabla de parametros y vigilante en pochoco_soc.v
+  actual   huella 24ad35279dfa  commit actual
+
+3. Solapamiento de las distribuciones
+
+  p1 contra antes: diferencia de medianas +0.18 MHz; U = 812 de 1600, z = 0.12, p = 9.1e-01 (Mann-Whitney, dos colas)
+    semillas de antes sobre la minima de p1: 40 de 40; semillas de p1 bajo la maxima de antes: 40 de 40
+  antes contra salto: diferencia de medianas +5.58 MHz; U = 1600 de 1600, z = 7.70, p = 1.4e-14 (Mann-Whitney, dos colas)
+    semillas de salto sobre la minima de antes: 0 de 40; semillas de antes bajo la maxima de salto: 0 de 40
+  salto contra actual: misma netlist (huella 24ad35279dfa), mismas frecuencias semilla a semilla: si
+  p1 contra actual: diferencia de medianas +5.76 MHz; U = 1593 de 1600, z = 7.63, p = 2.3e-14 (Mann-Whitney, dos colas)
+    semillas de actual sobre la minima de p1: 6 de 40; semillas de p1 bajo la maxima de actual: 2 de 40
+
+4. Mismas fuentes, distinto orden de lectura (rtl/ del commit actual, 40 semillas)
+
+  Cada orden lee los mismos archivos de rtl/ en otra secuencia (orden 0 es el de
+  tools/medir_variante.sh). La logica es la misma; cambia la numeracion interna de Yosys
+  y con ella la netlist que entrega la sintesis.
+
+  orden    huella       celdas  LUT4     min    p10 mediana    max
+  orden0   24ad35279dfa    990   798   44.82  46.13   47.88  51.17
+  orden1   4cb2e3362082    993   801   43.89  47.13   50.72  54.19
+  orden2   4cb2e3362082    993   801   43.89  47.13   50.72  54.19
+  orden3   24ad35279dfa    990   798   44.82  46.13   47.88  51.17
+  orden4   4cb2e3362082    993   801   43.89  47.13   50.72  54.19
+  orden5   cac0bb329d7e    997   805   50.55  52.03   53.59  56.44
+  orden6   24ad35279dfa    990   798   44.82  46.13   47.88  51.17
+  orden7   24ad35279dfa    990   798   44.82  46.13   47.88  51.17
+  orden8   4cb2e3362082    993   801   43.89  47.13   50.72  54.19
+  orden9   b1cb610e3033    994   802   45.64  47.13   49.39  52.65
+
+  Entre ordenes: medianas de 47.88 a 53.59 MHz, minimas de 43.89 a 50.55 MHz.
+
+5. Ruta critica de la semilla mas lenta de cada corrida
+
+  p1 (semilla 29, 50.25 MHz): 19.90 ns = logica 6.29 + ruteo 11.48 + registro 2.25; 37 pasos de logica (LUT y acarreo)
+    desde u_core.u_rf.u_bankB.u_lo_RAM.RDATA_1
+    hasta o_LED_SB_DFFER_Q_DFFLC.CEN
+    RTL: espino_register_file.v -> pochoco_spi_slave.v -> espino_alu.v -> pochoco_periph.v
+  antes (semilla 29, 51.37 MHz): 19.47 ns = logica 6.87 + ruteo 10.48 + registro 2.25; 40 pasos de logica (LUT y acarreo)
+    desde u_core.u_rf.u_bankA.u_lo_RAM.RDATA_0
+    hasta u_core.pc_target_SB_LUT4_O_LC.CEN
+    RTL: espino_register_file.v -> espino_alu.v
+  salto (semilla 35, 44.82 MHz): 22.31 ns = logica 5.04 + ruteo 14.99 + registro 2.25; 15 pasos de logica (LUT y acarreo)
+    desde u_core.u_rf.u_bankB.u_hi_RAM.RDATA_7
+    hasta u_core.pc_target_SB_LUT4_O_LC.CEN
+    RTL: espino_register_file.v -> espino_alu.v
+  actual (semilla 35, 44.82 MHz): 22.31 ns = logica 5.04 + ruteo 14.99 + registro 2.25; 15 pasos de logica (LUT y acarreo)
+    desde u_core.u_rf.u_bankB.u_hi_RAM.RDATA_7
+    hasta u_core.pc_target_SB_LUT4_O_LC.CEN
+    RTL: espino_register_file.v -> espino_alu.v
+  orden0 (semilla 35, 44.82 MHz): 22.31 ns = logica 5.04 + ruteo 14.99 + registro 2.25; 15 pasos de logica (LUT y acarreo)
+    desde u_core.u_rf.u_bankB.u_hi_RAM.RDATA_7
+    hasta u_core.pc_target_SB_LUT4_O_LC.CEN
+    RTL: p15_espino_register_file.v -> p06_espino_alu.v
+  orden1 (semilla 24, 43.89 MHz): 22.78 ns = logica 4.45 + ruteo 17.67 + registro 0.64; 13 pasos de logica (LUT y acarreo)
+    desde u_core.u_id.g_pipe.alu_op_a_sel_q_SB_DFF_Q_D_SB_LUT4_O_LC.O
+    hasta u_core.pc_target_SB_LUT4_O_LC.CEN
+    RTL: p09_espino_alu.v
+  orden2 (semilla 24, 43.89 MHz): 22.78 ns = logica 4.45 + ruteo 17.67 + registro 0.64; 13 pasos de logica (LUT y acarreo)
+    desde u_core.u_id.g_pipe.alu_op_a_sel_q_SB_DFF_Q_D_SB_LUT4_O_LC.O
+    hasta u_core.pc_target_SB_LUT4_O_LC.CEN
+    RTL: p04_espino_alu.v
+  orden3 (semilla 35, 44.82 MHz): 22.31 ns = logica 5.04 + ruteo 14.99 + registro 2.25; 15 pasos de logica (LUT y acarreo)
+    desde u_core.u_rf.u_bankB.u_hi_RAM.RDATA_7
+    hasta u_core.pc_target_SB_LUT4_O_LC.CEN
+    RTL: p05_espino_register_file.v -> p02_espino_alu.v
+  orden4 (semilla 24, 43.89 MHz): 22.78 ns = logica 4.45 + ruteo 17.67 + registro 0.64; 13 pasos de logica (LUT y acarreo)
+    desde u_core.u_id.g_pipe.alu_op_a_sel_q_SB_DFF_Q_D_SB_LUT4_O_LC.O
+    hasta u_core.pc_target_SB_LUT4_O_LC.CEN
+    RTL: p12_espino_alu.v
+  orden5 (semilla 23, 50.55 MHz): 19.78 ns = logica 6.03 + ruteo 11.59 + registro 2.25; 35 pasos de logica (LUT y acarreo)
+    desde u_core.u_rf.u_bankB.u_lo_RAM.RDATA_3
+    hasta i_Switch_SB_LUT4_I2_LC.CEN
+    RTL: p13_espino_register_file.v -> p07_pochoco_spi_slave.v -> p03_espino_alu.v -> p09_pochoco_periph.v
+  orden6 (semilla 35, 44.82 MHz): 22.31 ns = logica 5.04 + ruteo 14.99 + registro 2.25; 15 pasos de logica (LUT y acarreo)
+    desde u_core.u_rf.u_bankB.u_hi_RAM.RDATA_7
+    hasta u_core.pc_target_SB_LUT4_O_LC.CEN
+    RTL: p15_espino_register_file.v -> p04_espino_alu.v
+  orden7 (semilla 35, 44.82 MHz): 22.31 ns = logica 5.04 + ruteo 14.99 + registro 2.25; 15 pasos de logica (LUT y acarreo)
+    desde u_core.u_rf.u_bankB.u_hi_RAM.RDATA_7
+    hasta u_core.pc_target_SB_LUT4_O_LC.CEN
+    RTL: p06_espino_register_file.v -> p14_espino_alu.v
+  orden8 (semilla 24, 43.89 MHz): 22.78 ns = logica 4.45 + ruteo 17.67 + registro 0.64; 13 pasos de logica (LUT y acarreo)
+    desde u_core.u_id.g_pipe.alu_op_a_sel_q_SB_DFF_Q_D_SB_LUT4_O_LC.O
+    hasta u_core.pc_target_SB_LUT4_O_LC.CEN
+    RTL: p14_espino_alu.v
+  orden9 (semilla 3, 45.64 MHz): 21.91 ns = logica 4.88 + ruteo 14.73 + registro 2.25; 15 pasos de logica (LUT y acarreo)
+    desde u_core.u_rf.u_bankB.u_hi_RAM.RDATA_11
+    hasta u_core.pc_target_SB_LUT4_O_LC.CEN
+    RTL: p05_espino_register_file.v -> p02_espino_alu.v
+
+   Promedio sobre todas las semillas (la ruta critica de cada una):
+  p1       pasos de logica 34.48, logica  6.15 ns, ruteo 10.36 ns, total 18.67 ns (40 semillas)
+  antes    pasos de logica 37.60, logica  6.47 ns, ruteo 10.00 ns, total 18.62 ns (40 semillas)
+  salto    pasos de logica 16.07, logica  5.12 ns, ruteo 13.45 ns, total 20.76 ns (40 semillas)
+  actual   pasos de logica 16.07, logica  5.12 ns, ruteo 13.45 ns, total 20.76 ns (40 semillas)
+
+6. Equivalencia formal del SoC segmentado antes y despues del salto
+
+  p1 (e118269) contra actual (df082a7): EQUIVALENTES (Of those cells 2971 are proven and 0 are unproven.)
+  antes (05b3b7e) contra salto (c293cf4): EQUIVALENTES (Of those cells 2971 are proven and 0 are unproven.)
+  control, actual contra una copia con tab_sel activo (tiene que dar DISTINTOS): DISTINTOS (Of those cells 3009 are proven and 1 are unproven.)
+
+7. Frecuencia maxima por semilla (MHz)
+  p1:
+     53.91  51.59  54.07  54.67  53.54  53.20  53.42  53.09  54.95  53.01
+     55.05  55.44  56.09  55.56  53.80  52.91  52.00  53.74  53.58  52.87
+     53.25  54.15  54.73  55.03  54.10  54.99  52.79  53.69  50.25  51.37
+     53.16  51.96  54.84  51.48  55.20  55.03  51.11  52.12  54.32  53.41
+  antes:
+     56.53  55.44  52.39  53.50  52.46  52.60  53.83  52.87  52.85  53.20
+     56.64  51.93  52.44  53.50  53.32  54.65  54.17  53.60  53.40  53.79
+     52.93  53.99  55.71  53.29  54.32  56.96  52.37  53.96  51.37  52.62
+     53.34  55.09  52.60  56.02  53.56  52.48  55.44  52.81  53.15  54.24
+  salto:
+     45.34  47.29  46.18  47.75  47.11  47.31  46.80  48.96  46.41  50.64
+     47.62  49.14  47.07  47.49  47.11  49.22  49.72  51.09  49.23  50.57
+     48.99  46.79  48.95  45.25  45.69  49.38  50.14  50.87  48.34  48.12
+     51.09  47.75  47.05  47.30  44.82  50.14  50.13  51.17  48.00  47.69
+  actual:
+     45.34  47.29  46.18  47.75  47.11  47.31  46.80  48.96  46.41  50.64
+     47.62  49.14  47.07  47.49  47.11  49.22  49.72  51.09  49.23  50.57
+     48.99  46.79  48.95  45.25  45.69  49.38  50.14  50.87  48.34  48.12
+     51.09  47.75  47.05  47.30  44.82  50.14  50.13  51.17  48.00  47.69
+  orden0:
+     45.34  47.29  46.18  47.75  47.11  47.31  46.80  48.96  46.41  50.64
+     47.62  49.14  47.07  47.49  47.11  49.22  49.72  51.09  49.23  50.57
+     48.99  46.79  48.95  45.25  45.69  49.38  50.14  50.87  48.34  48.12
+     51.09  47.75  47.05  47.30  44.82  50.14  50.13  51.17  48.00  47.69
+  orden1:
+     49.84  53.60  53.17  52.33  49.53  47.13  52.46  52.52  46.59  46.88
+     54.08  51.61  47.10  50.64  51.08  54.19  47.68  49.84  48.59  51.04
+     50.60  52.06  47.73  43.89  50.64  48.07  52.21  51.61  53.52  49.53
+     50.13  52.85  50.93  48.96  50.80  52.06  51.08  49.88  53.09  49.65
+  orden2:
+     49.84  53.60  53.17  52.33  49.53  47.13  52.46  52.52  46.59  46.88
+     54.08  51.61  47.10  50.64  51.08  54.19  47.68  49.84  48.59  51.04
+     50.60  52.06  47.73  43.89  50.64  48.07  52.21  51.61  53.52  49.53
+     50.13  52.85  50.93  48.96  50.80  52.06  51.08  49.88  53.09  49.65
+  orden3:
+     45.34  47.29  46.18  47.75  47.11  47.31  46.80  48.96  46.41  50.64
+     47.62  49.14  47.07  47.49  47.11  49.22  49.72  51.09  49.23  50.57
+     48.99  46.79  48.95  45.25  45.69  49.38  50.14  50.87  48.34  48.12
+     51.09  47.75  47.05  47.30  44.82  50.14  50.13  51.17  48.00  47.69
+  orden4:
+     49.84  53.60  53.17  52.33  49.53  47.13  52.46  52.52  46.59  46.88
+     54.08  51.61  47.10  50.64  51.08  54.19  47.68  49.84  48.59  51.04
+     50.60  52.06  47.73  43.89  50.64  48.07  52.21  51.61  53.52  49.53
+     50.13  52.85  50.93  48.96  50.80  52.06  51.08  49.88  53.09  49.65
+  orden5:
+     52.08  55.69  52.43  53.19  53.85  51.59  56.44  54.86  53.69  54.05
+     54.92  53.80  53.21  53.16  53.77  54.65  53.37  52.60  51.18  53.54
+     54.50  52.95  50.55  52.85  53.81  52.36  53.25  53.68  53.65  52.54
+     53.18  55.18  55.56  55.63  53.15  55.13  52.60  54.19  54.95  51.46
+  orden6:
+     45.34  47.29  46.18  47.75  47.11  47.31  46.80  48.96  46.41  50.64
+     47.62  49.14  47.07  47.49  47.11  49.22  49.72  51.09  49.23  50.57
+     48.99  46.79  48.95  45.25  45.69  49.38  50.14  50.87  48.34  48.12
+     51.09  47.75  47.05  47.30  44.82  50.14  50.13  51.17  48.00  47.69
+  orden7:
+     45.34  47.29  46.18  47.75  47.11  47.31  46.80  48.96  46.41  50.64
+     47.62  49.14  47.07  47.49  47.11  49.22  49.72  51.09  49.23  50.57
+     48.99  46.79  48.95  45.25  45.69  49.38  50.14  50.87  48.34  48.12
+     51.09  47.75  47.05  47.30  44.82  50.14  50.13  51.17  48.00  47.69
+  orden8:
+     49.84  53.60  53.17  52.33  49.53  47.13  52.46  52.52  46.59  46.88
+     54.08  51.61  47.10  50.64  51.08  54.19  47.68  49.84  48.59  51.04
+     50.60  52.06  47.73  43.89  50.64  48.07  52.21  51.61  53.52  49.53
+     50.13  52.85  50.93  48.96  50.80  52.06  51.08  49.88  53.09  49.65
+  orden9:
+     51.78  49.45  45.64  46.55  46.85  48.05  49.86  50.51  51.04  52.65
+     50.52  48.21  49.31  49.85  48.42  47.37  48.21  49.86  49.28  50.06
+     49.47  47.40  47.71  49.58  47.97  49.31  47.16  49.45  47.33  49.86
+     49.41  50.93  46.40  47.70  50.60  49.38  50.62  48.82  50.80  50.23

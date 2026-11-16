@@ -772,7 +772,12 @@ peldano-fijar:
 #   p7-variantes  la tabla de variantes con sus mediciones
 #   p7-amdahl     el perfil y Amdahl con sus mediciones
 #   p7            todo lo anterior
-.PHONY: p7 p7-rapido p7-variantes p7-amdahl p7-recursos p7-medir p7-rtl p7-pll p7-doble
+#   p7-caida-seg  por qué la fmax mínima del segmentado bajó de 51,59 (P1) a 45,34 MHz (P7):
+#                 el mismo comando en cuatro commits, 40 semillas, órdenes de lectura y
+#                 equivalencia formal (unos 3 minutos; no es parte de p7)
+.PHONY: p7 p7-rapido p7-variantes p7-amdahl p7-recursos p7-medir p7-rtl p7-pll p7-doble p7-caida-seg
+p7-caida-seg:
+	tools/p7/caida_segmentado.sh 40
 p7-recursos:
 	tools/p7/recursos.sh 10
 p7-medir: $(GEMELO)
