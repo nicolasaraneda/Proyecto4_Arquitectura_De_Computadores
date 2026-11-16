@@ -1,0 +1,17 @@
+% Generado por tools/report.py (make report). No editar a mano.
+\begin{tabular}{llp{1.5cm}rrrrrr}
+\toprule
+Paso & Descripción & Estado & Instr./op & Ciclos/op & Ciclos/op (clase) & MOPS & Speedup & Celdas \\
+\midrule
+0 & Espino base, solo software (R0) & medido & 3{,}000 & 6{,}375 & 7{,}05 & 3{,}92 & 1{,}00 & 1091 \\
+1 & + extension de la ISA (devk, emad) en el Espino base & estimado & 1{,}500 & 3{,}250 & 3{,}52 & 7{,}69 & 1{,}96 & -- \\
+2 & pipeline de 3 etapas, solo software & medido & 3{,}000 & 3{,}375 & 4{,}50 & 7{,}41 & 1{,}89 & 990 \\
+1+2 & pipeline de 3 etapas + extension & estimado & 1{,}500 & 1{,}750 & 2{,}25 & 14{,}29 & 3{,}64 & -- \\
+2b & barrel, un hilo, solo software & medido & 3{,}000 & 12{,}000 & -- & 2{,}08 & 0{,}53 & 932 \\
+1+2b & barrel, un hilo + extension & medido & 1{,}500 & 6{,}000 & -- & 4{,}17 & 1{,}06 & 991 \\
+2c & barrel, 4 hilos + extension: el fondo (R1) & medido & 2{,}243 & 4{,}685 & -- & 5{,}34 & 1{,}36 & 1029 \\
+3 & instrucciones a medida (mmpos y mmbyte) sobre el pipeline & estimado & 0{,}875 & 0{,}875 & 0{,}88 & 28{,}57 & 7{,}29 & -- \\
+4 & SIMD de 2 carriles de 16 bits: las 4 reglas y el voto & estimado & 0{,}263 & 0{,}263 & 0{,}26 & 95{,}00 & 24{,}23 & -- \\
+\bottomrule
+\end{tabular}
+\par\smallskip{\footnotesize Escalera de la clase 7 aplicada a nuestro kernel. Los pasos medidos salen del gemelo y del RTL; los estimados, del modelo de costo o con CPI ideal 1, como hizo la clase. Fuente: \texttt{docs/mediciones/p7/escalera.txt}.}

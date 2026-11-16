@@ -230,6 +230,47 @@ def punto_32(c, peldano):
         c["CPIPrograma"] = "4 por hilo y 1 agregado"
 
 
+def _esperado(arg):
+    peldano, precios, perd = arg
+    est = trader.Oficial() if peldano == "r0" else fondo.Fondo()
+    return bytes(trader.decisiones(precios, est, perd))
+
+
+def equivalencia(c, peldano):
+    """Gemelo digital contra la referencia: la práctica a los tres períodos y un
+    lote de series sintéticas a 0,1 ms. Bytes leídos por la maestra, tick a tick."""
+    import multiprocessing
+    subprocess.run(["make", "-s", "build/gemelo", "fondo-hex"], cwd=RAIZ, check=True, stdout=subprocess.DEVNULL)
+    opts = [] if peldano == "r0" else ["--barrel", "--xd", "3", "--tabla", "sw/fondo_tabla.hex"]
+    hexf = "sw/trade.hex" if peldano == "r0" else "build/fondo/fondo.hex"
+    practica = market.leer_serie(os.path.join(RAIZ, "tb/practica.csv"))
+    lote = []
+    for nombre in series.FAMILIAS:
+        lote += series.lote(nombre, 50, n=2000, semilla=21)
+    trabajos = [(practica, per) for per in (100000, 1000000, 10000000)] + [(p, 100000) for p in lote]
+    ruta = os.path.join(RAIZ, "build", "report_lote.txt")
+    malas, ticks = 0, 0
+    for per in (100000, 1000000, 10000000):
+        grupo = [t for t in trabajos if t[1] == per]
+        with open(ruta, "w") as f:
+            for precios, _ in grupo:
+                f.write(" ".join(map(str, precios)) + "\n")
+        out = subprocess.run(["build/gemelo", *opts, "--hex", hexf, "--lote", ruta, "--bytes", "--periodo-ns", str(per)],
+                             cwd=RAIZ, capture_output=True, text=True, check=True).stdout.splitlines()
+        perd = trader.ticks_perdidos(per)
+        with multiprocessing.Pool(min(20, os.cpu_count())) as pool:
+            esperados = pool.map(_esperado, [(peldano, precios, perd) for precios, _ in grupo], chunksize=4)
+        for (precios, _), linea, esp in zip(grupo, out, esperados):
+            leidos = bytes.fromhex(linea.split()[8])
+            malas += leidos != esp
+            ticks += len(precios)
+    c["EqSeries"] = num(len(lote))
+    c["EqTicks"] = num(ticks)
+    c["EqDistintas"] = malas
+    if malas:
+        raise SystemExit(f"FAIL report: {malas} corridas del gemelo distintas a la referencia")
+
+
 def gemelo_respuesta(periodo_ns, nticks=2000):
     """Ciclos de respuesta promedio y peor caso del fondo en el gemelo."""
     subprocess.run(["make", "-s", "build/gemelo", "fondo-hex"], cwd=RAIZ, check=True, stdout=subprocess.DEVNULL)
@@ -266,6 +307,26 @@ def main(argv=None):
         f.write(f"\\newcommand{{\\commitinforme}}{{{commit}}}\n")
     punto_31(c, peldano)
     punto_32(c, peldano)
+    equivalencia(c, peldano)
+    # Hechos de la serie de práctica que justifican la reversión a la media
+    practica = market.leer_serie("tb/practica.csv")
+    for k, nombre in ((10, "Diez"), (50, "Cincuenta"), (100, "Cien")):
+        c[f"VR{nombre}"] = num(series.razon_de_varianza(practica, k), 2)
+    d = [b - a for a, b in zip(practica, practica[1:])]
+    m = sum(d) / len(d)
+    ac = sum((x - m) * (y - m) for x, y in zip(d, d[1:])) / sum((x - m) ** 2 for x in d)
+    c["AutocorrUno"] = num(ac, 2)
+    c["PrecioMin"], c["PrecioMax"] = min(practica), max(practica)
+    # Palabras de programa (sin el relleno de ceros) y series comparadas por el RTL
+    fuente = "sw/trade.s" if peldano == "r0" else "sw/fondo.s"
+    subprocess.run([sys.executable, "tools/pochoasm.py", fuente, "-o", "build/report_prog.hex"], cwd=RAIZ,
+                   check=True, capture_output=True)
+    pal = [l.strip() for l in open(os.path.join(RAIZ, "build/report_prog.hex")) if l.strip() and not l.startswith(("//", "@"))]
+    while pal and int(pal[-1], 16) == 0:
+        pal.pop()
+    c["PalabrasPrograma"] = len(pal)
+    if peldano != "r0":
+        c["SeriesRTL"] = num(buscar(r"PASS: (\d+) de \d+ series identicas", leer(f"{M}/fondo/{peldano}/series.txt"), tipo=int))
     import report_33   # noqa: E402  (tools/report_33.py: tablas y figura del punto 3.3)
     report_33.punto_33(c, peldano, tabla, num, leer)
     c.escribir(os.path.join(G, "cifras.tex"))

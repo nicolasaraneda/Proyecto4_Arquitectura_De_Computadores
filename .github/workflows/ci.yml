@@ -163,6 +163,37 @@ jobs:
       - name: El fondo en el gemelo contra su referencia (1 051 series a los tres períodos)
         run: make fondo-gemelo-series
 
+  # El informe en PDF: make report con LaTeX instalado en la máquina de GitHub.
+  # El PDF queda como artefacto de la corrida (pestaña Summary).
+  informe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Instalar OSS CAD Suite
+        uses: YosysHQ/setup-oss-cad-suite@v4
+        with:
+          version: '2026-09-06'
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Instalar LaTeX
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends texlive-latex-recommended texlive-latex-extra texlive-lang-spanish texlive-pictures texlive-fonts-recommended lmodern latexmk
+
+      - name: Informe con el diseño por defecto y con R1
+        run: |
+          make informe
+          cp informe/informe.pdf informe_por_defecto.pdf
+          make informe PELDANO_INFORME=r1
+          cp informe/informe.pdf informe_r1.pdf
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: informe
+          path: |
+            informe_por_defecto.pdf
+            informe_r1.pdf
+
   # Ejecución manual: la corrida completa con el simulador del testbench oficial
   equiv-icarus:
     if: github.event_name == 'workflow_dispatch' && inputs.icarus_completo

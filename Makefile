@@ -781,3 +781,15 @@ p7-amdahl: p7-medir
 	$(PYTHON) tools/p7/tablas.py > /dev/null && cat docs/mediciones/p7/perfil.txt docs/mediciones/p7/amdahl.txt
 p7: p7-recursos p7-medir p7-rtl p7-pll p7-doble
 	$(PYTHON) tools/p7/tablas.py
+
+# --- Informe (informe/informe.tex) -------------------------------------------------
+# report: rehace informe/generado/ (cifras y tablas) desde las referencias y
+#   docs/mediciones/, y compila el PDF si hay LaTeX (latexmk). El peldaño sale de
+#   rtl/00_peldano.v; sin él, de PELDANO (por defecto r0, como el comando oficial).
+.PHONY: report informe
+report: p7-rapido informe
+informe: $(GEMELO) fondo-hex
+	$(PYTHON) tools/report.py $(if $(PELDANO_INFORME),--peldano $(PELDANO_INFORME))
+	@if command -v latexmk > /dev/null; then \
+	  cd informe && latexmk -pdf -interaction=nonstopmode -halt-on-error informe.tex > /dev/null && echo "informe/informe.pdf listo"; \
+	else echo "No hay LaTeX en esta maquina: el PDF lo compila la integracion continua (trabajo informe)"; fi

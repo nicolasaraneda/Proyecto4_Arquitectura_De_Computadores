@@ -31,3 +31,11 @@ decisiones.csv
 
 # Bitstreams de competencia: estos si se versionan, con su hash
 !bitstreams/*.bin
+
+# Productos de LaTeX
+informe/*.aux
+informe/*.log
+informe/*.out
+informe/*.fls
+informe/*.fdb_latexmk
+informe/*.pdf

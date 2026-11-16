@@ -1,0 +1,18 @@
+% Generado por tools/report.py (make report). No editar a mano.
+\begin{tabular}{lrrrr}
+\toprule
+Estrategia & Patrimonio & Órdenes & Comisiones & Pérdida máx. \\
+\midrule
+\multicolumn{5}{l}{\textit{Serie de práctica completa, 20\,000 ticks}} \\
+No operar & 10\,000 & 0 & 0 & 0 \\
+Comprar y mantener & 6\,497 & 1 & 5 & -- \\
+Regla base (referencia de clases) & 27\,062 & 388 & 1\,940 & 2\,929 \\
+Nuestro algoritmo (\texttt{max\_media}) & 25\,973 & 624 & 3\,120 & 6\,295 \\
+\midrule
+\multicolumn{5}{l}{\textit{Primeros 2\,000 ticks, como el testbench (pierde 2 precios en el reset)}} \\
+No operar & 10\,000 & 0 & 0 & 0 \\
+Comprar y mantener & 6\,695 & 1 & 5 & -- \\
+Regla base (referencia de clases) & 9\,617 & 52 & 260 & 2\,082 \\
+Nuestro algoritmo (\texttt{max\_media}) & 9\,661 & 74 & 370 & 1\,846 \\
+\bottomrule
+\end{tabular}
