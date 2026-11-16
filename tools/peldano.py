@@ -70,7 +70,7 @@ PATRON = re.compile(r"(?<![\w/$.-])sw/trade\.(s|hex)\b")
 # Rutas armadas por partes, que el patrón no ve (se comprueba con make peldano-probar)
 POR_PARTES = [('"sw", "trade.hex"', '"sw", "max_media.hex"'), ('"sw", "trade.s"', '"sw", "max_media.s"')]
 # Pruebas que corre `probar` después de fijar (rápidas; la integración continua corre todo)
-PRUEBAS = ["test-ref", "tb", "equiv-gemelo", "fondo-oficial", "retune-control", "check-tabla", "test-fondo"]
+PRUEBAS = ["test-ref", "tb", "tb-param", "equiv-gemelo", "fondo-oficial", "retune-control", "check-tabla", "test-fondo"]
 
 
 def sh(cmd, cwd=RAIZ, **kw):

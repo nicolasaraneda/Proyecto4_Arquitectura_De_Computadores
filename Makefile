@@ -78,8 +78,15 @@ check-hex: | $(BUILD)
 
 # --- Testbench oficial, sin modificar ---------------------------------------
 # Mismos comandos que el encabezado de tb/tb_proyecto_4.sv. Falla si no es 4/4.
-tb: $(HEX) | $(BUILD)
-	$(IVERILOG) -g2012 -s tb_proyecto_4 -o $(BUILD)/tb_p4 $(CELLS_SIM) $(SRC) $(TB_OFICIAL)
+# Ejercita el diseño por defecto, igual que el comando del encabezado: con las
+# fuentes tal como las ve ese comando (incluido rtl/00_peldano.v si existe,
+# docs/peldano.md) y el programa que ensambla (PROG_OFICIAL, escrito sin la
+# extensión para que tools/peldano.py fijar no lo cambie por el de R0).
+PROG_OFICIAL := sw/trade
+SRC_OFICIAL := $(wildcard rtl/*.v rtl/espino_core/*.v)
+tb: | $(BUILD)
+	$(PYTHON) $(ASM) $(PROG_OFICIAL).s -o $(PROG_OFICIAL).hex
+	$(IVERILOG) -g2012 -s tb_proyecto_4 -o $(BUILD)/tb_p4 $(CELLS_SIM) $(SRC_OFICIAL) $(TB_OFICIAL)
 	$(VVP) -n $(BUILD)/tb_p4 | tee $(BUILD)/tb_p4.log
 	@grep -q "Testbenchs aprobados: 4/4" $(BUILD)/tb_p4.log
 

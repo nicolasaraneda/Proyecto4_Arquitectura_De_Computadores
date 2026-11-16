@@ -28,7 +28,7 @@ Sin ninguna definición. Hoy eso da R0: el Espino base con `max_media`. Si compi
 ## Cómo se sabe que funciona, hoy
 
 - `make peldano-oficial` corre el comando oficial con el diseño que hoy es el de por defecto y compara con su referencia. Hoy: R0, 4/4, patrimonio 9 661 y `decisiones.csv` idéntico al de `ref/trader.py`. Corre en la integración continua, así que también vigila que nadie rompa el comando oficial.
-- `make peldano-probar PELDANO=r1` hace el cambio en una copia del repositorio (un `git worktree` en `build/peldano/`), sin tocar el árbol de trabajo, y corre ahí el comando oficial y siete objetivos propios: `test-ref`, `tb` (R0 con su programa nuevo de nombre), `equiv-gemelo`, `fondo-oficial`, `retune-control`, `check-tabla` y `test-fondo`. Resultado en `docs/mediciones/peldano_probar_r1.txt`.
+- `make peldano-probar PELDANO=r1` hace el cambio en una copia del repositorio (un `git worktree` en `build/peldano/`), sin tocar el árbol de trabajo, y corre ahí el comando oficial y ocho objetivos propios: `test-ref`, `tb` (que es el comando oficial y por eso pasa a probar R1), `tb-param` (la copia parametrizada del testbench, que sigue probando R0 con `sw/max_media.hex`), `equiv-gemelo`, `fondo-oficial`, `retune-control`, `check-tabla` y `test-fondo`. Resultado en `docs/mediciones/peldano_probar_r1.txt`.
 
 ## Qué hacer después del 26/11
 
