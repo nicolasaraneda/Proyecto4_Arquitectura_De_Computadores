@@ -5,7 +5,8 @@
 # Grupo: Nicolás Araneda, Vicente Calderón y Santiago Muñoz.
 # Arquitectura de Computadores, Universidad de los Andes, 2026-2.
 #
-# Corre en el Espino barrel compilado con -DESPINO_XD_EMAD y -DESPINO_XD_DEVK.
+# Corre en el Espino barrel compilado con -DESPINO_XD_EMAD, -DESPINO_XD_DEVK y
+# -DESPINO_TABLA (la tabla de parámetros en su BRAM, docs/tabla_vigilante.md).
 # Referencia byte a byte: ref/fondo.py (make fondo-equiv).
 #
 #   hilo 0   supervisor: sondea el SPI, lee el precio, lo publica, calcula
@@ -58,11 +59,12 @@
 # Las líneas que empiezan con "#@" son marcas para tools/fondo/variante.py,
 # que arma desde este mismo archivo los programas con fallas puestas a
 # propósito (un gestor colgado, un voto que no llega, un voto atrasado). Para
-# el ensamblador son comentarios. En un gestor x1 está libre: lo usan solo esas
-# variantes.
+# el ensamblador son comentarios. En un gestor x1 queda libre después de leer
+# sus umbrales: lo usan solo esas variantes.
 #
 # Registros del supervisor (hilo 0):
-#   x1   temporal
+#   x1   base de la tabla de parámetros desde que se publica el precio hasta
+#        el voto; después, temporal
 #   x2   base del esclavo SPI
 #   x3   número de tick por 256
 #   x4   S0, la media por 32 de su max_media
@@ -108,26 +110,28 @@
 .equ BIT_PAR,       256        # bit 0 del número de tick, dentro de x3
 .equ BIT_LATIDO,    0x40000    # bit 10 del número de tick, dentro de x3
 
-# --- Tabla de parámetros (solo lectura) ---------------------------------------
+# --- Tabla de parámetros (solo lectura, en su propia BRAM) ---------------------
 # El programa no trae ninguna constante del algoritmo en sus instrucciones:
-# todas salen de aquí. El orden es el de PARAMETROS en ref/fondo.py.
-.equ TABLA,         0x770
-.equ T_S_ENTRA,     0x770      # supervisor, max_media: entra si dev < este valor
-.equ T_S_SALE,      0x774      #                         sale si dev >= este valor
-.equ T_G1_ENTRA,    0x778      # gestor 1
-.equ T_G1_SALE,     0x77C
-.equ T_G2_ENTRA,    0x780      # gestor 2
-.equ T_G2_SALE,     0x784
-.equ T_G3_ENTRA,    0x788      # gestor 3
-.equ T_G3_SALE,     0x78C
-.equ T_W1_INI,      0x790      # pesos iniciales, en dieciseisavos
-.equ T_W2_INI,      0x794
-.equ T_W3_INI,      0x798
-.equ T_W1_MAX,      0x79C      # tope de cada peso
-.equ T_W1_MIN,      0x7A8      # piso de cada peso
-.equ T_VENTANA,     0x7B4      # ticks entre ajustes de los pesos
-.equ T_UMBRAL,      0x7B8      # compra si los pesos adentro suman esto o más
-.equ T_PLAZO,       0x7BC      # vueltas del lazo de lectura de votos (1 o más)
+# todas salen de aquí. Son valores de 16 bits que se leen con lw y llegan con
+# extensión de signo. El orden es el de PARAMETROS en ref/fondo.py, y el
+# contenido es sw/fondo_tabla.hex (python3 ref/fondo.py --tabla-hex).
+.equ TAB_BASE,      0x80020000
+.equ T_S_ENTRA,     0          # supervisor, max_media: entra si dev < este valor
+.equ T_S_SALE,      4          #                         sale si dev >= este valor
+.equ T_G1_ENTRA,    8          # gestor 1
+.equ T_G1_SALE,     12
+.equ T_G2_ENTRA,    16         # gestor 2
+.equ T_G2_SALE,     20
+.equ T_G3_ENTRA,    24         # gestor 3
+.equ T_G3_SALE,     28
+.equ T_W1_INI,      32         # pesos iniciales, en dieciseisavos
+.equ T_W2_INI,      36
+.equ T_W3_INI,      40
+.equ T_W1_MAX,      44         # tope de cada peso
+.equ T_W1_MIN,      56         # piso de cada peso
+.equ T_VENTANA,     68         # ticks entre ajustes de los pesos
+.equ T_UMBRAL,      72         # compra si los pesos adentro suman esto o más
+.equ T_PLAZO,       76         # vueltas del lazo de lectura de votos (1 o más)
 
 # --- Estado compartido (parte en cero) ----------------------------------------
 .equ PUB,           0x7C0      # supervisor: tick * 256 + precio
@@ -162,13 +166,14 @@ supervisor:
     li   x2, SPI_BASE
     li   x3, 0                 # todavía no hay ningún tick
     li   x15, 0                # pos0 = 0: afuera
-    lw   x10, T_W1_INI(x0)     # los pesos parten en el prior de la tabla
+    li   x1, TAB_BASE
+    lw   x10, T_W1_INI(x1)     # los pesos parten en el prior de la tabla
     sw   x10, W1(x0)
-    lw   x11, T_W2_INI(x0)
+    lw   x11, T_W2_INI(x1)
     sw   x11, W2(x0)
-    lw   x12, T_W3_INI(x0)
+    lw   x12, T_W3_INI(x1)
     sw   x12, W3(x0)
-    lw   x13, T_VENTANA(x0)
+    lw   x13, T_VENTANA(x1)
 
 # Primer precio: la media del supervisor parte en ese precio
 s_primero:
@@ -188,20 +193,22 @@ s_espera:
 
 # --- 2. Publicar el precio con su número de tick, en un solo store ------------
 s_publica:
+#@SUPERVISOR
     addi x3, x3, 256
     add  x9, x3, x8
     sw   x9, PUB(x0)
 # --- 3. max_media propia, mientras los gestores calculan ----------------------
+    li   x1, TAB_BASE          # base de la tabla, hasta el voto
     devk x9, x8, x4, K         # dev = 32 p - S0
-    lw   x1, T_S_ENTRA(x0)
-    slt  x5, x9, x1            # 1 si hay que entrar
-    lw   x1, T_S_SALE(x0)
-    slt  x6, x9, x1            # 0 si hay que salir
+    lw   x5, T_S_ENTRA(x1)
+    slt  x5, x9, x5            # 1 si hay que entrar
+    lw   x6, T_S_SALE(x1)
+    slt  x6, x9, x6            # 0 si hay que salir
     or   x15, x15, x5
     and  x15, x15, x6          # pos0 = (pos0 | entrar) & no_salir
     emad x4, x9, x4, K         # S0 = S0 + (dev >>> 5)
     addi x13, x13, -1          # un tick menos para la frontera de ventana
-    lw   x14, T_PLAZO(x0)
+    lw   x14, T_PLAZO(x1)
 
 # --- 4. Recoger los votos, con plazo ------------------------------------------
 # Cada resta da 0 o 1 si el voto es de este tick, y 2 o más (sin signo) si es
@@ -234,7 +241,7 @@ d_3:
     mv   x7, x15
 d_4:
     bnez x13, s_voto
-    lw   x13, T_VENTANA(x0)    # era tick de frontera: sin los tres votos no se ajusta
+    lw   x13, T_VENTANA(x1)    # era tick de frontera: sin los tres votos no se ajusta
     j    s_voto
 
 # --- 5. Reparto: cada VENTANA ticks se ajustan los pesos ----------------------
@@ -251,7 +258,7 @@ s_voto:
     and  x7, x7, x12
     add  x9, x5, x6
     add  x9, x9, x7            # F: pesos de los votos adentro
-    lw   x1, T_UMBRAL(x0)
+    lw   x1, T_UMBRAL(x1)
     slt  x9, x9, x1            # 1 si no hay mayoría
     sub  x9, x0, x9            # 0 si se compra, 0xFFFFFFFF si se vende
     andi x1, x9, VENDER_MENOS_COMPRAR
@@ -294,7 +301,8 @@ t_leds:
 # del que menos ganó al que más ganó si la ventaja supera 1/32 del precio
 # (los puntajes están en treintaidosavos: ventaja > p) y los topes lo permiten.
 # Solo se llega aquí con los tres votos al día, así que los tres DES_k son de
-# este tick. Usa como temporales los registros de los votos y de los pesos: al
+# este tick. Usa como temporales los registros de los votos y de los pesos (x1
+# no se toca: sigue siendo la base de la tabla). Al
 # terminar se recargan los pesos y se repite la lectura de votos, que pasa de
 # inmediato porque ningún gestor vuelve a publicar hasta que cambie PUB.
 frontera:
@@ -333,10 +341,12 @@ f_4:
     sub  x9, x9, x11           # ventaja del mejor sobre el peor
     bge  x8, x9, f_fin         # ventaja <= p: no supera el margen
     lw   x5, W1(x10)           # peso del mejor
-    lw   x6, T_W1_MAX(x10)
+    add  x6, x1, x10
+    lw   x6, T_W1_MAX(x6)
     bge  x5, x6, f_fin         # ya está en su tope
     lw   x7, W1(x12)           # peso del peor
-    lw   x6, T_W1_MIN(x12)
+    add  x6, x1, x12
+    lw   x6, T_W1_MIN(x6)
     bge  x6, x7, f_fin         # ya está en su piso
     addi x5, x5, 1
     sw   x5, W1(x10)
@@ -346,7 +356,7 @@ f_fin:
     lw   x10, W1(x0)
     lw   x11, W2(x0)
     lw   x12, W3(x0)
-    lw   x13, T_VENTANA(x0)
+    lw   x13, T_VENTANA(x1)
     j    s_votos
 
 # =============================================================================
@@ -354,18 +364,21 @@ f_fin:
 # =============================================================================
 hilo1:
     li   x2, G1
-    lw   x10, T_G1_ENTRA(x0)
-    lw   x11, T_G1_SALE(x0)
+    li   x1, TAB_BASE
+    lw   x10, T_G1_ENTRA(x1)
+    lw   x11, T_G1_SALE(x1)
     j    gestor
 hilo2:
     li   x2, G2
-    lw   x10, T_G2_ENTRA(x0)
-    lw   x11, T_G2_SALE(x0)
+    li   x1, TAB_BASE
+    lw   x10, T_G2_ENTRA(x1)
+    lw   x11, T_G2_SALE(x1)
     j    gestor
 hilo3:
     li   x2, G3
-    lw   x10, T_G3_ENTRA(x0)
-    lw   x11, T_G3_SALE(x0)
+    li   x1, TAB_BASE
+    lw   x10, T_G3_ENTRA(x1)
+    lw   x11, T_G3_SALE(x1)
     j    gestor
 
 # --- Rutina común (reentrante: solo usa registros y el bloque de x2) ----------
@@ -425,18 +438,6 @@ g_decidir:
     emad x3, x6, x3, K
     j    g_espera
 
-# =============================================================================
-# Tabla de parámetros. El resto de la memoria queda en cero.
-# =============================================================================
-.org 0x770
-    .word -96, 1               # supervisor (max_media): entra, sale
-    .word -96, 1               # gestor 1 (max_media)
-    .word -128, 1              # gestor 2 (base)
-    .word -64, 17              # gestor 3 (activo)
-    .word 6, 5, 5              # pesos iniciales
-    .word 10, 9, 9             # topes
-    .word 2, 1, 1              # pisos
-    .word 512                  # ventana
-    .word 8                    # umbral del voto
-    .word 8                    # plazo
+# La memoria de datos parte en cero: el programa no toma ningún valor inicial
+# de su imagen. Los parámetros están en la BRAM de la tabla.
 .org 0x800

@@ -17,8 +17,9 @@ Qué comprueba:
   - Degradación: sin ningún voto los bytes son los de max_media sola
     (ref/trader.py); con un voto ausente no se ajustan los pesos; una falla
     acotada deja de tener efecto en los votos cuando termina.
-  - La tabla de parámetros de sw/fondo.s es la de ref/fondo.py, palabra por
-    palabra, y el programa no tiene otras constantes del algoritmo.
+  - sw/fondo_tabla.hex, el contenido de la BRAM de la tabla, es el que genera
+    ref/fondo.py; los desplazamientos que usa sw/fondo.s son los del orden de
+    PARAMETROS, y el programa no toma ningún valor inicial de su imagen.
 """
 import os
 import sys
@@ -154,11 +155,22 @@ class TestFondo(unittest.TestCase):
 
     def test_tabla_del_programa(self):
         e, palabras = simbolos.ensamblar(os.path.join(RAIZ, "sw", "fondo.s"))
-        base = e.simbolos["TABLA"] // 4
-        n = len(fondo.PARAMETROS)
-        self.assertEqual([w & 0xFFFFFFFF for w in palabras[base:base + n]], fondo.palabras_tabla())
-        self.assertEqual(e.simbolos["PUB"], e.simbolos["TABLA"] + 4 * n)
-        self.assertTrue(all(w == 0 for w in palabras[base + n:]))
+        with open(os.path.join(RAIZ, "sw", "fondo_tabla.hex")) as f:
+            self.assertEqual(f.read(), fondo.tabla_hex())
+        nombres = [n for n, _ in fondo.PARAMETROS]
+        for nombre, valor in e.simbolos.items():
+            if nombre.startswith("T_"):
+                self.assertEqual(valor, 4 * nombres.index(nombre[2:]), nombre)
+        self.assertEqual(e.simbolos["TAB_BASE"] & 0xFFFFFFFF, 0x80020000)
+        fin = max(i for i, w in enumerate(palabras) if w) + 1
+        self.assertLess(4 * fin, e.simbolos["PUB"])          # nada inicializado en los datos
+
+    def test_tabla_fuera_de_rango(self):
+        with self.assertRaises(ValueError):
+            fondo.tabla_hex({"VENTANA": 40000})
+        with self.assertRaises(ValueError):
+            fondo.tabla_hex({"PLAZO": 0})
+        self.assertEqual(fondo.tabla_hex({"G3_ENTRA": -65}).splitlines()[6], "ffbf")
 
 
 if __name__ == "__main__":

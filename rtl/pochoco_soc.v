@@ -49,12 +49,27 @@
   `else
     `define ESPINO_XD_B2 1'b0
   `endif
+  // Tabla de parámetros de solo lectura en una BRAM (rtl/pochoco_tabla.v), en
+  // 0x8002_0000. Se elige con -DESPINO_TABLA. Vigilante con SB_WARMBOOT
+  // (rtl/vigilante.v): -DESPINO_VIGILANTE. Las dos son del diseño integrado
+  // (docs/tabla_vigilante.md) y solo se usan con el barrel.
 `elsif ESPINO_ROM
   `define ESPINO_PIPELINE_DEF 2
 `elsif ESPINO_SEGMENTADO
   `define ESPINO_PIPELINE_DEF 1
 `else
   `define ESPINO_PIPELINE_DEF 0
+`endif
+
+`ifdef ESPINO_TABLA
+  `define ESPINO_TABLA_DEF 1
+`else
+  `define ESPINO_TABLA_DEF 0
+`endif
+`ifdef ESPINO_VIGILANTE
+  `define ESPINO_VIGILANTE_DEF 1
+`else
+  `define ESPINO_VIGILANTE_DEF 0
 `endif
 
 module pochoco_soc #(
@@ -65,7 +80,17 @@ module pochoco_soc #(
   // Bits del contador de programa. El core base conserva los 32 originales.
   // El segmentado y el barrel usan el ancho real de la memoria (11 bits con
   // 512 palabras).
-  parameter PcW        = (Pipeline != 0) ? $clog2(NumWords) + 2 : 32
+  parameter PcW        = (Pipeline != 0) ? $clog2(NumWords) + 2 : 32,
+  // Tabla de parámetros: 0 no hay, 1 BRAM de 256 x 16 de solo lectura.
+  // TablaFile es su contenido (un valor de 16 bits por línea).
+  parameter Tabla      = `ESPINO_TABLA_DEF,
+  parameter TablaFile  = "sw/fondo_tabla.hex",
+  // Vigilante: si quedan VigN precios seguidos sin escritura en DECISION y
+  // llega uno más, la FPGA se reconfigura con la imagen VigDestino (S1 S0 de
+  // SB_WARMBOOT).
+  parameter       Vigilante  = `ESPINO_VIGILANTE_DEF,
+  parameter       VigN       = 4,
+  parameter [1:0] VigDestino = 2'b01
 ) (
   input  wire       i_Clk,
 
@@ -144,30 +169,49 @@ module pochoco_soc #(
   );
 `endif
 
-  wire is_mmio, spi_sel, per_sel;
+  // Con Tabla = 0 la selección es la del SoC original: tab_sel vale cero.
+  wire is_mmio, spi_sel, per_sel, tab_sel;
   assign is_mmio = data_addr[31];
-  assign per_sel = is_mmio & ~data_addr[16];
-  assign spi_sel = is_mmio &  data_addr[16];
+  assign tab_sel = (Tabla != 0) ? (is_mmio & data_addr[17]) : 1'b0;
+  assign per_sel = is_mmio & ~data_addr[16] & ~tab_sel;
+  assign spi_sel = is_mmio &  data_addr[16] & ~tab_sel;
 
   wire ram_b_req, per_req, spi_req;
   assign ram_b_req = data_req & ~is_mmio;
   assign per_req   = data_req &  per_sel;
   assign spi_req   = data_req &  spi_sel;
 
-  wire [31:0] ram_b_rdata, per_rdata, spi_rdata;
+  wire [31:0] ram_b_rdata, per_rdata, spi_rdata, tab_rdata;
 
-  reg rd_is_per, rd_is_spi;
+  reg rd_is_per, rd_is_spi, rd_is_tab;
   always @(posedge clk or negedge rst_ni) begin
     if (!rst_ni) begin
       rd_is_per <= 1'b0;
       rd_is_spi <= 1'b0;
+      rd_is_tab <= 1'b0;
     end else if (data_req & ~data_we) begin
       rd_is_per <= per_sel;
       rd_is_spi <= spi_sel;
+      rd_is_tab <= tab_sel;
     end
   end
   assign data_rdata = rd_is_per ? per_rdata :
-                      rd_is_spi ? spi_rdata : ram_b_rdata;
+                      rd_is_spi ? spi_rdata :
+                      rd_is_tab ? tab_rdata : ram_b_rdata;
+
+  // Tabla de parámetros de solo lectura
+  generate
+    if (Tabla != 0) begin : g_tabla
+      pochoco_tabla #(.MemFile(TablaFile)) u_tabla (
+        .clk_i   (clk),
+        .rd_i    (data_req & tab_sel & ~data_we),
+        .idx_i   (data_addr[9:2]),
+        .rdata_o (tab_rdata)
+      );
+    end else begin : g_sin_tabla
+      assign tab_rdata = 32'b0;
+    end
+  endgenerate
 
   // El barrel busca como el core base: BRAM leída en el flanco de subida
   pochoco_ram #(.NumWords(NumWords), .MemFile(MemFile), .FetchMode((Pipeline == 3) ? 0 : Pipeline)) u_ram (
@@ -214,6 +258,7 @@ module pochoco_soc #(
   );
 
   // SPI Slave
+  wire spi_precio, spi_decision_wr, spi_cs_activo;
   pochoco_spi_slave u_spi (
     .clk_i      (clk),
     .rst_ni     (rst_ni),
@@ -226,8 +271,36 @@ module pochoco_soc #(
     .spi_sclk_i (i_SPI_SCLK),
     .spi_mosi_i (i_SPI_MOSI),
     .spi_cs_n_i (i_SPI_CS_n),
-    .spi_miso_o (o_SPI_MISO)
+    .spi_miso_o (o_SPI_MISO),
+    .byte_done_o   (spi_precio),
+    .decision_wr_o (spi_decision_wr),
+    .cs_active_o   (spi_cs_activo)
   );
+
+  // Vigilante y primitiva de warm boot (docs/tabla_vigilante.md)
+  generate
+    if (Vigilante != 0) begin : g_vig
+      wire       boot;
+      wire [1:0] sel;
+      vigilante #(.N(VigN), .Destino(VigDestino)) u_vig (
+        .clk_i         (clk),
+        .rst_ni        (rst_ni),
+        .precio_i      (spi_precio),
+        .decision_wr_i (spi_decision_wr),
+        .cs_activo_i   (spi_cs_activo),
+        .forzar_i      (1'b0),
+        .boot_o        (boot),
+        .sel_o         (sel)
+      );
+      SB_WARMBOOT u_warmboot (
+        .BOOT (boot),
+        .S1   (sel[1]),
+        .S0   (sel[0])
+      );
+    end else begin : g_sin_vig
+      wire _unused_vig = &{1'b0, spi_precio, spi_decision_wr, spi_cs_activo};
+    end
+  endgenerate
 
   // 7-seg is active-low on the board
   assign {o_Segment1_G, o_Segment1_F, o_Segment1_E, o_Segment1_D,

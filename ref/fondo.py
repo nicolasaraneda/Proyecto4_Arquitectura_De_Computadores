@@ -63,8 +63,11 @@ import trader
 
 K = 5                    # alfa = 1/32. El hardware solo tiene k = 5
 
-# Tabla de parámetros, en el orden en que está en la memoria (sw/fondo.s,
-# etiqueta TABLA). Los umbrales van en unidades de dev (precio por 32).
+# Tabla de parámetros, en el orden en que está en la BRAM de la tabla
+# (rtl/pochoco_tabla.v, 0x8002_0000; la palabra i está en el desplazamiento
+# 4 i). Cada valor tiene que caber en 16 bits con signo. Los umbrales van en
+# unidades de dev (precio por 32).
+PALABRAS_TABLA = 256
 PARAMETROS = [
     ("S_ENTRA", -96),    # supervisor, max_media: entra si dev < -3 * 32
     ("S_SALE", 1),       #                         sale si dev > 0
@@ -238,11 +241,24 @@ def correr(precios, perdidos=0, parametros=None, fallas=(), filas=None, traza=No
 
 
 def palabras_tabla(parametros=None):
-    """Las palabras de la tabla de parámetros, en el orden de la memoria."""
+    """Los valores de la tabla de parámetros, en el orden de la memoria."""
     q = dict(POR_DEFECTO)
     if parametros:
         q.update(parametros)
-    return [q[nombre] & M32 for nombre, _ in PARAMETROS]
+    valores = [q[nombre] for nombre, _ in PARAMETROS]
+    for (nombre, _), v in zip(PARAMETROS, valores):
+        if not -32768 <= v <= 32767:
+            raise ValueError(f"{nombre} = {v} no cabe en 16 bits con signo")
+    if q["PLAZO"] < 1:
+        raise ValueError("PLAZO tiene que ser 1 o más")
+    return valores
+
+
+def tabla_hex(parametros=None):
+    """El contenido de la BRAM de la tabla: 256 líneas con un valor de 16 bits."""
+    valores = palabras_tabla(parametros)
+    valores += [0] * (PALABRAS_TABLA - len(valores))
+    return "".join(f"{v & 0xFFFF:04x}\n" for v in valores)
 
 
 def main(argv=None):
@@ -259,6 +275,8 @@ def main(argv=None):
     ap.add_argument("-o", "--salida", help="escribir el decisiones.csv de referencia")
     ap.add_argument("--traza", help="escribir el estado interno por tick")
     ap.add_argument("--tabla", action="store_true", help="mostrar la tabla de parámetros y salir")
+    ap.add_argument("--tabla-hex", metavar="ARCHIVO",
+                    help="escribir el contenido de la BRAM de la tabla (256 valores de 16 bits) y salir")
     a = ap.parse_args(argv)
 
     parametros = {}
@@ -268,8 +286,12 @@ def main(argv=None):
             ap.error(f"parametro desconocido: {nombre}")
         parametros[nombre] = int(valor, 0)
     if a.tabla:
-        for (nombre, _), palabra in zip(PARAMETROS, palabras_tabla(parametros)):
-            print(f"{nombre:10s} {s32(palabra):6d}  0x{palabra:08x}")
+        for i, ((nombre, _), v) in enumerate(zip(PARAMETROS, palabras_tabla(parametros))):
+            print(f"{i:3d}  0x{4 * i:03x}  {nombre:10s} {v:6d}  0x{v & 0xFFFF:04x}")
+        return 0
+    if a.tabla_hex:
+        with open(a.tabla_hex, "w", newline="\n") as f:
+            f.write(tabla_hex(parametros))
         return 0
 
     precios = market.leer_serie(a.serie, a.nticks)

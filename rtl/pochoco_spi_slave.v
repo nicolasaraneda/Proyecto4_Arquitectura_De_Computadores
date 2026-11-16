@@ -24,7 +24,14 @@ module pochoco_spi_slave (
   input  wire        spi_sclk_i,
   input  wire        spi_mosi_i,
   input  wire        spi_cs_n_i,
-  output wire        spi_miso_o
+  output wire        spi_miso_o,
+
+  // Para el vigilante (rtl/vigilante.v). Agregadas por el grupo del Proyecto 4:
+  // sacan tres señales que ya existían. No cambian la lógica, el mapa de
+  // registros ni los nombres que el testbench oficial mira por jerarquía.
+  output wire        byte_done_o,     // pulso: llegó un precio completo
+  output wire        decision_wr_o,   // pulso: el core escribió DECISION
+  output wire        cs_active_o      // CS_n en bajo, sincronizado
 );
 
   // Register offsets
@@ -116,5 +123,9 @@ module pochoco_spi_slave (
       endcase
     end
   end
+
+  assign byte_done_o   = byte_done;
+  assign decision_wr_o = wr & (off == REG_DECISION);
+  assign cs_active_o   = cs_active;
 
 endmodule
