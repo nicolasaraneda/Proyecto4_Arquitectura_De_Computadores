@@ -389,6 +389,13 @@ static void sacar_r(Sim *s, int64_t x) {
  * solo lectura, en 0x8002_0000. Se lee con extensión de signo. No pasa por el
  * esclavo SPI ni por los periféricos, y un store ahí no hace nada. */
 static int16_t tabla[256];
+/* --perfil: instrucciones y ciclos por hilo y por palabra del programa. En el
+ * base y el segmentado cada instrucción suma sus ciclos (hilo 0); en el barrel
+ * cada instrucción de un hilo ocupa 4 ciclos de ese hilo. Solo se cuenta: no
+ * cambia nada de la simulación. Con --perfil el atajo del sondeo se apaga,
+ * para que cada vuelta del lazo quede contada. */
+static int     perfil;
+static int64_t perfil_n[4][NWORDS], perfil_c[4][NWORDS];
 static int     hay_tabla;
 static int es_tabla(uint32_t addr) { return hay_tabla && (addr & 0x80000000u) && (addr & 0x20000u); }
 
@@ -599,6 +606,7 @@ static void correr_core(Sim *s) {
     }
     s->pc = npc;
     if (!ya_leida) s->w = s->mem[(npc >> 2) & (NWORDS - 1)];
+    if (perfil) { perfil_n[0][(pc >> 2) & (NWORDS - 1)]++; perfil_c[0][(pc >> 2) & (NWORDS - 1)] += ciclos; }
     s->c = c + ciclos;
   }
   spi_avanzar(s, s->c_fin);
@@ -707,6 +715,7 @@ static void paso_barrel(Sim *s, int t, int64_t k) {
     x[rd] = res;
     if (s->f_traza && k + 1 <= s->c_fin) { s->pr_rd = rd; s->pr_t = t; s->pr_c = k + 1; s->pr_v = res; }
   }
+  if (perfil) { perfil_n[t][(pc >> 2) & (NWORDS - 1)]++; perfil_c[t][(pc >> 2) & (NWORDS - 1)] += 4; }
   s->bpc[t] = npc;
 }
 
@@ -910,13 +919,16 @@ static void ayuda(void) {
        "  --traza ARCHIVO       escribir la traza de eventos, igual a la de tb/tb_cpi.sv\n"
        "  --tabla ARCHIVO       tabla de parametros en 0x80020000, 256 valores hex de 16 bits\n"
        "                        (sw/fondo_tabla.hex; como -DESPINO_TABLA)\n"
-       "  --callado             no imprimir el resumen");
+       "  --callado             no imprimir el resumen\n"
+       "  --perfil ARCHIVO      escribir, por hilo y por direccion del programa, cuantas veces se\n"
+       "                        ejecuto cada instruccion y cuantos ciclos ocupo (apaga el atajo)");
 }
 
 static int64_t num(const char *txt) { return strtoll(txt, NULL, 0); }
 
 int main(int argc, char **argv) {
   int64_t cs_sclk = -1;
+  const char *perfil_ruta = NULL;
   for (int i = 1; i < argc; i++) {
     const char *o = argv[i];
     const char *v = i + 1 < argc ? argv[i + 1] : NULL;
@@ -944,6 +956,7 @@ int main(int argc, char **argv) {
     CON_VALOR("--periodo2-ns", cfg.periodo2_ns = num(v))
     CON_VALOR("--periodo3-ns", cfg.periodo3_ns = num(v))
     CON_VALOR("--tabla", cfg.tabla = v)
+    CON_VALOR("--perfil", perfil_ruta = v)
     if (!strcmp(o, "--barrel")) { cfg.barrel = 1; continue; }
     if (!strcmp(o, "--bytes")) { cfg.bytes = 1; continue; }
     if (!strcmp(o, "--sin-atajo")) { cfg.atajo = 0; continue; }
@@ -1032,8 +1045,20 @@ int main(int argc, char **argv) {
   }
   if (cfg.traza && !(s.f_traza = fopen(cfg.traza, "w"))) morir("no se pudo crear", cfg.traza);
 
+  if (perfil_ruta) { perfil = 1; cfg.atajo = 0; }
   simular(&s, programa, precio, n, leido);
 
+  if (perfil_ruta) {
+    FILE *fp = fopen(perfil_ruta, "w");
+    if (!fp) morir("no se pudo crear", perfil_ruta);
+    fprintf(fp, "# ticks_medidos %d ciclos %lld\n# hilo direccion palabra ejecuciones ciclos\n",
+            s.ticks_medidos, (long long)(s.c_fin - s.R));
+    for (int h = 0; h < 4; h++)
+      for (int i = 0; i < NWORDS; i++)
+        if (perfil_n[h][i]) fprintf(fp, "%d %03x %08x %lld %lld\n", h, 4 * i, programa[i],
+                                    (long long)perfil_n[h][i], (long long)perfil_c[h][i]);
+    fclose(fp);
+  }
   if (s.f_csv) fclose(s.f_csv);
   if (s.f_ticks) fclose(s.f_ticks);
   if (s.f_traza) fclose(s.f_traza);

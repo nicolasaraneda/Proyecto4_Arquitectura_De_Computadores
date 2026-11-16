@@ -1,0 +1,98 @@
+Margen real del reloj doblado. Oscilador de 25 MHz (40 ns). 10 semillas por variante.
+base_x2: Espino base. seg_x2: Espino segmentado. Los dos con el reloj interno doblado por lógica.
+
+1. Período al que hay que cerrar según el ciclo de trabajo del oscilador
+   El período corto del reloj doblado es 40 ns x min(d, 1 - d) menos la diferencia de latencia entre
+   el flanco de bajada y el de subida (0.27 ns en la esquina máxima). Las rutas de flanco de subida a
+   flanco de subida tienen que caber ahí. Semillas que lo logran según la frecuencia máxima de nextpnr:
+   ciclo de trabajo     período (ns) equivale a MHz | base_x2    seg_x2    
+   50 a 50 %                   19.73           50.7 | 0 de 10    10 de 10  
+   48 a 52 %                   18.93           52.8 | 0 de 10    9 de 10   
+   45 a 55 %                   17.73           56.4 | 0 de 10    1 de 10   
+   40 a 60 %                   15.73           63.6 | 0 de 10    0 de 10   
+   Además del período, nextpnr no descuenta el skew de la red global: hasta 0.727 ns en la HX1K
+   según la hoja de datos. Con el reloj de 25 MHz sobran más de 15 ns y no importa. Aquí sí.
+
+2. Ciclo de trabajo que tolera cada semilla, con todas las clases de ruta (%)
+   Rango de ciclos de trabajo del oscilador con holgura no negativa. 'no cierra': con ninguno.
+   El rango no queda centrado en 50 % por la diferencia de latencia entre flancos.
+   variante sem | esquina máxima   | esquina típica   | esquina mínima  
+   base_x2    1 | no cierra        | 50.5 a 50.7      | 45.7 a 55.4     
+   base_x2    2 | no cierra        | 48.9 a 52.4      | 44.2 a 57.0     
+   base_x2    3 | no cierra        | no cierra        | 46.6 a 54.5     
+   base_x2    4 | no cierra        | 50.1 a 51.1      | 45.3 a 55.8     
+   base_x2    5 | no cierra        | 49.2 a 52.0      | 44.5 a 56.6     
+   base_x2    6 | no cierra        | 47.0 a 54.1      | 42.5 a 58.5     
+   base_x2    7 | no cierra        | 49.0 a 52.2      | 44.4 a 56.8     
+   base_x2    8 | no cierra        | no cierra        | 46.4 a 54.8     
+   base_x2    9 | no cierra        | 50.2 a 51.0      | 45.5 a 55.6     
+   base_x2   10 | no cierra        | 48.4 a 52.9      | 43.8 a 57.4     
+   seg_x2     1 | 44.7 a 56.6      | 39.8 a 61.5      | 36.0 a 65.2     
+   seg_x2     2 | 46.0 a 55.3      | 41.0 a 60.2      | 37.0 a 64.1     
+   seg_x2     3 | 47.0 a 54.4      | 41.8 a 59.5      | 37.8 a 63.4     
+   seg_x2     4 | 46.9 a 54.5      | 41.7 a 59.5      | 37.7 a 63.4     
+   seg_x2     5 | 45.6 a 55.8      | 40.5 a 60.7      | 36.6 a 64.5     
+   seg_x2     6 | 48.8 a 52.6      | 43.4 a 57.9      | 39.2 a 61.9     
+   seg_x2     7 | 46.1 a 55.2      | 41.0 a 60.2      | 37.1 a 64.0     
+   seg_x2     8 | 46.0 a 55.3      | 41.0 a 60.2      | 37.0 a 64.1     
+   seg_x2     9 | 46.6 a 54.6      | 41.5 a 59.7      | 37.5 a 63.6     
+   seg_x2    10 | 49.8 a 51.5      | 44.2 a 57.0      | 40.0 a 61.1     
+   Semillas que cierran con cada supuesto sobre el oscilador:
+     variante esquina  | 45 a 55 %    | 48 a 52 %    | 50 % exacto 
+     base_x2  máxima   | 0 de 10      | 0 de 10      | 0 de 10     
+     base_x2  típica   | 0 de 10      | 1 de 10      | 5 de 10     
+     base_x2  mínima   | 5 de 10      | 10 de 10     | 10 de 10    
+     seg_x2   máxima   | 1 de 10      | 8 de 10      | 10 de 10    
+     seg_x2   típica   | 10 de 10     | 10 de 10     | 10 de 10    
+     seg_x2   mínima   | 10 de 10     | 10 de 10     | 10 de 10    
+   Peor holgura con 50 % exacto, esquina máxima: base_x2 -3.17 ns, seg_x2 0.10 ns.
+   Peor holgura con 45 a 55 %, esquina máxima: base_x2 -5.17 ns, seg_x2 -1.90 ns.
+
+3. La alternativa de los dos flancos a 25 MHz (Espino segmentado sin duplicador, seg_x1)
+   El fetch lee la memoria en el flanco de bajada: hay rutas de subida a bajada (necesitan el tiempo
+   en alto) y de bajada a subida (necesitan el tiempo en bajo). Peor ruta de cada clase, esquina máxima,
+   y ciclo de trabajo del oscilador que tolera cada semilla:
+   sem |  pos>pos  pos>neg  neg>pos | ciclo de trabajo tolerado (%)
+     1 |    18.12     2.32     7.10 | 6.4 a 81.6
+     2 |    18.59     2.08     8.00 | 5.8 a 79.4
+     3 |    19.30     2.45     7.08 | 6.7 a 81.7
+     4 |    18.63     2.33     7.46 | 6.4 a 80.7
+     5 |    18.26     2.45     7.76 | 6.7 a 80.0
+     6 |    18.85     2.25     7.19 | 6.2 a 81.4
+     7 |    18.28     2.25     7.71 | 6.2 a 80.1
+     8 |    18.05     2.45     7.59 | 6.7 a 80.4
+     9 |    18.68     2.41     7.15 | 6.6 a 81.5
+    10 |    18.66     2.45     7.26 | 6.7 a 81.2
+   En las 10 semillas: tolera al menos de 6.7 a 79.4 %. Holgura de la ruta de un período: 20.7 ns o más.
+
+4. Si el chip es más rápido o más lento que la base de tiempos
+   La base de icestorm trae tres valores por arco con razón fija (mínimo = 0,80 x máximo, típico = 0,89 x
+   máximo). La hoja de datos dice que son peores casos y que el retardo real puede ser mucho menor.
+   k escala todos los retardos (cadena y lógica) respecto de la esquina máxima. El período no escala.
+   k      | pulso (ns): base_x2, seg_x2  | peor holgura 50 %: base, seg | peor holgura 45 a 55 %: base, seg
+   1.20   | 7.96, 5.97                   | -7.80, -3.88                 | -9.80, -5.88                
+   1.10   | 7.30, 5.47                   | -5.48, -1.89                 | -7.48, -3.89                
+   1.00   | 6.63, 4.97                   | -3.17, +0.10                 | -5.17, -1.90                
+   0.89   | 5.90, 4.43                   | -0.62, +2.27                 | -2.62, +0.29                
+   0.80   | 5.31, 3.98                   | +1.47, +2.04                 | -0.53, +2.04                
+   0.65   | 4.31, 3.23                   | +4.94, +1.66                 | +2.94, +1.66                
+   0.50   | 3.32, 2.49                   | +8.42, +1.28                 | +6.42, +1.28                
+   El Espino base cierra con 45 a 55 % solo si el chip es al menos 23 % más rápido que la esquina
+   máxima en la peor semilla (k = 0.77) y 15 % en la mejor (k = 0.85).
+   Pulso mínimo de la red global (tW_GBUF): 0.88 ns. El pulso más angosto de la tabla lo cumple con holgura.
+
+5. Presupuesto de ciclos por ronda si el reloj doblado funcionara
+   Presupuesto del testbench: (período - 9500 ns de la transacción SPI) / período del reloj.
+   ronda      período |       a 25 MHz   a 2 x 25 MHz
+   1          10.0 ms |         249762         499525
+   2           1.0 ms |          24762          49525
+   3           0.1 ms |           2262           4525
+   El reloj doblado tiene en promedio 20 ns de período, pero sus períodos alternan (por ejemplo 18 y
+   22 ns con ciclo de trabajo de 45 %). El número de ciclos por tick es exactamente el doble.
+   Respuesta medida en la prueba de humo (ciclos del reloj interno, desde byte_done hasta DECISION):
+     Espino base        promedio 41.0, peor caso 44 ciclos: 0.88 us con el reloj doblado, 1.76 us a 25 MHz.
+                        uso del presupuesto de la ronda 3: 1.9 % a 25 MHz, 1.0 % con el reloj doblado.
+     Espino segmentado  promedio 22.0, peor caso 24 ciclos: 0.48 us con el reloj doblado, 0.96 us a 25 MHz.
+                        uso del presupuesto de la ronda 3: 1.1 % a 25 MHz, 0.5 % con el reloj doblado.
+   El programa hace el mismo trabajo en la mitad del tiempo, pero ya usaba menos del 2 % del
+   presupuesto más corto: el patrimonio no cambia.

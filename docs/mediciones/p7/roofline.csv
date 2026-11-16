@@ -1,0 +1,15 @@
+serie,intensidad_op_por_byte,mops,ppeak_mops,tipo
+R0 base,0.6154,3.9216,12.5,medido
+Segmentado,0.6154,7.4075,25.0,medido
+Barrel 1 hilo,0.6154,2.0834,6.25,medido
+Barrel 1 hilo + ext.,1.0000,4.1667,12.5,medido
+R1 fondo y R2,0.6989,5.3359,50.0,medido
+paso 1 (estimado),1.0000,7.6924,,estimado
+paso 1+2 (estimado),1.0000,14.2858,,estimado
+paso 3 (estimado),1.0000,28.5714,,estimado
+paso 4 (estimado),4.7501,95.0000,,estimado
+"techo 6,25: barrel, 1 hilo",,,6.25,Ppeak
+"techo 12,5: Espino base; barrel 1 hilo con extension",,,12.5,Ppeak
+techo 25: segmentado; barrel 4 hilos,,,25.0,Ppeak
+"techo 50: barrel 4 hilos con extension (R1, R2)",,,50.0,Ppeak
+quiebre del Espino base,0.1250,12.5,12.5,Ppeak / Bs

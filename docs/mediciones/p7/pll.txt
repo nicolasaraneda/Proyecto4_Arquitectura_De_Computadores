@@ -1,0 +1,34 @@
+PLL de 25 a 50 MHz en el SoC actual: resultado negativo en la Go Board
+Generado por tools/p7/pll.sh (make p7-pll). No editar a mano.
+
+Herramientas:
+  Yosys 0.68+195 (git sha1 435977e97-dirty, Release, Clang /usr/bin/clang++ 21.1.8)
+  "nextpnr-ice40" -- Next Generation Place and Route (Version nextpnr-0.11.1-19-g8dbcee5c)
+  Verilator 5.053 devel rev v5.052-22-g7cf8c5cca (mod)
+  cc (Ubuntu 15.2.0-16ubuntu1) 15.2.0
+Commit de partida: cb5571a (rama p7-codiseno)
+
+Copia de rtl/pochoco_soc.v en build/p7/pll/rtl/ con 'assign clk = i_Clk' reemplazado por un SB_PLL40_CORE
+(DIVR 0, DIVF 31, DIVQ 4, FILTER_RANGE 2: 25 MHz x 32 / 16 = 50 MHz, de icepll -i 25 -o 50).
+
+1. Go Board: nextpnr-ice40 --hx1k --package vq100 --freq 50 --pcf goboard.pcf
+  R0 (Espino base, sw/trade.s): nextpnr termina bien: no
+    ERROR: PLL 'u_pll' couldn't be placed anywhere, no suitable BEL found.
+    ERROR: Packing design failed.
+  R1 (fondo en un chip, sw/fondo.s): nextpnr termina bien: no
+    ERROR: PLL 'u_pll' couldn't be placed anywhere, no suitable BEL found.
+    ERROR: Packing design failed.
+  Log completo de R1 en docs/mediciones/p7/pll_vq100_r1.log
+
+2. Hipotético: HX1K en TQ144 (tiene PLL), --freq 50, sin restricciones de pines
+  r0: cierran a 50 MHz 0 de 10 semillas, fmax minima 42.68 mediana 44.54 MHz
+      por semilla: 42.93 42.68 48.66 42.77 44.72 44.49 44.82 44.59 45.08 44.39
+      PLL ubicado en: constrained PLL 'u_pll' to X6/Y0/pll_3
+  r1: cierran a 50 MHz 10 de 10 semillas, fmax minima 50.44 mediana 53.19 MHz
+      por semilla: 53.12 50.86 54.63 52.30 56.89 50.96 53.95 50.44 54.86 53.26
+      PLL ubicado en: constrained PLL 'u_pll' to X6/Y0/pll_3
+
+3. Presupuesto por ronda si el PLL existiera: (período - 9500 ns) / período del reloj
+  T = 10000000 ns: a 25 MHz 249762 ciclos, a 50 MHz 499525 ciclos
+  T =  1000000 ns: a 25 MHz  24762 ciclos, a 50 MHz  49525 ciclos
+  T =   100000 ns: a 25 MHz   2262 ciclos, a 50 MHz   4525 ciclos

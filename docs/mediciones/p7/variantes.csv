@@ -1,0 +1,7 @@
+variante,descripcion,celdas,lut4,bram,fmax_min_mhz,fmax_mediana_mhz,cierran_25mhz,resp_prom_ciclos,resp_peor_ciclos,tick_prom_ciclos,tick_peor_ciclos,ic_resp_prom,ic_tick_prom,cpi_resp,ciclos_kernel,ic_kernel_hilo0,ic_kernel_todos,cpi_kernel,ops_utiles_tick,mops_logrado,ppeak_mops,speedup_resp,speedup_mops,uso_r1_pct,uso_r2_pct,uso_r3_pct,patrimonio_r3
+r0,"Espino base, sw/trade.s (R0, solo software)",1091,921,12,41.93,44.09,10/10,41.00,44,63.00,66,19.50,28.50,2.103,51.00,24.00,24.00,2.125,8,3.922,12.5,1.000,1.000,0.018,0.178,1.945,26070
+seg,"Pipeline de 3 etapas, sw/trade.s",990,798,12,45.34,47.2,10/10,22.00,26,34.00,38,19.20,28.20,1.146,27.00,24.00,24.00,1.125,8,7.408,25.0,1.864,1.889,0.010,0.105,1.149,26070
+barrel,"Barrel, sw/trade.s en un hilo",932,761,12,53.45,56.32,10/10,75.00,83,115.00,123,19.00,28.00,3.947,96.00,24.00,24.00,4.000,8,2.083,6.25,0.547,0.531,0.035,0.351,3.669,26070
+barrel_xd,"Barrel con emad y devk, sw/xd/trade_xd.s en un hilo",991,817,12,48.59,51.61,10/10,55.00,63,67.00,75,14.00,16.00,3.929,48.00,12.00,12.00,4.000,8,4.167,12.5,0.745,1.062,0.027,0.271,2.785,26070
+r1,"R1: barrel, extensión y tabla, sw/fondo.s (4 hilos)",1029,854,13,51.59,52.57,10/10,223.01,443,281.01,475,56.00,69.50,3.982,262.37,65.59,125.59,4.000,56,5.336,50.0,0.184,1.361,0.174,1.789,19.584,26070
+r2,"R2: R1 con el vigilante, sw/fondo.s (4 hilos)",1045,868,13,47.86,50.33,10/10,223.01,443,281.01,475,56.00,69.50,3.982,262.37,65.59,125.59,4.000,56,5.336,50.0,0.184,1.361,0.174,1.789,19.584,26070

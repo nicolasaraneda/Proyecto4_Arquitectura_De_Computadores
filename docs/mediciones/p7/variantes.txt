@@ -1,0 +1,53 @@
+Tabla de variantes de co-diseno (punto 3.3 del enunciado)
+Generado por tools/p7/tablas.py (make p7-rapido) desde las mediciones de docs/mediciones/p7/. No editar a mano.
+
+Celdas, LUT4, BRAM y fmax: recursos.txt (nextpnr, 10 semillas). Ciclos: gemelo.txt (gemelo validado contra el
+RTL; rtl.txt confirma R0 y el segmentado tick por tick, y R1 y R2 contra la medicion del RTL de P5). Serie de
+practica completa a 0,1 ms. R2 tiene los ciclos de R1: el vigilante solo observa (rtl.txt). Reloj de 25 MHz.
+Operacion util: 8 por tick en max_media, 56 en el fondo (definicion en docs/codiseno.md, seccion 3).
+
+    Variante                 Celdas  LUT4 BRAM Fmax min   med.   Cierran
+    R0 base                    1091   921   12    41.93  44.09  10 de 10
+    Segmentado                  990   798   12    45.34  47.20  10 de 10
+    Barrel 1 hilo               932   761   12    53.45  56.32  10 de 10
+    Barrel 1 hilo + ext.        991   817   12    48.59  51.61  10 de 10
+    R1 fondo                   1029   854   13    51.59  52.57  10 de 10
+    R2 fondo + vigilante       1045   868   13    47.86  50.33  10 de 10
+
+    Ciclos por tick a 0,1 ms (respuesta: de byte_done a DECISION; tick completo: hasta volver a sondear)
+    Variante                 Resp. prom  peor Tick prom  peor IC resp CPI resp
+    R0 base                       41.00    44     63.00    66   19.50    2.103
+    Segmentado                    22.00    26     34.00    38   19.20    1.146
+    Barrel 1 hilo                 75.00    83    115.00   123   19.00    3.947
+    Barrel 1 hilo + ext.          55.00    63     67.00    75   14.00    3.929
+    R1 fondo                     223.01   443    281.01   475   56.00    3.982
+    R2 fondo + vigilante         223.01   443    281.01   475   56.00    3.982
+
+    Kernel (de leer PRICE a volver al sondeo, sin la espera), desempeño y speedup contra R0
+    Variante                 Ciclos  IC h0  IC 4h    CPI  Ops    MOPS  Ppeak  S resp  S MOPS
+    R0 base                   51.00  24.00  24.00  2.125    8   3.922  12.50   1.000   1.000
+    Segmentado                27.00  24.00  24.00  1.125    8   7.408  25.00   1.864   1.889
+    Barrel 1 hilo             96.00  24.00  24.00  4.000    8   2.083   6.25   0.547   0.531
+    Barrel 1 hilo + ext.      48.00  12.00  12.00  4.000    8   4.167  12.50   0.745   1.062
+    R1 fondo                 262.37  65.59 125.59  4.000   56   5.336  50.00   0.184   1.361
+    R2 fondo + vigilante     262.37  65.59 125.59  4.000   56   5.336  50.00   0.184   1.361
+
+    Peor caso de la respuesta contra el presupuesto de cada ronda
+    Variante                      ronda 1 (249762)       ronda 2 (24762)        ronda 3 (2262)
+    R0 base                     44 ciclos, 0.018 %    44 ciclos, 0.178 %    44 ciclos, 1.945 %
+    Segmentado                  26 ciclos, 0.010 %    26 ciclos, 0.105 %    26 ciclos, 1.149 %
+    Barrel 1 hilo               87 ciclos, 0.035 %    87 ciclos, 0.351 %    83 ciclos, 3.669 %
+    Barrel 1 hilo + ext.        67 ciclos, 0.027 %    67 ciclos, 0.271 %    63 ciclos, 2.785 %
+    R1 fondo                   435 ciclos, 0.174 %   443 ciclos, 1.789 %  443 ciclos, 19.584 %
+    R2 fondo + vigilante       435 ciclos, 0.174 %   443 ciclos, 1.789 %  443 ciclos, 19.584 %
+
+    Variantes que no existen en el RTL
+    Espino base con la extension y segmentado con la extension: emad y devk estan solo en el core barrel
+    (rtl/espino_core/espino_xd.v se conecta en espino_barrel_core.v). Construirlas obliga a tocar el RTL
+    compartido de R0, que paso la puerta: quedan como prediccion con Amdahl en amdahl.txt (decision T101).
+
+    Lectura
+    - Por hilo, la variante mas rapida es el segmentado: responde en 22.00 ciclos, 1.86 veces mas rapido que R0.
+    - R1, el que compite, responde en 223.01 ciclos en promedio y 443 en el peor caso: 5.44 veces mas lento que R0.
+      Pero hace 56 operaciones utiles por tick y no 8: su desempeño logrado es 5.336 MOPS contra 3.922 de R0 (1.36 veces).
+    - Todas usan menos del 20 % del presupuesto de la ronda 3.

@@ -1,0 +1,87 @@
+Perfil del tick: en que fase se van los ciclos (punto 3.3, perfilado)
+Generado por tools/p7/tablas.py (make p7-rapido) desde docs/mediciones/p7/perfil/. No editar a mano.
+
+El gemelo (build/gemelo --perfil) cuenta, por hilo y por direccion, las instrucciones ejecutadas y sus ciclos
+en la serie de practica completa a 0,1 ms. tools/p7/fuentes.py asigna cada direccion a una fase leyendo el
+programa. Ciclos por tick = ciclos de la fase / ticks. La deteccion (cuanto demora el sondeo en ver el
+precio) es la respuesta medida menos las fases que van antes de la escritura: no se estima.
+
+== Espino base, sw/trade.s (R0, solo software)
+   fase                                           ciclos/tick instr./tick  % resp. % kernel
+   esperar el precio: deteccion por el sondeo           10.00           -     24.4        -
+   leer PRICE                                            3.00        1.00      7.3      5.9
+   media: dev = 32 p - S                                12.00        6.00     29.3     23.5
+   decidir y armar el byte                              14.00        7.00     34.1     27.5
+   escribir DECISION                                     2.00        1.00      4.9      3.9
+   media: S = S + (dev >>> 5)                           17.00        8.00        -     33.3
+   volver al sondeo (j)                                  3.00        1.00        -      5.9
+   respuesta medida (gemelo)                            41.00
+   kernel (suma de las fases sin la deteccion)          51.00       24.00
+   sondeo en todo el tick (de 2500 ciclos)            2448.99      918.75     98.0 % del periodo
+   Fase mas larga de la respuesta: decidir y armar el byte (14.00 ciclos); del kernel: media: S = S + (dev >>> 5) (17.00).
+   Actualizar la media (dev y S) suma 29.00 ciclos: 56.9 % del kernel.
+
+== Pipeline de 3 etapas, sw/trade.s
+   fase                                           ciclos/tick instr./tick  % resp. % kernel
+   esperar el precio: deteccion por el sondeo            6.00           -     27.3        -
+   leer PRICE                                            2.00        1.00      9.1      7.4
+   media: dev = 32 p - S                                 6.00        6.00     27.3     22.2
+   decidir y armar el byte                               7.00        7.00     31.8     25.9
+   escribir DECISION                                     1.00        1.00      4.5      3.7
+   media: S = S + (dev >>> 5)                            9.00        8.00        -     33.3
+   volver al sondeo (j)                                  2.00        1.00        -      7.4
+   respuesta medida (gemelo)                            22.00
+   kernel (suma de las fases sin la deteccion)          27.00       24.00
+   sondeo en todo el tick (de 2500 ciclos)            2472.99     1484.39     98.9 % del periodo
+   Fase mas larga de la respuesta: decidir y armar el byte (7.00 ciclos); del kernel: media: S = S + (dev >>> 5) (9.00).
+   Actualizar la media (dev y S) suma 15.00 ciclos: 55.6 % del kernel.
+
+== Barrel, sw/trade.s en un hilo
+   fase                                           ciclos/tick instr./tick  % resp. % kernel
+   esperar el precio: deteccion por el sondeo           15.00           -     20.0        -
+   leer PRICE                                            4.00        1.00      5.3      4.2
+   media: dev = 32 p - S                                24.00        6.00     32.0     25.0
+   decidir y armar el byte                              28.00        7.00     37.3     29.2
+   escribir DECISION                                     4.00        1.00      5.3      4.2
+   media: S = S + (dev >>> 5)                           32.00        8.00        -     33.3
+   volver al sondeo (j)                                  4.00        1.00        -      4.2
+   respuesta medida (gemelo)                            75.00
+   kernel (suma de las fases sin la deteccion)          96.00       24.00
+   sondeo en todo el tick (de 2500 ciclos)            2403.99      601.00     96.2 % del periodo
+   Fase mas larga de la respuesta: decidir y armar el byte (28.00 ciclos); del kernel: media: S = S + (dev >>> 5) (32.00).
+   Actualizar la media (dev y S) suma 56.00 ciclos: 58.3 % del kernel.
+
+== Barrel con emad y devk, sw/xd/trade_xd.s en un hilo
+   fase                                           ciclos/tick instr./tick  % resp. % kernel
+   esperar el precio: deteccion por el sondeo           15.00           -     27.3        -
+   leer PRICE                                            4.00        1.00      7.3      8.3
+   media: dev = 32 p - S                                 4.00        1.00      7.3      8.3
+   decidir y armar el byte                              28.00        7.00     50.9     58.3
+   escribir DECISION                                     4.00        1.00      7.3      8.3
+   media: S = S + (dev >>> 5)                            4.00        1.00        -      8.3
+   volver al sondeo (j)                                  4.00        1.00        -      8.3
+   respuesta medida (gemelo)                            55.00
+   kernel (suma de las fases sin la deteccion)          48.00       12.00
+   sondeo en todo el tick (de 2500 ciclos)            2451.99      613.00     98.1 % del periodo
+   Fase mas larga de la respuesta: decidir y armar el byte (28.00 ciclos); del kernel: decidir y armar el byte (28.00).
+
+== R1: barrel, extensión y tabla, sw/fondo.s (4 hilos)
+   fase                                           ciclos/tick instr./tick  % resp. % kernel
+   esperar el precio: deteccion por el sondeo           14.64           -      6.6        -
+   leer PRICE                                            4.00        1.00      1.8      1.5
+   publicar precio y tick (PUB)                         12.00        3.00      5.4      4.6
+   regla max_media (dev, decisión y media)              44.00       11.00     19.7     16.8
+   recoger los votos (espera a los gestores)            88.08       22.02     39.5     33.6
+   ajuste de pesos (frontera de ventana)                 4.29        1.07      1.9      1.6
+   voto ponderado y byte                                52.00       13.00     23.3     19.8
+   escribir DECISION                                     4.00        1.00      1.8      1.5
+   telemetría                                           54.00       13.50        -     20.6
+   respuesta medida (gemelo)                           223.01
+   kernel (suma de las fases sin la deteccion)         262.37       65.59
+   sondeo en todo el tick (de 2500 ciclos)            2237.62      559.40     89.5 % del periodo
+   Gestores (hilos 1 a 3), instrucciones por tick fuera del lazo de espera:
+     hilo 1: publicar puntaje y voto 4.00, puntaje en papel 9.00, regla max_media (dev, decisión y media) 7.00
+     hilo 2: publicar puntaje y voto 4.00, puntaje en papel 9.00, regla max_media (dev, decisión y media) 7.00
+     hilo 3: publicar puntaje y voto 4.00, puntaje en papel 9.00, regla max_media (dev, decisión y media) 7.00
+   Fase mas larga de la respuesta: recoger los votos (espera a los gestores) (88.08 ciclos); del kernel: recoger los votos (espera a los gestores) (88.08).
+

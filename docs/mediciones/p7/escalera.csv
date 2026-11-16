@@ -1,0 +1,10 @@
+paso,descripcion,estado,ops_utiles,ic,ic_por_op,ciclos,ciclos_por_op,mops,speedup,ciclos_por_op_clase,celdas
+0,"Espino base, solo software (R0)",medido,8,24.00,3.000,51.00,6.375,3.922,1.000,7.05,1091
+1,"+ extension de la ISA (devk, emad) en el Espino base",estimado: modelo de costo medido del base,8,12.00,1.500,26.00,3.250,7.692,1.962,3.52,
+2,"pipeline de 3 etapas, solo software",medido,8,24.00,3.000,27.00,3.375,7.408,1.889,4.50,990
+1+2,pipeline de 3 etapas + extension,estimado: modelo de costo medido del segmentado,8,12.00,1.500,14.00,1.750,14.286,3.643,2.25,
+2b,"barrel, un hilo, solo software",medido,8,24.00,3.000,96.00,12.000,2.083,0.531,-,932
+1+2b,"barrel, un hilo + extension",medido,8,12.00,1.500,48.00,6.000,4.167,1.062,-,991
+2c,"barrel, 4 hilos + extension: el fondo (R1)",medido,56,125.59,2.243,262.37,4.685,5.336,1.361,-,1029
+3,instrucciones a medida (mmpos y mmbyte) sobre el pipeline,estimado: CPI ideal 1,8,7.00,0.875,7.00,0.875,28.571,7.286,0.88,
+4,SIMD de 2 carriles de 16 bits: las 4 reglas y el voto,estimado: CPI ideal 1,38,10.00,0.263,10.00,0.263,95.000,24.225,0.26,

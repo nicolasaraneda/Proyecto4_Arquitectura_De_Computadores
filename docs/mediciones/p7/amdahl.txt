@@ -1,0 +1,145 @@
+Amdahl generalizado: speedup predicho contra medido (punto 3.3)
+Generado por tools/p7/tablas.py (make p7-rapido). No editar a mano.
+
+S = 1 / sum(f_i / F_i). La fraccion f_i de cada fase sale del perfil medido de la variante de partida.
+El factor F_i predicho sale de aplicar el modelo de costo de la variante nueva a las instrucciones de la
+fase (contadas en el perfil, por clase: ALU, load, store y salto). La deteccion del sondeo se predice
+escalando la de R0 por la duracion de una vuelta del lazo (lw, andi, beqz tomado) en cada modelo.
+El F_i medido es el cociente de los ciclos medidos de la fase en las dos variantes.
+
+  modelo base       ALU 2, load 3, store 2, salto tomado 3  (Espino base, medido (make cpi)); vuelta del sondeo 8 ciclos
+  modelo seg_clase  ALU 1, load 2, store 1, salto tomado 3  (pipeline de 3 etapas, estimado en la clase 7); vuelta del sondeo 6 ciclos
+  modelo seg        ALU 1, load 2, store 1, salto tomado 2  (pipeline de 3 etapas, medido (make cpi-seg)); vuelta del sondeo 5 ciclos
+  modelo barrel     ALU 4, load 4, store 4, salto tomado 4  (barrel, 4 ciclos por instrucción de un hilo); vuelta del sondeo 12 ciclos
+
+=== Ventana: respuesta (de byte_done a DECISION)
+--- R0 -> segmentado, con el CPI que estimo la clase 7
+    fase                                         ciclos antes       f F predicho  F medido
+    leer PRICE                                           3.00   0.073      1.500     1.500
+    media: dev = 32 p - S                               12.00   0.293      2.000     2.000
+    decidir y armar el byte                             14.00   0.341      2.000     2.000
+    escribir DECISION                                    2.00   0.049      2.000     2.000
+    esperar el precio: deteccion por el sondeo          10.00   0.244      1.333     1.667
+    S predicho 1.745 (23.50 ciclos), S medido 1.864 (22.00 ciclos), diferencia -6.4 %
+--- R0 -> segmentado, con el modelo de costo medido
+    fase                                         ciclos antes       f F predicho  F medido
+    leer PRICE                                           3.00   0.073      1.500     1.500
+    media: dev = 32 p - S                               12.00   0.293      2.000     2.000
+    decidir y armar el byte                             14.00   0.341      2.000     2.000
+    escribir DECISION                                    2.00   0.049      2.000     2.000
+    esperar el precio: deteccion por el sondeo          10.00   0.244      1.600     1.667
+    S predicho 1.843 (22.25 ciclos), S medido 1.864 (22.00 ciclos), diferencia -1.1 %
+--- R0 -> barrel, sw/trade.s en un hilo
+    fase                                         ciclos antes       f F predicho  F medido
+    leer PRICE                                           3.00   0.073      0.750     0.750
+    media: dev = 32 p - S                               12.00   0.293      0.500     0.500
+    decidir y armar el byte                             14.00   0.341      0.500     0.500
+    escribir DECISION                                    2.00   0.049      0.500     0.500
+    esperar el precio: deteccion por el sondeo          10.00   0.244      0.667     0.667
+    S predicho 0.547 (75.00 ciclos), S medido 0.547 (75.00 ciclos), diferencia +0.0 %
+--- barrel -> barrel con emad y devk (la extension sola)
+    fase                                         ciclos antes       f F predicho  F medido
+    leer PRICE                                           4.00   0.053      1.000     1.000
+    media: dev = 32 p - S                               24.00   0.320      6.000     6.000
+    decidir y armar el byte                             28.00   0.373      1.000     1.000
+    escribir DECISION                                    4.00   0.053      1.000     1.000
+    esperar el precio: deteccion por el sondeo          15.00   0.200      1.000     1.000
+    S predicho 1.364 (55.00 ciclos), S medido 1.364 (55.00 ciclos), diferencia -0.0 %
+--- R0 -> barrel con la extension
+    fase                                         ciclos antes       f F predicho  F medido
+    leer PRICE                                           3.00   0.073      0.750     0.750
+    media: dev = 32 p - S                               12.00   0.293      3.000     3.000
+    decidir y armar el byte                             14.00   0.341      0.500     0.500
+    escribir DECISION                                    2.00   0.049      0.500     0.500
+    esperar el precio: deteccion por el sondeo          10.00   0.244      0.667     0.667
+    S predicho 0.745 (55.00 ciclos), S medido 0.745 (55.00 ciclos), diferencia -0.0 %
+--- R0 -> Espino base con la extension (no existe en el RTL)
+    fase                                         ciclos antes       f F predicho  F medido
+    leer PRICE                                           3.00   0.073      1.000         -
+    media: dev = 32 p - S                               12.00   0.293      6.000         -
+    decidir y armar el byte                             14.00   0.341      1.000         -
+    escribir DECISION                                    2.00   0.049      1.000         -
+    esperar el precio: deteccion por el sondeo          10.00   0.244      1.000         -
+    S predicho 1.323 (31.00 ciclos), sin medicion: la variante no existe en el RTL
+--- R0 -> segmentado con la extension (no existe en el RTL)
+    fase                                         ciclos antes       f F predicho  F medido
+    leer PRICE                                           3.00   0.073      1.500         -
+    media: dev = 32 p - S                               12.00   0.293     11.999         -
+    decidir y armar el byte                             14.00   0.341      2.000         -
+    escribir DECISION                                    2.00   0.049      2.000         -
+    esperar el precio: deteccion por el sondeo          10.00   0.244      1.600         -
+    S predicho 2.377 (17.25 ciclos), sin medicion: la variante no existe en el RTL
+
+=== Ventana: kernel (de leer PRICE a volver al sondeo)
+--- R0 -> segmentado, con el CPI que estimo la clase 7
+    fase                                         ciclos antes       f F predicho  F medido
+    leer PRICE                                           3.00   0.059      1.500     1.500
+    media: dev = 32 p - S                               12.00   0.235      2.000     2.000
+    decidir y armar el byte                             14.00   0.275      2.000     2.000
+    escribir DECISION                                    2.00   0.039      2.000     2.000
+    media: S = S + (dev >>> 5)                          17.00   0.333      1.889     1.889
+    volver al sondeo (j)                                 3.00   0.059      1.000     1.500
+    S predicho 1.821 (28.00 ciclos), S medido 1.889 (27.00 ciclos), diferencia -3.6 %
+--- R0 -> segmentado, con el modelo de costo medido
+    fase                                         ciclos antes       f F predicho  F medido
+    leer PRICE                                           3.00   0.059      1.500     1.500
+    media: dev = 32 p - S                               12.00   0.235      2.000     2.000
+    decidir y armar el byte                             14.00   0.275      2.000     2.000
+    escribir DECISION                                    2.00   0.039      2.000     2.000
+    media: S = S + (dev >>> 5)                          17.00   0.333      1.889     1.889
+    volver al sondeo (j)                                 3.00   0.059      1.500     1.500
+    S predicho 1.889 (27.00 ciclos), S medido 1.889 (27.00 ciclos), diferencia +0.0 %
+--- R0 -> barrel, sw/trade.s en un hilo
+    fase                                         ciclos antes       f F predicho  F medido
+    leer PRICE                                           3.00   0.059      0.750     0.750
+    media: dev = 32 p - S                               12.00   0.235      0.500     0.500
+    decidir y armar el byte                             14.00   0.275      0.500     0.500
+    escribir DECISION                                    2.00   0.039      0.500     0.500
+    media: S = S + (dev >>> 5)                          17.00   0.333      0.531     0.531
+    volver al sondeo (j)                                 3.00   0.059      0.750     0.750
+    S predicho 0.531 (96.00 ciclos), S medido 0.531 (96.00 ciclos), diferencia +0.0 %
+--- barrel -> barrel con emad y devk (la extension sola)
+    fase                                         ciclos antes       f F predicho  F medido
+    leer PRICE                                           4.00   0.042      1.000     1.000
+    media: dev = 32 p - S                               24.00   0.250      6.000     6.000
+    decidir y armar el byte                             28.00   0.292      1.000     1.000
+    escribir DECISION                                    4.00   0.042      1.000     1.000
+    media: S = S + (dev >>> 5)                          32.00   0.333      8.000     8.000
+    volver al sondeo (j)                                 4.00   0.042      1.000     1.000
+    S predicho 2.000 (48.00 ciclos), S medido 2.000 (48.00 ciclos), diferencia +0.0 %
+--- R0 -> barrel con la extension
+    fase                                         ciclos antes       f F predicho  F medido
+    leer PRICE                                           3.00   0.059      0.750     0.750
+    media: dev = 32 p - S                               12.00   0.235      3.000     3.000
+    decidir y armar el byte                             14.00   0.275      0.500     0.500
+    escribir DECISION                                    2.00   0.039      0.500     0.500
+    media: S = S + (dev >>> 5)                          17.00   0.333      4.250     4.250
+    volver al sondeo (j)                                 3.00   0.059      0.750     0.750
+    S predicho 1.062 (48.00 ciclos), S medido 1.062 (48.00 ciclos), diferencia +0.0 %
+--- R0 -> Espino base con la extension (no existe en el RTL)
+    fase                                         ciclos antes       f F predicho  F medido
+    leer PRICE                                           3.00   0.059      1.000         -
+    media: dev = 32 p - S                               12.00   0.235      6.000         -
+    decidir y armar el byte                             14.00   0.275      1.000         -
+    escribir DECISION                                    2.00   0.039      1.000         -
+    media: S = S + (dev >>> 5)                          17.00   0.333      8.500         -
+    volver al sondeo (j)                                 3.00   0.059      1.000         -
+    S predicho 1.962 (26.00 ciclos), sin medicion: la variante no existe en el RTL
+--- R0 -> segmentado con la extension (no existe en el RTL)
+    fase                                         ciclos antes       f F predicho  F medido
+    leer PRICE                                           3.00   0.059      1.500         -
+    media: dev = 32 p - S                               12.00   0.235     11.999         -
+    decidir y armar el byte                             14.00   0.275      2.000         -
+    escribir DECISION                                    2.00   0.039      2.000         -
+    media: S = S + (dev >>> 5)                          17.00   0.333     17.000         -
+    volver al sondeo (j)                                 3.00   0.059      1.500         -
+    S predicho 3.643 (14.00 ciclos), sin medicion: la variante no existe en el RTL
+
+=== Amdahl clasico sobre la fase que mas pesa en el kernel de R0: actualizar la media
+    f = 29.00 / 51.00 = 0.569. Con emad y devk las 14 instrucciones de la media pasan a 2.
+    En el Espino base eso es F = 7.25 y S = 1 / ((1 - f) + f / F) = 1.962. Limite con F infinito: 2.318.
+
+=== El fondo (R1) no es un speedup del mismo kernel
+    R1 hace 56 operaciones utiles por tick en 4 hilos; R0 hace 8 en uno. La respuesta de R1
+    (223.01 ciclos) la domina la espera de los votos: 88.08 ciclos del supervisor (39.5 %).
+    Un gestor ejecuta 20.00 instrucciones por tick a 4 ciclos cada una: es el piso de esa espera.

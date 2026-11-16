@@ -1,0 +1,15 @@
+ventana,caso,desde,descripcion,s_predicho,s_medido,ciclos_predichos,ciclos_medidos
+resp,seg_clase,r0,"R0 -> segmentado, con el CPI que estimo la clase 7",1.745,1.864,23.50,22.00
+resp,seg,r0,"R0 -> segmentado, con el modelo de costo medido",1.843,1.864,22.25,22.00
+resp,barrel,r0,"R0 -> barrel, sw/trade.s en un hilo",0.547,0.547,75.00,75.00
+resp,xd_barrel,barrel,barrel -> barrel con emad y devk (la extension sola),1.364,1.364,55.00,55.00
+resp,barrel_xd,r0,R0 -> barrel con la extension,0.745,0.745,55.00,55.00
+resp,base_xd,r0,R0 -> Espino base con la extension (no existe en el RTL),1.323,,31.00,
+resp,seg_xd,r0,R0 -> segmentado con la extension (no existe en el RTL),2.377,,17.25,
+kernel,seg_clase,r0,"R0 -> segmentado, con el CPI que estimo la clase 7",1.821,1.889,28.00,27.00
+kernel,seg,r0,"R0 -> segmentado, con el modelo de costo medido",1.889,1.889,27.00,27.00
+kernel,barrel,r0,"R0 -> barrel, sw/trade.s en un hilo",0.531,0.531,96.00,96.00
+kernel,xd_barrel,barrel,barrel -> barrel con emad y devk (la extension sola),2.000,2.000,48.00,48.00
+kernel,barrel_xd,r0,R0 -> barrel con la extension,1.062,1.062,48.00,48.00
+kernel,base_xd,r0,R0 -> Espino base con la extension (no existe en el RTL),1.962,,26.00,
+kernel,seg_xd,r0,R0 -> segmentado con la extension (no existe en el RTL),3.643,,14.00,

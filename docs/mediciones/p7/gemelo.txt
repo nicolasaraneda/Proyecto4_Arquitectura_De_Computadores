@@ -1,0 +1,114 @@
+Ciclos por tick de las variantes de co-diseno, con el gemelo digital
+Generado por tools/p7/medir.py (make p7-medir). No editar a mano.
+
+Herramientas:
+  cc (Ubuntu 15.2.0-16ubuntu1) 15.2.0
+  gemelo ref/gemelo/gemelo.c (sha256 1d3833430f1fbbb5...)
+Commit de partida: 8896599 (rama p7-codiseno)
+Serie tb/practica.csv (sha256 9db90594ce790c7d...), tabla sw/fondo_tabla.hex (sha256 f792588c9cc823cb...)
+
+== variante r0: build/gemelo  --hex sw/trade.hex (sha256 02572d65d5b59ab4...)
+r0 r1 | Patrimonio final:          9661
+r0 r1 | Peor caso precio->decision: 44 ciclos (disponibles: 249762)
+r0 r1 | Testbenchs aprobados: 4/4
+r0 r1 | Gemelo: 187508997 instrucciones, 499996004 ciclos desde el reset, 62485005 vueltas de sondeo saltadas
+r0 r1 | Gemelo: loads 62491004, stores 3998, branches tomados 62485006, no tomados 1999, jal y jalr 2000, otras 62524990
+r0 r1 | Gemelo: 1999 ticks medidos. Respuesta: 41.00 ciclos e IC 19.50 en promedio, peor caso 44 ciclos e IC 21. Tick completo: 63.00 ciclos e IC 28.50 en promedio, peor caso 66 ciclos e IC 30
+r0 r2 | Patrimonio final:          26070
+r0 r2 | Peor caso precio->decision: 44 ciclos (disponibles: 24762)
+r0 r2 | Testbenchs aprobados: 4/4
+r0 r2 | Gemelo: 187603497 instrucciones, 499996004 ciclos desde el reset, 62354505 vueltas de sondeo saltadas
+r0 r2 | Gemelo: loads 62414504, stores 39998, branches tomados 62354506, no tomados 19999, jal y jalr 20000, otras 62754490
+r0 r2 | Gemelo: 19999 ticks medidos. Respuesta: 41.00 ciclos e IC 19.50 en promedio, peor caso 44 ciclos e IC 21. Tick completo: 63.00 ciclos e IC 28.50 en promedio, peor caso 66 ciclos e IC 30
+r0 r3 | Patrimonio final:          26070
+r0 r3 | Peor caso precio->decision: 44 ciclos (disponibles: 2262)
+r0 r3 | Testbenchs aprobados: 4/4
+r0 r3 | Gemelo: 18853492 instrucciones, 49996004 ciclos desde el reset, 6104512 vueltas de sondeo saltadas
+r0 r3 | Gemelo: loads 6164508, stores 39996, branches tomados 6104514, no tomados 19998, jal y jalr 19999, otras 6504477
+r0 r3 | Gemelo: 19998 ticks medidos. Respuesta: 41.00 ciclos e IC 19.50 en promedio, peor caso 44 ciclos e IC 21. Tick completo: 63.00 ciclos e IC 28.50 en promedio, peor caso 66 ciclos e IC 30
+r0 perfil | docs/mediciones/p7/perfil/r0.txt, 20000 ticks a 0,1 ms sin atajo
+
+== variante seg: build/gemelo --pipeline --hex sw/trade.hex (sha256 02572d65d5b59ab4...)
+seg r1 | Patrimonio final:          9661
+seg r1 | Peor caso precio->decision: 26 ciclos (disponibles: 249762)
+seg r1 | Testbenchs aprobados: 4/4
+seg r1 | Gemelo: 300014395 instrucciones, 499996004 ciclos desde el reset, 99986804 vueltas de sondeo saltadas
+seg r1 | Gemelo: loads 99992803, stores 3998, branches tomados 99986806, no tomados 1999, jal y jalr 2000, otras 100026789
+seg r1 | Gemelo: 1999 ticks medidos. Respuesta: 22.00 ciclos e IC 19.20 en promedio, peor caso 26 ciclos e IC 22. Tick completo: 34.00 ciclos e IC 28.20 en promedio, peor caso 38 ciclos e IC 31
+seg r2 | Patrimonio final:          26070
+seg r2 | Peor caso precio->decision: 26 ciclos (disponibles: 24762)
+seg r2 | Testbenchs aprobados: 4/4
+seg r2 | Gemelo: 300165595 instrucciones, 499996004 ciclos desde el reset, 99875204 vueltas de sondeo saltadas
+seg r2 | Gemelo: loads 99935203, stores 39998, branches tomados 99875206, no tomados 19999, jal y jalr 20000, otras 100275189
+seg r2 | Gemelo: 19999 ticks medidos. Respuesta: 22.00 ciclos e IC 19.20 en promedio, peor caso 26 ciclos e IC 22. Tick completo: 34.00 ciclos e IC 28.20 en promedio, peor caso 38 ciclos e IC 31
+seg r3 | Patrimonio final:          26070
+seg r3 | Peor caso precio->decision: 26 ciclos (disponibles: 2262)
+seg r3 | Testbenchs aprobados: 4/4
+seg r3 | Gemelo: 30165586 instrucciones, 49996004 ciclos desde el reset, 9875211 vueltas de sondeo saltadas
+seg r3 | Gemelo: loads 9935207, stores 39996, branches tomados 9875212, no tomados 19998, jal y jalr 19999, otras 10275175
+seg r3 | Gemelo: 19998 ticks medidos. Respuesta: 22.00 ciclos e IC 19.20 en promedio, peor caso 26 ciclos e IC 22. Tick completo: 34.00 ciclos e IC 28.20 en promedio, peor caso 38 ciclos e IC 31
+seg perfil | docs/mediciones/p7/perfil/seg.txt, 20000 ticks a 0,1 ms sin atajo
+
+== variante barrel: build/gemelo --barrel --hex build/p7/sw/trade_h0.hex (sha256 4cae241fe6385510...)
+barrel r1 | Patrimonio final:          9661
+barrel r1 | Peor caso precio->decision: 87 ciclos (disponibles: 249762)
+barrel r1 | Testbenchs aprobados: 4/4
+barrel r1 | Gemelo: 499996003 instrucciones, 499996004 ciclos desde el reset, 41644339 vueltas de sondeo saltadas
+barrel r1 | Gemelo: loads 41654338, stores 3998, branches tomados 41648341, no tomados 1999, jal y jalr 374999003, otras 41688324
+barrel r1 | Gemelo: 1999 ticks medidos. Respuesta: 75.01 ciclos e IC 19.00 en promedio, peor caso 87 ciclos e IC 22. Tick completo: 115.01 ciclos e IC 28.00 en promedio, peor caso 127 ciclos e IC 31
+barrel r2 | Patrimonio final:          26070
+barrel r2 | Peor caso precio->decision: 87 ciclos (disponibles: 24762)
+barrel r2 | Testbenchs aprobados: 4/4
+barrel r2 | Gemelo: 499996003 instrucciones, 499996004 ciclos desde el reset, 41446339 vueltas de sondeo saltadas
+barrel r2 | Gemelo: loads 41546338, stores 39998, branches tomados 41486341, no tomados 19999, jal y jalr 375017003, otras 41886324
+barrel r2 | Gemelo: 19999 ticks medidos. Respuesta: 75.00 ciclos e IC 19.00 en promedio, peor caso 87 ciclos e IC 22. Tick completo: 115.00 ciclos e IC 28.00 en promedio, peor caso 127 ciclos e IC 31
+barrel r3 | Patrimonio final:          26070
+barrel r3 | Peor caso precio->decision: 83 ciclos (disponibles: 2262)
+barrel r3 | Testbenchs aprobados: 4/4
+barrel r3 | Gemelo: 49996003 instrucciones, 49996004 ciclos desde el reset, 3946350 vueltas de sondeo saltadas
+barrel r3 | Gemelo: loads 4046344, stores 39996, branches tomados 3986350, no tomados 19998, jal y jalr 37517002, otras 4386313
+barrel r3 | Gemelo: 19998 ticks medidos. Respuesta: 75.00 ciclos e IC 19.00 en promedio, peor caso 83 ciclos e IC 21. Tick completo: 115.00 ciclos e IC 28.00 en promedio, peor caso 123 ciclos e IC 30
+barrel perfil | docs/mediciones/p7/perfil/barrel.txt, 20000 ticks a 0,1 ms sin atajo
+
+== variante barrel_xd: build/gemelo --barrel --xd 3 --hex build/p7/sw/trade_xd_h0.hex (sha256 50824fb9c1cfc97d...)
+barrel_xd r1 | Patrimonio final:          9661
+barrel_xd r1 | Peor caso precio->decision: 67 ciclos (disponibles: 249762)
+barrel_xd r1 | Testbenchs aprobados: 4/4
+barrel_xd r1 | Gemelo: 499996003 instrucciones, 499996004 ciclos desde el reset, 41653777 vueltas de sondeo saltadas
+barrel_xd r1 | Gemelo: loads 41660335, stores 1999, branches tomados 41656337, no tomados 1999, jal y jalr 374999003, otras 41676330
+barrel_xd r1 | Gemelo: 1999 ticks medidos. Respuesta: 55.01 ciclos e IC 14.00 en promedio, peor caso 67 ciclos e IC 17. Tick completo: 67.01 ciclos e IC 16.00 en promedio, peor caso 79 ciclos e IC 19
+barrel_xd r2 | Patrimonio final:          26070
+barrel_xd r2 | Peor caso precio->decision: 67 ciclos (disponibles: 24762)
+barrel_xd r2 | Testbenchs aprobados: 4/4
+barrel_xd r2 | Gemelo: 499996003 instrucciones, 499996004 ciclos desde el reset, 41543164 vueltas de sondeo saltadas
+barrel_xd r2 | Gemelo: loads 41606335, stores 19999, branches tomados 41566337, no tomados 19999, jal y jalr 375017003, otras 41766330
+barrel_xd r2 | Gemelo: 19999 ticks medidos. Respuesta: 55.00 ciclos e IC 14.00 en promedio, peor caso 67 ciclos e IC 17. Tick completo: 67.00 ciclos e IC 16.00 en promedio, peor caso 79 ciclos e IC 19
+barrel_xd r3 | Patrimonio final:          26070
+barrel_xd r3 | Peor caso precio->decision: 63 ciclos (disponibles: 2262)
+barrel_xd r3 | Testbenchs aprobados: 4/4
+barrel_xd r3 | Gemelo: 49996003 instrucciones, 49996004 ciclos desde el reset, 4043170 vueltas de sondeo saltadas
+barrel_xd r3 | Gemelo: loads 4106338, stores 19998, branches tomados 4066342, no tomados 19998, jal y jalr 37517002, otras 4266325
+barrel_xd r3 | Gemelo: 19998 ticks medidos. Respuesta: 55.00 ciclos e IC 14.00 en promedio, peor caso 63 ciclos e IC 16. Tick completo: 67.00 ciclos e IC 16.00 en promedio, peor caso 75 ciclos e IC 18
+barrel_xd perfil | docs/mediciones/p7/perfil/barrel_xd.txt, 20000 ticks a 0,1 ms sin atajo
+
+== variante r1: build/gemelo --barrel --xd 3 --tabla sw/fondo_tabla.hex --hex build/p7/sw/fondo.hex (sha256 d1c9990dc3303f93...)
+r1 r1 | Patrimonio final:          9661
+r1 r1 | Peor caso precio->decision: 435 ciclos (disponibles: 249762)
+r1 r1 | Testbenchs aprobados: 4/4
+r1 r1 | Gemelo: 499996003 instrucciones, 499996004 ciclos desde el reset, 41615621 vueltas de sondeo saltadas
+r1 r1 | Gemelo: loads 229074211, stores 18007, branches tomados 229049179, no tomados 13005, jal y jalr 8010, otras 41833591
+r1 r1 | Gemelo: 1999 ticks medidos. Respuesta: 221.31 ciclos e IC 55.58 en promedio, peor caso 435 ciclos e IC 109. Tick completo: 279.32 ciclos e IC 69.08 en promedio, peor caso 467 ciclos e IC 116
+r1 r2 | Patrimonio final:          25031
+r1 r2 | Peor caso precio->decision: 443 ciclos (disponibles: 24762)
+r1 r2 | Testbenchs aprobados: 4/4
+r1 r2 | Gemelo: 499996003 instrucciones, 499996004 ciclos desde el reset, 41159034 vueltas de sondeo saltadas
+r1 r2 | Gemelo: loads 228258183, stores 180153, branches tomados 228007774, no tomados 130126, jal y jalr 80046, otras 43339721
+r1 r2 | Gemelo: 19999 ticks medidos. Respuesta: 222.55 ciclos e IC 55.89 en promedio, peor caso 443 ciclos e IC 111. Tick completo: 280.56 ciclos e IC 69.39 en promedio, peor caso 475 ciclos e IC 118
+r1 r3 | Patrimonio final:          26070
+r1 r3 | Peor caso precio->decision: 443 ciclos (disponibles: 2262)
+r1 r3 | Testbenchs aprobados: 4/4
+r1 r3 | Gemelo: 49996003 instrucciones, 49996004 ciclos desde el reset, 3659105 vueltas de sondeo saltadas
+r1 r3 | Gemelo: loads 22008230, stores 180142, branches tomados 21757840, no tomados 130115, jal y jalr 80042, otras 5839634
+r1 r3 | Gemelo: 19998 ticks medidos. Respuesta: 223.01 ciclos e IC 56.00 en promedio, peor caso 443 ciclos e IC 111. Tick completo: 281.01 ciclos e IC 69.50 en promedio, peor caso 475 ciclos e IC 118
+r1 perfil | docs/mediciones/p7/perfil/r1.txt, 20000 ticks a 0,1 ms sin atajo
+

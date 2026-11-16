@@ -1,0 +1,14 @@
+Duplicador de reloj por lógica: reproducción desde la rama origin/factibilidad-fondo (b556e1c)
+Generado por tools/p7/doble_frecuencia.sh (make p7-doble). No editar a mano.
+
+Herramientas:
+  Yosys 0.68+195 (git sha1 435977e97-dirty, Release, Clang /usr/bin/clang++ 21.1.8)
+  "nextpnr-ice40" -- Next Generation Place and Route (Version nextpnr-0.11.1-19-g8dbcee5c)
+  Verilator 5.053 devel rev v5.052-22-g7cf8c5cca (mod)
+  cc (Ubuntu 15.2.0-16ubuntu1) 15.2.0
+Commit de partida: cb5571a (rama p7-codiseno)
+
+IGUAL  soc_x2.txt: la corrida de hoy es idéntica byte a byte a la guardada
+IGUAL  humo_soc_x2.txt: la corrida de hoy es idéntica byte a byte a la guardada
+IGUAL  humo_fase.txt: la corrida de hoy es idéntica byte a byte a la guardada
+IGUAL  margen.txt: la corrida de hoy es idéntica byte a byte a la guardada

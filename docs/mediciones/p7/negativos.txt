@@ -1,0 +1,42 @@
+Resultados negativos: PLL y doble frecuencia, con el presupuesto que habria dado cada uno
+Generado por tools/p7/tablas.py (make p7-rapido). No editar a mano.
+
+1. PLL (tools/p7/pll.sh, make p7-pll; log en pll_vq100_r1.log)
+  R0 (Espino base, sw/trade.s): nextpnr termina bien: no
+  ERROR: PLL 'u_pll' couldn't be placed anywhere, no suitable BEL found.
+  ERROR: Packing design failed.
+  R1 (fondo en un chip, sw/fondo.s): nextpnr termina bien: no
+  ERROR: PLL 'u_pll' couldn't be placed anywhere, no suitable BEL found.
+  ERROR: Packing design failed.
+  r0: cierran a 50 MHz 0 de 10 semillas, fmax minima 42.68 mediana 44.54 MHz
+  r1: cierran a 50 MHz 10 de 10 semillas, fmax minima 50.44 mediana 53.19 MHz
+
+2. Duplicador de reloj por logica (tools/p7/doble_frecuencia.sh, make p7-doble)
+  IGUAL  soc_x2.txt: la corrida de hoy es idéntica byte a byte a la guardada
+  IGUAL  humo_soc_x2.txt: la corrida de hoy es idéntica byte a byte a la guardada
+  IGUAL  humo_fase.txt: la corrida de hoy es idéntica byte a byte a la guardada
+  IGUAL  margen.txt: la corrida de hoy es idéntica byte a byte a la guardada
+  45 a 55 %                   17.73           56.4 | 0 de 10    1 de 10
+  base_x2  máxima   | 0 de 10      | 0 de 10      | 0 de 10
+  base_x2  típica   | 0 de 10      | 1 de 10      | 5 de 10
+  seg_x2   máxima   | 1 de 10      | 8 de 10      | 10 de 10
+  seg_x2   típica   | 10 de 10     | 10 de 10     | 10 de 10
+  Peor holgura con 45 a 55 %, esquina máxima: base_x2 -5.17 ns, seg_x2 -1.90 ns.
+
+3. Presupuesto que habria dado cada uno (los dos duplican la frecuencia: 50 MHz, ciclo de 20 ns)
+  ronda     presupuesto a 25 MHz  a 50 MHz
+  r1                      249762    499525
+  r2                       24762     49525
+  r3                        2262      4525
+
+  variante                 peor caso  uso r3 a 25 MHz  uso r3 a 50 MHz                 cierra a 50 MHz
+  R0 base                         44            1.95%            0.97%        nunca (fmax 41.9 a 47.5)
+  Segmentado                      26            1.15%            0.57%   no siempre (fmax 45.3 a 50.6)
+  Barrel 1 hilo                   83            3.67%            1.83%           si (fmax 53.5 a 60.7)
+  Barrel 1 hilo + ext.            63            2.79%            1.39%   no siempre (fmax 48.6 a 56.1)
+  R1 fondo                       443           19.58%            9.79%           si (fmax 51.6 a 53.7)
+  R2 fondo + vigilante           443           19.58%            9.79%   no siempre (fmax 47.9 a 54.3)
+
+  Con el reloj al doble el programa haria el mismo trabajo en la mitad del tiempo, pero todas las variantes
+  ya usan menos del 20 % del presupuesto mas corto: el patrimonio no cambia. El PLL no existe en el VQ100
+  y el duplicador por logica no tiene margen real (1 de 10 semillas con un ciclo de trabajo de 45 a 55 %).
