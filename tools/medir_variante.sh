@@ -36,7 +36,7 @@ HEX=${HEX:-sw/trade.hex}
 JOBS=${JOBS:-10}
 EXIGIR=${EXIGIR:-0}
 RTL=${RTL:-rtl}
-SRC="$(ls $RTL/*.v $RTL/espino_core/*.v | grep -v "^$RTL/00_") $EXTRA"
+SRC="$(for f in $RTL/*.v $RTL/espino_core/*.v; do case "$f" in $RTL/00_*) ;; *) printf '%s ' "$f" ;; esac; done) $EXTRA"
 
 D=build/variantes/$ETIQUETA
 mkdir -p "$D"

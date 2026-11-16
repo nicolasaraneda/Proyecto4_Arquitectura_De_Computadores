@@ -39,7 +39,7 @@ if [ -z "${PCW:-}" ]; then
   PCW=32 "$0" "$@" || exit 1
   exit 0
 fi
-SRC=$(ls rtl/*.v rtl/espino_core/*.v | grep -v '^rtl/00_')
+SRC=$(for f in rtl/*.v rtl/espino_core/*.v; do case "$f" in rtl/00_*) ;; *) printf '%s ' "$f" ;; esac; done)
 CELLS_SIM=$(yosys-config --datdir)/ice40/cells_sim.v
 D=build/paralelo${ETQ:+_$ETQ}_pc$PCW
 mkdir -p "$D"
