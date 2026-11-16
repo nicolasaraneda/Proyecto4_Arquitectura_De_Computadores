@@ -81,7 +81,7 @@ Después de una corrida los botones de período no hacen nada. Para probar otro 
 1. **Con el gemelo digital** (`docs/gemelo.md`), corriendo el mismo `.hex` con la misma serie y los tiempos de la maestra interna (`--cs-setup-ns 1280 --sclk-medio-ns 640 --cs-hold-ns 640`), a los tres períodos. El gemelo está validado ciclo a ciclo contra el RTL.
 2. **Con la referencia del algoritmo** (`ref/trader.py` para R0, `ref/fondo.py` para R1 y R2), sin modelo de hardware.
 
-Para R0 las cuatro dan `a23c`. Que la firma sea la misma a los tres períodos es la prueba de que el programa responde siempre antes del tick siguiente: si una decisión llegara tarde, la maestra leería el byte anterior y la firma cambiaría.
+Para R0 las cuatro dan `a23c`; para R1 y R2, con su caminata, `15d7` (sección 8). Que la firma sea la misma a los tres períodos es la prueba de que el programa responde siempre antes del tick siguiente: si una decisión llegara tarde, la maestra leería el byte anterior y la firma cambiaría.
 
 ## 4. Verificación y recursos
 

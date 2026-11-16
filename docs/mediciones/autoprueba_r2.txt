@@ -1,4 +1,4 @@
-Autoprueba del peldano r2 (todo), commit f2f4a7d
+Autoprueba del peldano r2 (todo), commit 665ac58
 Generado por tools/autoprueba.py todo r2. No editar a mano.
 
 Serie: caminata aleatoria del LFSR con semilla 0x3CA1, 2000 precios, entre 87 y 152, sha256 8e4c1d5e3bbed54d...
@@ -68,7 +68,7 @@ PASS RTL con SW1 (10 ms): RESULTADO boton=1 firma=15d7 esperada=15d7 LED=0111 du
      CONTINUO boton=1 ms=2000 cambios_led1=3 firma=15d7 LED=0110 PASS
      WARMBOOT nunca: SB_WARMBOOT no se dispara en toda la corrida
 PASS RTL de la imagen testigo (minuto de 1000 ciclos): los cuatro LED encendidos (1111); los 7 segmentos muestran --; con SW4 muestran 00 al arrancar; eco de la UART y MISO del PMOD en 0; con SW4 muestran 01 después de un minuto; con SW4 muestran 02 después de dos minutos; con SW4 muestran 99 después de 122 minutos (se detiene); al soltar SW4 vuelve a --
-FAIL control negativo (G1_ENTRA=-64 en la tabla (era -96)): el gemelo da 6f2a; ref/fondo.py con ese parametro da 6f2a, y la autoprueba lo rechaza con LED4: RESULTADO boton=3 firma=6f2a esperada=15d7 LED=1011 duracion_ms=197 FAIL
+PASS control negativo (G1_ENTRA=-64 en la tabla (era -96)): el gemelo da 6f2a; ref/fondo.py con ese parametro da 6f2a, y la autoprueba lo rechaza con LED4: RESULTADO boton=3 firma=6f2a esperada=15d7 LED=1011 duracion_ms=197 FAIL
 PASS RTL con el supervisor colgado en el tick 100, SW3 (0,1 ms): BOOT sube en t = 10813180 ns con S1 S0 = 01: transaccion 103 (se esperaba 103 = 99 + 4), 12320 ns despues del comienzo del tick, cuando CS_n ya subio (12 200 ns) y antes de la transaccion siguiente
 PASS RTL con el supervisor colgado en el tick 100, SW2 (1 ms): BOOT sube en t = 103513180 ns con S1 S0 = 01: transaccion 103 (se esperaba 103 = 99 + 4), 12320 ns despues del comienzo del tick, cuando CS_n ya subio (12 200 ns) y antes de la transaccion siguiente
 PASS RTL con el supervisor colgado en el tick 100, SW1 (10 ms): BOOT sube en t = 1030513180 ns con S1 S0 = 01: transaccion 103 (se esperaba 103 = 99 + 4), 12320 ns despues del comienzo del tick, cuando CS_n ya subio (12 200 ns) y antes de la transaccion siguiente
@@ -82,4 +82,4 @@ PASS gemelo, media hora con SW2 (1 ms): 1800000 precios (entre 1 y 255), peor ca
 PASS gemelo, media hora con SW3 (0,1 ms): 18000000 precios (entre 1 y 255), peor caso precio->decision 442 de 2196 ciclos
      Todo precio se responde antes de que llegue el siguiente: la cuenta del vigilante vuelve a 0 en cada tick y no llega a 5
 
-FAIL
+PASS
