@@ -1,0 +1,29 @@
+Prueba mixta: la regla base en el hilo 0 con el testbench oficial y tres hilos ejecutando instrucciones nuevas
+Generado por factibilidad/i_integrado/tools/mixto.sh (make mixto). No editar a mano.
+
+Herramientas:
+  Yosys 0.68+195 (git sha1 435977e97-dirty, Release, Clang /usr/bin/clang++ 21.1.8)
+  "nextpnr-ice40" -- Next Generation Place and Route (Version nextpnr-0.11.1-19-g8dbcee5c)
+  Icarus Verilog version 14.0 (devel) (s20260301-403-g5ab23063f-dirty)
+Commit de partida: 8c14283 (rama factibilidad-fondo)
+tb/tb_proyecto_4.sv sin modificar (sha256 f83486755fe2b3de...), 2000 ticks a 0,1 ms.
+Referencia de las decisiones: Espino base de rtl/ con sw/trade.hex (Testbenchs aprobados: 4/4).
+
+--- media: I1; hilo 0 con sw/trade.s; hilos 1 a 3 con mulstep, emad y devk (sw/kernel_media.s)
+   PASS testbench oficial 4/4, Peor caso precio->decision: 83 ciclos (disponibles: 2262)
+   PASS decisiones.csv idéntico byte a byte al del Espino base (patrimonio 9617)
+   PASS hilos de estrategia iguales al modelo: vueltas_h1=155648 vueltas_h2=155647 vueltas_h3=155647 errores=0
+   PASS vigilante: precios=1998 escrituras=1998 max_sin_respuesta=1 ciclos_con_BOOT=0 N=4
+--- media_xd: I1; hilo 0 con la regla base escrita con devk y emad; hilos 1 a 3 con mulstep, emad y devk
+   PASS testbench oficial 4/4, Peor caso precio->decision: 63 ciclos (disponibles: 2262)
+   PASS decisiones.csv idéntico byte a byte al del Espino base (patrimonio 9617)
+   PASS hilos de estrategia iguales al modelo: vueltas_h1=155648 vueltas_h2=155647 vueltas_h3=155647 errores=0
+   PASS vigilante: precios=1998 escrituras=1998 max_sin_respuesta=1 ciclos_con_BOOT=0 N=4
+--- carriles: I1 más carriles en la ALU; hilo 0 con sw/trade.s; hilos 1 a 3 con seis operaciones de carril y emad (sw/kernel_carriles.s)
+   PASS testbench oficial 4/4, Peor caso precio->decision: 83 ciclos (disponibles: 2262)
+   PASS decisiones.csv idéntico byte a byte al del Espino base (patrimonio 9617)
+   PASS hilos de estrategia iguales al modelo: vueltas_h1=95232 vueltas_h2=95231 vueltas_h3=95231 errores=0
+   PASS vigilante: precios=1998 escrituras=1998 max_sin_respuesta=1 ciclos_con_BOOT=0 N=4
+
+Tiempo de las simulaciones: 527 s.
+RESULTADO: PASS

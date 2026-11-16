@@ -1,0 +1,42 @@
+Auditoría: repetición de los objetivos de las dos piezas contra sus salidas guardadas
+Generado por factibilidad/auditoria_hw/tools/repeticion.sh (make repeticion). No editar a mano.
+
+Herramientas:
+  Yosys 0.68+195 (git sha1 435977e97-dirty, Release, Clang /usr/bin/clang++ 21.1.8)
+  "nextpnr-ice40" -- Next Generation Place and Route (Version nextpnr-0.11.1-19-g8dbcee5c)
+  Icarus Verilog version 14.0 (devel) (s20260301-403-g5ab23063f-dirty)
+  Verilator 5.053 devel rev v5.052-22-g7cf8c5cca (mod)
+Commit de partida: 9b82e81 (rama factibilidad-fondo)
+Se ignoran las líneas del commit de partida y de los tiempos de corrida. Demora: 466 s.
+
+1. factibilidad/b_fondo_hilos
+   make programa: salida 0
+   make ticks: salida 0
+   make variantes: salida 0
+   make estado: salida 0
+   make oficial: salida 0
+   make equiv: salida 0
+PASS make programa  (tamano.txt): idéntico a lo guardado (33 líneas comparadas)
+PASS make ticks     (ticks.txt): idéntico a lo guardado (174 líneas comparadas)
+PASS make variantes (variantes.txt): idéntico a lo guardado (92 líneas comparadas)
+PASS make estado    (estado.txt): idéntico a lo guardado (59 líneas comparadas)
+PASS make oficial   (oficial.txt): idéntico a lo guardado (33 líneas comparadas)
+PASS make equiv     (equiv.txt): los 10 casos repetidos dan las mismas filas que el archivo guardado; la fila de 10 ms no se repitió
+   La fila de 10 ms del archivo guardado: PASS practica_10ms: periodo 10000000 ns, 20000 ticks, precios 72 a 190, Peor caso precio->decision: 439 ciclos (disponibles: 249762), 4/4, 20000 filas
+
+2. factibilidad/i_integrado
+   make verif: salida 0
+   make tabla-vigilante: salida 0
+   make mutaciones: salida 0
+   make formal: salida 0
+PASS make verif (verif_rv32e.txt): idéntico a lo guardado (538 líneas comparadas)
+PASS make tabla-vigilante (tabla_vigilante.txt): idéntico a lo guardado (27 líneas comparadas)
+PASS make mutaciones (mutaciones.txt): idéntico a lo guardado (100 líneas comparadas)
+PASS make formal (formal.txt): idéntico a lo guardado (43 líneas comparadas)
+   Los tres objetivos largos no se repitieron en esta corrida. Comparación de lo guardado con la copia anterior a la
+   repetición hecha al cerrar la pieza (factibilidad/i_integrado/build/mediciones_antes/):
+PASS recursos.txt contra la copia anterior: idéntico a lo guardado (219 líneas comparadas)
+PASS tb_xd.txt contra la copia anterior: idéntico a lo guardado (37 líneas comparadas)
+PASS oficial.txt contra la copia anterior: idéntico a lo guardado (73 líneas comparadas)
+
+RESULTADO: PASS, todas las salidas repetidas son las guardadas

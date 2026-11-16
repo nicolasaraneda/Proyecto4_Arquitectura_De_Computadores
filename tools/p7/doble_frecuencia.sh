@@ -5,10 +5,10 @@
 # Grupo: Nicolás Araneda, Vicente Calderón y Santiago Muñoz.
 # Arquitectura de Computadores, Universidad de los Andes, 2026-2.
 #
-# El experimento vive en la rama factibilidad-fondo (factibilidad/
-# f_doble_frecuencia), con su propio RTL: una copia de pochoco_soc.v con el
+# El experimento es del tramo de factibilidad (factibilidad/
+# f_doble_frecuencia, etiqueta archivo/factibilidad-fondo), con su propio RTL: una copia de pochoco_soc.v con el
 # reloj interno saliendo del duplicador. No se trae a rtl/ porque no compite
-# y el RTL compartido no se toca. Este script extrae esa rama completa en
+# y el RTL compartido no se toca. Este script extrae la etiqueta completa en
 # build/p7/factibilidad-fondo/ con git archive, corre ahí sus objetivos
 #   soc     SoC base y segmentado con y sin duplicador, 10 semillas
 #   humo    testbench oficial sin modificar sobre el SoC doblado
@@ -17,11 +17,11 @@
 # doble_frecuencia/ (que son las de la rama, sin cambios).
 #
 # Uso: tools/p7/doble_frecuencia.sh   (make p7-doble). Unos 15 minutos.
-# Variable RAMA (por defecto origin/factibilidad-fondo).
+# Variable RAMA (por defecto la etiqueta archivo/factibilidad-fondo).
 set -euo pipefail
 source "$(dirname "$0")/comun.sh"
 
-RAMA=${RAMA:-origin/factibilidad-fondo}
+RAMA=${RAMA:-archivo/factibilidad-fondo}
 D=$B/factibilidad-fondo
 G=$M/doble_frecuencia
 rm -rf "$D"; mkdir -p "$D" "$G"
@@ -30,7 +30,7 @@ F=$D/factibilidad/f_doble_frecuencia
 make -C "$F" soc humo margen SEMILLAS=10 JOBS=10 > "$B/doble_frecuencia.log" 2>&1
 
 {
-  echo "Duplicador de reloj por lógica: reproducción desde la rama $RAMA ($(git rev-parse --short "$RAMA"))"
+  echo "Duplicador de reloj por lógica: reproducción desde $RAMA ($(git rev-parse --short "$RAMA^{commit}"))"
   echo "Generado por tools/p7/doble_frecuencia.sh (make p7-doble). No editar a mano."
   echo
   versiones

@@ -1,0 +1,2 @@
+base_shifter_t40: Resultado: CIERRA
+seg_shifter_t40: Resultado: CIERRA

@@ -1,0 +1,17 @@
+Costo de las variantes del vigilante: N = 1 y disparo manual
+Comando: factibilidad/e_warmboot/scripts/medir_boton.sh 10
+Herramientas: Yosys 0.68+195, nextpnr nextpnr-0.11.1-19-g8dbcee5c
+nextpnr --hx1k --package vq100 --freq 25, 10 semillas
+
+fact_e_base_vig_n1     celdas 1095 de 1280, BRAM 12 de 16, LUT4  917, fmax min  43.98 mediana  45.30 max  47.04 MHz, cierran a 25 MHz 10 de 10
+fact_e_base_vig_boton  celdas 1106 de 1280, BRAM 12 de 16, LUT4  925, fmax min  42.05 mediana  44.14 max  46.55 MHz, cierran a 25 MHz 10 de 10
+fact_e_base_vig_cuelgue celdas 1106 de 1280, BRAM 12 de 16, LUT4  925, fmax min  42.05 mediana  44.14 max  46.55 MHz, cierran a 25 MHz 10 de 10
+
+Referencias de mediciones/vigilante_costo.txt (mismo flujo):
+  fact_e_base_sin        celdas 1076 de 1280, BRAM 12 de 16, LUT4  899, fmax min  42.74 mediana  44.75 max  46.13 MHz, cierran a 25 MHz 10 de 10
+  fact_e_base_vig        celdas 1085 de 1280, BRAM 12 de 16, LUT4  906, fmax min  45.09 mediana  45.61 max  47.63 MHz, cierran a 25 MHz 10 de 10
+
+Frecuencia máxima por semilla (MHz), semillas 1 a 10:
+  fact_e_base_vig_n1       44.71 46.34 44.91 45.19 45.41 43.98 46.21 47.04 45.48 44.78 
+  fact_e_base_vig_boton    45.39 45.32 46.55 43.67 45.70 43.15 43.37 42.05 44.09 44.18 
+  fact_e_base_vig_cuelgue  45.39 45.32 46.55 43.67 45.70 43.15 43.37 42.05 44.09 44.18 

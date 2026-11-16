@@ -1,0 +1,32 @@
+== 1. Causalidad ==
+  filtro: PASS: 1 estrategias, 78 comparaciones, 0 fallas
+  espera_e: PASS: 1 estrategias, 78 comparaciones, 0 fallas
+  rec_e: PASS: 1 estrategias, 78 comparaciones, 0 fallas
+  min_e: PASS: 1 estrategias, 78 comparaciones, 0 fallas
+  completo: PASS: 1 estrategias, 78 comparaciones, 0 fallas
+  completo_s: PASS: 1 estrategias, 78 comparaciones, 0 fallas
+  completo_esp: PASS: 1 estrategias, 78 comparaciones, 0 fallas
+  completo_ap: PASS: 1 estrategias, 78 comparaciones, 0 fallas
+  completo_ancla: PASS: 1 estrategias, 78 comparaciones, 0 fallas
+  completo_min: PASS: 1 estrategias, 78 comparaciones, 0 fallas
+== 2. fondoc con em=0 es fondo (series, series distintas, serie de practica) ==
+  ok    fondoc:c=3,w0=8,w1=4,w2=4,b=4 = fondo_rec: 14800 0 practica identica byte a byte
+  ok    fondoc:c=1,w0=12,w1=2,w2=2,b=2 = fondo_ancla: 14800 0 practica identica byte a byte
+  ok    fondoc:c=5,w0=6,w1=5,w2=5,m=2,v=9,mg=5,d=4,pp=1,vt=8 = fondo_min: 14800 0 practica identica byte a byte
+  ok    completo_s = fondo:c=3,x=cand:aprendiz,w0=6,w1=3,w2=3,w3=4,b=4: 14800 0 practica identica byte a byte
+  ok    fondoc:c=1,m=2,w0=12,w1=2,w2=2,v=9,mg=6,d=4,b=1 = fondo:c=1,m=2,w0=12,w1=2,w2=2,v=9,mg=6,d=4,b=1: 14800 0 practica identica byte a byte
+== 3. La ejecucion A puesta por fuera y en el supervisor es ejec:m=8 ==
+  ok    filtro:x=cand:max_media,m=8 = ejec:m=8: 14800 0 practica identica byte a byte
+  ok    fondoc:c=3,w0=16,em=8 = ejec:m=8: 14800 0 practica identica byte a byte
+  ok    fondoc:c=5,w0=16,vt=8,em=8 = ejec:m=8: 14800 0 practica identica byte a byte
+  ok    filtro:x=cand:max_media,m=0 = max_media: 14800 0 practica identica byte a byte
+== 4. Espejo del supervisor con compras suprimidas (contador 3 = ticks con diferencia) ==
+  ok    rec_e            series 14800, ticks con objetivo parcial 5834358, ticks con el espejo distinto 0
+  ok    completo         series 14800, ticks con objetivo parcial 6122039, ticks con el espejo distinto 0
+  ok    completo_ap      series 14800, ticks con objetivo parcial 5828487, ticks con el espejo distinto 0
+  ok    completo_ancla   series 14800, ticks con objetivo parcial 50919576, ticks con el espejo distinto 0
+  ok    completo_min     series 14800, ticks con objetivo parcial 0, ticks con el espejo distinto 0
+== 5. Control negativo ==
+  ok    rec_e difiere de fondo_rec: 14800 10709 practica DISTINTA
+  ok    completo difiere de completo_s: 14800 11037 practica DISTINTA
+PASS: todas las comprobaciones

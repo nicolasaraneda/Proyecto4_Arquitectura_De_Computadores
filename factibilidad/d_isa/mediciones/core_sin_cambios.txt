@@ -1,0 +1,37 @@
+La extensión no cambia las instrucciones de RV32E: etapa ID del repositorio contra la de la copia
+Generado por factibilidad/d_isa/tools/core_sin_cambios.sh (make sin-cambios). No editar a mano.
+
+Yosys 0.68+195, pases equiv_make, equiv_simple, equiv_induct y equiv_status -assert.
+'puntos' son los puntos de comparación (bits de registros, cables con el mismo nombre y salidas) y
+'sin' los que no quedaron probados.
+
+caso                   resultado       puntos    sin  qué compara
+
+-- Espino base (Pipeline = 0, contador de programa de 32 bits)
+base_sin               PROBADO           1278      0  la copia sin ninguna definición XD_*: es el core original
+base_emad              PROBADO           1214      0  con emad, todas las instrucciones menos las de custom-0
+base_media_mul         PROBADO           1214      0  con emad, devk y mulstep en la ALU (subconjunto recomendado)
+base_bandas            PROBADO           1214      0  con emad y los carriles de bandas en unidad aparte
+base_todo              PROBADO           1214      0  con todas las instrucciones y todos los k (carriles en unidad aparte)
+base_alu_todo          NO PROBADO        1214     93  con los carriles en el sumador de la ALU (xd_alu en vez de espino_alu)
+                         sin probar en: lsu_addr_o u.alu_result u.lsu_addr_o 
+control_negativo       FALLA DETECTADA   1278    111  control: extensión encendida sin reemplazar custom-0, tiene que fallar
+
+-- Espino segmentado (Pipeline = 1, contador de programa de 11 bits)
+seg_sin                NO PROBADO        1328     64  la copia sin ninguna definición XD_*
+                         sin probar en: rf_wdata_o u.rf_wdata_o 
+seg_media_mul          NO PROBADO        1264    225  con emad, devk y mulstep en la ALU
+                         sin probar en: lsu_addr_o rf_wdata_o u.alu_cmp_result u.alu_result u.lsu_addr_o u.operand_a u.operand_b u.rf_wdata_o 
+
+Lectura:
+- Base: sin definiciones la copia es el core original, y con la extensión encendida ninguna instrucción
+  de RV32E cambia, salvo en el caso de los carriles en la ALU. Ahí lo único que difiere es el resultado
+  de la ALU durante un branch (xd_alu deja la resta donde espino_alu deja la suma), que sale por
+  lsu_addr_o sin petición de acceso. El encabezado de rtl/xd_alu.v lo describe. Que ese valor no se use
+  no quedó probado formalmente: lo respaldan las simulaciones de make tb-core con XD_SIMDALU.
+- Segmentado: este método no alcanza. La copia tiene un registro que el original no tiene (is_xd_q, la
+  marca de instrucción nueva) y los registros de decodificación pueden partir en un valor que solo
+  custom-0 produce. La inducción parte de un estado cualquiera y no sabe que esos estados no se
+  alcanzan después del reset. Para el segmentado la evidencia es por simulación (make tb-core,
+  make tb-core-recomendado y make medir-ticks).
+PASS: los casos del Espino base que debían probarse quedaron probados y el control negativo falla

@@ -406,7 +406,7 @@ Además, con las tres instrucciones:
 - **Con qué subconjunto se compila R1** (T58). `emad` y `devk` entran seguro. `mulstep` solo si `sw/fondo.s` lleva la contabilidad. Es decisión de Nicolás al cerrar P3.
 - **`sw/fondo.s` con las instrucciones** (P3). Regla para ese programa: empieza con `.extension xd`, y el puntaje en papel de los gestores tiene que llevarse en treintaidosavos, porque con k fijo en 5 no hay forma barata de calcular 16 p.
 - **El gemelo no modela el barrel ni la extensión** (P4). `ref/xd.py` tiene las tres funciones listas para usarlas ahí.
-- **La extensión solo existe en el barrel.** La tabla de variantes de P7 pide el base y el segmentado con y sin extensión: esas mediciones están en la factibilidad (rama `factibilidad-fondo`, `d_isa/`), con otra integración.
+- **La extensión solo existe en el barrel.** La tabla de variantes de P7 pide el base y el segmentado con y sin extensión: esas mediciones están en la factibilidad (`factibilidad/d_isa/`), con otra integración.
 - **Criterios 4, 6, 7 y 8 de la puerta** con el programa que compite (P3 a P5).
 - **Valor por defecto del SoC** para que el comando del testbench oficial compile lo que compite (T55, P5).
 - **Nada probado en la placa.**

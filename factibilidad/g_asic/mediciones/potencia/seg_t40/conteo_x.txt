@@ -1,0 +1,4 @@
+ronda3 cambios_a_0_o_1=11729887 cambios_a_x=961878 porcentaje_x=8.20 senales_que_pasan_por_x=1726
+sondeo cambios_a_0_o_1=2043650 cambios_a_x=167300 porcentaje_x=8.19 senales_que_pasan_por_x=448
+calculo cambios_a_0_o_1=102520 cambios_a_x=8980 porcentaje_x=8.76 senales_que_pasan_por_x=1700
+calculo_b cambios_a_0_o_1=103164 cambios_a_x=9014 porcentaje_x=8.74 senales_que_pasan_por_x=1701

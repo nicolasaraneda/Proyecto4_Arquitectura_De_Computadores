@@ -1,0 +1,62 @@
+CPI y MIPS con el mix de la clase 7: Espino base, pipeline de 3 etapas y barrel
+Generado por factibilidad/a_barrel/tools/medir_cpi.sh (make cpi). No editar a mano.
+
+Herramientas:
+  Yosys 0.68+195 (git sha1 435977e97-dirty, Release, Clang /usr/bin/clang++ 21.1.8)
+  "nextpnr-ice40" -- Next Generation Place and Route (Version nextpnr-0.11.1-19-g8dbcee5c)
+  Icarus Verilog version 14.0 (devel) (s20260301-403-g5ab23063f-dirty)
+Commit de partida: 4bcd4ab (rama factibilidad-fondo)
+
+1. CPI medido con el lazo de sw/mix_clase7.s
+
+  Caso                                              IC  Ciclos    CPI   MIPS    loads tomados
+  Espino base (tb/tb_cpi.sv)                     19575   46000  2.350  10.64   20.0 %  15.0 %  
+  Pipeline de 3 etapas (tb/tb_cpi.sv)            34077   46003  1.350  18.52   20.0 %  15.0 %  
+  Barrel, mix en los 4 hilos: agregado           46000   46000  1.000  25.00   20.0 %  15.0 %  
+      hilo 0                                     11500   46000  4.000   6.25   20.0 %  15.0 %  
+      hilo 1                                     11500   46000  4.000   6.25   20.0 %  15.0 %  
+      hilo 2                                     11500   46000  4.000   6.25   20.0 %  15.0 %  
+      hilo 3                                     11500   46000  4.000   6.25   20.0 %  15.0 %  
+  Barrel, mix solo en el hilo 0: trabajo util    11500   46000  4.000   6.25   20.0 %  15.0 %  (los otros 3 hilos giran en un lazo vacio)
+
+  MIPS = 25 MHz / CPI. En el barrel de un hilo solo se cuentan las instrucciones del hilo 0.
+
+2. Comparacion
+
+                                         Base  Segmentado  Barrel x4  Barrel x1   Clase 7 (3 etapas, estimado)
+  CPI con el mix                        2.350       1.350      1.000      4.000                            1.5
+  MIPS a 25 MHz                         10.64       18.52      25.00       6.25                           16.7
+  Speedup contra el base                 1.00        1.74       2.35       0.59                           1.57
+  Speedup contra el segmentado           0.57        1.00       1.35       0.34
+  Ciclos de ALU, load, salto tomado   2, 3, 3     1, 2, 2    1, 1, 1    4, 4, 4                        1, 2, 3
+
+3. Ppeak con la definicion de la clase 7 (f x instrucciones por ciclo x operaciones por instruccion x nucleos)
+
+  Espino base:           25 MHz x 0,5  x 1 x 1          = 12,5  MOPS
+  Pipeline de 3 etapas:  25 MHz x 1    x 1 x 1          = 25    MOPS (solo con instrucciones de ALU; con el mix 18.52)
+  Barrel, 4 hilos:       25 MHz x 0,25 x 1 x 4 hilos    = 25    MOPS (con cualquier mix: medido 25.00)
+  Barrel, 1 hilo:        25 MHz x 0,25 x 1 x 1 hilo     =  6,25 MOPS (medido 6.25)
+
+  El barrel no sube el techo del segmentado. Lo alcanza con cualquier mezcla de
+  instrucciones, siempre que los cuatro hilos tengan trabajo. Con un solo hilo
+  activo rinde la cuarta parte.
+
+4. Salida de tb_barrel con el mix en los cuatro hilos
+
+  Programa:                 factibilidad/a_barrel/build/sw/mix_clase7_x4.hex
+  Ciclos simulados:         46004 despues del reset
+  Primera instruccion en ejecucion (ciclo): hilo 0 en 3, hilo 1 en 4, hilo 2 en 5, hilo 3 en 6
+  Ventana de medicion:      46000 ciclos (del 5 al 46004)
+    hilo      IC   ciclos    CPI   loads  stores  br.tom  br.no  jal/jalr   otras
+    0     11500    46000  4.000    2299    1149       0   1150      1725    5177
+    1     11500    46000  4.000    2299    1149       0   1150      1725    5177
+    2     11500    46000  4.000    2299    1149       0   1150      1726    5176
+    3     11500    46000  4.000    2299    1149       0   1150      1726    5176
+    todos  46000    46000  1.000
+  CPI agregado:             1.0000  (25.00 MIPS a 25 MHz)
+  CPI de un hilo:           4.0000  (6.25 MIPS a 25 MHz)
+  Monitor de X:             0 valores desconocidos usados en 32201 escrituras al banco y 13792 accesos al bus
+  PASS modelo de costo agregado: una instruccion completada por ciclo
+  PASS modelo de costo por hilo: una instruccion cada 4 ciclos, de cualquier clase
+  PASS ningun valor desconocido llega al banco ni al bus
+  RESULTADO: PASS

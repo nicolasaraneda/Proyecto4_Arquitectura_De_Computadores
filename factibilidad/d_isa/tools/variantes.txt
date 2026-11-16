@@ -1,0 +1,78 @@
+# variantes.txt: variantes de integración que mide tools/costo_integrado.sh.
+#
+# Grupo: Nicolás Araneda, Vicente Calderón y Santiago Muñoz.
+# Arquitectura de Computadores, Universidad de los Andes, 2026-2.
+#
+# Una variante por línea: etiqueta | definiciones XD_* | descripción.
+# Todas se miden sobre la copia del core segmentado (core/), con
+# -DESPINO_SEGMENTADO. Las líneas "= título" abren un grupo en la tabla.
+# Los valores de XD_EMA, XD_EMAD, XD_DEVK y XD_SRAK son el conjunto de k:
+# 0 solo k = 5, 2 k de 4 a 7, 3 k de 0 a 7, 5 k de 0 a 31. XD_SIMD es la
+# máscara de opciones de xd_simd8 (1 con signo, 2 mínimo y máximo, 4 saturadas,
+# 8 pbcast8, 16 pmovmsk8, 32 comparación de un bit por carril). XD_SIMDALU usa
+# los mismos bits 4 y 8.
+
+= Referencia
+ref           |                                   | copia del segmentado sin ninguna instrucción nueva
+
+= Paso de media exponencial en una instrucción: ema rd, rs1, rs2, k
+ema_k5        | -DXD_EMA=0                        | autónoma (restador y sumador propios), k = 5
+ema_k4a7      | -DXD_EMA=2                        | autónoma, k de 4 a 7
+ema_k0a7      | -DXD_EMA=3                        | autónoma, k de 0 a 7
+ema_todos     | -DXD_EMA=5                        | autónoma, k de 0 a 31
+emaalu_k5     | -DXD_EMA=0 -DXD_EMAALU            | con la resta de la ALU, k = 5
+emaalu_k4a7   | -DXD_EMA=2 -DXD_EMAALU            | con la resta de la ALU, k de 4 a 7
+emaalu_k0a7   | -DXD_EMA=3 -DXD_EMAALU            | con la resta de la ALU, k de 0 a 7
+emaalu_todos  | -DXD_EMA=5 -DXD_EMAALU            | con la resta de la ALU, k de 0 a 31
+
+= Paso de la media desde la desviación, en el sumador de la ALU: emad y devk
+emad_k5       | -DXD_EMAD=0                       | emad, k = 5
+emad_k4a7     | -DXD_EMAD=2                       | emad, k de 4 a 7
+emad_k0a7     | -DXD_EMAD=3                       | emad, k de 0 a 7
+emad_todos    | -DXD_EMAD=5                       | emad, k de 0 a 31
+devk_k5       | -DXD_DEVK=0                       | devk, k = 5
+media_k5      | -DXD_EMAD=0 -DXD_DEVK=0           | emad y devk, k = 5
+media_k4a7    | -DXD_EMAD=2 -DXD_DEVK=2           | emad y devk, k de 4 a 7
+emaalu_devk   | -DXD_EMA=0 -DXD_EMAALU -DXD_DEVK=0 | ema (resta de la ALU) y devk, k = 5
+
+= Desplazamiento suelto: srak rd, rs1, k (por el multiplexor de escritura)
+srak_k5       | -DXD_SRAK=0                       | k = 5
+srak_k0a7     | -DXD_SRAK=3                       | k de 0 a 7
+srak_todos    | -DXD_SRAK=5                       | k de 0 a 31
+
+= Carriles de 4 x 8 bits
+simd_min      | -DXD_SIMD=0                       | padd8, psub8 y pcmpltu8 (máscara por carril)
+simd_bit      | -DXD_SIMD=32                      | lo mismo, con la comparación de un bit por carril
+simd_signo    | -DXD_SIMD=1                       | más pcmplt8 (con signo)
+simd_minmax   | -DXD_SIMD=2                       | más pminu8 y pmaxu8
+simd_sat      | -DXD_SIMD=4                       | más paddus8 y psubus8
+simd_bcast    | -DXD_SIMD=8                       | más pbcast8
+simd_movmsk   | -DXD_SIMD=16                      | más pmovmsk8
+simd_bandas   | -DXD_SIMD=28                      | lo que usa el kernel de cuatro bandas: saturadas, pbcast8 y pmovmsk8
+simd_todo     | -DXD_SIMD=31                      | las diez operaciones
+
+= Carriles en el sumador de la ALU (xd_alu en vez de espino_alu)
+simdalu_min   | -DXD_SIMDALU=0                    | padd8, psub8 y pcmpltu8
+simdalu_sat   | -DXD_SIMDALU=4                    | más paddus8 y psubus8
+simdalu_bandas | -DXD_SIMDALU=12                  | más pbcast8 (por el operando A): lo que usa el kernel de cuatro bandas
+
+= Producto y cociente
+mulstep       | -DXD_MULSTEP                      | mulstep con sumador propio (por el multiplexor de escritura)
+mulstepalu    | -DXD_MULSTEPALU                   | mulstep en el sumador de la ALU
+divstep       | -DXD_DIVSTEP                      | divstep (restador propio)
+muldiv        | -DXD_MULSTEPALU -DXD_DIVSTEP      | mulstep en la ALU y divstep
+mulc8         | -DXD_MULC=8                       | producto combinacional de 8 x 8
+mulc16        | -DXD_MULC=16                      | producto combinacional de 16 x 8
+mulmmio       | -DXD_MULMMIO                      | periférico multiplicador serial de 24 x 8
+
+= Combinaciones
+min_mul       | -DXD_EMAD=0 -DXD_MULSTEPALU       | emad y mulstep
+media_mul     | -DXD_EMAD=0 -DXD_DEVK=0 -DXD_MULSTEPALU | emad, devk y mulstep: todo en el sumador de la ALU
+media_muldiv  | -DXD_EMAD=0 -DXD_DEVK=0 -DXD_MULSTEPALU -DXD_DIVSTEP | lo anterior más divstep
+min_bandas    | -DXD_EMAD=0 -DXD_SIMD=28          | emad y los carriles del kernel de bandas
+media_bandas  | -DXD_EMAD=0 -DXD_DEVK=0 -DXD_MULSTEPALU -DXD_SIMD=28 | emad, devk, mulstep y los carriles de bandas
+alu_min       | -DXD_EMAD=0 -DXD_MULSTEPALU -DXD_SIMDALU=4 | emad, mulstep y carriles con saturadas, todo en la ALU
+alu_todo      | -DXD_EMAD=0 -DXD_DEVK=0 -DXD_MULSTEPALU -DXD_SIMDALU=12 | emad, devk, mulstep y carriles de bandas, todo en la ALU
+alu_todo_div  | -DXD_EMAD=0 -DXD_DEVK=0 -DXD_MULSTEPALU -DXD_SIMDALU=12 -DXD_DIVSTEP | lo anterior más divstep
+completo_k5   | -DXD_EMAD=0 -DXD_DEVK=0 -DXD_MULSTEPALU -DXD_DIVSTEP -DXD_SIMD=31 | todo con k = 5: emad, devk, mulstep, divstep y los diez carriles
+todo          | -DXD_EMA=5 -DXD_EMAALU -DXD_EMAD=5 -DXD_DEVK=5 -DXD_SRAK=5 -DXD_SIMD=31 -DXD_MULSTEPALU -DXD_DIVSTEP -DXD_MULC=16 -DXD_MULMMIO | todas las instrucciones y el periférico, con todos los k

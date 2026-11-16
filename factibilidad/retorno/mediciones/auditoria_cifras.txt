@@ -1,0 +1,788 @@
+Cifras del estudio de retorno contra el evaluador independiente (auditoria/indep.c)
+Tipos: exacta (sin sorteo, igual al redondeo informado), torneo (valor esperado exacto contra sorteo de 6 campos),
+p5 (dos sorteos distintos, hasta 2 errores del estudio). Los candidatos kalman y guardia son externos: su patrimonio
+por serie viene del arnes y aqui se rehacen solo la estadistica y el torneo.
+
+--- Numeros conocidos ---
+cifra                                                      sem  informado   obtenido    tipo  coincide
+regla base, serie completa: patrimonio                       2      27062      27062  exacta  si
+regla base, serie completa: ordenes                          2        388        388  exacta  si
+comprar y mantener, serie completa                           2       6497       6497  exacta  si
+regla base, 10 bloques: media                                2      11069    11068.7  exacta  si
+regla base, 10 bloques: peor                                 2       9720       9720  exacta  si
+--- Frontera, 2000 ticks ---
+cifra                                                      sem  informado   obtenido    tipo  coincide
+base, bloques: media                                         2      11069    11068.7  exacta  si
+base, bloques: peor                                          2       9720       9720  exacta  si
+base, remuestreo: media                                      2      10766    10766.3  exacta  si
+base, remuestreo: p5                                         2       8966       8966  exacta  si
+base, plausibles: media                                      2      10914    10913.9  exacta  si
+base, plausibles: p5                                         2       8648       8648  exacta  si
+base, estres: p5                                             2       5637       5637  exacta  si
+base, estres: peor                                           2        256        256  exacta  si
+max_media, bloques: media                                    2      11043    11042.6  exacta  si
+max_media, bloques: peor                                     2       9620       9620  exacta  si
+max_media, remuestreo: media                                 2      10832    10832.4  exacta  si
+max_media, remuestreo: dif                                   2      66.00      66.17  exacta  si
+max_media, remuestreo: dif_ee                                2      11.00      10.78  exacta  si
+max_media, remuestreo: p5                                    2       8778       8778  exacta  si
+max_media, plausibles: media                                 2      11066    11065.9  exacta  si
+max_media, plausibles: dif                                   2        152        152  exacta  si
+max_media, plausibles: dif_ee                                2      12.00      12.20  exacta  si
+max_media, plausibles: p5                                    2       8552       8552  exacta  si
+max_media, estres: p5                                        2       5202       5202  exacta  si
+max_media, estres: peor                                      2        172        172  exacta  si
+activo, bloques: media                                       2      10826    10826.4  exacta  si
+activo, bloques: peor                                        2       8728       8728  exacta  si
+activo, remuestreo: media                                    2      10720    10720.1  exacta  si
+activo, remuestreo: dif                                      2     -46.00     -46.16  exacta  si
+activo, remuestreo: dif_ee                                   2      17.00      16.96  exacta  si
+activo, remuestreo: p5                                       2       8438       8438  exacta  si
+activo, plausibles: media                                    2      11244    11243.9  exacta  si
+activo, plausibles: dif                                      2        330        330  exacta  si
+activo, plausibles: dif_ee                                   2      19.00      19.42  exacta  si
+activo, plausibles: p5                                       2       8296       8296  exacta  si
+activo, estres: p5                                           2       4590       4590  exacta  si
+activo, estres: peor                                         2        116        116  exacta  si
+prudente, bloques: media                                     2      10712      10712  exacta  si
+prudente, bloques: peor                                      2      10000      10000  exacta  si
+prudente, remuestreo: media                                  2      10649    10648.7  exacta  si
+prudente, remuestreo: dif                                    2       -118     -117.6  exacta  si
+prudente, remuestreo: dif_ee                                 2      14.00      13.92  exacta  si
+prudente, remuestreo: p5                                     2       9281       9281  exacta  si
+prudente, plausibles: media                                  2      10616    10616.5  exacta  si
+prudente, plausibles: dif                                    2       -297     -297.4  exacta  si
+prudente, plausibles: dif_ee                                 2      17.00      17.45  exacta  si
+prudente, plausibles: p5                                     2       9021       9021  exacta  si
+prudente, estres: p5                                         2       6800       6800  exacta  si
+prudente, estres: peor                                       2        219        219  exacta  si
+kalman, bloques: media                                       2      11002    11001.6  exacta  si
+kalman, bloques: peor                                        2       9678       9678  exacta  si
+kalman, remuestreo: media                                    2      10874    10874.1  exacta  si
+kalman, remuestreo: dif                                      2        108      107.9  exacta  si
+kalman, remuestreo: dif_ee                                   2      11.00      11.08  exacta  si
+kalman, remuestreo: p5                                       2       8802       8802  exacta  si
+kalman, plausibles: media                                    2      11057    11057.2  exacta  si
+kalman, plausibles: dif                                      2        143      143.3  exacta  si
+kalman, plausibles: dif_ee                                   2      14.00      13.80  exacta  si
+kalman, plausibles: p5                                       2       8523       8523  exacta  si
+kalman, estres: p5                                           2       5219       5219  exacta  si
+kalman, estres: peor                                         2        156        156  exacta  si
+guardia, bloques: media                                      2      11018    11017.5  exacta  si
+guardia, bloques: peor                                       2       9024       9024  exacta  si
+guardia, remuestreo: media                                   2      10727    10726.6  exacta  si
+guardia, remuestreo: dif                                     2     -40.00     -39.71  exacta  si
+guardia, remuestreo: dif_ee                                  2      13.00      13.21  exacta  si
+guardia, remuestreo: p5                                      2       8811       8811  exacta  si
+guardia, plausibles: media                                   2      10863    10863.5  exacta  si
+guardia, plausibles: dif                                     2     -50.00     -50.42  exacta  si
+guardia, plausibles: dif_ee                                  2      16.00      15.54  exacta  si
+guardia, plausibles: p5                                      2       8339       8339  exacta  si
+guardia, estres: p5                                          2       6733       6733  exacta  si
+guardia, estres: peor                                        2        355        355  exacta  si
+--- Frontera, 20 000 ticks, interiores ---
+cifra                                                      sem  informado   obtenido    tipo  coincide
+remuestreos interiores                                       2       1994       1994  exacta  si
+plausibles interiores                                        2       2010       2010  exacta  si
+max_media, practica completa                                 2      25973      25973  exacta  si
+activo, practica completa                                    2      19234      19234  exacta  si
+prudente, practica completa                                  2      19790      19790  exacta  si
+kalman, practica completa                                    2      26450      26450  exacta  si
+guardia, practica completa                                   2      23399      23399  exacta  si
+base, remuestreo: media                                      2      23862    23862.1  exacta  si
+base, remuestreo: mediana                                    2      20955      20955  exacta  si
+base, remuestreo: p5                                         2      12315      12315  exacta  si
+base, plausibles: media                                      2      22314    22313.8  exacta  si
+base, plausibles: mediana                                    2      17046      17046  exacta  si
+base, plausibles: p5                                         2       9899       9899  exacta  si
+max_media, remuestreo: media                                 2      26533    26533.1  exacta  si
+max_media, remuestreo: mediana                               2      22861      22861  exacta  si
+max_media, remuestreo: dif                                   2       2671     2671.1  exacta  si
+max_media, remuestreo: dif_ee                                2        149      149.2  exacta  si
+max_media, remuestreo: p5                                    2      12916      12916  exacta  si
+max_media, plausibles: media                                 2      25642    25642.4  exacta  si
+max_media, plausibles: mediana                               2      19549      19549  exacta  si
+max_media, plausibles: dif                                   2       3329     3328.6  exacta  si
+max_media, plausibles: dif_ee                                2        183      183.5  exacta  si
+max_media, plausibles: p5                                    2      10213      10213  exacta  si
+activo, remuestreo: media                                    2      25709    25709.5  exacta  si
+activo, remuestreo: mediana                                  2      21884      21884  exacta  si
+activo, remuestreo: dif                                      2       1847     1847.4  exacta  si
+activo, remuestreo: dif_ee                                   2        231      231.4  exacta  si
+activo, remuestreo: p5                                       2      11468      11468  exacta  si
+activo, plausibles: media                                    2      30989    30989.4  exacta  si
+activo, plausibles: mediana                                  2      23260      23260  exacta  si
+activo, plausibles: dif                                      2       8676     8675.6  exacta  si
+activo, plausibles: dif_ee                                   2        419      418.6  exacta  si
+activo, plausibles: p5                                       2      10840      10840  exacta  si
+prudente, remuestreo: media                                  2      18994    18993.5  exacta  si
+prudente, remuestreo: mediana                                2      17412      17412  exacta  si
+prudente, remuestreo: dif                                    2      -4869    -4868.5  exacta  si
+prudente, remuestreo: dif_ee                                 2        177      177.5  exacta  si
+prudente, remuestreo: p5                                     2      11452      11452  exacta  si
+prudente, plausibles: media                                  2      16148    16148.4  exacta  si
+prudente, plausibles: mediana                                2      12808      12808  exacta  si
+prudente, plausibles: dif                                    2      -6165    -6165.4  exacta  si
+prudente, plausibles: dif_ee                                 2        258      257.8  exacta  si
+prudente, plausibles: p5                                     2       9220       9220  exacta  si
+kalman, remuestreo: media                                    2      27300    27300.2  exacta  si
+kalman, remuestreo: mediana                                  2      23618      23618  exacta  si
+kalman, remuestreo: dif                                      2       3438     3438.1  exacta  si
+kalman, remuestreo: dif_ee                                   2        153      152.5  exacta  si
+kalman, remuestreo: p5                                       2      13074      13074  exacta  si
+kalman, plausibles: media                                    2      25591    25591.1  exacta  si
+kalman, plausibles: mediana                                  2      19258      19258  exacta  si
+kalman, plausibles: dif                                      2       3277     3277.3  exacta  si
+kalman, plausibles: dif_ee                                   2        187      186.6  exacta  si
+kalman, plausibles: p5                                       2      10396      10396  exacta  si
+--- Frontera, 20 000 ticks, todas ---
+cifra                                                      sem  informado   obtenido    tipo  coincide
+base, remuestreo: media                                      2      37984    37983.6  exacta  si
+base, remuestreo: mediana                                    2      24238      24238  exacta  si
+base, remuestreo: p5                                         2      11878      11878  exacta  si
+base, plausibles: media                                      2      46934    46934.4  exacta  si
+base, plausibles: mediana                                    2      19970      19970  exacta  si
+base, plausibles: p5                                         2       9987       9987  exacta  si
+base, estres: mediana                                        2      22988      22988  exacta  si
+base, estres: p5                                             2       2697       2697  exacta  si
+max_media, remuestreo: media                                 2      45492    45492.2  exacta  si
+max_media, remuestreo: mediana                               2      27201      27201  exacta  si
+max_media, remuestreo: p5                                    2      12697      12697  exacta  si
+max_media, plausibles: media                                 2      57749    57749.4  exacta  si
+max_media, plausibles: mediana                               2      22740      22740  exacta  si
+max_media, plausibles: p5                                    2      10515      10515  exacta  si
+max_media, estres: mediana                                   2      31747      31747  exacta  si
+max_media, estres: p5                                        2       2840       2840  exacta  si
+activo, remuestreo: media                                    2      55922    55921.9  exacta  si
+activo, remuestreo: mediana                                  2      26210      26210  exacta  si
+activo, remuestreo: p5                                       2      11512      11512  exacta  si
+activo, plausibles: media                                    2      79951    79951.3  exacta  si
+activo, plausibles: mediana                                  2      27787      27787  exacta  si
+activo, plausibles: p5                                       2      11260      11260  exacta  si
+activo, estres: mediana                                      2      62196      62196  exacta  si
+activo, estres: p5                                           2       2760       2760  exacta  si
+prudente, remuestreo: media                                  2      26770    26770.2  exacta  si
+prudente, remuestreo: mediana                                2      19399      19399  exacta  si
+prudente, remuestreo: p5                                     2      11045      11045  exacta  si
+prudente, plausibles: media                                  2      29087    29086.7  exacta  si
+prudente, plausibles: mediana                                2      14274      14274  exacta  si
+prudente, plausibles: p5                                     2       8888       8888  exacta  si
+prudente, estres: mediana                                    2      17369      17369  exacta  si
+prudente, estres: p5                                         2       3970       3970  exacta  si
+guardia, remuestreo: media                                   2      38563    38562.8  exacta  si
+guardia, remuestreo: mediana                                 2      23914      23914  exacta  si
+guardia, remuestreo: p5                                      2      11586      11586  exacta  si
+guardia, plausibles: media                                   2      44264    44263.8  exacta  si
+guardia, plausibles: mediana                                 2      19525      19525  exacta  si
+guardia, plausibles: p5                                      2       9378       9378  exacta  si
+guardia, estres: mediana                                     2      27005      27005  exacta  si
+guardia, estres: p5                                          2       4587       4587  exacta  si
+--- Que cambia al alargar la ronda ---
+cifra                                                      sem  informado   obtenido    tipo  coincide
+base: crecimiento por 2000 ticks, ronda de 2000 (%)          2       7.06       7.06  exacta  si
+base: crecimiento, 20 000 interiores (%)                     2       7.32       7.32  exacta  si
+base: crecimiento, 20 000 todas (%)                          2      10.62      10.62  exacta  si
+base: ordenes por 2000 ticks, ronda de 2000                  2      34.60      34.55  exacta  si
+base: ordenes por 2000 ticks, 20 000 interiores              2      42.10      42.09  exacta  si
+base: ordenes por 2000 ticks, 20 000 todas                   2      82.30      82.29  exacta  si
+max_media: crecimiento por 2000 ticks, ronda de 2000 (%)     2       7.83       7.83  exacta  si
+max_media: crecimiento, 20 000 interiores (%)                2       8.47       8.47  exacta  si
+max_media: crecimiento, 20 000 todas (%)                     2      12.19      12.19  exacta  si
+max_media: ordenes por 2000 ticks, ronda de 2000             2      54.60      54.55  exacta  si
+max_media: ordenes por 2000 ticks, 20 000 interiores         2      71.10      71.14  exacta  si
+max_media: ordenes por 2000 ticks, 20 000 todas              2      130.7      130.7  exacta  si
+activo: crecimiento por 2000 ticks, ronda de 2000 (%)        2       7.83       7.83  exacta  si
+activo: crecimiento, 20 000 interiores (%)                   2       9.01       9.01  exacta  si
+activo: crecimiento, 20 000 todas (%)                        2      13.65      13.65  exacta  si
+activo: ordenes por 2000 ticks, ronda de 2000                2      75.10      75.14  exacta  si
+activo: ordenes por 2000 ticks, 20 000 interiores            2      102.4      102.4  exacta  si
+activo: ordenes por 2000 ticks, 20 000 todas                 2      193.7      193.7  exacta  si
+prudente: crecimiento por 2000 ticks, ronda de 2000 (%)      2       5.43       5.43  exacta  si
+prudente: crecimiento, 20 000 interiores (%)                 2       4.87       4.87  exacta  si
+prudente: crecimiento, 20 000 todas (%)                      2       7.39       7.39  exacta  si
+prudente: ordenes por 2000 ticks, ronda de 2000              2      17.00      17.04  exacta  si
+prudente: ordenes por 2000 ticks, 20 000 interiores          2      17.10      17.05  exacta  si
+prudente: ordenes por 2000 ticks, 20 000 todas               2      35.00      35.03  exacta  si
+kalman: crecimiento por 2000 ticks, ronda de 2000 (%)        2       7.98       7.98  exacta  si
+kalman: crecimiento, 20 000 interiores (%)                   2       8.59       8.59  exacta  si
+kalman: crecimiento, 20 000 todas (%)                        2      12.27      12.27  exacta  si
+kalman: ordenes por 2000 ticks, ronda de 2000                2      55.00      54.98  exacta  si
+kalman: ordenes por 2000 ticks, 20 000 interiores            2      72.60      72.62  exacta  si
+kalman: ordenes por 2000 ticks, 20 000 todas                 2      131.5      131.5  exacta  si
+--- Hipotesis, 2000 ticks ---
+cifra                                                      sem  informado   obtenido    tipo  coincide
+base: H1 media                                               2      10840    10840.1  exacta  si
+base: H1 error                                               2      20.00      19.88  exacta  si
+base: H1 p5                                                  2       8811       8811  exacta  si
+base: H2 exceso medio                                        2       1061     1060.6  exacta  si
+base: H2 exceso p5                                           2      -2818      -2818  exacta  si
+base: W/B&H media                                            2      1.221      1.221  exacta  si
+base: W/B&H mediana                                          2      1.084      1.084  exacta  si
+base: H3a                                                    2      1.452      1.453  torneo  si
+base: H3b                                                    2      1.423      1.425  torneo  si
+base: H3s                                                    2      1.675      1.671      p5  si
+base: H3r                                                    2      1.694      1.690      p5  si
+max_media: H1 media                                          2      10943    10943.1  exacta  si
+max_media: H1 error                                          2      23.00      23.01  exacta  si
+max_media: H1 p5                                             2       8683       8683  exacta  si
+max_media: H2 exceso medio                                   2       1164     1163.5  exacta  si
+max_media: H2 exceso p5                                      2      -2607      -2607  exacta  si
+max_media: W/B&H media                                       2      1.228      1.228  exacta  si
+max_media: W/B&H mediana                                     2      1.097      1.097  exacta  si
+max_media: H3a                                               2      1.494      1.495  torneo  si
+max_media: H3b                                               2      1.463      1.464  torneo  si
+max_media: H3s                                               2      1.724      1.722      p5  si
+max_media: H3r                                               2      1.729      1.727      p5  si
+activo: H1 media                                             2      10972    10972.5  exacta  si
+activo: H1 error                                             2      24.00      24.28  exacta  si
+activo: H1 p5                                                2       8373       8373  exacta  si
+activo: H2 exceso medio                                      2       1193     1192.9  exacta  si
+activo: H2 exceso p5                                         2      -2428      -2428  exacta  si
+activo: W/B&H media                                          2      1.217      1.217  exacta  si
+activo: W/B&H mediana                                        2      1.099      1.099  exacta  si
+activo: H3a                                                  2      1.457      1.459  torneo  si
+activo: H3b                                                  2      1.458      1.460  torneo  si
+activo: H3s                                                  2      1.681      1.680      p5  si
+activo: H3r                                                  2      1.670      1.669      p5  si
+prudente: H1 media                                           2      10641    10641.3  exacta  si
+prudente: H1 error                                           2      18.00      17.59  exacta  si
+prudente: H1 p5                                              2       9194       9194  exacta  si
+prudente: H2 exceso medio                                    2        862      861.7  exacta  si
+prudente: H2 exceso p5                                       2      -3119      -3119  exacta  si
+prudente: W/B&H media                                        2      1.207      1.207  exacta  si
+prudente: W/B&H mediana                                      2      1.065      1.065  exacta  si
+prudente: H3a                                                2      1.345      1.346  torneo  si
+prudente: H3b                                                2      1.352      1.354  torneo  si
+prudente: H3s                                                2      1.537      1.533      p5  si
+prudente: H3r                                                2      1.577      1.575      p5  si
+kalman: H1 media                                             2      10956    10955.8  exacta  si
+kalman: H1 error                                             2      23.00      22.54  exacta  si
+kalman: H1 p5                                                2       8646       8646  exacta  si
+kalman: H2 exceso medio                                      2       1176     1176.3  exacta  si
+kalman: H2 exceso p5                                         2      -2593      -2593  exacta  si
+kalman: W/B&H media                                          2      1.229      1.229  exacta  si
+kalman: W/B&H mediana                                        2      1.097      1.097  exacta  si
+kalman: H3a                                                  2      1.487      1.487  torneo  si
+kalman: H3b                                                  2      1.467      1.467  torneo  si
+kalman: H3s                                                  2      1.716      1.714      p5  si
+kalman: H3r                                                  2      1.721      1.719      p5  si
+guardia: H1 media                                            2      10796    10796.4  exacta  si
+guardia: H1 error                                            2      21.00      21.42  exacta  si
+guardia: H1 p5                                               2       8585       8585  exacta  si
+guardia: H2 exceso medio                                     2       1017     1016.8  exacta  si
+guardia: H2 exceso p5                                        2      -2730      -2730  exacta  si
+guardia: W/B&H media                                         2      1.207      1.207  exacta  si
+guardia: W/B&H mediana                                       2      1.086      1.086  exacta  si
+guardia: H3a                                                 2      1.429      1.430  torneo  si
+guardia: H3b                                                 2      1.400      1.399  torneo  si
+guardia: H3s                                                 2      1.632      1.632      p5  si
+guardia: H3r                                                 2      1.642      1.642      p5  si
+nada: H1 media                                               2      10000      10000  exacta  si
+nada: H1 error                                               2      0.000      0.000  exacta  si
+nada: H1 p5                                                  2      10000      10000  exacta  si
+nada: H2 exceso medio                                        2        220      220.5  exacta  si
+nada: H2 exceso p5                                           2      -3681      -3681  exacta  si
+nada: W/B&H media                                            2      1.129      1.129  exacta  si
+nada: W/B&H mediana                                          2      1.022      1.022  exacta  si
+nada: H3a                                                    2      1.161      1.163  torneo  si
+nada: H3b                                                    2      1.146      1.148  torneo  si
+nada: H3s                                                    2      1.233      1.230      p5  si
+nada: H3r                                                    2      1.313      1.311      p5  si
+byh: H1 media                                                2       9774     9773.8  exacta  si
+byh: H1 error                                                2      24.00      24.00  exacta  si
+byh: H1 p5                                                   2       5876       5876  exacta  si
+byh: H2 exceso medio                                         2      -6.00      -5.74  exacta  si
+byh: H2 exceso p5                                            2       -124       -124  exacta  si
+byh: W/B&H media                                             2      0.999      0.999  exacta  si
+byh: W/B&H mediana                                           2      1.000      1.000  exacta  si
+byh: H3a                                                     2      1.090      1.090  torneo  si
+byh: H3b                                                     2      1.093      1.094  torneo  si
+byh: H3s                                                     2      1.107      1.108      p5  si
+byh: H3r                                                     2      0.969      0.971      p5  si
+--- Hipotesis, 20 000 ticks, interiores ---
+cifra                                                      sem  informado   obtenido    tipo  coincide
+base: H1 media                                               2      23085    23084.8  exacta  si
+base: H1 error                                               2        246      245.8  exacta  si
+base: H1 p5                                                  2      10495      10495  exacta  si
+base: H2 exceso medio                                        2      13047    13046.7  exacta  si
+base: H2 exceso p5                                           2      -2225      -2225  exacta  si
+base: W/B&H media                                            2      2.954      2.954  exacta  si
+base: W/B&H mediana                                          2      2.061      2.061  exacta  si
+base: H3a                                                    2      1.732      1.737  torneo  si
+base: H3b                                                    2      1.745      1.746  torneo  si
+base: H3s                                                    2      1.803      1.804      p5  si
+base: H3r                                                    2      1.812      1.813      p5  si
+max_media: H1 media                                          2      26086      26086  exacta  si
+max_media: H1 error                                          2        300      300.4  exacta  si
+max_media: H1 p5                                             2      11231      11231  exacta  si
+max_media: H2 exceso medio                                   2      16048    16047.9  exacta  si
+max_media: H2 exceso p5                                      2      -1040      -1040  exacta  si
+max_media: W/B&H media                                       2       3.32       3.32  exacta  si
+max_media: W/B&H mediana                                     2      2.270      2.270  exacta  si
+max_media: H3a                                               2      1.857      1.859  torneo  si
+max_media: H3b                                               2      1.820      1.821  torneo  si
+max_media: H3s                                               2      1.935      1.934      p5  si
+max_media: H3r                                               2      1.934      1.934      p5  si
+activo: H1 media                                             2      28360      28360  exacta  si
+activo: H1 error                                             2        396      396.4  exacta  si
+activo: H1 p5                                                2      11085      11085  exacta  si
+activo: H2 exceso medio                                      2      18322    18321.9  exacta  si
+activo: H2 exceso p5                                         2       -228       -228  exacta  si
+activo: W/B&H media                                          2       3.52       3.52  exacta  si
+activo: W/B&H mediana                                        2      2.377      2.377  exacta  si
+activo: H3a                                                  2      1.812      1.814  torneo  si
+activo: H3b                                                  2      1.837      1.839  torneo  si
+activo: H3s                                                  2      1.915      1.915      p5  si
+activo: H3r                                                  2      1.900      1.899      p5  si
+prudente: H1 media                                           2      17565    17565.3  exacta  si
+prudente: H1 error                                           2        143      143.2  exacta  si
+prudente: H1 p5                                              2       9750       9750  exacta  si
+prudente: H2 exceso medio                                    2       7527     7527.2  exacta  si
+prudente: H2 exceso p5                                       2      -4756      -4756  exacta  si
+prudente: W/B&H media                                        2      2.260      2.260  exacta  si
+prudente: W/B&H mediana                                      2      1.626      1.626  exacta  si
+prudente: H3a                                                2      1.431      1.436  torneo  si
+prudente: H3b                                                2      1.623      1.625  torneo  si
+prudente: H3s                                                2      1.452      1.453      p5  si
+prudente: H3r                                                2      1.475      1.475      p5  si
+kalman: H1 media                                             2      26442    26442.2  exacta  si
+kalman: H1 error                                             2        304      303.7  exacta  si
+kalman: H1 p5                                                2      11154      11154  exacta  si
+kalman: H2 exceso medio                                      2      16404    16404.1  exacta  si
+kalman: H2 exceso p5                                         2      -1138      -1138  exacta  si
+kalman: W/B&H media                                          2       3.37       3.37  exacta  si
+kalman: W/B&H mediana                                        2      2.291      2.291  exacta  si
+kalman: H3a                                                  2      1.841      1.843  torneo  si
+kalman: H3b                                                  2      1.830      1.832  torneo  si
+kalman: H3s                                                  2      1.926      1.925      p5  si
+kalman: H3r                                                  2      1.925      1.925      p5  si
+nada: H1 media                                               2      10000      10000  exacta  si
+nada: H1 error                                               2      0.000      0.000  exacta  si
+nada: H1 p5                                                  2      10000      10000  exacta  si
+nada: H2 exceso medio                                        2     -38.00     -38.12  exacta  si
+nada: H2 exceso p5                                           2      -8183      -8183  exacta  si
+nada: W/B&H media                                            2      1.243      1.243  exacta  si
+nada: W/B&H mediana                                          2      1.047      1.047  exacta  si
+nada: H3a                                                    2      0.952      0.955  torneo  si
+nada: H3b                                                    2      1.247      1.245  torneo  si
+nada: H3s                                                    2      0.884      0.888      p5  si
+nada: H3r                                                    2      0.914      0.919      p5  si
+byh: H1 media                                                2      10040    10039.8  exacta  si
+byh: H1 error                                                2      70.00      70.23  exacta  si
+byh: H1 p5                                                   2       3731       3731  exacta  si
+byh: H2 exceso medio                                         2      2.000      1.647  exacta  si
+byh: H2 exceso p5                                            2       -120       -120  exacta  si
+byh: W/B&H media                                             2      0.999      0.999  exacta  si
+byh: W/B&H mediana                                           2      1.000      1.000  exacta  si
+byh: H3a                                                     2      0.932      0.934  torneo  si
+byh: H3b                                                     2      1.227      1.227  torneo  si
+byh: H3s                                                     2      0.879      0.884      p5  si
+byh: H3r                                                     2      0.765      0.771      p5  si
+series interiores de la evidencia                            2       4004       4004  exacta  si
+--- Puntos contra la regla base, 2000 ticks (semilla 0 / semilla 2) ---
+cifra                                                      sem  informado   obtenido    tipo  coincide
+base: H3a                                                    0      1.465      1.464  torneo  si
+base: H3b                                                    0      1.437      1.438  torneo  si
+base: p5 de tres rondas, H3a                                 0      0.835      0.838      p5  si
+base: p5 de tres rondas, H3b                                 0      0.872      0.875      p5  si
+max_media: H1 dif                                            0        103      102.6  exacta  si
+max_media: H1 dif error                                      0      10.00       9.89  exacta  si
+max_media: dif H3a                                           0      0.038      0.039  torneo  si
+max_media: dif H3b                                           0      0.036      0.035  torneo  si
+max_media: dif p5 tres rondas H3a                            0      0.047      0.037      p5  si
+max_media: dif p5 tres rondas H3b                            0      0.039      0.029      p5  si
+kalman: H1 dif                                               0        123      122.9  exacta  si
+kalman: H1 dif error                                         0      10.00      10.28  exacta  si
+kalman: dif H3a                                              0      0.033      0.035  torneo  si
+kalman: dif H3b                                              0      0.040      0.041  torneo  si
+kalman: dif p5 tres rondas H3a                               0      0.052      0.043      p5  si
+kalman: dif p5 tres rondas H3b                               0      0.028      0.013      p5  si
+activo: H1 dif                                               0        127      126.6  exacta  si
+activo: H1 dif error                                         0      18.00      17.53  exacta  si
+activo: dif H3a                                              0      0.001      0.001  torneo  si
+activo: dif H3b                                              0      0.029      0.028  torneo  si
+activo: dif p5 tres rondas H3a                               0      0.005     -0.002      p5  si
+activo: dif p5 tres rondas H3b                               0     -0.022     -0.017      p5  si
+guardia: H1 dif                                              0     -55.00     -54.85  exacta  si
+guardia: H1 dif error                                        0      16.00      16.42  exacta  si
+guardia: dif H3a                                             0     -0.027     -0.026  torneo  si
+guardia: dif H3b                                             0     -0.030     -0.031  torneo  si
+guardia: dif p5 tres rondas H3a                              0     -0.025     -0.028      p5  si
+guardia: dif p5 tres rondas H3b                              0     -0.072     -0.075      p5  si
+prudente: H1 dif                                             0       -232       -232  exacta  si
+prudente: H1 dif error                                       0      14.00      13.98  exacta  si
+prudente: dif H3a                                            0     -0.114     -0.114  torneo  si
+prudente: dif H3b                                            0     -0.076     -0.078  torneo  si
+prudente: dif p5 tres rondas H3a                             0     -0.108     -0.119      p5  si
+prudente: dif p5 tres rondas H3b                             0     -0.106     -0.117      p5  si
+nada: H1 dif                                                 0       -879     -879.3  exacta  si
+nada: H1 dif error                                           0      23.00      23.40  exacta  si
+nada: dif H3a                                                0     -0.301     -0.300  torneo  si
+nada: dif H3b                                                0     -0.286     -0.287  torneo  si
+nada: dif p5 tres rondas H3a                                 0     -0.299     -0.298      p5  si
+nada: dif p5 tres rondas H3b                                 0     -0.250     -0.250      p5  si
+byh: H1 dif                                                  0      -1106      -1106  exacta  si
+byh: H1 dif error                                            0      33.00      32.66  exacta  si
+byh: dif H3a                                                 0     -0.383     -0.384  torneo  si
+byh: dif H3b                                                 0     -0.350     -0.352  torneo  si
+byh: dif p5 tres rondas H3a                                  0     -0.475     -0.472      p5  si
+byh: dif p5 tres rondas H3b                                  0     -0.472     -0.475      p5  si
+base: H3a                                                    2      1.452      1.453  torneo  si
+base: H3b                                                    2      1.423      1.425  torneo  si
+base: p5 de tres rondas, H3a                                 2      0.828      0.816      p5  si
+base: p5 de tres rondas, H3b                                 2      0.867      0.850      p5  si
+max_media: H1 dif                                            2        103        103  exacta  si
+max_media: H1 dif error                                      2      11.00      10.51  exacta  si
+max_media: dif H3a                                           2      0.042      0.042  torneo  si
+max_media: dif H3b                                           2      0.040      0.039  torneo  si
+max_media: dif p5 tres rondas H3a                            2      0.042      0.049      p5  si
+max_media: dif p5 tres rondas H3b                            2      0.017      0.033      p5  si
+kalman: H1 dif                                               2        116      115.7  exacta  si
+kalman: H1 dif error                                         2      12.00      11.69  exacta  si
+kalman: dif H3a                                              2      0.034      0.034  torneo  si
+kalman: dif H3b                                              2      0.044      0.042  torneo  si
+kalman: dif p5 tres rondas H3a                               2      0.042      0.052      p5  si
+kalman: dif p5 tres rondas H3b                               2      0.000      0.017      p5  si
+activo: H1 dif                                               2        132      132.3  exacta  si
+activo: H1 dif error                                         2      16.00      16.22  exacta  si
+activo: dif H3a                                              2      0.005      0.006  torneo  si
+activo: dif H3b                                              2      0.036      0.035  torneo  si
+activo: dif p5 tres rondas H3a                               2     -0.002      0.015      p5  si
+activo: dif p5 tres rondas H3b                               2     -0.033      0.000      p5  si
+guardia: H1 dif                                              2     -44.00     -43.75  exacta  si
+guardia: H1 dif error                                        2      12.00      12.43  exacta  si
+guardia: dif H3a                                             2     -0.023     -0.023  torneo  si
+guardia: dif H3b                                             2     -0.023     -0.026  torneo  si
+guardia: dif p5 tres rondas H3a                              2     -0.031     -0.015      p5  si
+guardia: dif p5 tres rondas H3b                              2     -0.067     -0.050      p5  si
+prudente: H1 dif                                             2       -199     -198.8  exacta  si
+prudente: H1 dif error                                       2      14.00      13.98  exacta  si
+prudente: dif H3a                                            2     -0.107     -0.107  torneo  si
+prudente: dif H3b                                            2     -0.071     -0.071  torneo  si
+prudente: dif p5 tres rondas H3a                             2     -0.108     -0.092      p5  si
+prudente: dif p5 tres rondas H3b                             2     -0.100     -0.096      p5  si
+nada: H1 dif                                                 2       -840     -840.1  exacta  si
+nada: H1 dif error                                           2      20.00      19.88  exacta  si
+nada: dif H3a                                                2     -0.291     -0.290  torneo  si
+nada: dif H3b                                                2     -0.276     -0.277  torneo  si
+nada: dif p5 tres rondas H3a                                 2     -0.283     -0.279      p5  si
+nada: dif p5 tres rondas H3b                                 2     -0.250     -0.229      p5  si
+byh: H1 dif                                                  2      -1066    -1066.3  exacta  si
+byh: H1 dif error                                            2      30.00      29.72  exacta  si
+byh: dif H3a                                                 2     -0.363     -0.362  torneo  si
+byh: dif H3b                                                 2     -0.329     -0.331  torneo  si
+byh: dif p5 tres rondas H3a                                  2     -0.458     -0.448      p5  si
+byh: dif p5 tres rondas H3b                                  2     -0.467     -0.450      p5  si
+base: p5 de una ronda, H3a                                   2      0.160      0.168  torneo  si
+base: p5 de una ronda, H3b                                   2      0.300      0.300  torneo  si
+--- Puntos contra la regla base, 20 000 ticks interiores (semilla 0 / semilla 2) ---
+cifra                                                      sem  informado   obtenido    tipo  coincide
+base: H3a                                                    0      1.730      1.732  torneo  si
+base: H3b                                                    0      1.742      1.742  torneo  si
+base: p5 de tres rondas, H3a                                 0      1.314      1.323      p5  si
+base: p5 de tres rondas, H3b                                 0      1.389      1.387      p5  si
+max_media: H1 dif                                            0       3278     3277.9  exacta  si
+max_media: H1 dif error                                      0        124        124  exacta  si
+max_media: dif H3a                                           0      0.125      0.124  torneo  si
+max_media: dif H3b                                           0      0.079      0.079  torneo  si
+max_media: dif p5 tres rondas H3a                            0      0.188      0.187      p5  si
+max_media: dif p5 tres rondas H3b                            0      0.133      0.133      p5  si
+kalman: H1 dif                                               0       3720     3720.1  exacta  si
+kalman: H1 dif error                                         0        136      135.5  exacta  si
+kalman: dif H3a                                              0      0.111      0.110  torneo  si
+kalman: dif H3b                                              0      0.090      0.091  torneo  si
+kalman: dif p5 tres rondas H3a                               0      0.186      0.186      p5  si
+kalman: dif p5 tres rondas H3b                               0      0.122      0.138      p5  si
+activo: H1 dif                                               0       5407     5407.4  exacta  si
+activo: H1 dif error                                         0        236      235.8  exacta  si
+activo: dif H3a                                              0      0.080      0.078  torneo  si
+activo: dif H3b                                              0      0.097      0.096  torneo  si
+activo: dif p5 tres rondas H3a                               0      0.109      0.113      p5  si
+activo: dif p5 tres rondas H3b                               0      0.122      0.121      p5  si
+prudente: H1 dif                                             0      -5393    -5392.9  exacta  si
+prudente: H1 dif error                                       0        154      153.5  exacta  si
+prudente: dif H3a                                            0     -0.294     -0.295  torneo  si
+prudente: dif H3b                                            0     -0.112     -0.111  torneo  si
+prudente: dif p5 tres rondas H3a                             0     -0.378     -0.389      p5  si
+prudente: dif p5 tres rondas H3b                             0     -0.200     -0.196      p5  si
+base: H3a                                                    2      1.732      1.737  torneo  si
+base: H3b                                                    2      1.745      1.746  torneo  si
+base: p5 de tres rondas, H3a                                 2      1.322      1.320      p5  si
+base: p5 de tres rondas, H3b                                 2      1.389      1.396      p5  si
+max_media: H1 dif                                            2       3001     3001.1  exacta  si
+max_media: H1 dif error                                      2        118      118.4  exacta  si
+max_media: dif H3a                                           2      0.125      0.122  torneo  si
+max_media: dif H3b                                           2      0.075      0.075  torneo  si
+max_media: dif p5 tres rondas H3a                            2      0.192      0.196      p5  si
+max_media: dif p5 tres rondas H3b                            2      0.117      0.121      p5  si
+kalman: H1 dif                                               2       3357     3357.4  exacta  si
+kalman: H1 dif error                                         2        121      120.6  exacta  si
+kalman: dif H3a                                              2      0.109      0.106  torneo  si
+kalman: dif H3b                                              2      0.085      0.085  torneo  si
+kalman: dif p5 tres rondas H3a                               2      0.189      0.194      p5  si
+kalman: dif p5 tres rondas H3b                               2      0.122      0.121      p5  si
+activo: H1 dif                                               2       5275     5275.1  exacta  si
+activo: H1 dif error                                         2        246      245.7  exacta  si
+activo: dif H3a                                              2      0.080      0.077  torneo  si
+activo: dif H3b                                              2      0.092      0.092  torneo  si
+activo: dif p5 tres rondas H3a                               2      0.127      0.125      p5  si
+activo: dif p5 tres rondas H3b                               2      0.111      0.121      p5  si
+prudente: H1 dif                                             2      -5520    -5519.6  exacta  si
+prudente: H1 dif error                                       2        157        157  exacta  si
+prudente: dif H3a                                            2     -0.302     -0.302  torneo  si
+prudente: dif H3b                                            2     -0.122     -0.121  torneo  si
+prudente: dif p5 tres rondas H3a                             2     -0.384     -0.388      p5  si
+prudente: dif p5 tres rondas H3b                             2     -0.189     -0.212      p5  si
+--- Sensibilidad al campo y a G, H3a ---
+cifra                                                      sem  informado   obtenido    tipo  coincide
+2000 ticks, base, ingenuo G=5                                2      1.652      1.650  torneo  si
+2000 ticks, base, ingenuo G=10                               2      1.671      1.671  torneo  si
+2000 ticks, base, ingenuo G=15                               2      1.685      1.684  torneo  si
+2000 ticks, base, mixto G=5                                  2      1.480      1.480  torneo  si
+2000 ticks, base, mixto G=10                                 2      1.452      1.453  torneo  si
+2000 ticks, base, mixto G=15                                 2      1.437      1.436  torneo  si
+2000 ticks, base, fuerte G=5                                 2      1.309      1.308  torneo  si
+2000 ticks, base, fuerte G=10                                2      1.349      1.349  torneo  si
+2000 ticks, base, fuerte G=15                                2      1.367      1.366  torneo  si
+2000 ticks, max_media, ingenuo G=5                           2      0.022      0.022  torneo  si
+2000 ticks, max_media, ingenuo G=10                          2      0.020      0.019  torneo  si
+2000 ticks, max_media, ingenuo G=15                          2      0.019      0.019  torneo  si
+2000 ticks, max_media, mixto G=5                             2      0.039      0.041  torneo  si
+2000 ticks, max_media, mixto G=10                            2      0.042      0.042  torneo  si
+2000 ticks, max_media, mixto G=15                            2      0.042      0.043  torneo  si
+2000 ticks, max_media, fuerte G=5                            2      0.086      0.086  torneo  si
+2000 ticks, max_media, fuerte G=10                           2      0.066      0.066  torneo  si
+2000 ticks, max_media, fuerte G=15                           2      0.058      0.057  torneo  si
+2000 ticks, kalman, ingenuo G=5                              2      0.023      0.022  torneo  si
+2000 ticks, kalman, ingenuo G=10                             2      0.020      0.020  torneo  si
+2000 ticks, kalman, ingenuo G=15                             2      0.019      0.019  torneo  si
+2000 ticks, kalman, mixto G=5                                2      0.031      0.033  torneo  si
+2000 ticks, kalman, mixto G=10                               2      0.034      0.034  torneo  si
+2000 ticks, kalman, mixto G=15                               2      0.034      0.034  torneo  si
+2000 ticks, kalman, fuerte G=5                               2      0.070      0.069  torneo  si
+2000 ticks, kalman, fuerte G=10                              2      0.053      0.053  torneo  si
+2000 ticks, kalman, fuerte G=15                              2      0.047      0.046  torneo  si
+2000 ticks, activo, ingenuo G=5                              2      0.006      0.007  torneo  si
+2000 ticks, activo, ingenuo G=10                             2      0.008      0.007  torneo  si
+2000 ticks, activo, ingenuo G=15                             2      0.009      0.009  torneo  si
+2000 ticks, activo, mixto G=5                                2      0.004      0.006  torneo  si
+2000 ticks, activo, mixto G=10                               2      0.005      0.006  torneo  si
+2000 ticks, activo, mixto G=15                               2      0.006      0.007  torneo  si
+2000 ticks, activo, fuerte G=5                               2      0.036      0.037  torneo  si
+2000 ticks, activo, fuerte G=10                              2      0.022      0.023  torneo  si
+2000 ticks, activo, fuerte G=15                              2      0.018      0.018  torneo  si
+2000 ticks, guardia, ingenuo G=5                             2     -0.016     -0.016  torneo  si
+2000 ticks, guardia, ingenuo G=10                            2     -0.014     -0.014  torneo  si
+2000 ticks, guardia, ingenuo G=15                            2     -0.013     -0.013  torneo  si
+2000 ticks, guardia, mixto G=5                               2     -0.026     -0.024  torneo  si
+2000 ticks, guardia, mixto G=10                              2     -0.023     -0.023  torneo  si
+2000 ticks, guardia, mixto G=15                              2     -0.023     -0.023  torneo  si
+2000 ticks, guardia, fuerte G=5                              2     -0.023     -0.023  torneo  si
+2000 ticks, guardia, fuerte G=10                             2     -0.023     -0.023  torneo  si
+2000 ticks, guardia, fuerte G=15                             2     -0.023     -0.023  torneo  si
+2000 ticks, prudente, ingenuo G=5                            2     -0.054     -0.056  torneo  si
+2000 ticks, prudente, ingenuo G=10                           2     -0.049     -0.050  torneo  si
+2000 ticks, prudente, ingenuo G=15                           2     -0.048     -0.048  torneo  si
+2000 ticks, prudente, mixto G=5                              2     -0.107     -0.106  torneo  si
+2000 ticks, prudente, mixto G=10                             2     -0.107     -0.107  torneo  si
+2000 ticks, prudente, mixto G=15                             2     -0.106     -0.106  torneo  si
+2000 ticks, prudente, fuerte G=5                             2     -0.165     -0.166  torneo  si
+2000 ticks, prudente, fuerte G=10                            2     -0.141     -0.141  torneo  si
+2000 ticks, prudente, fuerte G=15                            2     -0.127     -0.127  torneo  si
+20000 ticks, base, ingenuo G=5                               2      1.875      1.875  torneo  si
+20000 ticks, base, ingenuo G=10                              2      1.815      1.815  torneo  si
+20000 ticks, base, ingenuo G=15                              2      1.762      1.763  torneo  si
+20000 ticks, base, mixto G=5                                 2      1.813      1.811  torneo  si
+20000 ticks, base, mixto G=10                                2      1.732      1.737  torneo  si
+20000 ticks, base, mixto G=15                                2      1.684      1.687  torneo  si
+20000 ticks, base, fuerte G=5                                2      1.509      1.514  torneo  si
+20000 ticks, base, fuerte G=10                               2      1.550      1.549  torneo  si
+20000 ticks, base, fuerte G=15                               2      1.556      1.556  torneo  si
+20000 ticks, max_media, ingenuo G=5                          2      0.049      0.048  torneo  si
+20000 ticks, max_media, ingenuo G=10                         2      0.071      0.071  torneo  si
+20000 ticks, max_media, ingenuo G=15                         2      0.089      0.088  torneo  si
+20000 ticks, max_media, mixto G=5                            2      0.087      0.088  torneo  si
+20000 ticks, max_media, mixto G=10                           2      0.125      0.122  torneo  si
+20000 ticks, max_media, mixto G=15                           2      0.144      0.142  torneo  si
+20000 ticks, max_media, fuerte G=5                           2      0.225      0.223  torneo  si
+20000 ticks, max_media, fuerte G=10                          2      0.199      0.198  torneo  si
+20000 ticks, max_media, fuerte G=15                          2      0.190      0.190  torneo  si
+20000 ticks, kalman, ingenuo G=5                             2      0.049      0.048  torneo  si
+20000 ticks, kalman, ingenuo G=10                            2      0.071      0.071  torneo  si
+20000 ticks, kalman, ingenuo G=15                            2      0.090      0.089  torneo  si
+20000 ticks, kalman, mixto G=5                               2      0.075      0.076  torneo  si
+20000 ticks, kalman, mixto G=10                              2      0.109      0.106  torneo  si
+20000 ticks, kalman, mixto G=15                              2      0.127      0.126  torneo  si
+20000 ticks, kalman, fuerte G=5                              2      0.202      0.202  torneo  si
+20000 ticks, kalman, fuerte G=10                             2      0.179      0.179  torneo  si
+20000 ticks, kalman, fuerte G=15                             2      0.173      0.173  torneo  si
+20000 ticks, activo, ingenuo G=5                             2      0.048      0.049  torneo  si
+20000 ticks, activo, ingenuo G=10                            2      0.073      0.074  torneo  si
+20000 ticks, activo, ingenuo G=15                            2      0.095      0.094  torneo  si
+20000 ticks, activo, mixto G=5                               2      0.050      0.052  torneo  si
+20000 ticks, activo, mixto G=10                              2      0.080      0.077  torneo  si
+20000 ticks, activo, mixto G=15                              2      0.098      0.096  torneo  si
+20000 ticks, activo, fuerte G=5                              2      0.174      0.171  torneo  si
+20000 ticks, activo, fuerte G=10                             2      0.153      0.153  torneo  si
+20000 ticks, activo, fuerte G=15                             2      0.149      0.150  torneo  si
+20000 ticks, prudente, ingenuo G=5                           2     -0.139     -0.140  torneo  si
+20000 ticks, prudente, ingenuo G=10                          2     -0.194     -0.193  torneo  si
+20000 ticks, prudente, ingenuo G=15                          2     -0.228     -0.227  torneo  si
+20000 ticks, prudente, mixto G=5                             2     -0.244     -0.244  torneo  si
+20000 ticks, prudente, mixto G=10                            2     -0.302     -0.302  torneo  si
+20000 ticks, prudente, mixto G=15                            2     -0.324     -0.324  torneo  si
+20000 ticks, prudente, fuerte G=5                            2     -0.399     -0.400  torneo  si
+20000 ticks, prudente, fuerte G=10                           2     -0.365     -0.366  torneo  si
+20000 ticks, prudente, fuerte G=15                           2     -0.348     -0.349  torneo  si
+--- Sensibilidad al campo, H3b (G = 10) ---
+cifra                                                      sem  informado   obtenido    tipo  coincide
+2000 ticks, base, ingenuo                                    2      1.542      1.542  torneo  si
+2000 ticks, base, mixto                                      2      1.423      1.425  torneo  si
+2000 ticks, base, fuerte                                     2      1.158      1.158  torneo  si
+2000 ticks, max_media, ingenuo                               2      0.027      0.028  torneo  si
+2000 ticks, max_media, mixto                                 2      0.040      0.039  torneo  si
+2000 ticks, max_media, fuerte                                2      0.085      0.084  torneo  si
+2000 ticks, kalman, ingenuo                                  2      0.032      0.033  torneo  si
+2000 ticks, kalman, mixto                                    2      0.044      0.042  torneo  si
+2000 ticks, kalman, fuerte                                   2      0.086      0.085  torneo  si
+2000 ticks, activo, ingenuo                                  2      0.019      0.019  torneo  si
+2000 ticks, activo, mixto                                    2      0.036      0.035  torneo  si
+2000 ticks, activo, fuerte                                   2      0.098      0.098  torneo  si
+2000 ticks, guardia, ingenuo                                 2     -0.020     -0.019  torneo  si
+2000 ticks, guardia, mixto                                   2     -0.023     -0.026  torneo  si
+2000 ticks, guardia, fuerte                                  2     -0.040     -0.040  torneo  si
+2000 ticks, prudente, ingenuo                                2     -0.068     -0.069  torneo  si
+2000 ticks, prudente, mixto                                  2     -0.071     -0.071  torneo  si
+2000 ticks, prudente, fuerte                                 2     -0.124     -0.124  torneo  si
+20000 ticks, base, ingenuo                                   2      1.844      1.844  torneo  si
+20000 ticks, base, mixto                                     2      1.745      1.746  torneo  si
+20000 ticks, base, fuerte                                    2      1.256      1.256  torneo  si
+20000 ticks, max_media, ingenuo                              2      0.046      0.047  torneo  si
+20000 ticks, max_media, mixto                                2      0.075      0.075  torneo  si
+20000 ticks, max_media, fuerte                               2      0.224      0.223  torneo  si
+20000 ticks, kalman, ingenuo                                 2      0.051      0.051  torneo  si
+20000 ticks, kalman, mixto                                   2      0.085      0.085  torneo  si
+20000 ticks, kalman, fuerte                                  2      0.257      0.257  torneo  si
+20000 ticks, activo, ingenuo                                 2      0.056      0.058  torneo  si
+20000 ticks, activo, mixto                                   2      0.092      0.092  torneo  si
+20000 ticks, activo, fuerte                                  2      0.275      0.275  torneo  si
+20000 ticks, prudente, ingenuo                               2     -0.111     -0.111  torneo  si
+20000 ticks, prudente, mixto                                 2     -0.122     -0.121  torneo  si
+20000 ticks, prudente, fuerte                                2     -0.287     -0.286  torneo  si
+--- Puntos por conjunto, 2000 ticks ---
+cifra                                                      sem  informado   obtenido    tipo  coincide
+base, remuestreo, H3a                                        2      1.475      1.479  torneo  si
+base, remuestreo, H3b                                        2      1.453      1.455  torneo  si
+base, plausibles, H3a                                        2      1.418      1.418  torneo  si
+base, plausibles, H3b                                        2      1.389      1.390  torneo  si
+base, estres, H3a                                            2      1.146      1.148  torneo  si
+base, estres, H3b                                            2      1.176      1.178  torneo  si
+max_media, remuestreo, H3a                                   2      0.033      0.032  torneo  si
+max_media, remuestreo, H3b                                   2      0.024      0.024  torneo  si
+max_media, plausibles, H3a                                   2      0.057      0.056  torneo  si
+max_media, plausibles, H3b                                   2      0.057      0.055  torneo  si
+max_media, estres, H3a                                       2      0.019      0.017  torneo  si
+max_media, estres, H3b                                       2      0.023      0.023  torneo  si
+kalman, remuestreo, H3a                                      2      0.034      0.034  torneo  si
+kalman, remuestreo, H3b                                      2      0.041      0.041  torneo  si
+kalman, plausibles, H3a                                      2      0.041      0.040  torneo  si
+kalman, plausibles, H3b                                      2      0.048      0.047  torneo  si
+kalman, estres, H3a                                          2      0.010      0.008  torneo  si
+kalman, estres, H3b                                          2      0.020      0.020  torneo  si
+activo, remuestreo, H3a                                      2     -0.053     -0.055  torneo  si
+activo, remuestreo, H3b                                      2     -0.027     -0.027  torneo  si
+activo, plausibles, H3a                                      2      0.066      0.066  torneo  si
+activo, plausibles, H3b                                      2      0.096      0.095  torneo  si
+activo, estres, H3a                                          2      0.011      0.008  torneo  si
+activo, estres, H3b                                          2      0.043      0.041  torneo  si
+guardia, remuestreo, H3a                                     2     -0.021     -0.022  torneo  si
+guardia, remuestreo, H3b                                     2     -0.026     -0.028  torneo  si
+guardia, plausibles, H3a                                     2     -0.021     -0.023  torneo  si
+guardia, plausibles, H3b                                     2     -0.022     -0.025  torneo  si
+guardia, estres, H3a                                         2      0.034      0.031  torneo  si
+guardia, estres, H3b                                         2      0.036      0.037  torneo  si
+prudente, remuestreo, H3a                                    2     -0.090     -0.091  torneo  si
+prudente, remuestreo, H3b                                    2     -0.046     -0.047  torneo  si
+prudente, plausibles, H3a                                    2     -0.126     -0.127  torneo  si
+prudente, plausibles, H3b                                    2     -0.099     -0.099  torneo  si
+prudente, estres, H3a                                        2     -0.004     -0.004  torneo  si
+prudente, estres, H3b                                        2     -0.001     -0.002  torneo  si
+--- Duelos contra max_media ---
+cifra                                                      sem  informado   obtenido    tipo  coincide
+kalman: H1 evidencia                                         2      13.00      12.72  exacta  si
+kalman: H1 evidencia, error                                  2       6.00       6.05  exacta  si
+kalman: H1 remuestreo                                        2      42.00      41.70  exacta  si
+kalman: H1 remuestreo, error                                 2       5.00       5.27  exacta  si
+kalman: H1 plausibles                                        2      -9.00      -8.70  exacta  si
+kalman: H1 plausibles, error                                 2       7.00       6.63  exacta  si
+kalman: H3a, 2000                                            2     -0.008     -0.008  torneo  si
+kalman: H3a, 20 000 interiores                               2     -0.016     -0.016  torneo  si
+kalman: H3b, 20 000 interiores                               2      0.010      0.010  torneo  si
+kalman: H3b, 2000                                            2      0.004      0.003  torneo  si
+activo: H1 evidencia                                         2      29.00      29.38  exacta  si
+activo: H1 evidencia, error                                  2      13.00      13.41  exacta  si
+activo: H1 remuestreo                                        2       -112     -112.3  exacta  si
+activo: H1 remuestreo, error                                 2      13.00      13.39  exacta  si
+activo: H1 plausibles                                        2        178        178  exacta  si
+activo: H1 plausibles, error                                 2      15.00      15.36  exacta  si
+activo: H3a, 2000                                            2     -0.037     -0.036  torneo  si
+activo: H3a, 20 000 interiores                               2     -0.045     -0.045  torneo  si
+activo: H3b, 20 000 interiores                               2      0.017      0.017  torneo  si
+activo: H3b, 2000                                            2     -0.005     -0.004  torneo  si
+guardia: H1 evidencia                                        2       -147     -146.7  exacta  si
+guardia: H1 evidencia, error                                 2      10.00       9.77  exacta  si
+guardia: H1 remuestreo                                       2       -106     -105.9  exacta  si
+guardia: H1 remuestreo, error                                2       8.00       7.78  exacta  si
+guardia: H1 plausibles                                       2       -202     -202.4  exacta  si
+guardia: H1 plausibles, error                                2      14.00      14.38  exacta  si
+guardia: H3a, 2000                                           2     -0.065     -0.065  torneo  si
+guardia: H3b, 2000                                           2     -0.063     -0.064  torneo  si
+guardia contra max_media en el estres, H3a, semilla 2        2      0.015      0.015  torneo  si
+guardia contra max_media en el estres, H3a, semilla 0        0      0.004      0.004  torneo  si
+--- Limites 1 y 255 (semilla 0) ---
+cifra                                                      sem  informado   obtenido    tipo  coincide
+2000 ticks, remuestreo: tocan 1 (%)                          0      0.100      0.140  exacta  si
+2000 ticks, remuestreo: minimo de 20 o menos (%)             0      0.700      0.680  exacta  si
+2000 ticks, remuestreo: tocan 255 (%)                        0      0.000      0.020  exacta  si
+2000 ticks, plausibles: tocan 1 (%)                          0      0.500      0.450  exacta  si
+2000 ticks, plausibles: minimo de 20 o menos (%)             0      1.300      1.340  exacta  si
+2000 ticks, plausibles: tocan 255 (%)                        0      0.600      0.610  exacta  si
+2000 ticks, estres: tocan 1 (%)                              0       7.60       7.64  exacta  si
+2000 ticks, estres: minimo de 20 o menos (%)                 0      17.70      17.67  exacta  si
+2000 ticks, estres: tocan 255 (%)                            0       3.60       3.57  exacta  si
+20000 ticks, remuestreo: tocan 1 (%)                         0      31.40      31.43  exacta  si
+20000 ticks, remuestreo: minimo de 20 o menos (%)            0      41.10      41.08  exacta  si
+20000 ticks, remuestreo: tocan 255 (%)                       0       8.80       8.75  exacta  si
+20000 ticks, plausibles: tocan 1 (%)                         0      20.30      20.30  exacta  si
+20000 ticks, plausibles: minimo de 20 o menos (%)            0      26.80      26.82  exacta  si
+20000 ticks, plausibles: tocan 255 (%)                       0      20.70      20.73  exacta  si
+20000 ticks, estres: tocan 1 (%)                             0      47.70      47.71  exacta  si
+20000 ticks, estres: minimo de 20 o menos (%)                0      56.50      56.54  exacta  si
+20000 ticks, estres: tocan 255 (%)                           0      37.40      37.36  exacta  si
+interiores de la evidencia a 20 000, semilla 0               0       4021       4021  exacta  si
+
+Resumen por tabla (coinciden / comparadas)
+tabla                                                                       exactas     torneo         p5
+Numeros conocidos                                                               5/5                      
+Frontera, 2000 ticks                                                          68/68                      
+Frontera, 20 000 ticks, interiores                                            53/53                      
+Frontera, 20 000 ticks, todas                                                 40/40                      
+Que cambia al alargar la ronda                                                30/30                      
+Hipotesis, 2000 ticks                                                         56/56      16/16      16/16
+Hipotesis, 20 000 ticks, interiores                                           50/50      14/14      14/14
+Puntos contra la regla base, 2000 ticks (semilla 0 / semilla 2)               28/28      34/34      32/32
+Puntos contra la regla base, 20 000 ticks interiores (semilla 0 / semilla 2)      16/16      20/20      20/20
+Sensibilidad al campo y a G, H3a                                                         99/99           
+Sensibilidad al campo, H3b (G = 10)                                                      33/33           
+Puntos por conjunto, 2000 ticks                                                          36/36           
+Duelos contra max_media                                                       18/18      12/12           
+Limites 1 y 255 (semilla 0)                                                   19/19                      
+TOTAL                                                                       383/383    264/264      82/82
+
+Tamano de las diferencias entre lo informado y lo obtenido
+  exacta   383 cifras: mediana 0.0200, percentil 95 0.4461, maxima 0.5000
+  torneo   264 cifras: mediana 0.0009, percentil 95 0.0031, maxima 0.0079
+  p5        82 cifras: mediana 0.0038, percentil 95 0.0170, maxima 0.0330
+  (en las exactas la diferencia es el redondeo de la cifra informada: como mucho media unidad del ultimo digito)
+
+Todas las cifras comparadas coinciden.

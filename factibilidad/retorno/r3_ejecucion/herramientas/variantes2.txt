@@ -1,0 +1,26 @@
+# (f) de la descomposicion: resto mediano solo mas abajo. Compra de menos de m acciones: nunca. De menos de m2: solo con dev < -(E + e2)
+ejec:m=8,m2=16,e2=16
+ejec:m=8,m2=16,e2=32
+ejec:m=8,m2=16,e2=64
+ejec:m=8,m2=16,e2=96
+ejec:m=8,m2=24,e2=16
+ejec:m=8,m2=24,e2=32
+ejec:m=8,m2=24,e2=64
+ejec:m=8,m2=24,e2=96
+ejec:m=8,m2=32,e2=16
+ejec:m=8,m2=32,e2=32
+ejec:m=8,m2=32,e2=64
+ejec:m=8,m2=32,e2=96
+ejec:m=8,m2=48,e2=16
+ejec:m=8,m2=48,e2=32
+ejec:m=8,m2=48,e2=64
+ejec:m=8,m2=48,e2=96
+ejec:m=8,m2=63,e2=16
+ejec:m=8,m2=63,e2=32
+ejec:m=8,m2=63,e2=64
+ejec:m=8,m2=63,e2=96
+# (f) lo mismo con otro piso m
+ejec:m=4,m2=24,e2=32
+ejec:m=4,m2=32,e2=32
+ejec:m=12,m2=24,e2=32
+ejec:m=12,m2=32,e2=32

@@ -1,0 +1,8 @@
+== Instrucciones nuevas dentro del core, contra ref/xd.py ==
+PASS emad_k5        base        200 programas, 38147 instrucciones nuevas,  95582 escrituras identicas al modelo   [-DXD_EMAD=0]
+PASS emad_k5        segmentado  200 programas, 38147 instrucciones nuevas,  95582 escrituras identicas al modelo   [-DXD_EMAD=0]
+PASS media_k5       base        200 programas, 38147 instrucciones nuevas,  95582 escrituras identicas al modelo   [-DXD_EMAD=0 -DXD_DEVK=0]
+PASS media_k5       segmentado  200 programas, 38147 instrucciones nuevas,  95582 escrituras identicas al modelo   [-DXD_EMAD=0 -DXD_DEVK=0]
+PASS media_mul      base        200 programas, 37822 instrucciones nuevas,  95546 escrituras identicas al modelo   [-DXD_EMAD=0 -DXD_DEVK=0 -DXD_MULSTEPALU]
+PASS media_mul      segmentado  200 programas, 37822 instrucciones nuevas,  95546 escrituras identicas al modelo   [-DXD_EMAD=0 -DXD_DEVK=0 -DXD_MULSTEPALU]
+PASS: todas las variantes coinciden con el modelo en los dos cores

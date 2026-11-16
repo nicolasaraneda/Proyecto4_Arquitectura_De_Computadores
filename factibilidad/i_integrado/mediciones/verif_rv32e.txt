@@ -1,0 +1,540 @@
+Cada hilo del barrel integrado contra el Espino base, instruccion por instruccion (instrucciones de RV32E)
+Generado por factibilidad/i_integrado/tools/verif_rv32e.sh (make verif). No editar a mano.
+
+Herramientas:
+  Yosys 0.68+195 (git sha1 435977e97-dirty, Release, Clang /usr/bin/clang++ 21.1.8)
+  "nextpnr-ice40" -- Next Generation Place and Route (Version nextpnr-0.11.1-19-g8dbcee5c)
+  Icarus Verilog version 14.0 (devel) (s20260301-403-g5ab23063f-dirty)
+Commit de partida: 9b82e81 (rama factibilidad-fondo)
+  Verilator 5.053 devel rev v5.052-22-g7cf8c5cca (mod)
+Testbench: factibilidad/a_barrel/tb/tb_verif.sv, sin modificar (sha256 bf13cc50342e5457...).
+Programas: 68 por configuracion, los mismos para todas. 161 palabras de codigo y 24 de datos con opcode custom-0 reemplazadas en 68 programas.
+
+==================================================================================================
+Configuracion ref: sin definiciones: es el prototipo del barrel (control)
+Definiciones: (ninguna)
+
+U. Un hilo con el programa (tools/prog_hilos.py --modo uno: 300 instrucciones al azar que no se quedan
+   quietas, precio nuevo cada 97 instrucciones) y los otros tres en un lazo vacio.
+   Corridas: 20. Pasan: 20. Fallan: 0. Programas que salieron de la memoria: 0.
+   hilo   instrucciones    distintas   escr. registro     stores      loads     saltos   SPI y perif.   solo SPI   STATUS con precio
+   0             30 000       13 528           21 706      3 932      5 446      4 449          2 713      2 033                 140
+   1             30 000       13 504           21 707      3 931      5 446      4 449          2 713      2 033                 142
+   2             30 000       13 734           21 697      3 932      5 450      4 434          2 718      2 032                 141
+   3             30 000       13 545           21 717      3 913      5 455      4 436          2 718      2 038                 145
+   total        120 000       54 311
+   Ademas, instrucciones de lazo vacio (jal x0 a si mismo: hilos ociosos y lazo final), tambien comparadas: 90 000, 90 000, 90 000 y 90 000.
+   Memoria al final: 10 230 palabras iguales y 10 sin comparar por stores en vuelo. Precios nuevos puestos por el testbench: 1 220. Ciclos del barrel: 480 060.
+
+H. sw/hazard_test.s y sw/hazard_review.s (sin modificar) en un hilo, los otros tres en un lazo vacio.
+   Los dos programas terminan en un lazo vacio, que se cuenta aparte.
+   Corridas: 8. Pasan: 8. Fallan: 0. Programas que salieron de la memoria: 0.
+   hilo   instrucciones    distintas   escr. registro     stores      loads     saltos   SPI y perif.   solo SPI   STATUS con precio
+   0                834          834              614         49         80        177              8          0                   0
+   1                834          834              614         49         80        177              8          0                   0
+   2                834          834              614         49         80        177              8          0                   0
+   3                834          834              614         49         80        177              8          0                   0
+   total          3 336        3 336
+   Ademas, instrucciones de lazo vacio (jal x0 a si mismo: hilos ociosos y lazo final), tambien comparadas: 11 166, 11 166, 11 166 y 11 166.
+   Memoria al final: 4 096 palabras iguales y 0 sin comparar por stores en vuelo. Precios nuevos puestos por el testbench: 0. Ciclos del barrel: 48 024.
+
+B. Cuatro hilos a la vez, programas aleatorios distintos, zonas de datos separadas, los cuatro con accesos
+   al SPI (bus quieto) y a los perifericos. Referencia: cada hilo contra un Espino base que corre solo.
+   Corridas: 10. Pasan: 10. Fallan: 0. Programas que salieron de la memoria: 0.
+   hilo   instrucciones    distintas   escr. registro     stores      loads     saltos   SPI y perif.   solo SPI   STATUS con precio
+   0             50 000       22 687           36 433      6 507      8 831      7 352          4 516      3 480                   0
+   1             50 000       17 536           36 683      6 247      8 560      7 330          4 158      3 612                   0
+   2             50 000       20 311           36 220      5 473      7 387      7 749          4 053      2 867                   0
+   3             50 000       17 484           36 596      5 750      8 819      8 068          4 339      2 853                   0
+   total        200 000       78 018
+   Memoria al final: 5 102 palabras iguales y 18 sin comparar por stores en vuelo. Precios nuevos puestos por el testbench: 0. Ciclos del barrel: 200 030.
+
+C. Cuatro hilos a la vez; uno solo accede al SPI y recibe un precio nuevo cada 29 instrucciones.
+   Corridas: 12. Pasan: 12. Fallan: 0. Programas que salieron de la memoria: 0.
+   hilo   instrucciones    distintas   escr. registro     stores      loads     saltos   SPI y perif.   solo SPI   STATUS con precio
+   0             60 000       22 641           41 519      8 207     10 861      7 981          3 926      1 465                  74
+   1             60 000       22 509           44 011      8 129      7 378      8 139          3 517      1 436                 153
+   2             60 000       23 217           45 351      5 523      9 904      8 384          2 469      1 084                   0
+   3             60 000       17 574           44 848      5 940     10 899      9 304          3 170      1 725                 121
+   total        240 000       85 941
+   Memoria al final: 6 119 palabras iguales y 25 sin comparar por stores en vuelo. Precios nuevos puestos por el testbench: 2 064. Ciclos del barrel: 240 036.
+
+T. Un hilo corre sw/trade.s (sin modificar) con un precio nuevo cada 61 instrucciones y los otros tres
+   corren programas aleatorios.
+   Corridas: 8. Pasan: 8. Fallan: 0. Programas que salieron de la memoria: 0.
+   hilo   instrucciones    distintas   escr. registro     stores      loads     saltos   SPI y perif.   solo SPI   STATUS con precio
+   0             40 000       18 681           28 326      4 992      6 594      6 223          3 444      2 358                 162
+   1             40 000       15 013           28 724      4 912      6 798      5 735          3 440      2 358                 162
+   2             40 000       12 733           28 902      4 378      7 125      6 185          3 387      2 358                 162
+   3             40 000       10 506           29 298      3 435      7 449      7 447          3 291      2 358                 162
+   total        160 000       56 933
+   Memoria al final: 4 079 palabras iguales y 17 sin comparar por stores en vuelo. Precios nuevos puestos por el testbench: 648. Ciclos del barrel: 160 024.
+
+D. Cuatro hilos a la vez sobre la MISMA zona de datos, y con saltos que pueden caer en el codigo de otro
+   hilo. Referencia: cuatro Espino base por turnos, con las escrituras de cada uno copiadas a la memoria
+   de los demas. Si un hilo sale de la memoria la corrida termina ahi.
+   Corridas: 10. Pasan: 10. Fallan: 0. Programas que salieron de la memoria: 2.
+   hilo   instrucciones    distintas   escr. registro     stores      loads     saltos   SPI y perif.   solo SPI   STATUS con precio
+   0             40 237       21 310           29 900      5 173      7 284      5 360          3 979      3 097                   0
+   1             40 236       15 425           29 128      5 468      6 924      5 618          3 588      3 039                   0
+   2             40 236       19 182           28 941      4 749      5 398      6 263          3 144      2 232                   0
+   3             40 236       14 010           29 478      4 719      7 138      6 443          3 476      2 235                   0
+   total        160 945       69 927
+   Memoria al final: 5 101 palabras iguales y 19 sin comparar por stores en vuelo. Precios nuevos puestos por el testbench: 0. Ciclos del barrel: 161 247.
+
+TOTAL de instrucciones de programa comparadas una por una, por hilo, con el barrel tal como se sintetiza
+(contador de programa de 11 bits; sin contar los lazos vacios ni los grupos W, J y K):
+   hilo 0:     221 071   de ellas distintas:     99 681
+   hilo 1:     221 070   de ellas distintas:     84 821
+   hilo 2:     221 070   de ellas distintas:     90 011
+   hilo 3:     221 070   de ellas distintas:     73 953
+   total:      884 281   de ellas distintas:    348 466
+   (distinta: el mismo contador de programa con otro valor escrito u otro acceso al bus dentro de la corrida;
+    mide cuanto de lo comparado no es repeticion de la misma vuelta del programa)
+   De ellas: 643 641 escriben un registro, 149 466 son loads, 105 506 son stores, 132 057 son saltos, 68 791 acceden al SPI o a los perifericos (46 693 al SPI).
+   Precios nuevos puestos por el testbench: 3 932. Lecturas de STATUS con la bandera de precio nuevo: 1 564.
+   Instrucciones de lazo vacio comparadas aparte: 404 664.
+
+RESULTADO: PASS, cero diferencias entre cada hilo del barrel y el Espino base
+==================================================================================================
+Configuracion media_mul: (b) emad, devk y mulstep en el sumador de la ALU
+Definiciones: -DXD_EMAD=0 -DXD_DEVK=0 -DXD_MULSTEPALU
+
+U. Un hilo con el programa (tools/prog_hilos.py --modo uno: 300 instrucciones al azar que no se quedan
+   quietas, precio nuevo cada 97 instrucciones) y los otros tres en un lazo vacio.
+   Corridas: 20. Pasan: 20. Fallan: 0. Programas que salieron de la memoria: 0.
+   hilo   instrucciones    distintas   escr. registro     stores      loads     saltos   SPI y perif.   solo SPI   STATUS con precio
+   0             30 000       13 528           21 706      3 932      5 446      4 449          2 713      2 033                 140
+   1             30 000       13 504           21 707      3 931      5 446      4 449          2 713      2 033                 142
+   2             30 000       13 734           21 697      3 932      5 450      4 434          2 718      2 032                 141
+   3             30 000       13 545           21 717      3 913      5 455      4 436          2 718      2 038                 145
+   total        120 000       54 311
+   Ademas, instrucciones de lazo vacio (jal x0 a si mismo: hilos ociosos y lazo final), tambien comparadas: 90 000, 90 000, 90 000 y 90 000.
+   Memoria al final: 10 230 palabras iguales y 10 sin comparar por stores en vuelo. Precios nuevos puestos por el testbench: 1 220. Ciclos del barrel: 480 060.
+
+H. sw/hazard_test.s y sw/hazard_review.s (sin modificar) en un hilo, los otros tres en un lazo vacio.
+   Los dos programas terminan en un lazo vacio, que se cuenta aparte.
+   Corridas: 8. Pasan: 8. Fallan: 0. Programas que salieron de la memoria: 0.
+   hilo   instrucciones    distintas   escr. registro     stores      loads     saltos   SPI y perif.   solo SPI   STATUS con precio
+   0                834          834              614         49         80        177              8          0                   0
+   1                834          834              614         49         80        177              8          0                   0
+   2                834          834              614         49         80        177              8          0                   0
+   3                834          834              614         49         80        177              8          0                   0
+   total          3 336        3 336
+   Ademas, instrucciones de lazo vacio (jal x0 a si mismo: hilos ociosos y lazo final), tambien comparadas: 11 166, 11 166, 11 166 y 11 166.
+   Memoria al final: 4 096 palabras iguales y 0 sin comparar por stores en vuelo. Precios nuevos puestos por el testbench: 0. Ciclos del barrel: 48 024.
+
+B. Cuatro hilos a la vez, programas aleatorios distintos, zonas de datos separadas, los cuatro con accesos
+   al SPI (bus quieto) y a los perifericos. Referencia: cada hilo contra un Espino base que corre solo.
+   Corridas: 10. Pasan: 10. Fallan: 0. Programas que salieron de la memoria: 0.
+   hilo   instrucciones    distintas   escr. registro     stores      loads     saltos   SPI y perif.   solo SPI   STATUS con precio
+   0             50 000       22 687           36 433      6 507      8 831      7 352          4 516      3 480                   0
+   1             50 000       17 536           36 683      6 247      8 560      7 330          4 158      3 612                   0
+   2             50 000       20 311           36 220      5 473      7 387      7 749          4 053      2 867                   0
+   3             50 000       17 484           36 596      5 750      8 819      8 068          4 339      2 853                   0
+   total        200 000       78 018
+   Memoria al final: 5 102 palabras iguales y 18 sin comparar por stores en vuelo. Precios nuevos puestos por el testbench: 0. Ciclos del barrel: 200 030.
+
+C. Cuatro hilos a la vez; uno solo accede al SPI y recibe un precio nuevo cada 29 instrucciones.
+   Corridas: 12. Pasan: 12. Fallan: 0. Programas que salieron de la memoria: 0.
+   hilo   instrucciones    distintas   escr. registro     stores      loads     saltos   SPI y perif.   solo SPI   STATUS con precio
+   0             60 000       22 641           41 519      8 207     10 861      7 981          3 926      1 465                  74
+   1             60 000       22 509           44 011      8 129      7 378      8 139          3 517      1 436                 153
+   2             60 000       23 217           45 351      5 523      9 904      8 384          2 469      1 084                   0
+   3             60 000       17 574           44 848      5 940     10 899      9 304          3 170      1 725                 121
+   total        240 000       85 941
+   Memoria al final: 6 119 palabras iguales y 25 sin comparar por stores en vuelo. Precios nuevos puestos por el testbench: 2 064. Ciclos del barrel: 240 036.
+
+T. Un hilo corre sw/trade.s (sin modificar) con un precio nuevo cada 61 instrucciones y los otros tres
+   corren programas aleatorios.
+   Corridas: 8. Pasan: 8. Fallan: 0. Programas que salieron de la memoria: 0.
+   hilo   instrucciones    distintas   escr. registro     stores      loads     saltos   SPI y perif.   solo SPI   STATUS con precio
+   0             40 000       18 681           28 326      4 992      6 594      6 223          3 444      2 358                 162
+   1             40 000       15 013           28 724      4 912      6 798      5 735          3 440      2 358                 162
+   2             40 000       12 733           28 902      4 378      7 125      6 185          3 387      2 358                 162
+   3             40 000       10 506           29 298      3 435      7 449      7 447          3 291      2 358                 162
+   total        160 000       56 933
+   Memoria al final: 4 079 palabras iguales y 17 sin comparar por stores en vuelo. Precios nuevos puestos por el testbench: 648. Ciclos del barrel: 160 024.
+
+D. Cuatro hilos a la vez sobre la MISMA zona de datos, y con saltos que pueden caer en el codigo de otro
+   hilo. Referencia: cuatro Espino base por turnos, con las escrituras de cada uno copiadas a la memoria
+   de los demas. Si un hilo sale de la memoria la corrida termina ahi.
+   Corridas: 10. Pasan: 10. Fallan: 0. Programas que salieron de la memoria: 2.
+   hilo   instrucciones    distintas   escr. registro     stores      loads     saltos   SPI y perif.   solo SPI   STATUS con precio
+   0             40 237       21 310           29 900      5 173      7 284      5 360          3 979      3 097                   0
+   1             40 236       15 425           29 128      5 468      6 924      5 618          3 588      3 039                   0
+   2             40 236       19 182           28 941      4 749      5 398      6 263          3 144      2 232                   0
+   3             40 236       14 010           29 478      4 719      7 138      6 443          3 476      2 235                   0
+   total        160 945       69 927
+   Memoria al final: 5 101 palabras iguales y 19 sin comparar por stores en vuelo. Precios nuevos puestos por el testbench: 0. Ciclos del barrel: 161 247.
+
+TOTAL de instrucciones de programa comparadas una por una, por hilo, con el barrel tal como se sintetiza
+(contador de programa de 11 bits; sin contar los lazos vacios ni los grupos W, J y K):
+   hilo 0:     221 071   de ellas distintas:     99 681
+   hilo 1:     221 070   de ellas distintas:     84 821
+   hilo 2:     221 070   de ellas distintas:     90 011
+   hilo 3:     221 070   de ellas distintas:     73 953
+   total:      884 281   de ellas distintas:    348 466
+   (distinta: el mismo contador de programa con otro valor escrito u otro acceso al bus dentro de la corrida;
+    mide cuanto de lo comparado no es repeticion de la misma vuelta del programa)
+   De ellas: 643 641 escriben un registro, 149 466 son loads, 105 506 son stores, 132 057 son saltos, 68 791 acceden al SPI o a los perifericos (46 693 al SPI).
+   Precios nuevos puestos por el testbench: 3 932. Lecturas de STATUS con la bandera de precio nuevo: 1 564.
+   Instrucciones de lazo vacio comparadas aparte: 404 664.
+
+RESULTADO: PASS, cero diferencias entre cada hilo del barrel y el Espino base
+==================================================================================================
+Configuracion alu_todo_div: (c) y (e): xd_alu en vez de espino_alu, más divstep
+Definiciones: -DXD_EMAD=0 -DXD_DEVK=0 -DXD_MULSTEPALU -DXD_SIMDALU=12 -DXD_DIVSTEP
+
+U. Un hilo con el programa (tools/prog_hilos.py --modo uno: 300 instrucciones al azar que no se quedan
+   quietas, precio nuevo cada 97 instrucciones) y los otros tres en un lazo vacio.
+   Corridas: 20. Pasan: 20. Fallan: 0. Programas que salieron de la memoria: 0.
+   hilo   instrucciones    distintas   escr. registro     stores      loads     saltos   SPI y perif.   solo SPI   STATUS con precio
+   0             30 000       13 528           21 706      3 932      5 446      4 449          2 713      2 033                 140
+   1             30 000       13 504           21 707      3 931      5 446      4 449          2 713      2 033                 142
+   2             30 000       13 734           21 697      3 932      5 450      4 434          2 718      2 032                 141
+   3             30 000       13 545           21 717      3 913      5 455      4 436          2 718      2 038                 145
+   total        120 000       54 311
+   Ademas, instrucciones de lazo vacio (jal x0 a si mismo: hilos ociosos y lazo final), tambien comparadas: 90 000, 90 000, 90 000 y 90 000.
+   Memoria al final: 10 230 palabras iguales y 10 sin comparar por stores en vuelo. Precios nuevos puestos por el testbench: 1 220. Ciclos del barrel: 480 060.
+
+H. sw/hazard_test.s y sw/hazard_review.s (sin modificar) en un hilo, los otros tres en un lazo vacio.
+   Los dos programas terminan en un lazo vacio, que se cuenta aparte.
+   Corridas: 8. Pasan: 8. Fallan: 0. Programas que salieron de la memoria: 0.
+   hilo   instrucciones    distintas   escr. registro     stores      loads     saltos   SPI y perif.   solo SPI   STATUS con precio
+   0                834          834              614         49         80        177              8          0                   0
+   1                834          834              614         49         80        177              8          0                   0
+   2                834          834              614         49         80        177              8          0                   0
+   3                834          834              614         49         80        177              8          0                   0
+   total          3 336        3 336
+   Ademas, instrucciones de lazo vacio (jal x0 a si mismo: hilos ociosos y lazo final), tambien comparadas: 11 166, 11 166, 11 166 y 11 166.
+   Memoria al final: 4 096 palabras iguales y 0 sin comparar por stores en vuelo. Precios nuevos puestos por el testbench: 0. Ciclos del barrel: 48 024.
+
+B. Cuatro hilos a la vez, programas aleatorios distintos, zonas de datos separadas, los cuatro con accesos
+   al SPI (bus quieto) y a los perifericos. Referencia: cada hilo contra un Espino base que corre solo.
+   Corridas: 10. Pasan: 10. Fallan: 0. Programas que salieron de la memoria: 0.
+   hilo   instrucciones    distintas   escr. registro     stores      loads     saltos   SPI y perif.   solo SPI   STATUS con precio
+   0             50 000       22 687           36 433      6 507      8 831      7 352          4 516      3 480                   0
+   1             50 000       17 536           36 683      6 247      8 560      7 330          4 158      3 612                   0
+   2             50 000       20 311           36 220      5 473      7 387      7 749          4 053      2 867                   0
+   3             50 000       17 484           36 596      5 750      8 819      8 068          4 339      2 853                   0
+   total        200 000       78 018
+   Memoria al final: 5 102 palabras iguales y 18 sin comparar por stores en vuelo. Precios nuevos puestos por el testbench: 0. Ciclos del barrel: 200 030.
+
+C. Cuatro hilos a la vez; uno solo accede al SPI y recibe un precio nuevo cada 29 instrucciones.
+   Corridas: 12. Pasan: 12. Fallan: 0. Programas que salieron de la memoria: 0.
+   hilo   instrucciones    distintas   escr. registro     stores      loads     saltos   SPI y perif.   solo SPI   STATUS con precio
+   0             60 000       22 641           41 519      8 207     10 861      7 981          3 926      1 465                  74
+   1             60 000       22 509           44 011      8 129      7 378      8 139          3 517      1 436                 153
+   2             60 000       23 217           45 351      5 523      9 904      8 384          2 469      1 084                   0
+   3             60 000       17 574           44 848      5 940     10 899      9 304          3 170      1 725                 121
+   total        240 000       85 941
+   Memoria al final: 6 119 palabras iguales y 25 sin comparar por stores en vuelo. Precios nuevos puestos por el testbench: 2 064. Ciclos del barrel: 240 036.
+
+T. Un hilo corre sw/trade.s (sin modificar) con un precio nuevo cada 61 instrucciones y los otros tres
+   corren programas aleatorios.
+   Corridas: 8. Pasan: 8. Fallan: 0. Programas que salieron de la memoria: 0.
+   hilo   instrucciones    distintas   escr. registro     stores      loads     saltos   SPI y perif.   solo SPI   STATUS con precio
+   0             40 000       18 681           28 326      4 992      6 594      6 223          3 444      2 358                 162
+   1             40 000       15 013           28 724      4 912      6 798      5 735          3 440      2 358                 162
+   2             40 000       12 733           28 902      4 378      7 125      6 185          3 387      2 358                 162
+   3             40 000       10 506           29 298      3 435      7 449      7 447          3 291      2 358                 162
+   total        160 000       56 933
+   Memoria al final: 4 079 palabras iguales y 17 sin comparar por stores en vuelo. Precios nuevos puestos por el testbench: 648. Ciclos del barrel: 160 024.
+
+D. Cuatro hilos a la vez sobre la MISMA zona de datos, y con saltos que pueden caer en el codigo de otro
+   hilo. Referencia: cuatro Espino base por turnos, con las escrituras de cada uno copiadas a la memoria
+   de los demas. Si un hilo sale de la memoria la corrida termina ahi.
+   Corridas: 10. Pasan: 10. Fallan: 0. Programas que salieron de la memoria: 2.
+   hilo   instrucciones    distintas   escr. registro     stores      loads     saltos   SPI y perif.   solo SPI   STATUS con precio
+   0             40 237       21 310           29 900      5 173      7 284      5 360          3 979      3 097                   0
+   1             40 236       15 425           29 128      5 468      6 924      5 618          3 588      3 039                   0
+   2             40 236       19 182           28 941      4 749      5 398      6 263          3 144      2 232                   0
+   3             40 236       14 010           29 478      4 719      7 138      6 443          3 476      2 235                   0
+   total        160 945       69 927
+   Memoria al final: 5 101 palabras iguales y 19 sin comparar por stores en vuelo. Precios nuevos puestos por el testbench: 0. Ciclos del barrel: 161 247.
+
+TOTAL de instrucciones de programa comparadas una por una, por hilo, con el barrel tal como se sintetiza
+(contador de programa de 11 bits; sin contar los lazos vacios ni los grupos W, J y K):
+   hilo 0:     221 071   de ellas distintas:     99 681
+   hilo 1:     221 070   de ellas distintas:     84 821
+   hilo 2:     221 070   de ellas distintas:     90 011
+   hilo 3:     221 070   de ellas distintas:     73 953
+   total:      884 281   de ellas distintas:    348 466
+   (distinta: el mismo contador de programa con otro valor escrito u otro acceso al bus dentro de la corrida;
+    mide cuanto de lo comparado no es repeticion de la misma vuelta del programa)
+   De ellas: 643 641 escriben un registro, 149 466 son loads, 105 506 son stores, 132 057 son saltos, 68 791 acceden al SPI o a los perifericos (46 693 al SPI).
+   Precios nuevos puestos por el testbench: 3 932. Lecturas de STATUS con la bandera de precio nuevo: 1 564.
+   Instrucciones de lazo vacio comparadas aparte: 404 664.
+
+RESULTADO: PASS, cero diferencias entre cada hilo del barrel y el Espino base
+==================================================================================================
+Configuracion media_bandas: (d) carriles de bandas en unidad aparte
+Definiciones: -DXD_EMAD=0 -DXD_DEVK=0 -DXD_MULSTEPALU -DXD_SIMD=28
+
+U. Un hilo con el programa (tools/prog_hilos.py --modo uno: 300 instrucciones al azar que no se quedan
+   quietas, precio nuevo cada 97 instrucciones) y los otros tres en un lazo vacio.
+   Corridas: 20. Pasan: 20. Fallan: 0. Programas que salieron de la memoria: 0.
+   hilo   instrucciones    distintas   escr. registro     stores      loads     saltos   SPI y perif.   solo SPI   STATUS con precio
+   0             30 000       13 528           21 706      3 932      5 446      4 449          2 713      2 033                 140
+   1             30 000       13 504           21 707      3 931      5 446      4 449          2 713      2 033                 142
+   2             30 000       13 734           21 697      3 932      5 450      4 434          2 718      2 032                 141
+   3             30 000       13 545           21 717      3 913      5 455      4 436          2 718      2 038                 145
+   total        120 000       54 311
+   Ademas, instrucciones de lazo vacio (jal x0 a si mismo: hilos ociosos y lazo final), tambien comparadas: 90 000, 90 000, 90 000 y 90 000.
+   Memoria al final: 10 230 palabras iguales y 10 sin comparar por stores en vuelo. Precios nuevos puestos por el testbench: 1 220. Ciclos del barrel: 480 060.
+
+H. sw/hazard_test.s y sw/hazard_review.s (sin modificar) en un hilo, los otros tres en un lazo vacio.
+   Los dos programas terminan en un lazo vacio, que se cuenta aparte.
+   Corridas: 8. Pasan: 8. Fallan: 0. Programas que salieron de la memoria: 0.
+   hilo   instrucciones    distintas   escr. registro     stores      loads     saltos   SPI y perif.   solo SPI   STATUS con precio
+   0                834          834              614         49         80        177              8          0                   0
+   1                834          834              614         49         80        177              8          0                   0
+   2                834          834              614         49         80        177              8          0                   0
+   3                834          834              614         49         80        177              8          0                   0
+   total          3 336        3 336
+   Ademas, instrucciones de lazo vacio (jal x0 a si mismo: hilos ociosos y lazo final), tambien comparadas: 11 166, 11 166, 11 166 y 11 166.
+   Memoria al final: 4 096 palabras iguales y 0 sin comparar por stores en vuelo. Precios nuevos puestos por el testbench: 0. Ciclos del barrel: 48 024.
+
+B. Cuatro hilos a la vez, programas aleatorios distintos, zonas de datos separadas, los cuatro con accesos
+   al SPI (bus quieto) y a los perifericos. Referencia: cada hilo contra un Espino base que corre solo.
+   Corridas: 10. Pasan: 10. Fallan: 0. Programas que salieron de la memoria: 0.
+   hilo   instrucciones    distintas   escr. registro     stores      loads     saltos   SPI y perif.   solo SPI   STATUS con precio
+   0             50 000       22 687           36 433      6 507      8 831      7 352          4 516      3 480                   0
+   1             50 000       17 536           36 683      6 247      8 560      7 330          4 158      3 612                   0
+   2             50 000       20 311           36 220      5 473      7 387      7 749          4 053      2 867                   0
+   3             50 000       17 484           36 596      5 750      8 819      8 068          4 339      2 853                   0
+   total        200 000       78 018
+   Memoria al final: 5 102 palabras iguales y 18 sin comparar por stores en vuelo. Precios nuevos puestos por el testbench: 0. Ciclos del barrel: 200 030.
+
+C. Cuatro hilos a la vez; uno solo accede al SPI y recibe un precio nuevo cada 29 instrucciones.
+   Corridas: 12. Pasan: 12. Fallan: 0. Programas que salieron de la memoria: 0.
+   hilo   instrucciones    distintas   escr. registro     stores      loads     saltos   SPI y perif.   solo SPI   STATUS con precio
+   0             60 000       22 641           41 519      8 207     10 861      7 981          3 926      1 465                  74
+   1             60 000       22 509           44 011      8 129      7 378      8 139          3 517      1 436                 153
+   2             60 000       23 217           45 351      5 523      9 904      8 384          2 469      1 084                   0
+   3             60 000       17 574           44 848      5 940     10 899      9 304          3 170      1 725                 121
+   total        240 000       85 941
+   Memoria al final: 6 119 palabras iguales y 25 sin comparar por stores en vuelo. Precios nuevos puestos por el testbench: 2 064. Ciclos del barrel: 240 036.
+
+T. Un hilo corre sw/trade.s (sin modificar) con un precio nuevo cada 61 instrucciones y los otros tres
+   corren programas aleatorios.
+   Corridas: 8. Pasan: 8. Fallan: 0. Programas que salieron de la memoria: 0.
+   hilo   instrucciones    distintas   escr. registro     stores      loads     saltos   SPI y perif.   solo SPI   STATUS con precio
+   0             40 000       18 681           28 326      4 992      6 594      6 223          3 444      2 358                 162
+   1             40 000       15 013           28 724      4 912      6 798      5 735          3 440      2 358                 162
+   2             40 000       12 733           28 902      4 378      7 125      6 185          3 387      2 358                 162
+   3             40 000       10 506           29 298      3 435      7 449      7 447          3 291      2 358                 162
+   total        160 000       56 933
+   Memoria al final: 4 079 palabras iguales y 17 sin comparar por stores en vuelo. Precios nuevos puestos por el testbench: 648. Ciclos del barrel: 160 024.
+
+D. Cuatro hilos a la vez sobre la MISMA zona de datos, y con saltos que pueden caer en el codigo de otro
+   hilo. Referencia: cuatro Espino base por turnos, con las escrituras de cada uno copiadas a la memoria
+   de los demas. Si un hilo sale de la memoria la corrida termina ahi.
+   Corridas: 10. Pasan: 10. Fallan: 0. Programas que salieron de la memoria: 2.
+   hilo   instrucciones    distintas   escr. registro     stores      loads     saltos   SPI y perif.   solo SPI   STATUS con precio
+   0             40 237       21 310           29 900      5 173      7 284      5 360          3 979      3 097                   0
+   1             40 236       15 425           29 128      5 468      6 924      5 618          3 588      3 039                   0
+   2             40 236       19 182           28 941      4 749      5 398      6 263          3 144      2 232                   0
+   3             40 236       14 010           29 478      4 719      7 138      6 443          3 476      2 235                   0
+   total        160 945       69 927
+   Memoria al final: 5 101 palabras iguales y 19 sin comparar por stores en vuelo. Precios nuevos puestos por el testbench: 0. Ciclos del barrel: 161 247.
+
+TOTAL de instrucciones de programa comparadas una por una, por hilo, con el barrel tal como se sintetiza
+(contador de programa de 11 bits; sin contar los lazos vacios ni los grupos W, J y K):
+   hilo 0:     221 071   de ellas distintas:     99 681
+   hilo 1:     221 070   de ellas distintas:     84 821
+   hilo 2:     221 070   de ellas distintas:     90 011
+   hilo 3:     221 070   de ellas distintas:     73 953
+   total:      884 281   de ellas distintas:    348 466
+   (distinta: el mismo contador de programa con otro valor escrito u otro acceso al bus dentro de la corrida;
+    mide cuanto de lo comparado no es repeticion de la misma vuelta del programa)
+   De ellas: 643 641 escriben un registro, 149 466 son loads, 105 506 son stores, 132 057 son saltos, 68 791 acceden al SPI o a los perifericos (46 693 al SPI).
+   Precios nuevos puestos por el testbench: 3 932. Lecturas de STATUS con la bandera de precio nuevo: 1 564.
+   Instrucciones de lazo vacio comparadas aparte: 404 664.
+
+RESULTADO: PASS, cero diferencias entre cada hilo del barrel y el Espino base
+==================================================================================================
+Configuracion i1a: I1: (b) con vigilante y tabla de 256 x 16
+Definiciones: -DXD_EMAD=0 -DXD_DEVK=0 -DXD_MULSTEPALU -DI_VIGILANTE -DI_TABLA=1
+
+U. Un hilo con el programa (tools/prog_hilos.py --modo uno: 300 instrucciones al azar que no se quedan
+   quietas, precio nuevo cada 97 instrucciones) y los otros tres en un lazo vacio.
+   Corridas: 20. Pasan: 20. Fallan: 0. Programas que salieron de la memoria: 0.
+   hilo   instrucciones    distintas   escr. registro     stores      loads     saltos   SPI y perif.   solo SPI   STATUS con precio
+   0             30 000       13 528           21 706      3 932      5 446      4 449          2 713      2 033                 140
+   1             30 000       13 504           21 707      3 931      5 446      4 449          2 713      2 033                 142
+   2             30 000       13 734           21 697      3 932      5 450      4 434          2 718      2 032                 141
+   3             30 000       13 545           21 717      3 913      5 455      4 436          2 718      2 038                 145
+   total        120 000       54 311
+   Ademas, instrucciones de lazo vacio (jal x0 a si mismo: hilos ociosos y lazo final), tambien comparadas: 90 000, 90 000, 90 000 y 90 000.
+   Memoria al final: 10 230 palabras iguales y 10 sin comparar por stores en vuelo. Precios nuevos puestos por el testbench: 1 220. Ciclos del barrel: 480 060.
+
+H. sw/hazard_test.s y sw/hazard_review.s (sin modificar) en un hilo, los otros tres en un lazo vacio.
+   Los dos programas terminan en un lazo vacio, que se cuenta aparte.
+   Corridas: 8. Pasan: 8. Fallan: 0. Programas que salieron de la memoria: 0.
+   hilo   instrucciones    distintas   escr. registro     stores      loads     saltos   SPI y perif.   solo SPI   STATUS con precio
+   0                834          834              614         49         80        177              8          0                   0
+   1                834          834              614         49         80        177              8          0                   0
+   2                834          834              614         49         80        177              8          0                   0
+   3                834          834              614         49         80        177              8          0                   0
+   total          3 336        3 336
+   Ademas, instrucciones de lazo vacio (jal x0 a si mismo: hilos ociosos y lazo final), tambien comparadas: 11 166, 11 166, 11 166 y 11 166.
+   Memoria al final: 4 096 palabras iguales y 0 sin comparar por stores en vuelo. Precios nuevos puestos por el testbench: 0. Ciclos del barrel: 48 024.
+
+B. Cuatro hilos a la vez, programas aleatorios distintos, zonas de datos separadas, los cuatro con accesos
+   al SPI (bus quieto) y a los perifericos. Referencia: cada hilo contra un Espino base que corre solo.
+   Corridas: 10. Pasan: 10. Fallan: 0. Programas que salieron de la memoria: 0.
+   hilo   instrucciones    distintas   escr. registro     stores      loads     saltos   SPI y perif.   solo SPI   STATUS con precio
+   0             50 000       22 687           36 433      6 507      8 831      7 352          4 516      3 480                   0
+   1             50 000       17 536           36 683      6 247      8 560      7 330          4 158      3 612                   0
+   2             50 000       20 311           36 220      5 473      7 387      7 749          4 053      2 867                   0
+   3             50 000       17 484           36 596      5 750      8 819      8 068          4 339      2 853                   0
+   total        200 000       78 018
+   Memoria al final: 5 102 palabras iguales y 18 sin comparar por stores en vuelo. Precios nuevos puestos por el testbench: 0. Ciclos del barrel: 200 030.
+
+C. Cuatro hilos a la vez; uno solo accede al SPI y recibe un precio nuevo cada 29 instrucciones.
+   Corridas: 12. Pasan: 12. Fallan: 0. Programas que salieron de la memoria: 0.
+   hilo   instrucciones    distintas   escr. registro     stores      loads     saltos   SPI y perif.   solo SPI   STATUS con precio
+   0             60 000       22 641           41 519      8 207     10 861      7 981          3 926      1 465                  74
+   1             60 000       22 509           44 011      8 129      7 378      8 139          3 517      1 436                 153
+   2             60 000       23 217           45 351      5 523      9 904      8 384          2 469      1 084                   0
+   3             60 000       17 574           44 848      5 940     10 899      9 304          3 170      1 725                 121
+   total        240 000       85 941
+   Memoria al final: 6 119 palabras iguales y 25 sin comparar por stores en vuelo. Precios nuevos puestos por el testbench: 2 064. Ciclos del barrel: 240 036.
+
+T. Un hilo corre sw/trade.s (sin modificar) con un precio nuevo cada 61 instrucciones y los otros tres
+   corren programas aleatorios.
+   Corridas: 8. Pasan: 8. Fallan: 0. Programas que salieron de la memoria: 0.
+   hilo   instrucciones    distintas   escr. registro     stores      loads     saltos   SPI y perif.   solo SPI   STATUS con precio
+   0             40 000       18 681           28 326      4 992      6 594      6 223          3 444      2 358                 162
+   1             40 000       15 013           28 724      4 912      6 798      5 735          3 440      2 358                 162
+   2             40 000       12 733           28 902      4 378      7 125      6 185          3 387      2 358                 162
+   3             40 000       10 506           29 298      3 435      7 449      7 447          3 291      2 358                 162
+   total        160 000       56 933
+   Memoria al final: 4 079 palabras iguales y 17 sin comparar por stores en vuelo. Precios nuevos puestos por el testbench: 648. Ciclos del barrel: 160 024.
+
+D. Cuatro hilos a la vez sobre la MISMA zona de datos, y con saltos que pueden caer en el codigo de otro
+   hilo. Referencia: cuatro Espino base por turnos, con las escrituras de cada uno copiadas a la memoria
+   de los demas. Si un hilo sale de la memoria la corrida termina ahi.
+   Corridas: 10. Pasan: 10. Fallan: 0. Programas que salieron de la memoria: 2.
+   hilo   instrucciones    distintas   escr. registro     stores      loads     saltos   SPI y perif.   solo SPI   STATUS con precio
+   0             40 237       21 310           29 900      5 173      7 284      5 360          3 979      3 097                   0
+   1             40 236       15 425           29 128      5 468      6 924      5 618          3 588      3 039                   0
+   2             40 236       19 182           28 941      4 749      5 398      6 263          3 144      2 232                   0
+   3             40 236       14 010           29 478      4 719      7 138      6 443          3 476      2 235                   0
+   total        160 945       69 927
+   Memoria al final: 5 101 palabras iguales y 19 sin comparar por stores en vuelo. Precios nuevos puestos por el testbench: 0. Ciclos del barrel: 161 247.
+
+TOTAL de instrucciones de programa comparadas una por una, por hilo, con el barrel tal como se sintetiza
+(contador de programa de 11 bits; sin contar los lazos vacios ni los grupos W, J y K):
+   hilo 0:     221 071   de ellas distintas:     99 681
+   hilo 1:     221 070   de ellas distintas:     84 821
+   hilo 2:     221 070   de ellas distintas:     90 011
+   hilo 3:     221 070   de ellas distintas:     73 953
+   total:      884 281   de ellas distintas:    348 466
+   (distinta: el mismo contador de programa con otro valor escrito u otro acceso al bus dentro de la corrida;
+    mide cuanto de lo comparado no es repeticion de la misma vuelta del programa)
+   De ellas: 643 641 escriben un registro, 149 466 son loads, 105 506 son stores, 132 057 son saltos, 68 791 acceden al SPI o a los perifericos (46 693 al SPI).
+   Precios nuevos puestos por el testbench: 3 932. Lecturas de STATUS con la bandera de precio nuevo: 1 564.
+   Instrucciones de lazo vacio comparadas aparte: 404 664.
+
+RESULTADO: PASS, cero diferencias entre cada hilo del barrel y el Espino base
+==================================================================================================
+Configuracion i1b: I1 con la tabla en otras 512 palabras de datos
+Definiciones: -DXD_EMAD=0 -DXD_DEVK=0 -DXD_MULSTEPALU -DI_VIGILANTE -DI_TABLA=2
+
+U. Un hilo con el programa (tools/prog_hilos.py --modo uno: 300 instrucciones al azar que no se quedan
+   quietas, precio nuevo cada 97 instrucciones) y los otros tres en un lazo vacio.
+   Corridas: 20. Pasan: 20. Fallan: 0. Programas que salieron de la memoria: 0.
+   hilo   instrucciones    distintas   escr. registro     stores      loads     saltos   SPI y perif.   solo SPI   STATUS con precio
+   0             30 000       13 528           21 706      3 932      5 446      4 449          2 713      2 033                 140
+   1             30 000       13 504           21 707      3 931      5 446      4 449          2 713      2 033                 142
+   2             30 000       13 734           21 697      3 932      5 450      4 434          2 718      2 032                 141
+   3             30 000       13 545           21 717      3 913      5 455      4 436          2 718      2 038                 145
+   total        120 000       54 311
+   Ademas, instrucciones de lazo vacio (jal x0 a si mismo: hilos ociosos y lazo final), tambien comparadas: 90 000, 90 000, 90 000 y 90 000.
+   Memoria al final: 10 230 palabras iguales y 10 sin comparar por stores en vuelo. Precios nuevos puestos por el testbench: 1 220. Ciclos del barrel: 480 060.
+
+H. sw/hazard_test.s y sw/hazard_review.s (sin modificar) en un hilo, los otros tres en un lazo vacio.
+   Los dos programas terminan en un lazo vacio, que se cuenta aparte.
+   Corridas: 8. Pasan: 8. Fallan: 0. Programas que salieron de la memoria: 0.
+   hilo   instrucciones    distintas   escr. registro     stores      loads     saltos   SPI y perif.   solo SPI   STATUS con precio
+   0                834          834              614         49         80        177              8          0                   0
+   1                834          834              614         49         80        177              8          0                   0
+   2                834          834              614         49         80        177              8          0                   0
+   3                834          834              614         49         80        177              8          0                   0
+   total          3 336        3 336
+   Ademas, instrucciones de lazo vacio (jal x0 a si mismo: hilos ociosos y lazo final), tambien comparadas: 11 166, 11 166, 11 166 y 11 166.
+   Memoria al final: 4 096 palabras iguales y 0 sin comparar por stores en vuelo. Precios nuevos puestos por el testbench: 0. Ciclos del barrel: 48 024.
+
+B. Cuatro hilos a la vez, programas aleatorios distintos, zonas de datos separadas, los cuatro con accesos
+   al SPI (bus quieto) y a los perifericos. Referencia: cada hilo contra un Espino base que corre solo.
+   Corridas: 10. Pasan: 10. Fallan: 0. Programas que salieron de la memoria: 0.
+   hilo   instrucciones    distintas   escr. registro     stores      loads     saltos   SPI y perif.   solo SPI   STATUS con precio
+   0             50 000       22 687           36 433      6 507      8 831      7 352          4 516      3 480                   0
+   1             50 000       17 536           36 683      6 247      8 560      7 330          4 158      3 612                   0
+   2             50 000       20 311           36 220      5 473      7 387      7 749          4 053      2 867                   0
+   3             50 000       17 484           36 596      5 750      8 819      8 068          4 339      2 853                   0
+   total        200 000       78 018
+   Memoria al final: 5 102 palabras iguales y 18 sin comparar por stores en vuelo. Precios nuevos puestos por el testbench: 0. Ciclos del barrel: 200 030.
+
+C. Cuatro hilos a la vez; uno solo accede al SPI y recibe un precio nuevo cada 29 instrucciones.
+   Corridas: 12. Pasan: 12. Fallan: 0. Programas que salieron de la memoria: 0.
+   hilo   instrucciones    distintas   escr. registro     stores      loads     saltos   SPI y perif.   solo SPI   STATUS con precio
+   0             60 000       22 641           41 519      8 207     10 861      7 981          3 926      1 465                  74
+   1             60 000       22 509           44 011      8 129      7 378      8 139          3 517      1 436                 153
+   2             60 000       23 217           45 351      5 523      9 904      8 384          2 469      1 084                   0
+   3             60 000       17 574           44 848      5 940     10 899      9 304          3 170      1 725                 121
+   total        240 000       85 941
+   Memoria al final: 6 119 palabras iguales y 25 sin comparar por stores en vuelo. Precios nuevos puestos por el testbench: 2 064. Ciclos del barrel: 240 036.
+
+T. Un hilo corre sw/trade.s (sin modificar) con un precio nuevo cada 61 instrucciones y los otros tres
+   corren programas aleatorios.
+   Corridas: 8. Pasan: 8. Fallan: 0. Programas que salieron de la memoria: 0.
+   hilo   instrucciones    distintas   escr. registro     stores      loads     saltos   SPI y perif.   solo SPI   STATUS con precio
+   0             40 000       18 681           28 326      4 992      6 594      6 223          3 444      2 358                 162
+   1             40 000       15 013           28 724      4 912      6 798      5 735          3 440      2 358                 162
+   2             40 000       12 733           28 902      4 378      7 125      6 185          3 387      2 358                 162
+   3             40 000       10 506           29 298      3 435      7 449      7 447          3 291      2 358                 162
+   total        160 000       56 933
+   Memoria al final: 4 079 palabras iguales y 17 sin comparar por stores en vuelo. Precios nuevos puestos por el testbench: 648. Ciclos del barrel: 160 024.
+
+D. Cuatro hilos a la vez sobre la MISMA zona de datos, y con saltos que pueden caer en el codigo de otro
+   hilo. Referencia: cuatro Espino base por turnos, con las escrituras de cada uno copiadas a la memoria
+   de los demas. Si un hilo sale de la memoria la corrida termina ahi.
+   Corridas: 10. Pasan: 10. Fallan: 0. Programas que salieron de la memoria: 2.
+   hilo   instrucciones    distintas   escr. registro     stores      loads     saltos   SPI y perif.   solo SPI   STATUS con precio
+   0             40 237       21 310           29 900      5 173      7 284      5 360          3 979      3 097                   0
+   1             40 236       15 425           29 128      5 468      6 924      5 618          3 588      3 039                   0
+   2             40 236       19 182           28 941      4 749      5 398      6 263          3 144      2 232                   0
+   3             40 236       14 010           29 478      4 719      7 138      6 443          3 476      2 235                   0
+   total        160 945       69 927
+   Memoria al final: 5 101 palabras iguales y 19 sin comparar por stores en vuelo. Precios nuevos puestos por el testbench: 0. Ciclos del barrel: 161 247.
+
+TOTAL de instrucciones de programa comparadas una por una, por hilo, con el barrel tal como se sintetiza
+(contador de programa de 11 bits; sin contar los lazos vacios ni los grupos W, J y K):
+   hilo 0:     221 071   de ellas distintas:     99 681
+   hilo 1:     221 070   de ellas distintas:     84 821
+   hilo 2:     221 070   de ellas distintas:     90 011
+   hilo 3:     221 070   de ellas distintas:     73 953
+   total:      884 281   de ellas distintas:    348 466
+   (distinta: el mismo contador de programa con otro valor escrito u otro acceso al bus dentro de la corrida;
+    mide cuanto de lo comparado no es repeticion de la misma vuelta del programa)
+   De ellas: 643 641 escriben un registro, 149 466 son loads, 105 506 son stores, 132 057 son saltos, 68 791 acceden al SPI o a los perifericos (46 693 al SPI).
+   Precios nuevos puestos por el testbench: 3 932. Lecturas de STATUS con la bandera de precio nuevo: 1 564.
+   Instrucciones de lazo vacio comparadas aparte: 404 664.
+
+RESULTADO: PASS, cero diferencias entre cada hilo del barrel y el Espino base
+==================================================================================================
+Resumen por configuracion: instrucciones de programa comparadas una por una y cuantas de ellas son distintas
+   configuracion        instrucciones      distintas
+   ref           PASS         884 281        348 466   sin definiciones: es el prototipo del barrel (control)
+   media_mul     PASS         884 281        348 466   (b) emad, devk y mulstep en el sumador de la ALU
+   alu_todo_div  PASS         884 281        348 466   (c) y (e): xd_alu en vez de espino_alu, más divstep
+   media_bandas  PASS         884 281        348 466   (d) carriles de bandas en unidad aparte
+   i1a           PASS         884 281        348 466   I1: (b) con vigilante y tabla de 256 x 16
+   i1b           PASS         884 281        348 466   I1 con la tabla en otras 512 palabras de datos
+
+Tiempo de las simulaciones: 3 s con 5 procesos.
+RESULTADO GENERAL: PASS, cero diferencias con el Espino base en las 6 configuraciones

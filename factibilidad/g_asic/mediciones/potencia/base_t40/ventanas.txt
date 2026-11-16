@@ -1,0 +1,4 @@
+ronda3 t0=2004000 ns t1=2404000 ns ciclos=10000 vcd=45393727 bytes senales=28148
+sondeo t0=2024000 ns t1=2094000 ns ciclos=1750 vcd=9275242 bytes senales=28148
+calculo t0=2012500 ns t1=2015700 ns ciclos=80 vcd=2011644 bytes senales=28148
+calculo_b t0=2312500 ns t1=2315700 ns ciclos=80 vcd=2018521 bytes senales=28148

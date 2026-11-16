@@ -1,0 +1,61 @@
+Costo de cada módulo de la extensión de la ISA, sintetizado solo
+Generado por factibilidad/d_isa/tools/costo_suelto.sh (make costo-suelto). No editar a mano.
+
+Herramienta: Yosys 0.68+195, synth_ice40. Módulo suelto: sus entradas y salidas son puertos,
+así que no comparte nada con el core. En el iCE40 cada celda lógica tiene una LUT4, un acarreo y un flip-flop:
+las celdas que ocupa un módulo combinacional son aproximadamente sus LUT4.
+
+módulo y configuración            LUT4  CARRY  DFF  qué es
+
+-- Referencias
+espino_alu                           255     63    0  la ALU del core (sin desplazamientos)
+xd_srak KB=5                         163      0    0  desplazador aritmético a la derecha completo, 32 bits
+
+-- Paso de media exponencial autónomo: xd_ema (restador, desplazamiento y sumador)
+xd_ema KB=0 (k = 5)                   90     62    0  un solo k cableado
+xd_ema KB=2 (k de 4 a 7)             145     62    0  cuatro valores de k
+xd_ema KB=3 (k de 0 a 7)             213     62    0  ocho valores de k
+xd_ema KB=5 (k de 0 a 31)            253     62    0  todos los k
+
+-- Desplazamiento suelto: xd_srak
+xd_srak KB=0 (k = 5)                   0      0    0  solo cables
+xd_srak KB=2 (k de 4 a 7)             54      0    0  
+xd_srak KB=3 (k de 0 a 7)             93      0    0  
+
+-- Operando A desplazado para el sumador de la ALU: xd_opa (la suma la hace la ALU)
+xd_opa emad k = 5                      0      0    0  solo cables
+xd_opa devk k = 5                      0      0    0  solo cables
+xd_opa mulstep                         1      0    0  solo cables y el bit que anula B
+xd_opa emad + devk, k = 5             84      0    0  multiplexor de 2 entradas
+xd_opa emad + devk + mulstep          85      0    0  multiplexor de 3 entradas
+xd_opa lo anterior + pbcast8          99      0    0  multiplexor de 4 entradas
+xd_opa emad + devk, k de 4 a 7       180      0    0  
+xd_opa emad + devk, k de 0 a 31      373      0    0  dos desplazadores completos
+
+-- Carriles de 4 x 8 bits, unidad aparte: xd_simd8
+xd_simd8 mínimo                      99     32    0  padd8, psub8, pcmpltu8 (máscara por carril)
+xd_simd8 comparación de 1 bit        71     32    0  lo mismo, un bit por carril
+xd_simd8 + pcmplt8                   111     32    0  comparación con signo
+xd_simd8 + pminu8, pmaxu8            204     32    0  mínimo y máximo
+xd_simd8 + paddus8, psubus8          107     32    0  saturadas
+xd_simd8 + pbcast8                   113     32    0  
+xd_simd8 + pmovmsk8                  108     32    0  
+xd_simd8 kernel de bandas            147     32    0  saturadas, pbcast8 y pmovmsk8
+xd_simd8 las diez operaciones        260     32    0  
+
+-- Carriles en el sumador de la ALU: xd_alu (reemplaza a espino_alu)
+xd_alu                               219     32    0  la ALU completa con padd8, psub8, pcmpltu8, paddus8 y psubus8
+
+-- Producto y cociente
+xd_mulstep                            62     30    0  un paso de multiplicación (sumador propio)
+xd_divstep                            48     25    0  un paso de división (restador propio de 26 bits)
+xd_mulc AW=8                         158     12    0  producto combinacional de 8 x 8
+xd_mulc AW=16                        300     20    0  producto combinacional de 16 x 8
+xd_mulc AW=24                        444     28    0  producto combinacional de 24 x 8
+xd_mul_mmio                          104     32   92  periférico serial de 24 x 8 (registro, contador y lectura)
+
+-- Unidad completa
+xd_unit, todo con todos los k       1010    169    0  ema, carriles, mulstep, divstep, mulc y srak
+xd_unit, kernel de bandas k = 5      363    124    0  ema, carriles de bandas y mulstep
+
+La diferencia entre xd_alu y espino_alu es el costo de los carriles cuando comparten el sumador.

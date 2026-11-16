@@ -1,0 +1,2 @@
+DRC de KLayout de base_t40: 0 marcadores en 0 reglas (de 684 reglas evaluadas por el deck). Generado por `asic/drc/resumir.py`. (343 s)
+DRC de KLayout de seg_t40: 0 marcadores en 0 reglas (de 684 reglas evaluadas por el deck). Generado por `asic/drc/resumir.py`. (305 s)

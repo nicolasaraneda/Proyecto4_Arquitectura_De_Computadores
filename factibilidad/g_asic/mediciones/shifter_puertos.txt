@@ -1,0 +1,4 @@
+PASS pnr base_shifter_t40: 2000 ticks a 15000 ns identicos a ref/trader.py, MISO sin X, patrimonio 9720, cambios del byte de decision 26, simulacion 576 s
+PASS pnr seg_shifter_t40: 2000 ticks a 15000 ns identicos a ref/trader.py, MISO sin X, patrimonio 9720, cambios del byte de decision 26, simulacion 591 s
+PASS sint base_shifter_t40: 300 ticks a 15000 ns identicos a ref/trader.py, MISO sin X, patrimonio 9156, cambios del byte de decision 8, simulacion 80 s
+PASS sint seg_shifter_t40: 300 ticks a 15000 ns identicos a ref/trader.py, MISO sin X, patrimonio 9156, cambios del byte de decision 8, simulacion 77 s

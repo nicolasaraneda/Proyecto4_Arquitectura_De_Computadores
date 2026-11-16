@@ -1,0 +1,60 @@
+== RETORNO_CAMPO=racional: el campo ocupa la columna del mixto ==
+Rivales del torneo simulado: 61. Patrimonio en la serie de practica completa (20 000 ticks)
+y probabilidad de que un grupo rival sea ese, en cada composicion del campo.
+
+clase                rival                                     practica |  ingenuo racional   fuerte
+no_operar            nada                                         10000 |   16.67%    4.35%    6.00%
+reversion            reversion:k=4,a=2,b=0                        15297 |    0.67%    4.35%    0.00%
+reversion            reversion:k=4,a=3,b=0                        14055 |    0.67%    4.35%    0.00%
+reversion            reversion:k=4,a=4,b=1                        17597 |    0.67%    4.35%    0.00%
+reversion            reversion:k=5,a=2,b=0                        21031 |    0.67%    4.35%    0.00%
+reversion            reversion:k=5,a=3,b=0                        25973 |    0.67%    4.35%   20.00%
+reversion            reversion:k=5,a=4,b=0                        27062 |    0.67%    4.35%   20.00%
+reversion            reversion:k=5,a=4,b=1                        20012 |    0.67%    4.35%    0.00%
+reversion            reversion:k=5,a=6,b=0                        19392 |    0.67%    4.35%    0.00%
+reversion            reversion:k=5,a=3,b=1                        16424 |    0.67%    4.35%    0.00%
+reversion            reversion:k=6,a=3,b=0                        15638 |    0.67%    4.35%    0.00%
+reversion            reversion:k=6,a=4,b=0                        14768 |    0.67%    4.35%    0.00%
+reversion            reversion:k=6,a=6,b=1                        14714 |    0.67%    4.35%    0.00%
+reversion            reversion:k=5,a=4,b=0,q=63,rep=0             18133 |    0.67%    4.35%    0.00%
+reversion            reversion:k=5,a=4,b=0,q=10,rep=1             13569 |    0.67%    4.35%    0.00%
+reversion            reversion:k=5,a=3,b=0,q=63,rep=0             18283 |    0.67%    4.35%    0.00%
+reversion            reversion:k=5,a=3,b=0,q=10,rep=1             11746 |    0.67%    4.35%    0.00%
+reversion            reversion:k=4,a=3,b=0,q=63,rep=0             12988 |    0.67%    4.35%    0.00%
+reversion            reversion:k=4,a=3,b=0,q=10,rep=1             11020 |    0.67%    4.35%    0.00%
+reversion            reversion:tipo=1,n=20,a=3,b=0                13520 |    0.67%    4.35%    0.00%
+reversion            reversion:tipo=1,n=50,a=4,b=0                20879 |    0.67%    4.35%    0.00%
+reversion            reversion:tipo=1,n=64,a=4,b=1                24143 |    0.67%    4.35%   20.00%
+reversion            momentum:inv=1,h=10,u=4                      12472 |    0.67%    4.35%    0.00%
+
+== RETORNO_CAMPO=reversores: el campo ocupa la columna del mixto ==
+Rivales del torneo simulado: 61. Patrimonio en la serie de practica completa (20 000 ticks)
+y probabilidad de que un grupo rival sea ese, en cada composicion del campo.
+
+clase                rival                                     practica |  ingenuo reversores   fuerte
+reversion            reversion:k=5,a=3,b=0                        25973 |    0.67%   33.33%   20.00%
+reversion            reversion:k=5,a=4,b=0                        27062 |    0.67%   33.33%   20.00%
+reversion            reversion:tipo=1,n=64,a=4,b=1                24143 |    0.67%   33.33%   20.00%
+
+== RETORNO_CAMPO=fijos2: el campo ocupa la columna del mixto ==
+Rivales del torneo simulado: 61. Patrimonio en la serie de practica completa (20 000 ticks)
+y probabilidad de que un grupo rival sea ese, en cada composicion del campo.
+
+clase                rival                                     practica |  ingenuo   fijos2   fuerte
+cruce                cruce:tipo=1,kr=3,kl=6                        3438 |    1.19%    5.56%    2.67%
+cruce                cruce:tipo=1,kr=4,kl=6                        1841 |    1.19%    5.56%    2.67%
+cruce                cruce:tipo=1,kr=3,kl=6,q=63,rep=0             3413 |    1.19%    5.56%    2.67%
+momentum             momentum:h=1,u=2                              4870 |    1.52%    5.56%    2.67%
+momentum             momentum:h=20,u=3                             1922 |    1.52%    5.56%    2.67%
+momentum             momentum:h=50,u=4                             2431 |    1.52%    5.56%    2.67%
+comprar_y_mantener   byh:q=63,rep=0                                6845 |    4.17%    5.56%    4.00%
+comprar_y_mantener   byh:q=10,rep=1                                6664 |    4.17%    5.56%    4.00%
+comprar_y_mantener   byh:q=20,rep=0                                8995 |    4.17%    5.56%    4.00%
+no_operar            nada                                         10000 |   16.67%   16.67%    6.00%
+reversion            reversion:k=5,a=3,b=0                        25973 |    0.67%    5.56%   20.00%
+reversion            reversion:k=5,a=4,b=0                        27062 |    0.67%    5.56%   20.00%
+reversion            reversion:tipo=1,n=64,a=4,b=1                24143 |    0.67%    5.56%   20.00%
+azar                 azar:pm=100,q=63                              2973 |    2.78%    5.56%    2.00%
+azar                 azar:pm=10,q=63                               9075 |    2.78%    5.56%    2.00%
+azar                 azar:pm=10,q=10                               9542 |    2.78%    5.56%    2.00%
+

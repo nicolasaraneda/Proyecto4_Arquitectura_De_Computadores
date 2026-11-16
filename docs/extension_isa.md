@@ -242,7 +242,7 @@ El plan pide que al bitstream entren solo las instrucciones que `sw/fondo.s` usa
 - `emad` y `devk` las usan los cuatro hilos: el supervisor calcula `max_media` por su cuenta y cada gestor corre una banda de la misma regla. Entran seguro.
 - `mulstep` solo tiene uso si el supervisor lleva la contabilidad de la cuenta (el "espejo" del prototipo). El fondo mínimo no la necesita para decidir: su voto es todo o nada y las órdenes son idempotentes. Si P3 no la lleva, el bitstream se compila con `-DESPINO_XD_EMAD -DESPINO_XD_DEVK` (990 celdas, 48,92 MHz de mínima) y `mulstep` queda para la edición de exhibición y el ASIC.
 
-Las demás instrucciones que estudió la factibilidad (`ema`, `srak`, los carriles de 4 por 8 bits, `divstep`, `mulc` y el periférico multiplicador) no están en `rtl/`. Sus números están en la rama `factibilidad-fondo`.
+Las demás instrucciones que estudió la factibilidad (`ema`, `srak`, los carriles de 4 por 8 bits, `divstep`, `mulc` y el periférico multiplicador) no están en `rtl/`. Sus números están en `factibilidad/d_isa/` y `factibilidad/i_integrado/` (T125).
 
 ## 10. Reglas del enunciado y riesgos
 

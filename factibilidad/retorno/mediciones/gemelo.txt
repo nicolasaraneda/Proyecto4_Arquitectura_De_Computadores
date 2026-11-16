@@ -1,0 +1,6 @@
+sw/trade.hex en el gemelo digital contra la regla base del arnes. Semilla 0, 32 lotes.
+PASS  periodo 0,1 ms (ronda 3), todas las series: 33561 series, 264240000 ticks. Distintas al arnes: 0. Series con algun precio sin respuesta: 0. Peor caso de respuesta: 48 ciclos
+PASS  periodo 1 ms (ronda 2), muestra: 1811 series, 9040000 ticks. Distintas al arnes: 0. Series con algun precio sin respuesta: 0. Peor caso de respuesta: 48 ciclos
+PASS  periodo 10 ms (ronda 1), muestra: 1811 series, 9040000 ticks. Distintas al arnes: 0. Series con algun precio sin respuesta: 0. Peor caso de respuesta: 48 ciclos
+PASS  core segmentado, 0,1 ms, muestra: 1811 series, 9040000 ticks. Distintas al arnes: 0. Series con algun precio sin respuesta: 0. Peor caso de respuesta: 26 ciclos
+PASS: el binario decide igual que la regla base del arnes en todas las series

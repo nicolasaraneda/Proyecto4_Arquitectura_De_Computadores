@@ -1,0 +1,75 @@
+Testbench oficial sin modificar contra cada configuración
+Generado por factibilidad/i_integrado/tools/oficial.sh (make oficial). No editar a mano.
+
+Herramientas:
+  Yosys 0.68+195 (git sha1 435977e97-dirty, Release, Clang /usr/bin/clang++ 21.1.8)
+  "nextpnr-ice40" -- Next Generation Place and Route (Version nextpnr-0.11.1-19-g8dbcee5c)
+  Icarus Verilog version 14.0 (devel) (s20260301-403-g5ab23063f-dirty)
+Commit de partida: 9b82e81 (rama factibilidad-fondo)
+tb/tb_proyecto_4.sv: sin cambios respecto del repositorio (sha256 f83486755fe2b3de...)
+2000 ticks a 0,1 ms. Referencia de las decisiones: Espino base de rtl/ con sw/trade.hex,
+decisiones.csv con sha256 3fd1bebe688550c1...
+
+configuración  4/4   decisiones peor caso patrimonio   vigilante              qué es
+base            si    idénticas 44        9617         -                      Espino base de rtl/ (referencia de las decisiones, I4)
+segmentado      si    idénticas 26        9617         -                      Pipeline de 3 etapas de rtl/ (I4)
+x_ref           si    idénticas 83        9617         -                      Barrel de esta carpeta sin definiciones
+x_emad_k5       si    idénticas 83        9617         -                      (a) emad
+x_media_mul     si    idénticas 83        9617         -                      (b) emad, devk y mulstep
+x_alu_todo      si    idénticas 83        9617         -                      (c) más carriles en la ALU
+x_media_bandas  si    idénticas 83        9617         -                      (d) más carriles en unidad aparte
+x_media_muldiv  si    idénticas 83        9617         -                      (e) el recomendado más divstep
+x_alu_todo_div  si    idénticas 83        9617         -                      (e) carriles en la ALU más divstep
+tabla1          si    idénticas 83        9617         -                      Barrel con la tabla de 256 x 16
+tabla2          si    idénticas 83        9617         -                      Barrel con otras 512 palabras de datos
+i2              si    idénticas 83        9617         cuenta 1, BOOT 0       I2: barrel y vigilante
+i1a             si    idénticas 83        9617         cuenta 1, BOOT 0       I1 con la tabla de 256 x 16
+i1b             si    idénticas 83        9617         cuenta 1, BOOT 0       I1 con otras 512 palabras de datos
+i1a_xd          si    idénticas 63        9617         cuenta 1, BOOT 0       I1 con la regla base escrita con devk y emad (xd)
+i1b_xd          si    idénticas 63        9617         cuenta 1, BOOT 0       I1 de 16 BRAM con devk y emad (xd)
+seg_vig         si    idénticas 26        9617         cuenta 1, BOOT 0       Segmentado con vigilante, sin extensión
+i3a             si    idénticas 26        9617         cuenta 1, BOOT 0       I3: segmentado, emad y vigilante
+i3a_xd          si    idénticas 26        9617         cuenta 1, BOOT 0       I3 con la regla base escrita con emad (xd)
+i3b             si    idénticas 26        9617         cuenta 1, BOOT 0       I3 con emad, devk y mulstep
+i3b_xd          si    idénticas 21        9617         cuenta 1, BOOT 0       I3 con la regla base escrita con devk y emad (xd)
+
+Definiciones de cada configuración
+  base            fuentes base    programa sw/trade.hex                                            (sin definiciones)
+  segmentado      fuentes base    programa sw/trade.hex                                            -DESPINO_SEGMENTADO
+  x_ref           fuentes barrel  programa factibilidad/i_integrado/build/sw/trade_h0.hex          (sin definiciones)
+  x_emad_k5       fuentes barrel  programa factibilidad/i_integrado/build/sw/trade_h0.hex          -DXD_EMAD=0
+  x_media_mul     fuentes barrel  programa factibilidad/i_integrado/build/sw/trade_h0.hex          -DXD_EMAD=0 -DXD_DEVK=0 -DXD_MULSTEPALU
+  x_alu_todo      fuentes barrel  programa factibilidad/i_integrado/build/sw/trade_h0.hex          -DXD_EMAD=0 -DXD_DEVK=0 -DXD_MULSTEPALU -DXD_SIMDALU=12
+  x_media_bandas  fuentes barrel  programa factibilidad/i_integrado/build/sw/trade_h0.hex          -DXD_EMAD=0 -DXD_DEVK=0 -DXD_MULSTEPALU -DXD_SIMD=28
+  x_media_muldiv  fuentes barrel  programa factibilidad/i_integrado/build/sw/trade_h0.hex          -DXD_EMAD=0 -DXD_DEVK=0 -DXD_MULSTEPALU -DXD_DIVSTEP
+  x_alu_todo_div  fuentes barrel  programa factibilidad/i_integrado/build/sw/trade_h0.hex          -DXD_EMAD=0 -DXD_DEVK=0 -DXD_MULSTEPALU -DXD_SIMDALU=12 -DXD_DIVSTEP
+  tabla1          fuentes barrel  programa factibilidad/i_integrado/build/sw/trade_h0.hex          -DI_TABLA=1
+  tabla2          fuentes barrel  programa factibilidad/i_integrado/build/sw/trade_h0.hex          -DI_TABLA=2
+  i2              fuentes barrel  programa factibilidad/i_integrado/build/sw/trade_h0.hex          -DI_VIGILANTE
+  i1a             fuentes barrel  programa factibilidad/i_integrado/build/sw/trade_h0.hex          -DXD_EMAD=0 -DXD_DEVK=0 -DXD_MULSTEPALU -DI_VIGILANTE -DI_TABLA=1
+  i1b             fuentes barrel  programa factibilidad/i_integrado/build/sw/trade_h0.hex          -DXD_EMAD=0 -DXD_DEVK=0 -DXD_MULSTEPALU -DI_VIGILANTE -DI_TABLA=2
+  i1a_xd          fuentes barrel  programa factibilidad/i_integrado/build/sw/trade_media_h0.hex    -DXD_EMAD=0 -DXD_DEVK=0 -DXD_MULSTEPALU -DI_VIGILANTE -DI_TABLA=1
+  i1b_xd          fuentes barrel  programa factibilidad/i_integrado/build/sw/trade_media_h0.hex    -DXD_EMAD=0 -DXD_DEVK=0 -DXD_MULSTEPALU -DI_VIGILANTE -DI_TABLA=2
+  seg_vig         fuentes seg     programa sw/trade.hex                                            -DESPINO_SEGMENTADO
+  i3a             fuentes seg     programa sw/trade.hex                                            -DESPINO_SEGMENTADO -DXD_EMAD=0
+  i3a_xd          fuentes seg     programa factibilidad/i_integrado/build/sw/trade_emad.hex        -DESPINO_SEGMENTADO -DXD_EMAD=0
+  i3b             fuentes seg     programa sw/trade.hex                                            -DESPINO_SEGMENTADO -DXD_EMAD=0 -DXD_DEVK=0 -DXD_MULSTEPALU
+  i3b_xd          fuentes seg     programa factibilidad/i_integrado/build/sw/trade_media.hex       -DESPINO_SEGMENTADO -DXD_EMAD=0 -DXD_DEVK=0 -DXD_MULSTEPALU
+
+Salida completa del testbench oficial con la configuración I1 (i1a)
+  Patrimonio final:          9617
+  Ordenes ejecutadas:        52
+  Perdida maxima:            2082
+  No operar:                 10000
+  Comprar y mantener:        6695
+  Peor caso precio->decision: 83 ciclos (disponibles: 2262)
+  Detalle por tick en decisiones.csv
+  PASS MISO sin valores X
+  PASS el programa escribe DECISION
+  PASS el programa lee todos los precios
+  PASS la decision llega antes del siguiente tick
+  Testbenchs aprobados: 4/4
+  monitor del vigilante: precios=1998 escrituras=1998 max_sin_respuesta=1 ciclos_con_BOOT=0 N=4
+
+Tiempo de las simulaciones: 509 s con 5 procesos.
+RESULTADO: PASS, 21 configuraciones con 4/4 y decisiones idénticas a las del Espino base

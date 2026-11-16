@@ -1,0 +1,158 @@
+Cotas del aprendizaje en vivo. Semilla 0, series de 20000 ticks, cada una hasta el primer precio fuera de 21 a 249 (vista de parada).
+Patrimonio final, diferencia pareada contra max_media (E=96, X=0) con su error estandar entre series.
+O1: mejor banda fija de la familia entre 48 (E de 32 a 160, X de -32 a 48). O2: tabla de retorno a h ticks de la
+familia, fija, con los mejores umbrales (z: con el signo del ultimo cambio). O3: mejor banda de cada serie, elegida
+despues de verla (3: entre activo, max_media y base; todas: entre las 48). O1 y O2 se eligen con las mismas series
+en que se miden.
+
+--- Familia remuestreo: 1000 series, 15298 ticks de media ---
+max_media: media 21046.8 (control contra el arnes: `resumen --conjunto remuestreo`)
+O1 banda de la familia: E=96 X=-16, +172.0 +- 99.0
+   activo (E=64, X=16): -2032.2 +- 205.9    base (E=128, X=0): -1450.5 +- 163.5
+O3 mejor banda de cada serie: entre 3, +2156.6 +- 120.3; entre las 48, +6258.4 +- 217.4
+O2 tabla de la familia: h=8, compra si R > 0.11, vende si R < -0.04, +796.5 +- 99.9
+O2 tabla de la familia con el signo del ultimo cambio (z): h=8, compra si R > 0.21, vende si R < -0.04, +3525.1 +- 177.3
+   retorno medio a 16 ticks por casilla de desviacion (unidades de precio), casillas -8 a +7:
+    +1.54 +1.37 +0.72 +0.63 +0.35 +0.15 +0.06 +0.01 -0.12 -0.26 -0.30 -0.20 -0.13 -0.11 -0.38 -0.04
+   parte de los ticks en cada casilla (%):
+      0.4   0.5   0.9   1.6   3.4   6.4  11.4  17.0  20.8  15.7   9.3   5.0   2.6   1.4   0.8   0.6
+
+--- Familia modelo: 1000 series, 16526 ticks de media ---
+max_media: media 17577.6 (control contra el arnes: `resumen --conjunto modelo`)
+O1 banda de la familia: E=32 X=48, +5055.4 +- 369.6
+   activo (E=64, X=16): +2824.3 +- 230.7    base (E=128, X=0): -2150.1 +- 178.3
+O3 mejor banda de cada serie: entre 3, +4041.3 +- 200.6; entre las 48, +10698.5 +- 395.0
+O2 tabla de la familia: h=8, compra si R > 0.07, vende si R < -0.07, +5435.0 +- 398.1
+O2 tabla de la familia con el signo del ultimo cambio (z): h=8, compra si R > 0.07, vende si R < -0.07, +5435.0 +- 398.1
+   retorno medio a 16 ticks por casilla de desviacion (unidades de precio), casillas -8 a +7:
+    +0.77 +0.73 +0.62 +0.50 +0.40 +0.29 +0.21 +0.11 +0.00 -0.10 -0.20 -0.31 -0.40 -0.49 -0.59 -0.64
+   parte de los ticks en cada casilla (%):
+      0.4   0.5   0.7   1.2   2.7   5.8  10.7  16.7  20.8  16.7  10.7   5.9   2.7   1.2   0.7   0.5
+
+--- Familia modelo_vecino: 1000 series, 15289 ticks de media ---
+max_media: media 19991.9 (control contra el arnes: `resumen --conjunto modelo_vecino`)
+O1 banda de la familia: E=32 X=48, +7688.5 +- 815.6
+   activo (E=64, X=16): +3797.3 +- 395.8    base (E=128, X=0): -2477.6 +- 272.6
+O3 mejor banda de cada serie: entre 3, +5119.7 +- 374.1; entre las 48, +13748.3 +- 858.1
+O2 tabla de la familia: h=8, compra si R > 0.07, vende si R < -0.07, +7529.9 +- 851.9
+O2 tabla de la familia con el signo del ultimo cambio (z): h=16, compra si R > 0.15, vende si R < -0.20, +7531.0 +- 880.0
+   retorno medio a 16 ticks por casilla de desviacion (unidades de precio), casillas -8 a +7:
+    +0.79 +0.70 +0.62 +0.51 +0.41 +0.30 +0.21 +0.10 +0.00 -0.10 -0.21 -0.31 -0.41 -0.54 -0.61 -0.70
+   parte de los ticks en cada casilla (%):
+      0.4   0.6   0.9   1.5   2.8   5.6  10.3  16.4  21.1  16.4  10.3   5.6   2.8   1.5   0.9   0.6
+
+--- Familia dos_componentes: 1000 series, 16890 ticks de media ---
+max_media: media 21477.2 (control contra el arnes: `resumen --conjunto dos_componentes`)
+O1 banda de la familia: E=48 X=48, +6301.0 +- 466.6
+   activo (E=64, X=16): +3242.0 +- 272.7    base (E=128, X=0): -3051.6 +- 200.0
+O3 mejor banda de cada serie: entre 3, +4761.6 +- 235.0; entre las 48, +13578.7 +- 470.2
+O2 tabla de la familia: h=8, compra si R > 0.07, vende si R < -0.07, +6232.0 +- 492.3
+O2 tabla de la familia con el signo del ultimo cambio (z): h=8, compra si R > 0.07, vende si R < -0.07, +6232.0 +- 492.3
+   retorno medio a 16 ticks por casilla de desviacion (unidades de precio), casillas -8 a +7:
+    +0.89 +0.74 +0.62 +0.54 +0.43 +0.32 +0.22 +0.10 -0.00 -0.11 -0.22 -0.32 -0.43 -0.54 -0.65 -0.76
+   parte de los ticks en cada casilla (%):
+      0.2   0.5   1.2   2.6   4.8   7.7  11.0  14.1  15.7  14.1  11.0   7.7   4.8   2.6   1.2   0.5
+
+--- Familia cambio_volatilidad: 1000 series, 12052 ticks de media ---
+max_media: media 26880.7 (control contra el arnes: `resumen --conjunto cambio_volatilidad`)
+O1 banda de la familia: E=48 X=48, +4461.7 +- 621.6
+   activo (E=64, X=16): +1982.0 +- 363.8    base (E=128, X=0): -1460.4 +- 272.4
+O3 mejor banda de cada serie: entre 3, +5229.0 +- 302.3; entre las 48, +14996.1 +- 717.4
+O2 tabla de la familia: h=8, compra si R > 0.07, vende si R < -0.07, +4767.8 +- 764.4
+O2 tabla de la familia con el signo del ultimo cambio (z): h=16, compra si R > 0.20, vende si R < -0.20, +4989.2 +- 732.3
+   retorno medio a 16 ticks por casilla de desviacion (unidades de precio), casillas -8 a +7:
+    +0.84 +0.76 +0.64 +0.53 +0.41 +0.31 +0.20 +0.10 +0.00 -0.11 -0.21 -0.30 -0.42 -0.55 -0.67 -0.76
+   parte de los ticks en cada casilla (%):
+      1.2   1.6   2.1   2.8   4.0   6.1   9.2  12.7  15.1  12.7   9.2   6.1   4.0   2.8   2.1   1.6
+
+--- Familia paseo: 400 series, 14020 ticks de media ---
+max_media: media 8473.4 (control contra el arnes: `resumen --conjunto paseo`)
+O1 banda de la familia: E=160 X=48, +962.8 +- 143.7
+   activo (E=64, X=16): -593.0 +- 111.3    base (E=128, X=0): +530.2 +- 79.2
+O3 mejor banda de cada serie: entre 3, +1131.5 +- 82.5; entre las 48, +3425.7 +- 167.0
+O2 tabla de la familia: h=8, compra si R > 0.07, vende si R < -0.07, +1676.7 +- 290.2
+O2 tabla de la familia con el signo del ultimo cambio (z): h=32, compra si R > 0.21, vende si R < -0.28, +2168.1 +- 689.7
+   retorno medio a 16 ticks por casilla de desviacion (unidades de precio), casillas -8 a +7:
+    +0.12 +0.05 -0.05 -0.02 +0.02 +0.00 +0.00 -0.00 +0.00 +0.00 +0.01 +0.00 +0.01 -0.00 -0.01 +0.01
+   parte de los ticks en cada casilla (%):
+      0.4   0.5   0.8   1.6   3.4   6.6  10.8  15.5  18.7  15.5  10.8   6.7   3.5   1.6   0.8   0.5
+
+--- Familia tendencia: 400 series, 4312 ticks de media ---
+max_media: media 7952.1 (control contra el arnes: `resumen --conjunto tendencia`)
+O1 banda de la familia: E=160 X=-32, +866.0 +- 143.2
+   activo (E=64, X=16): -53.9 +- 88.6    base (E=128, X=0): +242.2 +- 80.8
+O3 mejor banda de cada serie: entre 3, +1169.6 +- 67.7; entre las 48, +3662.5 +- 145.0
+O2 tabla de la familia: h=8, compra si R > 0.04, vende si R < -0.21, +18187.3 +- 1496.2
+O2 tabla de la familia con el signo del ultimo cambio (z): h=8, compra si R > 0.04, vende si R < -0.21, +18271.6 +- 1484.3
+   retorno medio a 16 ticks por casilla de desviacion (unidades de precio), casillas -8 a +7:
+    -0.30 -0.45 -0.46 -0.48 -0.46 -0.41 -0.32 -0.20 -0.06 +0.10 +0.22 +0.32 +0.37 +0.37 +0.33 +0.07
+   parte de los ticks en cada casilla (%):
+      0.5   0.7   1.3   2.5   4.8   7.7  10.9  14.1  16.2  13.5  10.2   7.0   4.2   2.2   1.1   0.6
+
+--- Familia reversion: 400 series, 20000 ticks de media ---
+max_media: media 69765.7 (control contra el arnes: `resumen --conjunto reversion`)
+O1 banda de la familia: E=32 X=48, +242676.3 +- 9401.5
+   activo (E=64, X=16): +81194.5 +- 3415.1    base (E=128, X=0): -24298.3 +- 1313.9
+O3 mejor banda de cada serie: entre 3, +81194.5 +- 3415.1; entre las 48, +244258.9 +- 9402.0
+O2 tabla de la familia: h=8, compra si R > 0.04, vende si R < -0.21, +254105.5 +- 11656.8
+O2 tabla de la familia con el signo del ultimo cambio (z): h=8, compra si R > 0.04, vende si R < -0.14, +254105.5 +- 11656.8
+   retorno medio a 16 ticks por casilla de desviacion (unidades de precio), casillas -8 a +7:
+    +3.44 +3.11 +2.67 +2.17 +1.72 +1.26 +0.84 +0.42 +0.00 -0.42 -0.85 -1.27 -1.71 -2.19 -2.63 -3.03
+   parte de los ticks en cada casilla (%):
+      0.2   0.3   0.5   0.7   1.4   3.8   9.6  19.7  26.9  19.7   9.7   3.8   1.4   0.7   0.5   0.3
+
+--- Familia saltos: 400 series, 5950 ticks de media ---
+max_media: media 11472.0 (control contra el arnes: `resumen --conjunto saltos`)
+O1 banda de la familia: E=32 X=48, +758.1 +- 567.2
+   activo (E=64, X=16): +247.5 +- 485.7    base (E=128, X=0): -602.9 +- 208.3
+O3 mejor banda de cada serie: entre 3, +2199.0 +- 455.6; entre las 48, +7100.6 +- 801.7
+O2 tabla de la familia: h=8, compra si R > 0.11, vende si R < -0.07, +1012.5 +- 508.3
+O2 tabla de la familia con el signo del ultimo cambio (z): h=16, compra si R > 0.30, vende si R < -0.30, +1213.8 +- 667.4
+   retorno medio a 16 ticks por casilla de desviacion (unidades de precio), casillas -8 a +7:
+    +0.22 +0.30 +0.23 +0.22 +0.28 +0.24 +0.16 +0.09 +0.02 -0.08 -0.16 -0.26 -0.27 -0.34 -0.28 -0.24
+   parte de los ticks en cada casilla (%):
+      1.0   1.2   1.5   2.1   3.3   5.5   8.8  12.7  15.4  12.6   8.8   5.5   3.3   2.1   1.5   1.3
+
+--- Familia cambio_de_caracter: 400 series, 10735 ticks de media ---
+max_media: media 10513.8 (control contra el arnes: `resumen --conjunto cambio_de_caracter`)
+O1 banda de la familia: E=48 X=48, +786.0 +- 276.9
+   activo (E=64, X=16): +403.2 +- 135.3    base (E=128, X=0): -316.7 +- 113.0
+O3 mejor banda de cada serie: entre 3, +1564.2 +- 99.4; entre las 48, +4829.7 +- 248.3
+O2 tabla de la familia: h=32, compra si R > 0.07, vende si R < -0.42, +634.3 +- 395.5
+O2 tabla de la familia con el signo del ultimo cambio (z): h=8, compra si R > 0.07, vende si R < -0.07, +813.7 +- 296.7
+   retorno medio a 16 ticks por casilla de desviacion (unidades de precio), casillas -8 a +7:
+    +0.48 +0.30 +0.16 +0.09 +0.06 +0.11 +0.10 +0.07 -0.00 -0.06 -0.09 -0.09 -0.03 -0.00 -0.06 -0.31
+   parte de los ticks en cada casilla (%):
+      0.4   0.6   0.9   1.6   3.1   6.1  10.6  15.9  19.6  15.8  10.6   6.2   3.2   1.6   0.9   0.6
+
+--- Familia volatil: 400 series, 4212 ticks de media ---
+max_media: media 31770.5 (control contra el arnes: `resumen --conjunto volatil`)
+O1 banda de la familia: E=112 X=0, +345.3 +- 428.0
+   activo (E=64, X=16): -1677.6 +- 1033.7    base (E=128, X=0): -329.7 +- 633.3
+O3 mejor banda de cada serie: entre 3, +3998.4 +- 594.5; entre las 48, +12756.1 +- 1441.0
+O2 tabla de la familia: h=8, compra si R > 0.21, vende si R < 0.04, +0.0 +- 0.0
+O2 tabla de la familia con el signo del ultimo cambio (z): h=16, compra si R > 0.40, vende si R < 0.00, +218.1 +- 724.6
+   retorno medio a 16 ticks por casilla de desviacion (unidades de precio), casillas -8 a +7:
+    +0.93 +0.82 +0.73 +0.52 +0.56 +0.36 +0.26 +0.14 +0.01 -0.11 -0.19 -0.34 -0.43 -0.60 -0.68 -0.76
+   parte de los ticks en cada casilla (%):
+      3.0   3.4   3.8   4.1   4.5   4.8   5.0   5.2   5.3   5.2   5.1   4.8   4.5   4.2   3.8   3.4
+
+--- Familia nivel_bajo: 400 series, 2563 ticks de media ---
+max_media: media 12702.0 (control contra el arnes: `resumen --conjunto nivel_bajo`)
+O1 banda de la familia: E=32 X=48, +2498.4 +- 751.4
+   activo (E=64, X=16): +1241.4 +- 347.4    base (E=128, X=0): -629.5 +- 211.7
+O3 mejor banda de cada serie: entre 3, +2454.4 +- 309.9; entre las 48, +6850.5 +- 829.8
+O2 tabla de la familia: h=8, compra si R > 0.04, vende si R < -0.07, +2778.7 +- 1136.6
+O2 tabla de la familia con el signo del ultimo cambio (z): h=8, compra si R > 0.04, vende si R < -0.07, +3036.4 +- 1066.3
+   retorno medio a 16 ticks por casilla de desviacion (unidades de precio), casillas -8 a +7:
+    +0.83 +0.59 +0.60 +0.56 +0.44 +0.32 +0.21 +0.09 +0.01 -0.11 -0.21 -0.32 -0.40 -0.51 -0.57 -0.75
+   parte de los ticks en cada casilla (%):
+      0.3   0.4   0.7   1.2   2.6   5.7  10.7  16.9  21.1  16.8  10.8   5.8   2.6   1.2   0.6   0.5
+
+=== Conjunto evidencia (remuestreo la mitad, cada familia plausible un octavo) ===
+max_media: media 21264.3
+O1 banda de cada familia:              +3024.3 +- 156.3
+O2 tabla de cada familia:              +3393.8 +- 171.0
+O2 tabla de cada familia, con signo:   +4786.0 +- 186.0
+O3 mejor de 3 bandas por serie:        +3472.2 +- 93.4
+O3 mejor de 48 bandas por serie:       +9756.9 +- 193.0

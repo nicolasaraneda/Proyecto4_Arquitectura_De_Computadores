@@ -1,0 +1,31 @@
+Propiedades formales de estructura del Espino barrel (SymbiYosys)
+Generado por factibilidad/a_barrel/tools/formal.sh (make formal). No editar a mano.
+
+Herramientas:
+  Yosys 0.68+195 (git sha1 435977e97-dirty, Release, Clang /usr/bin/clang++ 21.1.8)
+  "nextpnr-ice40" -- Next Generation Place and Route (Version nextpnr-0.11.1-19-g8dbcee5c)
+  Icarus Verilog version 14.0 (devel) (s20260301-403-g5ab23063f-dirty)
+Commit de partida: 4bcd4ab (rama factibilidad-fondo)
+  SBY v0.68
+
+Propiedades: formal/propiedades.vh, insertadas en una copia de rtl/espino_barrel_core.v.
+Entradas libres: la instruccion que entrega la memoria, el dato del bus y lo que entrega el banco de registros.
+Afirmaciones (assert) en el archivo: 24.
+
+PASS invariantes P1 a P8, por induccion (profundidad 10), banco con cualquier valor
+PASS P1 a P9 desde el reset, 12 ciclos, para cualquier contenido de la memoria
+PASS P1 a P8 mas P10 y P11, por induccion (profundidad 10), banco que devuelve sus direcciones
+PASS cobertura: existe una ejecucion que llega al ciclo 6 con una escritura al banco
+
+Controles negativos: las mismas tareas sobre el core con un error puesto a proposito (tools/mutar.py)
+PASS ctx_escritura: hace fallar: operandos
+PASS ctx_lectura_rs1: hace fallar: operandos
+PASS ctx_lectura_rs2: hace fallar: operandos
+PASS rd_otro_hilo: hace fallar: invariantes arranque operandos
+PASS x0: hace fallar: invariantes arranque operandos
+PASS pc_otro_hilo: hace fallar: invariantes arranque operandos
+PASS peticion_bus: hace fallar: invariantes arranque operandos
+PASS burbuja_salta: hace fallar: invariantes arranque operandos
+PASS hilo_desfasado: hace fallar: arranque
+
+RESULTADO: PASS, las propiedades valen para cualquier programa y 9 de 9 mutaciones las hacen fallar

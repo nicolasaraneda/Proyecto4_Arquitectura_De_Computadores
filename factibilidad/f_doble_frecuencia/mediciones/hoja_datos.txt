@@ -1,0 +1,24 @@
+Hoja de datos: DS1040 Version 3.4, October 2017
+
+Tabla de relojes de los iCE40HX (External Switching Characteristics, HX Devices):
+  f MAX_GBUF Frequency for Global Buffer Clock networkAll iCE40HX devices [sin dato] 275MHz
+  t W_GBUF Clock Pulse Width for Global BufferAll iCE40HX devices0.88 [sin dato] ns
+  t SKEW_GBUF Global Buffer Clock Skew Within a Device iCE40HX1K [sin dato] 727ps iCE40HX4K [sin dato] 300ps iCE40HX8K [sin dato] 300ps
+
+Párrafo sobre los tiempos de las herramientas:
+  Derating Logic Timing Logic timing provided in the following sections of the data sheet and the Lattice design tools are worst case num- bers in the operating range. Actual delays may be much faster. Lattice design tools can provide logic timing num- bers at a particular temperature and voltage.
+
+Todas las líneas del documento que mencionan un ancho de pulso (pulse width):
+  Clock Pulse Width for Global BufferAll iCE40LP devices0.92 [sin dato] ns
+  Clock Pulse Width for Global BufferAll iCE40HX devices0.88 [sin dato] ns
+  Output Clock Pulse WidthAt 90% or 10%1.3 [sin dato] ns
+  LATCHINPUTVALUE Pulse Width [sin dato] 100ns
+  RESET Pulse Width10 [sin dato] ns
+  DYNAMICDELAY Pulse Width100 [sin dato]
+  CCLK clock pulse width high20
+  CCLK clock pulse width low20
+
+Columnas de la tabla de relojes: parámetro, dispositivo, mínimo, máximo y unidad.
+tW_GBUF es un mínimo y tSKEW_GBUF un máximo.
+
+Archivo leído: iCE40LPHXFamilyDataSheet.pdf, 3437661 bytes, SHA-256 8879b0da267bef143d80da8bb5015c0c3aa2aafdd2f72b0851634994c2e2947c

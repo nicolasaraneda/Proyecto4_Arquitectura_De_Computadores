@@ -1,0 +1,101 @@
+Prueba independiente de informacion del futuro (lazo y contabilidad propios)
+10 estrategias (con parametros por defecto), 14 alias y 61 rivales. Por cada una: 24 series de 2500 ticks,
+40 cortes por serie con todo el futuro cambiado y 40 con solo el precio de ejecucion cambiado.
+Martingala: 4000 series de 2000 ticks sin comision; z = (media - 10000) / error estandar.
+
+estrategia                                     lazo  futuro  precio  repetir | martingala     ee      z
+param                                             0       0       0        0 |   10013.3   17.2  +0.77
+cruce                                             0       0       0        0 |    9989.8   28.1  -0.36
+momentum                                          0       0       0        0 |    9992.8   28.0  -0.26
+byh                                               0       0       0        0 |    9973.3   39.1  -0.68
+nada                                              0       0       0        0 |   10000.0    0.0  +0.00
+reversion                                         0       0       0        0 |   10013.3   17.2  +0.77
+azar                                              0       0       0        0 |    9974.8   26.7  -0.94
+ejemplo                                           0       0       0        0 |   10013.3   17.2  +0.77
+seguidor                                          0       0       0        0 |   10018.0   15.1  +1.19
+mia                                               0       0       0        0 |    9987.7   19.8  -0.62
+cand:base                                         0       0       0        0 |   10013.3   17.2  +0.77
+cand:max_media                                    0       0       0        0 |    9987.7   19.8  -0.62
+cand:guardia                                      0       0       0        0 |    9980.2   17.6  -1.13
+cand:guardia_tope                                 0       0       0        0 |    9980.4   17.5  -1.12
+cand:prudente                                     0       0       0        0 |   10008.1    9.6  +0.85
+cand:kalman                                       0       0       0        0 |    9984.6   19.7  -0.78
+cand:kalman_base                                  0       0       0        0 |   10008.0   17.2  +0.47
+cand:activo                                       0       0       0        0 |    9995.1   23.2  -0.21
+cand:base_guardia                                 0       0       0        0 |   10001.2   15.2  +0.08
+cand:base_tope                                    0       0       0        0 |   10001.6   15.1  +0.11
+cand:base_fuerte                                  0       0       0        0 |   10004.7   14.0  +0.34
+cand:prud_guardia                                 0       0       0        0 |   10000.7    9.1  +0.08
+cand:guardia_tope_r                               0       0       0        0 |    9980.4   17.5  -1.12
+cand:base_tope_r                                  0       0       0        0 |   10001.6   15.1  +0.11
+cruce:tipo=1,kr=1,kl=3                            0       0       0        0 |    9992.2   30.1  -0.26
+cruce:tipo=1,kr=2,kl=4                            0       0       0        0 |    9966.8   28.6  -1.16
+cruce:tipo=1,kr=2,kl=5                            0       0       0        0 |    9963.0   28.2  -1.31
+cruce:tipo=1,kr=3,kl=5                            0       0       0        0 |    9950.0   27.9  -1.79
+cruce:tipo=1,kr=3,kl=6                            0       0       0        0 |    9970.3   27.3  -1.08
+cruce:tipo=1,kr=4,kl=6                            0       0       0        0 |    9979.7   27.0  -0.75
+cruce:tipo=1,kr=2,kl=5,q=63,rep=0                 0       0       0        0 |    9970.3   22.8  -1.30
+cruce:tipo=1,kr=2,kl=5,q=10,rep=1                 0       0       0        0 |    9959.3   27.4  -1.48
+cruce:tipo=1,kr=3,kl=6,q=63,rep=0                 0       0       0        0 |    9973.6   22.2  -1.19
+cruce:tipo=1,kr=3,kl=6,q=10,rep=1                 0       0       0        0 |    9970.8   26.8  -1.09
+cruce:tipo=0,r=5,l=20                             0       0       0        0 |    9989.8   28.1  -0.36
+cruce:tipo=0,r=10,l=50                            0       0       0        0 |    9970.4   28.0  -1.06
+cruce:tipo=0,r=20,l=100                           0       0       0        0 |    9958.0   27.5  -1.53
+cruce:tipo=0,r=5,l=20,h=1                         0       0       0        0 |    9966.1   27.7  -1.22
+momentum:h=1,u=1                                  0       0       0        0 |    9997.7   27.3  -0.08
+momentum:h=1,u=2                                  0       0       0        0 |   10000.0    0.0  +0.00
+momentum:h=5,u=2                                  0       0       0        0 |   10002.9   27.9  +0.10
+momentum:h=10,u=2                                 0       0       0        0 |    9992.8   28.0  -0.26
+momentum:h=10,u=3                                 0       0       0        0 |    9986.2   27.7  -0.50
+momentum:h=20,u=3                                 0       0       0        0 |    9977.6   27.7  -0.81
+momentum:h=50,u=4                                 0       0       0        0 |    9975.9   27.3  -0.88
+momentum:h=5,u=2,q=63,rep=0                       0       0       0        0 |   10003.5   22.4  +0.16
+momentum:h=5,u=2,q=10,rep=1                       0       0       0        0 |   10002.3   26.2  +0.09
+momentum:h=10,u=3,q=63,rep=0                      0       0       0        0 |    9992.6   22.2  -0.33
+momentum:h=10,u=3,q=10,rep=1                      0       0       0        0 |    9968.2   26.6  -1.20
+byh:q=63,rep=1                                    0       0       0        0 |    9973.3   39.1  -0.68
+byh:q=63,rep=0                                    0       0       0        0 |    9978.6   31.6  -0.68
+byh:q=10,rep=1                                    0       0       0        0 |    9972.6   39.0  -0.70
+byh:q=20,rep=0                                    0       0       0        0 |    9993.2   10.0  -0.68
+nada                                              0       0       0        0 |   10000.0    0.0  +0.00
+reversion:k=3,a=2,b=0                             0       0       0        0 |    9986.2   14.5  -0.95
+reversion:k=4,a=2,b=0                             0       0       0        0 |   10004.1   18.9  +0.22
+reversion:k=4,a=3,b=0                             0       0       0        0 |   10002.4   15.4  +0.16
+reversion:k=4,a=4,b=1                             0       0       0        0 |   10030.7   13.0  +2.36
+reversion:k=5,a=2,b=0                             0       0       0        0 |    9992.5   21.8  -0.35
+reversion:k=5,a=3,b=0                             0       0       0        0 |    9987.7   19.8  -0.62
+reversion:k=5,a=4,b=0                             0       0       0        0 |   10013.3   17.2  +0.77
+reversion:k=5,a=4,b=1                             0       0       0        0 |   10003.2   19.1  +0.17
+reversion:k=5,a=6,b=0                             0       0       0        0 |    9994.6   11.0  -0.49
+reversion:k=5,a=3,b=1                             0       0       0        0 |    9992.1   21.9  -0.36
+reversion:k=6,a=3,b=0                             0       0       0        0 |   10018.5   23.2  +0.80
+reversion:k=6,a=4,b=0                             0       0       0        0 |   10024.6   21.5  +1.14
+reversion:k=6,a=6,b=1                             0       0       0        0 |   10012.6   19.0  +0.67
+reversion:k=5,a=4,b=0,q=63,rep=0                  0       0       0        0 |   10009.4   12.7  +0.74
+reversion:k=5,a=4,b=0,q=10,rep=1                  0       0       0        0 |   10016.1   16.7  +0.96
+reversion:k=5,a=3,b=0,q=63,rep=0                  0       0       0        0 |    9991.0   14.9  -0.61
+reversion:k=5,a=3,b=0,q=10,rep=1                  0       0       0        0 |    9998.5   19.0  -0.08
+reversion:k=4,a=3,b=0,q=63,rep=0                  0       0       0        0 |    9998.2   11.5  -0.16
+reversion:k=4,a=3,b=0,q=10,rep=1                  0       0       0        0 |   10000.5   14.4  +0.04
+reversion:tipo=1,n=20,a=3,b=0                     0       0       0        0 |   10002.7   16.8  +0.16
+reversion:tipo=1,n=50,a=4,b=0                     0       0       0        0 |    9992.7   19.2  -0.38
+reversion:tipo=1,n=64,a=4,b=1                     0       0       0        0 |   10006.3   22.3  +0.28
+momentum:inv=1,h=1,u=2                            0       0       0        0 |   10000.0    0.0  +0.00
+momentum:inv=1,h=5,u=3                            0       0       0        0 |    9992.3   28.4  -0.27
+momentum:inv=1,h=10,u=4                           0       0       0        0 |    9975.2   28.6  -0.87
+azar:pm=1000,q=63                                 0       0       0        0 |    9982.1   26.4  -0.68
+azar:pm=1000,q=10                                 0       0       0        0 |    9975.0   23.3  -1.07
+azar:pm=100,q=63                                  0       0       0        0 |    9985.5   27.0  -0.54
+azar:pm=100,q=10                                  0       0       0        0 |    9993.4   22.3  -0.30
+azar:pm=10,q=63                                   0       0       0        0 |    9968.0   25.4  -1.26
+azar:pm=10,q=10                                   0       0       0        0 |    9999.2   13.7  -0.06
+
+Columnas: comparaciones que fallan en cada prueba (lazo propio contra correr_serie, futuro cambiado,
+precio de ejecucion cambiado, ronda repetida).
+PASS  85 estrategias, 167280 comparaciones, 0 fallas
+PASS  martingala: la mayor distancia a 10 000 es 2.36 errores estandar (reversion:k=4,a=4,b=1); limite 4
+
+Control negativo: estrategia tramposa, que mira el precio de ejecucion y el siguiente por una fuga puesta a proposito
+  con la fuga:  futuro 773 fallas, precio de ejecucion 753 fallas, martingala 58203 (z = +638)
+  sin la fuga:  futuro 0 fallas, precio de ejecucion 0 fallas, martingala 10000 (no opera)
+PASS  las pruebas detectan a la tramposa

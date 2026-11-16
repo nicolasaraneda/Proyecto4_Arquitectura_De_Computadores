@@ -1,0 +1,81 @@
+# xd.sby: pruebas formales de la extensión de la ISA (pieza D).
+#
+# Grupo: Nicolás Araneda, Vicente Calderón y Santiago Muñoz.
+# Arquitectura de Computadores, Universidad de los Andes, 2026-2.
+#
+# Una tarea por propiedad (ver formal/xd_formal.sv). Se corre con
+# `make formal` desde factibilidad/d_isa, que deja las carpetas de trabajo en
+# build/formal/ y el resumen en mediciones/formal.txt. Las rutas de [files]
+# son relativas a factibilidad/d_isa, que es desde donde se corre sby.
+
+[tasks]
+ema_k5       ema kb0
+ema_k4a7     ema kb2
+ema_k0a7     ema kb3
+ema_todos    ema kb5
+caminos_k5    caminos kb0
+caminos_todos caminos kb5
+alu_base
+alu_carriles
+simd
+mul8
+div8
+divpaso
+# Con 24 bits el producto y el cociente no terminaron en 300 s (no están en make formal)
+mul8_24      mul8 mw24
+mul8_16      mul8 mw16
+div8_24      div8 dw24
+# Controles negativos: con la mutación de prueba de cada módulo la propiedad
+# tiene que fallar (expect fail)
+mut_ema      ema kb0 muta m_ema
+mut_caminos  caminos kb0 muta m_opa
+mut_alu      alu_carriles muta m_alu
+mut_simd     simd muta m_simd
+mut_mul8     mul8 muta m_mul
+mut_div8     div8 muta m_div
+mut_divpaso  divpaso muta m_div
+
+[options]
+mode bmc
+depth 1
+muta: expect fail
+
+[engines]
+smtbmc boolector
+
+[script]
+kb0: read -define KB=0
+kb2: read -define KB=2
+kb3: read -define KB=3
+kb5: read -define KB=5
+dw24: read -define DIV_W=24
+mw24: read -define MUL_W=24
+mw16: read -define MUL_W=16
+m_ema: read -define MUTA_XD_EMA=1
+m_opa: read -define MUTA_XD_OPA=1
+m_alu: read -define MUTA_XD_ALU=1
+m_simd: read -define MUTA_XD_SIMD=1
+m_mul: read -define MUTA_XD_MULSTEP=1
+m_div: read -define MUTA_XD_DIVSTEP=1
+read -formal espino_alu.v xd_alu.v xd_divstep.v xd_ema.v xd_mulc.v xd_mulstep.v xd_opa.v xd_simd8.v xd_srak.v xd_unit.v xd_formal.sv
+ema: prep -top f_ema
+caminos: prep -top f_caminos
+alu_base: prep -top f_alu_base
+alu_carriles: prep -top f_alu_carriles
+simd: prep -top f_simd
+mul8: prep -top f_mul8
+div8: prep -top f_div8
+divpaso: prep -top f_divpaso
+
+[files]
+core/espino_core/espino_alu.v
+rtl/xd_alu.v
+rtl/xd_divstep.v
+rtl/xd_ema.v
+rtl/xd_mulc.v
+rtl/xd_mulstep.v
+rtl/xd_opa.v
+rtl/xd_simd8.v
+rtl/xd_srak.v
+rtl/xd_unit.v
+formal/xd_formal.sv

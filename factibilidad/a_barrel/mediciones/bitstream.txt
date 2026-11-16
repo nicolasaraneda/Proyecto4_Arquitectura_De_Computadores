@@ -1,0 +1,19 @@
+Bitstreams del SoC barrel para la Go Board, simulados desde el .asc
+Generado por factibilidad/a_barrel/tools/bitstream.sh (make bitstream). No editar a mano.
+
+Herramientas:
+  Yosys 0.68+195 (git sha1 435977e97-dirty, Release, Clang /usr/bin/clang++ 21.1.8)
+  "nextpnr-ice40" -- Next Generation Place and Route (Version nextpnr-0.11.1-19-g8dbcee5c)
+  Icarus Verilog version 14.0 (devel) (s20260301-403-g5ab23063f-dirty)
+Commit de partida: 4bcd4ab (rama factibilidad-fondo)
+nextpnr-ice40 --hx1k --package vq100 --freq 25 --seed 1, goboard.pcf. Los .bin quedan en factibilidad/a_barrel/build/bitstream/.
+
+1. barrel_cooperacion.bin: los cuatro hilos, sin la maestra
+  celdas 933 de 1280, BRAM 12 de 16, frecuencia maxima 59.18 MHz, PASS a 25 MHz
+  32220 bytes, sha256 3551e201c241634d6057b4e8f0886dd75a4d47e1f89422b8813cf668e51a074d
+  PASS simulado desde el .asc, 12000 ciclos: LEDs = 1111, display = 1111101 0111111 (segmentos {G,F,E,D,C,B,A} encendidos: se lee "60")
+
+2. barrel_trade.bin: la regla base en el hilo 0 (sw/trade.s con la tabla de arranque)
+  celdas 933 de 1280, BRAM 12 de 16, frecuencia maxima 59.18 MHz, PASS a 25 MHz
+  32220 bytes, sha256 73244aafa743413b79cdc7acb467e25cb19d596426683892a67e49c98bafcecf
+  PASS simulado desde el .asc por los pines: 500 ticks a 0,1 ms identicos a ref/trader.py, patrimonio 9009

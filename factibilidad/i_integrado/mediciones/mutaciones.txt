@@ -1,0 +1,101 @@
+Controles negativos de las pruebas del diseño integrado
+Generado por factibilidad/i_integrado/tools/mutaciones.sh (make mutaciones). No editar a mano.
+
+Herramientas:
+  Yosys 0.68+195 (git sha1 435977e97-dirty, Release, Clang /usr/bin/clang++ 21.1.8)
+  "nextpnr-ice40" -- Next Generation Place and Route (Version nextpnr-0.11.1-19-g8dbcee5c)
+  Icarus Verilog version 14.0 (devel) (s20260301-403-g5ab23063f-dirty)
+Commit de partida: 9b82e81 (rama factibilidad-fondo)
+  Verilator 5.053 devel rev v5.052-22-g7cf8c5cca (mod)
+Configuración de las pruebas: -DXD_EMAD=0 -DXD_DEVK=0 -DXD_MULSTEPALU -DXD_SIMDALU=12 -DXD_DIVSTEP -DI_VIGILANTE -DI_TABLA=1 (T2 con -DI_TABLA=2)
+Pruebas: XD custom-0 en los cuatro hilos contra el modelo; RV cada hilo contra el Espino base (RV32E);
+T1 y T2 la tabla en sus dos formas dentro del SoC; TM los módulos de memoria solos; VIG el vigilante con el supervisor colgado.
+
+Sin mutación: las seis pruebas deben pasar
+   PASS XD: tb_xd_barrel: 6 de 6 programas iguales al modelo
+   PASS RV: tb_verif: los 4 programas iguales al Espino base
+   PASS T1: tb_tabla forma 1: 256 entradas iguales al modelo, sumas por hilo 001edab8 001edbb9 001edcba 001fddbb, total 007c70e6, display e6, 3519 ciclos
+   PASS T2: tb_tabla forma 2: 512 entradas iguales al modelo, sumas por hilo 17d28598 17da8699 17e2879a 17ea889b, total 5f7a1c66, display 66, 6851 ciclos
+   PASS TM: tb_tabla_mod: 8974 lecturas, 9038 escrituras y 1988 ciclos sin acceso iguales al modelo; contenido inicial (256 palabras) y final (256 y 512 palabras) correctos
+   PASS VIG: tb_vig_barrel N=4: el supervisor responde 20 precios (cuenta maxima 1 mientras responde), BOOT sube con el precio 25 = K + N + 1 con CS_n en alto, destino 01; estrategias vivas: cuentas 4169 4169 4169 al colgarse y 5836 5836 5836 al final
+
+PASS f3_otro_hilo: detectada por 1 de las 6 pruebas (XD)
+      xd_opa recibe el funct3 de la instruccion que sale de la memoria (etapa R, otro hilo) y no el de la que esta en X (espino_barrel_core.v)
+      XD: tb_xd_barrel: 0 de 6 programas iguales al modelo (diferencia en el hilo 0, escritura 30: x15 = 00018e7a, esperado x15 = 0000178e)
+PASS sin_anular_b: detectada por 1 de las 6 pruebas (XD)
+      mulstep no anula el operando B cuando rs1[31] = 0 (espino_barrel_core.v)
+      XD: tb_xd_barrel: 0 de 6 programas iguales al modelo (diferencia en el hilo 0, escritura 30: x15 = 00002d28, esperado x15 = 0000178e)
+PASS anula_sin_seleccion: detectada por 1 de las 6 pruebas (RV)
+      El operando B se anula sin mirar si la instruccion es de la extension: afecta a slti, slt, lw y sw (funct3 = 010) con rs1[31] = 0 (espino_barrel_core.v)
+      RV: tb_verif: difieren U B C D (el hilo 2 difiere del Espino base en su instruccion 429 (escritura al banco de registros))
+PASS opa_sin_conectar: detectada por 1 de las 6 pruebas (XD)
+      La seleccion 3 del operando A entrega rs1 sin desplazar (espino_barrel_core.v)
+      XD: tb_xd_barrel: 0 de 6 programas iguales al modelo (diferencia en el hilo 0, escritura 30: x15 = 00000bc7, esperado x15 = 0000178e)
+PASS lane_op_otro_hilo: detectada por 1 de las 6 pruebas (XD)
+      La ALU corta los acarreos segun la instruccion que esta en R (otro hilo): rompe las sumas de RV32E de los demas hilos (espino_barrel_core.v)
+      XD: tb_xd_barrel: 0 de 6 programas iguales al modelo (diferencia en el hilo 3, escritura 33: x9 = ff00ffff, esperado x9 = 088fbff0)
+PASS is_xd_otro_hilo: detectada por 1 de las 6 pruebas (XD)
+      El resultado de xd_unit se elige con la marca de la instruccion que esta en R (otro hilo) (espino_barrel_core.v)
+      XD: tb_xd_barrel: 0 de 6 programas iguales al modelo (diferencia en el hilo 1, escritura 34: x10 = f2d607dd, esperado x10 = 03cbea32)
+PASS xd_operandos: detectada por 1 de las 6 pruebas (XD)
+      xd_unit recibe rs1 en lugar de rs2 (espino_barrel_core.v)
+      XD: tb_xd_barrel: 0 de 6 programas iguales al modelo (diferencia en el hilo 2, escritura 34: x15 = 717dbe81, esperado x15 = 6efbfd81)
+PASS enlace_sin_pc4: detectada por 1 de las 6 pruebas (RV)
+      El registro entre X y M guarda siempre el resultado de la etapa X: jal y jalr escriben el resultado de la ALU en vez del enlace (espino_barrel_core.v)
+      RV: tb_verif: difieren U B C D (el hilo 2 difiere del Espino base en su instruccion 68 (escritura al banco de registros))
+PASS vig_sin_latido: detectada por 1 de las 6 pruebas (VIG)
+      El vigilante no ve las escrituras en DECISION: dispara con el programa sano (pochoco_soc.v)
+      VIG: tb_vig_barrel N=4: 4 fallas
+PASS vig_cualquier_store: detectada por 1 de las 6 pruebas (VIG)
+      El vigilante toma cualquier escritura al bus, de cualquier hilo, como respuesta: no dispara si los otros hilos siguen vivos (pochoco_soc.v)
+      VIG: tb_vig_barrel N=4: 1 fallas
+PASS vig_sin_cs: detectada por 1 de las 6 pruebas (VIG)
+      El vigilante no espera a que CS_n suba para disparar (pochoco_soc.v)
+      VIG: tb_vig_barrel N=4: 2 fallas
+PASS tabla_sin_seleccion: detectada por 2 de las 6 pruebas (T1 T2)
+      Todo acceso al bus llega a la memoria de la tabla (pochoco_soc.v)
+      T1: tb_tabla forma 1: 14 diferencias
+      T2: tb_tabla forma 2: 11 diferencias
+PASS tabla_mux: detectada por 2 de las 6 pruebas (T1 T2)
+      El multiplexor de lectura nunca elige la tabla (pochoco_soc.v)
+      T1: tb_tabla forma 1: 262 diferencias
+      T2: tb_tabla forma 2: 518 diferencias
+PASS tabla_y_perifericos: detectada por 1 de las 6 pruebas (T1)
+      Un acceso a la tabla por MMIO tambien selecciona los perifericos (forma 1) (pochoco_soc.v)
+      T1: tb_tabla forma 1: 262 diferencias
+PASS tabla_alias: detectada por 1 de las 6 pruebas (T2)
+      Una escritura en las 512 palabras nuevas tambien escribe la memoria de programa (forma 2) (pochoco_soc.v)
+      T2: tb_tabla forma 2: 570 diferencias
+PASS tabla_indice: detectada por 1 de las 6 pruebas (T1)
+      La tabla por MMIO se direcciona con los bits 8 a 1 en vez de 9 a 2 (forma 1) (pochoco_soc.v)
+      T1: tb_tabla forma 1: 261 diferencias
+PASS tabla_byte_alto: detectada por 2 de las 6 pruebas (T1 TM)
+      tabla_mmio escribe el byte alto con la habilitacion del byte bajo (tabla_mmio.v)
+      T1: tb_tabla forma 1: 10 diferencias
+      TM: tb_tabla_mod: 12941 diferencias
+PASS tabla_ram_byte: detectada por 2 de las 6 pruebas (T2 TM)
+      tabla_ram escribe el byte 1 con el dato del byte 0 (tabla_ram.v)
+      T2: tb_tabla forma 2: 510 diferencias
+      TM: tb_tabla_mod: 18265 diferencias
+
+Resumen: mutación, cuántas pruebas la detectan y cuáles
+   f3_otro_hilo           1 de 6   XD
+   sin_anular_b           1 de 6   XD
+   anula_sin_seleccion    1 de 6   RV
+   opa_sin_conectar       1 de 6   XD
+   lane_op_otro_hilo      1 de 6   XD
+   is_xd_otro_hilo        1 de 6   XD
+   xd_operandos           1 de 6   XD
+   enlace_sin_pc4         1 de 6   RV
+   vig_sin_latido         1 de 6   VIG
+   vig_cualquier_store    1 de 6   VIG
+   vig_sin_cs             1 de 6   VIG
+   tabla_sin_seleccion    2 de 6   T1 T2
+   tabla_mux              2 de 6   T1 T2
+   tabla_y_perifericos    1 de 6   T1
+   tabla_alias            1 de 6   T2
+   tabla_indice           1 de 6   T1
+   tabla_byte_alto        2 de 6   T1 TM
+   tabla_ram_byte         2 de 6   T2 TM
+
+RESULTADO: PASS, 18 de 18 mutaciones detectadas y el RTL sin mutar pasa las seis pruebas

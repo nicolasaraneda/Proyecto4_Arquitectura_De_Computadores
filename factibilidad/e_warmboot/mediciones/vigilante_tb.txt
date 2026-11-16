@@ -1,0 +1,109 @@
+Testbench del vigilante (tb/tb_vigilante.v)
+Comando: factibilidad/e_warmboot/scripts/probar_vigilante.sh
+
+vigilante, N = 1
+  ok    despues del reset BOOT esta en 0 y el destino es 01
+  ok    2000 ticks con respuesta: no dispara
+  ok    N - 1 precios sin respuesta: no dispara
+  ok    el programa vuelve a responder: la cuenta parte de cero
+  ok    otra racha de N - 1 sin respuesta: tampoco dispara
+  ok    N precios sin respuesta: espera al siguiente
+  ok    llega el precio N + 1 con CS_n en bajo: BOOT espera
+  ok    CS_n sube: BOOT sube en el ciclo siguiente
+  ok    una escritura posterior no baja BOOT
+  ok    respuesta antes de que CS_n suba: no dispara
+  ok    escritura simultanea con el precio: cuenta como respuesta
+  ok    disparo manual con CS_n en bajo: espera
+  ok    disparo manual: BOOT sube cuando CS_n sube
+  ok    disparo manual con CS_n en alto: inmediato
+  ok    el reset borra la cuenta
+  ok    sin precios no dispara, aunque CS_n se mueva
+  aleatorio: 400223 ciclos, 214 disparos, 0 diferencias con el modelo
+  ok    BOOT igual al modelo en todos los ciclos, con disparos
+PASS vigilante N=1: 17 comprobaciones
+
+vigilante, N = 2
+  ok    despues del reset BOOT esta en 0 y el destino es 01
+  ok    2000 ticks con respuesta: no dispara
+  ok    N - 1 precios sin respuesta: no dispara
+  ok    el programa vuelve a responder: la cuenta parte de cero
+  ok    otra racha de N - 1 sin respuesta: tampoco dispara
+  ok    N precios sin respuesta: espera al siguiente
+  ok    llega el precio N + 1 con CS_n en bajo: BOOT espera
+  ok    CS_n sube: BOOT sube en el ciclo siguiente
+  ok    una escritura posterior no baja BOOT
+  ok    respuesta antes de que CS_n suba: no dispara
+  ok    escritura simultanea con el precio: cuenta como respuesta
+  ok    disparo manual con CS_n en bajo: espera
+  ok    disparo manual: BOOT sube cuando CS_n sube
+  ok    disparo manual con CS_n en alto: inmediato
+  ok    el reset borra la cuenta
+  ok    sin precios no dispara, aunque CS_n se mueva
+  aleatorio: 400223 ciclos, 208 disparos, 0 diferencias con el modelo
+  ok    BOOT igual al modelo en todos los ciclos, con disparos
+PASS vigilante N=2: 17 comprobaciones
+
+vigilante, N = 4
+  ok    despues del reset BOOT esta en 0 y el destino es 01
+  ok    2000 ticks con respuesta: no dispara
+  ok    N - 1 precios sin respuesta: no dispara
+  ok    el programa vuelve a responder: la cuenta parte de cero
+  ok    otra racha de N - 1 sin respuesta: tampoco dispara
+  ok    N precios sin respuesta: espera al siguiente
+  ok    llega el precio N + 1 con CS_n en bajo: BOOT espera
+  ok    CS_n sube: BOOT sube en el ciclo siguiente
+  ok    una escritura posterior no baja BOOT
+  ok    respuesta antes de que CS_n suba: no dispara
+  ok    escritura simultanea con el precio: cuenta como respuesta
+  ok    disparo manual con CS_n en bajo: espera
+  ok    disparo manual: BOOT sube cuando CS_n sube
+  ok    disparo manual con CS_n en alto: inmediato
+  ok    el reset borra la cuenta
+  ok    sin precios no dispara, aunque CS_n se mueva
+  aleatorio: 400223 ciclos, 177 disparos, 0 diferencias con el modelo
+  ok    BOOT igual al modelo en todos los ciclos, con disparos
+PASS vigilante N=4: 17 comprobaciones
+
+vigilante, N = 7
+  ok    despues del reset BOOT esta en 0 y el destino es 01
+  ok    2000 ticks con respuesta: no dispara
+  ok    N - 1 precios sin respuesta: no dispara
+  ok    el programa vuelve a responder: la cuenta parte de cero
+  ok    otra racha de N - 1 sin respuesta: tampoco dispara
+  ok    N precios sin respuesta: espera al siguiente
+  ok    llega el precio N + 1 con CS_n en bajo: BOOT espera
+  ok    CS_n sube: BOOT sube en el ciclo siguiente
+  ok    una escritura posterior no baja BOOT
+  ok    respuesta antes de que CS_n suba: no dispara
+  ok    escritura simultanea con el precio: cuenta como respuesta
+  ok    disparo manual con CS_n en bajo: espera
+  ok    disparo manual: BOOT sube cuando CS_n sube
+  ok    disparo manual con CS_n en alto: inmediato
+  ok    el reset borra la cuenta
+  ok    sin precios no dispara, aunque CS_n se mueva
+  aleatorio: 400223 ciclos, 111 disparos, 0 diferencias con el modelo
+  ok    BOOT igual al modelo en todos los ciclos, con disparos
+PASS vigilante N=7: 17 comprobaciones
+
+vigilante, N = 15
+  ok    despues del reset BOOT esta en 0 y el destino es 01
+  ok    2000 ticks con respuesta: no dispara
+  ok    N - 1 precios sin respuesta: no dispara
+  ok    el programa vuelve a responder: la cuenta parte de cero
+  ok    otra racha de N - 1 sin respuesta: tampoco dispara
+  ok    N precios sin respuesta: espera al siguiente
+  ok    llega el precio N + 1 con CS_n en bajo: BOOT espera
+  ok    CS_n sube: BOOT sube en el ciclo siguiente
+  ok    una escritura posterior no baja BOOT
+  ok    respuesta antes de que CS_n suba: no dispara
+  ok    escritura simultanea con el precio: cuenta como respuesta
+  ok    disparo manual con CS_n en bajo: espera
+  ok    disparo manual: BOOT sube cuando CS_n sube
+  ok    disparo manual con CS_n en alto: inmediato
+  ok    el reset borra la cuenta
+  ok    sin precios no dispara, aunque CS_n se mueva
+  aleatorio: 400223 ciclos, 24 disparos, 0 diferencias con el modelo
+  ok    BOOT igual al modelo en todos los ciclos, con disparos
+PASS vigilante N=15: 17 comprobaciones
+
+RESUMEN: 5 valores de N con PASS, 0 con FAIL; 85 comprobaciones correctas, 0 con falla

@@ -1,0 +1,44 @@
+Validacion de la estrategia ejec (ejecucion con contabilidad propia)
+
+1. ejec sin opciones contra max_media: patrimonio, ordenes y perdida maxima de cada serie
+  17 lotes, 25011 series, 0 distintas
+
+2. Espejo de la contabilidad contra la cuenta oficial (ticks en que caja o acciones no coinciden)
+  ejec                       25011 series, 165240000 ticks, 0 ticks distintos
+  ejec:m=8                   25011 series, 165240000 ticks, 0 ticks distintos
+  ejec:m=12                  25011 series, 165240000 ticks, 0 ticks distintos
+  ejec:m=8,m2=24,e2=32       25011 series, 165240000 ticks, 0 ticks distintos
+  ejec:mv=8                  25011 series, 165240000 ticks, 0 ticks distintos
+  ejec:K=2                   25011 series, 165240000 ticks, 0 ticks distintos
+  ejec:F=12                  25011 series, 165240000 ticks, 0 ticks distintos
+  ejec:eo=16                 25011 series, 165240000 ticks, 0 ticks distintos
+  ejec:ec=1,eo=16            25011 series, 165240000 ticks, 0 ticks distintos
+  ejec:ea=0,eo=32            25011 series, 165240000 ticks, 0 ticks distintos
+  ejec:xo=16                 25011 series, 165240000 ticks, 0 ticks distintos
+  ejec:xa=0,xo=16            25011 series, 165240000 ticks, 0 ticks distintos
+  ejec:xc=1,xo=16            25011 series, 165240000 ticks, 0 ticks distintos
+  ejec:nr=1                  25011 series, 165240000 ticks, 0 ticks distintos
+  ejec:nt=3                  25011 series, 165240000 ticks, 0 ticks distintos
+
+3. Control negativo: con otra caja real (--caja 9000) el espejo de ejec:m=8, que supone 10000, debe fallar
+  remuestreo_s0_n2000: 5000 de 5000 series con el espejo distinto
+
+4. Causalidad
+  ejec                       PASS: 1 estrategias, 78 comparaciones, 0 fallas
+  ejec:m=8                   PASS: 1 estrategias, 78 comparaciones, 0 fallas
+  ejec:m=12                  PASS: 1 estrategias, 78 comparaciones, 0 fallas
+  ejec:m=8,m2=24,e2=32       PASS: 1 estrategias, 78 comparaciones, 0 fallas
+  ejec:mv=8                  PASS: 1 estrategias, 78 comparaciones, 0 fallas
+  ejec:K=2                   PASS: 1 estrategias, 78 comparaciones, 0 fallas
+  ejec:F=12                  PASS: 1 estrategias, 78 comparaciones, 0 fallas
+  ejec:eo=16                 PASS: 1 estrategias, 78 comparaciones, 0 fallas
+  ejec:ec=1,eo=16            PASS: 1 estrategias, 78 comparaciones, 0 fallas
+  ejec:ea=0,eo=32            PASS: 1 estrategias, 78 comparaciones, 0 fallas
+  ejec:xo=16                 PASS: 1 estrategias, 78 comparaciones, 0 fallas
+  ejec:xa=0,xo=16            PASS: 1 estrategias, 78 comparaciones, 0 fallas
+  ejec:xc=1,xo=16            PASS: 1 estrategias, 78 comparaciones, 0 fallas
+  ejec:nr=1                  PASS: 1 estrategias, 78 comparaciones, 0 fallas
+  ejec:nt=3                  PASS: 1 estrategias, 78 comparaciones, 0 fallas
+  ejec:m=8,caja0=9000        PASS: 1 estrategias, 78 comparaciones, 0 fallas
+
+PASS: 0 fallas

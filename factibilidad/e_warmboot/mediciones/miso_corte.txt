@@ -1,0 +1,47 @@
+Byte que lee la maestra si el pin MISO cambia a mitad de una transacción
+Comando: python3 factibilidad/e_warmboot/scripts/corte_miso.py
+
+1. Transacción completa con el pin suelto
+   tirón = 1: 0xFF mantener
+   tirón = 0: 0x00 mantener
+
+2. Vuelta: el respaldo empieza a manejar el pin después de k bits
+   tirón = 1: 0x00 mantener, 0x80 mantener, 0xC0 mantener, 0xE0 mantener, 0xF0 mantener, 0xF8 mantener, 0xFC mantener, 0xFE mantener, 0xFF mantener
+      órdenes que se ejecutarían: 0 de 9 casos
+   tirón = 0: 0x00 mantener
+      órdenes que se ejecutarían: 0 de 9 casos
+
+3. Salida: el principal suelta el pin después de k bits (256 valores de DECISION por 9 cortes)
+   tirón = 1:
+      igual    511 casos   (ejemplo: DECISION 0x00 mantener, corte tras 8 bits, lee 0x00 mantener)
+      inocuo  1024 casos   (ejemplo: DECISION 0x00 mantener, corte tras 0 bits, lee 0xFF mantener)
+      mayor    692 casos   (ejemplo: DECISION 0x41 comprar 1, corte tras 1 bits, lee 0x7F comprar 63)
+      ajena     77 casos   (ejemplo: DECISION 0x00 mantener, corte tras 1 bits, lee 0x7F comprar 63)
+   tirón = 0:
+      igual    511 casos   (ejemplo: DECISION 0x00 mantener, corte tras 0 bits, lee 0x00 mantener)
+      inocuo  1391 casos   (ejemplo: DECISION 0x01 mantener, corte tras 0 bits, lee 0x00 mantener)
+      menor    402 casos   (ejemplo: DECISION 0x43 comprar 3, corte tras 7 bits, lee 0x42 comprar 2)
+
+4. Salida, solo los bytes que escribe el programa de la regla base y los de un programa que mantiene
+   tirón = 1:
+      DECISION = comprar 63       -> 0xFF mantener[inocuo]; 0x7F comprar 63[igual]
+      DECISION = vender 63        -> 0xFF mantener[inocuo]; 0xBF vender 63[igual]
+      DECISION = mantener (0x00)  -> 0xFF mantener[inocuo]; 0x7F comprar 63[ajena]; 0x3F mantener[inocuo]; 0x1F mantener[inocuo]; 0x0F mantener[inocuo]; 0x07 mantener[inocuo]; 0x03 mantener[inocuo]; 0x01 mantener[inocuo]; 0x00 mantener[igual]
+      DECISION = mantener (0xC0)  -> 0xFF mantener[inocuo]; 0xDF mantener[inocuo]; 0xCF mantener[inocuo]; 0xC7 mantener[inocuo]; 0xC3 mantener[inocuo]; 0xC1 mantener[inocuo]; 0xC0 mantener[igual]
+   tirón = 0:
+      DECISION = comprar 63       -> 0x00 mantener[inocuo]; 0x40 mantener[inocuo]; 0x60 comprar 32[menor]; 0x70 comprar 48[menor]; 0x78 comprar 56[menor]; 0x7C comprar 60[menor]; 0x7E comprar 62[menor]; 0x7F comprar 63[igual]
+      DECISION = vender 63        -> 0x00 mantener[inocuo]; 0x80 mantener[inocuo]; 0xA0 vender 32[menor]; 0xB0 vender 48[menor]; 0xB8 vender 56[menor]; 0xBC vender 60[menor]; 0xBE vender 62[menor]; 0xBF vender 63[igual]
+      DECISION = mantener (0x00)  -> 0x00 mantener[igual]
+      DECISION = mantener (0xC0)  -> 0x00 mantener[inocuo]; 0x80 mantener[inocuo]; 0xC0 mantener[igual]
+
+Conclusión:
+- Con el pin suelto durante toda la transacción la maestra lee 0xFF o 0x00: mantener.
+- En la vuelta ningún caso ejecuta una orden, con cualquiera de los dos tirones.
+- En la salida, los bytes de la regla base (comprar 63 y vender 63) dan la misma orden,
+  una menor o mantener. Con tirón = 1 hay 77 casos de 2304 con una orden ajena: todos
+  parten de un mantener con el bit 7 en 0 (0x00 a 0x3F, corte tras el primer bit) o de
+  una orden de cantidad 0 (0x40 y 0x80). Un programa que escriba mantener como 0xC0 no
+  tiene ningún caso con orden ajena.
+- El vigilante sube BOOT solo con CS_n en alto. La salida cae dentro de una transacción
+  solo si el pin tarda en soltarse más que lo que falta para el tick siguiente. Ese
+  retardo no está documentado y hay que medirlo en la placa.

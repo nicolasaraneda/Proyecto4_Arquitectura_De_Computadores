@@ -1,0 +1,30 @@
+Un ejemplo de cada instrucción de la extensión en custom-0
+Generado por factibilidad/d_isa/tools/ejemplos.py (make ejemplos). No editar a mano.
+
+Media exponencial: precio p = 100 y media 102, o sea S = 32 * 102 = 3264 (k = 5)
+ema x3, x10, x3, 5       0x0a35018b  rs1 = 0x00000c80  rs2 = 0x00000cc0  rd = 0x00000cbe  S nueva = 3262
+devk x6, x5, x3, 5       0x0a32d30b  rs1 = 0x00000064  rs2 = 0x00000cc0  rd = 0xffffffc0  dev = -64
+emad x3, x6, x3, 5       0x0a33418b  rs1 = 0xffffffc0  rs2 = 0x00000cc0  rd = 0x00000cbe  S nueva = 3262
+srak x7, x6, 5           0x0a03338b  rs1 = 0xffffffc0  rs2 = 0x00000000  rd = 0xfffffffe  -64 >>> 5 = -2
+
+Carriles de 4 x 8 bits
+padd8 x7, x8, x9         0x0094138b  rs1 = 0x10ff8001  rs2 = 0x20017f02  rd = 0x3000ff03  
+psub8 x7, x8, x9         0x0294138b  rs1 = 0x10ff8001  rs2 = 0x20017f02  rd = 0xf0fe01ff  
+pcmpltu8 x7, x8, x9      0x0494138b  rs1 = 0x10ff8001  rs2 = 0x20017f02  rd = 0xff0000ff  
+pcmplt8 x7, x8, x9       0x0694138b  rs1 = 0x10ff8001  rs2 = 0x20017f02  rd = 0xffffffff  
+pminu8 x7, x8, x9        0x0894138b  rs1 = 0x10ff8001  rs2 = 0x20017f02  rd = 0x10017f01  
+pmaxu8 x7, x8, x9        0x0a94138b  rs1 = 0x10ff8001  rs2 = 0x20017f02  rd = 0x20ff8002  
+paddus8 x7, x8, x9       0x0c94138b  rs1 = 0x10ff8001  rs2 = 0x20017f02  rd = 0x30ffff03  
+psubus8 x7, x8, x9       0x0e94138b  rs1 = 0x10ff8001  rs2 = 0x20017f02  rd = 0x00fe0100  
+pbcast8 x7, x8           0x1004138b  rs1 = 0x12345664  rs2 = 0x00000000  rd = 0x64646464  el precio 100 en los cuatro carriles
+pmovmsk8 x7, x8          0x1204138b  rs1 = 0xff0000ff  rs2 = 0x00000000  rd = 0x00000009  un bit por carril: 1001
+
+Producto y cociente
+mulstep x7, x7, x8       0x0083a38b  rs1 = 0xc0000000  rs2 = 0x000003e8  rd = 0x800003e8  un paso: sale un 1 del multiplicador y se suma rs2
+8 veces mulstep                      rs1 = 0x3f000000  rs2 = 0x000000ff  rd = 0x00003ec1  63 acciones a 255: 16065
+divstep x7, x7, x8       0x0283a38b  rs1 = 0x0000270b  rs2 = 0x000000b4  rd = 0x00004e16  un paso con N = 9995 y D = 180
+8 veces divstep                      rs1 = 0x0000270b  rs2 = 0x000000b4  rd = 0x00005f37  (10000 - 5) / 180: cociente 55 y resto 95
+mulc x7, x7, x8          0x0483a38b  rs1 = 0x0000003f  rs2 = 0x000000ff  rd = 0x00003ec1  63 * 255 = 16065
+
+Periférico multiplicador serial (MMIO, base 0x8002_0000)
+MULA = 1000, MULB = 255: MULP leído 8 ciclos después de escribir MULB = 2147610648 (falta un paso), 9 ciclos después = 255000

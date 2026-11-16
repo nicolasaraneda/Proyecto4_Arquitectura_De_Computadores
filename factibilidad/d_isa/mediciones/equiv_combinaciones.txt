@@ -1,0 +1,20 @@
+Las combinaciones que caben, por el testbench oficial
+Generado por factibilidad/d_isa/tools/equiv_combinaciones.sh (make equiv-combinaciones). No editar a mano.
+
+Serie tb/practica.csv, 20000 ticks, período de la ronda 3 (100000 ns). Verilator.
+Copia parametrizada de tb/tb_proyecto_4.sv (cambian PROGRAMA, PERIODO_NS, NTICKS y el archivo de salida).
+'igual' significa decisiones.csv idéntico byte a byte al de ref/trader.py.
+
+core        combinación  programa     resultado  peor caso  definiciones
+base        media_mul     trade_media  4/4,igual        34  -DXD_EMAD=0 -DXD_DEVK=0 -DXD_MULSTEPALU
+base        alu_todo      trade_media  4/4,igual        34  -DXD_EMAD=0 -DXD_DEVK=0 -DXD_MULSTEPALU -DXD_SIMDALU=12
+base        alu_todo_div  trade_media  4/4,igual        34  -DXD_EMAD=0 -DXD_DEVK=0 -DXD_MULSTEPALU -DXD_SIMDALU=12 -DXD_DIVSTEP
+base        min_bandas    trade_emad   4/4,igual        44  -DXD_EMAD=0 -DXD_SIMD=28
+
+segmentado  media_mul     trade_media  4/4,igual        21  -DXD_EMAD=0 -DXD_DEVK=0 -DXD_MULSTEPALU
+segmentado  alu_todo      trade_media  4/4,igual        21  -DXD_EMAD=0 -DXD_DEVK=0 -DXD_MULSTEPALU -DXD_SIMDALU=12
+segmentado  alu_todo_div  trade_media  4/4,igual        21  -DXD_EMAD=0 -DXD_DEVK=0 -DXD_MULSTEPALU -DXD_SIMDALU=12 -DXD_DIVSTEP
+segmentado  min_bandas    trade_emad   4/4,igual        26  -DXD_EMAD=0 -DXD_SIMD=28
+
+'peor caso' es el de la respuesta (byte_done a DECISION) que informa el testbench oficial, en ciclos.
+PASS: las cuatro combinaciones entregan 4/4 y las mismas decisiones que ref/trader.py en los dos cores

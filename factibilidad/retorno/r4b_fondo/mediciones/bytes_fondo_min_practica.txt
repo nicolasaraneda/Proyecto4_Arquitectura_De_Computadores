@@ -1,0 +1,54 @@
+Flujo de bytes de DECISION: configuracion fondo_min, serie ../../../tb/practica.csv
+Comando: sh bytes.sh build/arnes fondo_min ../../../tb/practica.csv mediciones/bytes_fondo_min_practica.txt
+estrategia fondo_min (fondo:c=5,w0=6,w1=5,w2=5,m=2,v=9,mg=5,d=4,pp=1,vt=8), serie ../../../tb/practica.csv, 20000 ticks, precios iniciales sin ver 0
+patrimonio 26388 ordenes 614 comisiones 3070 perdida_maxima 6413 comprar_y_mantener 6497
+Bytes (uno por tick, el que la maestra lee en ese tick): 20000
+Huella md5 de build/bytes_fondo_min.hex: 4ce5af5bf2106e7820a14164199158e5
+Huella md5 de build/decisiones_fondo_min.csv: 125378b6979c5a983a721bfcd141f51a
+Huella md5 de build/traza_fondo_min.csv: 6991c9cedcfef4a266fc81434832108e
+Veces que aparece cada byte:
+  bf: 16958
+  7f: 3041
+  00: 1
+Bytes distintos: 3
+Primeros 80 bytes:
+00 bf bf bf bf 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 
+7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 
+7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f bf bf bf 
+bf bf bf bf bf bf bf bf bf bf bf bf bf bf bf bf bf bf bf bf 
+Primeras 12 filas de la traza (tick, precio, caja, acciones, pos0..2, desempeno0..2, pesos0..2, F, decision):
+tick,precio,caja,acciones,pos0,pos1,pos2,des0,des1,des2,w0,w1,w2,F,decision
+0,151,10000,0,0,0,0,0,0,0,6,5,5,0,bf
+1,148,10000,0,0,0,1,0,0,0,6,5,5,0,bf
+2,149,10000,0,0,0,1,0,0,-1,6,5,5,0,bf
+3,148,10000,0,0,0,1,0,0,-17,6,5,5,0,bf
+4,147,10000,0,1,0,1,0,0,-33,6,5,5,16,7f
+5,147,734,63,1,0,1,-1,0,-33,6,5,5,16,7f
+6,143,14,68,1,1,1,-65,0,-97,6,5,5,16,7f
+7,144,14,68,1,1,1,-49,-1,-81,6,5,5,16,7f
+8,145,14,68,1,1,1,-33,15,-65,6,5,5,16,7f
+9,147,14,68,1,1,1,-1,47,-33,6,5,5,16,7f
+10,149,14,68,1,1,1,31,79,-1,6,5,5,16,7f
+11,146,14,68,1,1,1,-17,31,-49,6,5,5,16,7f
+Filas 110 a 130 de la traza:
+109,156,9650,0,0,0,0,-82,-34,-114,6,5,5,0,bf
+110,155,9650,0,0,0,0,-82,-34,-114,6,5,5,0,bf
+111,156,9650,0,0,0,0,-82,-34,-114,6,5,5,0,bf
+112,155,9650,0,0,0,0,-82,-34,-114,6,5,5,0,bf
+113,155,9650,0,0,0,0,-82,-34,-114,6,5,5,0,bf
+114,157,9650,0,0,0,0,-82,-34,-114,6,5,5,0,bf
+115,159,9650,0,0,0,0,-82,-34,-114,6,5,5,0,bf
+116,156,9650,0,0,0,0,-82,-34,-114,6,5,5,0,bf
+117,158,9650,0,0,0,0,-82,-34,-114,6,5,5,0,bf
+118,159,9650,0,0,0,0,-82,-34,-114,6,5,5,0,bf
+119,158,9650,0,0,0,0,-82,-34,-114,6,5,5,0,bf
+120,159,9650,0,0,0,0,-82,-34,-114,6,5,5,0,bf
+121,160,9650,0,0,0,0,-82,-34,-114,6,5,5,0,bf
+122,159,9650,0,0,0,0,-82,-34,-114,6,5,5,0,bf
+123,163,9650,0,0,0,0,-82,-34,-114,6,5,5,0,bf
+124,165,9650,0,0,0,0,-82,-34,-114,6,5,5,0,bf
+125,163,9650,0,0,0,0,-82,-34,-114,6,5,5,0,bf
+126,161,9650,0,0,0,0,-82,-34,-114,6,5,5,0,bf
+127,163,9650,0,0,0,0,-82,-34,-114,6,5,5,0,bf
+128,165,9650,0,0,0,0,-82,-34,-114,6,5,5,0,bf
+129,164,9650,0,0,0,0,-82,-34,-114,6,5,5,0,bf

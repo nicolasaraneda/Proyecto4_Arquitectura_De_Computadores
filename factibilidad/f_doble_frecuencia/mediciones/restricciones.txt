@@ -1,0 +1,92 @@
+Restricciones del reloj doblado en nextpnr (nextpnr-0.11.1-19-g8dbcee5c)
+Diseño: rtl/placa_x2.v sin el anillo, cadena de 8 LUT, semilla 1. Dos relojes: el del pin y clk2x.
+
+1. Formas de restringir y objetivo que le queda a cada reloj
+  sin restricción:
+    Max frequency for clock 'i_Clk$SB_IO_IN_$glb_clk': 171.09 MHz (PASS at 12.00 MHz)
+    Max frequency for clock                   'clk2x': 128.06 MHz (PASS at 12.00 MHz)
+  --freq 50:
+    Max frequency for clock 'i_Clk$SB_IO_IN_$glb_clk': 171.09 MHz (PASS at 50.00 MHz)
+    Max frequency for clock                   'clk2x': 128.06 MHz (PASS at 50.00 MHz)
+  --freq 25 y --pre-pack restricciones/reloj_x2.py (ctx.addClock):
+    Max frequency for clock 'i_Clk$SB_IO_IN_$glb_clk': 171.09 MHz (PASS at 25.00 MHz)
+    Max frequency for clock                   'clk2x': 128.06 MHz (PASS at 50.00 MHz)
+  --sdc restricciones/relojes.sdc (create_clock):
+    Max frequency for clock 'i_Clk$SB_IO_IN_$glb_clk': 171.09 MHz (PASS at 25.00 MHz)
+    Max frequency for clock                   'clk2x': 128.06 MHz (PASS at 50.00 MHz)
+
+2. Comandos de SDC (cada uno agregado a relojes.sdc, solo hasta el empaquetado)
+  acepta    create_clock -period 20 -name otro [get_nets clk2x]
+  rechaza   create_clock -period 20 -waveform {0 8} -name otro [get_nets clk2x]
+              ERROR: unsupported argument '-waveform' to create_clock
+  rechaza   create_generated_clock -name gen -source [get_ports i_Clk] -multiply_by 2 [get_nets clk2x]
+              ERROR: Unsupported SDC command 'create_generated_clock'
+  rechaza   set_clock_groups -asynchronous -group osc -group clk2x
+              ERROR: Unsupported SDC command 'set_clock_groups'
+  rechaza   set_clock_uncertainty 0.5 osc
+              ERROR: Unsupported SDC command 'set_clock_uncertainty'
+  rechaza   set_clock_latency 3 clk2x
+              ERROR: Unsupported SDC command 'set_clock_latency'
+  rechaza   set_max_delay 5 -from [get_ports i_Clk] -to [get_ports o_Prueba]
+              ERROR: Unsupported SDC command 'set_max_delay'
+  rechaza   set_input_delay 2 -clock osc [get_ports {i_Switch[0]}]
+              ERROR: Unsupported SDC command 'set_input_delay'
+  rechaza   set_multicycle_path 2 -from [get_ports i_Clk] -to [get_ports o_Prueba]
+              ERROR: Unsupported SDC command 'set_multicycle_path'
+  acepta    set_false_path -from [get_ports i_Clk] -to [get_ports o_Prueba]
+  rechaza   set_false_path -from [get_clocks osc] -to [get_clocks clk2x]
+              ERROR: Unsupported SDC command 'get_clocks'
+
+3. Relación entre los dos relojes según nextpnr (--sdc, después de rutear)
+    Max frequency for posedge clk2x                   -> posedge i_Clk$SB_IO_IN_$glb_clk: 658.33 MHz (PASS at 25.00 MHz)
+    Max frequency for posedge i_Clk$SB_IO_IN_$glb_clk -> posedge clk2x                  : 489.24 MHz (PASS at 25.00 MHz)
+    Clock to clock delay posedge i_Clk$SB_IO_IN_$glb_clk -> posedge clk2x                  : 0.45 ns
+    Clock to clock delay posedge clk2x                   -> posedge i_Clk$SB_IO_IN_$glb_clk: -0.45 ns
+    Max delay <async>                         -> <async>                        : 16.30 ns
+    Max delay <async>                         -> posedge clk2x                  : 2.06 ns
+    Max delay <async>                         -> posedge i_Clk$SB_IO_IN_$glb_clk: 2.06 ns
+    Max delay posedge clk2x                   -> <async>                        : 5.48 ns
+    Max delay posedge clk2x                   -> posedge i_Clk$SB_IO_IN_$glb_clk: 1.52 ns
+    Max delay posedge i_Clk$SB_IO_IN_$glb_clk -> <async>                        : 6.08 ns
+    Max delay posedge i_Clk$SB_IO_IN_$glb_clk -> posedge clk2x                  : 2.04 ns
+  Con --ignore-rel-clk:
+    Max frequency for posedge clk2x                   -> posedge i_Clk$SB_IO_IN_$glb_clk: 658.33 MHz (PASS at 25.00 MHz)
+    Max frequency for posedge i_Clk$SB_IO_IN_$glb_clk -> posedge clk2x                  : 489.24 MHz (PASS at 25.00 MHz)
+    Clock to clock delay posedge i_Clk$SB_IO_IN_$glb_clk -> posedge clk2x                  : 0.45 ns
+    Clock to clock delay posedge clk2x                   -> posedge i_Clk$SB_IO_IN_$glb_clk: -0.45 ns
+  El mismo dato con otros largos de cadena (si nextpnr viera la cadena, cambiaría):
+    N = 4: Clock to clock delay posedge i_Clk$SB_IO_IN_$glb_clk -> posedge clk2x                  : 0.45 ns
+            Max delay <async>                         -> <async>                        : 11.89 ns
+    N = 16: Clock to clock delay posedge i_Clk$SB_IO_IN_$glb_clk -> posedge clk2x                  : 0.45 ns
+            Max delay <async>                         -> <async>                        : 23.95 ns
+    N = 8: Clock to clock delay posedge i_Clk$SB_IO_IN_$glb_clk -> posedge clk2x                  : 0.45 ns
+            Max delay <async>                         -> <async>                        : 16.30 ns
+
+4. ¿Aparece la cadena en alguna ruta que nextpnr informa? (--sdc, después de rutear)
+    ruta crítica for clock 'clk2x': 0 LUT de la cadena
+    ruta crítica for clock 'i_Clk: 0 LUT de la cadena
+    ruta crítica for cross-domain path '<async>' -> '<async>': 8 LUT de la cadena
+    ruta crítica for cross-domain path '<async>' -> 'posedge clk2x': 0 LUT de la cadena
+    ruta crítica for cross-domain path 'posedge i_Clk$SB_IO_IN_$glb_clk' -> 'posedge clk2x': 0 LUT de la cadena
+  La cadena aparece solo en la ruta combinacional de pin a pin (i_Clk hasta o_Prueba, el pin de prueba),
+  que nextpnr informa como retardo sin compararlo con nada. En las rutas de los dos relojes no está:
+  para nextpnr el reloj doblado nace en la salida del buffer global.
+
+5. icetime sobre el mismo diseño ruteado (--sdc)
+    Total path delay: 16.10 ns (62.12 MHz)
+    // Checking 20.00 ns (50.00 MHz) clock constraint: PASSED.
+    primera y última celda de la ruta que informa:
+      pre_io_0_8_1 (PRE_IO) [clk] -> DIN0: 0.240 ns
+      pre_io_13_9_0 (PRE_IO) DOUT0 [setup]: 0.070 ns
+    tramos de la cadena en esa ruta: 16
+
+6. En el SoC con el reloj doblado (Espino base, semilla 1, ctx.addClock a 50 MHz)
+    Max frequency for clock 'clk': 45.22 MHz (FAIL at 50.00 MHz)
+    Max delay <async>     -> posedge clk: 2.07 ns
+    Max delay posedge clk -> <async>    : 3.59 ns
+  Ruta crítica de las entradas asíncronas (SCLK, MOSI, CS_n e interruptores) al reloj doblado:
+      source  0.00  0.00 Source i_SPI_MOSI$sb_io.D_IN_0
+      Sink u_spi.mosi_sync_SB_DFFR_Q_DFFLC.I0
+      setup  0.47  2.07 Source u_spi.mosi_sync_SB_DFFR_Q_DFFLC.I0
+      0.47 ns logic, 1.60 ns routing
+  icetime: Total path delay: 22.26 ns (44.93 MHz)

@@ -1,0 +1,9 @@
+Copia del nucleo para la cota: 2 lineas cambiadas en nucleo.c, los otros 6 archivos identicos.
+27c27
+<   int q = decision & 63, accion = (decision >> 6) & 3, hecho = 0;
+---
+>   int q = (decision & 63) | ((decision >> 8) << 6), accion = (decision >> 6) & 3, hecho = 0;   /* COTA: cantidad ancha */
+156c156
+<   return i->e->decidir(i->estado, precio, propia) & 0xFF;
+---
+>   return i->e->decidir(i->estado, precio, propia) & 0x3FFFFFFF;   /* COTA: deja pasar la cantidad ancha */

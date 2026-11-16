@@ -1,0 +1,44 @@
+Propiedades formales de estructura del barrel sobre el core con la extensión (SymbiYosys)
+Generado por factibilidad/i_integrado/tools/formal.sh (make formal). No editar a mano.
+
+Herramientas:
+  Yosys 0.68+195 (git sha1 435977e97-dirty, Release, Clang /usr/bin/clang++ 21.1.8)
+  "nextpnr-ice40" -- Next Generation Place and Route (Version nextpnr-0.11.1-19-g8dbcee5c)
+  Icarus Verilog version 14.0 (devel) (s20260301-403-g5ab23063f-dirty)
+Commit de partida: 9b82e81 (rama factibilidad-fondo)
+  SBY v0.68
+
+Propiedades: factibilidad/a_barrel/formal/propiedades.vh, sin modificar (sha256 b7a869eb4651a7c8...),
+insertadas en una copia de factibilidad/i_integrado/rtl/espino_barrel_core.v. Afirmaciones (assert) en el archivo: 24.
+Entradas libres: la instrucción que entrega la memoria, el dato del bus y lo que entrega el banco de registros.
+
+Configuración ref: sin definiciones (control: es el prototipo del barrel)   []
+   PASS invariantes P1 a P8, por inducción (profundidad 10), banco con cualquier valor
+   PASS P1 a P9 desde el reset, 12 ciclos, para cualquier contenido de la memoria
+   PASS P1 a P8 más P10 y P11, por inducción (profundidad 10), banco que devuelve sus direcciones
+Configuración media_mul: (b) emad, devk y mulstep en el sumador de la ALU   [-DXD_EMAD=0 -DXD_DEVK=0 -DXD_MULSTEPALU]
+   PASS invariantes P1 a P8, por inducción (profundidad 10), banco con cualquier valor
+   PASS P1 a P9 desde el reset, 12 ciclos, para cualquier contenido de la memoria
+   PASS P1 a P8 más P10 y P11, por inducción (profundidad 10), banco que devuelve sus direcciones
+Configuración alu_todo_div: (c) y (e): xd_alu en vez de espino_alu, más divstep por xd_unit   [-DXD_EMAD=0 -DXD_DEVK=0 -DXD_MULSTEPALU -DXD_SIMDALU=12 -DXD_DIVSTEP]
+   PASS invariantes P1 a P8, por inducción (profundidad 10), banco con cualquier valor
+   PASS P1 a P9 desde el reset, 12 ciclos, para cualquier contenido de la memoria
+   PASS P1 a P8 más P10 y P11, por inducción (profundidad 10), banco que devuelve sus direcciones
+Configuración bandas_div: (d) y (e): carriles en unidad aparte más divstep (no cabe en la FPGA)   [-DXD_EMAD=0 -DXD_DEVK=0 -DXD_MULSTEPALU -DXD_SIMD=28 -DXD_DIVSTEP]
+   PASS invariantes P1 a P8, por inducción (profundidad 10), banco con cualquier valor
+   PASS P1 a P9 desde el reset, 12 ciclos, para cualquier contenido de la memoria
+   PASS P1 a P8 más P10 y P11, por inducción (profundidad 10), banco que devuelve sus direcciones
+
+PASS cobertura (configuración media_mul): existe una ejecución que llega al ciclo 6 con una escritura al banco
+
+Controles negativos: las mismas tareas sobre el core (configuración media_mul) con un error de estructura puesto a propósito
+PASS ctx_escritura: hace fallar: operandos
+      El resultado se escribe en el contexto del hilo que esta en X, no en el del que esta en M
+PASS ctx_lectura_rs1: hace fallar: operandos
+      rs1 se lee del contexto del hilo que esta en F
+PASS x0: hace fallar: invariantes arranque operandos
+      Se permite escribir x0
+PASS rd_otro_hilo: hace fallar: invariantes arranque operandos
+      El registro destino sale de la instruccion que esta en R
+
+RESULTADO: PASS, las propiedades valen en las 4 configuraciones y 4 de 4 errores puestos a propósito las hacen fallar

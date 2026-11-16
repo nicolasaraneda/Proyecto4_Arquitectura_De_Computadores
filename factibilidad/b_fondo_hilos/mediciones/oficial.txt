@@ -1,0 +1,35 @@
+Testbench oficial sin modificar con el fondo de cuatro hilos (sw/fondo.s) en el Espino barrel
+Generado por factibilidad/b_fondo_hilos/tools/oficial.sh (make oficial). No editar a mano.
+
+Herramientas:
+  Yosys 0.68+195 (git sha1 435977e97-dirty, Release, Clang /usr/bin/clang++ 21.1.8)
+  Icarus Verilog version 14.0 (devel) (s20260301-403-g5ab23063f-dirty)
+  Verilator 5.053 devel rev v5.052-22-g7cf8c5cca (mod)
+Commit de partida: 9b82e81 (rama factibilidad-fondo)
+tb/tb_proyecto_4.sv: sin cambios respecto del repositorio (sha256 f83486755fe2b3de...)
+Simulador: Icarus Verilog, 115 s de simulacion
+
+--- Salida del testbench oficial ---
+Patrimonio final:          9661
+Ordenes ejecutadas:        74
+Perdida maxima:            1846
+No operar:                 10000
+Comprar y mantener:        6695
+Peor caso precio->decision: 439 ciclos (disponibles: 2262)
+Detalle por tick en decisiones.csv
+PASS MISO sin valores X
+PASS el programa escribe DECISION
+PASS el programa lee todos los precios
+PASS la decision llega antes del siguiente tick
+Testbenchs aprobados: 4/4
+
+--- Referencia en C: fondo_min, 2 precios iniciales sin ver (llegan durante el reset de encendido) ---
+estrategia fondo_min (fondo:c=5,w0=6,w1=5,w2=5,m=2,v=9,mg=5,d=4,pp=1,vt=8), serie tb/practica.csv, 2000 ticks, precios iniciales sin ver 2
+patrimonio 9661 ordenes 74 comisiones 370 perdida_maxima 1846 comprar_y_mantener 6695
+
+--- Comparacion de decisiones.csv ---
+barrel:     2001 lineas, sha256 a14ca64278b7b0d4...
+referencia: 2001 lineas, sha256 a14ca64278b7b0d4...
+PASS decisiones.csv del testbench oficial es identico byte a byte al de la referencia en C (2000 ticks)
+Bytes distintos en el flujo: 00 x 3  7f x 556  bf x 1441  
+PASS el testbench oficial entrega 4/4

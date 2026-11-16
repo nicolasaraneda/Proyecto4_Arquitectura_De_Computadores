@@ -1,0 +1,26 @@
+Comprobacion independiente de las series guardadas
+PASS  bloques_n2000: los 10 tramos de 2000 ticks de tb/practica.csv, en orden
+PASS  practica_n20000: tb/practica.csv completa (20000 ticks, precio entre 72 y 190)
+PASS  77 archivos, 89711 series: tamano segun la cabecera y precios entre 1 y 255 (0 archivos con problemas)
+PASS  cantidad de series y largo segun el nombre de cada archivo (0 distintos)
+PASS  huella sha256 igual a la de mediciones/series_manifiesto.txt (0 distintas)
+PASS  225 series regeneradas con ref/series.py (ultima, medio mas uno y una al azar de cada archivo): 0 distintas
+PASS  series repetidas dentro de un mismo archivo (sin contar las degeneradas): 0
+PASS  series repetidas entre semillas de una misma familia y largo: 0 en 48 pares de archivos
+Semillas generadas: 2000 ticks: [0, 1, 2]; 20000 ticks: [0, 2]
+
+Cronologia de la semilla reservada (2): fecha de modificacion de lo que fija el estudio y de sus resultados
+  nucleo/e_param.c         13/11 20:39:53
+  nucleo/e_rivales.c       13/11 20:39:53
+  nucleo/nucleo.c          14/11 01:20:03
+  nucleo/nucleo.h          14/11 01:19:55
+  nucleo/torneo.c          14/11 01:19:55
+  nucleo/torneo.h          14/11 01:09:18
+  nucleo/main.c            14/11 07:59:03
+  pruebas/veredictos.py    14/11 01:12:54
+  pruebas/tablas.py        14/11 01:15:46
+  resultados de la semilla 0: 2280 archivos, del 14/11 01:20:08 al 14/11 01:21:47
+  resultados de la semilla 2: 2280 archivos, del 14/11 02:34:04 al 14/11 02:34:38
+AVISO  el primer resultado guardado de la semilla 2 es anterior a la ultima modificacion de los fuentes que fijan candidatos, rivales, campos, umbrales y criterio (14/11 07:59:03)
+  (indicio, no prueba: las fechas no dicen que nadie haya mirado la semilla 2 antes por otra via)
+PASS

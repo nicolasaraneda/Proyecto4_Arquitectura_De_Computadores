@@ -1,0 +1,32 @@
+Equivalencia con el aprendizaje apagado: cada estructura contra max_media, serie por serie.
+Columnas: estructura, lotes, series, ticks, series con resultado distinto, ticks con decision distinta.
+tabla:cmp=1 | 32 | 33561 | 264240000 | 0 | 0
+tabla:cmp=1,sh=4,nb=64 | 32 | 33561 | 264240000 | 0 | 0
+tabla:cmp=1,sh=3,nb=64 | 32 | 33561 | 264240000 | 0 | 0
+tabla:cmp=1,nb=16 | 32 | 33561 | 264240000 | 0 | 0
+tabla:cmp=1,ter=1 | 32 | 33561 | 264240000 | 0 | 0
+tabla:cmp=1,ter=2 | 32 | 33561 | 264240000 | 0 | 0
+tabla:cmp=1,ter=3,filas=2 | 32 | 33561 | 264240000 | 0 | 0
+tabla:cmp=1,filas=2,c=8 | 32 | 33561 | 264240000 | 0 | 0
+tabla:cmp=1,c=64,h=64 | 32 | 33561 | 264240000 | 0 | 0
+tabla:cmp=1,ui=48,uo=-48 | 32 | 33561 | 264240000 | 0 | 0
+tabla:cmp=1,ui=-48,uo=48 | 32 | 33561 | 264240000 | 0 | 0
+tabla:cmp=1,modo=1,bits=4 | 32 | 33561 | 264240000 | 0 | 0
+tabla:cmp=1,modo=1,bits=8,filas=2,ter=1 | 32 | 33561 | 264240000 | 0 | 0
+tabla:cmp=1,banda=1,lim=2 | 32 | 33561 | 264240000 | 0 | 0
+tabla:cmp=1,banda=1,ter=2,sh=4,nb=64 | 32 | 33561 | 264240000 | 0 | 0
+mm_patron:cmp=1,apr=0 | 32 | 33561 | 264240000 | 0 | 0
+mm_patron:cmp=1,apr=0,fe=2,fs=2,tipo=3,sim=3,H=6 | 32 | 33561 | 264240000 | 0 | 0
+mm_patron:cmp=1,apr=0,fe=2,fs=2,tipo=1,H=12,bits=3 | 32 | 33561 | 264240000 | 0 | 0
+
+Control negativo (tabla:cmp=1,ka=8 en remuestreo_s0_n2000): 1075465 ticks con decision distinta (debe ser mayor que cero)
+Control negativo (tabla:cmp=1,ui=80 en remuestreo_s0_n2000): 584162 ticks con decision distinta (debe ser mayor que cero)
+
+decisiones.csv en la serie de practica completa (20000 filas):
+  tabla: identico byte a byte a max_media
+  filtro: identico byte a byte a max_media
+  max_media: patrimonio 25973 ordenes 624 comisiones 3120 perdida_maxima 6295 comprar_y_mantener 6497
+  tabla:     patrimonio 25973 ordenes 624 comisiones 3120 perdida_maxima 6295 comprar_y_mantener 6497
+
+TOTAL: 604098 corridas de series, 0 con resultado distinto, 0 ticks con decision distinta
+EQUIVALENCIA: OK

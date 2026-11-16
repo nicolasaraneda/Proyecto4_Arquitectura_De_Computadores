@@ -1,0 +1,51 @@
+# Control: ejec sin opciones (debe dar cero en todo)
+ejec
+# (a) no mandar compras residuales de menos de m acciones
+ejec:m=2
+ejec:m=4
+ejec:m=6
+ejec:m=8
+ejec:m=10
+ejec:m=12
+ejec:m=16
+ejec:m=24
+ejec:m=32
+# (a) quedarse con las acciones si son menos de mv (no vender residuales)
+ejec:mv=8
+ejec:mv=16
+# (b) tope de la posicion en K ordenes
+ejec:K=1
+ejec:K=2
+ejec:K=3
+# (b) tope de la posicion en F/16 del patrimonio
+ejec:F=8
+ejec:F=12
+ejec:F=14
+# (c) entrada escalonada que empieza antes: la ultima orden en E, las anteriores eo antes
+ejec:eo=16
+ejec:eo=32
+# (c) entrada anticipada completa, proporcional a las ordenes que hacen falta
+ejec:ec=1,eo=8
+ejec:ec=1,eo=16
+ejec:ec=1,eo=32
+# (e) tamano segun la profundidad: la primera orden en E, las siguientes eo mas abajo
+ejec:ea=0,eo=16
+ejec:ea=0,eo=32
+ejec:ea=0,eo=64
+# (c) salida escalonada que empieza antes: la ultima orden en X, las anteriores xo antes
+ejec:xo=16
+ejec:xo=32
+# (c) salida escalonada hacia arriba: la primera orden en X, las siguientes xo despues
+ejec:xa=0,xo=16
+ejec:xa=0,xo=32
+# (d) salida anticipada completa, proporcional a las ordenes que hacen falta
+ejec:xc=1,xo=8
+ejec:xc=1,xo=16
+ejec:xc=1,xo=32
+# (f) no recomprar con la posicion completa
+ejec:nr=1
+# (f) sin contabilidad: comprar solo en los primeros nt ticks de la entrada
+ejec:nt=2
+ejec:nt=3
+ejec:nt=4
+ejec:nt=6

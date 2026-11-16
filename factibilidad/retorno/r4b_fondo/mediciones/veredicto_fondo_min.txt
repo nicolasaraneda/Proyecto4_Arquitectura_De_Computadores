@@ -1,0 +1,72 @@
+Veredicto del criterio de corte: fondo_min contra max_media
+Semilla 0 (exploracion), campo mixto, G = 10 rivales, caja 10000, comision 5.
+Puntos de 0 a 2. dif = candidata - referencia, pareada. Juicio con dos errores estandar.
+Series: todas, o interiores (precio siempre entre 21 y 249). H3s y H3r: lineal sobre la suma del patrimonio y sobre
+la suma de W/B&H de las tres rondas; su p5 es el de esos mismos puntos.
+
+largo  series     conjunto        |    cand     ref      dif   +-ee media    | p5 cand  p5 ref      dif   +-ee p5 (3r)  | fila
+2000   todas      evidencia  H3a  |   1.503   1.503   +0.000  0.000 igual    |   0.882   0.882   +0.000  0.002 igual    | no pasa
+2000   todas      evidencia  H3b  |   1.474   1.473   +0.000  0.000 igual    |   0.917   0.911   +0.006  0.007 igual    | no pasa
+2000   todas      evidencia  H3s  |   1.733   1.733   -0.000  0.000 igual    |   0.800   0.795   +0.004  0.004 igual    | (informativa)
+2000   todas      evidencia  H3r  |   1.740   1.740   -0.000  0.000 igual    |   0.801   0.798   +0.003  0.006 igual    | (informativa)
+2000   todas      evidencia  H1   |   10983   10982       +1      1 igual    |    8752    8754       -2                 | (informativa: patrimonio, n = 10000)
+2000   todas      remuestreo H3a  |   1.528   1.529   -0.000  0.000 igual    |   0.917   0.916   +0.000  0.003 igual    | (informativa)
+2000   todas      remuestreo H3b  |   1.498   1.498   +0.000  0.000 igual    |   0.922   0.922   +0.000  0.006 igual    | (informativa)
+2000   todas      remuestreo H1   |   10869   10868       +0      1 igual    |    8866    8866       +0                 | (informativa: patrimonio, n = 5000)
+2000   todas      plausibles H3a  |   1.480   1.481   -0.000  0.000 igual    |   0.840   0.841   -0.001  0.003 igual    | (informativa)
+2000   todas      plausibles H3b  |   1.449   1.449   -0.000  0.000 igual    |   0.867   0.867   +0.000  0.010 igual    | (informativa)
+2000   todas      plausibles H1   |   11067   11066       +2      1 igual    |    8621    8621       +0                 | (informativa: patrimonio, n = 10000)
+2000   todas      estres     H3a  |   1.178   1.177   +0.001  0.000 mejora   |   0.423   0.425   -0.002  0.005 igual    | (informativa)
+2000   todas      estres     H3b  |   1.214   1.212   +0.002  0.001 mejora   |   0.561   0.556   +0.006  0.009 igual    | (informativa)
+2000   todas      estres     H1   |   13201   13174      +27      9 mejora   |    5326    5323       +3                 | (informativa: patrimonio, n = 7000)
+
+20000  interiores evidencia  H3a  |   1.836   1.855   -0.018  0.002 empeora  |   1.494   1.502   -0.007  0.015 igual    | no pasa
+20000  interiores evidencia  H3b  |   1.818   1.821   -0.003  0.002 igual    |   1.467   1.522   -0.056  0.021 empeora  | no pasa
+20000  interiores evidencia  H3s  |   1.918   1.930   -0.012  0.003 empeora  |   1.564   1.550   +0.014  0.022 igual    | (informativa)
+20000  interiores evidencia  H3r  |   1.912   1.929   -0.017  0.003 empeora  |   1.539   1.540   -0.001  0.023 igual    | (informativa)
+20000  interiores evidencia  H1   |   27135   26534     +602     86 mejora   |   10935   10987      -52                 | (informativa: patrimonio, n = 4021)
+20000  interiores remuestreo H3a  |   1.867   1.907   -0.040  0.003 empeora  |   1.576   1.631   -0.055  0.019 empeora  | (informativa)
+20000  interiores remuestreo H3b  |   1.837   1.859   -0.022  0.002 empeora  |   1.528   1.611   -0.083  0.026 empeora  | (informativa)
+20000  interiores remuestreo H1   |   26553   26904     -351     79 empeora  |   12292   12488     -196                 | (informativa: patrimonio, n = 1960)
+20000  interiores plausibles H3a  |   1.806   1.804   +0.002  0.003 igual    |   1.429   1.414   +0.015  0.021 igual    | (informativa)
+20000  interiores plausibles H3b  |   1.795   1.782   +0.014  0.003 mejora   |   1.450   1.450   -0.000  0.027 igual    | (informativa)
+20000  interiores plausibles H1   |   27689   26181    +1508    147 mejora   |   10042   10081      -39                 | (informativa: patrimonio, n = 2061)
+20000  interiores estres     H3a  |   1.658   1.559   +0.099  0.007 mejora   |   1.006   0.961   +0.045  0.064 igual    | (informativa)
+20000  interiores estres     H3b  |   1.660   1.570   +0.090  0.006 mejora   |   0.978   0.989   -0.011  0.061 igual    | (informativa)
+20000  interiores estres     H1   |   94600   51265   +43335   2320 mejora   |    5759    5976     -217                 | (informativa: patrimonio, n = 602)
+
+20000  todas      evidencia  H3a  |   1.813   1.825   -0.013  0.002 empeora  |   1.402   1.397   +0.005  0.011 igual    | (informativa)
+20000  todas      evidencia  H3b  |   1.820   1.818   +0.002  0.001 igual    |   1.467   1.500   -0.033  0.017 igual    | (informativa)
+20000  todas      evidencia  H3s  |   1.883   1.883   +0.000  0.003 igual    |   1.345   1.308   +0.037  0.020 igual    | (informativa)
+20000  todas      evidencia  H3r  |   1.862   1.867   -0.005  0.003 igual    |   1.242   1.216   +0.026  0.024 igual    | (informativa)
+20000  todas      evidencia  H1   |   56195   52212    +3982    256 mejora   |   11309   11310       -1                 | (informativa: patrimonio, n = 8000)
+20000  todas      remuestreo H3a  |   1.828   1.859   -0.031  0.003 empeora  |   1.445   1.465   -0.020  0.017 igual    | (informativa)
+20000  todas      remuestreo H3b  |   1.832   1.845   -0.013  0.002 empeora  |   1.528   1.583   -0.056  0.023 empeora  | (informativa)
+20000  todas      remuestreo H1   |   48292   46215    +2077    262 mejora   |   12322   12488     -166                 | (informativa: patrimonio, n = 4000)
+20000  todas      plausibles H3a  |   1.799   1.794   +0.005  0.003 mejora   |   1.389   1.358   +0.030  0.017 igual    | (informativa)
+20000  todas      plausibles H3b  |   1.805   1.788   +0.017  0.002 mejora   |   1.461   1.461   +0.000  0.020 igual    | (informativa)
+20000  todas      plausibles H1   |   64097   58209    +5888    439 mejora   |   10617   10400     +217                 | (informativa: patrimonio, n = 4000)
+20000  todas      estres     H3a  |   1.467   1.433   +0.034  0.004 mejora   |   0.723   0.700   +0.022  0.018 igual    | (informativa)
+20000  todas      estres     H3b  |   1.554   1.518   +0.036  0.004 mejora   |   0.906   0.889   +0.017  0.028 igual    | (informativa)
+20000  todas      estres     H1   |  206488  182161   +24327   1446 mejora   |    3207    3059     +148                 | (informativa: patrimonio, n = 2800)
+
+20000  parada     evidencia  H3a  |   1.702   1.721   -0.019  0.002 empeora  |   1.217   1.232   -0.015  0.011 igual    | (informativa)
+20000  parada     evidencia  H3b  |   1.703   1.708   -0.005  0.002 empeora  |   1.267   1.283   -0.017  0.015 igual    | (informativa)
+20000  parada     evidencia  H3s  |   1.895   1.913   -0.018  0.002 empeora  |   1.470   1.486   -0.016  0.016 igual    | (informativa)
+20000  parada     evidencia  H3r  |   1.856   1.880   -0.024  0.002 empeora  |   1.325   1.357   -0.033  0.017 igual    | (informativa)
+20000  parada     evidencia  H1   |   21852   21556     +296     50 mejora   |    6492    6689     -197                 | (informativa: patrimonio, n = 8000)
+
+Criterio: en evidencia, una fila H3a o H3b pasa si la media de los puntos mejora en mas de 2 ee y el p5 de la
+competencia de tres rondas no baja en mas de 2 ee. A 20000 ticks cuentan las series interiores.
+Parada: todas las series de la evidencia, cada una solo hasta el primer precio fuera de 21 a 249 (minimo 200 ticks).
+No selecciona por la trayectoria futura. Es informativa: si no confirma el signo de las interiores, el resultado
+a 20000 ticks depende del filtro y no se debe dar por bueno.
+Filas que no pasan:
+  2000 ticks, H3a: no mejora los puntos esperados (la diferencia no se distingue del ruido)
+  2000 ticks, H3b: no mejora los puntos esperados (la diferencia no se distingue del ruido)
+  20000 ticks, H3a: empeora los puntos esperados
+  20000 ticks, H3b: no mejora los puntos esperados (la diferencia no se distingue del ruido)
+Veredicto literal (solo el signo de las estimaciones, sin error): no pasa
+VEREDICTO 2000: NO_PASA
+VEREDICTO 20000: NO_PASA
+VEREDICTO: NO_PASA (4 filas de evidencia)

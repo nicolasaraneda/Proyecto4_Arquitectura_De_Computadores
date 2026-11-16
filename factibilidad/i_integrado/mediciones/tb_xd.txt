@@ -1,0 +1,38 @@
+Instrucciones nuevas en los cuatro hilos del barrel, contra el modelo ref/xd.py de factibilidad/d_isa
+Generado por factibilidad/i_integrado/tools/tb_xd.sh 200 10 (make tb-xd). No editar a mano.
+
+Herramientas:
+  Yosys 0.68+195 (git sha1 435977e97-dirty, Release, Clang /usr/bin/clang++ 21.1.8)
+  "nextpnr-ice40" -- Next Generation Place and Route (Version nextpnr-0.11.1-19-g8dbcee5c)
+  Icarus Verilog version 14.0 (devel) (s20260301-403-g5ab23063f-dirty)
+Commit de partida: 8c14283 (rama factibilidad-fondo)
+
+Por variante: 200 programas con los cuatro hilos a la vez (un programa distinto por hilo) y 10 programas
+por hilo con ese hilo solo. Cada escritura al banco de registros de cada hilo se compara con el modelo.
+
+PASS emad_k5        240 de 240 programas; instrucciones nuevas por hilo 6323 6220 6307 6367 (total 25217); escrituras identicas al modelo por hilo 21182 21151 21150 21137 (total 84620)
+     (a) emad, k = 5   [-DXD_EMAD=0]
+PASS media_k5       240 de 240 programas; instrucciones nuevas por hilo 6323 6220 6307 6367 (total 25217); escrituras identicas al modelo por hilo 21182 21151 21150 21137 (total 84620)
+     emad y devk, k = 5   [-DXD_EMAD=0 -DXD_DEVK=0]
+PASS media_mul      240 de 240 programas; instrucciones nuevas por hilo 6369 6299 6270 6293 (total 25231); escrituras identicas al modelo por hilo 21137 21206 21152 21182 (total 84677)
+     (b) emad, devk y mulstep en el sumador de la ALU   [-DXD_EMAD=0 -DXD_DEVK=0 -DXD_MULSTEPALU]
+PASS alu_todo       240 de 240 programas; instrucciones nuevas por hilo 6366 6374 6350 6219 (total 25309); escrituras identicas al modelo por hilo 21176 21184 21116 21137 (total 84613)
+     (c) lo anterior más los carriles de bandas en la ALU   [-DXD_EMAD=0 -DXD_DEVK=0 -DXD_MULSTEPALU -DXD_SIMDALU=12]
+PASS media_bandas   240 de 240 programas; instrucciones nuevas por hilo 6361 6372 6298 6258 (total 25289); escrituras identicas al modelo por hilo 21149 21168 21162 21174 (total 84653)
+     (d) lo anterior con los carriles de bandas en unidad aparte   [-DXD_EMAD=0 -DXD_DEVK=0 -DXD_MULSTEPALU -DXD_SIMD=28]
+PASS media_muldiv   240 de 240 programas; instrucciones nuevas por hilo 6384 6334 6289 6272 (total 25279); escrituras identicas al modelo por hilo 21181 21192 21163 21166 (total 84702)
+     (e) el recomendado más divstep   [-DXD_EMAD=0 -DXD_DEVK=0 -DXD_MULSTEPALU -DXD_DIVSTEP]
+PASS alu_todo_div   240 de 240 programas; instrucciones nuevas por hilo 6339 6368 6281 6252 (total 25240); escrituras identicas al modelo por hilo 21158 21164 21139 21166 (total 84627)
+     (e) carriles en la ALU más divstep   [-DXD_EMAD=0 -DXD_DEVK=0 -DXD_MULSTEPALU -DXD_SIMDALU=12 -DXD_DIVSTEP]
+PASS bandas_div     240 de 240 programas; instrucciones nuevas por hilo 6337 6376 6313 6294 (total 25320); escrituras identicas al modelo por hilo 21154 21179 21173 21167 (total 84673)
+     (e) carriles en unidad aparte más divstep (no cabe en la FPGA)   [-DXD_EMAD=0 -DXD_DEVK=0 -DXD_MULSTEPALU -DXD_SIMD=28 -DXD_DIVSTEP]
+PASS i1a            240 de 240 programas; instrucciones nuevas por hilo 6369 6299 6270 6293 (total 25231); escrituras identicas al modelo por hilo 21137 21206 21152 21182 (total 84677)
+     I1: el recomendado con vigilante y tabla de 256 x 16   [-DXD_EMAD=0 -DXD_DEVK=0 -DXD_MULSTEPALU -DI_VIGILANTE -DI_TABLA=1]
+PASS i1b            240 de 240 programas; instrucciones nuevas por hilo 6369 6299 6270 6293 (total 25231); escrituras identicas al modelo por hilo 21137 21206 21152 21182 (total 84677)
+     I1 con la tabla en otras 512 palabras de datos   [-DXD_EMAD=0 -DXD_DEVK=0 -DXD_MULSTEPALU -DI_VIGILANTE -DI_TABLA=2]
+PASS todo_autonomo  240 de 240 programas; instrucciones nuevas por hilo 6291 6292 6278 6256 (total 25117); escrituras identicas al modelo por hilo 21166 21187 21137 21166 (total 84656)
+     todas las instrucciones con todos los k, en unidad aparte (no cabe en la FPGA)   [-DXD_EMA=5 -DXD_SRAK=5 -DXD_SIMD=31 -DXD_MULSTEP -DXD_DIVSTEP -DXD_MULC=16]
+PASS todo_alu       240 de 240 programas; instrucciones nuevas por hilo 6397 6358 6313 6259 (total 25327); escrituras identicas al modelo por hilo 21159 21196 21153 21187 (total 84695)
+     todas con todos los k, compartiendo la ALU donde se puede (no cabe en la FPGA)   [-DXD_EMA=5 -DXD_EMAALU -DXD_EMAD=5 -DXD_DEVK=5 -DXD_SRAK=5 -DXD_SIMD=31 -DXD_MULSTEPALU -DXD_DIVSTEP -DXD_MULC=16]
+
+RESULTADO: PASS, todas las variantes coinciden con el modelo en los cuatro hilos

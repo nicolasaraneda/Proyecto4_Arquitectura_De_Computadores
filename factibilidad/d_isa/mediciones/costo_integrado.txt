@@ -1,0 +1,81 @@
+Costo de la extensión de la ISA integrada en el core segmentado
+Generado por factibilidad/d_isa/tools/costo_integrado.sh (make costo-integrado). No editar a mano.
+
+Herramientas: Yosys 0.68+195, nextpnr nextpnr-0.11.1-19-g8dbcee5c
+Flujo: tools/medir_variante.sh, nextpnr-ice40 --hx1k --package vq100 --freq 25, goboard.pcf, semillas 1 a 10.
+SoC completo (core, memoria, esclavo SPI, periféricos y reset) con sw/trade.hex. La FPGA tiene 1280 celdas y 16 BRAM.
+
+Segmentado del repositorio (rtl/, sin tocar): 994 celdas, fmax mínima 51.13, mediana 53.50, máxima 54.50 MHz
+Copia sin instrucciones nuevas (referencia):  995 celdas, fmax mínima 45.55, mediana 48.61, máxima 51.06 MHz
+Las dos son el mismo circuito: la diferencia entre ellas es ruido de la síntesis (decisión T6: unas 10 celdas).
+La columna 'agrega' es la diferencia contra la copia sin instrucciones nuevas.
+
+variante      celdas agrega libres BRAM  LUT4     fmin    fmed    fmax  cierran  qué incluye
+
+-- Referencia
+ref              995     +0    285   12   801    45.55   48.61   51.06 10 de 10  copia del segmentado sin ninguna instrucción nueva
+
+-- Paso de media exponencial en una instrucción: ema rd, rs1, rs2, k
+ema_k5          1162   +167    118   12   969    49.06   49.67   51.57 10 de 10  autónoma (restador y sumador propios), k = 5
+ema_k4a7        1211   +216     69   12  1017    46.99   48.64   51.73 10 de 10  autónoma, k de 4 a 7
+ema_k0a7        1277   +282      3   12  1083    46.16   47.68   48.57 10 de 10  autónoma, k de 0 a 7
+ema_todos       1309   +314    -29   12  1117        0    0.00       0  0 de 10  NO CABE. autónoma, k de 0 a 31
+emaalu_k5       1055    +60    225   12   861    45.42   48.50   50.20 10 de 10  con la resta de la ALU, k = 5
+emaalu_k4a7     1112   +117    168   12   918    42.34   43.95   45.43 10 de 10  con la resta de la ALU, k de 4 a 7
+emaalu_k0a7     1180   +185    100   12   986    38.65   40.24   42.61 10 de 10  con la resta de la ALU, k de 0 a 7
+emaalu_todos    1216   +221     64   12  1023    34.28   34.80   35.78 10 de 10  con la resta de la ALU, k de 0 a 31
+
+-- Paso de la media desde la desviación, en el sumador de la ALU: emad y devk
+emad_k5         1032    +37    248   12   840    51.59   54.17   57.12 10 de 10  emad, k = 5
+emad_k4a7       1095   +100    185   12   903    45.12   46.32   48.48 10 de 10  emad, k de 4 a 7
+emad_k0a7       1132   +137    148   12   940    43.55   45.59   46.59 10 de 10  emad, k de 0 a 7
+emad_todos      1195   +200     85   12  1004    39.24   40.64   41.28 10 de 10  emad, k de 0 a 31
+devk_k5         1036    +41    244   12   843    50.18   53.59   55.26 10 de 10  devk, k = 5
+media_k5        1108   +113    172   12   912    48.62   49.99   51.28 10 de 10  emad y devk, k = 5
+media_k4a7      1226   +231     54   12  1031    42.85   45.54   47.16 10 de 10  emad y devk, k de 4 a 7
+emaalu_devk     1118   +123    162   12   926    46.87   49.02   50.67 10 de 10  ema (resta de la ALU) y devk, k = 5
+
+-- Desplazamiento suelto: srak rd, rs1, k (por el multiplexor de escritura)
+srak_k5         1052    +57    228   12   857    44.09   47.50   51.41 10 de 10  k = 5
+srak_k0a7       1149   +154    131   12   956    48.92   51.62   53.36 10 de 10  k de 0 a 7
+srak_todos      1212   +217     68   12  1018    48.71   50.87   53.30 10 de 10  k de 0 a 31
+
+-- Carriles de 4 x 8 bits
+simd_min        1160   +165    120   12   962    50.02   51.70   56.35 10 de 10  padd8, psub8 y pcmpltu8 (máscara por carril)
+simd_bit        1140   +145    140   12   944    47.35   52.35   53.71 10 de 10  lo mismo, con la comparación de un bit por carril
+simd_signo      1156   +161    124   12   960    46.04   48.07   49.66 10 de 10  más pcmplt8 (con signo)
+simd_minmax     1256   +261     24   12  1056    49.21   52.16   53.81 10 de 10  más pminu8 y pmaxu8
+simd_sat        1167   +172    113   12   967    49.65   52.08   53.20 10 de 10  más paddus8 y psubus8
+simd_bcast      1162   +167    118   12   964    46.33   48.44   52.97 10 de 10  más pbcast8
+simd_movmsk     1163   +168    117   12   963    44.04   47.52   51.24 10 de 10  más pmovmsk8
+simd_bandas     1181   +186     99   12   980    50.68   52.58   53.81 10 de 10  lo que usa el kernel de cuatro bandas: saturadas, pbcast8 y pmovmsk8
+simd_todo       1273   +278      7   12  1073    47.81   49.85   52.81 10 de 10  las diez operaciones
+
+-- Carriles en el sumador de la ALU (xd_alu en vez de espino_alu)
+simdalu_min      987     -8    293   12   789    36.14   37.75   38.39 10 de 10  padd8, psub8 y pcmpltu8
+simdalu_sat      984    -11    296   12   788    36.08   37.67   39.48 10 de 10  más paddus8 y psubus8
+simdalu_bandas   1024    +29    256   12   826    36.49   37.87   39.30 10 de 10  más pbcast8 (por el operando A): lo que usa el kernel de cuatro bandas
+
+-- Producto y cociente
+mulstep         1131   +136    149   12   937    45.22   49.90   52.00 10 de 10  mulstep con sumador propio (por el multiplexor de escritura)
+mulstepalu      1037    +42    243   12   842    47.59   49.96   51.99 10 de 10  mulstep en el sumador de la ALU
+divstep         1103   +108    177   12   910    50.67   53.31   54.99 10 de 10  divstep (restador propio)
+muldiv          1145   +150    135   12   948    45.84   47.60   48.42 10 de 10  mulstep en la ALU y divstep
+mulc8           1179   +184    101   12   987    48.84   51.31   54.46 10 de 10  producto combinacional de 8 x 8
+mulc16          1338   +343    -58   12  1143        0    0.00       0  0 de 10  NO CABE. producto combinacional de 16 x 8
+mulmmio         1193   +198     87   12   975    44.12   46.42   49.02 10 de 10  periférico multiplicador serial de 24 x 8
+
+-- Combinaciones
+min_mul         1074    +79    206   12   879    49.01   49.32   51.11 10 de 10  emad y mulstep
+media_mul       1119   +124    161   12   923    47.12   48.47   49.63 10 de 10  emad, devk y mulstep: todo en el sumador de la ALU
+media_muldiv    1205   +210     75   12  1006    44.12   46.36   48.76 10 de 10  lo anterior más divstep
+min_bandas      1202   +207     78   12  1001    48.18   50.69   52.25 10 de 10  emad y los carriles del kernel de bandas
+media_bandas    1282   +287     -2   12  1076        0    0.00       0  0 de 10  NO CABE. emad, devk, mulstep y los carriles de bandas
+alu_min         1074    +79    206   12   874    34.69   35.77   37.59 10 de 10  emad, mulstep y carriles con saturadas, todo en la ALU
+alu_todo        1161   +166    119   12   962    33.31   34.64   36.93 10 de 10  emad, devk, mulstep y carriles de bandas, todo en la ALU
+alu_todo_div    1226   +231     54   12  1023    33.00   34.45   35.98 10 de 10  lo anterior más divstep
+completo_k5     1466   +471   -186   12  1261        0    0.00       0  0 de 10  NO CABE. todo con k = 5: emad, devk, mulstep, divstep y los diez carriles
+todo            2505  +1510  -1225   12  2273        0    0.00       0  0 de 10  NO CABE. todas las instrucciones y el periférico, con todos los k
+
+fmin, fmed y fmax: frecuencia máxima mínima, mediana y máxima entre las semillas, en MHz. Un 0 es una semilla
+en que nextpnr no terminó: el diseño no cabe. 'cierran' cuenta las semillas que cumplen los 25 MHz.

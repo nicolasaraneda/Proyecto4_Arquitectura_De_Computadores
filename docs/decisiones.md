@@ -323,6 +323,44 @@ Hay tres hechos que estas decisiones no cambian y con los que se planifica:
 - **Consecuencia.** Donde las decisiones anteriores dicen 18/11, 19/11 o 24/11 debe leerse 25/11, 26/11 y 1/12, y la etiqueta `v-maestra-19nov` pasa a llamarse `v-maestra-26nov`. Las decisiones anteriores no se reescriben. Se corrigió la fecha en `bitstreams/README.md`, `docs/gemelo.md` y `docs/espino_segmentado.md`.
 - **Qué se gana.** Siete días más antes de la prueba con la maestra real.
 
+### T45. Tramo de factibilidad del fondo de estrategias en un chip, en rama aparte (13/11)
+
+- **Encargo de Nicolás, textual.** "Quiero un diseño integrado y mucho más radical, aceptando el riesgo de área. Este tramo es de factibilidad: prototipos mínimos y mediciones, sin integrar nada en main."
+- **Decisión.** Todo el tramo vive en la rama `factibilidad-fondo` y en la carpeta `factibilidad/`, una subcarpeta por pieza con su README, su Makefile y sus mediciones. Los prototipos copian los fuentes que necesitan cambiar. Ningún archivo de `rtl/`, `sw/`, `ref/`, `tb/` ni `tools/` se modificó, y el flujo de `make` de la raíz y la integración continua no conocen la carpeta.
+- **Criterios de corte, fijados por Nicolás antes de medir.** Una pieza de hardware se descarta de la edición de competencia si no cabe junto al SPI o no cierra a 25 MHz en 10 semillas. Una pieza de algoritmo se descarta si no mejora los puntos esperados del torneo sin empeorar el percentil 5. Lo descartado se documenta con sus números y pasa a la edición de exhibición o a la ASIC.
+- **Alternativas.** Construir el diseño integrado directamente sobre `main`, con una bandera de compilación como se hizo con el segmentado.
+- **Qué se pierde.** Los prototipos no pasan por la integración continua, y lo que se decida llevar a `main` hay que integrarlo aparte: mover a `rtl/` y `tb/`, enseñarle las instrucciones al ensamblador y al gemelo, y rehacer la equivalencia.
+
+### T46. El retorno se mide en puntos de torneo, con tres vistas y semillas reservadas (14/11)
+
+- **Decisión.** Las estrategias se comparan con el arnés de `factibilidad/retorno/`, bajo tres hipótesis de puntaje: patrimonio, exceso sobre comprar y mantener, y torneo contra un campo de rivales sorteado. El enunciado dice que el resto de los grupos "se repartirá de forma lineal según su posición relativa": es ambiguo, así que el torneo se evalúa lineal en patrimonio (H3a) y lineal en el puesto (H3b). La referencia a superar es `max_media` y no la regla base.
+- **Rondas largas.** A 20 000 ticks las series de prueba tocan los límites 1 y 255 y las medias se inflan. Un resultado a ese largo vale solo si tiene el mismo signo con las series interiores y con la vista de parada, que corta cada serie cuando el precio sale de 21 a 249.
+- **Semillas.** La 0 es de exploración. La 2 se usó una vez para los candidatos del estudio 1 y 2, y la 3 una vez para la lista final del estudio 4, fijada antes. Las auditorías las volvieron a correr sin elegir nada con ellas: una confirmación nueva pide otra semilla.
+- **Rivales.** Nadie sabe qué van a programar los otros grupos. Se usaron siete campos, desde uno ingenuo hasta uno en que todos traen una reversión ajustada. El nivel de puntos cambia mucho con el campo (0,87 a 1,67 de 2 para la regla base) y el signo de las diferencias entre candidatos no.
+- **Qué se pierde.** El criterio es más exigente que el protocolo de T20 y deja fuera piezas que protegen el patrimonio en series con tendencia. Toda la evidencia sigue saliendo de la serie de práctica o del modelo ajustado a ella.
+
+### T47. Veredictos del tramo de factibilidad (15/11)
+
+Resultado de aplicar los criterios de T45. No cambia nada en `main`: qué se construye lo decide Nicolás con `docs/estado.md`.
+
+- **Pasan el criterio de hardware.** El Espino barrel de 4 hilos (934 celdas), la extensión de la ISA en sus subconjuntos (`emad`, y `emad` con `devk` y `mulstep`), el vigilante con SB_WARMBOOT y las cuatro configuraciones integradas, incluida I1 "fondo en un chip" (1071 celdas, 13 BRAM, 46,8 MHz de mínima).
+- **No pasan el criterio de hardware.** El duplicador de reloj (con un ciclo de trabajo real cierra 1 de 10 semillas), el conjunto completo de la extensión (2505 celdas), los carriles en unidad aparte con `divstep` sobre el barrel (1312) y una memoria de 1024 palabras completa (20 BRAM).
+- **Pasa el criterio de algoritmo.** `max_media` contra la regla base, y `max_media` con supresión de compras residuales (`ejec:m=8`) contra `max_media`, confirmada con la semilla reservada en cinco campos de rivales.
+- **No pasan el criterio de algoritmo.** El fondo de estrategias en todas sus formas (90 variantes y el fondo completo), el reparto de capital según desempeño en papel, la tabla de política que aprende, el predictor de patrones, el ancla en comprar y mantener, la guardia, el tope de pérdida y las bandas anchas.
+- **Consecuencia.** El hardware no es lo que limita al fondo en un chip. Lo descarta de la competencia el criterio de algoritmo: con una sola estrategia el barrel decide igual que los otros cores y responde más lento.
+
+### T48. `ejec:m=8` queda condicionada a tres confirmaciones (15/11)
+
+- **Observación.** La supresión de compras residuales lleva un espejo de la contabilidad de la maestra, con caja inicial 10 000 y comisión 5. Vale +0,007 puntos esperados. Si la caja real fuera 12 000 perdería 21 de patrimonio por ronda de 2000 ticks y 640 por ronda de 20 000. Con caja 20 000 pierde 3 % y 19 %. Con comisión 0 pierde 13 y 986.
+- **Decisión.** No se recomienda para la edición de competencia mientras el ayudante no confirme caja 10 000, comisión 5 y reset de la placa antes de cada ronda. Sin eso la estrategia recomendada es `max_media` sola, que no supone nada.
+- **Qué se pierde.** 0,007 puntos esperados si las condiciones eran las del testbench y no se preguntó a tiempo.
+
+### T49. El generador de programas aleatorios cae en un punto fijo (14/11)
+
+- **Observación.** Al verificar el barrel se vio que los programas de `tools/prog_aleatorio.py` llegan pronto a un lazo corto: de 960 721 instrucciones ejecutadas, solo 130 771 eran distintas. La verificación del barrel usó un generador corregido (`factibilidad/a_barrel/tools/prog_hilos.py`: registros que avanzan en cada vuelta y saltos que no caen en un `jalr`).
+- **Consecuencia.** Las 1 300 756 instrucciones de `make paralelo-largo` del Espino segmentado (T38) valen menos de lo que dice el conteo. No se encontró ningún error, pero la cobertura real es menor.
+- **Pendiente.** Llevar la corrección al generador del repositorio y repetir `make paralelo-largo`. Importa más si el segmentado termina siendo el core de la competencia.
+
 ### T50. Compite el fondo en un chip: opción b (15/11)
 
 - **Decisión de Nicolás, con su razón textual.** "opción b, tomemos riesgos".
@@ -652,4 +690,14 @@ Las decisiones T87 a T99 son del paquete P6 de R1 y R2 y las T100 a T119 del paq
 
 - **Decisión.** Regla 3 del árbol: con SCLK bajo 115 kHz en la ronda 3, compite R0. Es la cifra que fijó Nicolás con el programa de P3. Con el programa de P5, R1 responde a tiempo desde 110 kHz.
 - **Razón.** Deja 5 kHz de margen para el error del medidor (un ciclo en 217) y para un SCLK que no sea estable. La combinación es improbable: el testbench del curso usa 1 MHz.
-- **Qué se pierde.** Si la maestra usara entre 110 y 115 kHz, competiría R0 cuando R1 habría podido. Queda en `docs/pendientes_nicolas.md`.
+- **Qué se pierde.** Si la maestra usara entre 110 y 115 kHz, competiría R0 cuando R1 habría podido.
+- **Confirmada por Nicolás (16/11).** "Prefiero dejar margen sobre el límite medido."
+
+### T125. La factibilidad pasa a `main` como archivo y las tres ramas sin integrar se borran con una etiqueta (16/11)
+
+- **Encargo de Nicolás.** Revisar qué tiene cada rama que no esté en `main`, traer a `main` la evidencia que citen el informe, el README o la defensa, dejar una etiqueta de archivo por rama y borrarlas.
+- **Qué tenía cada una.** `frente-a` y `frente-b`: nada que falte. Cada archivo que cambiaron está en `main` con el mismo contenido en algún commit; las diferencias en el `Makefile`, el README, la integración continua y los documentos de estado y decisiones son de las integraciones (`integra-a` e `integra-b`), que renumeraron sus decisiones TA1 a TA7 y TB1 a TB12 como T25 a T43. `factibilidad-fondo`: la carpeta `factibilidad/` (825 archivos, unos 9,5 MB), las decisiones T45 a T49 y la sección del tramo en `docs/estado.md`, ninguna en `main`.
+- **Qué se cita.** La defensa (`docs/defensa/fondo.md`, `resumen.md`, `cifras.md`, `extension.md` y `preguntas.md`), `docs/fondo.md`, `docs/extension_isa.md`, `docs/codiseno.md` y `docs/decisiones.md` usan cifras que solo estaban en esa rama: +0,007 y -0,005 puntos del fondo contra `max_media`, el `ema` de 60 a 167 celdas, el k variable que baja la mínima a 39,2 MHz, el multiplicador de 1 338 celdas, las 35 instrucciones por gestor, entre otras. `tools/p7/doble_frecuencia.sh` extraía la rama para correr.
+- **Decisión.** La carpeta `factibilidad/` entra a `main` completa y sin integrar (nada de la raíz la usa), con `factibilidad/cierre.md` (la sección del estado de la rama) y T45 a T49 en este archivo. Las rutas de la máquina en que se corrió se reemplazan por variables (`factibilidad/README.md`, "Procedencia"); ninguna cifra cambia. Cada rama queda en una etiqueta anotada, `archivo/factibilidad-fondo`, `archivo/frente-a` y `archivo/frente-b`, y después se borra. `make p7-doble` extrae la etiqueta en vez de la rama.
+- **Alternativa descartada.** Traer solo las mediciones. Se pierden los scripts que las producen, y la regla del proyecto es que cada cifra salga de un script del repositorio.
+- **Qué se pierde.** Nada: los commits siguen en las etiquetas. La carpeta suma 9,5 MB al repositorio.

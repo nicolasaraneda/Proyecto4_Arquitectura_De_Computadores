@@ -1,0 +1,48 @@
+Cuántas imágenes caben en la flash
+Comando: factibilidad/e_warmboot/scripts/tamanos.sh
+Capacidad supuesta de la flash: 131072 bytes (1 Mbit)
+
+Tamaño de un bitstream de la HX1K (icepack):
+  bitstreams/segmentado_v1.bin                      32220 bytes
+  bitstreams/competencia_v1.bin                     32220 bytes
+  factibilidad/e_warmboot/build/demo/img0.bin       32220 bytes
+  factibilidad/e_warmboot/build/demo/img1.bin       32220 bytes
+
+Imágenes  Alineación   Tamaño del archivo
+2         sin alinear    64600 bytes   49.3 %  sobran  66472   última imagen en 0x007e7c a 0x00fc58   cabe
+3         sin alinear    96820 bytes   73.9 %  sobran  34252   última imagen en 0x00fc58 a 0x017a34   cabe
+4         sin alinear   129040 bytes   98.4 %  sobran   2032   última imagen en 0x017a34 a 0x01f810   cabe
+2         -a15           64988 bytes   49.6 %  sobran  66084   última imagen en 0x008000 a 0x010000   cabe
+3         -a15           97756 bytes   74.6 %  sobran  33316   última imagen en 0x010000 a 0x018000   cabe
+4         -a15          130524 bytes   99.6 %  sobran    548   última imagen en 0x018000 a 0x020000   cabe
+2         -A15           97756 bytes   74.6 %  sobran  33316   última imagen en 0x010000 a 0x018000   cabe
+3         -A15          130524 bytes   99.6 %  sobran    548   última imagen en 0x018000 a 0x020000   cabe
+4         -A15          163292 bytes  124.6 %  sobran -32220   última imagen en 0x020000 a 0x028000   NO CABE
+2         -a16           97756 bytes   74.6 %  sobran  33316   última imagen en 0x010000 a 0x020000   cabe
+3         -a16          163292 bytes  124.6 %  sobran -32220   última imagen en 0x020000 a 0x030000   NO CABE
+4         -a16          228828 bytes  174.6 %  sobran -97756   última imagen en 0x030000 a 0x040000   NO CABE
+5         sin alinear  icemulti falla: icemulti: Too many images supplied
+
+Cabecera de icemulti: 5 vectores de 32 bytes = 160 bytes (encendido y los 4 de S1 S0).
+Con -a<n> las imágenes 1, 2 y 3 parten en múltiplos de 2^n bytes; con -A<n>, también la 0.
+
+--- Archivo realista: segmentado_v1.bin (encendido) + competencia_v1.bin (respaldo) ---
+icemulti -a15 -v -o build/tamanos/realista.bin bitstreams/segmentado_v1.bin bitstreams/competencia_v1.bin
+  Place image 0 at 0000a0 .. 008000 (`bitstreams/segmentado_v1.bin')
+  Place image 1 at 008000 .. 010000 (`bitstreams/competencia_v1.bin')
+archivo: factibilidad/e_warmboot/build/tamanos/realista.bin
+tamaño: 64988 bytes de 131072 (49.6 %), sobran 66084
+sha256: e0389b85fab6efe03f9aadc7429b914e6b7551c88db96a525cbea1622d68bdc4
+vector 0 (encendido ) -> 0x0000A0   modo 0x00, oscilador de configuración en frecuencia baja, warm boot habilitado
+vector 1 (S1 S0 = 00) -> 0x0000A0   modo 0x00, oscilador de configuración en frecuencia baja, warm boot habilitado
+vector 2 (S1 S0 = 01) -> 0x008000   modo 0x00, oscilador de configuración en frecuencia baja, warm boot habilitado
+vector 3 (S1 S0 = 10) -> 0x0000A0   modo 0x00, oscilador de configuración en frecuencia baja, warm boot habilitado
+vector 4 (S1 S0 = 11) -> 0x0000A0   modo 0x00, oscilador de configuración en frecuencia baja, warm boot habilitado
+imágenes distintas: 2, en 0x0000A0, 0x008000
+imagen 0: bitstreams/segmentado_v1.bin, 32220 bytes, sha256 fe4089f7e50ca20120f36ed7b81299e1922cb76dc5b4138e8c0dd3ee9c49e0b4, copia idéntica
+imagen 1: bitstreams/competencia_v1.bin, 32220 bytes, sha256 4e902ec878e4dde33353e7fb97b6695bec259bd7e229222735009d1ea6fb0b83, copia idéntica
+RESULTADO: correcto
+
+Los bitstreams originales, según bitstreams/SHA256SUMS:
+  4e902ec878e4dde33353e7fb97b6695bec259bd7e229222735009d1ea6fb0b83  competencia_v1.bin
+  fe4089f7e50ca20120f36ed7b81299e1922cb76dc5b4138e8c0dd3ee9c49e0b4  segmentado_v1.bin

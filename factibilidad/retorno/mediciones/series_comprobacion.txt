@@ -1,0 +1,2 @@
+serie de practica: 20000 ticks, precio minimo 72, precio maximo 190
+PASS  series guardadas contra ref/series.py: 77 archivos, 176 series regeneradas, 0 distintas, 0 archivos con tamano inesperado, 0 precios fuera de 1..255

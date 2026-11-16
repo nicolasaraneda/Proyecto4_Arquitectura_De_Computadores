@@ -1,0 +1,20 @@
+Verificación formal del vigilante (formal/vigilante.sby)
+Comando: factibilidad/e_warmboot/scripts/formal_vigilante.sh
+Herramientas: SBY v0.68, Yices 2.7.0
+Propiedades en rtl/vigilante.v: 7 sentencias assert y 2 cover
+
+Tarea       Resultado   Detalle
+prove_n1    PASS        successful proof by k-induction.
+prove_n4    PASS        successful proof by k-induction.
+prove_n7    PASS        successful proof by k-induction.
+cover_n1    PASS        línea 152 en el paso 5, línea 153 en el paso 18
+cover_n4    PASS        línea 152 en el paso 8, línea 153 en el paso 18
+cover_n7    PASS        línea 152 en el paso 11, línea 153 en el paso 18
+
+Línea 152: cover (boot_q && !f_forzado), el disparo por cuenta, sin disparo manual.
+Línea 153: cover (f_respuestas == 8 && !boot_q), ocho precios respondidos sin que BOOT suba.
+
+Controles negativos (deben dar FAIL):
+mutación A FAIL        Assert failed in vigilante: vigilante.v:132.34-132.52
+mutación B FAIL        Assert failed in vigilante: vigilante.v:128.9-128.49
+RESULTADO: correcto

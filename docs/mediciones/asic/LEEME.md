@@ -2,7 +2,7 @@
 
 Grupo: Nicolás Araneda, Vicente Calderón y Santiago Muñoz.
 
-Estos archivos son copias, sin cambios, de las salidas guardadas de la pieza G de la factibilidad (rama `factibilidad-fondo`, commit `b556e1c`, carpeta `factibilidad/g_asic/mediciones/`, salidas del 14/11). Se traen solo las mediciones; el flujo (LibreLane 3.0.16 en Docker, PDK GF180MCU `gf180mcuD`, biblioteca de 7 pistas a 5 V) no se corrió en P7 y no se trae al repositorio.
+Estos archivos son copias, sin cambios, de las salidas guardadas de la pieza G de la factibilidad (rama `factibilidad-fondo`, commit `b556e1c`, carpeta `factibilidad/g_asic/mediciones/`, salidas del 14/11; desde el 16/11 la carpeta está también en `main`, decisión T125). Se traen solo las mediciones; el flujo (LibreLane 3.0.16 en Docker, PDK GF180MCU `gf180mcuD`, biblioteca de 7 pistas a 5 V) no se corrió en P7 y no se trae al repositorio.
 
 | Archivo | Copia de | Qué contiene |
 |---|---|---|
@@ -14,7 +14,7 @@ Estos archivos son copias, sin cambios, de las salidas guardadas de la pieza G d
 Cómo se regeneran (necesita Docker, la imagen de LibreLane y el PDK, varios GB; 2 horas el barrido):
 
 ```
-git worktree add ../factibilidad origin/factibilidad-fondo
+git worktree add ../factibilidad archivo/factibilidad-fondo
 make -C ../factibilidad/factibilidad/g_asic barrido recolectar cierre potencia
 ```
 

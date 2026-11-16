@@ -1,0 +1,86 @@
+1. Productos, cocientes, restos y tipos anchos en las rutinas de decision
+   (lineas con ' * ', ' / ', ' % ', long long, double o float; sin comentarios)
+
+   ejec_a (ejec:m=8): r3_ejecucion/ejec.c
+     espejo:  97  [producto              ] if (q * p + c->com > s->caja) {
+     espejo:  99  [cociente              ] q = (s->caja - c->com) / p;
+     espejo: 104  [producto              ] if (q > 0) { s->caja -= q * p + c->com; s->acc += q; }
+     espejo: 108  [producto              ] if (q > 0 && s->caja + q * p >= c->com) { s->caja += q * p - c->com; s->acc -= q; }
+     decidir: 126  [producto              ] int W = s->caja + s->acc * p;
+     decidir: 129  [producto              ] if (W - c->com >= (63 * j + 1) * p) n++;
+     decidir: 140  [producto              ] int umbral = c->ec ? c->E - c->eo * (top - 1) : c->ea ? c->E - c->eo * (top - j) : c->E + c->eo * (j - 1);
+     decidir: 146  [producto              ] for (int j = 0; j < NMAX; j++) tengo += s->acc > 63 * j;
+     decidir: 148  [producto              ] int umbral = c->xc ? c->X - c->xo * ((tengo > 1 ? tengo : 1) - 1) : c->xa ? c->X - c->xo * (top - j) : c->X + c->xo * (j - 1);
+     decidir: 166  [producto              ] int objetivo = 63 * s->obj;
+     decidir: 172  [producto              ] if (c->m && s->caja - c->com < c->m * p) suprime = 1;
+     decidir: 173  [producto              ] if (c->m2 && s->caja - c->com < c->m2 * p && dev >= -(c->E + c->e2)) suprime = 1;
+     decidir: 174  [producto              ] if (c->F) { s->n_mul++; if (16 * s->acc * p >= c->F * (s->caja + s->acc * p)) suprime = 1; }
+
+   gestores max_media, base, activo y kalman (param): nucleo/e_param.c
+     decidir:  93  [producto              ] Eef += ASR(c->ev * s->V, c->sv);
+     decidir:  94  [producto              ] Xef += ASR(c->xv * s->V, c->sv);
+
+   aprendiz (tabla:ka=12,h=16): r4c_aprendizaje/e_tabla.c
+     tabla_iniciar: 155  [cociente              ] int mitad = c->nb / 2;
+     tabla_iniciar: 164  [producto, cociente    ] v = (-c->c * centro / 8) * (1 << c->ks);
+     tabla_iniciar: 168  [producto              ] s->T[(f * c->nt + z) * c->nb + i] = v;
+     decidir: 190  [cociente              ] int mitad = c->nb / 2;
+     decidir: 191  [producto, cociente    ] int th_in = c->c * c->E / 8 + c->ui, th_out = c->c * c->X / 8 + c->uo;
+     decidir: 208  [cociente              ] int zu = su / c->nb;
+     decidir: 211  [producto              ] const int *T = &s->T[zu * c->nb];
+     decidir: 223  [producto              ] int st = (fila * c->nt + z) * c->nb + idx;
+     decidir: 230  [producto, cociente    ] else if (c->modo == 0) { entra = v > th_in + c->c * ez / 8; sale = v < th_out; }
+
+   supervisor del fondo (fondoc): r4_final/fondoc.c
+     desempeno: ninguna
+     supera: 188  [producto, tipo ancho  ] static int supera(long long ventaja, long long base, int mg) { return ventaja * (1LL << mg) > base; }
+     decidir: 207  [producto              ] if (s->ten[k]) s->S[k] += dp * 16;
+     decidir: 222  [tipo ancho            ] long long ventaja = (long long)(vis_des[mejor] - s->ref[mejor]) - (vis_des[s->lider] - s->ref[s->lider]);
+     decidir: 223  [producto, tipo ancho  ] long long base = c->pp ? 16LL * p : vis_des[s->lider];
+     decidir: 238  [tipo ancho            ] long long ventaja = (long long)(vis_des[mejor] - s->ref[mejor]) - (vis_des[peor] - s->ref[peor]);
+     decidir: 239  [producto, tipo ancho  ] long long base = c->pp ? 16LL * p : vis_des[peor];
+     decidir: 259  [producto, tipo ancho  ] long long V = (long long)s->real.acciones * p;
+     decidir: 260  [tipo ancho            ] long long W = s->real.caja + V;
+     decidir: 261  [producto, tipo ancho  ] long long D = F * W - NP * V;
+     decidir: 262  [producto, tipo ancho  ] long long banda = c->b * W, q;
+     decidir: 265  [producto, cociente, tipo ancho] q = (D - NP * (long long)s->r.comision) / (NP * (long long)p);
+     decidir: 269  [producto, cociente, tipo ancho] q = (-D) / (NP * (long long)p);
+     decidir: 275  [producto              ] if (c->em && ((decision >> 6) & 3) == 1 && s->real.caja - s->r.comision < c->em * p) {
+
+   contabilidad que el supervisor usa como espejo (cuenta_ejecutar): nucleo/nucleo.c
+     cuenta_ejecutar:  29  [cociente              ] int tope = (c->caja - r->comision) / p;
+     cuenta_ejecutar:  31  [producto              ] if (q > 0) { c->caja -= q * p + r->comision; c->acciones += q; c->ordenes++; hecho = q; }
+     cuenta_ejecutar:  34  [producto              ] if (q > 0 && c->caja + q * p >= r->comision) { c->caja += q * p - r->comision; c->acciones -= q; c->ordenes++; hecho = -q; }
+     cuenta_ejecutar:  36  [producto, tipo ancho  ] long long w = (long long)c->caja + (long long)c->acciones * p;
+     cuenta_ejecutar:  37  [producto              ] if (w > 0x7fffffffLL || c->caja > 0x7fffffff - 63 * 255) c->desborde = 1;
+
+   42 lineas en total
+
+2. Frecuencia de las operaciones caras, conjunto evidencia, semilla 0 (comando detalle del arnes)
+   Columnas de detalle: patrimonio, ordenes, perdida maxima, aux0..aux3, comprar y mantener.
+
+   Rondas de 2000 ticks
+     ejec_a        10000 series: ordenes    51.1; cocientes  11.07 por ronda (0.55 % de los ticks); productos de resto  10.87 (0.54 %); compras suprimidas 56.36; ticks con el espejo distinto 0
+     ejec_b        10000 series: ordenes    47.7; cocientes   9.33 por ronda (0.47 % de los ticks); productos de resto   9.16 (0.46 %); compras suprimidas 89.89; ticks con el espejo distinto 0
+     fondo_rec     10000 series: ordenes    55.2; ticks con objetivo parcial    225.4 por ronda (11.27 %); cambios de pesos  0.00; ticks con el espejo distinto 0
+     rec_e         10000 series: ordenes    52.2; ticks con objetivo parcial    225.4 por ronda (11.27 %); cambios de pesos  0.00; ticks con el espejo distinto 0
+     completo      10000 series: ordenes    52.4; ticks con objetivo parcial    225.8 por ronda (11.29 %); cambios de pesos  0.00; ticks con el espejo distinto 0
+     completo_min  10000 series: ordenes    51.1; ticks con objetivo parcial      0.0 por ronda ( 0.00 %); cambios de pesos  1.88; ticks con el espejo distinto 0
+     fondo_min     10000 series: ordenes    55.4; ticks con objetivo parcial      0.0 por ronda ( 0.00 %); cambios de pesos  1.88; ticks con el espejo distinto 0
+
+   Rondas de 20000 ticks
+     ejec_a        8000 series: ordenes  1298.3; cocientes  99.13 por ronda (0.50 % de los ticks); productos de resto  97.28 (0.49 %); compras suprimidas 414.20; ticks con el espejo distinto 0
+     ejec_b        8000 series: ordenes  1273.9; cocientes  85.43 por ronda (0.43 % de los ticks); productos de resto  83.90 (0.42 %); compras suprimidas 668.95; ticks con el espejo distinto 0
+     fondo_rec     8000 series: ordenes  1335.8; ticks con objetivo parcial   2249.7 por ronda (11.25 %); cambios de pesos  0.00; ticks con el espejo distinto 0
+     rec_e         8000 series: ordenes  1312.6; ticks con objetivo parcial   2249.7 por ronda (11.25 %); cambios de pesos  0.00; ticks con el espejo distinto 0
+     completo      8000 series: ordenes  1311.3; ticks con objetivo parcial   2385.2 por ronda (11.93 %); cambios de pesos  0.00; ticks con el espejo distinto 0
+     completo_min  8000 series: ordenes  1372.7; ticks con objetivo parcial      0.0 por ronda ( 0.00 %); cambios de pesos 23.26; ticks con el espejo distinto 0
+     fondo_min     8000 series: ordenes  1464.3; ticks con objetivo parcial      0.0 por ronda ( 0.00 %); cambios de pesos 22.65; ticks con el espejo distinto 0
+
+   Patrimonio final mas grande, todas las series de la evidencia de 20 000 ticks (para las cuentas en 32 bits)
+     max_media     maximo      1468488; series con patrimonio final de 2^24 o mas: 0 de 8000; de 2^27 o mas: 0
+     ejec_a        maximo      1468549; series con patrimonio final de 2^24 o mas: 0 de 8000; de 2^27 o mas: 0
+     completo      maximo      1676705; series con patrimonio final de 2^24 o mas: 0 de 8000; de 2^27 o mas: 0
+     completo_min  maximo      1504676; series con patrimonio final de 2^24 o mas: 0 de 8000; de 2^27 o mas: 0
+
+LISTO: lectura del codigo y frecuencias medidas. La clasificacion de cada linea esta en el README.

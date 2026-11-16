@@ -1,0 +1,20 @@
+Interfaz: estrategia propia desde una carpeta ajena al repositorio
+Carpeta fuera del repositorio: si
+Archivos: Makefile mia.c 
+--- listar
+  param        familia parametrica del frente del algoritmo (ref/candidatos.py). Sin parametros es la regla base
+  mia          ejemplo minimo
+--- causal
+PASS: 1 estrategias, 78 comparaciones, 0 fallas
+--- correr (con entra=4 es la regla base: 27062 con 388 ordenes)
+patrimonio 27062 ordenes 388 comisiones 1940 perdida_maxima 2929 comprar_y_mantener 6497
+--- resumen (mia sin parametros es max_media: las dos filas tienen que ser iguales)
+# remuestreo, semilla 0, 2000 ticks: 5000 series. candidato
+max_media 5000 10868.416800 0.000000 0.000000 10745 8866 2346 25916
+mia 5000 10868.416800 0.000000 0.000000 10745 8866 2346 25916
+--- veredicto de mia:entra=4 contra max_media, 2000 ticks, semilla 0
+Veredicto literal (solo el signo de las estimaciones, sin error): no pasa
+VEREDICTO 2000: NO_PASA
+VEREDICTO: NO_PASA (2 filas de evidencia)
+--- huella de nucleo/ antes 235e188af84b7b17 y despues 235e188af84b7b17
+PASS: compila y corre fuera del repositorio sin editar nada del nucleo

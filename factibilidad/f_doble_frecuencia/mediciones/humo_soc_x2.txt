@@ -1,0 +1,32 @@
+Prueba de humo del SoC con el reloj doblado (simulación RTL con Icarus, retardo del duplicador modelado)
+Testbench: tb/tb_proyecto_4.sv sin modificar (igual al del último commit)
+
+== base
+  Patrimonio final:          9798
+  Peor caso precio->decision: 22 ciclos (disponibles: 2262)
+  PASS MISO sin valores X
+  PASS el programa escribe DECISION
+  PASS el programa lee todos los precios
+  PASS la decision llega antes del siguiente tick
+  Testbenchs aprobados: 4/4
+  MONITOR reloj interno: 10000199 flancos por 5000100 del reloj de entrada, periodos de 20.000 a 20.000 ns
+  MONITOR byte_done: 1999 reales, 1999 vistos con el reloj de 25 MHz
+  MONITOR escrituras de DECISION: 1999 reales, 1999 vistas con el reloj de 25 MHz
+  MONITOR respuesta en ciclos del reloj interno: promedio 41.00, peor caso 44, 1999 respuestas
+  decisiones.csv idéntico a ref/trader.py (2000 filas)
+
+== seg
+  Patrimonio final:          9798
+  Peor caso precio->decision: 12 ciclos (disponibles: 2262)
+  PASS MISO sin valores X
+  PASS el programa escribe DECISION
+  PASS el programa lee todos los precios
+  PASS la decision llega antes del siguiente tick
+  Testbenchs aprobados: 4/4
+  MONITOR reloj interno: 10000199 flancos por 5000100 del reloj de entrada, periodos de 20.000 a 20.000 ns
+  MONITOR byte_done: 1999 reales, 1999 vistos con el reloj de 25 MHz
+  MONITOR escrituras de DECISION: 1999 reales, 1200 vistas con el reloj de 25 MHz
+  MONITOR respuesta en ciclos del reloj interno: promedio 22.00, peor caso 24, 1999 respuestas
+  decisiones.csv idéntico a ref/trader.py (2000 filas)
+
+HUMO: PASS

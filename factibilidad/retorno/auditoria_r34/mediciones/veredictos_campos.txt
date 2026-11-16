@@ -1,0 +1,23 @@
+Veredicto del comando oficial (veredicto --parada, semilla 0, G = 10) y veredicto global de la tabla del estudio
+candidata      campo       comando oficial (2000 / 20000 / global) tabla del estudio
+ejec_a         ingenuo     PASA / PASA / PASA                 PASA / PASA / PASA                 igual
+ejec_a         fuerte      PASA / PASA / PASA                 PASA / PASA / PASA                 igual
+ejec_a         racional    PASA / PASA / PASA                 PASA / PASA / PASA                 igual
+ejec_a         reversores  PASA / PASA / PASA                 PASA / PASA / PASA                 igual
+completo       ingenuo     PASA / PASA / PASA                 PASA / PASA / PASA                 igual
+completo       fuerte      NO_PASA / PASA / NO_PASA           NO_PASA / PASA / NO_PASA           igual
+completo       racional    PASA / PASA / PASA                 PASA / PASA / PASA                 igual
+completo       reversores  PASA / PASA / PASA                 PASA / PASA / PASA                 igual
+completo_min   ingenuo     PASA / PASA / PASA                 PASA / PASA / PASA                 igual
+completo_min   fuerte      PASA / NO_PASA / NO_PASA           PASA / NO_PASA / NO_PASA           igual
+completo_min   racional    PASA / PASA / PASA                 PASA / PASA / PASA                 igual
+completo_min   reversores  PASA / PASA / PASA                 PASA / PASA / PASA                 igual
+rec_e          ingenuo     PASA / PASA / PASA                 PASA / PASA / PASA                 igual
+rec_e          fuerte      NO_PASA / PASA / NO_PASA           NO_PASA / PASA / NO_PASA           igual
+rec_e          racional    PASA / PASA / PASA                 PASA / PASA / PASA                 igual
+rec_e          reversores  PASA / PASA / PASA                 PASA / PASA / PASA                 igual
+fondo_rec      ingenuo     PASA / PASA / PASA                 PASA / PASA / PASA                 igual
+fondo_rec      fuerte      NO_PASA / NO_PASA / NO_PASA        NO_PASA / NO_PASA / NO_PASA        igual
+fondo_rec      racional    NO_PASA / PASA / NO_PASA           NO_PASA / PASA / NO_PASA           igual
+fondo_rec      reversores  NO_PASA / PASA / NO_PASA           NO_PASA / PASA / NO_PASA           igual
+PASS: los 20 veredictos por campo de la tabla coinciden con el comando oficial

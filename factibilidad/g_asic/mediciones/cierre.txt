@@ -1,0 +1,10 @@
+base_t40: Resultado: CIERRA
+base_t30: Resultado: CIERRA
+base_t25: Resultado: CIERRA
+base_t23p5: Resultado: CIERRA
+base_t22: Resultado: NO CIERRA (falla: setup WNS peor esquina (ns);setup TNS peor esquina (ns))
+seg_t40: Resultado: CIERRA
+seg_t30: Resultado: CIERRA
+seg_t25: Resultado: NO CIERRA (falla: antena (antenna__violating__nets))
+seg_t23p5: Resultado: CIERRA
+seg_t22: Resultado: NO CIERRA (falla: antena (antenna__violating__nets);setup WNS peor esquina (ns);setup TNS peor esquina (ns))

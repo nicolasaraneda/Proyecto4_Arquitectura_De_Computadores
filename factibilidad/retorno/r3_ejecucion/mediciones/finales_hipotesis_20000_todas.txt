@@ -1,0 +1,352 @@
+
+=== Hipotesis de puntaje: rondas de 20000 ticks, semilla 0 (exploracion) ===
+Referencia de las diferencias: max_media. Las filas nada y byh son no operar y "comprar 63 siempre".
+Torneo: 61 rivales posibles, campo de G grupos sorteado segun la composicion (comando rivales).
+
+--- Conjunto evidencia: 8000 series de 20000 ticks ---
+
+H1 (patrimonio) y H2 (exceso sobre comprar y mantener: diferencia W - B&H y razon W/B&H), por serie
+candidato        | H1 media  +-ee  mediana  m. geom      p5    peor     dif  +-ee | H2 media  +-ee      p5     peor |   W/B&H   +-ee mediana     p5     dif   +-ee |  >B&H
+max_media        |    52212   851    25854    32057   11310      52      +0     0 |   +43402   865   -1289   -23933 |  19.661  0.709   3.217  0.911  +0.000  0.000 |   93%
+ejec:m=8         |    52409   851    26078    32292   11393     203    +197     4 |   +43599   865   -1152   -23815 |  19.711  0.709   3.248  0.920  +0.051  0.002 |   93%
+ejec:m=8,m2=24,e2=32 |    52556   852    26196    32442   11493     195    +344     9 |   +43746   866   -1123   -23821 |  19.762  0.711   3.256  0.921  +0.102  0.006 |   93%
+base             |    42824   667    22676    27732   10645      95   -9388   273 |   +34014   682   -2552   -23508 |  15.972  0.576   2.850  0.840  -3.688  0.206 |   90%
+nada             |    10000     0    10000    10000   10000   10000  -42212   851 |    +1190    63   -8542   -26311 |   2.825  0.063   1.202  0.539 -16.836  0.666 |   60%
+byh              |     8806    64     8337     6434     892      59  -43406   865 |       -4     1    -121    -2987 |   0.990  0.000   0.999  0.945 -18.670  0.709 |   34%
+
+H1 y H2 en una competencia de tres rondas (promedio de las tres)
+candidato        |     H1 p5  +-ee      peor   dif p5  +-ee |     H2 p5  +-ee      peor
+max_media        |     16368   260      7986       +0     0 |     +5158   282     -6962
+ejec:m=8         |     16543   256      8171     +175    52 |     +5330   277     -6793
+ejec:m=8,m2=24,e2=32 |     16602   267      8035     +234    66 |     +5408   285     -6654
+base             |     14780   210      7867    -1588   205 |     +3504   230     -7482
+nada             |     10000     0     10000    -6368   260 |     -4434   144    -12853
+byh              |      3765   107       478   -12603   286 |       -81     2     -1117
+
+H3, torneo con G = 10 rivales y campo mixto. Puntos de 0 a 2.
+H3a: lineal en patrimonio entre el peor y el mejor del campo. H3b: lineal en el puesto.
+                 | una ronda: media, +-ee, p5                | tres rondas (promedio): p5, +-ee, peor    | diferencia contra la referencia                        
+candidato        |    H3a   +-ee    p5     H3b   +-ee    p5 | H3a p5   +-ee  peor  H3b p5   +-ee  peor |    dH3a   +-ee     dH3b   +-ee    dp5 a   +-ee    dp5 b   +-ee
+max_media        |  1.825  0.003  1.11   1.818  0.002  1.40 |  1.397  0.013  0.65   1.500  0.015  0.83 |  +0.000  0.000   +0.000  0.000   +0.000  0.000   +0.000  0.000
+ejec:m=8         |  1.831  0.003  1.12   1.867  0.002  1.40 |  1.407  0.013  0.66   1.589  0.025  0.87 |  +0.006  0.000   +0.050  0.001   +0.010  0.004   +0.089  0.022
+ejec:m=8,m2=24,e2=32 |  1.834  0.003  1.13   1.860  0.002  1.40 |  1.414  0.013  0.66   1.583  0.026  0.87 |  +0.009  0.000   +0.042  0.001   +0.017  0.005   +0.083  0.025
+base             |  1.677  0.003  0.87   1.733  0.002  1.20 |  1.183  0.014  0.45   1.361  0.016  0.63 |  -0.148  0.003   -0.084  0.002   -0.215  0.015   -0.139  0.020
+nada             |  0.832  0.004  0.10   1.267  0.003  0.60 |  0.306  0.007  0.00   0.800  0.015  0.20 |  -0.993  0.005   -0.551  0.004   -1.092  0.015   -0.700  0.021
+byh              |  0.764  0.007  0.02   1.159  0.005  0.40 |  0.160  0.007  0.00   0.600  0.012  0.00 |  -1.061  0.007   -0.658  0.006   -1.237  0.015   -0.900  0.019
+
+H3 sobre la competencia completa: lineal entre el peor y el mejor segun la suma de las tres rondas.
+Suma: patrimonio sumado. Razon: suma de W / comprar y mantener. Diferencias contra la referencia.
+candidato        |   suma   +-ee     p5   +-ee      dif   +-ee   dif p5   +-ee |  razon   +-ee     p5   +-ee      dif   +-ee   dif p5   +-ee
+max_media        |  1.883  0.005  1.308  0.023   +0.000  0.000   +0.000  0.000 |  1.867  0.005  1.216  0.029   +0.000  0.000   +0.000  0.000
+ejec:m=8         |  1.886  0.005  1.316  0.023   +0.003  0.000   +0.008  0.004 |  1.869  0.005  1.223  0.029   +0.003  0.000   +0.007  0.005
+ejec:m=8,m2=24,e2=32 |  1.888  0.005  1.322  0.024   +0.005  0.000   +0.014  0.006 |  1.872  0.005  1.232  0.028   +0.005  0.000   +0.016  0.007
+base             |  1.705  0.007  1.007  0.019   -0.177  0.005   -0.301  0.019 |  1.694  0.007  0.926  0.022   -0.172  0.006   -0.291  0.025
+nada             |  0.700  0.011  0.116  0.004   -1.182  0.011   -1.192  0.023 |  0.720  0.012  0.102  0.004   -1.146  0.012   -1.114  0.029
+byh              |  0.618  0.011  0.063  0.003   -1.265  0.010   -1.245  0.023 |  0.445  0.009  0.019  0.001   -1.421  0.010   -1.197  0.029
+
+Orden de los candidatos segun cada hipotesis (de mayor a menor)
+  H1, media del patrimonio:   ejec:m=8,m2=24,e2=32 > ejec:m=8 > max_media > base > nada > byh
+  H1, percentil 5:            ejec:m=8,m2=24,e2=32 > ejec:m=8 > max_media > base > nada > byh
+  H2, media de W/B&H:         ejec:m=8,m2=24,e2=32 > ejec:m=8 > max_media > base > nada > byh
+  H3a, puntos esperados:      ejec:m=8,m2=24,e2=32 > ejec:m=8 > max_media > base > nada > byh
+  H3b, puntos esperados:      ejec:m=8 > ejec:m=8,m2=24,e2=32 > max_media > base > nada > byh
+  H3 sobre la suma:           ejec:m=8,m2=24,e2=32 > ejec:m=8 > max_media > base > nada > byh
+  H3 sobre la razon:          ejec:m=8,m2=24,e2=32 > ejec:m=8 > max_media > base > nada > byh
+  H3a, p5 de tres rondas:     ejec:m=8,m2=24,e2=32 > ejec:m=8 > max_media > base > nada > byh
+  H3b, p5 de tres rondas:     ejec:m=8 > ejec:m=8,m2=24,e2=32 > max_media > base > nada > byh
+  (el orden por H2 en diferencia es el mismo de H1: comprar y mantener es igual para todos en cada serie)
+
+Sensibilidad al campo y a G: puntos de la referencia y diferencia de cada candidato contra ella (+-ee)
+H3a (lineal en patrimonio), puntos esperados
+candidato        | ingenuo G=5    | ingenuo G=10   | ingenuo G=15   | mixto G=5      | mixto G=10     | mixto G=15     | fuerte G=5     | fuerte G=10    | fuerte G=15    |
+max_media        |  1.887 puntos  |  1.823 puntos  |  1.769 puntos  |  1.881 puntos  |  1.825 puntos  |  1.788 puntos  |  1.701 puntos  |  1.693 puntos  |  1.688 puntos  |
+ejec:m=8         |  +0.003  0.000 |  +0.005  0.000 |  +0.005  0.000 |  +0.004  0.000 |  +0.006  0.000 |  +0.006  0.000 |  +0.012  0.000 |  +0.009  0.000 |  +0.009  0.000 |
+ejec:m=8,m2=24,e2=32 |  +0.006  0.000 |  +0.007  0.000 |  +0.009  0.000 |  +0.007  0.000 |  +0.009  0.000 |  +0.010  0.000 |  +0.019  0.001 |  +0.015  0.000 |  +0.014  0.000 |
+base             |  -0.059  0.002 |  -0.089  0.002 |  -0.110  0.002 |  -0.105  0.002 |  -0.148  0.003 |  -0.174  0.003 |  -0.256  0.005 |  -0.230  0.005 |  -0.224  0.004 |
+nada             |  -0.594  0.004 |  -0.772  0.005 |  -0.859  0.005 |  -0.821  0.005 |  -0.993  0.005 |  -1.059  0.005 |  -1.244  0.006 |  -1.163  0.006 |  -1.121  0.006 |
+byh              |  -0.794  0.007 |  -0.900  0.007 |  -0.938  0.007 |  -0.969  0.007 |  -1.061  0.007 |  -1.089  0.007 |  -1.213  0.008 |  -1.144  0.008 |  -1.110  0.007 |
+H3b (lineal en el puesto), puntos esperados
+candidato        | ingenuo G=5    | ingenuo G=10   | ingenuo G=15   | mixto G=5      | mixto G=10     | mixto G=15     | fuerte G=5     | fuerte G=10    | fuerte G=15    |
+max_media        |  1.876 puntos  |  1.877 puntos  |  1.876 puntos  |  1.818 puntos  |  1.818 puntos  |  1.817 puntos  |  1.474 puntos  |  1.471 puntos  |  1.473 puntos  |
+ejec:m=8         |  +0.010  0.000 |  +0.010  0.000 |  +0.010  0.000 |  +0.049  0.001 |  +0.050  0.001 |  +0.050  0.001 |  +0.173  0.002 |  +0.172  0.002 |  +0.173  0.002 |
+ejec:m=8,m2=24,e2=32 |  +0.011  0.000 |  +0.011  0.000 |  +0.012  0.000 |  +0.041  0.001 |  +0.042  0.001 |  +0.042  0.001 |  +0.142  0.002 |  +0.141  0.002 |  +0.143  0.002 |
+base             |  -0.047  0.002 |  -0.047  0.002 |  -0.047  0.002 |  -0.084  0.002 |  -0.084  0.002 |  -0.083  0.002 |  -0.262  0.005 |  -0.258  0.005 |  -0.258  0.005 |
+nada             |  -0.515  0.003 |  -0.514  0.003 |  -0.513  0.003 |  -0.551  0.004 |  -0.551  0.004 |  -0.550  0.004 |  -0.828  0.005 |  -0.825  0.005 |  -0.826  0.005 |
+byh              |  -0.596  0.005 |  -0.597  0.005 |  -0.599  0.005 |  -0.661  0.006 |  -0.658  0.006 |  -0.658  0.005 |  -0.830  0.006 |  -0.829  0.006 |  -0.831  0.006 |
+H3a, percentil 5 de la competencia de tres rondas
+candidato        | ingenuo G=5    | ingenuo G=10   | ingenuo G=15   | mixto G=5      | mixto G=10     | mixto G=15     | fuerte G=5     | fuerte G=10    | fuerte G=15    |
+max_media        |  1.464 puntos  |  1.362 puntos  |  1.293 puntos  |  1.456 puntos  |  1.397 puntos  |  1.366 puntos  |  1.079 puntos  |  1.247 puntos  |  1.276 puntos  |
+ejec:m=8         |  +0.010  0.005 |  +0.005  0.003 |  +0.010  0.004 |  +0.012  0.005 |  +0.010  0.004 |  +0.010  0.003 |  +0.035  0.010 |  +0.014  0.004 |  +0.011  0.004 |
+ejec:m=8,m2=24,e2=32 |  +0.015  0.006 |  +0.008  0.005 |  +0.015  0.005 |  +0.019  0.006 |  +0.017  0.005 |  +0.018  0.005 |  +0.053  0.012 |  +0.023  0.006 |  +0.020  0.005 |
+base             |  -0.153  0.018 |  -0.165  0.014 |  -0.166  0.014 |  -0.214  0.016 |  -0.215  0.015 |  -0.226  0.014 |  -0.442  0.037 |  -0.266  0.017 |  -0.241  0.015 |
+nada             |  -1.090  0.023 |  -0.976  0.015 |  -0.939  0.017 |  -1.242  0.019 |  -1.092  0.015 |  -1.064  0.014 |  -1.079  0.029 |  -1.170  0.016 |  -1.083  0.016 |
+byh              |  -1.230  0.024 |  -1.129  0.017 |  -1.096  0.018 |  -1.328  0.019 |  -1.237  0.015 |  -1.211  0.015 |  -1.079  0.029 |  -1.209  0.015 |  -1.183  0.014 |
+H3b, percentil 5 de la competencia de tres rondas
+candidato        | ingenuo G=5    | ingenuo G=10   | ingenuo G=15   | mixto G=5      | mixto G=10     | mixto G=15     | fuerte G=5     | fuerte G=10    | fuerte G=15    |
+max_media        |  1.522 puntos  |  1.600 puntos  |  1.644 puntos  |  1.433 puntos  |  1.500 puntos  |  1.530 puntos  |  0.944 puntos  |  1.050 puntos  |  1.096 puntos  |
+ejec:m=8         |  +0.078  0.051 |  +0.006  0.021 |  +0.000  0.015 |  +0.033  0.036 |  +0.089  0.022 |  +0.070  0.013 |  +0.144  0.048 |  +0.150  0.018 |  +0.148  0.019 |
+ejec:m=8,m2=24,e2=32 |  +0.078  0.051 |  +0.011  0.024 |  +0.000  0.018 |  +0.033  0.029 |  +0.083  0.025 |  +0.070  0.015 |  +0.122  0.026 |  +0.150  0.022 |  +0.111  0.018 |
+base             |  -0.056  0.051 |  -0.067  0.011 |  -0.089  0.013 |  -0.211  0.034 |  -0.139  0.020 |  -0.119  0.015 |  -0.344  0.027 |  -0.344  0.021 |  -0.311  0.018 |
+nada             |  -0.722  0.050 |  -0.672  0.015 |  -0.656  0.016 |  -0.767  0.037 |  -0.700  0.021 |  -0.670  0.016 |  -0.944  0.021 |  -0.850  0.018 |  -0.830  0.014 |
+byh              |  -0.922  0.055 |  -0.861  0.018 |  -0.841  0.019 |  -1.022  0.041 |  -0.900  0.019 |  -0.896  0.020 |  -0.944  0.021 |  -0.900  0.027 |  -0.874  0.016 |
+
+--- Conjunto remuestreo: 4000 series de 20000 ticks ---
+
+H1 (patrimonio) y H2 (exceso sobre comprar y mantener: diferencia W - B&H y razon W/B&H), por serie
+candidato        | H1 media  +-ee  mediana  m. geom      p5    peor     dif  +-ee | H2 media  +-ee      p5     peor |   W/B&H   +-ee mediana     p5     dif   +-ee |  >B&H
+max_media        |    46215   694    28099    33412   12488     112      +0     0 |   +38714   728    +563   -13755 |  21.819  0.863   4.500  1.039  +0.000  0.000 |   96%
+ejec:m=8         |    46370   694    28189    33610   12682     300    +155     3 |   +38869   728    +714   -13475 |  21.873  0.865   4.522  1.051  +0.054  0.003 |   96%
+ejec:m=8,m2=24,e2=32 |    46514   694    28376    33775   12758     304    +298     8 |   +39013   729    +743   -13397 |  21.939  0.868   4.555  1.054  +0.120  0.011 |   96%
+base             |    38638   541    25186    29175   12093     280   -7578   278 |   +31137   577    -768   -13904 |  18.077  0.725   4.000  0.945  -3.743  0.280 |   94%
+nada             |    10000     0    10000    10000   10000   10000  -36215   694 |    +2499    83   -6882   -21541 |   3.532  0.099   1.496  0.592 -18.287  0.790 |   70%
+byh              |     7490    84     6672     5206     665      69  -38726   728 |      -11     1    -114    -1292 |   0.986  0.001   0.998  0.923 -20.833  0.864 |   31%
+
+H1 y H2 en una competencia de tres rondas (promedio de las tres)
+candidato        |     H1 p5  +-ee      peor   dif p5  +-ee |     H2 p5  +-ee      peor
+max_media        |     18131   348      8566       +0     0 |     +7796   396     -2677
+ejec:m=8         |     18248   348      8637     +117    50 |     +7925   389     -2530
+ejec:m=8,m2=24,e2=32 |     18347   360      8692     +217   100 |     +8048   411     -2221
+base             |     16462   266      9246    -1669   275 |     +5977   391     -5296
+nada             |     10000     0     10000    -8131   348 |     -2974   230    -11654
+byh              |      2795   118       531   -15336   373 |       -76     3      -467
+
+H3, torneo con G = 10 rivales y campo mixto. Puntos de 0 a 2.
+H3a: lineal en patrimonio entre el peor y el mejor del campo. H3b: lineal en el puesto.
+                 | una ronda: media, +-ee, p5                | tres rondas (promedio): p5, +-ee, peor    | diferencia contra la referencia                        
+candidato        |    H3a   +-ee    p5     H3b   +-ee    p5 | H3a p5   +-ee  peor  H3b p5   +-ee  peor |    dH3a   +-ee     dH3b   +-ee    dp5 a   +-ee    dp5 b   +-ee
+max_media        |  1.859  0.004  1.17   1.845  0.002  1.50 |  1.465  0.020  0.47   1.583  0.019  0.90 |  +0.000  0.000   +0.000  0.000   +0.000  0.000   +0.000  0.000
+ejec:m=8         |  1.863  0.004  1.18   1.893  0.002  1.60 |  1.470  0.019  0.47   1.633  0.031  1.00 |  +0.004  0.000   +0.049  0.001   +0.005  0.004   +0.050  0.028
+ejec:m=8,m2=24,e2=32 |  1.866  0.004  1.19   1.885  0.002  1.60 |  1.476  0.019  0.47   1.600  0.027  1.07 |  +0.007  0.000   +0.041  0.001   +0.011  0.006   +0.017  0.027
+base             |  1.724  0.005  0.91   1.769  0.003  1.30 |  1.251  0.021  0.40   1.433  0.021  0.73 |  -0.135  0.004   -0.075  0.003   -0.213  0.024   -0.150  0.025
+nada             |  0.793  0.006  0.13   1.300  0.004  0.60 |  0.298  0.011  0.00   0.850  0.021  0.00 |  -1.066  0.007   -0.545  0.005   -1.167  0.021   -0.733  0.027
+byh              |  0.634  0.009  0.01   1.062  0.007  0.40 |  0.109  0.009  0.00   0.506  0.025  0.00 |  -1.225  0.009   -0.782  0.007   -1.356  0.021   -1.078  0.031
+
+H3 sobre la competencia completa: lineal entre el peor y el mejor segun la suma de las tres rondas.
+Suma: patrimonio sumado. Razon: suma de W / comprar y mantener. Diferencias contra la referencia.
+candidato        |   suma   +-ee     p5   +-ee      dif   +-ee   dif p5   +-ee |  razon   +-ee     p5   +-ee      dif   +-ee   dif p5   +-ee
+max_media        |  1.906  0.006  1.364  0.032   +0.000  0.000   +0.000  0.000 |  1.883  0.007  1.245  0.048   +0.000  0.000   +0.000  0.000
+ejec:m=8         |  1.907  0.006  1.369  0.032   +0.002  0.000   +0.005  0.005 |  1.885  0.007  1.248  0.049   +0.002  0.000   +0.003  0.005
+ejec:m=8,m2=24,e2=32 |  1.909  0.006  1.377  0.033   +0.003  0.000   +0.013  0.008 |  1.886  0.007  1.253  0.049   +0.004  0.000   +0.009  0.008
+base             |  1.742  0.009  1.047  0.033   -0.164  0.007   -0.317  0.031 |  1.723  0.010  0.927  0.035   -0.160  0.008   -0.318  0.042
+nada             |  0.698  0.016  0.164  0.006   -1.207  0.015   -1.200  0.030 |  0.714  0.017  0.137  0.005   -1.168  0.017   -1.108  0.047
+byh              |  0.507  0.013  0.057  0.004   -1.398  0.013   -1.307  0.032 |  0.338  0.011  0.017  0.001   -1.545  0.012   -1.228  0.048
+
+Orden de los candidatos segun cada hipotesis (de mayor a menor)
+  H1, media del patrimonio:   ejec:m=8,m2=24,e2=32 > ejec:m=8 > max_media > base > nada > byh
+  H1, percentil 5:            ejec:m=8,m2=24,e2=32 > ejec:m=8 > max_media > base > nada > byh
+  H2, media de W/B&H:         ejec:m=8,m2=24,e2=32 > ejec:m=8 > max_media > base > nada > byh
+  H3a, puntos esperados:      ejec:m=8,m2=24,e2=32 > ejec:m=8 > max_media > base > nada > byh
+  H3b, puntos esperados:      ejec:m=8 > ejec:m=8,m2=24,e2=32 > max_media > base > nada > byh
+  H3 sobre la suma:           ejec:m=8,m2=24,e2=32 > ejec:m=8 > max_media > base > nada > byh
+  H3 sobre la razon:          ejec:m=8,m2=24,e2=32 > ejec:m=8 > max_media > base > nada > byh
+  H3a, p5 de tres rondas:     ejec:m=8,m2=24,e2=32 > ejec:m=8 > max_media > base > nada > byh
+  H3b, p5 de tres rondas:     ejec:m=8 > ejec:m=8,m2=24,e2=32 > max_media > base > nada > byh
+  (el orden por H2 en diferencia es el mismo de H1: comprar y mantener es igual para todos en cada serie)
+
+Sensibilidad al campo y a G: puntos de la referencia y diferencia de cada candidato contra ella (+-ee)
+H3a (lineal en patrimonio), puntos esperados
+candidato        | ingenuo G=5    | ingenuo G=10   | ingenuo G=15   | mixto G=5      | mixto G=10     | mixto G=15     | fuerte G=5     | fuerte G=10    | fuerte G=15    |
+max_media        |  1.910 puntos  |  1.852 puntos  |  1.803 puntos  |  1.906 puntos  |  1.859 puntos  |  1.825 puntos  |  1.761 puntos  |  1.750 puntos  |  1.742 puntos  |
+ejec:m=8         |  +0.002  0.000 |  +0.003  0.000 |  +0.004  0.000 |  +0.003  0.000 |  +0.004  0.000 |  +0.004  0.000 |  +0.009  0.000 |  +0.007  0.000 |  +0.006  0.000 |
+ejec:m=8,m2=24,e2=32 |  +0.004  0.000 |  +0.005  0.000 |  +0.006  0.000 |  +0.005  0.000 |  +0.007  0.000 |  +0.007  0.000 |  +0.014  0.001 |  +0.011  0.001 |  +0.011  0.000 |
+base             |  -0.046  0.002 |  -0.071  0.003 |  -0.093  0.003 |  -0.087  0.003 |  -0.135  0.004 |  -0.161  0.005 |  -0.227  0.007 |  -0.215  0.007 |  -0.211  0.006 |
+nada             |  -0.601  0.006 |  -0.796  0.006 |  -0.898  0.006 |  -0.852  0.007 |  -1.066  0.007 |  -1.140  0.007 |  -1.337  0.007 |  -1.262  0.007 |  -1.222  0.007 |
+byh              |  -0.929  0.010 |  -1.034  0.009 |  -1.067  0.009 |  -1.131  0.010 |  -1.225  0.009 |  -1.249  0.009 |  -1.373  0.009 |  -1.309  0.009 |  -1.274  0.009 |
+H3b (lineal en el puesto), puntos esperados
+candidato        | ingenuo G=5    | ingenuo G=10   | ingenuo G=15   | mixto G=5      | mixto G=10     | mixto G=15     | fuerte G=5     | fuerte G=10    | fuerte G=15    |
+max_media        |  1.907 puntos  |  1.907 puntos  |  1.907 puntos  |  1.848 puntos  |  1.845 puntos  |  1.845 puntos  |  1.529 puntos  |  1.531 puntos  |  1.529 puntos  |
+ejec:m=8         |  +0.008  0.000 |  +0.008  0.000 |  +0.008  0.000 |  +0.047  0.001 |  +0.049  0.001 |  +0.048  0.001 |  +0.169  0.002 |  +0.167  0.002 |  +0.167  0.002 |
+ejec:m=8,m2=24,e2=32 |  +0.009  0.001 |  +0.009  0.000 |  +0.009  0.000 |  +0.040  0.001 |  +0.041  0.001 |  +0.040  0.001 |  +0.140  0.003 |  +0.137  0.003 |  +0.137  0.003 |
+base             |  -0.038  0.002 |  -0.036  0.002 |  -0.037  0.002 |  -0.072  0.003 |  -0.075  0.003 |  -0.073  0.003 |  -0.237  0.007 |  -0.241  0.007 |  -0.241  0.007 |
+nada             |  -0.505  0.004 |  -0.506  0.004 |  -0.507  0.004 |  -0.542  0.005 |  -0.545  0.005 |  -0.544  0.005 |  -0.863  0.006 |  -0.865  0.006 |  -0.865  0.006 |
+byh              |  -0.700  0.006 |  -0.697  0.006 |  -0.699  0.006 |  -0.782  0.007 |  -0.782  0.007 |  -0.784  0.007 |  -0.956  0.008 |  -0.957  0.008 |  -0.957  0.007 |
+H3a, percentil 5 de la competencia de tres rondas
+candidato        | ingenuo G=5    | ingenuo G=10   | ingenuo G=15   | mixto G=5      | mixto G=10     | mixto G=15     | fuerte G=5     | fuerte G=10    | fuerte G=15    |
+max_media        |  1.501 puntos  |  1.404 puntos  |  1.330 puntos  |  1.528 puntos  |  1.465 puntos  |  1.418 puntos  |  1.246 puntos  |  1.333 puntos  |  1.332 puntos  |
+ejec:m=8         |  +0.005  0.005 |  +0.002  0.003 |  +0.003  0.003 |  +0.010  0.006 |  +0.005  0.004 |  +0.008  0.005 |  +0.018  0.010 |  +0.015  0.006 |  +0.008  0.005 |
+ejec:m=8,m2=24,e2=32 |  +0.011  0.007 |  +0.005  0.005 |  +0.009  0.006 |  +0.017  0.007 |  +0.011  0.006 |  +0.017  0.007 |  +0.032  0.014 |  +0.024  0.007 |  +0.015  0.007 |
+base             |  -0.138  0.021 |  -0.146  0.022 |  -0.169  0.019 |  -0.209  0.020 |  -0.213  0.024 |  -0.219  0.019 |  -0.495  0.064 |  -0.270  0.022 |  -0.237  0.023 |
+nada             |  -1.138  0.027 |  -1.022  0.021 |  -0.984  0.022 |  -1.309  0.021 |  -1.167  0.021 |  -1.135  0.020 |  -1.246  0.032 |  -1.243  0.022 |  -1.131  0.020 |
+byh              |  -1.338  0.026 |  -1.248  0.021 |  -1.191  0.021 |  -1.455  0.020 |  -1.356  0.021 |  -1.312  0.019 |  -1.246  0.032 |  -1.323  0.019 |  -1.273  0.018 |
+H3b, percentil 5 de la competencia de tres rondas
+candidato        | ingenuo G=5    | ingenuo G=10   | ingenuo G=15   | mixto G=5      | mixto G=10     | mixto G=15     | fuerte G=5     | fuerte G=10    | fuerte G=15    |
+max_media        |  1.600 puntos  |  1.672 puntos  |  1.704 puntos  |  1.500 puntos  |  1.583 puntos  |  1.604 puntos  |  1.056 puntos  |  1.133 puntos  |  1.152 puntos  |
+ejec:m=8         |  +0.000  0.006 |  +0.028  0.028 |  +0.030  0.017 |  +0.100  0.031 |  +0.050  0.028 |  +0.059  0.017 |  +0.144  0.029 |  +0.144  0.028 |  +0.152  0.019 |
+ejec:m=8,m2=24,e2=32 |  +0.000  0.010 |  +0.039  0.029 |  +0.030  0.017 |  +0.100  0.040 |  +0.017  0.027 |  +0.041  0.017 |  +0.144  0.033 |  +0.133  0.026 |  +0.137  0.020 |
+base             |  -0.111  0.037 |  -0.072  0.022 |  -0.074  0.018 |  -0.178  0.035 |  -0.150  0.025 |  -0.119  0.017 |  -0.367  0.044 |  -0.333  0.027 |  -0.293  0.024 |
+nada             |  -0.778  0.027 |  -0.700  0.028 |  -0.667  0.022 |  -0.811  0.034 |  -0.733  0.027 |  -0.707  0.021 |  -1.056  0.029 |  -0.928  0.022 |  -0.874  0.021 |
+byh              |  -1.100  0.045 |  -0.989  0.032 |  -0.970  0.023 |  -1.100  0.036 |  -1.078  0.031 |  -1.041  0.022 |  -1.056  0.028 |  -1.022  0.026 |  -0.974  0.020 |
+
+--- Conjunto plausibles: 4000 series de 20000 ticks ---
+
+H1 (patrimonio) y H2 (exceso sobre comprar y mantener: diferencia W - B&H y razon W/B&H), por serie
+candidato        | H1 media  +-ee  mediana  m. geom      p5    peor     dif  +-ee | H2 media  +-ee      p5     peor |   W/B&H   +-ee mediana     p5     dif   +-ee |  >B&H
+max_media        |    58209  1548    23464    30758   10400      52      +0     0 |   +48090  1566   -2504   -23933 |  17.502  1.123   2.459  0.839  +0.000  0.000 |   89%
+ejec:m=8         |    58447  1549    23649    31025   10513     203    +238     8 |   +48328  1567   -2399   -23815 |  17.549  1.124   2.486  0.848  +0.048  0.003 |   90%
+ejec:m=8,m2=24,e2=32 |    58599  1550    23901    31163   10613     195    +389    16 |   +48479  1568   -2359   -23821 |  17.585  1.124   2.508  0.846  +0.083  0.005 |   90%
+base             |    47011  1216    20176    26360    9899      95  -11198   468 |   +36891  1234   -3761   -23508 |  13.868  0.894   2.155  0.772  -3.634  0.304 |   86%
+nada             |    10000     0    10000    10000   10000   10000  -48209  1548 |     -119    91  -10174   -26311 |   2.117  0.076   1.008  0.496 -15.385  1.073 |   51%
+byh              |    10122    91     9927     7953    1485      59  -48087  1566 |       +3     2    -133    -2987 |   0.994  0.001   1.000  0.965 -16.507  1.123 |   38%
+
+H1 y H2 en una competencia de tres rondas (promedio de las tres)
+candidato        |     H1 p5  +-ee      peor   dif p5  +-ee |     H2 p5  +-ee      peor
+max_media        |     14840   277      6299       +0     0 |     +3164   341     -8796
+ejec:m=8         |     14992   290      6497     +152    62 |     +3324   350     -8525
+ejec:m=8,m2=24,e2=32 |     15052   286      6517     +212    91 |     +3393   334     -8294
+base             |     13476   230      5813    -1364   234 |     +1491   266     -8539
+nada             |     10000     0     10000    -4840   277 |     -5820   253    -14230
+byh              |      5051   153       563    -9789   324 |       -87     4     -1044
+
+H3, torneo con G = 10 rivales y campo mixto. Puntos de 0 a 2.
+H3a: lineal en patrimonio entre el peor y el mejor del campo. H3b: lineal en el puesto.
+                 | una ronda: media, +-ee, p5                | tres rondas (promedio): p5, +-ee, peor    | diferencia contra la referencia                        
+candidato        |    H3a   +-ee    p5     H3b   +-ee    p5 | H3a p5   +-ee  peor  H3b p5   +-ee  peor |    dH3a   +-ee     dH3b   +-ee    dp5 a   +-ee    dp5 b   +-ee
+max_media        |  1.794  0.004  1.06   1.788  0.003  1.30 |  1.358  0.018  0.60   1.461  0.016  0.80 |  +0.000  0.000   +0.000  0.000   +0.000  0.000   +0.000  0.000
+ejec:m=8         |  1.801  0.004  1.08   1.840  0.003  1.40 |  1.369  0.019  0.60   1.533  0.021  0.80 |  +0.007  0.000   +0.052  0.001   +0.010  0.005   +0.072  0.020
+ejec:m=8,m2=24,e2=32 |  1.805  0.004  1.09   1.833  0.003  1.40 |  1.377  0.019  0.61   1.522  0.028  0.87 |  +0.011  0.000   +0.044  0.001   +0.019  0.007   +0.061  0.025
+base             |  1.631  0.005  0.84   1.694  0.004  1.10 |  1.123  0.022  0.42   1.300  0.018  0.77 |  -0.163  0.004   -0.094  0.003   -0.236  0.023   -0.161  0.021
+nada             |  0.867  0.007  0.08   1.227  0.004  0.60 |  0.320  0.015  0.00   0.767  0.020  0.20 |  -0.927  0.008   -0.561  0.005   -1.039  0.023   -0.694  0.024
+byh              |  0.892  0.009  0.03   1.251  0.007  0.40 |  0.237  0.017  0.00   0.683  0.027  0.13 |  -0.902  0.011   -0.537  0.008   -1.122  0.025   -0.778  0.031
+
+H3 sobre la competencia completa: lineal entre el peor y el mejor segun la suma de las tres rondas.
+Suma: patrimonio sumado. Razon: suma de W / comprar y mantener. Diferencias contra la referencia.
+candidato        |   suma   +-ee     p5   +-ee      dif   +-ee   dif p5   +-ee |  razon   +-ee     p5   +-ee      dif   +-ee   dif p5   +-ee
+max_media        |  1.854  0.007  1.278  0.029   +0.000  0.000   +0.000  0.000 |  1.845  0.008  1.216  0.033   +0.000  0.000   +0.000  0.000
+ejec:m=8         |  1.859  0.007  1.288  0.029   +0.004  0.000   +0.009  0.006 |  1.849  0.008  1.224  0.033   +0.004  0.000   +0.009  0.006
+ejec:m=8,m2=24,e2=32 |  1.861  0.007  1.291  0.029   +0.007  0.000   +0.013  0.009 |  1.852  0.008  1.234  0.033   +0.007  0.000   +0.018  0.009
+base             |  1.665  0.010  0.988  0.028   -0.190  0.007   -0.290  0.028 |  1.655  0.011  0.912  0.029   -0.190  0.008   -0.303  0.031
+nada             |  0.708  0.015  0.091  0.004   -1.146  0.015   -1.187  0.029 |  0.734  0.016  0.076  0.004   -1.112  0.016   -1.140  0.033
+byh              |  0.729  0.016  0.070  0.004   -1.126  0.016   -1.209  0.028 |  0.580  0.015  0.023  0.002   -1.265  0.015   -1.192  0.032
+
+Orden de los candidatos segun cada hipotesis (de mayor a menor)
+  H1, media del patrimonio:   ejec:m=8,m2=24,e2=32 > ejec:m=8 > max_media > base > byh > nada
+  H1, percentil 5:            ejec:m=8,m2=24,e2=32 > ejec:m=8 > max_media > nada > base > byh
+  H2, media de W/B&H:         ejec:m=8,m2=24,e2=32 > ejec:m=8 > max_media > base > nada > byh
+  H3a, puntos esperados:      ejec:m=8,m2=24,e2=32 > ejec:m=8 > max_media > base > byh > nada
+  H3b, puntos esperados:      ejec:m=8 > ejec:m=8,m2=24,e2=32 > max_media > base > byh > nada
+  H3 sobre la suma:           ejec:m=8,m2=24,e2=32 > ejec:m=8 > max_media > base > byh > nada
+  H3 sobre la razon:          ejec:m=8,m2=24,e2=32 > ejec:m=8 > max_media > base > nada > byh
+  H3a, p5 de tres rondas:     ejec:m=8,m2=24,e2=32 > ejec:m=8 > max_media > base > nada > byh
+  H3b, p5 de tres rondas:     ejec:m=8 > ejec:m=8,m2=24,e2=32 > max_media > base > nada > byh
+  (el orden por H2 en diferencia es el mismo de H1: comprar y mantener es igual para todos en cada serie)
+
+Sensibilidad al campo y a G: puntos de la referencia y diferencia de cada candidato contra ella (+-ee)
+H3a (lineal en patrimonio), puntos esperados
+candidato        | ingenuo G=5    | ingenuo G=10   | ingenuo G=15   | mixto G=5      | mixto G=10     | mixto G=15     | fuerte G=5     | fuerte G=10    | fuerte G=15    |
+max_media        |  1.867 puntos  |  1.792 puntos  |  1.735 puntos  |  1.853 puntos  |  1.794 puntos  |  1.750 puntos  |  1.637 puntos  |  1.637 puntos  |  1.632 puntos  |
+ejec:m=8         |  +0.005  0.000 |  +0.006  0.000 |  +0.007  0.000 |  +0.006  0.000 |  +0.007  0.000 |  +0.008  0.000 |  +0.016  0.001 |  +0.012  0.000 |  +0.011  0.000 |
+ejec:m=8,m2=24,e2=32 |  +0.007  0.000 |  +0.009  0.000 |  +0.011  0.000 |  +0.008  0.000 |  +0.011  0.000 |  +0.012  0.000 |  +0.023  0.001 |  +0.018  0.001 |  +0.017  0.001 |
+base             |  -0.071  0.003 |  -0.106  0.003 |  -0.128  0.003 |  -0.120  0.004 |  -0.163  0.004 |  -0.192  0.005 |  -0.283  0.007 |  -0.247  0.006 |  -0.237  0.006 |
+nada             |  -0.585  0.006 |  -0.745  0.007 |  -0.814  0.007 |  -0.787  0.007 |  -0.927  0.008 |  -0.984  0.008 |  -1.145  0.009 |  -1.062  0.009 |  -1.020  0.009 |
+byh              |  -0.657  0.009 |  -0.762  0.010 |  -0.805  0.010 |  -0.809  0.010 |  -0.902  0.011 |  -0.936  0.011 |  -1.047  0.012 |  -0.979  0.011 |  -0.945  0.011 |
+H3b (lineal en el puesto), puntos esperados
+candidato        | ingenuo G=5    | ingenuo G=10   | ingenuo G=15   | mixto G=5      | mixto G=10     | mixto G=15     | fuerte G=5     | fuerte G=10    | fuerte G=15    |
+max_media        |  1.848 puntos  |  1.846 puntos  |  1.846 puntos  |  1.788 puntos  |  1.788 puntos  |  1.788 puntos  |  1.416 puntos  |  1.416 puntos  |  1.415 puntos  |
+ejec:m=8         |  +0.011  0.001 |  +0.011  0.000 |  +0.012  0.000 |  +0.051  0.001 |  +0.052  0.001 |  +0.051  0.001 |  +0.177  0.002 |  +0.176  0.002 |  +0.178  0.002 |
+ejec:m=8,m2=24,e2=32 |  +0.014  0.001 |  +0.013  0.001 |  +0.014  0.001 |  +0.044  0.001 |  +0.044  0.001 |  +0.044  0.001 |  +0.146  0.003 |  +0.146  0.003 |  +0.147  0.003 |
+base             |  -0.058  0.003 |  -0.058  0.002 |  -0.058  0.002 |  -0.094  0.003 |  -0.094  0.003 |  -0.094  0.003 |  -0.275  0.007 |  -0.275  0.007 |  -0.275  0.007 |
+nada             |  -0.525  0.005 |  -0.518  0.005 |  -0.522  0.005 |  -0.563  0.006 |  -0.561  0.005 |  -0.561  0.005 |  -0.785  0.007 |  -0.786  0.007 |  -0.786  0.007 |
+byh              |  -0.499  0.007 |  -0.499  0.007 |  -0.499  0.007 |  -0.539  0.008 |  -0.537  0.008 |  -0.533  0.008 |  -0.700  0.009 |  -0.701  0.009 |  -0.702  0.009 |
+H3a, percentil 5 de la competencia de tres rondas
+candidato        | ingenuo G=5    | ingenuo G=10   | ingenuo G=15   | mixto G=5      | mixto G=10     | mixto G=15     | fuerte G=5     | fuerte G=10    | fuerte G=15    |
+max_media        |  1.403 puntos  |  1.327 puntos  |  1.245 puntos  |  1.372 puntos  |  1.358 puntos  |  1.315 puntos  |  0.974 puntos  |  1.176 puntos  |  1.206 puntos  |
+ejec:m=8         |  +0.006  0.005 |  +0.008  0.005 |  +0.009  0.005 |  +0.019  0.008 |  +0.010  0.005 |  +0.012  0.005 |  +0.036  0.017 |  +0.019  0.008 |  +0.017  0.006 |
+ejec:m=8,m2=24,e2=32 |  +0.012  0.008 |  +0.010  0.007 |  +0.011  0.007 |  +0.026  0.011 |  +0.019  0.007 |  +0.020  0.007 |  +0.061  0.023 |  +0.030  0.009 |  +0.024  0.009 |
+base             |  -0.182  0.024 |  -0.193  0.022 |  -0.186  0.019 |  -0.214  0.026 |  -0.236  0.023 |  -0.223  0.020 |  -0.445  0.078 |  -0.277  0.023 |  -0.242  0.021 |
+nada             |  -1.063  0.031 |  -0.944  0.028 |  -0.898  0.026 |  -1.161  0.033 |  -1.039  0.023 |  -1.005  0.023 |  -0.974  0.042 |  -1.117  0.023 |  -1.018  0.024 |
+byh              |  -1.084  0.036 |  -1.011  0.031 |  -0.978  0.027 |  -1.156  0.031 |  -1.122  0.025 |  -1.085  0.024 |  -0.974  0.042 |  -1.101  0.023 |  -1.060  0.024 |
+H3b, percentil 5 de la competencia de tres rondas
+candidato        | ingenuo G=5    | ingenuo G=10   | ingenuo G=15   | mixto G=5      | mixto G=10     | mixto G=15     | fuerte G=5     | fuerte G=10    | fuerte G=15    |
+max_media        |  1.467 puntos  |  1.533 puntos  |  1.563 puntos  |  1.333 puntos  |  1.461 puntos  |  1.474 puntos  |  0.867 puntos  |  0.967 puntos  |  1.015 puntos  |
+ejec:m=8         |  +0.000  0.011 |  +0.033  0.029 |  +0.033  0.020 |  +0.133  0.036 |  +0.072  0.020 |  +0.067  0.017 |  +0.200  0.040 |  +0.167  0.025 |  +0.163  0.018 |
+ejec:m=8,m2=24,e2=32 |  +0.000  0.012 |  +0.044  0.029 |  +0.037  0.020 |  +0.133  0.040 |  +0.061  0.025 |  +0.052  0.017 |  +0.156  0.055 |  +0.156  0.026 |  +0.133  0.021 |
+base             |  -0.133  0.014 |  -0.078  0.029 |  -0.085  0.021 |  -0.133  0.034 |  -0.161  0.021 |  -0.130  0.019 |  -0.333  0.047 |  -0.322  0.032 |  -0.296  0.021 |
+nada             |  -0.733  0.036 |  -0.644  0.029 |  -0.615  0.023 |  -0.722  0.037 |  -0.694  0.024 |  -0.652  0.022 |  -0.867  0.032 |  -0.767  0.023 |  -0.759  0.018 |
+byh              |  -0.789  0.035 |  -0.706  0.031 |  -0.667  0.028 |  -0.800  0.041 |  -0.778  0.031 |  -0.737  0.029 |  -0.867  0.041 |  -0.767  0.022 |  -0.763  0.022 |
+
+--- Conjunto estres: 2800 series de 20000 ticks ---
+
+H1 (patrimonio) y H2 (exceso sobre comprar y mantener: diferencia W - B&H y razon W/B&H), por serie
+candidato        | H1 media  +-ee  mediana  m. geom      p5    peor     dif  +-ee | H2 media  +-ee      p5     peor |   W/B&H   +-ee mediana     p5     dif   +-ee |  >B&H
+max_media        |   182161  7273    33588    40279    3059       3      +0     0 |  +163491  7341  -82781   -99884 |  55.808  5.780   3.577  0.134  +0.000  0.000 |   73%
+ejec:m=8         |   182554  7277    33820    41648    3386       9    +393    44 |  +163884  7345  -82716   -99580 |  56.011  5.787   3.607  0.137  +0.203  0.047 |   74%
+ejec:m=8,m2=24,e2=32 |   182776  7282    33708    41909    3386     281    +615    60 |  +164106  7349  -82506   -99590 |  56.236  5.805   3.624  0.137  +0.428  0.097 |   74%
+base             |   149751  6184    24105    33696    3084      12  -32410  1489 |  +131081  6254  -84271  -100103 |  47.479  5.167   2.435  0.127  -8.329  1.006 |   71%
+nada             |    10000     0    10000    10000   10000   10000 -172161  7273 |    -8670   484  -89371  -113268 |   4.053  0.197   0.980  0.101 -51.754  5.715 |   47%
+byh              |    18697   486    10185     8632     300      44 -163463  7341 |      +28    41   -1082   -16335 |   0.974  0.002   1.000  0.784 -54.834  5.780 |   41%
+
+H1 y H2 en una competencia de tres rondas (promedio de las tres)
+candidato        |     H1 p5  +-ee      peor   dif p5  +-ee |     H2 p5  +-ee      peor
+max_media        |     11483   708      1907       +0     0 |    -20511  2524    -89253
+ejec:m=8         |     11660   692      1991     +177   135 |    -20406  2537    -89249
+ejec:m=8,m2=24,e2=32 |     11741   679      1957     +258   198 |    -20419  2518    -89196
+base             |     10092   466      1958    -1391   514 |    -24486  1769    -89150
+nada             |     10000     0     10000    -1483   708 |    -34813  1145    -90701
+byh              |      4771   241       247    -6712   760 |     -1189   145     -6755
+
+H3, torneo con G = 10 rivales y campo mixto. Puntos de 0 a 2.
+H3a: lineal en patrimonio entre el peor y el mejor del campo. H3b: lineal en el puesto.
+                 | una ronda: media, +-ee, p5                | tres rondas (promedio): p5, +-ee, peor    | diferencia contra la referencia                        
+candidato        |    H3a   +-ee    p5     H3b   +-ee    p5 | H3a p5   +-ee  peor  H3b p5   +-ee  peor |    dH3a   +-ee     dH3b   +-ee    dp5 a   +-ee    dp5 b   +-ee
+max_media        |  1.433  0.012  0.01   1.518  0.010  0.20 |  0.700  0.021  0.05   0.889  0.032  0.23 |  +0.000  0.000   +0.000  0.000   +0.000  0.000   +0.000  0.000
+ejec:m=8         |  1.443  0.012  0.03   1.562  0.010  0.20 |  0.715  0.022  0.05   0.939  0.036  0.27 |  +0.010  0.001   +0.044  0.002   +0.015  0.009   +0.050  0.028
+ejec:m=8,m2=24,e2=32 |  1.446  0.012  0.04   1.555  0.010  0.20 |  0.723  0.023  0.05   0.933  0.036  0.27 |  +0.014  0.002   +0.037  0.002   +0.023  0.011   +0.044  0.027
+base             |  1.260  0.011  0.04   1.442  0.010  0.20 |  0.579  0.023  0.04   0.867  0.027  0.13 |  -0.172  0.007   -0.076  0.005   -0.122  0.025   -0.022  0.031
+nada             |  0.685  0.010  0.01   1.157  0.007  0.30 |  0.094  0.009  0.00   0.650  0.024  0.10 |  -0.747  0.017   -0.361  0.011   -0.606  0.024   -0.239  0.038
+byh              |  0.804  0.013  0.01   1.290  0.009  0.40 |  0.102  0.013  0.00   0.739  0.030  0.10 |  -0.628  0.021   -0.228  0.015   -0.599  0.026   -0.150  0.045
+
+H3 sobre la competencia completa: lineal entre el peor y el mejor segun la suma de las tres rondas.
+Suma: patrimonio sumado. Razon: suma de W / comprar y mantener. Diferencias contra la referencia.
+candidato        |   suma   +-ee     p5   +-ee      dif   +-ee   dif p5   +-ee |  razon   +-ee     p5   +-ee      dif   +-ee   dif p5   +-ee
+max_media        |  1.724  0.015  0.660  0.078   +0.000  0.000   +0.000  0.000 |  1.739  0.015  0.688  0.082   +0.000  0.000   +0.000  0.000
+ejec:m=8         |  1.729  0.015  0.672  0.078   +0.004  0.001   +0.012  0.015 |  1.746  0.014  0.710  0.081   +0.007  0.002   +0.022  0.022
+ejec:m=8,m2=24,e2=32 |  1.730  0.015  0.682  0.078   +0.006  0.001   +0.022  0.019 |  1.749  0.014  0.730  0.084   +0.010  0.002   +0.041  0.029
+base             |  1.476  0.017  0.417  0.058   -0.249  0.012   -0.243  0.060 |  1.505  0.017  0.485  0.043   -0.234  0.013   -0.203  0.068
+nada             |  0.416  0.018  0.011  0.003   -1.308  0.022   -0.649  0.078 |  0.583  0.021  0.020  0.001   -1.156  0.026   -0.669  0.082
+byh              |  0.691  0.024  0.022  0.002   -1.033  0.030   -0.638  0.079 |  0.423  0.019  0.006  0.001   -1.316  0.024   -0.683  0.082
+
+Orden de los candidatos segun cada hipotesis (de mayor a menor)
+  H1, media del patrimonio:   ejec:m=8,m2=24,e2=32 > ejec:m=8 > max_media > base > byh > nada
+  H1, percentil 5:            nada > ejec:m=8,m2=24,e2=32 > ejec:m=8 > base > max_media > byh
+  H2, media de W/B&H:         ejec:m=8,m2=24,e2=32 > ejec:m=8 > max_media > base > nada > byh
+  H3a, puntos esperados:      ejec:m=8,m2=24,e2=32 > ejec:m=8 > max_media > base > byh > nada
+  H3b, puntos esperados:      ejec:m=8 > ejec:m=8,m2=24,e2=32 > max_media > base > byh > nada
+  H3 sobre la suma:           ejec:m=8,m2=24,e2=32 > ejec:m=8 > max_media > base > byh > nada
+  H3 sobre la razon:          ejec:m=8,m2=24,e2=32 > ejec:m=8 > max_media > base > nada > byh
+  H3a, p5 de tres rondas:     ejec:m=8,m2=24,e2=32 > ejec:m=8 > max_media > base > byh > nada
+  H3b, p5 de tres rondas:     ejec:m=8 > ejec:m=8,m2=24,e2=32 > max_media > base > byh > nada
+  (el orden por H2 en diferencia es el mismo de H1: comprar y mantener es igual para todos en cada serie)
+
+Sensibilidad al campo y a G: puntos de la referencia y diferencia de cada candidato contra ella (+-ee)
+H3a (lineal en patrimonio), puntos esperados
+candidato        | ingenuo G=5    | ingenuo G=10   | ingenuo G=15   | mixto G=5      | mixto G=10     | mixto G=15     | fuerte G=5     | fuerte G=10    | fuerte G=15    |
+max_media        |  1.559 puntos  |  1.452 puntos  |  1.369 puntos  |  1.501 puntos  |  1.433 puntos  |  1.380 puntos  |  1.358 puntos  |  1.310 puntos  |  1.292 puntos  |
+ejec:m=8         |  +0.009  0.001 |  +0.009  0.001 |  +0.008  0.001 |  +0.010  0.001 |  +0.010  0.001 |  +0.010  0.001 |  +0.018  0.001 |  +0.014  0.001 |  +0.013  0.001 |
+ejec:m=8,m2=24,e2=32 |  +0.012  0.002 |  +0.012  0.001 |  +0.011  0.001 |  +0.014  0.002 |  +0.014  0.002 |  +0.014  0.002 |  +0.022  0.002 |  +0.018  0.002 |  +0.017  0.002 |
+base             |  -0.075  0.005 |  -0.113  0.006 |  -0.135  0.006 |  -0.126  0.007 |  -0.172  0.007 |  -0.200  0.008 |  -0.263  0.011 |  -0.241  0.010 |  -0.233  0.009 |
+nada             |  -0.467  0.014 |  -0.617  0.015 |  -0.677  0.015 |  -0.596  0.016 |  -0.747  0.017 |  -0.794  0.017 |  -0.846  0.019 |  -0.805  0.018 |  -0.785  0.018 |
+byh              |  -0.432  0.018 |  -0.532  0.019 |  -0.566  0.019 |  -0.513  0.020 |  -0.628  0.021 |  -0.657  0.022 |  -0.693  0.023 |  -0.648  0.022 |  -0.626  0.022 |
+H3b (lineal en el puesto), puntos esperados
+candidato        | ingenuo G=5    | ingenuo G=10   | ingenuo G=15   | mixto G=5      | mixto G=10     | mixto G=15     | fuerte G=5     | fuerte G=10    | fuerte G=15    |
+max_media        |  1.628 puntos  |  1.621 puntos  |  1.623 puntos  |  1.521 puntos  |  1.518 puntos  |  1.518 puntos  |  1.275 puntos  |  1.275 puntos  |  1.273 puntos  |
+ejec:m=8         |  +0.013  0.001 |  +0.013  0.001 |  +0.013  0.001 |  +0.044  0.002 |  +0.044  0.002 |  +0.044  0.002 |  +0.135  0.004 |  +0.137  0.003 |  +0.136  0.003 |
+ejec:m=8,m2=24,e2=32 |  +0.015  0.001 |  +0.016  0.001 |  +0.015  0.001 |  +0.036  0.002 |  +0.037  0.002 |  +0.036  0.002 |  +0.099  0.004 |  +0.101  0.004 |  +0.100  0.004 |
+base             |  -0.047  0.004 |  -0.044  0.004 |  -0.044  0.004 |  -0.081  0.006 |  -0.076  0.005 |  -0.078  0.005 |  -0.231  0.010 |  -0.230  0.009 |  -0.228  0.009 |
+nada             |  -0.356  0.010 |  -0.352  0.010 |  -0.355  0.010 |  -0.369  0.011 |  -0.361  0.011 |  -0.367  0.011 |  -0.513  0.014 |  -0.512  0.014 |  -0.508  0.014 |
+byh              |  -0.246  0.013 |  -0.237  0.013 |  -0.239  0.013 |  -0.229  0.015 |  -0.228  0.015 |  -0.228  0.015 |  -0.371  0.017 |  -0.368  0.017 |  -0.366  0.017 |
+H3a, percentil 5 de la competencia de tres rondas
+candidato        | ingenuo G=5    | ingenuo G=10   | ingenuo G=15   | mixto G=5      | mixto G=10     | mixto G=15     | fuerte G=5     | fuerte G=10    | fuerte G=15    |
+max_media        |  0.792 puntos  |  0.734 puntos  |  0.667 puntos  |  0.713 puntos  |  0.700 puntos  |  0.679 puntos  |  0.586 puntos  |  0.625 puntos  |  0.630 puntos  |
+ejec:m=8         |  +0.014  0.010 |  +0.011  0.009 |  +0.011  0.009 |  +0.014  0.009 |  +0.015  0.009 |  +0.012  0.008 |  +0.027  0.018 |  +0.023  0.010 |  +0.016  0.010 |
+ejec:m=8,m2=24,e2=32 |  +0.019  0.013 |  +0.017  0.012 |  +0.014  0.010 |  +0.022  0.012 |  +0.023  0.011 |  +0.018  0.010 |  +0.043  0.022 |  +0.030  0.013 |  +0.025  0.013 |
+base             |  -0.082  0.030 |  -0.145  0.030 |  -0.125  0.025 |  -0.088  0.029 |  -0.122  0.025 |  -0.135  0.023 |  -0.293  0.052 |  -0.160  0.031 |  -0.154  0.025 |
+nada             |  -0.644  0.037 |  -0.600  0.033 |  -0.557  0.031 |  -0.641  0.027 |  -0.606  0.024 |  -0.585  0.025 |  -0.586  0.042 |  -0.585  0.031 |  -0.570  0.027 |
+byh              |  -0.627  0.041 |  -0.613  0.036 |  -0.562  0.033 |  -0.623  0.032 |  -0.599  0.026 |  -0.581  0.027 |  -0.584  0.043 |  -0.583  0.031 |  -0.570  0.028 |
+H3b, percentil 5 de la competencia de tres rondas
+candidato        | ingenuo G=5    | ingenuo G=10   | ingenuo G=15   | mixto G=5      | mixto G=10     | mixto G=15     | fuerte G=5     | fuerte G=10    | fuerte G=15    |
+max_media        |  1.000 puntos  |  1.072 puntos  |  1.093 puntos  |  0.844 puntos  |  0.889 puntos  |  0.885 puntos  |  0.700 puntos  |  0.783 puntos  |  0.811 puntos  |
+ejec:m=8         |  +0.044  0.044 |  +0.017  0.026 |  +0.026  0.021 |  +0.089  0.048 |  +0.050  0.028 |  +0.048  0.023 |  +0.100  0.042 |  +0.106  0.028 |  +0.122  0.021 |
+ejec:m=8,m2=24,e2=32 |  +0.044  0.048 |  +0.022  0.029 |  +0.033  0.022 |  +0.067  0.047 |  +0.044  0.027 |  +0.048  0.023 |  +0.056  0.043 |  +0.072  0.031 |  +0.078  0.027 |
+base             |  -0.044  0.052 |  -0.039  0.034 |  -0.019  0.026 |  -0.044  0.042 |  -0.022  0.031 |  -0.011  0.028 |  -0.256  0.040 |  -0.194  0.030 |  -0.193  0.028 |
+nada             |  -0.311  0.061 |  -0.256  0.039 |  -0.252  0.031 |  -0.300  0.052 |  -0.239  0.038 |  -0.185  0.033 |  -0.567  0.057 |  -0.533  0.027 |  -0.548  0.026 |
+byh              |  -0.244  0.064 |  -0.211  0.045 |  -0.170  0.036 |  -0.200  0.063 |  -0.150  0.045 |  -0.107  0.036 |  -0.567  0.047 |  -0.472  0.034 |  -0.511  0.031 |

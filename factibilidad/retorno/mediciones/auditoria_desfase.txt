@@ -1,0 +1,13 @@
+Desfase, primer tick y ultimo tick contra el testbench oficial sin modificar
+  testbench: Patrimonio final: 9617
+  testbench: Ordenes ejecutadas: 52
+  testbench: Comprar y mantener: 6695
+  testbench: Testbenchs aprobados: 4/4
+PASS  decisiones.csv del testbench contra arnes (correr, 2 precios perdidos): 2000 filas, identicos byte a byte
+PASS  decisiones.csv del testbench contra regla y lazo propios: 2000 filas, identicos byte a byte
+Primer tick: el testbench lee el byte 00 (reset de DECISION) y no ejecuta nada: caja 10000.
+Primera orden del testbench: fila 7, 63 acciones, pago 9072 = 63 x 144 (resto 0). Precio del tick 7: 144. La senal salio con el precio del tick 6 (143).
+PASS  la orden se ejecuta al precio del tick siguiente al que la produjo, no al que la produjo
+Ultimo tick: patrimonio final del testbench 9617, propio 9617, ordenes propias 52. La decision tomada con el ultimo precio no se ejecuta.
+Regla y lazo propios, serie completa sin precios perdidos: patrimonio 27062, ordenes 388, comprar y mantener 6497.
+PASS

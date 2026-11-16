@@ -1,0 +1,2 @@
+auditoria_cifras.txt: 729 de 729 cifras coinciden (exactas 383/383, torneo 264/264, p5 82/82)
+auditoria_tablas.md escrito

@@ -1,0 +1,35 @@
+potencia.tcl: esquina nom_tt_025C_5v00, modo cero
+  liberty: $PDK_CIEL/gf180mcu/versions/54435919abffb937387ec956209f9cf5fd2dfbee/gf180mcuD/libs.ref/gf180mcu_fd_sc_mcu7t5v0/lib/gf180mcu_fd_sc_mcu7t5v0__tt_025C_5v00.lib
+  netlist: factibilidad/g_asic/runs/base_t40/final/nl/asic_top.nl.v
+  sdc:     factibilidad/g_asic/runs/base_t40/final/sdc/asic_top.sdc
+  spef:    factibilidad/g_asic/runs/base_t40/final/spef/nom/asic_top.nom.spef
+
+=== clocks ===
+clock clk: periodo 40.000000, propagado 1
+
+MODO cero: set_power_activity -global -activity 0 -duty 0.5 (solo conmuta el reloj)
+
+=== report_activity_annotation ===
+unannotated 21034
+
+=== report_power -corner nom_tt_025C_5v00 ===
+Group                    Internal    Switching      Leakage        Total
+                            Power        Power        Power        Power (Watts)
+------------------------------------------------------------------------
+Sequential           1.153330e-02 0.000000e+00 3.646830e-07 1.153366e-02  53.1%
+Combinational        0.000000e+00 0.000000e+00 7.219705e-07 7.219705e-07   0.0%
+Clock                5.432216e-03 4.746451e-03 7.297658e-07 1.017940e-02  46.9%
+Macro                0.000000e+00 0.000000e+00 0.000000e+00 0.000000e+00   0.0%
+Pad                  0.000000e+00 0.000000e+00 0.000000e+00 0.000000e+00   0.0%
+------------------------------------------------------------------------
+Total                1.696553e-02 4.746451e-03 1.816367e-06 2.171379e-02 100.0%
+                            78.1%        21.9%         0.0%
+
+=== sonda: actividad de puertos (densidad 1/s, duty, origen) ===
+sonda puerto clk: 5.00000e+07 0.500 clock
+sonda puerto rst_n: 0.00000e+00 0.500 global
+sonda puerto spi_sclk: 0.00000e+00 0.500 global
+sonda puerto spi_cs_n: 0.00000e+00 0.500 global
+sonda puerto spi_miso: 0.00000e+00 0.500 global
+
+=== design_power (W): interna 0.016965525224804878 conmutacion 0.004746450576931238 fuga 1.8163672166338074e-6 total 0.02171379141509533 ===

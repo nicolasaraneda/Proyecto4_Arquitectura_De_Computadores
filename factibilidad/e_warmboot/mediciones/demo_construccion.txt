@@ -1,0 +1,36 @@
+Prueba de placa: dos imágenes con SB_WARMBOOT
+Comando: factibilidad/e_warmboot/scripts/construir_demo.sh
+Herramientas: Yosys 0.68+195, nextpnr nextpnr-0.11.1-19-g8dbcee5c
+nextpnr --hx1k --package vq100 --freq 25 --seed 1, goboard.pcf
+
+imagen 0 (rtl/wb_demo.v, Img = 0):
+  celdas lógicas   184 de 1280
+  BRAM             0 de 16
+  SB_WARMBOOT      1 de 1
+  frecuencia máx.  159.16 MHz (PASS at 25.00 MHz)
+  tamaño           32220 bytes
+  sha256           52677b15ac709656bb5669858ec202d677ca1dbef7f31a0cf6de9c206597f8eb
+imagen 1 (rtl/wb_demo.v, Img = 1):
+  celdas lógicas   186 de 1280
+  BRAM             0 de 16
+  SB_WARMBOOT      1 de 1
+  frecuencia máx.  153.35 MHz (PASS at 25.00 MHz)
+  tamaño           32220 bytes
+  sha256           9011f6f3a5b642d011c8e218f251070fb9f4e6a0f6dbe72ba480d8422e8e43a9
+
+icemulti -v -o wb_demo_multi.bin img0.bin img1.bin:
+  Place image 0 at 0000a0 .. 007e7c (`factibilidad/e_warmboot/build/demo/img0.bin')
+  Place image 1 at 007e7c .. 00fc58 (`factibilidad/e_warmboot/build/demo/img1.bin')
+
+archivo: factibilidad/e_warmboot/wb_demo_multi.bin
+tamaño: 64600 bytes de 131072 (49.3 %), sobran 66472
+sha256: 2f0d6efe6d26c067205086cc02588ddaeee8ef32249a68e6723efb0b26e1fa26
+vector 0 (encendido ) -> 0x0000A0   modo 0x00, oscilador de configuración en frecuencia baja, warm boot habilitado
+vector 1 (S1 S0 = 00) -> 0x0000A0   modo 0x00, oscilador de configuración en frecuencia baja, warm boot habilitado
+vector 2 (S1 S0 = 01) -> 0x007E7C   modo 0x00, oscilador de configuración en frecuencia baja, warm boot habilitado
+vector 3 (S1 S0 = 10) -> 0x0000A0   modo 0x00, oscilador de configuración en frecuencia baja, warm boot habilitado
+vector 4 (S1 S0 = 11) -> 0x0000A0   modo 0x00, oscilador de configuración en frecuencia baja, warm boot habilitado
+imágenes distintas: 2, en 0x0000A0, 0x007E7C
+imagen 0: factibilidad/e_warmboot/build/demo/img0.bin, 32220 bytes, sha256 52677b15ac709656bb5669858ec202d677ca1dbef7f31a0cf6de9c206597f8eb, copia idéntica
+imagen 1: factibilidad/e_warmboot/build/demo/img1.bin, 32220 bytes, sha256 9011f6f3a5b642d011c8e218f251070fb9f4e6a0f6dbe72ba480d8422e8e43a9, copia idéntica
+RESULTADO: correcto

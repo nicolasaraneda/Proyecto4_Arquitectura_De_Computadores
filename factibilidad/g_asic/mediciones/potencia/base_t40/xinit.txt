@@ -1,0 +1,8 @@
+ronda3 init=0 cambios_a_x=0 total_W=2.691611e-02 combinacional_W=5.355494e-03
+calculo init=0 cambios_a_x=0 total_W=2.793521e-02 combinacional_W=6.295220e-03
+init=0: los 19 primeros bytes de decision son los mismos de la simulacion normal
+ronda3 init=1 cambios_a_x=0 total_W=2.914719e-02 combinacional_W=7.364918e-03
+calculo init=1 cambios_a_x=0 total_W=2.938558e-02 combinacional_W=7.571865e-03
+init=1: los 19 primeros bytes de decision son los mismos de la simulacion normal
+normal ronda3 total_W=2.802943e-02 combinacional_W=6.409449e-03
+normal calculo total_W=2.870041e-02 combinacional_W=7.001956e-03

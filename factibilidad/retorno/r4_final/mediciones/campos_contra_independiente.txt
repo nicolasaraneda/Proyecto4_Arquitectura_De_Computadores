@@ -1,0 +1,89 @@
+Campos nuevos del arnes (nucleo/torneo.c) contra el evaluador independiente (auditoria/indep.c).
+Semilla 0, G = 10, candidatos base y max_media. arnes: sorteo de 6 campos por serie. indep: valor esperado exacto.
+dif = arnes - indep. tol: 4 errores del sorteo (puntos) o 3 errores combinados (p5 de tres rondas).
+
+vista                      campo      conjunto   cifra                     arnes    indep      dif     tol
+2000 ticks                 racional   evidencia  base H3A                 1.1136   1.1149  -0.0013  0.0080
+2000 ticks                 racional   evidencia  base H3A p5 3r           0.5396   0.5456  -0.0060  0.0483
+2000 ticks                 racional   evidencia  base H3B                 1.1697   1.1698  -0.0002  0.0080
+2000 ticks                 racional   evidencia  base H3B p5 3r           0.6444   0.6417  +0.0028  0.0573
+2000 ticks                 racional   evidencia  max_media H3A            1.2077   1.2088  -0.0011  0.0080
+2000 ticks                 racional   evidencia  max_media H3A p5 3r      0.6474   0.6444  +0.0030  0.0438
+2000 ticks                 racional   evidencia  max_media H3B            1.2451   1.2461  -0.0009  0.0080
+2000 ticks                 racional   evidencia  max_media H3B p5 3r      0.7278   0.7208  +0.0069  0.0543
+2000 ticks                 racional   evidencia  max_media - base H3A     0.0941   0.0939  +0.0002  0.0080
+2000 ticks                 racional   evidencia  max_media - base H3B     0.0755   0.0762  -0.0008  0.0080
+2000 ticks                 reversores evidencia  base H3A                 0.8793   0.8801  -0.0007  0.0080
+2000 ticks                 reversores evidencia  base H3A p5 3r           0.0000   0.0000  +0.0000  0.0146
+2000 ticks                 reversores evidencia  base H3B                 0.9267   0.9281  -0.0014  0.0080
+2000 ticks                 reversores evidencia  base H3B p5 3r           0.3944   0.3917  +0.0028  0.0478
+2000 ticks                 reversores evidencia  max_media H3A            1.0624   1.0622  +0.0002  0.0080
+2000 ticks                 reversores evidencia  max_media H3A p5 3r      0.2152   0.2110  +0.0041  0.0740
+2000 ticks                 reversores evidencia  max_media H3B            1.0413   1.0423  -0.0010  0.0080
+2000 ticks                 reversores evidencia  max_media H3B p5 3r      0.5056   0.5083  -0.0028  0.0538
+2000 ticks                 reversores evidencia  max_media - base H3A     0.1831   0.1822  +0.0009  0.0080
+2000 ticks                 reversores evidencia  max_media - base H3B     0.1146   0.1142  +0.0004  0.0080
+2000 ticks                 fijos2     evidencia  base H3A                 1.4279   1.4275  +0.0004  0.0080
+2000 ticks                 fijos2     evidencia  base H3A p5 3r           0.8072   0.8071  +0.0001  0.0555
+2000 ticks                 fijos2     evidencia  base H3B                 1.3379   1.3367  +0.0013  0.0080
+2000 ticks                 fijos2     evidencia  base H3B p5 3r           0.8333   0.8375  -0.0042  0.0457
+2000 ticks                 fijos2     evidencia  max_media H3A            1.4827   1.4819  +0.0008  0.0080
+2000 ticks                 fijos2     evidencia  max_media H3A p5 3r      0.8389   0.8579  -0.0189  0.0646
+2000 ticks                 fijos2     evidencia  max_media H3B            1.3923   1.3917  +0.0006  0.0080
+2000 ticks                 fijos2     evidencia  max_media H3B p5 3r      0.8944   0.9000  -0.0056  0.0555
+2000 ticks                 fijos2     evidencia  max_media - base H3A     0.0548   0.0544  +0.0004  0.0080
+2000 ticks                 fijos2     evidencia  max_media - base H3B     0.0544   0.0550  -0.0006  0.0080
+2000 ticks                 fijos3     evidencia  base H3A                 1.3830   1.3824  +0.0006  0.0080
+2000 ticks                 fijos3     evidencia  base H3A p5 3r           0.7795   0.7738  +0.0057  0.0498
+2000 ticks                 fijos3     evidencia  base H3B                 1.2849   1.2847  +0.0002  0.0080
+2000 ticks                 fijos3     evidencia  base H3B p5 3r           0.8111   0.8167  -0.0056  0.0625
+2000 ticks                 fijos3     evidencia  max_media H3A            1.4366   1.4360  +0.0006  0.0080
+2000 ticks                 fijos3     evidencia  max_media H3A p5 3r      0.8296   0.8260  +0.0036  0.0470
+2000 ticks                 fijos3     evidencia  max_media H3B            1.3447   1.3437  +0.0010  0.0080
+2000 ticks                 fijos3     evidencia  max_media H3B p5 3r      0.8556   0.8500  +0.0056  0.0625
+2000 ticks                 fijos3     evidencia  max_media - base H3A     0.0536   0.0536  +0.0000  0.0080
+2000 ticks                 fijos3     evidencia  max_media - base H3B     0.0598   0.0589  +0.0008  0.0080
+20 000 ticks, interiores   racional   evidencia  base H3A                 1.2684   1.2703  -0.0019  0.0080
+20 000 ticks, interiores   racional   evidencia  base H3A p5 3r           0.7496   0.7641  -0.0146  0.0747
+20 000 ticks, interiores   racional   evidencia  base H3B                 1.3106   1.3093  +0.0012  0.0080
+20 000 ticks, interiores   racional   evidencia  base H3B p5 3r           0.8000   0.7958  +0.0042  0.0629
+20 000 ticks, interiores   racional   evidencia  max_media H3A            1.4996   1.5010  -0.0014  0.0080
+20 000 ticks, interiores   racional   evidencia  max_media H3A p5 3r      1.0175   1.0111  +0.0064  0.0678
+20 000 ticks, interiores   racional   evidencia  max_media H3B            1.5142   1.5131  +0.0011  0.0080
+20 000 ticks, interiores   racional   evidencia  max_media H3B p5 3r      1.0611   1.0583  +0.0028  0.0659
+20 000 ticks, interiores   racional   evidencia  max_media - base H3A     0.2312   0.2308  +0.0005  0.0080
+20 000 ticks, interiores   racional   evidencia  max_media - base H3B     0.2036   0.2038  -0.0002  0.0080
+20 000 ticks, interiores   reversores evidencia  base H3A                 0.6573   0.6570  +0.0003  0.0080
+20 000 ticks, interiores   reversores evidencia  base H3A p5 3r           0.0000   0.0000  +0.0000  0.0053
+20 000 ticks, interiores   reversores evidencia  base H3B                 0.7854   0.7860  -0.0005  0.0080
+20 000 ticks, interiores   reversores evidencia  base H3B p5 3r           0.3000   0.3000  +0.0000  0.0533
+20 000 ticks, interiores   reversores evidencia  max_media H3A            1.2505   1.2499  +0.0006  0.0080
+20 000 ticks, interiores   reversores evidencia  max_media H3A p5 3r      0.4482   0.4581  -0.0100  0.1222
+20 000 ticks, interiores   reversores evidencia  max_media H3B            1.1691   1.1699  -0.0009  0.0080
+20 000 ticks, interiores   reversores evidencia  max_media H3B p5 3r      0.6833   0.6875  -0.0042  0.0809
+20 000 ticks, interiores   reversores evidencia  max_media - base H3A     0.5932   0.5929  +0.0003  0.0080
+20 000 ticks, interiores   reversores evidencia  max_media - base H3B     0.3837   0.3840  -0.0003  0.0080
+20 000 ticks, interiores   fijos2     evidencia  base H3A                 1.6300   1.6311  -0.0011  0.0080
+20 000 ticks, interiores   fijos2     evidencia  base H3A p5 3r           1.2690   1.2733  -0.0043  0.0573
+20 000 ticks, interiores   fijos2     evidencia  base H3B                 1.5499   1.5494  +0.0005  0.0080
+20 000 ticks, interiores   fijos2     evidencia  base H3B p5 3r           1.2222   1.2125  +0.0097  0.0559
+20 000 ticks, interiores   fijos2     evidencia  max_media H3A            1.8363   1.8377  -0.0014  0.0080
+20 000 ticks, interiores   fijos2     evidencia  max_media H3A p5 3r      1.5054   1.4854  +0.0200  0.0606
+20 000 ticks, interiores   fijos2     evidencia  max_media H3B            1.7015   1.7014  +0.0001  0.0080
+20 000 ticks, interiores   fijos2     evidencia  max_media H3B p5 3r      1.4111   1.3958  +0.0153  0.0606
+20 000 ticks, interiores   fijos2     evidencia  max_media - base H3A     0.2063   0.2066  -0.0003  0.0080
+20 000 ticks, interiores   fijos2     evidencia  max_media - base H3B     0.1516   0.1520  -0.0004  0.0080
+20 000 ticks, interiores   fijos3     evidencia  base H3A                 1.5400   1.5405  -0.0005  0.0080
+20 000 ticks, interiores   fijos3     evidencia  base H3A p5 3r           1.1760   1.1756  +0.0004  0.0577
+20 000 ticks, interiores   fijos3     evidencia  base H3B                 1.4558   1.4552  +0.0006  0.0080
+20 000 ticks, interiores   fijos3     evidencia  base H3B p5 3r           1.1000   1.1000  +0.0000  0.0561
+20 000 ticks, interiores   fijos3     evidencia  max_media H3A            1.7375   1.7382  -0.0007  0.0080
+20 000 ticks, interiores   fijos3     evidencia  max_media H3A p5 3r      1.3900   1.3841  +0.0058  0.0666
+20 000 ticks, interiores   fijos3     evidencia  max_media H3B            1.6256   1.6260  -0.0004  0.0080
+20 000 ticks, interiores   fijos3     evidencia  max_media H3B p5 3r      1.3056   1.3125  -0.0069  0.0615
+20 000 ticks, interiores   fijos3     evidencia  max_media - base H3A     0.1975   0.1977  -0.0002  0.0080
+20 000 ticks, interiores   fijos3     evidencia  max_media - base H3B     0.1698   0.1707  -0.0009  0.0080
+
+Cifras comparadas: 80. Fuera de tolerancia: 0.
+Puntos esperados y diferencias pareadas (48 cifras): diferencia absoluta mediana 0.0006, maxima 0.0019.
+CAMPOS: OK

@@ -1,0 +1,59 @@
+Auditoría: integridad del repositorio
+Generado por factibilidad/auditoria_hw/tools/integridad.sh (make integridad). No editar a mano.
+
+Rama factibilidad-fondo, commit 9b82e81. Fecha: 15/11/2026 02:36.
+
+1. Archivos versionados con cambios locales (git diff --stat HEAD)
+    factibilidad/retorno/generar_series.py |  5 ++--
+    factibilidad/retorno/nucleo/torneo.c   | 54 ++++++++++++++++++++++++++++++++--
+    2 files changed, 55 insertions(+), 4 deletions(-)
+PASS ningún archivo versionado fuera de factibilidad/ tiene cambios locales
+PASS ningún archivo versionado de a_barrel, d_isa ni e_warmboot (de los que dependen las dos piezas) tiene cambios locales
+AVISO cambios locales dentro de factibilidad/ que no son de estas piezas (otro estudio en curso): factibilidad/retorno/generar_series.py factibilidad/retorno/nucleo/torneo.c 
+      La referencia del fondo se compila con factibilidad/retorno/nucleo/*.c. factibilidad/retorno/r4b_fondo/fondo.c: sin cambios.
+      factibilidad/retorno/nucleo/nucleo.c: sin cambios.
+
+2. Archivos sin versionar (git status --porcelain)
+    M factibilidad/retorno/generar_series.py
+    M factibilidad/retorno/nucleo/torneo.c
+   ?? factibilidad/auditoria_hw/
+   ?? factibilidad/b_fondo_hilos/
+   ?? factibilidad/i_integrado/
+   ?? factibilidad/retorno/r4_final/
+   ?? factibilidad/retorno/r4c_aprendizaje/
+PASS todo lo que aparece en git status está dentro de factibilidad/
+   Carpetas de este tramo que todavía no están en un commit:
+     factibilidad/i_integrado: 0 archivos versionados, 44 sin versionar
+     factibilidad/b_fondo_hilos: 0 archivos versionados, 23 sin versionar
+     factibilidad/auditoria_hw: 0 archivos versionados, 26 sin versionar
+
+3. Testbench oficial
+   sha256 en el disco:                 f83486755fe2b3de385a2bdc39c2f275b9dd690342fb4fc0391401706876f8f3
+   sha256 en HEAD:                     f83486755fe2b3de385a2bdc39c2f275b9dd690342fb4fc0391401706876f8f3
+   sha256 en el commit que lo entregó: f83486755fe2b3de385a2bdc39c2f275b9dd690342fb4fc0391401706876f8f3 (63e5d19, Estructura del proyecto y archivos entregados por el curso)
+   commits que lo tocaron: 1
+PASS tb/tb_proyecto_4.sv es el archivo entregado, sin ningún cambio
+
+4. Commits de la rama que tocan algo fuera de factibilidad/ (git log main..HEAD)
+    bitstreams/README.md      | 6 +++---
+    docs/decisiones.md        | 9 ++++++++-
+    docs/espino_segmentado.md | 4 ++--
+    docs/gemelo.md            | 2 +-
+    4 files changed, 14 insertions(+), 7 deletions(-)
+   4bcd4ab 13/11 Calendario corrido una semana: decision T44 y fechas en los documentos
+   AVISO son commits anteriores a estas dos piezas, que todavía no están en ningún commit.
+   Dentro de factibilidad/: 618 files changed, 69982 insertions(+)
+   rtl/, tb/, ref/, tools/, sw/ y Makefile respecto de main: sin cambios
+PASS rtl/, tb/, ref/, tools/, sw/ y el Makefile de la raíz son los de main
+
+5. Copias de fuentes del repositorio que usan las piezas: siguen iguales al original
+   igual     factibilidad/d_isa/core/pochoco_ram.v
+   igual     factibilidad/d_isa/core/pochoco_periph.v
+   igual     factibilidad/d_isa/core/espino_core/espino_alu.v
+   igual     factibilidad/d_isa/core/espino_core/espino_load_store_unit.v
+   factibilidad/i_integrado/rtl/espino_decoder_xd.v contra factibilidad/d_isa/core/espino_core/espino_decoder.v: 0 líneas de código distintas además del nombre del módulo (8 líneas de comentario agregadas en el encabezado)
+   factibilidad/e_warmboot/soc/pochoco_spi_slave.v contra rtl/pochoco_spi_slave.v: 17 líneas agregadas y 1 cambiada (el encabezado de la copia, las tres salidas para el vigilante y la coma del último puerto)
+
+6. La referencia en C del fondo no depende de los cambios locales de factibilidad/retorno/nucleo
+   Fuentes de HEAD contra fuentes del disco, fondo_min y fondo_min_ant, 20 000 ticks de la práctica, con 0 y con 2 precios sin ver:
+PASS las dos compilaciones entregan el mismo decisiones.csv (sha256 del último: b0514d254bcfcc5a...)
