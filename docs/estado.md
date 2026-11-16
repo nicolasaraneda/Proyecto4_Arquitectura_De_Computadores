@@ -2,6 +2,40 @@
 
 Se actualiza al cerrar cada tramo de trabajo. La versión anterior queda en el historial de git.
 
+## Resumen del trabajo autónomo del 16/11 (para Nicolás)
+
+Los diez puntos de la lista, en orden. El detalle de cada uno está en el tramo 13, más abajo. Las decisiones y acciones que te tocan están en `docs/pendientes_nicolas.md`.
+
+### Qué quedó hecho
+
+1. **`p4-gemelo` en `main`** (`cb5571a`, integración continua en verde). El gemelo aprendió la tabla de P5; las herramientas de P4 corren sobre R1. `fases.txt` y `series.txt` de R1, R2 y P3 están completos.
+2. **P6 de R1 y R2**: autoprueba con firma `15d7` (gemelo a los tres períodos y referencia), simulada por el RTL y por el bitstream; para R2 la media hora sin disparo, la falla inyectada y una prueba para medir el tiempo real del relevo por la UART (`tools/medir_relevo.py`). Comandos uno por uno, incluido SW4: `docs/autoprueba.md`, secciones 9 y 10.
+3. **P8**: matriz de estrés de R0, R1 y R2 (por el RTL y en el gemelo), `docs/checklist_26nov.md` con la medición del SCLK real en las tres rondas (bitstream nuevo `medidor_spi.bin`), `docs/checklist_1dic.md` con el acceso al repositorio privado, kit de contingencia (molde de R0, `tools/retune.py`, juegos ya construidos para comisión de 20 y 50) y `docs/arbol_decision.md` con la regla de 115 kHz. Además `r2_falla_multi.bin`, para ver el relevo con la maestra real.
+4. **Diseño por defecto, preparado y sin ejecutar**: `make peldano-fijar PELDANO=r1`. Probado en una copia: el comando oficial da 4/4 con R1 y 8 objetivos propios quedan en verde (`docs/mediciones/peldano_probar_r1.txt`). Instrucciones en `docs/peldano.md`.
+5. **P7**: seis variantes medidas con todas las métricas del 3.3, Amdahl medido contra predicho, escalera de la clase con roofline, ASIC con Ops/W y energía por decisión, PLL y doble frecuencia como resultados negativos (`docs/codiseno.md`).
+6. **README** según la regla del enunciado, con una sección corta por pieza.
+7. **Informe** en `informe/informe.tex`, con todas las cifras desde `make report` y el texto del peldaño que compite. El PDF lo compila la integración continua (artefacto `informe`): aquí no hay LaTeX.
+8. **Kit de defensa** en `docs/defensa/`: un documento por pieza, 155 preguntas con `archivo:línea`, cifras de memoria, resumen de una página y plan de estudio para los tres.
+9. **Exhibición, parcial**: la versión con las tres instrucciones, medida (1 073 celdas, 28 más que R2; 10 de 10 semillas; 4/4). **No se hizo** el SoC del barrel por el flujo ASIC.
+10. **Limpieza**: historial con 141 commits, todos de Nicolás; ningún archivo del repositorio menciona herramientas ni rutas locales; ramas integradas borradas de GitHub (lista en el tramo 13).
+
+### Qué falló o quedó a medias
+
+- **El ASIC del barrel con el fondo (punto 9)**. Exige portar el SoC al flujo del Proyecto 3 (banco de registros de 4 contextos y memorias a flip-flops) y una corrida de LibreLane de más de una hora. No alcanzó con lo anterior cerrado a tiempo.
+- **Dos errores míos, corregidos y probados**: un barrido de `retune` borró la carpeta de una simulación que estaba corriendo (se rehízo entera), y el primer cambio de las listas de fuentes partía el comando de Yosys en la integración continua (se corrigió y se repitió todo).
+- **La frecuencia mínima del segmentado bajó de 51,6 a 45,3 MHz** desde P1 (su core no cambió; sí `pochoco_soc.v`). Sigue cerrando a 25 MHz en 10 de 10 semillas. No se investigó.
+- Nada se probó en la placa: eso lo haces tú (`docs/pendientes_nicolas.md`).
+
+### Pendientes tuyos (detalle en `docs/pendientes_nicolas.md`)
+
+1. Decidir si el árbol usa 115 kHz (recomendado) o 110 kHz, ahora que R1 responde desde 110 kHz.
+2. Usuarios de GitHub de Santiago, del profesor y de los ayudantes, para invitarlos el 29/11.
+3. Confirmar los números del PMOD antes del 26/11.
+4. Correr en la placa la puerta de placa de R0 (SW4: "A2"), R1 y R2, la media hora de R2 y la medición del relevo.
+5. Poner OSS CAD Suite en el `PATH` desde el archivo de inicio de tu shell (los scripts ya no traen la ruta).
+6. Si quieres el PDF en tu máquina, instalar LaTeX (comando con `sudo` en los pendientes).
+7. Después del 26/11: `make peldano-fijar` con el peldaño que compita.
+
 ## Kit de defensa (16/11)
 
 Rama `defensa`, desde `p8-anticipacion` (`9ad1c40`). Bitácora: `docs/bitacora/defensa.md`. Quedó `docs/defensa/`: un documento de estudio por pieza (Espino base, segmentado, barrel, extensión, fondo, tabla y vigilante, algoritmo y verificación), un banco de 155 preguntas con `archivo:línea` comprobado (24 marcadas como incómodas), la hoja de cifras con su fuente, un resumen de una página y el plan de estudio para los tres hasta el 1/12, con repasos cruzados el 18, 21, 24 y 28/11 y el ensayo con preguntas al azar el 30/11. Solo documentación: no cambió código. La bitácora anota nueve diferencias entre documentos ajenos (cifras de R0 y del segmentado según la corrida, documentos que todavía dicen que el gemelo no modela el barrel, una cifra de P3 en `docs/fondo.md`, dos archivos citados que no están donde se dice), sin corregirlas. Falta: agregar al banco lo que salga del 26/11 y ajustar el plan si compite R0.
@@ -126,6 +160,20 @@ Rama `p7-codiseno`, integrada en `p8-anticipacion`. Documento de estudio: `docs/
 ### Puntos 6 y 7: README e informe
 
 Bitácora: `docs/bitacora/p9_entrega.md`. README según la regla del enunciado, con una sección corta por pieza (comandos detallados en `docs/comandos.md`). Informe en `informe/informe.tex`: 3.1, 3.2 y 3.3 en orden, todas las cifras desde `make report`, con el texto y las cifras del peldaño que compite. No hay LaTeX local: el PDF lo compila el trabajo `informe` de la integración continua.
+
+### Punto 8: kit de defensa
+
+Rama `defensa`, integrada en `p8-anticipacion`. Bitácora: `docs/bitacora/defensa.md`. `docs/defensa/`: ocho documentos de estudio (Espino base, segmentado, barrel, extensión, fondo, tabla y vigilante, algoritmo y verificación), 155 preguntas con `archivo:línea` comprobado (24 incómodas), cifras de memoria, resumen y plan de estudio. Encontró nueve contradicciones entre documentos; se corrigieron las que no requerían medir de nuevo (`docs/trade_s.md`, `docs/algoritmo.md`, `docs/gemelo.md`, `docs/fondo.md` y los documentos que decían que el gemelo no modela el barrel). Quedan como están las cifras de R0 y del segmentado que difieren según la corrida de síntesis (1083, 1086 y 1091 celdas): cada documento cita su corrida.
+
+### Punto 9: edición de exhibición, parcial
+
+`make exhibicion` (`docs/mediciones/p9/exhibicion.txt`): R2 con las tres instrucciones (`-DESPINO_XD`) y el mismo programa da 1 073 celdas contra 1 045 de R2 (`mulstep` cuesta 28), 13 BRAM, 10 de 10 semillas con mínima de 48,57 MHz, y el testbench oficial da 4/4 con `decisiones.csv` idéntico a `ref/fondo.py`. El SoC del barrel con el fondo por el flujo ASIC del Proyecto 3 no se hizo.
+
+### Punto 10: limpieza
+
+- Historial: 141 commits en todas las ramas, autor y committer Nicolás Araneda, sin pies de herramientas.
+- Ningún archivo del repositorio menciona herramientas de IA ni rutas locales: los scripts toman OSS CAD Suite de `OSS_CAD_SUITE` o del `PATH`.
+- Ramas borradas en GitHub, todas contenidas en `main`: ver la lista al final de este punto (se completa al borrar).
 
 ## Tramo 12: paquetes P4, gemelo del barrel, y P6, autoprueba de R0 (15/11)
 
