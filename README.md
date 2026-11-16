@@ -163,9 +163,9 @@ Ocho criterios que un bitstream debe pasar antes de la placa, más una matriz de
 - Documento: `docs/puertas.md`, `docs/contingencia.md`.
 
 ### Autoprueba en placa
-El SoC que compite con una maestra SPI dentro de la FPGA y una firma CRC-16 de las decisiones en los 7 segmentos.
-- Prueba: `make autoprueba-r0`.
-- Número: R0, firma `a23c` en el gemelo, la referencia, el RTL y el bitstream ruteado; vista en la placa a los tres períodos.
+El SoC de cada peldaño con una maestra SPI dentro de la FPGA y una firma CRC-16 de las decisiones en los 7 segmentos. Es la puerta de placa: prueba la placa sin la maestra del curso.
+- Prueba: `make autoprueba-r0`, `make autoprueba-r1` y `make autoprueba-r2`.
+- Número: R0, firma `a23c` en el gemelo, la referencia, el RTL y el bitstream ruteado, vista en la placa a los tres períodos. R1 y R2, firma `15d7`; en R2, 18 millones de precios en el gemelo (media hora a 0,1 ms) sin que el vigilante pueda dispararse, y el relevo con la falla inyectada en la transacción esperada. El tiempo real del relevo se mide en la placa con `tools/medir_relevo.py`.
 - Documento: `docs/autoprueba.md`.
 
 ### Co-diseño: variantes, Amdahl, escalera y roofline
