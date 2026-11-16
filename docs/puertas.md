@@ -37,10 +37,10 @@ Medido el 15/11 (paquete P0). Los registros completos están en `docs/mediciones
 | 4 | Peor caso 49 ciclos en las 8 fases (y en las 8 fases desplazadas 13 ns, y con un período de 2501 ciclos que las recorre todas), contra el límite de 1131 |
 | 5 | El core de R0 es el base. `make formal-base` prueba que sus etapas IF e ID son las del repositorio del curso, y `make cosim` valida el gemelo contra el RTL con programas del generador corregido |
 | 6 | No aplica: un solo hilo |
-| 7 | 60 casos en el rango pedido, todos pasan (`docs/mediciones/estres_base.txt`). SCLK funciona hasta 4 MHz; a 5 MHz no (exploración, decisión T53) |
+| 7 | 60 casos en el rango pedido, todos pasan (`docs/mediciones/estres_base.txt`). SCLK funciona hasta 4 MHz; a 5 MHz no (exploración, decisión T53). Repetido el 15/11 en P4 después de corregir `tb_estres.sv`, cuyas rondas seguidas no cambiaban de período (T81): siguen pasando los 60 |
 | 8 | 2 000 ticks a 0,1 ms del `.asc` ruteado idénticos a la referencia |
 
-R0 pasó la puerta de simulación. Le faltan la de placa (la corre Nicolás con la autoprueba de P6) y la de la maestra real el 26/11.
+R0 pasó la puerta de simulación. Le faltan la de placa (la corre Nicolás con la autoprueba de P6, `docs/autoprueba.md`, sección 5) y la de la maestra real el 26/11.
 
 
 ## Espino barrel con un programa de un hilo
@@ -98,9 +98,10 @@ Lo propio de R2:
 
 Notas:
 
-- **Criterio 7.** El gemelo del barrel (P4) no existe todavía: la matriz corrió por el RTL con Verilator, con los casos de R0. SCLK de 100 kHz con período de 0,1 ms queda fuera, porque deja 237 ciclos entre transacciones y el fondo necesita hasta 444. Con período de 1 ms pasa. R0 sí cabe en esa combinación (decisión T73).
+- **Criterio 7.** La matriz de la puerta corre por el RTL con `tb/fondo/tb_fondo.sv` (T73), repetida el 16/11 con el arreglo de T81 en el testbench: los casos de rondas seguidas ahora sí cambian de período y siguen pasando, 56 de 56 en R1 y en R2. SCLK de 100 kHz con período de 0,1 ms queda fuera de la puerta como **límite documentado de R1** (decisión de Nicolás del 16/11, opción a): deja 237 ciclos entre transacciones y el fondo necesita hasta 444. R1 responde a tiempo a 0,1 ms desde SCLK de 110 kHz (`docs/mediciones/fondo/r1/sclk_minimo.txt`); el árbol de decisión usa 115 kHz para dejar margen. R0 sí cabe en esa combinación.
+- **Validación cruzada con el gemelo (P4, T86).** La matriz de R0 con la referencia del fondo (60 casos) da las mismas 60 líneas por el RTL y por el gemelo: 57 pasan y 3 son exploración (`make fondo-estres-rtl60` y `make fondo-estres-gemelo`). El gemelo, con la tabla, coincide con el RTL de R1 en 21 configuraciones y 18,3 millones de eventos (`make cosim-barrel`).
 - **Criterio 5.** De las 9 mutaciones de la extensión, 3 tocan solo lógica de `mulstep`, que R1 y R2 no tienen. En vez de correrlas se probó formalmente que no cambian el core (decisión T74).
-- **Criterio 2.** Las series sintéticas se corrieron a 0,1 ms. A 1 ms y 10 ms solo la serie de práctica.
+- **Criterio 2.** Las 1 050 series sintéticas se corrieron a 0,1 ms por el RTL, y a 0,1, 1 y 10 ms por el gemelo con el hardware de R1, junto con la práctica: 6,36 millones de ticks idénticos a `ref/fondo.py` (`make fondo-gemelo-series`, `docs/mediciones/fondo/r1/gemelo_series.txt`).
 - **Un bitstream cambiado con `icebram`** (otra tabla u otro programa) no hereda esta puerta: hay que simularlo desde su `.asc` antes de grabarlo.
 
 Las mediciones del paquete P3, con la tabla todavía en la memoria de datos, quedaron en `docs/mediciones/fondo/p3/`.

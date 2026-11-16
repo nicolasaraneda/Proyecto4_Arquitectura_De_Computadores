@@ -5,7 +5,7 @@ Herramientas:
   Yosys 0.68+195 (git sha1 435977e97-dirty, Release, Clang /usr/bin/clang++ 21.1.8)
   "nextpnr-ice40" -- Next Generation Place and Route (Version nextpnr-0.11.1-19-g8dbcee5c)
   Icarus Verilog version 14.0 (devel) (s20260301-403-g5ab23063f-dirty)
-Commit de partida: 05b3b7e (rama p5-tabla-vigilante)
+Commit de partida: 5ea436b (rama integra-p4)
   Verilator 5.053 devel rev v5.052-22-g7cf8c5cca (mod)
 Hardware (r1): pochoco_soc con -DESPINO_BARREL -DESPINO_XD_EMAD -DESPINO_XD_DEVK -DESPINO_TABLA
 Programa: sw/fondo.s (sha256 19773517830a2e16...), tabla sw/fondo_tabla.hex (sha256 f792588c9cc823cb...), referencia ref/fondo.py
@@ -61,7 +61,7 @@ PASS familia_borde_alto: perdidos en reset 2, respuestas 1998, bytes distintos 0
 PASS familia_saltos: perdidos en reset 2, respuestas 1998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, plazo 0, violaciones 0, vigilante 0 (max 0), ciclos prom 222.3 peor 443 de 2262
 PASS familia_tendencia: perdidos en reset 2, respuestas 1998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, plazo 0, violaciones 0, vigilante 0 (max 0), ciclos prom 223.3 peor 435 de 2262
 PASS familia_paseo: perdidos en reset 2, respuestas 1998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, plazo 0, violaciones 0, vigilante 0 (max 0), ciclos prom 222.8 peor 443 de 2262
-PASS rondas_10ms_1ms_01ms: perdidos en reset 1, respuestas 599, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, plazo 0, violaciones 0, vigilante 0 (max 0), ciclos prom 223.3 peor 395 de 249762
+PASS rondas_10ms_1ms_01ms: perdidos en reset 1, respuestas 599, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, plazo 0, violaciones 0, vigilante 0 (max 0), ciclos prom 223.3 peor 395 de 2262
 PASS rondas_01ms_1ms_10ms: perdidos en reset 2, respuestas 598, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, plazo 0, violaciones 0, vigilante 0 (max 0), ciclos prom 223.3 peor 391 de 2262
 PASS rondas_3x2000_01ms: perdidos en reset 2, respuestas 5998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, plazo 0, violaciones 0, vigilante 0 (max 0), ciclos prom 223.2 peor 443 de 2262
 PASS sclk_100k_periodo_1ms: perdidos en reset 1, respuestas 999, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, plazo 0, violaciones 0, vigilante 0 (max 0), ciclos prom 222.2 peor 442 de 22737

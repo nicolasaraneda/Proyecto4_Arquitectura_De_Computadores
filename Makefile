@@ -658,3 +658,49 @@ fondo-completo:
 	$(MAKE) fondo-bitstreams
 	$(MAKE) fondo-criterio5 HW=r1
 	$(MAKE) fondo-criterio5 HW=r2
+
+# --- Gemelo del barrel (paquete P4, docs/gemelo.md sección 7) -----------------
+# cosim-barrel: traza, ticks y decisiones del RTL (tb/barrel/tb_gemelo.sv)
+#   contra el gemelo en 21 configuraciones, controles negativos y gemelo con y
+#   sin atajo. Unos 6 minutos. La versión corta corre en la integración continua.
+#   El hardware del fondo es el de R1 (con la tabla en su BRAM).
+# fondo-gemelo-series: 1 051 series a los tres períodos contra ref/fondo.py.
+# fondo-estres-rtl60 / fondo-estres-gemelo: la matriz de estrés de R0 (60 casos,
+#   tools/estres.py) con la referencia del fondo, por el RTL y por el gemelo. Es
+#   la validación cruzada del gemelo; la matriz de la puerta es make fondo-estres.
+#   Como en esa, los casos con menos de 600 ciclos entre transacciones (SCLK de
+#   100 kHz a 0,1 ms) son exploración: es el límite documentado de R1 (T86).
+# El gemelo modela R1: el vigilante de R2 no existe en el gemelo, así que estas
+# salidas van a docs/mediciones/fondo/r1/.
+.PHONY: cosim-barrel cosim-barrel-corta fondo-gemelo-series fondo-estres-rtl60 fondo-estres-gemelo fondo-sclk-minimo
+FONDO_MINIMOS := 33500,38300
+GEMELO_R1 := --barrel --xd 3 --tabla sw/fondo_tabla.hex
+cosim-barrel: $(GEMELO)
+	$(PYTHON) tools/gemelo_barrel.py --jobs $(FONDO_JOBS)
+cosim-barrel-corta: $(GEMELO)
+	$(PYTHON) tools/gemelo_barrel.py --corta --jobs $(FONDO_JOBS)
+fondo-gemelo-series: $(GEMELO) fondo-hex
+	$(PYTHON) tools/fondo/gemelo_series.py --practica
+fondo-estres-rtl60: fondo-hex
+	mkdir -p docs/mediciones/fondo/r1
+	DEFS="$(R1_DEFS)" $(PYTHON) tools/estres.py --ref fondo --hex $(BUILD)/fondo/fondo.hex --etiqueta fondo_r1 \
+	  --solo estres --periodos-minimos $(FONDO_MINIMOS) --presupuesto-minimo 600 > docs/mediciones/fondo/r1/estres_rtl60.txt; \
+	  r=$$?; cat docs/mediciones/fondo/r1/estres_rtl60.txt; exit $$r
+fondo-estres-gemelo: fondo-hex
+	mkdir -p docs/mediciones/fondo/r1
+	$(PYTHON) tools/estres.py --ref fondo --motor gemelo --gemelo-opts "$(GEMELO_R1)" --hex $(BUILD)/fondo/fondo.hex \
+	  --etiqueta fondo_gemelo --solo estres --periodos-minimos $(FONDO_MINIMOS) --presupuesto-minimo 600 > docs/mediciones/fondo/r1/estres_gemelo.txt; \
+	  r=$$?; cat docs/mediciones/fondo/r1/estres_gemelo.txt; exit $$r
+# Exploración: SCLK mínimo a 0,1 ms y período mínimo a 1 MHz, R0 y R1, con el gemelo
+fondo-sclk-minimo: fondo-hex
+	$(PYTHON) tools/fondo/sclk_minimo.py
+
+# --- Autoprueba en placa (paquete P6, docs/autoprueba.md) ---------------------
+# autoprueba-r0: firma esperada (gemelo y referencia), bitstream, simulación del
+#   RTL con los tres botones y del bitstream ruteado con SW3. Unos 20 minutos.
+#   Deja build/autoprueba/r0/autoprueba_r0.bin y docs/mediciones/autoprueba_r0.txt.
+.PHONY: autoprueba-r0 autoprueba-r0-firma
+autoprueba-r0:
+	$(PYTHON) tools/autoprueba.py todo r0
+autoprueba-r0-firma:
+	$(PYTHON) tools/autoprueba.py firma r0

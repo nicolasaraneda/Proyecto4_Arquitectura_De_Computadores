@@ -1,0 +1,39 @@
+Gemelo digital del Espino barrel contra el RTL
+Generado por tools/gemelo_barrel.py (make cosim-barrel). No editar a mano.
+Commit 5ea436b con cambios sin commit. Verilator 5.053 devel rev v5.052-22-g7cf8c5cca (mod)
+
+Traza, mediciones por tick y decisiones.csv del RTL (tb/barrel/tb_gemelo.sv, Verilator)
+contra el gemelo (build/gemelo --barrel), byte a byte.
+
+PASS A_fondo_oficial [fondo]: traza igual (747195 lineas), ticks igual (299 lineas), csv igual (301 lineas); eventos R=415502 L=328412 W=2685 B=298 C=298
+PASS control negativo neg_borde: la traza difiere del RTL
+PASS control negativo neg_xd: la traza difiere del RTL
+PASS B1_fondo_fases_sclk500k [fondo]: traza igual (747272 lineas), ticks igual (299 lineas), csv igual (301 lineas); eventos R=415544 L=328447 W=2685 B=298 C=298
+PASS B2_fondo_sclk100k_reset63 [fondo_por6]: traza igual (600224 lineas), ticks igual (61 lineas), csv igual (61 lineas); eventos R=327285 L=272276 W=543 B=60 C=60
+PASS B3_fondo_tiempos_raros [fondo]: traza igual (222256 lineas), ticks igual (295 lineas), csv igual (301 lineas); eventos R=131016 L=88003 W=2649 B=294 C=294
+PASS C1_aleatorio_separado_xd3 [fondo]: traza igual (110849 lineas), ticks igual (1 lineas), csv igual (151 lineas); eventos R=79817 L=18241 W=12503 B=144 C=144
+PASS C2_aleatorio_separado_xd3 [fondo]: traza igual (108916 lineas), ticks igual (1 lineas), csv igual (151 lineas); eventos R=84469 L=16310 W=7849 B=144 C=144
+PASS C3_aleatorio_compartido_xd3 [fondo]: traza igual (108988 lineas), ticks igual (1 lineas), csv igual (151 lineas); eventos R=78003 L=16581 W=14116 B=144 C=144
+PASS C4_aleatorio_spi1_xd3 [fondo]: traza igual (111715 lineas), ticks igual (145 lineas), csv igual (151 lineas); eventos R=85248 L=18012 W=8167 B=144 C=144
+PASS C5_aleatorio_separado_xd7 [xd7]: traza igual (103159 lineas), ticks igual (1 lineas), csv igual (151 lineas); eventos R=84349 L=9553 W=8969 B=144 C=144
+PASS C6_aleatorio_compartido_xd7 [xd7]: traza igual (104308 lineas), ticks igual (145 lineas), csv igual (151 lineas); eventos R=80336 L=12461 W=11223 B=144 C=144
+PASS C7_aleatorio_trade_xd7 [xd7]: traza igual (103733 lineas), ticks igual (145 lineas), csv igual (151 lineas); eventos R=78043 L=17049 W=8353 B=144 C=144
+PASS C8_aleatorio_xd7_en_core_sin_extension [sin_xd]: traza igual (83051 lineas), ticks igual (145 lineas), csv igual (151 lineas); eventos R=59669 L=12475 W=10619 B=144 C=144
+PASS D_trade_un_hilo [sin_xd]: traza igual (187394 lineas), ticks igual (299 lineas), csv igual (301 lineas); eventos R=125824 L=60378 W=596 B=298 C=298
+PASS E1_fondo_gestor_colgado [fondo]: traza igual (563809 lineas), ticks igual (299 lineas), csv igual (301 lineas); eventos R=324422 L=236694 W=2097 B=298 C=298
+PASS E2_fondo_voto_atrasado [fondo]: traza igual (735875 lineas), ticks igual (299 lineas), csv igual (301 lineas); eventos R=418930 L=313664 W=2685 B=298 C=298
+PASS E3_fondo_voto_ausente [fondo]: traza igual (746004 lineas), ticks igual (299 lineas), csv igual (301 lineas); eventos R=416735 L=326026 W=2647 B=298 C=298
+PASS F_fondo_rondas_10ms_1ms_01ms [fondo]: traza igual (11196480 lineas), ticks igual (120 lineas), csv igual (121 lineas); eventos R=6069060 L=5126108 W=1074 B=119 C=119
+PASS G1_fondo_reset_desde_0 [fondo]: traza igual (371496 lineas), ticks igual (149 lineas), csv igual (151 lineas); eventos R=206574 L=163291 W=1335 B=148 C=148
+PASS G2_fondo_reset_a_mitad [fondo]: traza igual (375469 lineas), ticks igual (150 lineas), csv igual (151 lineas); eventos R=208763 L=165063 W=1344 B=149 C=150
+PASS H1_fondo_pegada_1 [fondo]: traza igual (496795 lineas), ticks igual (199 lineas), csv igual (201 lineas); eventos R=276252 L=218362 W=1785 B=198 C=198
+PASS H2_fondo_pegada_255 [fondo]: traza igual (496795 lineas), ticks igual (199 lineas), csv igual (201 lineas); eventos R=276252 L=218362 W=1785 B=198 C=198
+
+Configuraciones: 21. Eventos comparados: R 10242093, L 7965768, W 105709, B 4106, C 4107, total 18321783
+
+Gemelo con y sin el atajo del sondeo, sw/fondo.s, practica completa (20 000 ticks):
+PASS periodo 100000 ns: decisiones, ticks y conteos identicos (3659105 vueltas de sondeo saltadas)
+PASS periodo 1000000 ns: decisiones, ticks y conteos identicos (41159034 vueltas de sondeo saltadas)
+PASS periodo 10000000 ns: decisiones, ticks y conteos identicos (416159034 vueltas de sondeo saltadas)
+
+PASS: 0 fallas

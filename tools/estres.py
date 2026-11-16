@@ -25,6 +25,18 @@ Uso, desde la raíz:
     python3 tools/estres.py                       # todo, core base
     python3 tools/estres.py --solo fases
     DEFS=-DESPINO_SEGMENTADO python3 tools/estres.py --etiqueta seg
+
+El fondo en un chip (sw/fondo.s sobre el barrel, docs/fondo.md) usa la misma
+matriz con su referencia, ref/fondo.py, y con dos motores: el RTL (tb_estres.sv
+con Verilator) y el gemelo digital (build/gemelo --barrel, validado ciclo a
+ciclo contra el RTL en make cosim-barrel):
+    DEFS="-DESPINO_BARREL -DESPINO_XD_EMAD -DESPINO_XD_DEVK -DESPINO_TABLA" python3 tools/estres.py \
+        --ref fondo --hex build/fondo/fondo.hex --etiqueta fondo --solo estres
+    python3 tools/estres.py --ref fondo --motor gemelo --gemelo-opts "--barrel --xd 3 --tabla sw/fondo_tabla.hex" \
+        --hex build/fondo/fondo.hex --etiqueta fondo_gemelo --solo estres
+Con el gemelo no hay valores X que mirar: esa columna queda en 0. Los dos casos
+de período cercano al mínimo se eligen según el programa (--periodos-minimos):
+con un presupuesto de 50 ciclos el fondo no alcanza a responder.
 """
 import argparse
 import multiprocessing
@@ -35,6 +47,7 @@ import sys
 
 RAIZ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(RAIZ, "ref"))
+import fondo     # noqa: E402
 import market    # noqa: E402
 import series    # noqa: E402
 import trader    # noqa: E402
@@ -67,23 +80,61 @@ def perdidos(caso):
     return n
 
 
-def correr(arg):
-    sim, d, caso = arg
+# plusarg de tb_estres.sv -> opción del gemelo
+OPCION_GEMELO = {"PERIODO_NS": "--periodo-ns", "PERIODO2_NS": "--periodo2-ns", "PERIODO3_NS": "--periodo3-ns",
+                 "RONDA_TICKS": "--ronda-ticks", "PAUSA_NS": "--pausa-ns", "INICIO_NS": "--inicio-ns",
+                 "SCLK_MEDIO_NS": "--sclk-medio-ns", "CS_SETUP_NS": "--cs-sclk-ns", "CS_HOLD_NS": "--cs-hold-ns"}
+
+
+def correr_gemelo(d, caso, hexfile, opciones):
+    """El caso en el gemelo. Devuelve el RESUMEN de tb_estres.sv y los bytes leídos."""
     nombre = caso["nombre"]
-    csv = f"{d}/{nombre}.csv"
-    series.escribir_csv(csv, caso["precios"])
-    args = [sim, f"+SERIE={csv}", f"+SALIDA={d}/{nombre}.out.csv"] + \
-        [f"+{k}={v}" for k, v in caso.items() if k.isupper()]
+    lote = f"{d}/{nombre}.lote"
+    with open(lote, "w") as f:
+        f.write(" ".join(map(str, caso["precios"])) + "\n")
+    args = ["build/gemelo", *opciones.split(), "--hex", hexfile, "--lote", lote, "--bytes"]
+    for k, v in caso.items():
+        if k in OPCION_GEMELO:
+            args += [OPCION_GEMELO[k], str(v)]
+    out = subprocess.run(args, capture_output=True, text=True)
+    campos = out.stdout.split()
+    if out.returncode != 0 or len(campos) != 9:
+        return None, None
+    _, _, _, peor, respuestas, sin_leer, _, suma, hexbytes = campos
+    per = [caso["PERIODO_NS"], caso.get("PERIODO2_NS", caso["PERIODO_NS"])]
+    per.append(caso.get("PERIODO3_NS", per[1]))
+    rondas = 1 if not caso.get("RONDA_TICKS") else min(3, -(-caso["NTICKS"] // caso["RONDA_TICKS"]))
+    dur = caso["CS_SETUP_NS"] + 15 * caso["SCLK_MEDIO_NS"] + caso["CS_HOLD_NS"]
+    r = dict(bits_x=0, precios_perdidos=int(sin_leer), respuestas=int(respuestas), peor_caso=int(peor),
+             presupuesto=min((p - dur) // CLK_NS for p in per[:rondas]))
+    r["sin_respuesta"] = 0
+    r["suma_ciclos"] = int(suma)
+    return r, list(bytes.fromhex(hexbytes))
+
+
+def correr(arg):
+    sim, d, caso, ref, motor = arg
+    nombre = caso["nombre"]
     explora = caso.get("explora", False)
-    out = subprocess.run(args, capture_output=True, text=True).stdout
-    linea = [l for l in out.splitlines() if l.startswith("RESUMEN")]
-    if not linea:
-        return nombre, False, "sin RESUMEN: " + out[-300:], 0, explora
-    r = dict(kv.split("=") for kv in linea[0].split()[1:])
-    r = {k: int(v) for k, v in r.items()}
-    leidos = [int(l.split(",")[2], 16) for l in open(f"{d}/{nombre}.out.csv").read().split("\n")[1:] if l]
+    if motor[0] == "gemelo":
+        r, leidos = correr_gemelo(d, caso, motor[1], motor[2])
+        if r is None:
+            return nombre, False, "el gemelo no corrio", 0, explora
+    else:
+        csv = f"{d}/{nombre}.csv"
+        series.escribir_csv(csv, caso["precios"])
+        args = [sim, f"+SERIE={csv}", f"+SALIDA={d}/{nombre}.out.csv"] + \
+            [f"+{k}={v}" for k, v in caso.items() if k.isupper()]
+        out = subprocess.run(args, capture_output=True, text=True).stdout
+        linea = [l for l in out.splitlines() if l.startswith("RESUMEN")]
+        if not linea:
+            return nombre, False, "sin RESUMEN: " + out[-300:], 0, explora
+        r = dict(kv.split("=") for kv in linea[0].split()[1:])
+        r = {k: int(v) for k, v in r.items()}
+        leidos = [int(l.split(",")[2], 16) for l in open(f"{d}/{nombre}.out.csv").read().split("\n")[1:] if l]
     perd = perdidos(caso)
-    esperado = trader.decisiones(caso["precios"], trader.Oficial(), perd)
+    estrategia = fondo.Fondo() if ref == "fondo" else trader.Oficial()
+    esperado = trader.decisiones(caso["precios"], estrategia, perd)
     distintos = sum(a != b for a, b in zip(leidos, esperado)) + abs(len(leidos) - len(esperado))
     ok = (distintos == 0 and r["bits_x"] == 0 and r["precios_perdidos"] == 0 and r["sin_respuesta"] == 0
           and r["respuestas"] == caso["NTICKS"] - perd and r["peor_caso"] < r["presupuesto"])
@@ -109,7 +160,7 @@ def casos_fases(practica):
     return c
 
 
-def casos_estres(practica):
+def casos_estres(practica, minimos=(11500, 13500)):
     p = practica[:2000]
     rng = random.Random(7)
     c = []
@@ -148,9 +199,10 @@ def casos_estres(practica):
     c.append(base("rondas_01ms_1ms_10ms", r3 + r2 + r1, RONDA_TICKS=200, PAUSA_NS=5000000,
                   PERIODO_NS=100000, PERIODO2_NS=1000000, PERIODO3_NS=10000000))
     c.append(base("rondas_3x2000_01ms", practica[:6000], RONDA_TICKS=2000, PAUSA_NS=20000000))
-    # Período cercano al mínimo: presupuesto de 50 y de 100 ciclos
-    c.append(base("periodo_11500ns", p, PERIODO_NS=11500))
-    c.append(base("periodo_13500ns", p, PERIODO_NS=13500))
+    # Período cercano al mínimo: con sw/trade.hex, presupuesto de 50 y de 100
+    # ciclos. Para otro programa se eligen con --periodos-minimos.
+    for per in minimos:
+        c.append(base(f"periodo_{per}ns", p, PERIODO_NS=per))
     return c
 
 
@@ -159,23 +211,47 @@ def main(argv=None):
     ap.add_argument("--solo", choices=("fases", "estres"))
     ap.add_argument("--etiqueta", default="base")
     ap.add_argument("--hex", default="sw/trade.hex")
+    ap.add_argument("--ref", choices=("trader", "fondo"), default="trader",
+                    help="referencia: ref/trader.py (max_media) o ref/fondo.py")
+    ap.add_argument("--motor", choices=("rtl", "gemelo"), default="rtl")
+    ap.add_argument("--gemelo-opts", default="", help="opciones del gemelo para el hardware (p. ej. --barrel --xd 3)")
+    ap.add_argument("--periodos-minimos", default="11500,13500",
+                    help="periodos en ns de los casos cercanos al minimo")
+    ap.add_argument("--presupuesto-minimo", type=int, default=0,
+                    help="ciclos entre transacciones bajo los cuales un caso es exploracion y no cuenta "
+                         "(600 para el fondo, como tools/fondo/estres.py; 0 para R0)")
     a = ap.parse_args(argv)
     os.chdir(RAIZ)
     defs = os.environ.get("DEFS", "")
     d = f"build/estres/{a.etiqueta}"
-    sim = compilar(d, a.hex, defs)
+    os.makedirs(d, exist_ok=True)
+    if a.motor == "gemelo":
+        r = subprocess.run(["cc", "-O2", "-o", "build/gemelo", "ref/gemelo/gemelo.c"])
+        if r.returncode != 0:
+            raise SystemExit("el gemelo no compila")
+        sim, motor, defs = None, ("gemelo", a.hex, a.gemelo_opts), f"gemelo {a.gemelo_opts}".strip()
+    else:
+        sim, motor = compilar(d, a.hex, defs), ("rtl",)
+    minimos = tuple(int(x) for x in a.periodos_minimos.split(","))
     practica = market.leer_serie("tb/practica.csv")
     grupos = []
     if a.solo in (None, "fases"):
         grupos.append(("fases", casos_fases(practica)))
     if a.solo in (None, "estres"):
-        grupos.append(("estres", casos_estres(practica)))
+        ce = casos_estres(practica, minimos)
+        for caso in ce:
+            dur = caso["CS_SETUP_NS"] + 15 * caso["SCLK_MEDIO_NS"] + caso["CS_HOLD_NS"]
+            per = min(caso.get(k, caso["PERIODO_NS"]) for k in ("PERIODO_NS", "PERIODO2_NS", "PERIODO3_NS"))
+            if (per - dur) // CLK_NS < a.presupuesto_minimo:
+                caso["explora"] = True
+        grupos.append(("estres", ce))
     commit = subprocess.run(["git", "rev-parse", "--short", "HEAD"], capture_output=True, text=True).stdout.strip()
-    print(f"Variante {a.etiqueta} (DEFS='{defs}'), programa {a.hex}, commit {commit}")
+    extra = f", referencia ref/{a.ref}.py, motor {a.motor}" if (a.ref, a.motor) != ("trader", "rtl") else ""
+    print(f"Variante {a.etiqueta} (DEFS='{defs}'), programa {a.hex}, commit {commit}{extra}")
     fallas = 0
     with multiprocessing.Pool(min(16, os.cpu_count())) as pool:
         for nombre_g, casos in grupos:
-            res = pool.map(correr, [(sim, d, c) for c in casos])
+            res = pool.map(correr, [(sim, d, c, a.ref, motor) for c in casos])
             print(f"\n== {nombre_g}: {len(casos)} casos")
             for nombre, ok, det, _, explora in res:
                 if explora:

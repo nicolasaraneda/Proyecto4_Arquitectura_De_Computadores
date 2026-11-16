@@ -1,0 +1,65 @@
+Variante fondo_r1 (DEFS='-DESPINO_BARREL -DESPINO_XD_EMAD -DESPINO_XD_DEVK -DESPINO_TABLA'), programa build/fondo/fondo.hex, commit 5ea436b, referencia ref/fondo.py, motor rtl
+
+== estres: 60 casos
+no pasa (exploracion, fuera del rango pedido) sclk_100k: perdidos en reset 2, respuestas 1998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 224.3 peor 438 de 237
+PASS sclk_200k: perdidos en reset 2, respuestas 1998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 219.3 peor 433 de 1362
+PASS sclk_500k: perdidos en reset 2, respuestas 1998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 220.3 peor 434 de 2037
+PASS sclk_1M: perdidos en reset 2, respuestas 1998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 223.3 peor 443 de 2262
+pasa (exploracion, fuera del rango pedido) sclk_2M: perdidos en reset 2, respuestas 1998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 220.3 peor 434 de 2356
+pasa (exploracion, fuera del rango pedido) sclk_4M: perdidos en reset 2, respuestas 1998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 222.3 peor 442 de 2403
+no pasa (exploracion, fuera del rango pedido) sclk_5M: perdidos en reset 2, respuestas 1998, bytes distintos 1997, X 0, sin leer 0, sin respuesta 0, ciclos prom 225.3 peor 439 de 2412
+PASS cs_setup500_hold40: perdidos en reset 2, respuestas 998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 224.2 peor 444 de 2299
+PASS cs_setup500_hold100: perdidos en reset 2, respuestas 998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 224.2 peor 444 de 2297
+PASS cs_setup500_hold500: perdidos en reset 2, respuestas 998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 224.2 peor 444 de 2287
+PASS cs_setup500_hold5000: perdidos en reset 2, respuestas 998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 224.2 peor 444 de 2175
+PASS cs_setup600_hold40: perdidos en reset 2, respuestas 998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 221.2 peor 441 de 2296
+PASS cs_setup600_hold100: perdidos en reset 2, respuestas 998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 221.2 peor 441 de 2295
+PASS cs_setup600_hold500: perdidos en reset 2, respuestas 998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 221.2 peor 441 de 2285
+PASS cs_setup600_hold5000: perdidos en reset 2, respuestas 998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 221.2 peor 441 de 2172
+PASS cs_setup1000_hold40: perdidos en reset 2, respuestas 998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 223.2 peor 443 de 2286
+PASS cs_setup1000_hold100: perdidos en reset 2, respuestas 998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 223.2 peor 443 de 2285
+PASS cs_setup1000_hold500: perdidos en reset 2, respuestas 998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 223.2 peor 443 de 2275
+PASS cs_setup1000_hold5000: perdidos en reset 2, respuestas 998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 223.2 peor 443 de 2162
+PASS cs_setup5000_hold40: perdidos en reset 2, respuestas 998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 225.2 peor 439 de 2186
+PASS cs_setup5000_hold100: perdidos en reset 2, respuestas 998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 225.2 peor 439 de 2185
+PASS cs_setup5000_hold500: perdidos en reset 2, respuestas 998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 225.2 peor 439 de 2175
+PASS cs_setup5000_hold5000: perdidos en reset 2, respuestas 998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 225.2 peor 439 de 2062
+PASS cs_setup20000_hold40: perdidos en reset 2, respuestas 998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 222.2 peor 436 de 1811
+PASS cs_setup20000_hold100: perdidos en reset 2, respuestas 998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 222.2 peor 436 de 1810
+PASS cs_setup20000_hold500: perdidos en reset 2, respuestas 998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 222.2 peor 436 de 1800
+PASS cs_setup20000_hold5000: perdidos en reset 2, respuestas 998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 222.2 peor 436 de 1687
+PASS reset_flanco_0: perdidos en reset 0, respuestas 500, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 222.0 peor 230 de 2262
+PASS reset_flanco_1: perdidos en reset 1, respuestas 499, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 225.0 peor 227 de 2262
+PASS reset_flanco_2: perdidos en reset 1, respuestas 499, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 226.0 peor 228 de 2262
+PASS reset_flanco_3: perdidos en reset 1, respuestas 499, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 221.0 peor 229 de 2262
+PASS reset_flanco_4: perdidos en reset 1, respuestas 499, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 222.0 peor 230 de 2262
+PASS reset_flanco_5: perdidos en reset 1, respuestas 499, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 223.0 peor 231 de 2262
+PASS reset_flanco_6: perdidos en reset 1, respuestas 499, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 224.0 peor 232 de 2262
+PASS reset_flanco_7: perdidos en reset 1, respuestas 499, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 219.0 peor 233 de 2262
+PASS reset_flanco_8: perdidos en reset 1, respuestas 499, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 220.0 peor 234 de 2262
+PASS reset_inicio_0: perdidos en reset 2, respuestas 498, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 221.0 peor 235 de 2262
+PASS reset_inicio_1: perdidos en reset 2, respuestas 498, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 220.0 peor 234 de 2262
+PASS reset_inicio_20: perdidos en reset 2, respuestas 498, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 220.0 peor 234 de 2262
+PASS reset_inicio_100000: perdidos en reset 1, respuestas 499, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 221.0 peor 235 de 2262
+PASS reset_inicio_163000: perdidos en reset 0, respuestas 500, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 222.0 peor 236 de 2262
+PASS reset_inicio_162440: perdidos en reset 0, respuestas 500, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 224.0 peor 226 de 2262
+PASS reset_inicio_162441: perdidos en reset 0, respuestas 500, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 223.0 peor 225 de 2262
+PASS reset_inicio_162480: perdidos en reset 0, respuestas 500, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 223.0 peor 225 de 2262
+PASS pegada_1: perdidos en reset 2, respuestas 998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 224.1 peor 379 de 2262
+PASS pegada_255: perdidos en reset 2, respuestas 998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 224.1 peor 379 de 2262
+PASS alterna_1_255: perdidos en reset 2, respuestas 998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 224.1 peor 379 de 2262
+PASS pegada_1_luego_255: perdidos en reset 2, respuestas 998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 224.1 peor 379 de 2262
+PASS al_azar_1_255: perdidos en reset 2, respuestas 1998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 224.3 peor 439 de 2262
+PASS familia_plana: perdidos en reset 2, respuestas 1998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 223.2 peor 379 de 2262
+PASS familia_borde_bajo: perdidos en reset 2, respuestas 1998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 223.3 peor 443 de 2262
+PASS familia_borde_alto: perdidos en reset 2, respuestas 1998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 222.3 peor 443 de 2262
+PASS familia_saltos: perdidos en reset 2, respuestas 1998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 222.3 peor 443 de 2262
+PASS familia_tendencia: perdidos en reset 2, respuestas 1998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 223.3 peor 435 de 2262
+PASS familia_paseo: perdidos en reset 2, respuestas 1998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 222.8 peor 443 de 2262
+PASS rondas_10ms_1ms_01ms: perdidos en reset 1, respuestas 599, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 223.3 peor 395 de 2262
+PASS rondas_01ms_1ms_10ms: perdidos en reset 2, respuestas 598, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 223.3 peor 391 de 2262
+PASS rondas_3x2000_01ms: perdidos en reset 2, respuestas 5998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 223.2 peor 443 de 2262
+PASS periodo_33500ns: perdidos en reset 5, respuestas 1995, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 222.8 peor 433 de 600
+PASS periodo_38300ns: perdidos en reset 5, respuestas 1995, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 222.8 peor 433 de 720
+
+PASS: 0 casos fallidos

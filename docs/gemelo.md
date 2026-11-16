@@ -9,6 +9,8 @@ Documento de estudio de `ref/gemelo/gemelo.c`: qué es, qué modela, cómo se sa
 | `tb/tb_cpi.sv` | Testbench que escribe la traza y las mediciones del RTL. |
 | `tools/cosim.sh` | La validación (`make cosim`). |
 | `tools/prog_aleatorio.py` | Generador de programas aleatorios. |
+| `tb/barrel/tb_gemelo.sv` | Testbench que escribe la traza y las mediciones del Espino barrel (sección 7). |
+| `tools/gemelo_barrel.py` | La validación del modo barrel (`make cosim-barrel`). |
 
 ## 1. Qué es y por qué existe
 
@@ -124,7 +126,7 @@ Además, `make equiv-gemelo` corre `trade.hex` en el gemelo sobre las 3810 serie
 
 - **Timing eléctrico.** No hay retardos de compuertas ni metaestabilidad. Que el diseño cierre a 25 MHz lo dice nextpnr, y que el SPI funcione con la maestra real se prueba el 26/11.
 - **Valores indefinidos.** Una palabra que no está en el `.hex` vale 0 (en el RTL simulado sería X). Por eso `trade.hex` se rellena a 512 palabras, y el gemelo avisa si recibe un `.hex` más corto.
-- **Solo el Espino base.** Cuando el core se segmente, la tabla de ciclos de la sección 2 cambia. El gemelo se actualiza y se vuelve a validar con `make cosim`.
+- **Tres cores, validados por separado.** El Espino base (`make cosim`), el segmentado (`--pipeline`, `make cosim-seg`) y el barrel con o sin la extensión (`--barrel --xd`, `make cosim-barrel`, sección 7). Un cambio en el RTL de cualquiera obliga a repetir su validación.
 - **Interruptores.** Valen 0, como en el testbench.
 
 ## 4. Qué se encontró con el gemelo
@@ -160,3 +162,77 @@ La salida normal son las mismas líneas del testbench oficial, más dos líneas 
 **¿Qué pasa si cambian el programa?** El gemelo ejecuta cualquier `.hex`. No sabe nada del algoritmo.
 
 **¿Y si cambian el hardware?** Hay que actualizar el modelo y volver a correr `make cosim`. Un periférico nuevo o una instrucción nueva se agregan en `bus_leer`, `bus_escribir` o el `switch` del core.
+
+## 7. El Espino barrel y la extensión (paquete P4)
+
+Con `--barrel` el gemelo modela el Espino barrel de `docs/espino_barrel.md`, y con `--xd MASCARA` la extensión de `docs/extension_isa.md` (1 `emad`, 2 `devk`, 4 `mulstep`; el fondo corre con `--xd 3`). Es lo que corre `sw/fondo.s`.
+
+### 7.1 Por qué el barrel es más fácil de modelar que el base
+
+En el barrel la rotación de hilos es fija y no depende de las instrucciones: no hay burbujas, ni esperas, ni instrucciones anuladas. Con R el último ciclo del reset y x0 = R + 2:
+
+| Etapa | Ciclo del hilo t, instrucción n | Qué hace el gemelo |
+|-------|----------------------------------|--------------------|
+| F | x0 + t + 4n - 2 | Lee la palabra de su contador de programa, con la memoria de antes de las escrituras de ese flanco |
+| X | x0 + t + 4n | Ejecuta la instrucción completa: ALU, salto y acceso al bus |
+| M | x0 + t + 4n + 1 | La escritura al banco aparece en la traza |
+
+Como cada hilo tiene su banco y su instrucción anterior ya terminó (sección 3.4 de `docs/espino_barrel.md`), ejecutar cada instrucción entera en su ciclo X da exactamente lo mismo que el RTL. Lo único que hay que respetar es el orden entre hilos: un ciclo, un hilo en X. Al salir del reset el hilo 0 busca en el ciclo R, el 1 en R + 1, el 2 en R + 2 y el 3 en R + 3: son las burbujas del arranque, que el gemelo no ejecuta.
+
+El IC que informa por tick es el del hilo 0, el que decide. Sale de una fórmula: el hilo 0 completa una instrucción cada 4 ciclos desde x0.
+
+### 7.2 El atajo, ahora con cuatro hilos
+
+El atajo del core base reconoce el lazo de sondeo y salta vueltas. En el barrel no basta: mientras el supervisor sondea STATUS, los gestores sondean PUB, y un hilo de prueba puede estar en cualquier lazo. El gemelo usa una regla general:
+
+1. Cada vez que el hilo 0 está por leer STATUS en el lazo `lw / andi 1 / beqz` y no hay precio nuevo, saca una foto del estado: registros y contadores de programa de los cuatro hilos, palabras ya buscadas, LED y dígitos, y cuántas escrituras cambiaron la memoria.
+2. Si la foto es igual a una anterior, y entre las dos el único acceso al SPI o a los periféricos fue esa lectura de STATUS (que el `andi` reduce a la bandera, que valió 0), todo el sistema es periódico: cada P ciclos vuelve al mismo estado. Con `sw/fondo.s` P = 24 ciclos (el lazo del supervisor dura 12 y el de los gestores 8).
+3. Se adelanta el esclavo SPI hasta que se levante la bandera, se calcula la primera lectura de STATUS que la ve, y se salta a ella reponiendo la foto de esa fase del período. Los conteos de instrucciones por clase se suman por períodos completos.
+
+Si un programa nunca llega a un estado periódico (un contador que siempre avanza, como el gestor colgado de las pruebas de degradación) no se salta nada y el resultado sigue siendo exacto, solo más lento.
+
+| Fondo, 20 000 ticks de práctica | Verilator | Gemelo sin atajo | Gemelo con atajo |
+|---------------------------------|-----------|------------------|------------------|
+| 0,1 ms | 58 s (`tb/barrel/tb_gemelo.sv` sin traza) | 0,74 s | 0,14 s |
+| 10 ms | 35 minutos (medido en P3) | 76 s | 0,14 s |
+
+Con y sin atajo las decisiones, las mediciones por tick y los conteos por clase de instrucción son idénticos a los tres períodos (`make cosim-barrel`, última parte).
+
+### 7.3 Lo que se agregó a la maestra
+
+- `--ronda-ticks`, `--pausa-ns`, `--periodo2-ns` y `--periodo3-ns`: rondas seguidas sin reset de la placa, como `tb/tb_estres.sv`.
+- `--cs-sclk-ns`: tiempo de la bajada de CS_n al primer flanco de SCLK, con la convención de `tb_estres.sv` (en el gemelo `--cs-setup-ns` cuenta hasta el primer bit).
+- `--bytes`, con `--lote`: agrega a cada línea la suma de los ciclos de respuesta y los bytes leídos, para comparar series enteras con la referencia.
+
+### 7.4 Validación contra el RTL
+
+`tools/gemelo_barrel.py` corre cada configuración en `tb/barrel/tb_gemelo.sv` (Verilator, compilado una vez por hardware) y en el gemelo, y exige traza, mediciones por tick y `decisiones.csv` idénticos byte a byte. La traza es la de `tb_cpi.sv`, con el hilo en cada escritura al banco: `<ciclo> R <hilo> <registro> <valor>`. Resultado en `docs/mediciones/gemelo_barrel.txt`.
+
+| Grupo | Configuraciones |
+|-------|-----------------|
+| A | `sw/fondo.s`, timing oficial, 300 ticks |
+| B | Fases que se recorren solas (período de 100 010 ns), SCLK de 500 kHz y de 100 kHz, reset de 63 ciclos, tiempos de SPI que no son múltiplos de 40 ns |
+| C | 8 programas aleatorios de cuatro hilos (`tools/barrel/prog_hilos.py`): zonas separadas, memoria compartida, un solo hilo en el SPI, un hilo con `sw/trade.s`; con la extensión de 2 y de 3 instrucciones, y palabras de la extensión en un core sin ella |
+| D | `sw/trade.s` en el hilo 0 (tabla de arranque) |
+| E | El fondo con un gestor colgado, un voto atrasado y un voto ausente |
+| F | Tres rondas seguidas sin reset, a 10 ms, 1 ms y 0,1 ms |
+| G | Reset con la maestra transmitiendo: desde t = 0 y con el reset terminando a mitad de una transacción |
+| H | Series pegadas en 1 y en 255 |
+
+Son 21 configuraciones y 18,3 millones de eventos, todos iguales. Dos controles negativos: con `--borde 0` y con la máscara de la extensión equivocada la traza difiere, como debe.
+
+**Lo que encontró la validación.** La primera corrida dio 20 de 21: en las rondas seguidas el RTL nunca cambiaba de período. El error estaba en el testbench, no en el gemelo: `int r = ...;` dentro del `for` de un bloque `initial` es una variable estática en SystemVerilog, se inicializa una sola vez y queda en 0. La misma línea estaba en `tb/tb_estres.sv` y `tb/fondo/tb_fondo.sv`, así que los casos de rondas seguidas de R0 y del fondo habían corrido todas las rondas con el período de la primera (decisión T70). Es el valor de tener dos modelos escritos por separado: cuando no coinciden, alguno está mal, y no siempre es el nuevo.
+
+### 7.5 Para qué se usó
+
+- `make fondo-gemelo-series`: 1 051 series (70 de cada familia más la práctica) a los tres períodos, 6,36 millones de ticks idénticos a `ref/fondo.py`, en un minuto (`docs/mediciones/fondo/gemelo_series.txt`).
+- `make fondo-estres-gemelo`: la matriz de estrés del criterio 7 con el fondo (`docs/mediciones/fondo/estres_gemelo.txt`), que también se corre por el RTL con `make fondo-estres`.
+- La firma esperada de la autoprueba en placa (`docs/autoprueba.md`).
+
+### 7.6 Preguntas
+
+**¿Cómo sabemos que el atajo no tapa un error?** La validación contra el RTL de los grupos A a H se hace sin atajo, porque pedir la traza lo desactiva. Y el gemelo con atajo da lo mismo que sin atajo en la práctica completa a los tres períodos: decisiones, mediciones por tick y conteos de instrucciones.
+
+**¿Por qué una foto del estado completo y no reconocer el lazo de los gestores, como en el base?** Porque así el atajo no depende de `sw/fondo.s`. Sirve para cualquier programa que, mientras espera el precio, quede en un ciclo; y si no queda, no salta.
+
+**¿El gemelo modela el código que se modifica a sí mismo?** Sí: cada hilo busca su instrucción en el ciclo que corresponde y con la memoria de antes de las escrituras de ese flanco, que es lo que hace la BRAM. Los programas aleatorios con memoria compartida, que pueden ejecutar datos, dan la misma traza que el RTL.
