@@ -23,7 +23,7 @@ Sin ninguna definición. Hoy eso da R0: el Espino base con `max_media`. Si compi
 3. **`sw/trade.s` pasa a ser una copia exacta de `sw/fondo.s`**, y `sw/trade.hex` su ensamblado.
 4. **Comprueba**: corre el comando oficial tal cual en una copia y exige 4/4 y `decisiones.csv` igual al de `ref/fondo.py`.
 
-¿Por qué no se rompe todo lo demás? Porque desde el 16/11 **ningún flujo propio del repositorio lee los `rtl/00_*`**: todos arman su lista de fuentes sin ellos (el `Makefile` con `filter-out`, los scripts con `grep -v '^rtl/00_'`, los de Python con `startswith("00_")`) y eligen la variante con sus propias definiciones, como siempre. Sin definiciones, para ellos sigue siendo el Espino base. El único que ve `rtl/00_peldano.v` es el comando oficial, que es justamente el que tiene que verlo.
+¿Por qué no se rompe todo lo demás? Porque desde el 16/11 **ningún flujo propio del repositorio lee los `rtl/00_*`**: todos arman su lista de fuentes sin ellos (el `Makefile` con `filter-out`, los scripts con `grep -v '^rtl/00_'`, los de Python con `startswith("00_")`) y eligen la variante con sus propias definiciones, como siempre. Sin definiciones, para ellos sigue siendo el Espino base. Los únicos que ven `rtl/00_peldano.v` son el comando oficial y `make tb`, que es ese mismo comando, y son justamente los que tienen que verlo. R0 con el testbench del curso queda en `make tb-param`, que usa una copia parametrizada con el programa de R0.
 
 ## Cómo se sabe que funciona, hoy
 
