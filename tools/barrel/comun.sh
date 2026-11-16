@@ -35,7 +35,7 @@ CELLS_SIM=$(yosys-config --datdir)/ice40/cells_sim.v
 CORE_V=rtl/espino_core/espino_barrel_core.v
 RF_V=rtl/espino_core/espino_barrel_regfile.v
 SOC_V=rtl/pochoco_soc.v
-BASE_SRC=$(echo rtl/*.v rtl/espino_core/*.v)
+BASE_SRC=$(ls rtl/*.v rtl/espino_core/*.v | grep -v '^rtl/00_')
 BARREL_SRC="-DESPINO_BARREL $BASE_SRC"
 # Las fuentes sin los dos archivos del core barrel, para compilar en su lugar
 # copias con un error puesto a propósito

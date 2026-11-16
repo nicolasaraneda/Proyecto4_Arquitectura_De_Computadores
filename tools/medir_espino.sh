@@ -19,7 +19,7 @@ set -euo pipefail
 
 SEMILLAS=${1:-10}
 PYTHON=${PYTHON:-python3}
-SRC=$(echo rtl/*.v rtl/espino_core/*.v)
+SRC=$(ls rtl/*.v rtl/espino_core/*.v | grep -v '^rtl/00_')
 CELLS_SIM=$(yosys-config --datdir)/ice40/cells_sim.v
 D=build/medir_espino
 SALIDA=docs/mediciones/espino_segmentado.txt

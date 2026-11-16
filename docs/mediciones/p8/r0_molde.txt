@@ -1,0 +1,10 @@
+Molde de R0 para icebram
+Generado por tools/p8/r0_molde.sh (make r0-molde). No editar a mano.
+
+Herramientas: Yosys 0.68+195 (git sha1 435977e97-dirty, Release, Clang /usr/bin/clang++ 21.1.8); "nextpnr-ice40" -- Next Generation Place and Route (Version nextpnr-0.11.1-19-g8dbcee5c)
+Fuentes: commit 1d4a82f (el de R0). Patron: icebram -g -s 7 32 512
+Molde: 	         ICESTORM_LC:    1083/   1280    84%
+icebram con sw/trade.hex sobre el molde e icepack: 0.10 s
+  sha256 de bitstreams/r0_base_max_media.bin  67f6f1c4986966320596303fc105532e627e22449f36c4b627274d4edb172204
+  sha256 del molde con sw/trade.hex           67f6f1c4986966320596303fc105532e627e22449f36c4b627274d4edb172204
+PASS: el molde con el programa de R0 da R0 byte por byte. Guardado en bitstreams/moldes/r0_molde.asc.gz

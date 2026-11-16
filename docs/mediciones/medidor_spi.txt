@@ -1,0 +1,32 @@
+Medidor de la maestra SPI: testbench, controles negativos, timing y bitstream
+Generado por tools/medidor.sh (make medidor). No editar a mano.
+
+Herramientas:
+  Yosys 0.68+195 (git sha1 435977e97-dirty, Release, Clang /usr/bin/clang++ 21.1.8)
+  "nextpnr-ice40" -- Next Generation Place and Route (Version nextpnr-0.11.1-19-g8dbcee5c)
+  Icarus Verilog version 14.0 (devel) (s20260301-403-g5ab23063f-dirty)
+Commit de partida: cb5571a
+
+== 1. Testbench
+RESUMEN pruebas=66 fallas=0
+PASS: 66 comprobaciones, cero fallas
+
+== 2. Controles negativos
+PASS flanco_de_bajada: detectado (8 comprobaciones fallan)
+PASS periodo_sin_escala: detectado (15 comprobaciones fallan)
+PASS sin_primera_subida: detectado (15 comprobaciones fallan)
+PASS sin_alarma: detectado (2 comprobaciones fallan)
+
+== 3. Timing en 10 semillas (nextpnr --hx1k --package vq100 --freq 25)
+Celdas: ICESTORM_LC: 611/ 1280. BRAM: ICESTORM_RAM: 0/ 16
+Frecuencia maxima por semilla (MHz): 112.52 116.18 118.40 114.51 121.42 124.81 116.18 116.66 117.43 114.51
+Minima 112.52 MHz, mediana 116.42 MHz, maxima 124.81 MHz
+PASS: 10 de 10 semillas cierran a 25 MHz
+
+== 4. Bitstream (semilla 1)
+build/medidor/medidor_spi.bin: 32220 bytes, sha256 abb4cd7cf9e3b070c51a26c398314d383adb78009074e470ca1dc05ab2aa107d
+
+== 5. Bitstream ruteado simulado por los pines (el mismo testbench, construido con REBOTE = 8)
+PASS: 66 comprobaciones por los pines del bitstream, cero fallas
+
+PASS: medidor listo

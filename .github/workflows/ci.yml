@@ -132,6 +132,9 @@ jobs:
       - name: Extensión de la ISA (módulos, formal, comparación corta, oficial 4/4, equivalencia y timing en 10 semillas)
         run: make check-xd BARREL_JOBS=4
 
+      - name: Anticipación (medidor del SPI, molde de R0, matriz rápida y control de retune)
+        run: make r0-molde check-p8
+
   # Fondo en un chip: sw/fondo.s en los peldaños R1 y R2, y el vigilante
   fondo:
     runs-on: ubuntu-latest

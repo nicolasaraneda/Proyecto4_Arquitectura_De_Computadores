@@ -19,7 +19,7 @@ set -euo pipefail
 
 VARIANTE=${1:-software}
 HEX=${HEX:-sw/trade.hex}
-SRC=${SRC:-$(echo rtl/*.v rtl/espino_core/*.v)}
+SRC=${SRC:-$(ls rtl/*.v rtl/espino_core/*.v | grep -v '^rtl/00_')}
 SERIE=${SERIE:-tb/practica.csv}
 DEFS=${DEFS:-}
 NT_R1=${NT_R1:-2000}

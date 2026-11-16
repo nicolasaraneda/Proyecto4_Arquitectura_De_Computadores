@@ -540,3 +540,35 @@ Las decisiones T80 a T85 son de los paquetes P4 y P6, trabajados en paralelo con
 - **Decisión.** `make fondo-estres` es la matriz de P5 (`tools/fondo/estres.py`, con `tb/fondo/tb_fondo.sv`, T73), que es la del criterio 7 de R1 y R2. La de P4 (T82, los 60 casos de R0 con la referencia del fondo) pasa a llamarse `make fondo-estres-rtl60` por el RTL y `make fondo-estres-gemelo` por el gemelo, siempre con el hardware de R1. El gemelo aprende la tabla de parámetros (`--tabla sw/fondo_tabla.hex`) y las herramientas de P4 corren con el programa de P5. Las salidas de P4 hechas con el programa de P3 se movieron a `docs/mediciones/fondo/p3/`.
 - **Razón.** Las dos matrices miden casi lo mismo. La de P5 compara además el estado interno, la telemetría y el protocolo, y es la que ya está en `docs/puertas.md`. La de P4 sigue sirviendo para lo que la hizo valiosa: dos motores que tienen que dar las mismas líneas.
 - **Qué se pierde.** Nada. El gemelo no modela el vigilante, así que todo lo que corre en el gemelo es R1; en R2 el vigilante no se dispara en ninguna corrida sana (T71, T73).
+
+Las decisiones T87 a T99 son del paquete P6 de R1 y R2 y las T100 a T119 del paquete P7, trabajados en paralelo el 16/11 en otras ramas. Las del paquete P8 parten en T120.
+
+### T120. El SCLK real se mide con un bitstream aparte, sin el SoC (16/11)
+
+- **Decisión.** `rtl/medidor/medidor_spi.v` es un diseño propio que solo escucha la maestra y muestra en los 7 segmentos el período de SCLK, el período entre precios, la duración de `CS_n`, el tiempo libre mínimo y la cantidad de transacciones. Responde `0x00` por MISO. Se graba el 26/11 antes que los peldaños.
+- **Razón.** El SCLK real decide entre R0 y R1 (árbol, regla 3) y no hay garantía de tener un osciloscopio ese día. Ponerlo dentro del SoC cambiaría el hardware de R0, R1 y R2, que ya pasaron la puerta; además, junto a R0 no cabe (quedan 197 celdas y el medidor usa 611).
+- **Qué se pierde.** Unos minutos de maestra: mientras está grabado el medidor, el grupo no opera.
+
+### T121. El molde de R0 se construye desde el commit de R0 (16/11)
+
+- **Decisión.** `make r0-molde` extrae las fuentes del commit de R0, sintetiza con la memoria llena de un patrón al azar y guarda el molde solo si `icebram` con `sw/trade.hex` sobre él da R0 byte por byte.
+- **Razón.** Una síntesis desde otro commit da otra ubicación (T62), y el molde tiene que ser del mismo hardware que el bitstream que pasó las puertas. Con la comparación byte por byte no hay que confiar en que el molde es el correcto: se comprueba.
+- **Qué se pierde.** Nada. La comparación corre en la integración continua.
+
+### T122. `retune` cambia los umbrales solo si mejora la media sin empeorar el percentil 5 ni el peor bloque (16/11)
+
+- **Decisión.** `tools/retune.py` evalúa 77 pares (entra, sale) de `max_media` con las reglas nuevas en los bloques de la práctica y en 80 series de las familias plausibles. Elige otro par solo si sube la media en más de 0,2 % sin bajar el percentil 5 ni el peor bloque de la práctica. Los gestores 2 y 3 del fondo quedan una unidad más abajo y más arriba que el supervisor, como en la tabla actual.
+- **Razón.** Es el principio 4 del proyecto. Con la media sola, la herramienta habría cambiado los umbrales incluso con las reglas publicadas (entrar a 1, salir a 2), con peor percentil 5: habría sido sobreajuste a la práctica. Con el criterio completo, las reglas publicadas devuelven los umbrales actuales y los bitstreams guardados byte por byte, y eso es el control.
+- **Qué se pierde.** Con comisión de 10 y caja de 1 000 el fondo pierde contra comprar y mantener en la práctica y `retune` no lo cambia, porque ningún par mejora la media sin bajar el percentil 5. Es conservador a propósito.
+
+### T123. La matriz de P8 corre en el gemelo y la columna de R2 se deduce de la de R1 (16/11)
+
+- **Decisión.** Período, SCLK por período, largo de ronda y comisión con caja se corren en el gemelo (`tools/p8/matriz.py`). R2 no tiene columna propia: el vigilante solo se dispara con 5 precios sin escritura en `DECISION`, y en todas las celdas R1 escribe una vez por precio.
+- **Razón.** El gemelo está validado contra el RTL de R0 y de R1 y corre las 56 celdas en 10 segundos, incluida una ronda de 200 000 ticks. La matriz de la puerta ya probó el vigilante por el RTL en sus 56 casos.
+- **Qué se pierde.** Una prueba directa del vigilante en esas celdas. El argumento cubre el disparo; no cubre una falla del vigilante mismo, que tiene su testbench y su prueba formal (P5).
+
+### T124. El árbol usa 115 kHz aunque R1 responda desde 110 kHz (16/11)
+
+- **Decisión.** Regla 3 del árbol: con SCLK bajo 115 kHz en la ronda 3, compite R0. Es la cifra que fijó Nicolás con el programa de P3. Con el programa de P5, R1 responde a tiempo desde 110 kHz.
+- **Razón.** Deja 5 kHz de margen para el error del medidor (un ciclo en 217) y para un SCLK que no sea estable. La combinación es improbable: el testbench del curso usa 1 MHz.
+- **Qué se pierde.** Si la maestra usara entre 110 y 115 kHz, competiría R0 cuando R1 habría podido. Queda en `docs/pendientes_nicolas.md`.

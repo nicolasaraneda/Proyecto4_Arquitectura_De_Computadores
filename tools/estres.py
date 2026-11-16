@@ -60,7 +60,7 @@ PRESUPUESTO_R3 = (100000 - 9500) // CLK_NS                    # 2262
 def compilar(d, hexfile, defs):
     os.makedirs(d, exist_ok=True)
     cells = subprocess.check_output(["yosys-config", "--datdir"], text=True).strip() + "/ice40/cells_sim.v"
-    src = sorted(f"rtl/{f}" for f in os.listdir("rtl") if f.endswith(".v")) + \
+    src = sorted(f"rtl/{f}" for f in os.listdir("rtl") if f.endswith(".v") and not f.startswith("00_")) + \
         sorted(f"rtl/espino_core/{f}" for f in os.listdir("rtl/espino_core") if f.endswith(".v"))
     cmd = ["verilator", "--binary", "--timing", "-Wno-fatal", "-Wno-lint", "-Wno-style",
            "--top-module", "tb_estres", "-DNO_ICE40_DEFAULT_ASSIGNMENTS", *defs.split(),

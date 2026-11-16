@@ -160,7 +160,7 @@ def firma(peldano, informe):
 
 
 def fuentes_soc():
-    rtl = sorted(f"rtl/{f}" for f in os.listdir(os.path.join(RAIZ, "rtl")) if f.endswith(".v"))
+    rtl = sorted(f"rtl/{f}" for f in os.listdir(os.path.join(RAIZ, "rtl")) if f.endswith(".v") and not f.startswith("00_"))
     core = sorted(f"rtl/espino_core/{f}" for f in os.listdir(os.path.join(RAIZ, "rtl/espino_core")) if f.endswith(".v"))
     return rtl + core + ["rtl/autoprueba/autoprueba_top.v"]
 

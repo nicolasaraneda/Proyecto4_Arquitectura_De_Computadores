@@ -49,7 +49,7 @@ programas
 # diferencia es el atributo en los dos arreglos.
 D=$O/rtl_ramdirecta
 rm -rf "$D"; mkdir -p "$D/espino_core"
-for f in rtl/*.v; do [ "$f" = rtl/pochoco_ram.v ] || ln -s "$RAIZ/$f" "$D/"; done
+for f in rtl/*.v; do case "$f" in rtl/pochoco_ram.v|rtl/00_*) ;; *) ln -s "$RAIZ/$f" "$D/" ;; esac; done
 ln -s "$RAIZ"/rtl/espino_core/*.v "$D/espino_core/"
 sed -E 's|^( *)reg \[31:0\] (mem(_f)?) \[0:NumWords-1\];|\1(* no_rw_check *) reg [31:0] \2 [0:NumWords-1];|' \
   rtl/pochoco_ram.v > "$D/pochoco_ram.v"

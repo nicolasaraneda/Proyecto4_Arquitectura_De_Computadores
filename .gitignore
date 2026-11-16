@@ -22,6 +22,8 @@ sim/sim
 *.csv
 # Proyecto 4: la serie de practica si se versiona (el testbench la lee desde tb/)
 !tb/practica.csv
+# Las mediciones en CSV se versionan: el informe las lee (make report)
+!docs/mediciones/**/*.csv
 
 # Artefactos de construccion y de simulacion del Proyecto 4
 build/

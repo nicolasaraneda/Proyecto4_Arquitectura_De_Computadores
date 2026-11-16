@@ -18,7 +18,7 @@ PCF   := goboard.pcf
 BUILD := build
 
 # Fuentes RTL: la misma lista que usa el comando del testbench oficial
-SRC := $(wildcard rtl/*.v rtl/espino_core/*.v)
+SRC := $(filter-out rtl/00_%,$(wildcard rtl/*.v rtl/espino_core/*.v))
 
 # Programa. $readmemh lo deja dentro del bitstream al sintetizar, así que el
 # .hex es prerrequisito de la síntesis.
@@ -704,3 +704,46 @@ autoprueba-r0:
 	$(PYTHON) tools/autoprueba.py todo r0
 autoprueba-r0-firma:
 	$(PYTHON) tools/autoprueba.py firma r0
+
+# --- Anticipación (paquete P8, docs/contingencia.md) ---------------------------
+# medidor: testbench, controles negativos, 10 semillas, bitstream y su
+#   simulación por los pines del medidor de la maestra SPI (1 minuto).
+# r0-molde: molde de R0 para icebram, desde el commit de R0 (necesita el
+#   historial completo).
+# p8-matriz: período, SCLK, largo de ronda, comisión y caja en R0, R1 y R2,
+#   con el gemelo (10 s). p8-matriz-rapida deja la salida en build/p8/.
+# retune-control: con las reglas publicadas, retune no cambia nada y los .bin
+#   que arma son los de bitstreams/, byte por byte.
+# contingencia: juegos preconstruidos para comisión de 20 y 50, simulados por
+#   los pines (45 minutos).
+.PHONY: medidor r0-molde p8-matriz p8-matriz-rapida retune-control contingencia check-p8
+medidor:
+	tools/medidor.sh
+r0-molde:
+	tools/p8/r0_molde.sh
+p8-matriz: $(GEMELO) fondo-hex
+	$(PYTHON) tools/p8/matriz.py
+p8-matriz-rapida: $(GEMELO) fondo-hex
+	$(PYTHON) tools/p8/matriz.py --rapida --salida $(BUILD)/p8
+retune-control: $(GEMELO) fondo-hex
+	$(PYTHON) tools/retune.py --comision 5 --caja 10000 --control
+contingencia: $(GEMELO) fondo-hex
+	tools/p8/contingencia.sh
+check-p8: medidor p8-matriz-rapida retune-control
+
+# --- Diseño por defecto (docs/peldano.md) ---------------------------------------
+# peldano-oficial: el comando del encabezado de tb/tb_proyecto_4.sv tal cual, sin
+#   definiciones, con el diseño que hoy es el de por defecto: 4/4 y decisiones.csv
+#   igual a su referencia. Corre en la integración continua.
+# peldano-probar: el cambio a R1 (o R2) hecho en una copia, con el comando
+#   oficial y otras pruebas después del cambio. No toca este árbol.
+# peldano-fijar: el cambio de verdad, en este árbol, sin commit. Después del 26/11.
+.PHONY: peldano-oficial peldano-probar peldano-fijar
+PELDANO ?= r1
+peldano-oficial:
+	$(PYTHON) tools/peldano.py oficial
+peldano-probar:
+	$(PYTHON) tools/peldano.py probar $(PELDANO) > docs/mediciones/peldano_probar_$(PELDANO).txt; \
+	  r=$$?; cat docs/mediciones/peldano_probar_$(PELDANO).txt; exit $$r
+peldano-fijar:
+	$(PYTHON) tools/peldano.py fijar $(PELDANO)

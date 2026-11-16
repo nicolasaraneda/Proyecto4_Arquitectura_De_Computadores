@@ -81,7 +81,7 @@ def compilar_hw(nombre):
     defs, _, por = HW[nombre]
     d = f"{B}/hw_{nombre}"
     sim = f"{d}/obj/sim"
-    fuentes = sorted(f"rtl/{f}" for f in os.listdir(os.path.join(RAIZ, "rtl")) if f.endswith(".v")) + \
+    fuentes = sorted(f"rtl/{f}" for f in os.listdir(os.path.join(RAIZ, "rtl")) if f.endswith(".v") and not f.startswith("00_")) + \
         sorted(f"rtl/espino_core/{f}" for f in os.listdir(os.path.join(RAIZ, "rtl/espino_core")) if f.endswith(".v"))
     cells = subprocess.check_output(["yosys-config", "--datdir"], text=True).strip() + "/ice40/cells_sim.v"
     os.makedirs(os.path.join(RAIZ, d), exist_ok=True)
