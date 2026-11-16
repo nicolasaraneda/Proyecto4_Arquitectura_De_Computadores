@@ -2,6 +2,75 @@
 
 Se actualiza al cerrar cada tramo de trabajo. La versión anterior queda en el historial de git.
 
+## Tramo 10: integración en `main` y paquete P3, fondo de competencia (15/11)
+
+Rama `p3-fondo`, desde `main`. Bitácora: `docs/bitacora/p3.md`. Documento de estudio: `docs/fondo.md`. Decisiones T62 a T68 y la decisión de Nicolás sobre T58.
+
+### Antes del paquete: `main` y R0
+
+- `main` tiene P0, P1 y P2, cada uno con su integración continua en verde (corridas 43742516188, 43748081263 y 43776412628).
+- **R0 desde `main`.** `make check` pasa y `make sim-bitstream` da 2000 ticks idénticos a la referencia, pero `make bin` ya no entrega el archivo guardado: los archivos del barrel y de la extensión cambian los nombres internos de Yosys y la ubicación de nextpnr, y el hash es otro. Desde el commit de P0 el hash sí es el guardado. Quedó `make r0-reproducir`, que construye R0 desde las fuentes de ese commit y compara el sha256 (T62). Corre en la integración continua, que lo reprodujo en una máquina de GitHub.
+
+### Qué quedó hecho
+
+- **`sw/fondo.s`**: el supervisor en el hilo 0 y un gestor en cada uno de los hilos 1 a 3, con `emad` y `devk`. 193 palabras de programa, 20 de tabla y 13 de estado: 226 de 512.
+- **Decisión de Nicolás sobre T58**: R1 se compila solo con `emad` y `devk`. El fondo no usa `mulstep` ni lleva contabilidad (T63).
+- **Protocolo de memoria compartida** documentado (`docs/fondo.md`, sección 3): qué palabra escribe cada hilo y cuándo, y cómo se detecta un voto viejo (el voto lleva el número del tick que el gestor procesó).
+- **Degradación** (T64): plazo de 8 vueltas del lazo de lectura de votos. Vencido, cada voto viejo se reemplaza por la `max_media` que el supervisor calcula por su cuenta. Sin ningún voto, los bytes son los de `sw/trade.s`.
+- **Tabla de parámetros** de 20 palabras, de solo lectura (T65). El programa no tiene constantes del algoritmo en sus instrucciones. Por ahora vive en la memoria de datos.
+- **Telemetría** con un store por tick (T66): 7 segmentos con la posición objetivo, tres LED con los votos y uno de latido.
+- **Referencia** `ref/fondo.py`, con sus pruebas (`make test-fondo`): reproduce los números que la factibilidad midió con su módulo en C.
+- **Testbench** `tb/fondo/tb_fondo.sv`: mide por tick y por hilo, vigila el protocolo y saca el estado compartido en cada decisión. Se compila una vez; el programa y la serie se cargan al ejecutar.
+- **Integración continua**: trabajo nuevo `fondo` con `make check-fondo`.
+
+### Qué se midió
+
+Los cuatro criterios de la puerta de simulación que pedía el paquete, más el 3:
+
+| Criterio | Resultado |
+|----------|-----------|
+| 1. Testbench oficial sin modificar | 4/4. Peor caso 435 ciclos de 2262. `decisiones.csv` idéntico al de la referencia |
+| 2. Equivalencia | Cero diferencias. Práctica completa a 0,1 ms, 1 ms y 10 ms; una serie de 20 000 ticks de cada una de las 15 familias; 1 050 series sintéticas de 2000 ticks (2,1 millones de ticks). Se compara el byte, el estado interno en cada decisión, la telemetría y el protocolo |
+| 3. Timing | 10 de 10 semillas. 990 celdas, 12 BRAM, mínima 48,92 MHz |
+| 4. Peor caso barriendo la fase | 480 ciclos con el programa sano y 564 con el plazo agotado, contra el límite de 1131 |
+| 6. Degradación | 30 corridas de 20 000 ticks con un gestor colgado, un voto que no llega o un voto atrasado: decisión esperada en todas, peor caso 671 ciclos |
+
+Mediciones por tick del punto 3.2 del enunciado (`docs/mediciones/fondo/ticks.txt`, ronda 3):
+
+| | IC promedio | IC máximo | Ciclos promedio | CPI |
+|-|-------------|-----------|-----------------|-----|
+| Supervisor | 71,59 | 125 | 286,37 | 4 |
+| Cada gestor | 25 | 25 | 100 | 4 |
+| Agregado | 146,59 | 200 | 146,59 | 1 |
+
+Respuesta de `byte_done` a `DECISION`: 235,37 ciclos en promedio (9,41 us) y 480 en el peor caso (19,2 us), el 21,2 % del presupuesto de la ronda 3.
+
+Controles negativos: 15 errores puestos a propósito en el programa, 15 detectados.
+
+### Hallazgos
+
+1. **Con un voto ausente el fondo decide como `max_media`**, no como una mezcla. Con los pesos congelados en 6/5/5 la mayoría la define la banda del medio. Lo que separa al fondo sano de `max_media` es solo el ajuste de pesos.
+2. **En la serie de práctica el fondo sano escribe los mismos 20 000 bytes que `max_media`**. Es coherente con lo que midió la factibilidad (el fondo no suma puntos), y obliga a probar con otras series: las pruebas de degradación usan además una de reversión, donde difieren en 1816 bytes.
+3. **Un control negativo no se detectaba**: el margen de la frontera, corrido sobre 6000 ticks de la serie de reversión, donde nunca decide. Sobre la práctica sí. La equivalencia completa lo cubría, pero el control estaba mal elegido.
+4. **Un error del testbench**, no del programa: una variable con valor inicial dentro de un `always` (estática en SystemVerilog) dejaba los votos de dos gestores sin registrar en la primera corrida.
+5. **La respuesta no bajó respecto de la factibilidad** (235 ciclos contra 227) aunque los gestores pasaron de 35 a 25 instrucciones: el lazo con plazo lee los tres votos en cada vuelta y la tabla cuesta 5 loads por tick.
+
+### Qué falta
+
+- **Criterio 5 con la máscara exacta.** La campaña de P2 corrió con las tres instrucciones. Para R1 falta repetirla con `emad` y `devk` solas y con la tabla de P5: conviene hacerlo una vez, sobre el hardware definitivo.
+- **Criterio 7** (estrés: SCLK, `CS_n`, reset con la maestra transmitiendo, rondas seguidas sin reset, serie pegada en 1 y en 255) y las series sintéticas a 1 ms y 10 ms: P4, con el gemelo del barrel. El testbench del fondo ya acepta esos parámetros.
+- **Criterio 8** y los bitstreams R1 y R2: P5.
+- **La tabla en su BRAM**: P5. Hoy está en la memoria de datos.
+- **La razón de la decisión sobre T58** quedó sin escribir: el mensaje la traía como campo por completar.
+- **Borde del plazo**: atrasos de un gestor entre 200 y 600 ciclos no se probaron contra la referencia, porque el resultado depende del ciclo exacto.
+- Nada se ha probado en la placa.
+
+### Qué conviene atacar después
+
+1. **P4, el gemelo del barrel.** Es lo que falta para el criterio 7 y para correr el protocolo completo con el binario. Las equivalencias largas hoy dependen de Verilator (35 minutos la ronda de 10 ms).
+2. **P5, tabla, vigilante y bitstreams.** Con P3 cerrado ya no depende de nada más. Es el camino a R1 y R2 antes del corte del 22/11.
+3. **La pregunta al ayudante** sobre si un Espino multihilo con custom-0 sigue siendo Espino. Todo lo de P1 a P5 depende de esa respuesta.
+
 ## Tramo 9: paquete P2, extensión de la ISA sobre el barrel (15/11)
 
 Rama `p2-extension`, desde `p1-barrel`. Bitácora: `docs/bitacora/p2.md`. Especificación y documento de estudio: `docs/extension_isa.md`. Decisiones T58 a T61.

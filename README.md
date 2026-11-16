@@ -112,6 +112,7 @@ Cada una tiene su documento de estudio, su prueba y el número que la respalda.
 | Espino segmentado | Pipeline de 3 etapas: la memoria de instrucciones se lee en el flanco de bajada y el banco de registros adelanta el dato recién escrito. Es el mismo Espino, elegido al compilar con `-DESPINO_SEGMENTADO`. El core por defecto sigue siendo el base. | `make check-seg`, `make paralelo-largo`, `make mutaciones`, `make cosim-seg` y `make equiv-seg` | CPI con el mix de la clase 7: 1,350 contra 2,350 del base (la clase estimó 1,5). Respuesta de `trade.s`: 22 ciclos en promedio contra 41. 994 celdas contra 1083. Cierra a 25 MHz en 10 de 10 semillas, con 51,1 MHz en la peor. 3,2 millones de instrucciones aleatorias comparadas una por una con el base, 628 583 distintas (corrida del 15/11 con el generador corregido, T52). | `docs/espino_segmentado.md` |
 | Espino barrel | Cuatro hilos por un pipeline de 4 etapas, con los cuatro contextos en las BRAM del banco de registros. Sin adelantamiento ni burbujas. Se elige con `-DESPINO_BARREL`. Es el core del diseño que compite (decisión T50). | `make check-barrel`, `make barrel-verif` y `make barrel-mutaciones` | CPI 1,000 agregado y 4,000 por hilo. 933 celdas contra 1086 del base, 52,6 MHz en la peor de 10 semillas. 7,9 millones de instrucciones comparadas una por una con el base, 91,96 % distintas, cero diferencias. 21 de 21 errores puestos a propósito detectados. Testbench oficial 4/4, con respuesta en 83 ciclos de 2262. | `docs/espino_barrel.md` |
 | Extensión de la ISA | Tres instrucciones en custom-0 sobre el barrel: `emad`, `devk` y `mulstep`. Usan el sumador de la ALU con el operando desplazado. Se eligen con `-DESPINO_XD`. | `make check-xd`, `make xd-verif` y `make xd-mutaciones` | 96 celdas, 48,3 MHz en la peor de 10 semillas. Cada instrucción probada formalmente contra su especificación. 8,0 millones de instrucciones comparadas con el base más la especificación, cero diferencias. La regla con `devk` y `emad` responde en 63 ciclos contra 83. | `docs/extension_isa.md` |
+| Fondo en un chip | `sw/fondo.s`: un supervisor y tres gestores, uno por hilo del barrel. Cada gestor corre una banda de la regla de reversión y vota por memoria compartida; el supervisor combina los votos con pesos que se ajustan y escribe `DECISION`. Si un voto no llega a tiempo decide sin él, y sin ninguno decide como `sw/trade.s`. | `make check-fondo`, `make fondo-series` y `make fondo-degradacion` | 226 de 512 palabras. 4/4 en el testbench oficial. Idéntico a su referencia en 1 050 series y en la práctica a los tres períodos. Peor caso 480 ciclos de 2262, y 671 con fallas puestas a propósito. 15 de 15 controles negativos detectados. | `docs/fondo.md` |
 
 ### Espino barrel
 
@@ -138,6 +139,21 @@ Tres instrucciones propias en el opcode custom-0, solo en el Espino barrel: `ema
 | `make xd-mutaciones` | 9 errores puestos a propósito. La comparación anterior tiene que detectarlos todos. |
 | `make xd-timing` | Celdas y frecuencia máxima de los 7 subconjuntos, en 10 semillas. |
 | `make xd-oficial` | Testbench oficial y serie completa, con `sw/trade.s` y con la misma regla escrita con `devk` y `emad` (`sw/xd/trade_xd.s`). |
+
+### Fondo en un chip
+
+`sw/fondo.s` es el programa del diseño integrado. Corre en el barrel con `emad` y `devk` (`-DESPINO_BARREL -DESPINO_XD_EMAD -DESPINO_XD_DEVK`). El hilo 0 lee el precio, lo publica con su número de tick, recoge los votos de los hilos 1 a 3 y escribe `DECISION`. Su referencia es `ref/fondo.py`. El protocolo entre hilos, la degradación y las mediciones por tick están en `docs/fondo.md`.
+
+| Comando | Qué hace |
+|---------|----------|
+| `make check-fondo` | Lo que corre la integración continua: pruebas de la referencia, testbench oficial con 4/4 y las versiones cortas de la equivalencia, el lote de series, el barrido de fases, la degradación y los controles. |
+| `make fondo-oficial` | Testbench oficial sin modificar con `sw/fondo.s`. |
+| `make fondo-equiv` y `make fondo-equiv-ronda1` | Serie de práctica completa a 0,1 ms y 1 ms (y a 10 ms) y una serie de cada familia: bytes, estado interno, telemetría y protocolo. |
+| `make fondo-series` | 1 050 series sintéticas por el RTL. |
+| `make fondo-fases` | Peor caso de la respuesta barriendo la fase de llegada del precio. |
+| `make fondo-degradacion` | Un gestor colgado, un voto que no llega y un voto atrasado: la decisión sigue saliendo a tiempo y es la esperada. |
+| `make fondo-controles` | 15 errores puestos a propósito en el programa. Las pruebas tienen que detectarlos todos. |
+| `make fondo-ticks` y `make fondo-timing` | Instrucciones, ciclos y tiempo por tick y por hilo; celdas y frecuencia en 10 semillas. |
 
 ### Espino segmentado
 
@@ -167,7 +183,7 @@ make prog            # iceprog build/pochoco_soc.bin, con la Go Board conectada 
 
 `make bin` ensambla `sw/trade.s` si hace falta y deja el programa dentro del bitstream. El resumen de celdas, BRAM y frecuencia máxima queda en `build/nextpnr.log`.
 
-Los bitstreams ya probados están en `bitstreams/`, con su hash y las pruebas que pasó cada uno. Para grabar uno de esos: `iceprog bitstreams/competencia_v1.bin`.
+Los bitstreams ya probados están en `bitstreams/`, con su hash y las pruebas que pasó cada uno. `make r0-reproducir` vuelve a construir el respaldo R0 desde las fuentes de su commit y comprueba que el resultado es, bit a bit, el archivo guardado. Para grabar uno de esos: `iceprog bitstreams/competencia_v1.bin`.
 
 ## Mediciones del repositorio base
 
@@ -182,9 +198,9 @@ Extrae la copia sin cambios del repositorio base (etiqueta `base-curso`) y mide 
 | Carpeta    | Contenido |
 |------------|-----------|
 | `rtl/`     | Pochoco SoC y Espino Core. |
-| `sw/`      | `trade.s`, los programas de ejemplo del repositorio base, los programas de riesgos (`hazard_*.s`) y `mix_clase7.s`. |
+| `sw/`      | `trade.s`, `fondo.s` (el programa de cuatro hilos del diseño integrado), los programas de ejemplo del repositorio base, los programas de riesgos (`hazard_*.s`) y `mix_clase7.s`. |
 | `tb/`      | Testbench oficial, serie de práctica y testbenches propios. |
-| `ref/`     | Referencia del algoritmo en Python, mercado de la maestra, series de prueba, protocolo de evaluación y gemelo digital. |
+| `ref/`     | Referencia del algoritmo en Python (`trader.py` para `trade.s` y `fondo.py` para `fondo.s`), mercado de la maestra, series de prueba, protocolo de evaluación y gemelo digital. |
 | `tools/`   | Ensamblador, generador de programas aleatorios y scripts de equivalencia, co-simulación y medición. |
 | `bitstreams/` | Bitstreams de competencia, con su hash. |
 | `formal/`  | Verificación formal: la equivalencia del Espino base con el del repositorio del curso (`formal/base_sin_cambios/`) y las propiedades de estructura del barrel (`formal/barrel/`) y las de la extensión de la ISA contra su especificación (`formal/xd/`). |

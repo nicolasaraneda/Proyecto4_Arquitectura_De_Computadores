@@ -386,7 +386,7 @@ Hay tres hechos que estas decisiones no cambian y con los que se planifica:
 - **Razón.** El plan pide que al bitstream entren solo las instrucciones que `sw/fondo.s` usa de verdad, y ese programa es del paquete P3. `emad` y `devk` las usan los cuatro hilos. `mulstep` solo tiene uso si el supervisor lleva la contabilidad de la cuenta, que el fondo mínimo no necesita para decidir. Con los 7 subconjuntos ya probados, sacar `mulstep` es quitar una definición y no repetir el paquete.
 - **Alternativas.** (a) Solo `emad` y `devk`: si P3 necesitara el producto habría que reabrir P2. (b) Las tres siempre: deja en el bitstream una instrucción que puede quedar sin uso, contra lo que pide el plan.
 - **Qué se pierde.** Nada medible: las tres juntas cuestan 96 celdas y `emad` con `devk` 52.
-- **Queda por decidir, y es de Nicolás.** Con qué subconjunto se compila R1. Recomendación: el que use `sw/fondo.s` al cerrar P3. Si no lleva contabilidad, `-DESPINO_XD_EMAD -DESPINO_XD_DEVK` (990 celdas, 48,92 MHz de mínima).
+- **Decidido por Nicolás (15/11).** "R1 se compila solo con emad y devk. mulstep queda para la edición de exhibición y el ASIC." La razón no quedó escrita: el mensaje traía el campo sin completar, y aquí no se inventa una. El fondo de P3 se escribió con esa restricción (T63).
 
 ### T59. La extensión va fuera del decodificador del Espino y las codificaciones que no existen son ilegales (15/11)
 
@@ -410,3 +410,48 @@ Hay tres hechos que estas decisiones no cambian y con los que se planifica:
 - **Razón.** El comando del encabezado del testbench oficial ensambla sin opciones, así que la habilitación tiene que poder ir dentro del fuente. Y un programa con estas instrucciones cargado en el base o en el segmentado no falla: simplemente no las ejecuta. El error tiene que aparecer al ensamblar.
 - **Qué se pierde.** Una línea más en cada programa que use la extensión.
 
+### T62. R0 se reproduce desde su commit, no desde el último (15/11)
+
+- **Decisión.** `make r0-reproducir` extrae las fuentes del commit `1d4a82f` con `git archive`, construye el bitstream ahí y compara su sha256 con el de `bitstreams/SHA256SUMS`. Corre en la integración continua.
+- **Razón.** Al integrar P1 y P2 en `main`, `make bin` siguió dando un R0 correcto (`make check` y `make sim-bitstream` pasan) pero con otro hash: los archivos nuevos de `rtl/` cambian los nombres internos de Yosys y con ellos la ubicación que elige nextpnr. El bitstream que va a la maestra el 26/11 tiene que ser un archivo con hash conocido que cualquiera pueda volver a obtener.
+- **Alternativas.** (a) Sintetizar R0 solo con los archivos que existían entonces: se probó y da un tercer hash, porque `pochoco_soc.v` también cambió de líneas. (b) Volver a generar R0 en cada paquete y repetirle la puerta: gasta tiempo y cambia el archivo que ya pasó las pruebas.
+- **Qué se pierde.** El script depende del historial de git y de la versión de las herramientas (OSS CAD Suite del 2026-09-06).
+
+### T63. El fondo de competencia es `fondo_min` sin el espejo de la cuenta (15/11)
+
+- **Decisión.** `sw/fondo.s` implementa la configuración `fondo_min` de la factibilidad (tres gestores de la regla de reversión con entradas a 3, 4 y 2 unidades bajo la media, pesos 6/5/5 que se ajustan cada 512 ticks y mayoría de 8/16) y no lleva la contabilidad de la cuenta. El puntaje en papel se guarda en treintaidosavos de unidad de precio en vez de dieciseisavos.
+- **Razón.** El plan pide la combinación medida en la factibilidad y órdenes idempotentes. El espejo no entraba en ninguna decisión, ocupaba 75 de las 227 palabras y era el único uso de `mulstep`, que quedó fuera de R1 (T58). El puntaje en treintaidosavos sale de `devk` sin instrucciones adicionales: es el doble exacto y el margen de la frontera se escala igual, así que no cambia ninguna decisión. `ref/test_fondo.py` lo comprueba contra una segunda escritura con la aritmética de la factibilidad y contra los números que midió su módulo en C.
+- **Alternativas.** Conservar el espejo para la telemetría (mostrar el patrimonio): exige `mulstep` o 25 instrucciones por venta, y un espejo que nadie compara con la maestra puede mostrar un número falso sin que se note.
+- **Qué se pierde.** El programa no sabe cuánto tiene. La telemetría muestra la posición objetivo, no el patrimonio.
+
+### T64. Degradación: plazo en el supervisor y `max_media` propia en el lugar del voto ausente (15/11)
+
+- **Decisión.** El supervisor lee los tres votos en un lazo de 12 instrucciones (48 ciclos) y sale cuando los tres traen el tick en curso o después de `PLAZO` vueltas (8 en la tabla). Vencido el plazo, cada voto viejo se reemplaza por la posición de la `max_media` que el supervisor calcula en todos los ticks con su propia media. Con algún voto ausente no se ajustan los pesos, y si el tick era de frontera la ventana vuelve a empezar.
+- **Razón.** La especificación pide que la decisión nunca dependa de que otro hilo esté vivo, y que sin ningún voto el supervisor decida solo. Con esta regla, sin votos el byte es exactamente el de `sw/trade.s` (probado en 20 000 ticks y en `ref/test_fondo.py`). No ajustar los pesos mantiene la única propiedad en que se apoya la lectura de los puntajes: `DES_k` solo se lee después de ver `EST_k` con el tick en curso.
+- **Alternativas.** (a) Repartir el peso del ausente entre los presentes: necesita comparar contra la mitad de un total que cambia, y con dos ausentes deja la decisión en un solo gestor que no es `max_media`. (b) Contar al ausente como afuera: sesga hacia vender. (c) Esperar siempre, como en la factibilidad: un gestor colgado deja al fondo sin escribir `DECISION`.
+- **Qué se pierde.** Cerca del plazo la decisión sí depende de los ciclos: un voto que llega justo cuando vence puede entrar o no. Con los gestores sanos el lazo da a lo más 3 vueltas en un tick común (4 con frontera), contra las 8 del plazo. La respuesta promedio sube de 227 a 235 ciclos respecto de la factibilidad, porque el lazo lee los tres votos en cada vuelta.
+- **Lo que mostró.** Con un voto ausente el fondo decide igual que `max_media`: con los pesos en 6/5/5 la mayoría la define la banda del medio. Lo que separa al fondo sano de `max_media` es solo el ajuste de pesos.
+
+### T65. Las constantes del algoritmo viven en una tabla de 20 palabras (15/11)
+
+- **Decisión.** Umbrales, pesos iniciales, topes, pisos, ventana, umbral del voto y plazo se leen de una tabla en `0x770`, en el mismo orden que `PARAMETROS` de `ref/fondo.py`. Los pesos vigentes son estado y el supervisor los copia de la tabla al arrancar. El resto de la memoria de datos parte en cero.
+- **Razón.** La especificación pide los parámetros en una tabla de solo lectura que se pueda cambiar con `icebram` sin sintetizar. La BRAM dedicada es hardware del paquete P5; hasta entonces la tabla va al final de la memoria de datos, y P5 solo tiene que cambiar su dirección. `ref/test_fondo.py` compara la tabla del programa con la de la referencia palabra por palabra.
+- **Qué se pierde.** 5 loads por tick en el supervisor (20 ciclos de respuesta) frente a tener las constantes como inmediatos.
+
+### T66. Telemetría con un store por tick, alternando registro (15/11)
+
+- **Decisión.** En los ticks pares el supervisor escribe los 7 segmentos (63 si la orden es comprar, 00 si es vender) y en los impares los LED (LED 0 el bit 10 del número de tick, LED 1 a 3 los votos tal como entraron a la suma). Siempre después de escribir `DECISION`.
+- **Razón.** El periférico de la placa tiene los dígitos y los LED en registros distintos y el plan admite un store por tick. Cambiar el periférico para juntarlos sería hardware nuevo sin otra función.
+- **Qué se pierde.** Cada indicador se actualiza tick por medio. El latido cambia cada 1024 ticks: 0,1 s en la ronda 3, 1 s en la ronda 2 y 10 s en la ronda 1.
+
+### T67. Criterio 2 de la puerta por el RTL con Verilator (15/11)
+
+- **Decisión.** Las 1 000 series sintéticas del criterio 2 se corren por el RTL con `tb/fondo/tb_fondo.sv`: 70 series de 2000 ticks de cada una de las 15 familias, a 0,1 ms. Los tres períodos se cubren con los 20 000 ticks de la serie de práctica.
+- **Razón.** El gemelo digital no modela el barrel (es el paquete P4) y el criterio es de este paquete. El testbench carga el programa y la serie al ejecutarse, así que se compila una vez y cada serie demora unos 2 segundos.
+- **Qué se pierde.** Las series sintéticas no se corren a 1 ms ni a 10 ms: eso queda para el gemelo de P4.
+
+### T68. Las fallas de la degradación se ponen en el programa, no en el simulador (15/11)
+
+- **Decisión.** Los casos del criterio 6 son `sw/fondo.s` con instrucciones insertadas en la rutina de los gestores (`tools/fondo/variante.py`): un lazo infinito, un salto que omite el store del voto o un lazo de retardo. El supervisor no se toca. La decisión esperada sale de `ref/fondo.py` con la falla descrita como "el voto del gestor K no llega entre los ticks N y M".
+- **Razón.** Un gestor colgado de verdad sigue ocupando su turno en el barrel y sigue leyendo la memoria: es lo que pasaría en la placa. Forzar señales en el simulador prueba otra cosa.
+- **Qué se pierde.** No se prueban atrasos cercanos al plazo (entre 200 y 600 ciclos), donde el resultado depende del ciclo exacto y la referencia no lo modela.

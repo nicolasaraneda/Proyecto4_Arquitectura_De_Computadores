@@ -7,7 +7,7 @@ Un bitstream sube a la escalera solo si pasa tres puertas, en orden: simulación
 | Peldaño | Hardware | Programa | Archivo |
 |---------|----------|----------|---------|
 | R0 | Espino base, sin hardware agregado | `sw/trade.s` con `max_media` | `bitstreams/r0_base_max_media.bin` |
-| R1 | Espino barrel con la extensión y la tabla, sin vigilante | `sw/fondo.s` | Pendiente (P2 a P5). El core solo ya pasó los criterios 1, 3 y 5 (P1) |
+| R1 | Espino barrel con `emad` y `devk` y la tabla, sin vigilante | `sw/fondo.s` | Pendiente (P5). El hardware sin la tabla dedicada ya pasó los criterios 1, 2, 3, 4, 5 y 6 con `sw/fondo.s` (P1 a P3) |
 | R2 | R1 con vigilante y dos imágenes | `sw/fondo.s` e imagen de respaldo | Pendiente (P5) |
 
 ## Puerta de simulación
@@ -70,3 +70,21 @@ Medido el 15/11 (paquete P2). Tampoco es un peldaño: es el core de R1 y R2 con 
 
 Para el criterio 5, la referencia de las instrucciones nuevas es la fórmula de la especificación escrita en el testbench (decisión T60).
 
+## El fondo en un chip: barrel con `emad` y `devk` y `sw/fondo.s`
+
+Medido el 15/11 (paquete P3). Es el hardware de R1 sin la tabla en BRAM (`-DESPINO_BARREL -DESPINO_XD_EMAD -DESPINO_XD_DEVK`, decisión de Nicolás sobre T58) con el programa de competencia. La tabla de parámetros va por ahora en la memoria de datos (T65). El paquete pedía los criterios 1, 2, 4 y 6. Detalle en `docs/fondo.md` y salidas en `docs/mediciones/fondo/`.
+
+| N.º | Resultado | Comando |
+|-----|-----------|---------|
+| 1 | 4/4 con `tb/tb_proyecto_4.sv` sin modificar. Peor caso 435 ciclos de 2262. `decisiones.csv` idéntico byte a byte al de `ref/fondo.py` | `make fondo-oficial` |
+| 2 | Cero diferencias con `ref/fondo.py`. Serie de práctica completa a 0,1 ms, 1 ms y 10 ms con la copia parametrizada del oficial (4/4 en las tres) y con `tb/fondo/tb_fondo.sv`. Una serie de 20 000 ticks de cada una de las 15 familias. 1 050 series sintéticas de 2000 ticks a 0,1 ms (2,1 millones de ticks). Con `tb_fondo.sv` se compara además el estado interno en cada decisión, la telemetría y el protocolo | `make fondo-equiv-ronda1` y `make fondo-series` |
+| 3 | 10 de 10 semillas. 990 celdas de 1280 y 12 BRAM de 16. Frecuencia máxima mínima 48,92 MHz, mediana 51,08 y máxima 54,05 | `make fondo-timing` |
+| 4 | Peor caso 480 ciclos con el programa sano (72 fases de un ciclo y un período de 2501 ciclos que las recorre todas) y 564 con gestores colgados y el plazo agotado, contra el límite de 1131 | `make fondo-fases` |
+| 5 | El core es el de P2: `make xd-verif` y `make xd-mutaciones` cubren el subconjunto `emad` y `devk` dentro de sus 7 966 640 instrucciones. No se repitió con la máscara exacta: ver la nota | |
+| 6 | 30 corridas de 20 000 ticks: cada gestor en lazo infinito desde el arranque y desde el tick 1500, dos y tres colgados, un voto que no llega (en un tick, en una frontera y en un tramo), y un voto atrasado dentro y fuera del plazo. La decisión es la esperada en todas y el peor caso son 671 ciclos de 1131. 15 de 15 controles negativos detectados | `make fondo-degradacion` y `make fondo-controles` |
+| 7 | Pendiente (P4, con el gemelo del barrel) | |
+| 8 | Pendiente (P5, con el bitstream de R1) | |
+
+Nota sobre el criterio 5. Pide la verificación del core "en la configuración exacta que compite". La campaña de P2 se corrió con las tres instrucciones (`-DESPINO_XD`), y la prueba formal y el timing con los 7 subconjuntos. Para R1 falta repetir la campaña de simulación con la máscara de `emad` y `devk` (`XD=3`) y con la tabla de P5 puesta: conviene hacerlo una sola vez, al cerrar P5, sobre el hardware definitivo.
+
+Cómo se comprueba el criterio 6. Cada caso es `sw/fondo.s` con instrucciones insertadas en la rutina de los gestores (`tools/fondo/variante.py`); el supervisor no se toca. La decisión esperada sale de `ref/fondo.py` con la falla descrita como "el voto del gestor K no llega entre los ticks N y M" (decisión T68).
