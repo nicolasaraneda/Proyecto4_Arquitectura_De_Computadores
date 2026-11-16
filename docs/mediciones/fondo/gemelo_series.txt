@@ -1,0 +1,63 @@
+El fondo en un chip en el gemelo digital contra ref/fondo.py
+Generado por tools/fondo/gemelo_series.py (make fondo-gemelo-series). No editar a mano.
+70 series por familia de 2000 ticks, semilla 1, 1051 series en total. Primera transaccion a los 4 us, como el testbench oficial.
+
+Periodo 100000 ns (presupuesto 2262 ciclos, 2 precios perdidos en el reset):
+  familia              series  pasan     ticks    prom   peor
+  remuestreo               70     70    140000   235.3    475
+  borde_alto               70     70    140000   235.3    475
+  borde_bajo               70     70    140000   235.3    475
+  cambio_de_caracter       70     70    140000   235.3    475
+  cambio_volatilidad       70     70    140000   235.3    475
+  dos_componentes          70     70    140000   235.3    475
+  modelo                   70     70    140000   235.3    475
+  modelo_vecino            70     70    140000   235.3    475
+  nivel_bajo               70     70    140000   235.3    475
+  paseo                    70     70    140000   235.3    475
+  plana                    70     70    140000   235.2    367
+  reversion                70     70    140000   235.3    475
+  saltos                   70     70    140000   235.3    475
+  tendencia                70     70    140000   235.3    475
+  volatil                  70     70    140000   235.3    475
+  practica                  1      1     20000   235.4    475
+
+Periodo 1000000 ns (presupuesto 24762 ciclos, 1 precios perdidos en el reset):
+  familia              series  pasan     ticks    prom   peor
+  remuestreo               70     70    140000   243.3    479
+  borde_alto               70     70    140000   243.3    479
+  borde_bajo               70     70    140000   243.3    479
+  cambio_de_caracter       70     70    140000   243.3    479
+  cambio_volatilidad       70     70    140000   243.3    479
+  dos_componentes          70     70    140000   243.3    479
+  modelo                   70     70    140000   243.3    479
+  modelo_vecino            70     70    140000   243.3    479
+  nivel_bajo               70     70    140000   243.3    479
+  paseo                    70     70    140000   243.3    479
+  plana                    70     70    140000   243.1    371
+  reversion                70     70    140000   243.3    479
+  saltos                   70     70    140000   243.3    479
+  tendencia                70     70    140000   243.3    479
+  volatil                  70     70    140000   243.3    479
+  practica                  1      1     20000   243.4    479
+
+Periodo 10000000 ns (presupuesto 249762 ciclos, 1 precios perdidos en el reset):
+  familia              series  pasan     ticks    prom   peor
+  remuestreo               70     70    140000   243.3    479
+  borde_alto               70     70    140000   243.3    479
+  borde_bajo               70     70    140000   243.3    479
+  cambio_de_caracter       70     70    140000   243.3    479
+  cambio_volatilidad       70     70    140000   243.3    479
+  dos_componentes          70     70    140000   243.3    479
+  modelo                   70     70    140000   243.3    479
+  modelo_vecino            70     70    140000   243.3    479
+  nivel_bajo               70     70    140000   243.3    479
+  paseo                    70     70    140000   243.3    479
+  plana                    70     70    140000   243.1    371
+  reversion                70     70    140000   243.3    479
+  saltos                   70     70    140000   243.3    479
+  tendencia                70     70    140000   243.3    479
+  volatil                  70     70    140000   243.3    479
+  practica                  1      1     20000   243.4    479
+
+Ticks comparados: 6360000 (1051 series por 3 periodos). Tiempo del gemelo: 63.5 s en total.
+PASS: 0 corridas con diferencias

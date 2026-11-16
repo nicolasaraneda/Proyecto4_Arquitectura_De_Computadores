@@ -1,0 +1,53 @@
+SCLK minimo a 0,1 ms y periodo minimo a 1 MHz, con el gemelo (exploracion)
+Generado por tools/fondo/sclk_minimo.py. No editar a mano.
+
+R0, sw/trade.s en el core base:
+  pasa    SCLK 100 kHz (medio periodo 5000 ns): perdidos en reset 2, respuestas 1998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 40.0 peor 43 de 237
+  pasa    SCLK 105 kHz (medio periodo 4762 ns): perdidos en reset 2, respuestas 1998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 41.0 peor 48 de 344
+  pasa    SCLK 110 kHz (medio periodo 4545 ns): perdidos en reset 2, respuestas 1998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 41.0 peor 44 de 442
+  pasa    SCLK 115 kHz (medio periodo 4348 ns): perdidos en reset 2, respuestas 1998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 41.0 peor 48 de 530
+  pasa    SCLK 120 kHz (medio periodo 4167 ns): perdidos en reset 2, respuestas 1998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 40.0 peor 45 de 612
+  pasa    SCLK 125 kHz (medio periodo 4000 ns): perdidos en reset 2, respuestas 1998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 41.0 peor 44 de 687
+  pasa    SCLK 130 kHz (medio periodo 3846 ns): perdidos en reset 2, respuestas 1998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 40.0 peor 45 de 756
+  pasa    SCLK 135 kHz (medio periodo 3704 ns): perdidos en reset 2, respuestas 1998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 41.0 peor 44 de 820
+  pasa    SCLK 140 kHz (medio periodo 3571 ns): perdidos en reset 2, respuestas 1998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 41.0 peor 44 de 880
+  pasa    SCLK 145 kHz (medio periodo 3448 ns): perdidos en reset 2, respuestas 1998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 40.0 peor 47 de 935
+  pasa    SCLK 150 kHz (medio periodo 3333 ns): perdidos en reset 2, respuestas 1998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 40.0 peor 47 de 987
+  pasa    SCLK 155 kHz (medio periodo 3226 ns): perdidos en reset 2, respuestas 1998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 40.0 peor 45 de 1035
+  pasa    SCLK 160 kHz (medio periodo 3125 ns): perdidos en reset 2, respuestas 1998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 41.0 peor 48 de 1081
+  pasa    SCLK 165 kHz (medio periodo 3030 ns): perdidos en reset 2, respuestas 1998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 41.0 peor 48 de 1124
+  pasa    SCLK 170 kHz (medio periodo 2941 ns): perdidos en reset 2, respuestas 1998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 41.0 peor 46 de 1164
+  pasa    SCLK 175 kHz (medio periodo 2857 ns): perdidos en reset 2, respuestas 1998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 41.0 peor 44 de 1201
+  pasa    SCLK 180 kHz (medio periodo 2778 ns): perdidos en reset 2, respuestas 1998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 40.0 peor 43 de 1237
+  pasa    SCLK 185 kHz (medio periodo 2703 ns): perdidos en reset 2, respuestas 1998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 40.0 peor 43 de 1271
+  pasa    SCLK 190 kHz (medio periodo 2632 ns): perdidos en reset 2, respuestas 1998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 40.0 peor 49 de 1303
+  pasa    SCLK 195 kHz (medio periodo 2564 ns): perdidos en reset 2, respuestas 1998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 41.0 peor 46 de 1333
+  pasa    SCLK 200 kHz (medio periodo 2500 ns): perdidos en reset 2, respuestas 1998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 41.0 peor 44 de 1362
+  SCLK minimo con que responde a tiempo a 0,1 ms: 100 kHz
+  Periodo minimo con SCLK de 1 MHz: 11340 ns, 8.82 veces mas rapido que la ronda 3: perdidos en reset 14, respuestas 1986, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 40.5 peor 44 de 46
+
+R1, sw/fondo.s en el barrel:
+  no pasa SCLK 100 kHz (medio periodo 5000 ns): perdidos en reset 2, respuestas 1998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 234.3 peor 474 de 237
+  no pasa SCLK 105 kHz (medio periodo 4762 ns): perdidos en reset 2, respuestas 1998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 251.3 peor 479 de 344
+  no pasa SCLK 110 kHz (medio periodo 4545 ns): perdidos en reset 2, respuestas 1998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 235.3 peor 475 de 442
+  pasa    SCLK 115 kHz (medio periodo 4348 ns): perdidos en reset 2, respuestas 1998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 251.3 peor 479 de 530
+  pasa    SCLK 120 kHz (medio periodo 4167 ns): perdidos en reset 2, respuestas 1998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 236.3 peor 436 de 612
+  pasa    SCLK 125 kHz (medio periodo 4000 ns): perdidos en reset 2, respuestas 1998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 235.3 peor 435 de 687
+  pasa    SCLK 130 kHz (medio periodo 3846 ns): perdidos en reset 2, respuestas 1998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 236.3 peor 476 de 756
+  pasa    SCLK 135 kHz (medio periodo 3704 ns): perdidos en reset 2, respuestas 1998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 233.3 peor 473 de 820
+  pasa    SCLK 140 kHz (medio periodo 3571 ns): perdidos en reset 2, respuestas 1998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 233.3 peor 473 de 880
+  pasa    SCLK 145 kHz (medio periodo 3448 ns): perdidos en reset 2, respuestas 1998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 250.3 peor 478 de 935
+  pasa    SCLK 150 kHz (medio periodo 3333 ns): perdidos en reset 2, respuestas 1998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 250.3 peor 478 de 987
+  pasa    SCLK 155 kHz (medio periodo 3226 ns): perdidos en reset 2, respuestas 1998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 236.3 peor 476 de 1035
+  pasa    SCLK 160 kHz (medio periodo 3125 ns): perdidos en reset 2, respuestas 1998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 251.3 peor 479 de 1081
+  pasa    SCLK 165 kHz (medio periodo 3030 ns): perdidos en reset 2, respuestas 1998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 251.3 peor 471 de 1124
+  pasa    SCLK 170 kHz (medio periodo 2941 ns): perdidos en reset 2, respuestas 1998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 249.3 peor 477 de 1164
+  pasa    SCLK 175 kHz (medio periodo 2857 ns): perdidos en reset 2, respuestas 1998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 233.3 peor 473 de 1201
+  pasa    SCLK 180 kHz (medio periodo 2778 ns): perdidos en reset 2, respuestas 1998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 234.3 peor 474 de 1237
+  pasa    SCLK 185 kHz (medio periodo 2703 ns): perdidos en reset 2, respuestas 1998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 234.3 peor 434 de 1271
+  pasa    SCLK 190 kHz (medio periodo 2632 ns): perdidos en reset 2, respuestas 1998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 252.3 peor 472 de 1303
+  pasa    SCLK 195 kHz (medio periodo 2564 ns): perdidos en reset 2, respuestas 1998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 249.3 peor 477 de 1333
+  pasa    SCLK 200 kHz (medio periodo 2500 ns): perdidos en reset 2, respuestas 1998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 233.3 peor 473 de 1362
+  SCLK minimo con que responde a tiempo a 0,1 ms: 115 kHz
+  Periodo minimo con SCLK de 1 MHz: 26660 ns, 3.75 veces mas rapido que la ronda 3: perdidos en reset 6, respuestas 1994, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 242.7 peor 422 de 429
+
