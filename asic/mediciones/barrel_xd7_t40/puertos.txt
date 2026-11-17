@@ -1,0 +1,1 @@
+PASS: 500 bytes del netlist final de barrel_xd7_t40 identicos a ref/fondo.py (2038 s)
