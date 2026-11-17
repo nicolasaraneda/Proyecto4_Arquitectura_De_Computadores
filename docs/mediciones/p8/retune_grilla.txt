@@ -1,0 +1,21 @@
+Umbrales que elige tools/retune.py (entra, sale) para cada comision y caja, y el juego de bitstreams/contingencia/
+Generado por tools/p8/grilla.py. 'actuales' = (3, 0), los de bitstreams/ (no hay que cambiar nada).
+
+| Comision | Caja 1 000 | Caja 2 000 | Caja 5 000 | Caja 10 000 | Caja 20 000 | Caja 50 000 | Caja 100 000 |
+|---|---|---|---|---|---|---|---|
+| 0 | actuales | actuales | actuales | actuales | actuales | actuales | actuales |
+| 2 | actuales | actuales | actuales | actuales | actuales | actuales | actuales |
+| 5 | actuales | actuales | actuales | actuales | actuales | actuales | actuales |
+| 8 | actuales | actuales | actuales | actuales | actuales | actuales | actuales |
+| 10 | actuales | `e3_s1` | actuales | actuales | actuales | actuales | actuales |
+| 12 | `e16_s4` | `e3_s1` | actuales | actuales | actuales | actuales | actuales |
+| 15 | `e16_s4` | `e3_s2` | actuales | `e4_s1` | actuales | actuales | actuales |
+| 20 | `e16_s4` | `e16_s4` | `e7_s3` | `e7_s4` | `e10_s4` | `e7_s3` | actuales |
+| 25 | `e16_s4` | `e16_s4` | `e3_s1` | `e7_s4` | `e7_s4` | `e7_s3` | `e7_s3` |
+| 30 | `e16_s4` | `e16_s4` | `e10_s4` | `e7_s4` | `e7_s4` | `e7_s3` | `e7_s3` |
+| 40 | `e16_s4` | `e16_s4` | `e16_s4` | `e16_s4` | `e16_s3` | `e7_s3` | `e7_s3` |
+| 50 | `e16_s4` | `e16_s4` | `e16_s4` | `e16_s4` | `e16_s3` | `e16_s3` | `e16_s3` |
+| 75 | `e16_s4` | `e16_s4` | `e16_s4` | `e16_s4` | `e16_s4` | `e16_s3` | `e16_s3` |
+| 100 | `e63_s-1` (no construido) | `e16_s4` | `e16_s4` | `e16_s4` | `e16_s4` | `e16_s3` | `e16_s3` |
+
+Juegos que aparecen y no estan construidos: e63_s-1

@@ -925,3 +925,9 @@ p10-rondas-sin-reset:
 	  r=$$?; cat docs/mediciones/p10/rondas_sin_reset.txt; exit $$r
 p10-modo-spi:
 	tools/p10/modo_spi.sh
+
+# Grilla de comisión y caja: qué umbrales elige retune en cada caso y qué juego de
+# bitstreams/contingencia/ corresponde (docs/mediciones/p8/retune_grilla.txt, un minuto).
+.PHONY: contingencia-grilla
+contingencia-grilla:
+	$(PYTHON) tools/p8/grilla.py
