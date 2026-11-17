@@ -36,7 +36,7 @@ CRC-16. Este script:
               todo precio se responde antes del siguiente, la cuenta del
               vigilante no pasa de 1 y no puede disparar (necesita 5).
 
-Peldaños (sección 16.3 del plan): r0 es el core base con sw/trade.s
+Peldaños (docs/peldano.md y docs/puertas.md): r0 es el core base con sw/trade.s
 (max_media); r1 el barrel con emad, devk y la tabla, con sw/fondo.s; r2 es r1
 con el vigilante y SB_WARMBOOT.
 

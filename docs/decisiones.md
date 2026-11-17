@@ -373,8 +373,8 @@ Resultado de aplicar los criterios de T45. No cambia nada en `main`: qué se con
 ### T51. `max_media` reemplaza a la regla base en `trade.s` y en la referencia (15/11)
 
 - **Decisión.** `sw/trade.s` entra cuando `dev < -96` (3 unidades bajo la media) en vez de `dev < -128`. Es la única línea de código que cambia. En `ref/trader.py`, `MaxMedia` es la estrategia oficial (`trader.Oficial`) y la que usan `correr`, la línea de comandos, `tools/equiv.sh`, `tools/equiv_gemelo.sh`, `tools/sim_bitstream.sh` y `ref/protocolo.py --binario`. `ReglaBase` se conserva sin cambios, con la entrada a 4 unidades, porque el protocolo compara a los candidatos contra ella (`--comparar`, `--meseta`).
-- **Razón.** Decisión de Nicolás (sección 16.0 del plan). Es el único cambio con retorno medido: +0,04 puntos esperados del torneo sobre la regla base a 2 000 ticks, +0,7 % de patrimonio en los remuestreos y +1,4 % en las familias plausibles, con semilla reservada.
-- **Conflicto con el principio 4, que se avisa.** El principio pide mejorar la media y el peor bloque fuera de muestra. `max_media` no lo cumple en los 10 bloques de práctica: media 11 043 contra 11 069 y peor bloque 9 620 contra 9 720. En la serie completa de práctica da 25 973 contra 27 062. La sección 16 del plan manda sobre la 5, y las diferencias en los bloques están dentro del error (238), pero en la defensa hay que poder explicar por qué la tabla del punto 3.1 muestra un número menor que el de la versión anterior.
+- **Razón.** Decisión de Nicolás, del mismo día que T50. Es el único cambio con retorno medido: +0,04 puntos esperados del torneo sobre la regla base a 2 000 ticks, +0,7 % de patrimonio en los remuestreos y +1,4 % en las familias plausibles, con semilla reservada.
+- **Conflicto con el principio 4, que se avisa.** El principio pide mejorar la media y el peor bloque fuera de muestra. `max_media` no lo cumple en los 10 bloques de práctica: media 11 043 contra 11 069 y peor bloque 9 620 contra 9 720. En la serie completa de práctica da 25 973 contra 27 062. La decisión del 15/11 (T50 y esta) manda sobre los principios anteriores, y las diferencias en los bloques están dentro del error (238), pero en la defensa hay que poder explicar por qué la tabla del punto 3.1 muestra un número menor que el de la versión anterior.
 - **Equivalencia.** `make equiv` (gemelo a los tres períodos, Verilator a 0,1 y 1 ms, 13 series de familias), `make equiv-gemelo` (3810 series a los tres períodos, 7,62 millones de ticks por período) y `make equiv-r3` (Icarus) con cero diferencias. Patrimonio en el testbench con los 20 000 ticks: 26 070 a los tres períodos.
 
 ### T52. El generador de programas aleatorios se corrige y se mide su cobertura (15/11)
@@ -421,8 +421,8 @@ Resultado de aplicar los criterios de T45. No cambia nada en `main`: qué se con
 ### T58. La extensión lleva tres instrucciones elegibles por separado; cuáles compiten se fija con `sw/fondo.s` (15/11)
 
 - **Decisión.** El paquete P2 deja en `rtl/` `emad`, `devk` y `mulstep`, cada una con su definición (`-DESPINO_XD_EMAD`, `-DESPINO_XD_DEVK`, `-DESPINO_XD_MULSTEP`; `-DESPINO_XD` las tres), y mide y verifica los 7 subconjuntos. No se trajo ninguna otra instrucción de la factibilidad.
-- **Razón.** El plan pide que al bitstream entren solo las instrucciones que `sw/fondo.s` usa de verdad, y ese programa es del paquete P3. `emad` y `devk` las usan los cuatro hilos. `mulstep` solo tiene uso si el supervisor lleva la contabilidad de la cuenta, que el fondo mínimo no necesita para decidir. Con los 7 subconjuntos ya probados, sacar `mulstep` es quitar una definición y no repetir el paquete.
-- **Alternativas.** (a) Solo `emad` y `devk`: si P3 necesitara el producto habría que reabrir P2. (b) Las tres siempre: deja en el bitstream una instrucción que puede quedar sin uso, contra lo que pide el plan.
+- **Razón.** El criterio del grupo es que al bitstream entren solo las instrucciones que `sw/fondo.s` usa realmente, y ese programa es del paquete P3. `emad` y `devk` las usan los cuatro hilos. `mulstep` solo tiene uso si el supervisor lleva la contabilidad de la cuenta, que el fondo mínimo no necesita para decidir. Con los 7 subconjuntos ya probados, sacar `mulstep` es quitar una definición y no repetir el paquete.
+- **Alternativas.** (a) Solo `emad` y `devk`: si P3 necesitara el producto habría que reabrir P2. (b) Las tres siempre: deja en el bitstream una instrucción que puede quedar sin uso, contra ese criterio.
 - **Qué se pierde.** Nada medible: las tres juntas cuestan 96 celdas y `emad` con `devk` 52.
 - **Decidido por Nicolás (15/11).** "R1 se compila solo con emad y devk. mulstep queda para la edición de exhibición y el ASIC." Razón, textual: "no quiero piezas sin uso en el chip que compite". El fondo de P3 se escribió con esa restricción (T63).
 
@@ -458,7 +458,7 @@ Resultado de aplicar los criterios de T45. No cambia nada en `main`: qué se con
 ### T63. El fondo de competencia es `fondo_min` sin el espejo de la cuenta (15/11)
 
 - **Decisión.** `sw/fondo.s` implementa la configuración `fondo_min` de la factibilidad (tres gestores de la regla de reversión con entradas a 3, 4 y 2 unidades bajo la media, pesos 6/5/5 que se ajustan cada 512 ticks y mayoría de 8/16) y no lleva la contabilidad de la cuenta. El puntaje en papel se guarda en treintaidosavos de unidad de precio en vez de dieciseisavos.
-- **Razón.** El plan pide la combinación medida en la factibilidad y órdenes idempotentes. El espejo no entraba en ninguna decisión, ocupaba 75 de las 227 palabras y era el único uso de `mulstep`, que quedó fuera de R1 (T58). El puntaje en treintaidosavos sale de `devk` sin instrucciones adicionales: es el doble exacto y el margen de la frontera se escala igual, así que no cambia ninguna decisión. `ref/test_fondo.py` lo comprueba contra una segunda escritura con la aritmética de la factibilidad y contra los números que midió su módulo en C.
+- **Razón.** La especificación del fondo pide la combinación medida en la factibilidad y órdenes idempotentes. El espejo no entraba en ninguna decisión, ocupaba 75 de las 227 palabras y era el único uso de `mulstep`, que quedó fuera de R1 (T58). El puntaje en treintaidosavos sale de `devk` sin instrucciones adicionales: es el doble exacto y el margen de la frontera se escala igual, así que no cambia ninguna decisión. `ref/test_fondo.py` lo comprueba contra una segunda escritura con la aritmética de la factibilidad y contra los números que midió su módulo en C.
 - **Alternativas.** Conservar el espejo para la telemetría (mostrar el patrimonio): exige `mulstep` o 25 instrucciones por venta, y un espejo que nadie compara con la maestra puede mostrar un número falso sin que se note.
 - **Qué se pierde.** El programa no sabe cuánto tiene. La telemetría muestra la posición objetivo, no el patrimonio.
 
@@ -479,7 +479,7 @@ Resultado de aplicar los criterios de T45. No cambia nada en `main`: qué se con
 ### T66. Telemetría con un store por tick, alternando registro (15/11)
 
 - **Decisión.** En los ticks pares el supervisor escribe los 7 segmentos (63 si la orden es comprar, 00 si es vender) y en los impares los LED (LED 0 el bit 10 del número de tick, LED 1 a 3 los votos tal como entraron a la suma). Siempre después de escribir `DECISION`.
-- **Razón.** El periférico de la placa tiene los dígitos y los LED en registros distintos y el plan admite un store por tick. Cambiar el periférico para juntarlos sería hardware nuevo sin otra función.
+- **Razón.** El periférico de la placa tiene los dígitos y los LED en registros distintos y la especificación admite un store de telemetría por tick. Cambiar el periférico para juntarlos sería hardware nuevo sin otra función.
 - **Qué se pierde.** Cada indicador se actualiza tick por medio. El latido cambia cada 1024 ticks: 0,1 s en la ronda 3, 1 s en la ronda 2 y 10 s en la ronda 1.
 
 ### T67. Criterio 2 de la puerta por el RTL con Verilator (15/11)
@@ -511,7 +511,7 @@ Resultado de aplicar los criterios de T45. No cambia nada en `main`: qué se con
 ### T71. Vigilante con K = 4 y tres salidas nuevas en el esclavo SPI (15/11)
 
 - **Decisión.** `rtl/vigilante.v` es el de la factibilidad, sin cambios en la lógica, con `VigN = 4`: dispara al quinto precio seguido sin escritura en `DECISION`. `rtl/pochoco_spi_slave.v` saca `byte_done`, la escritura en `DECISION` y `CS_n` sincronizado por tres salidas nuevas. No se conectó el disparo manual por interruptor.
-- **Razón.** En todas las corridas sanas de R2, incluida la matriz de estrés, la cuenta del vigilante nunca pasó de 1, así que cualquier K de 2 o más cumple lo que pide el plan. 4 deja margen y gasta 5 ticks de los 536 del relevo. Las salidas del esclavo son la forma más chica de darle al vigilante las señales que necesita: no cambian su lógica ni los nombres que mira el testbench oficial. El disparo manual quedó fuera porque el uso de los interruptores durante la competencia es una pregunta pendiente para el ayudante.
+- **Razón.** En todas las corridas sanas de R2, incluida la matriz de estrés, la cuenta del vigilante nunca pasó de 1, así que cualquier K de 2 o más cumple el criterio de no disparar en ninguna simulación sana. 4 deja margen y gasta 5 ticks de los 536 del relevo (361 con el tiempo medido después en la placa, `docs/mediciones/placa_16nov.md`). Las salidas del esclavo son la forma más chica de darle al vigilante las señales que necesita: no cambian su lógica ni los nombres que mira el testbench oficial. El disparo manual quedó fuera porque el uso de los interruptores durante la competencia es una pregunta pendiente para el ayudante.
 - **Alternativas.** Derivar `byte_done` fuera del esclavo: habría que duplicar su sincronizador y su contador de bits.
 - **Qué se pierde.** 16 celdas y unos 4 MHz de frecuencia mínima respecto de R1.
 
@@ -557,7 +557,7 @@ Las decisiones T80 a T85 son de los paquetes P4 y P6, trabajados en paralelo con
 ### T83. La autoprueba vive fuera de `rtl/*.v` y deja sin conectar la telemetría del SoC (15/11)
 
 - **Decisión.** El top de la autoprueba está en `rtl/autoprueba/`, instancia `pochoco_soc` sin cambios y deja sus LED y 7 segmentos sin conectar. Los botones del SoC van a 0.
-- **Razón.** `rtl/*.v` es la lista de fuentes del comando del testbench oficial y de la síntesis de R0: un archivo más ahí cambia los nombres internos de Yosys y el hash del bitstream (T62). Los LED y los 7 segmentos de la placa los necesita la autoprueba para mostrar la firma. El plan permite sacar la telemetría de esta versión si no cabe; aquí además se necesitan los pines.
+- **Razón.** `rtl/*.v` es la lista de fuentes del comando del testbench oficial y de la síntesis de R0: un archivo más ahí cambia los nombres internos de Yosys y el hash del bitstream (T62). Los LED y los 7 segmentos de la placa los necesita la autoprueba para mostrar la firma. La especificación de la autoprueba permite sacar la telemetría de esta versión si no cabe; aquí además se necesitan los pines.
 - **Qué se pierde.** La autoprueba no muestra la telemetría de `sw/fondo.s`. El SoC de la autoprueba no es el mismo bitstream que compite: es el mismo RTL, sintetizado junto a otra lógica.
 
 ### T84. Maestra interna mínima: SCLK de 781 kHz, caminata de a 1 y CRC bit a bit (15/11)
