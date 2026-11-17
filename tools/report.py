@@ -97,6 +97,24 @@ def tabla(ruta, cabecera, filas, alineacion, nota=None):
             f.write(f"\\par\\smallskip{{\\footnotesize {nota}}}\n")
 
 
+def comprar_y_mantener(precios):
+    """Comprar y mantener con la contabilidad de ref/market.py. Compra en el tick 0 todo lo
+    que alcanza la caja, como la referencia del testbench (pueden ser más de 63 acciones, así
+    que no se expresa con bytes de decisión), y después solo mantiene. El patrimonio final es
+    el de market.comprar_y_mantener; la pérdida máxima tiene la misma definición que en las
+    otras filas (Mercado.max_dd: mayor caída del patrimonio desde un máximo anterior, que
+    parte en la caja inicial)."""
+    m = market.Mercado()
+    q = market.div_sv(m.caja - m.comision, precios[0])
+    m.caja -= q * precios[0] + m.comision
+    m.acciones = q
+    m.ordenes = 1
+    for p in precios:
+        m.ejecutar(market.MANTENER, p)
+    assert m.w == market.comprar_y_mantener(precios)
+    return m
+
+
 def estrategia(peldano):
     return (lambda: trader.Oficial()) if peldano == "r0" else (lambda: fondo.Fondo())
 
@@ -110,15 +128,17 @@ def punto_31(c, peldano):
     for etiqueta, n, per in (("20\\,000 ticks", 20000, None), ("2\\,000 ticks, testbench", 2000, 100000)):
         p = practica[:n]
         perd = trader.ticks_perdidos(per) if per else 0
-        cym = market.comprar_y_mantener(p)
+        mc = comprar_y_mantener(p)
+        cym = mc.w
         candidatos = [("No operar", None), ("Comprar y mantener", "cym"),
-                      ("Regla base (referencia de clases)", lambda: trader.ReglaBase()),
+                      ("Regla base del grupo (hasta el 15/11)", lambda: trader.ReglaBase()),
                       (f"Nuestro algoritmo ({nombre})", nuevo)]
         for nom, est in candidatos:
             if est is None:
                 fila = [nom, num(market.CAJA0), 0, 0, 0]
             elif est == "cym":
-                fila = [nom, num(cym), 1, num(market.COMISION), "--"]
+                fila = [nom, num(cym), mc.ordenes, num(mc.comisiones), num(mc.max_dd)]
+                c[f"CymPerdidaMax{'Veinte' if n == 20000 else 'Dos'}"] = num(mc.max_dd)
             else:
                 m = market.simular(p, trader.decisiones(p, est(), perd))
                 fila = [nom, num(m.w), num(m.ordenes), num(m.comisiones), num(m.max_dd)]
@@ -142,7 +162,7 @@ def punto_31(c, peldano):
 
     # Bloques de 2 000 ticks y familias plausibles
     filas = []
-    for nom, est in (("Comprar y mantener", "cym"), ("Regla base", lambda: trader.ReglaBase()),
+    for nom, est in (("Comprar y mantener", "cym"), ("Regla base del grupo", lambda: trader.ReglaBase()),
                      (f"Nuestro algoritmo", nuevo)):
         ws = []
         for b in series.bloques(practica, 2000):
@@ -150,7 +170,7 @@ def punto_31(c, peldano):
         cyms = [market.comprar_y_mantener(b) for b in series.bloques(practica, 2000)]
         gana = sum(w > y for w, y in zip(ws, cyms))
         filas.append([nom, num(sum(ws) / len(ws)), num(min(ws)), num(max(ws)),
-                      "--" if est == "cym" else f"{gana} de {len(ws)}"])
+                      "n/a" if est == "cym" else f"{gana} de {len(ws)}"])
         if nom.startswith("Nuestro"):
             c["BloquesMedia"] = num(sum(ws) / len(ws))
             c["BloquesPeor"] = num(min(ws))
@@ -178,8 +198,11 @@ def punto_32(c, peldano):
         c["RespPeor"] = num(buscar(r"respuesta, peor caso\s+IC\s+[\d.]+\s+ciclos\s+([\d.]+)", r3), 0)
         c["RespProm"] = num(buscar(r"respuesta, promedio\s+IC\s+[\d.]+\s+ciclos\s+([\d.]+)", r3), 1)
         c["UsoRondaTres"] = num(buscar(r"respuesta, peor caso.*\(\s*([\d.]+) % de T\)", r3), 2)
+        # El mismo peor caso contra el presupuesto (período menos la transacción SPI), no contra el período
+        c["UsoPresuRondaTres"] = num(100.0 * buscar(r"respuesta, peor caso\s+IC\s+[\d.]+\s+ciclos\s+([\d.]+)", r3)
+                                     / buscar(r"presupuesto (\d+) ciclos", r3, tipo=int), 2)
         tabla(os.path.join(RAIZ, G, "t32.tex"),
-              ["Ronda", "Caso", "IC", "Ciclos", "CPI", "Tiempo (us)", "\\% de $T$", "Presupuesto"],
+              ["Ronda", "Caso", "IC", "Ciclos", "CPI", "Tiempo ($\\mu$s)", "\\% de $T$", "Presupuesto"],
               filas, "llrrrrrr", "Respuesta: desde que el esclavo SPI entrega el precio (\\texttt{byte\\_done}) "
               "hasta la escritura en \\texttt{DECISION}. Fuente: \\texttt{docs/mediciones/ticks\\_software.txt}.")
         with open(os.path.join(RAIZ, G, "t32hilos.tex"), "w") as f:
@@ -219,8 +242,9 @@ def punto_32(c, peldano):
                 c["RespPeor"] = num(peor)
                 c["RespProm"] = num(prom, 1)
                 c["UsoRondaTres"] = num(peor * 40 / T * 100, 2)
+                c["UsoPresuRondaTres"] = num(100.0 * peor / presu, 2)
         tabla(os.path.join(RAIZ, G, "t32.tex"),
-              ["Ronda", "Caso", "IC supervisor", "IC 4 hilos", "Ciclos", "CPI hilo / agregado", "Tiempo (us)",
+              ["Ronda", "Caso", "IC supervisor", "IC 4 hilos", "Ciclos", "CPI hilo / agregado", "Tiempo ($\\mu$s)",
                "\\% de $T$", "Presupuesto"], filas, "llrrrrrrr",
               "Ciclos: desde \\texttt{byte\\_done} hasta la escritura en \\texttt{DECISION}. IC: instrucciones de "
               f"trabajo del tick. Fuente: \\texttt{{docs/mediciones/fondo/{peldano}/ticks.txt}}, por el RTL. "

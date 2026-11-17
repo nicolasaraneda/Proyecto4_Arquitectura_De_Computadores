@@ -24,6 +24,10 @@ FASES = {"deteccion": "Detectar el precio", "leer": "Leer \\texttt{PRICE}", "med
          "volver": "Volver al sondeo", "publicar": "Publicar precio y tick", "regla": "Regla propia (\\texttt{max\\_media})",
          "votos": "Esperar y leer votos", "pesos": "Ajuste de pesos", "voto": "Combinar votos",
          "telemetria": "Telemetría"}
+SUFIJO = {"r0": "Rcero", "seg": "Seg", "barrel": "Barrel", "barrel_xd": "BarrelXd", "r1": "Runo", "r2": "Rdos"}
+PASO = {"0": "Cero", "1": "Uno", "2": "Dos", "1+2": "UnoDos", "2b": "DosB", "1+2b": "UnoDosB", "2c": "DosC",
+        "3": "Tres", "4": "Cuatro"}
+NA = "n/a"   # celda sin dato: no aplica o no se midió
 
 
 def filas_csv(nombre):
@@ -31,9 +35,19 @@ def filas_csv(nombre):
         return list(csv.DictReader(f))
 
 
+def macros_p7():
+    """Valores de las macros de docs/mediciones/p7/cifras.tex. Los CSV guardan cifras ya
+    redondeadas a 3 decimales, y volver a redondearlas a 2 puede diferir en una centésima
+    del texto (0,745 da 0,74 y no 0,75). Las columnas de speedup se toman de aquí para que
+    la tabla y el texto muestren el mismo número."""
+    with open(os.path.join(P7, "cifras.tex"), encoding="utf-8") as fh:
+        return dict(re.findall(r"^\\newcommand\{\\(\w+)\}\{(.*)\}\s*$", fh.read(), re.M))
+
+
 def punto_33(c, peldano, tabla, num, leer):
     os.makedirs(G, exist_ok=True)
     f = lambda x, d=2: num(float(x), d)   # noqa: E731
+    mp = macros_p7()
 
     # Variantes
     var = filas_csv("variantes.csv")
@@ -44,17 +58,17 @@ def punto_33(c, peldano, tabla, num, leer):
                       f"{f(v['resp_prom_ciclos'], 1)} / {v['resp_peor_ciclos']}",
                       f"{f(v['tick_prom_ciclos'], 1)} / {v['tick_peor_ciclos']}",
                       f(v["ciclos_kernel"], 1), f(v["cpi_kernel"], 3), v["ops_utiles_tick"], f(v["mops_logrado"]),
-                      f(v["ppeak_mops"]), f(v["speedup_resp"]), f(v["uso_r3_pct"])])
+                      f(v["ppeak_mops"]), mp[f"pSieteSpeedupResp{SUFIJO[v['variante']]}"], f(v["uso_r3_pct"])])
     tabla(os.path.join(G, "t33variantes.tex"),
           ["Variante", "Celdas / LUT4 / BRAM", "$f_{\\max}$ mín. / med. (MHz)", "Resp. prom. / peor",
            "Tick prom. / peor", "Ciclos kernel", "CPI kernel", "Ops/tick", "MOPS", "$P_{peak}$", "Speedup resp.",
            "\\% ronda 3"], filas, "lrrrrrrrrrrr",
           "Recursos: 10 semillas de nextpnr a 25 MHz (todas cierran). Ciclos: práctica a 0,1 ms, en ciclos de 40 ns. "
           "Kernel: de leer \\texttt{PRICE} a volver al sondeo. Operación útil: las 8 operaciones de \\texttt{max\\_media} "
-          "por tick (56 en el fondo, T100). MOPS = operaciones útiles $\\times$ 25 MHz / ciclos del kernel. Fuente: "
+          "por tick (56 en el fondo). MOPS = operaciones útiles $\\times$ 25 MHz / ciclos del kernel. Fuente: "
           "\\texttt{docs/mediciones/p7/variantes.txt} (\\texttt{make p7-variantes}).")
     for v in var:
-        sufijo = {"r0": "Rcero", "seg": "Seg", "barrel": "Barrel", "barrel_xd": "BarrelXd", "r1": "Runo", "r2": "Rdos"}[v["variante"]]
+        sufijo = SUFIJO[v["variante"]]
         c[f"Celdas{sufijo}"] = v["celdas"]
         c[f"Fmin{sufijo}"] = f(v["fmax_min_mhz"])
         c[f"Mops{sufijo}"] = f(v["mops_logrado"])
@@ -74,19 +88,19 @@ def punto_33(c, peldano, tabla, num, leer):
     perfil = filas_csv("perfil.csv")
     clave = "r0" if peldano == "r0" else "r1"
     filas = [[FASES.get(p["fase"], p["fase"]), f(p["ciclos_tick"], 2),
-              f(p["instrucciones_tick"], 2) if p["instrucciones_tick"] else "--",
-              f(p["pct_respuesta"], 1) if p["pct_respuesta"] else "--",
-              f(p["pct_kernel"], 1) if p["pct_kernel"] else "--"] for p in perfil if p["variante"] == clave]
+              f(p["instrucciones_tick"], 2) if p["instrucciones_tick"] else NA,
+              f(p["pct_respuesta"], 1) if p["pct_respuesta"] else NA,
+              f(p["pct_kernel"], 1) if p["pct_kernel"] else NA] for p in perfil if p["variante"] == clave]
     tabla(os.path.join(G, "t33perfil.tex"), ["Fase", "Ciclos por tick", "Instrucciones", "\\% de la respuesta",
                                               "\\% del kernel"], filas, "lrrrr",
           f"Perfil medido con el gemelo digital (\\texttt{{--perfil}}), {'R0' if clave == 'r0' else 'R1, hilo supervisor'}. "
           "Fuente: \\texttt{docs/mediciones/p7/perfil.txt}.")
     if clave == "r0":
         filas = [[FASES.get(p["fase"], p["fase"]), f(p["ciclos_tick"], 2), f(p["instrucciones_tick"], 2)
-                  if p["instrucciones_tick"] else "--"] for p in perfil if p["variante"] == "r1"]
+                  if p["instrucciones_tick"] else NA] for p in perfil if p["variante"] == "r1"]
     else:
         filas = [[FASES.get(p["fase"], p["fase"]), f(p["ciclos_tick"], 2), f(p["instrucciones_tick"], 2)
-                  if p["instrucciones_tick"] else "--"] for p in perfil if p["variante"] == "r0"]
+                  if p["instrucciones_tick"] else NA] for p in perfil if p["variante"] == "r0"]
     tabla(os.path.join(G, "t33perfilotro.tex"), ["Fase", "Ciclos por tick", "Instrucciones"], filas, "lrr")
 
     # Amdahl
@@ -95,10 +109,10 @@ def punto_33(c, peldano, tabla, num, leer):
     for a in am:
         filas.append(["Respuesta" if a["ventana"] == "resp" else "Kernel", a["descripcion"].replace("->", "$\\to$"),
                       f(a["s_predicho"], 3), f(a["s_medido"], 3) if a["s_medido"] else "no construida",
-                      f"{f(a['ciclos_predichos'], 2)} / {f(a['ciclos_medidos'], 2) if a['ciclos_medidos'] else '--'}"])
+                      f"{f(a['ciclos_predichos'], 2)} / {f(a['ciclos_medidos'], 2) if a['ciclos_medidos'] else 'sin medir'}"])
     tabla(os.path.join(G, "t33amdahl.tex"), ["Ventana", "Cambio", "$S$ predicho", "$S$ medido", "Ciclos pred. / med."],
           filas, "llrrr", "Amdahl generalizado, $S = 1 / \\sum_i (f_i / F_i)$, con las fracciones del perfil medido de "
-          "la variante de partida (T105). Fuente: \\texttt{docs/mediciones/p7/amdahl.txt} (\\texttt{make p7-amdahl}).")
+          "la variante de partida. Fuente: \\texttt{docs/mediciones/p7/amdahl.txt} (\\texttt{make p7-amdahl}).")
 
     for a in am:
         if a["ventana"] == "resp" and a["caso"] in ("seg_clase", "seg"):
@@ -110,8 +124,8 @@ def punto_33(c, peldano, tabla, num, leer):
     # Escalera
     es = filas_csv("escalera.csv")
     filas = [[e["paso"], e["descripcion"], e["estado"].split(":")[0], f(e["ic_por_op"], 3), f(e["ciclos_por_op"], 3),
-              e["ciclos_por_op_clase"].replace(".", "{,}") if e["ciclos_por_op_clase"] not in ("", "-") else "--",
-              f(e["mops"]), f(e["speedup"]), e["celdas"] or "--"] for e in es]
+              e["ciclos_por_op_clase"].replace(".", "{,}") if e["ciclos_por_op_clase"] not in ("", "-") else NA,
+              f(e["mops"]), mp[f"pSieteEscSpeedup{PASO[e['paso']]}"], e["celdas"] or NA] for e in es]
     tabla(os.path.join(G, "t33escalera.tex"), ["Paso", "Descripción", "Estado", "Instr./op", "Ciclos/op",
                                                 "Ciclos/op (clase)", "MOPS", "Speedup", "Celdas"], filas,
           "llp{1.5cm}rrrrrr", "Escalera de la clase 7 aplicada a nuestro kernel. Los pasos medidos salen del gemelo y "

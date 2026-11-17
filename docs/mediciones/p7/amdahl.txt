@@ -13,7 +13,7 @@ El F_i medido es el cociente de los ciclos medidos de la fase en las dos variant
   modelo barrel     ALU 4, load 4, store 4, salto tomado 4  (barrel, 4 ciclos por instrucción de un hilo); vuelta del sondeo 12 ciclos
 
 === Ventana: respuesta (de byte_done a DECISION)
---- R0 -> segmentado, con el CPI que estimo la clase 7
+--- R0 -> segmentado, con el CPI que estimó la clase 7
     fase                                         ciclos antes       f F predicho  F medido
     leer PRICE                                           3.00   0.073      1.500     1.500
     media: dev = 32 p - S                               12.00   0.293      2.000     2.000
@@ -37,7 +37,7 @@ El F_i medido es el cociente de los ciclos medidos de la fase en las dos variant
     escribir DECISION                                    2.00   0.049      0.500     0.500
     esperar el precio: deteccion por el sondeo          10.00   0.244      0.667     0.667
     S predicho 0.547 (75.00 ciclos), S medido 0.547 (75.00 ciclos), diferencia +0.0 %
---- barrel -> barrel con emad y devk (la extension sola)
+--- barrel -> barrel con emad y devk (la extensión sola)
     fase                                         ciclos antes       f F predicho  F medido
     leer PRICE                                           4.00   0.053      1.000     1.000
     media: dev = 32 p - S                               24.00   0.320      6.000     6.000
@@ -45,7 +45,7 @@ El F_i medido es el cociente de los ciclos medidos de la fase en las dos variant
     escribir DECISION                                    4.00   0.053      1.000     1.000
     esperar el precio: deteccion por el sondeo          15.00   0.200      1.000     1.000
     S predicho 1.364 (55.00 ciclos), S medido 1.364 (55.00 ciclos), diferencia -0.0 %
---- R0 -> barrel con la extension
+--- R0 -> barrel con la extensión
     fase                                         ciclos antes       f F predicho  F medido
     leer PRICE                                           3.00   0.073      0.750     0.750
     media: dev = 32 p - S                               12.00   0.293      3.000     3.000
@@ -53,7 +53,7 @@ El F_i medido es el cociente de los ciclos medidos de la fase en las dos variant
     escribir DECISION                                    2.00   0.049      0.500     0.500
     esperar el precio: deteccion por el sondeo          10.00   0.244      0.667     0.667
     S predicho 0.745 (55.00 ciclos), S medido 0.745 (55.00 ciclos), diferencia -0.0 %
---- R0 -> Espino base con la extension (no existe en el RTL)
+--- R0 -> Espino base con la extensión (no existe en el RTL)
     fase                                         ciclos antes       f F predicho  F medido
     leer PRICE                                           3.00   0.073      1.000         -
     media: dev = 32 p - S                               12.00   0.293      6.000         -
@@ -61,7 +61,7 @@ El F_i medido es el cociente de los ciclos medidos de la fase en las dos variant
     escribir DECISION                                    2.00   0.049      1.000         -
     esperar el precio: deteccion por el sondeo          10.00   0.244      1.000         -
     S predicho 1.323 (31.00 ciclos), sin medicion: la variante no existe en el RTL
---- R0 -> segmentado con la extension (no existe en el RTL)
+--- R0 -> segmentado con la extensión (no existe en el RTL)
     fase                                         ciclos antes       f F predicho  F medido
     leer PRICE                                           3.00   0.073      1.500         -
     media: dev = 32 p - S                               12.00   0.293     11.999         -
@@ -71,7 +71,7 @@ El F_i medido es el cociente de los ciclos medidos de la fase en las dos variant
     S predicho 2.377 (17.25 ciclos), sin medicion: la variante no existe en el RTL
 
 === Ventana: kernel (de leer PRICE a volver al sondeo)
---- R0 -> segmentado, con el CPI que estimo la clase 7
+--- R0 -> segmentado, con el CPI que estimó la clase 7
     fase                                         ciclos antes       f F predicho  F medido
     leer PRICE                                           3.00   0.059      1.500     1.500
     media: dev = 32 p - S                               12.00   0.235      2.000     2.000
@@ -98,7 +98,7 @@ El F_i medido es el cociente de los ciclos medidos de la fase en las dos variant
     media: S = S + (dev >>> 5)                          17.00   0.333      0.531     0.531
     volver al sondeo (j)                                 3.00   0.059      0.750     0.750
     S predicho 0.531 (96.00 ciclos), S medido 0.531 (96.00 ciclos), diferencia +0.0 %
---- barrel -> barrel con emad y devk (la extension sola)
+--- barrel -> barrel con emad y devk (la extensión sola)
     fase                                         ciclos antes       f F predicho  F medido
     leer PRICE                                           4.00   0.042      1.000     1.000
     media: dev = 32 p - S                               24.00   0.250      6.000     6.000
@@ -107,7 +107,7 @@ El F_i medido es el cociente de los ciclos medidos de la fase en las dos variant
     media: S = S + (dev >>> 5)                          32.00   0.333      8.000     8.000
     volver al sondeo (j)                                 4.00   0.042      1.000     1.000
     S predicho 2.000 (48.00 ciclos), S medido 2.000 (48.00 ciclos), diferencia +0.0 %
---- R0 -> barrel con la extension
+--- R0 -> barrel con la extensión
     fase                                         ciclos antes       f F predicho  F medido
     leer PRICE                                           3.00   0.059      0.750     0.750
     media: dev = 32 p - S                               12.00   0.235      3.000     3.000
@@ -116,7 +116,7 @@ El F_i medido es el cociente de los ciclos medidos de la fase en las dos variant
     media: S = S + (dev >>> 5)                          17.00   0.333      4.250     4.250
     volver al sondeo (j)                                 3.00   0.059      0.750     0.750
     S predicho 1.062 (48.00 ciclos), S medido 1.062 (48.00 ciclos), diferencia +0.0 %
---- R0 -> Espino base con la extension (no existe en el RTL)
+--- R0 -> Espino base con la extensión (no existe en el RTL)
     fase                                         ciclos antes       f F predicho  F medido
     leer PRICE                                           3.00   0.059      1.000         -
     media: dev = 32 p - S                               12.00   0.235      6.000         -
@@ -125,7 +125,7 @@ El F_i medido es el cociente de los ciclos medidos de la fase en las dos variant
     media: S = S + (dev >>> 5)                          17.00   0.333      8.500         -
     volver al sondeo (j)                                 3.00   0.059      1.000         -
     S predicho 1.962 (26.00 ciclos), sin medicion: la variante no existe en el RTL
---- R0 -> segmentado con la extension (no existe en el RTL)
+--- R0 -> segmentado con la extensión (no existe en el RTL)
     fase                                         ciclos antes       f F predicho  F medido
     leer PRICE                                           3.00   0.059      1.500         -
     media: dev = 32 p - S                               12.00   0.235     11.999         -
