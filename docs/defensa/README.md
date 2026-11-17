@@ -22,6 +22,10 @@ Estos documentos **resumen y ordenan** los documentos de estudio de `docs/`, que
 | `tabla_vigilante.md` | Tabla en BRAM, `icebram` con moldes, vigilante con `SB_WARMBOOT`, relevo e imagen múltiple |
 | `algoritmo.md` | De la serie al modelo, reversión a la media, `max_media`, protocolo de evaluación, por qué no otras ideas, suerte y sobreajuste |
 | `verificacion.md` | El flujo completo: referencia en Python, gemelo digital, equivalencia, formal, mutaciones, puertas, matriz de estrés, simulación del bitstream, placa y maestra |
+| `diagramas.md` | Seis dibujos para la pizarra: el SoC, las fases del Espino base, el segmentado, el barrel, un tick por los cuatro hilos del fondo y el relevo de R2 |
+| `guiones.md` | Guion de 1 minuto y de 5 minutos (un bloque por integrante, en el orden de la pauta) |
+| `pruebas_practica.md` | Tres pruebas de 15 preguntas del banco con su pauta (`python3 tools/defensa/pruebas.py`) |
+| `guia_nicolas.md`, `guia_vicente.md`, `guia_santiago.md` | Una guía por integrante según el plan de estudio: qué leer, qué dibujar, cifras, preguntas y fechas |
 
 ## En qué orden leerlo
 
@@ -29,5 +33,6 @@ Estos documentos **resumen y ordenan** los documentos de estudio de `docs/`, que
 2. `plan_estudio.md`, para saber qué pieza es de cada uno.
 3. Los documentos de estudio en este orden, que va de lo básico a lo que compite: `espino_base.md`, `algoritmo.md`, `segmentado.md`, `barrel.md`, `extension.md`, `fondo.md`, `tabla_vigilante.md`, `verificacion.md`.
 4. `preguntas.md`: primero las **[B]** y las **[I]** de todo el banco, después las **[A]** de la propia pieza.
+5. La guía propia (`guia_*.md`), `diagramas.md` y `guiones.md`, y las pruebas de práctica en los repasos.
 
 Fuera de esta carpeta, para el día: `docs/arbol_decision.md` (qué se graba el 1/12), `docs/checklist_26nov.md` y `docs/checklist_1dic.md`.
