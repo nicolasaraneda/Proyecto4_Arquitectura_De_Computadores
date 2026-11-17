@@ -524,7 +524,7 @@ Al quinto precio seguido sin escritura en `DECISION` (K = 4), y espera a que `CS
 Dato: `rtl/vigilante.v:65` y `:81`, `rtl/pochoco_soc.v:295`.
 
 **120. [A] ¿Por qué K = 4?**
-En todas las corridas sanas de R2, incluida la matriz de estrés, la cuenta nunca pasó de 1. Cualquier K de 2 o más cumple; 4 da margen y gasta solo 5 ticks de los 536 del relevo.
+En todas las corridas sanas de R2, incluida la matriz de estrés, la cuenta nunca pasó de 1. Cualquier K de 2 o más cumple; 4 da margen y gasta solo 5 ticks de los 361 del relevo (con el tiempo medido en la placa).
 Dato: `docs/tabla_vigilante.md:101`, `docs/decisiones.md:473`.
 
 **121. [A] ¿Puede el vigilante disparar por una condición del algoritmo?**
@@ -532,8 +532,8 @@ No: solo cuenta precios y escrituras en `DECISION`. No mira precios, votos ni el
 Dato: `rtl/vigilante.v:12` a `:16`.
 
 **122. [I] ¿Cuánto cuesta un relevo?**
-536 ticks sin decisión nueva a 0,1 ms (58 a 1 ms, 10 a 10 ms), con los 53 ms de reconfiguración de la hoja de datos, sin medir en la placa. Y probablemente la posición: R0 parte de cero y su primera decisión suele ser vender.
-Dato: `docs/tabla_vigilante.md:132` y `:141`.
+361 ticks sin decisión nueva a 0,1 ms (40 a 1 ms, 8 a 10 ms), con los 35,50 ms de reconfiguración medidos en la placa el 16/11; con los 53 ms de la hoja de datos eran 536. Y probablemente la posición: R0 parte de cero y su primera decisión suele ser vender.
+Dato: `docs/tabla_vigilante.md:132` y `:144`.
 
 **123. [A] ¿Qué lee la maestra durante la reconfiguración?**
 MISO queda con pull-up: lee `0xFF`, acción 11, que se trata como mantener. Después `0x00` mientras R0 está en su reset. Está en la simulación; el nivel real del pin se ve en la placa.

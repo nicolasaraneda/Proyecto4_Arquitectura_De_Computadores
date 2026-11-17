@@ -88,11 +88,11 @@ Un bitstream cambiado con `icebram` **no hereda la puerta**: hay que simularlo d
 
 | Período | Ticks sin decisión nueva |
 |---------|--------------------------|
-| 0,1 ms | 536 (530 con `0xFF`) |
-| 1 ms | 58 |
-| 10 ms | 10 |
+| 0,1 ms | 361 (355 con `0xFF`) |
+| 1 ms | 40 |
+| 10 ms | 8 |
 
-Con los **53 ms de reconfiguración de la hoja de datos, sin medir en la placa**. 130 simulaciones, todos los bytes iguales a lo esperado.
+Con los **35,50 ms de reconfiguración medidos en la placa** el 16/11 por el eco de la UART (una medición). Con los 53 ms de la hoja de datos eran 536, 58 y 10. Todas las simulaciones del relevo dan los bytes esperados.
 
 Lo que hay que saber decir:
 
@@ -113,6 +113,6 @@ Lo que hay que saber decir:
 5. **¿Cuándo dispara el vigilante?** Al quinto precio seguido sin escritura en `DECISION`, y espera a que `CS_n` suba (`rtl/vigilante.v:65` y `:81`).
 6. **¿Puede disparar con el programa sano?** En ninguna corrida sana la cuenta pasó de 1; el disparo necesita 5 (`docs/puertas.md`, lo propio de R2).
 7. **¿Qué pasa si se cuelga un gestor y no el supervisor?** Nada que vea el vigilante: el supervisor decide sin ese voto.
-8. **¿Qué pierde el fondo si dispara?** 536 ticks sin decisión nueva a 0,1 ms con el tiempo de la hoja de datos, y probablemente la posición.
+8. **¿Qué pierde el fondo si dispara?** 361 ticks sin decisión nueva a 0,1 ms con el tiempo medido en la placa (536 con el de la hoja de datos), y probablemente la posición.
 9. **¿Por qué la imagen de respaldo no tiene vigilante?** Para que no exista un ciclo de reinicios, y porque es R0, que ya pasó su puerta tal como está (T72).
 10. **¿Cuánto demora cambiar un parámetro el día de la competencia?** 0,32 s en armar el bitstream, más unos 40 minutos de simulación desde el `.asc`. Para comisión de 20 y 50 los juegos ya están hechos.

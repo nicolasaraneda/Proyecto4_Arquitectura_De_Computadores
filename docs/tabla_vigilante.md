@@ -133,14 +133,17 @@ Qué lee la maestra, en orden:
 | Falla en el tick 100, 1 ms | 104 | 53 | 58 |
 | Falla en el tick 100, 10 ms | 104 | 5 | 10 |
 | Falla en el tick 3, 0,1 ms | 8 | 530 | 536 |
+| Falla en el tick 100, 0,1 ms, con los 35,50 ms medidos | 105 | 355 | 361 |
+| Falla en el tick 100, 1 ms, medido | 104 | 35 | 40 |
+| Falla en el tick 100, 10 ms, medido | 104 | 3 | 8 |
 
-Los 53 ms de reconfiguración son el tiempo de la hoja de datos, **sin medir en la placa**. El testbench lo toma como parámetro. Todos los bytes coinciden con el esperado en las 130 simulaciones de `docs/mediciones/vigilante/relevo.txt`, y en todas `BOOT` sube con `CS_n` en alto y sin transacción en curso, 80 ns después de que `CS_n` sube.
+Las cuatro primeras filas usan los 53 ms típicos de la hoja de datos. El 16/11 se midió en la placa, por el eco de la UART, **35,50 ms** (una medición; `docs/mediciones/placa_16nov.md`), y las tres últimas filas son la misma simulación con ese tiempo (sección 2b de `docs/mediciones/vigilante/relevo.txt`). El testbench lo toma como parámetro. Todos los bytes coinciden con el esperado en las 130 simulaciones de `docs/mediciones/vigilante/relevo.txt`, y en todas `BOOT` sube con `CS_n` en alto y sin transacción en curso, 80 ns después de que `CS_n` sube.
 
 Tres cosas que conviene saber para la defensa:
 
 - **El relevo cuesta posición.** `max_media` parte sin posición y su primera decisión suele ser vender. Si el fondo estaba adentro, la imagen de respaldo liquida.
 - **Una transacción puede quedar cortada** por el fin de la reconfiguración. Se barrió ese instante en 40 corridas: la maestra lee `80`, `c0`, `e0`, `f0`, `f8`, `fc` o `fe`, y ninguno es una orden (acción 11, o vender 0). Eso vale si el pin suelto se lee como 1 y la imagen 1 mantiene MISO en 0 durante su reset.
-- **Qué no demuestra la simulación**: cuánto dura de verdad la reconfiguración, qué nivel tiene el pin mientras tanto, y que `SB_WARMBOOT` cargue la imagen correcta. El modelo de simulación de esa primitiva está vacío: aquí se comprueba que `BOOT` suba cuando debe y con `S1 S0 = 01`. Lo demás es de la puerta de placa.
+- **Qué no demuestra la simulación**: cuánto dura de verdad la reconfiguración (se midió en la placa el 16/11: 35,50 ms), qué nivel tiene el pin mientras tanto, y que `SB_WARMBOOT` cargue la imagen correcta. El modelo de simulación de esa primitiva está vacío: aquí se comprueba que `BOOT` suba cuando debe y con `S1 S0 = 01`. Lo demás es de la puerta de placa.
 
 ## 6. Bitstreams e imagen múltiple
 
@@ -211,6 +214,6 @@ Fuera de la puerta, en dos casos de exploración con períodos de 11,5 y 13,5 us
 4. **¿Por qué no se puede cambiar la tabla directamente en el bitstream final?** Porque `icebram` ubica la memoria por su contenido y la tabla de verdad no es distinguible. Sección 3.1.
 5. **¿Cuándo dispara el vigilante?** Al quinto precio seguido sin escritura en `DECISION`, y espera a que `CS_n` suba.
 6. **¿Puede disparar con el programa sano?** En ninguna corrida sana la cuenta pasó de 1, y el disparo necesita 5. Sección 7.
-7. **¿Qué pierde el fondo si dispara?** Unos 536 ticks sin decisión nueva a 0,1 ms, y probablemente la posición. Sección 5.
+7. **¿Qué pierde el fondo si dispara?** 361 ticks sin decisión nueva a 0,1 ms con los 35,50 ms medidos en la placa (536 con los 53 ms de la hoja de datos), y probablemente la posición. Sección 5.
 8. **¿Qué pasa si se cuelga un gestor y no el supervisor?** Nada que vea el vigilante: el supervisor decide sin ese voto. `docs/fondo.md`, sección 10.
 9. **¿Por qué la imagen de respaldo no tiene vigilante?** Para que no exista un ciclo de reinicios, y porque es R0, que ya pasó su puerta tal como está.

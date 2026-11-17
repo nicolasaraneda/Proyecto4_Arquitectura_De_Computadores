@@ -36,7 +36,7 @@ La parte incómoda, que hay que decir sin rodeos: **el fondo no suma puntos** fr
 | Placa (autoprueba con firma) | Bitstream listo, falta grabarlo | Pendiente | Pendiente, más el relevo con falla inyectada |
 | Maestra real (26/11) | Pendiente | Pendiente | Pendiente |
 
-El 16/11 el profesor confirmó que se puede modificar lo que uno quiera y que el Espino multihilo es válido; la reconfiguración durante una ronda queda cubierta por esa respuesta general, sin confirmación específica (T126). Pendiente además: qué SCLK usa la maestra, el tiempo real de reconfiguración (53 ms es de la hoja de datos) y la revisión del informe (`informe/informe.tex`, con las cifras que genera `make report`). **Nada se ha probado todavía en la placa.**
+El 16/11 el profesor confirmó que se puede modificar lo que uno quiera y que el Espino multihilo es válido; la reconfiguración durante una ronda queda cubierta por esa respuesta general, sin confirmación específica (T126). Pendiente además: qué SCLK usa la maestra, la confirmación del relevo a la vista (el tiempo ya se midió: 35,50 ms) y la revisión del informe (`informe/informe.tex`, con las cifras que genera `make report`). **En la placa (16/11):** R2 pasó la firma a 0,1 ms y la media hora sin disparo, y el relevo se midió en 35,50 ms; faltan las firmas de R1 y de R2 a 1 y 10 ms (`docs/puertas.md`, puerta de placa).
 
 Fechas: 22/11 corte del diseño integrado; 25/11 congelamiento del hardware; **26/11 maestra**; 29/11 congelamiento total; 30/11 ensayo general; **1/12** entrega a las 10:00 y competencia y defensa a las 10:30.
 

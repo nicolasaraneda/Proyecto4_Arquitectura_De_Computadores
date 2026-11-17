@@ -39,7 +39,7 @@ Sin mirar nada, cada uno de los tres:
 2. **El recorrido de un tick**, de punta a punta: la maestra baja `CS_n` y manda el precio; `byte_done`; el programa sale del sondeo, lee `PRICE`, calcula `dev`, decide sin saltos, escribe `DECISION` una vez; el byte sale en la transacción siguiente y la maestra lo ejecuta al precio de ese tick. En R0 (`sw/trade.s:91` a `:129`) y en R1 (supervisor, gestores y votos, `docs/defensa/fondo.md`, sección 3).
 3. **La escalera R0, R1 y R2**, qué hardware tiene cada peldaño y el árbol de decisión del 1/12 (`docs/arbol_decision.md`).
 4. **La ley de hierro aplicada a cada pieza**: segmentado y barrel atacan el CPI, la extensión el IC, el PLL atacaría Tclk y no existe en el VQ100.
-5. **Las cifras de `docs/defensa/cifras.md`** que están en negrita o que aparecen en las preguntas [B]: celdas y frecuencia de R0, R1 y R2; 41/44/49 y 223/443/444 ciclos; presupuestos 249 762, 24 762 y 2 262; 19,6 %; CPI 2, 1,350, 1 y 4; 25 973, 27 062, 6 497 y 10 000; +0,007 y -0,005; 0,7 % y 1,4 %; 53 ms y 536 ticks; 110 y 115 kHz.
+5. **Las cifras de `docs/defensa/cifras.md`** que están en negrita o que aparecen en las preguntas [B]: celdas y frecuencia de R0, R1 y R2; 41/44/49 y 223/443/444 ciclos; presupuestos 249 762, 24 762 y 2 262; 19,6 %; CPI 2, 1,350, 1 y 4; 25 973, 27 062, 6 497 y 10 000; +0,007 y -0,005; 0,7 % y 1,4 %; 35,50 ms medidos (53 de la hoja de datos) y 361 ticks; 110 y 115 kHz.
 6. **Qué está probado y qué no** (`docs/defensa/resumen.md`): todo es simulación hasta el 26/11.
 
 ## 4. Calendario de estudio

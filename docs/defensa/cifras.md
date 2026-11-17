@@ -93,7 +93,7 @@ Uso del presupuesto de la ronda 3 en el peor caso: R0 2,2 % (49 ciclos); **R1 19
 | Período mínimo con SCLK de 1 MHz | R0 11,34 us (8,82 veces la ronda 3); R1 26,94 us (3,71 veces) | `docs/mediciones/fondo/r1/sclk_minimo.txt` |
 | SCLK máximo que funciona | 4 MHz; a 5 MHz el esclavo pierde bits en todos los diseños | decisión T53 |
 | Vigilante | Dispara al 5.º precio seguido sin escritura (K = 4); cuenta máxima en corridas sanas: 1 | `docs/tabla_vigilante.md`, secciones 4 y 7 |
-| Reconfiguración por warm boot | 53 ms de la hoja de datos, **sin medir**: 536 ticks sin decisión nueva a 0,1 ms, 58 a 1 ms, 10 a 10 ms | `docs/mediciones/vigilante/relevo.txt` |
+| Reconfiguración por warm boot | **35,50 ms medidos en la placa** (16/11, una medición; la hoja de datos da 53 ms típicos): 361 ticks sin decisión nueva a 0,1 ms, 40 a 1 ms, 8 a 10 ms (con 53 ms eran 536, 58 y 10) | `docs/mediciones/placa_16nov.md`, `docs/mediciones/vigilante/relevo.txt` (sección 2b) |
 | Cambio de tabla con `icebram` | 0,32 s; R0 desde su molde 0,10 s; simular el `.asc` nuevo unos 40 minutos | `docs/tabla_vigilante.md`, sección 3; `docs/mediciones/p8/r0_molde.txt` |
 | Imagen múltiple | 64 600 de 131 072 bytes de la flash | `docs/tabla_vigilante.md`, sección 6 |
 | Tamaño de `sw/fondo.s` | 213 de 512 palabras; `sw/trade.s` 40 | `docs/mediciones/fondo/r1/tamano.txt`, `docs/trade_s.md` |

@@ -231,7 +231,7 @@ Anotar en cada período los LED encendidos y los cuatro dígitos. Si los tres da
 ### 9.4 R2: el relevo con la falla inyectada
 
 1. **Programar.** `iceprog -b bitstreams/relevo_r2_multi.bin`. "VERIFY OK", "cdone: high", y la placa queda con los LED apagados y "FF".
-2. **(c) Inyectar la falla.** Apretar SW3. El supervisor se cuelga con el precio 100, el vigilante cuenta cinco precios sin respuesta y pide el relevo 10,3 ms después de apretar. Los 7 segmentos se apagan un instante (unos 53 ms según la hoja de datos, casi no se nota) y aparece la testigo: **los cuatro LED encendidos y "--"**. Con SW4, "00" (cero minutos).
+2. **(c) Inyectar la falla.** Apretar SW3. El supervisor se cuelga con el precio 100, el vigilante cuenta cinco precios sin respuesta y pide el relevo 10,3 ms después de apretar. Los 7 segmentos se apagan un instante (35,50 ms medidos el 16/11, casi no se nota) y aparece la testigo: **los cuatro LED encendidos y "--"**. Con SW4, "00" (cero minutos).
 3. Desconectar y conectar, y repetir con SW1: ahora LED1 se enciende y alrededor de 1 s después (el precio 100 llega al segundo) aparece la testigo.
 
 Si aparece la testigo, el relevo funciona en la placa: el vigilante dentro del bitstream disparó, `SB_WARMBOOT` cargó la imagen del vector 01 y esa imagen arrancó.
@@ -254,7 +254,7 @@ Si aparece la testigo, el relevo funciona en la placa: el vigilante dentro del b
 
 ## 10. Medir el tiempo del relevo
 
-La hoja de datos da 53 ms típicos para configurar la HX1K desde la flash, sin máximo, y nunca se midió. Es lo que más pesa en cuántos ticks pierde R2 si dispara: el vigilante gasta 5 y el reset de R0 0,164 ms. La FPGA pierde todo su estado al reconfigurarse, así que la medición tiene que ser externa. `relevo_r2_multi.bin` está preparado para tres formas, de la más exacta a la más simple. Las tres miden lo mismo: el tiempo en que los pines quedan sueltos, desde que sube BOOT hasta que arranca la testigo (T92).
+La hoja de datos da 53 ms típicos para configurar la HX1K desde la flash, sin máximo. **El 16/11 se midió por la UART: 35,50 ms** (35,42 a 35,59, una medición; `docs/mediciones/placa_16nov.md`). Faltan las otras dos mediciones del paso 4 de 10.1. Es lo que más pesa en cuántos ticks pierde R2 si dispara: el vigilante gasta 5 y el reset de R0 0,164 ms. La FPGA pierde todo su estado al reconfigurarse, así que la medición tiene que ser externa. `relevo_r2_multi.bin` está preparado para tres formas, de la más exacta a la más simple. Las tres miden lo mismo: el tiempo en que los pines quedan sueltos, desde que sube BOOT hasta que arranca la testigo (T92).
 
 ### 10.1 Por la UART (eco)
 
@@ -282,7 +282,8 @@ El pin de MISO del PMOD (pin 63 de la FPGA, el mismo que usa la maestra real) es
 | Tiempo de reconfiguración | Ronda 1 (10 ms) | Ronda 2 (1 ms) | Ronda 3 (0,1 ms) |
 |---------------------------|-----------------|----------------|------------------|
 | 35,2 ms (cota inferior: leer el bitstream a 7,5 MHz) | 8 | 40 | 358 |
+| **35,50 ms (medido en la placa el 16/11)** | **8** | **40** | **361** |
 | 53 ms (típico de la hoja de datos) | 10 | 58 | 536 |
 | 106 ms (el doble) | 15 | 111 | 1066 |
 
-La cuenta es: 5 ticks del vigilante, más el tiempo de reconfiguración y los 0,164 ms del reset de R0 divididos por el período, más el primer precio que R0 alcanza a responder. Durante la reconfiguración la maestra lee 0xFF, que es mantener. El número medido reemplaza a los 53 ms en `tools/vigilante/relevo.sh` (`T_RECONF`) y en el árbol de decisión del 1/12.
+La cuenta es: 5 ticks del vigilante, más el tiempo de reconfiguración y los 0,164 ms del reset de R0 divididos por el período, más el primer precio que R0 alcanza a responder. Durante la reconfiguración la maestra lee 0xFF, que es mantener. El número medido ya está en `tools/vigilante/relevo.sh` (`T_MEDIDO`, sección 2b de `docs/mediciones/vigilante/relevo.txt`: 361, 40 y 8 ticks, iguales a la traducción) y en el árbol de decisión del 1/12. Los casos con 53 ms se conservan como el escenario de la hoja de datos.
