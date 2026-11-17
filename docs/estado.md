@@ -2,9 +2,23 @@
 
 Se actualiza al cerrar cada tramo de trabajo. La versión anterior queda en el historial de git.
 
-## Tramo 15: trabajo del 16 al 17/11 (en curso)
+## Tramo 15: trabajo del 16 y 17/11 (cerrado el 17/11 en la noche)
 
-### Estado al 17/11, 14:30
+### 1. Resultado de la tarea prioritaria: la regla `zscore` de Vicente
+
+**No reemplaza a `max_media`.** Rama `zscore`, documento de estudio `docs/zscore.md`, decisiones T128 y T129, mediciones en `docs/mediciones/zscore/`.
+
+- **Equivalencia.** `ref/zscore.py` da 40 957 con 578 órdenes en la práctica completa y los mismos bytes que `tools/referencia.py` del repositorio de Vicente (clonado fuera de esta carpeta) en 81 series.
+- **Protocolo.** Gana en los 10 bloques (+346 +- 321, ruido) y pierde en los remuestreos (-110 +- 37) y en las cuatro familias plausibles. No reemplaza.
+- **Torneo, semilla reservada (4).** Pierde 0,094 puntos H3a por ronda a 2000 ticks y 0,222 a 20 000. Cabeza a cabeza gana el 41 % de las rondas de 2000 ticks y el 35 % de las competencias de tres rondas en las familias plausibles (26 % y 16 % a 20 000 ticks).
+- **Meseta.** Ninguno de los 81 puntos (z de 1 a 3, memorias de 16 a 64 y de 32 a 128) le gana a `max_media`. El centro está en z = 1,5 con la desviación de memoria 128. Sobre 2,5 pierde cada vez más.
+- **Fondo de tres gestores `zscore`.** No supera al mejor `zscore` solo: tres bandas anidadas con la misma salida votan igual que la del medio.
+- **Por qué 40 957.** Es el máximo de la grilla en la serie con que se eligió; su vecino a 2,75 da 22 421. La ventaja por bloque, compuesta sobre una sola trayectoria, se vuelve un 58 %.
+- **Diferencia con las bandas del frente A.** `zscore` mide el desvío respecto de la media y no el cambio de un tick: se ensancha en tendencia (gana en `tendencia` y `cambio_de_caracter`) pero ignora la comisión fija y pierde mucho en series volátiles y de precio bajo.
+- **Corrección del 17/11 (T130): el largo del trozo cambia el signo.** El remuestreo del protocolo usa trozos de 100 ticks. Con trozos de 250 o más, en tramos reales contiguos y eligiendo en una mitad de la práctica para probar en la otra, `zscore` gana (+313 +- 43 con trozos de 1000; +0,107 puntos H3b). En series del modelo no. Con muestras independientes, +346 +- 321 en 10 bloques. La explicación de los 40 957 ya no es solo sobreajuste (`docs/zscore.md`, sección 4.5; pregunta 156 del banco).
+- **Decisión de Nicolás pendiente**: qué algoritmo compite (`docs/pendientes_nicolas.md`, decisión 1).
+
+### 2. Qué quedó hecho
 
 | Punto | Estado | Dónde |
 |-------|--------|-------|
@@ -20,21 +34,56 @@ Se actualiza al cerrar cada tramo de trabajo. La versión anterior queda en el h
 | A. Registrador | Hecho: `make registrador` PASS (478 celdas, 10 de 10 semillas, 7 de 7 controles negativos, bitstream ruteado simulado); en el checklist del 26/11 | `docs/registrador.md`, `bitstreams/registrador.bin` |
 | B. Generador | Cerrado (T131): ninguna candidata mejora en todo; la salida a +0,5 pasa solo contra un campo de reversiones, condicionada al 26/11 | `docs/generador_b.md` |
 
-Lo pesado corre de a un trabajo por vez con una cola global (`flock`), revisando el espacio libre antes de cada uno y deteniendo el trabajo si la memoria disponible baja de 3 GB. `main` todavía no avanza a `integra-noche`: lo hace Nicolás. Desde el 17/11 en la tarde la integración continua no corre (GitHub no inicia los trabajos por la facturación de la cuenta); mientras tanto las mismas pruebas se corren en la máquina.
+Todo está en la rama `integra-noche`. La corrida local de los mismos pasos de la integración continua pasó 24 de 24 (`docs/mediciones/ci_local_17nov.txt`). `main` no avanzó: esta sesión no tiene permiso para empujar a `main` (acción 0b de los pendientes).
 
-### Resultado de la tarea prioritaria: la regla `zscore` de Vicente
+### 3. Qué falló
 
-**No reemplaza a `max_media`.** Rama `zscore`, documento de estudio `docs/zscore.md`, decisiones T128 y T129, mediciones en `docs/mediciones/zscore/`.
+Corregido:
 
-- **Equivalencia.** `ref/zscore.py` da 40 957 con 578 órdenes en la práctica completa y los mismos bytes que `tools/referencia.py` del repositorio de Vicente (clonado fuera de esta carpeta) en 81 series.
-- **Protocolo.** Gana en los 10 bloques (+346 +- 321, ruido) y pierde en los remuestreos (-110 +- 37) y en las cuatro familias plausibles. No reemplaza.
-- **Torneo, semilla reservada (4).** Pierde 0,094 puntos H3a por ronda a 2000 ticks y 0,222 a 20 000. Cabeza a cabeza gana el 41 % de las rondas de 2000 ticks y el 35 % de las competencias de tres rondas en las familias plausibles (26 % y 16 % a 20 000 ticks).
-- **Meseta.** Ninguno de los 81 puntos (z de 1 a 3, memorias de 16 a 64 y de 32 a 128) le gana a `max_media`. El centro está en z = 1,5 con la desviación de memoria 128. Sobre 2,5 pierde cada vez más.
-- **Fondo de tres gestores `zscore`.** No supera al mejor `zscore` solo: tres bandas anidadas con la misma salida votan igual que la del medio.
-- **Por qué 40 957.** Es el máximo de la grilla en la serie con que se eligió; su vecino a 2,75 da 22 421. La ventaja por bloque, compuesta sobre una sola trayectoria, se vuelve un 58 %.
-- **Diferencia con las bandas del frente A.** `zscore` mide el desvío respecto de la media y no el cambio de un tick: se ensancha en tendencia (gana en `tendencia` y `cambio_de_caracter`) pero ignora la comisión fija y pierde mucho en series volátiles y de precio bajo.
-- **Corrección del 17/11 (T130): el largo del trozo cambia el signo.** El remuestreo del protocolo usa trozos de 100 ticks. Con trozos de 250 o más, en tramos reales contiguos y eligiendo en una mitad de la práctica para probar en la otra, `zscore` gana (+313 +- 43 con trozos de 1000; +0,107 puntos H3b). En series del modelo no. Con muestras independientes, +346 +- 321 en 10 bloques. La explicación de los 40 957 ya no es solo sobreajuste (`docs/zscore.md`, sección 4.5; pregunta 156 del banco).
-- **Decisión de Nicolás pendiente**: qué algoritmo compite (`docs/pendientes_nicolas.md`, decisión 1).
+- **Dos caídas de WSL en la noche del 16/11**, por memoria: muchas compilaciones de Verilator a la vez. Desde el 17/11 lo pesado pasa por una cola global, de a un trabajo, con revisión del espacio libre y, desde la tarde, con un vigía que detiene el trabajo si la memoria disponible baja de 3 GB. El inventario de la mañana del 17/11 recuperó todo lo que no tenía commit.
+- **La cobertura exhaustiva de R1 llegó a 30,6 GB** y se detuvo a mano antes de una tercera caída. Juntaba en memoria los mapas de bits de todas las series; ahora se acumulan a medida que llegan.
+- **Tres errores de las herramientas de la verificación exhaustiva**, ninguno del diseño: el arreglo de 20 000 precios del testbench oficial plegaba las series largas en Verilator, el gemelo en modo lote cortaba las líneas de más de 4 MB y el control de la copia del testbench exigía 6 líneas cambiadas cuando eran 5 (`docs/bitacora/campanas.md`).
+- **La conclusión sobre `zscore` cambió** con el largo del trozo del remuestreo (T130): el protocolo usa trozos de 100 ticks, y con trozos de 250 o más `zscore` gana. La primera versión del documento decía que perdía sin esa salvedad.
+- **El registrador comparaba la cola llena en 32 bits** y sobrescribía registros a 30 us por precio. Lo encontró un control negativo; quedó como mutación.
+- **ASIC del barrel.** La configuración de LibreLane había perdido las perillas del flujo (la primera corrida salió sin reloj). Y el macro decidía distinto según el estado de encendido de sus flip-flops: la RAM de datos del ASIC no tenía reset y `fondo.s` supone que parte en cero, como la BRAM. Lo encontró la simulación del netlist final; la del RTL lo escondía. Se agregó el reset y una prueba de arranque en 0 y en 1 (`asic/README.md`, sección 5). En la FPGA no pasa: la BRAM parte con la imagen de `MemFile`.
+- **Una corrida de LibreLane siguió viva después de sacarla de la cola** (matar `pesado.sh` no mata a su hijo, que corre en otra sesión) y corrió en paralelo con otra. Se descartó; la otra está verificada a nivel de netlist.
+
+Sin resolver:
+
+- **La integración continua de GitHub no corre** desde el 17/11 en la tarde: "recent account payments have failed or your spending limit needs to be increased" (acción 0).
+- **El PDF del informe no está en el repositorio**: necesita LaTeX, que se instala con `sudo` (acción 5).
+- **Pruebas de placa sin correr o sin anotar** del 16/11 (acción 3).
+- **El arreglo del esclavo SPI** (`p10-arreglo-1`) no se integró: cambia hardware que ya pasó su puerta (decisión 4).
+
+### 4. Hallazgos de la revisión adversarial (P10, `docs/revision_p10.md`)
+
+Un revisor que no participó en el diseño leyó el RTL y el assembly de R1 y R2, agregó pruebas (`make p10-*`) y repitió la puerta de simulación desde cero. Todas las mediciones y los sha256 de los bitstreams salieron idénticos a los registrados.
+
+| Severidad | Hallazgo | Reproducción | Estado |
+|-----------|----------|--------------|--------|
+| Crítico y alto | Ninguno | | |
+| Bajo; medio si la maestra mueve SCLK con `CS_n` en alto | El esclavo SPI del curso cuenta precios fantasma si su contador de bits queda en 7 y hay flancos de SCLK con `CS_n` en alto. En R2 dispara el vigilante con el programa sano; en R0 y R1 mete precios falsos | `make p10-spi-7flancos`, `make p10-formal-spi` (contraejemplo de 18 pasos) | Arreglo en `p10-arreglo-1`, sin integrar: decisión 4 |
+| Bajo | El medidor del 26/11 no veía esa condición | Lectura de `rtl/medidor/medidor_spi.v` | Corregido e integrado: LED4 avisa flancos de SCLK con `CS_n` en alto y maestras de modo 2 o 3 |
+| Observación | El número de tick da la vuelta a los 16,7 millones de ticks: con un gestor colgado, un voto viejo cuenta un tick | `make p10-vuelta-tick` | Son 28 minutos seguidos a 0,1 ms: no afecta la competencia |
+| Observación | Rondas sin reiniciar la placa: la ronda nueva parte con la media de la anterior (-63 por ronda en promedio, -1 922 si cambia el nivel) | `make p10-rondas-sin-reset` | Decisión 5 |
+| Observación | Entradas del SPI sin pull-up | `goboard.pcf:39-42` | El orden del checklist (conectar y después grabar) basta |
+| Observación | El esclavo supone maestra de modo 0: con modo 3 "vender 63" llega como "comprar 62" | `make p10-modo-spi` | El enunciado define modo 0; verlo con el medidor el 26/11 |
+
+### 5. Pendientes de Nicolás (`docs/pendientes_nicolas.md`)
+
+Decisiones:
+
+1. Qué algoritmo compite: `max_media` o `zscore` (opciones y lo que se pierde en cada una en la decisión 1).
+2. Cómo usar la serie que se registre el 26/11. Recomendación: preguntar al ayudante y, mientras tanto, usarla solo como control del gemelo.
+3. Salida de `max_media` a +0,5. Recomendación: no cambiar.
+4. Arreglo del esclavo SPI. Recomendación: no cambiar el hardware y medir el bus el 26/11; si aparecen flancos con `CS_n` en alto, competir con R1 y no con R2.
+5. Reiniciar la placa entre rondas. Recomendación: preguntarlo el 26/11.
+
+Acciones:
+
+- Arreglar la facturación de GitHub Actions (acción 0) y avanzar `main` a `integra-noche` (acción 0b).
+- Pruebas de placa pendientes (acción 3): R1 en los tres períodos, R2 a 1 y 10 ms, el relevo a la vista, dos mediciones más del relevo, los LED de `r1_fondo.bin` y la mitad alta de la firma de R0.
+- Instalar LaTeX (acción 5), confirmar los números del PMOD (acción 2) y pedir los usuarios de GitHub (acción 1).
 
 ## Tramo 14: decisiones de Nicolás, ramas archivadas, frecuencia del segmentado y respuesta del profesor (16/11, tarde)
 
