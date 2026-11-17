@@ -11,7 +11,7 @@ Espino no tiene desplazamientos (el shifter completo no cabe: 1491 celdas de 128
 1. **La desviación**, `dev = 32 p - S`. Sin shifter, `32 p` son cinco sumas: 6 instrucciones (`sw/trade.s:100` a `:106`).
 2. **El paso de la media**, `S = S + (dev >>> 5)`. Sin desplazamiento a la derecha, `trade.s` multiplica por 8, guarda en memoria y lee el segundo byte: 8 instrucciones con un store y un load (`sw/trade.s:121` a `:128`).
 
-Las dos son "un desplazamiento por una constante seguido de una suma o una resta". Un desplazamiento por una constante en hardware no es lógica: **son cables**. Lo único que falta es que el operando A del sumador de la ALU pueda venir desplazado. Eso es toda la extensión.
+Las dos son "un desplazamiento por una constante seguido de una suma o una resta". En hardware, un desplazamiento por una constante no necesita compuertas: **se implementa solo con cableado**. Basta con que el operando A del sumador de la ALU pueda venir desplazado, y eso es lo único que agrega la extensión.
 
 En términos de la ley de hierro, la extensión ataca el **IC**: el estimador pasa de 14 instrucciones a 2. El CPI por hilo del barrel sigue en 4 y el reloj no cambia.
 
@@ -37,11 +37,11 @@ emad x4, x9, x4, 5        # S = S + (dev >>> 5)   (sw/fondo.s:209)
 
 Con `rs2 = x0`, `devk` es un desplazamiento de 5 a la izquierda (multiplicar por 32) y `emad` un desplazamiento aritmético de 5 a la derecha.
 
-**R1 y R2 llevan solo `emad` y `devk`.** `mulstep` está construida y verificada, pero `sw/fondo.s` no la usa: era para la contabilidad de la cuenta, que el fondo no lleva porque sus órdenes son idempotentes. Por la regla de Nicolás ("no quiero piezas sin uso en el chip que compite", decisión T58) queda para la edición de exhibición y el ASIC.
+**R1 y R2 llevan solo `emad` y `devk`.** `mulstep` está construida y verificada, pero `sw/fondo.s` no la usa: era para la contabilidad de la cuenta, que el fondo no lleva porque sus órdenes son idempotentes. Por decisión del grupo (ninguna pieza sin uso en el chip que compite, decisión T58) queda para la edición de exhibición y el ASIC.
 
 ## 3. Cómo está construida
 
-Dos módulos chicos en `rtl/espino_core/espino_xd.v` y cuatro puntos de contacto en el core barrel. El decodificador, la ALU y la LSU del Espino **no se tocaron** (decisión T59).
+Dos módulos pequeños en `rtl/espino_core/espino_xd.v` y cuatro puntos de contacto en el core barrel. El decodificador, la ALU y la LSU del Espino **no se tocaron** (decisión T59).
 
 | Paso | Qué hace | Dónde |
 |------|----------|-------|
@@ -60,10 +60,10 @@ No hay sumador nuevo, ni estado, ni cambios en el control del pipeline.
 |-------------|------------|--------|
 | Shifter completo | No cabe: 1491 celdas en el base | `docs/mediciones/base.txt` |
 | `ema` de una instrucción, `rd = rs2 + ((rs1 - rs2) >>> k)` | Encadena resta, desplazamiento y suma: necesita un segundo sumador. 60 a 167 celdas contra 37 de `emad` en la factibilidad. Y el programa necesita la desviación de todas formas para decidir | `docs/extension_isa.md`, sección 4 |
-| k variable (0 a 31) | Hace falta un desplazador delante del sumador: unas 160 celdas más y la frecuencia mínima baja de 51,6 a 39,2 MHz (medido en la factibilidad). Con k fijo son cables | idem |
+| k variable (0 a 31) | Hace falta un desplazador delante del sumador: unas 160 celdas más y la frecuencia mínima baja de 51,6 a 39,2 MHz (medido en la factibilidad). Con k fijo basta el cableado | idem |
 | Multiplicador combinacional de 16 por 8 | No cabe: 1338 celdas en el segmentado (factibilidad) | `docs/extension_isa.md`, sección 12 |
 
-**Por qué k fijo en 5.** El alfa de `max_media` y de las tres bandas del fondo es 1/32, y el estudio del algoritmo encontró que alfa 1/32 es el mejor compromiso (`docs/algoritmo.md`, sección 5.2). Un k fijo son cables; un k variable es un desplazador. Si después del 25/11 el algoritmo necesitara otro alfa, hay que volver a las sumas: el ensamblador rechaza otro k y el core lo trata como ilegal, así que no se puede ejecutar otro k en silencio.
+**Por qué k fijo en 5.** El alfa de `max_media` y de las tres bandas del fondo es 1/32, y el estudio del algoritmo encontró que alfa 1/32 es el mejor compromiso (`docs/algoritmo.md`, sección 5.2). Un k fijo se implementa solo con cableado; un k variable necesita un desplazador. Si después del 25/11 el algoritmo necesitara otro alfa, hay que volver a las sumas: el ensamblador rechaza otro k y el core lo trata como ilegal, así que no se puede ejecutar otro k en silencio.
 
 ## 5. Costo y efecto
 
@@ -107,8 +107,8 @@ El enunciado permite "una instrucción nueva en el espacio custom-0" como altern
 ## 8. Preguntas típicas
 
 1. **¿Por qué custom-0?** Es uno de los opcodes que RISC-V reserva para extensiones propias; ninguna estándar lo va a ocupar (`rtl/espino_core/espino_xd.v:44`).
-2. **¿Por qué no agregaron el shifter?** El completo no cabe (1491 celdas). Un desplazamiento por una constante son cables, y las dos instrucciones cuestan 52 celdas.
-3. **¿Por qué k fijo en 5?** Con un k son cables; con k variable hace falta un desplazador de unas 160 celdas que baja la frecuencia. El alfa del algoritmo es 1/32 en las cuatro reglas.
+2. **¿Por qué no agregaron el shifter?** El completo no cabe (1491 celdas). Un desplazamiento por una constante se implementa solo con cableado, y las dos instrucciones cuestan 52 celdas.
+3. **¿Por qué k fijo en 5?** Con un k fijo basta el cableado; con k variable hace falta un desplazador de unas 160 celdas que baja la frecuencia. El alfa del algoritmo es 1/32 en las cuatro reglas.
 4. **¿Qué pasa si el programa usa k = 4?** El ensamblador lo rechaza (decisión T61). Si la palabra llega igual a la memoria, el core la trata como ilegal: lo prueba la propiedad X4 y la mutación `MUTA_XD_K` (`rtl/espino_core/espino_xd.v:56`).
 5. **¿Cómo saben que no rompieron RV32E?** Formal B: con palabras de custom-0 reemplazadas por nop, el core es equivalente al de P1 en 1890 puntos. Y la campaña compara cada instrucción contra el Espino base.
 6. **¿Contra qué se compara una instrucción que el Espino base no tiene?** Contra la fórmula, escrita tres veces por separado: modelo, testbench y propiedades formales (decisión T60).

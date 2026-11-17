@@ -75,7 +75,7 @@ Todo el diseño usa el flanco de subida. No hay BRAM con reloj invertido ni ruta
 | X | Si es un store, se escribe la memoria o el periférico. Si es un load, la memoria o el periférico registran el dato. Aquí ocurren los efectos sobre el esclavo SPI: leer `PRICE` baja la bandera y escribir `DECISION` cambia el byte de salida. Se registran el resultado de la ALU o el enlace, los dos bits bajos de la dirección y el próximo contador de programa del hilo. |
 | M | Se escribe el banco en `{hilo, rd}`, con el resultado o con el dato del load ya alineado. El próximo contador de programa pasa a la etapa F. |
 
-Las tres memorias del SoC (instrucciones, datos y banco de registros) son BRAM con lectura registrada. En el Espino base esa lectura registrada cuesta un ciclo de espera. En el segmentado obligó a leer la memoria de instrucciones en el flanco de bajada. En este pipeline cada BRAM cae justo en una frontera entre etapas y su registro de salida hace de registro de pipeline. Por eso el barrel es el más chico de los tres cores.
+Las tres memorias del SoC (instrucciones, datos y banco de registros) son BRAM con lectura registrada. En el Espino base esa lectura registrada cuesta un ciclo de espera. En el segmentado obligó a leer la memoria de instrucciones en el flanco de bajada. En este pipeline cada BRAM cae justo en una frontera entre etapas y su registro de salida hace de registro de pipeline. Por eso el barrel es el más pequeño de los tres cores.
 
 ### 3.4 Por qué no hay riesgos de datos ni de control
 
@@ -87,7 +87,7 @@ Para un mismo hilo, la instrucción i ocupa los ciclos 1 a 4 y la i+1 los ciclos
 | Load seguido de uso | El dato del load se escribe en ese mismo flanco del ciclo 4. No hace falta detener nada. |
 | Store seguido de load a la misma dirección | El store de i se escribe al cerrar el ciclo 3 y el load de i+1 se pide al cerrar el ciclo 7. |
 | Salto: se buscan instrucciones antes de saber si se toma | El próximo contador de programa se calcula en el ciclo 3 y se usa para buscar en el ciclo 5. Nunca se busca una instrucción antes de que la anterior del mismo hilo haya resuelto su salto. Ninguna instrucción buscada se descarta. |
-| Efectos en el SPI de una instrucción que después se anula | No hay instrucciones especulativas. Una lectura de `PRICE` o una escritura de `DECISION` que llega a la etapa X siempre es de verdad. |
+| Efectos en el SPI de una instrucción que después se anula | No hay instrucciones especulativas. Una lectura de `PRICE` o una escritura de `DECISION` que llega a la etapa X siempre se ejecuta. |
 | Lectura y escritura del banco en el mismo flanco | La lectura es del hilo que está en R y la escritura del que está en M. Sus números de hilo difieren siempre en 2, así que las direcciones `{hilo, registro}` no pueden coincidir. |
 
 Las únicas burbujas son las dos del arranque (sección 3.6).
@@ -137,7 +137,7 @@ Diferencias de comportamiento con el Espino base:
 2. El contador de programa tiene 11 bits, el ancho real de la memoria, igual que en el segmentado (T36). Si un programa salta fuera de las 512 palabras, `auipc` y el enlace de `jal` entregan el contador recortado.
 3. El programa empieza con la tabla de arranque.
 4. Los ciclos: 4 por instrucción y por hilo.
-5. Código que se modifica a sí mismo: un store sobre una palabra que otro hilo está buscando se ve en un ciclo distinto que en el base. Ningún programa del proyecto lo hace.
+5. Código que se modifica a sí mismo: un store sobre una palabra que otro hilo está buscando se ve en un ciclo distinto del que se ve en el base. Ningún programa del proyecto lo hace.
 
 ## 4. Qué cuesta: la latencia por hilo
 
@@ -149,7 +149,7 @@ Cada hilo avanza una instrucción cada 4 ciclos. Con `sw/trade.s` en el hilo 0 y
 | Segmentado | 22,0 | 26 | 27 | 1,2 % |
 | Barrel, hilo 0 | 75,1 | 83 | 88 | 3,9 % |
 
-El barrel responde 1,8 veces más lento que el base y 3,4 veces más lento que el segmentado, con el mismo programa. El lazo de sondeo dura 12 ciclos (3 instrucciones) en vez de 6 o 7, y por eso el peor caso depende más de la fase en que llega el precio.
+Con el mismo programa, el barrel tarda en responder 1,8 veces lo que tarda el base y 3,4 veces lo que tarda el segmentado. El lazo de sondeo dura 12 ciclos (3 instrucciones) en vez de 6 o 7, y por eso el peor caso depende más de la fase en que llega el precio.
 
 El peor caso sube un ciclo por hilo (83, 84, 85 y 86 en los hilos 0 a 3, `make barrel-spi`), porque el hilo t pasa por la etapa X un ciclo después que el t - 1. No cambia cuando los otros hilos están ocupados: **el tiempo de un hilo no depende de lo que hagan los demás**. Esa es la propiedad que usa el fondo de estrategias, con un hilo que atiende a la maestra mientras los otros calculan.
 
@@ -273,7 +273,7 @@ Lo que se repite de una corrida a otra (el 5,8 % que separa las dos cifras) son 
 
 De las instrucciones de la campaña lineal, 6,19 millones escriben un registro, 891 mil son loads, 754 mil son stores, 998 mil son saltos y 406 mil acceden al SPI o a los periféricos. El testbench puso 98 mil precios nuevos. Las simulaciones demoran 190 segundos con 14 procesos.
 
-**Un hallazgo del método.** La primera corrida completa terminó con 2 programas del grupo P, de 4 500, distintos al modelo de turnos. En los dos, un `jalr` con una base cualquiera (permitido a propósito en ese grupo) llevó a un hilo a ejecutar la zona de datos compartida. En uno, los otros hilos estaban escribiendo la palabra que ese hilo buscaba, y el barrel la busca en un ciclo distinto que el modelo. En el otro, el hilo ejecutó un `jalr` en la última palabra de la memoria y el enlace vale 0x800 en el base y 0 en el barrel. Son las diferencias 2 y 5 de la sección 3.8, no un error del core. La comparación terminaba cuando un hilo salía de la memoria, pero no cuando entraba a la zona de datos. Ahora termina ahí (`+limite_codigo` en `tb/barrel/tb_verif.sv`) y la campaña se repitió completa. La campaña de lazos de la factibilidad no lo había visto con 100 programas.
+**Un hallazgo del método.** La primera corrida completa terminó con 2 programas del grupo P, de 4 500, distintos al modelo de turnos. En los dos, un `jalr` con una base cualquiera (permitido a propósito en ese grupo) llevó a un hilo a ejecutar la zona de datos compartida. En uno, los otros hilos estaban escribiendo la palabra que ese hilo buscaba, y el barrel la busca en un ciclo distinto del que usa el modelo. En el otro, el hilo ejecutó un `jalr` en la última palabra de la memoria y el enlace vale 0x800 en el base y 0 en el barrel. Son las diferencias 2 y 5 de la sección 3.8, no un error del core. La comparación terminaba cuando un hilo salía de la memoria, pero no cuando entraba a la zona de datos. Ahora termina ahí (`+limite_codigo` en `tb/barrel/tb_verif.sv`) y la campaña se repitió completa. La campaña de lazos de la factibilidad no lo había visto con 100 programas.
 
 ### 8.3 Controles negativos
 
@@ -316,7 +316,7 @@ Un detalle del método. Con profundidad de inducción 6 la mutación `ctx_escrit
 
 ### 8.5 Lo que no está cubierto
 
-- **La placa y la maestra real.** Todo lo anterior es simulación. Falta la puerta de placa (P6) y la del 26/11.
+- **La placa y la maestra real.** Lo anterior es simulación. El 16/11, R2, que usa el barrel con `emad` y `devk`, pasó en la placa la firma a 0,1 ms y la media hora sin disparo del vigilante (`docs/mediciones/placa_16nov.md`). Faltan la firma de R2 a 1 ms y 10 ms, las tres firmas de R1 y la puerta de la maestra real (26/11).
 - **Prueba formal de lo que calcula cada instrucción.** Las propiedades son de estructura. Que un `add` sume se apoya en la comparación contra el Espino base. No se corrió riscv-formal ni una equivalencia formal contra el base.
 - **El gemelo digital** modela el barrel desde P4 (`docs/gemelo.md`, sección 7).
 - **Cuatro hilos accediendo al SPI mientras llegan precios por los pines**, comparados contra el base. Ahí lo que ve cada hilo depende de cuál leyó `PRICE` primero y no hay un Espino base de referencia. Se cubre con el bus quieto, con un solo hilo en el SPI y en la comparación de netlist contra RTL.
@@ -338,7 +338,7 @@ Un detalle del método. Con profundidad de inducción 6 la mutación `ctx_escrit
 
 ## 10. Riesgos
 
-1. **No se ha probado en la placa ni con la maestra real.**
+1. **La puerta de placa está incompleta y falta la maestra real.** El 16/11 R2, que usa el barrel con `emad` y `devk`, pasó en la placa la firma a 0,1 ms y la media hora sin disparo (`docs/mediciones/placa_16nov.md`); faltan la firma de R2 a 1 ms y 10 ms, las tres firmas de R1 y la prueba con la maestra el 26/11.
 2. **Que cada instrucción calcula lo que debe está comprobado por simulación**, no por una prueba formal.
 3. **El software concurrente es más difícil que el hardware.** El core no tiene riesgos entre instrucciones, pero un programa con cuatro hilos sí puede tener carreras sobre la memoria compartida.
 4. **Un hilo ocioso desperdicia su turno.** Con un solo hilo con trabajo el barrel rinde menos que el base.

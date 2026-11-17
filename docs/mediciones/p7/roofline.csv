@@ -9,7 +9,7 @@ paso 1+2 (estimado),1.0000,14.2858,,estimado
 paso 3 (estimado),1.0000,28.5714,,estimado
 paso 4 (estimado),4.7501,95.0000,,estimado
 "techo 6,25: barrel, 1 hilo",,,6.25,Ppeak
-"techo 12,5: Espino base; barrel 1 hilo con extension",,,12.5,Ppeak
+"techo 12,5: Espino base; barrel 1 hilo con extensión",,,12.5,Ppeak
 techo 25: segmentado; barrel 4 hilos,,,25.0,Ppeak
-"techo 50: barrel 4 hilos con extension (R1, R2)",,,50.0,Ppeak
+"techo 50: barrel 4 hilos con extensión (R1, R2)",,,50.0,Ppeak
 quiebre del Espino base,0.1250,12.5,12.5,Ppeak / Bs

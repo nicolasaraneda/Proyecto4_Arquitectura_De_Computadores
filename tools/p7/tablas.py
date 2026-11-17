@@ -425,13 +425,13 @@ def tabla_amdahl(R):
     w("")
     casos = [
         # (etiqueta, desde, programa nuevo, modelo, variante medida o None, descripcion)
-        ("seg_clase", "r0", "r0", "seg_clase", "seg", "R0 -> segmentado, con el CPI que estimo la clase 7"),
+        ("seg_clase", "r0", "r0", "seg_clase", "seg", "R0 -> segmentado, con el CPI que estimó la clase 7"),
         ("seg", "r0", "r0", "seg", "seg", "R0 -> segmentado, con el modelo de costo medido"),
         ("barrel", "r0", "r0", "barrel", "barrel", "R0 -> barrel, sw/trade.s en un hilo"),
-        ("xd_barrel", "barrel", "barrel_xd", "barrel", "barrel_xd", "barrel -> barrel con emad y devk (la extension sola)"),
-        ("barrel_xd", "r0", "barrel_xd", "barrel", "barrel_xd", "R0 -> barrel con la extension"),
-        ("base_xd", "r0", "barrel_xd", "base", None, "R0 -> Espino base con la extension (no existe en el RTL)"),
-        ("seg_xd", "r0", "barrel_xd", "seg", None, "R0 -> segmentado con la extension (no existe en el RTL)"),
+        ("xd_barrel", "barrel", "barrel_xd", "barrel", "barrel_xd", "barrel -> barrel con emad y devk (la extensión sola)"),
+        ("barrel_xd", "r0", "barrel_xd", "barrel", "barrel_xd", "R0 -> barrel con la extensión"),
+        ("base_xd", "r0", "barrel_xd", "base", None, "R0 -> Espino base con la extensión (no existe en el RTL)"),
+        ("seg_xd", "r0", "barrel_xd", "seg", None, "R0 -> segmentado con la extensión (no existe en el RTL)"),
     ]
     for ventana, titulo in (("resp", "respuesta (de byte_done a DECISION)"), ("kernel", "kernel (de leer PRICE a volver al sondeo)")):
         w(f"=== Ventana: {titulo}")
@@ -514,16 +514,16 @@ def tabla_escalera(R, rec):
     pasos = [
         # paso, descripcion, estado, ops, ic, ciclos, cpi_clase, costo
         ("0", "Espino base, solo software (R0)", "medido", OPS_TRADE, b["k_ic"], b["k_c"], 2.35, rec["r0"]["celdas"]),
-        ("1", "+ extension de la ISA (devk, emad) en el Espino base", "estimado: modelo de costo medido del base",
+        ("1", "+ extensión de la ISA (devk, emad) en el Espino base", "estimado: modelo de costo medido del base",
          OPS_TRADE, ic_xd, ciclos_modelo("barrel_xd", "base"), 2.35, None),
         ("2", "pipeline de 3 etapas, solo software", "medido", OPS_TRADE, R["seg"]["k_ic"], R["seg"]["k_c"], 1.5,
          rec["seg"]["celdas"]),
-        ("1+2", "pipeline de 3 etapas + extension", "estimado: modelo de costo medido del segmentado", OPS_TRADE, ic_xd,
+        ("1+2", "pipeline de 3 etapas + extensión", "estimado: modelo de costo medido del segmentado", OPS_TRADE, ic_xd,
          ciclos_modelo("barrel_xd", "seg"), 1.5, None),
         ("2b", "barrel, un hilo, solo software", "medido", OPS_TRADE, R["barrel"]["k_ic"], R["barrel"]["k_c"], None,
          rec["barrel"]["celdas"]),
-        ("1+2b", "barrel, un hilo + extension", "medido", OPS_TRADE, ic_xd, xd["k_c"], None, rec["barrel_xd"]["celdas"]),
-        ("2c", "barrel, 4 hilos + extension: el fondo (R1)", "medido", OPS_FONDO, R["r1"]["ic_hilos"], R["r1"]["k_c"],
+        ("1+2b", "barrel, un hilo + extensión", "medido", OPS_TRADE, ic_xd, xd["k_c"], None, rec["barrel_xd"]["celdas"]),
+        ("2c", "barrel, 4 hilos + extensión: el fondo (R1)", "medido", OPS_FONDO, R["r1"]["ic_hilos"], R["r1"]["k_c"],
          None, rec["r1"]["celdas"]),
         # Estimaciones con CPI ideal 1, como hizo la clase
         ("3", "instrucciones a medida (mmpos y mmbyte) sobre el pipeline", "estimado: CPI ideal 1", OPS_TRADE, 7, 7, 1.0, None),
@@ -593,8 +593,8 @@ def roofline(R, pasos):
     for paso, desc, est, ops, ic, cic, cpi_c, costo in pasos:
         if paso in ("1", "1+2", "3", "4"):
             puntos.append((f"paso {paso} (estimado)", ops / by_xd, ops * F_CLK / cic, None, False, "#6b6b6b"))
-    techos = [(6.25, "6,25: barrel, 1 hilo"), (12.5, "12,5: Espino base; barrel 1 hilo con extension"),
-              (25.0, "25: segmentado; barrel 4 hilos"), (50.0, "50: barrel 4 hilos con extension (R1, R2)")]
+    techos = [(6.25, "6,25: barrel, 1 hilo"), (12.5, "12,5: Espino base; barrel 1 hilo con extensión"),
+              (25.0, "25: segmentado; barrel 4 hilos"), (50.0, "50: barrel 4 hilos con extensión (R1, R2)")]
     filas = [[p[0], f2(p[1], 4), f2(p[2], 4), "" if p[3] is None else p[3], "medido" if p[4] else "estimado"] for p in puntos]
     filas += [[f"techo {t[1]}", "", "", t[0], "Ppeak"] for t in techos]
     filas.append(["quiebre del Espino base", f2(12.5 / BS, 4), "12.5", "12.5", "Ppeak / Bs"])
@@ -808,8 +808,12 @@ def tabla_negativos(R, gem):
     for linea in marg.splitlines():
         if re.match(r"\s+(base_x2|seg_x2)\s+(máxima|típica)", linea) or "45 a 55 %" in linea[:30]:
             w("  " + linea.strip())
-    m = re.search(r"seg_x2\s+máxima\s+\|\s+(\d+) de 10", marg)
+    # Semillas que cierran con un oscilador de 45 a 55 % en la esquina máxima (primera columna)
+    m = re.search(r"seg_x2\s+máxima\s+\|\s+(\d+) de (\d+)", marg)
     macro("pSieteDobleSemillas", int(m.group(1)))
+    macro("pSieteDobleSemillasTotal", int(m.group(2)))
+    m = re.search(r"base_x2\s+máxima\s+\|\s+(\d+) de (\d+)", marg)
+    macro("pSieteDobleSemillasBase", int(m.group(1)))
     w("")
     w("3. Presupuesto que habria dado cada uno (los dos duplican la frecuencia: 50 MHz, ciclo de 20 ns)")
     w(f"  {'ronda':<8}{'presupuesto a 25 MHz':>22}{'a 50 MHz':>10}")

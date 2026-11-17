@@ -1,6 +1,6 @@
 # Protocolo de evaluación de algoritmos
 
-Documento de estudio de `ref/series.py` y `ref/protocolo.py`: con qué series se evalúa un algoritmo, qué se informa, cuándo una candidata reemplaza a la regla base y qué dio la regla base.
+Documento de estudio de `ref/series.py` y `ref/protocolo.py`: con qué series se evalúa un algoritmo, qué se informa, cuándo un candidato reemplaza a la regla base y qué dio la regla base.
 
 | Archivo | Qué es |
 |---------|--------|
@@ -31,7 +31,7 @@ Los 10 tramos consecutivos de 2000 ticks. Cada bloque parte con caja 10 000 y si
 
 Se toman los cambios de precio de un tick al siguiente, se cortan en bloques de 100 ticks seguidos, se eligen bloques al azar con reposición y se vuelven a sumar partiendo de un precio de la serie original. Si el nivel toca 1 o 255, rebota.
 
-- **Qué conserva:** la dependencia entre ticks vecinos dentro de cada bloque. La reversión que explota la regla base ocurre en horizontes de 10 a 50 ticks, así que queda adentro. La razón de varianza promedio de los remuestreos es 0,75 a 10 ticks y 0,62 a 50, contra 0,73 y 0,57 de los bloques originales.
+- **Qué conserva:** la dependencia entre ticks vecinos dentro de cada bloque. La reversión que explota la regla base ocurre en horizontes de 10 a 50 ticks, así que queda dentro. La razón de varianza promedio de los remuestreos es 0,75 a 10 ticks y 0,62 a 50, contra 0,73 y 0,57 de los bloques originales.
 - **Qué pierde:** la relación entre bloques. El nivel de largo plazo de una serie remuestreada es un paseo aleatorio, sin la reversión lenta de la original (0,53 a 100 ticks).
 - **Consecuencia:** para una regla de reversión es una prueba más dura que la serie original. Un algoritmo que gana aquí no depende de la trayectoria particular de la serie de práctica.
 
@@ -65,7 +65,7 @@ En todas las corridas el programa ve todos los precios, que es la situación de 
 
 ## 4. Criterio de aceptación
 
-`python3 ref/protocolo.py --comparar CANDIDATA` evalúa la candidata y la base sobre las mismas series, y la candidata reemplaza a la base solo si cumple las tres condiciones:
+`python3 ref/protocolo.py --comparar CANDIDATA` evalúa el candidato y la base sobre las mismas series, y el candidato reemplaza a la base solo si cumple las tres condiciones:
 
 | | Conjunto | Condición |
 |-|----------|-----------|
@@ -75,11 +75,11 @@ En todas las corridas el programa ve todos los precios, que es la situación de 
 
 La condición a es el principio del proyecto: una pieza cambia la forma de operar solo si mejora la media y el peor bloque. La b pide lo mismo donde hay 1000 muestras en vez de 10, y usa el percentil 5 porque el peor de 1000 es demasiado ruidoso. La c evita aceptar algo que gana en la serie de práctica a costa de hundirse si la serie oculta es distinta.
 
-Una candidata que no cumple se queda como experimento documentado, con su tabla.
+Un candidato que no cumple se queda como experimento documentado, con su tabla.
 
 ### Error de la diferencia
 
-La comparación informa además la diferencia pareada: para cada serie se resta el patrimonio de la base al de la candidata, y se entrega la media de esas diferencias con su error estándar (columnas `dif` y `+-ee`). Comparar serie por serie quita casi toda la dispersión que viene de la serie y deja la que viene del algoritmo. Una diferencia menor que dos errores estándar no se distingue del ruido. En los 10 bloques el error es grande (cerca de 240 entre dos reglas parecidas), así que la condición a decide poco por sí sola: sirve para descartar lo que empeora claramente.
+La comparación informa además la diferencia pareada: para cada serie se resta el patrimonio de la base al del candidato, y se entrega la media de esas diferencias con su error estándar (columnas `dif` y `+-ee`). Comparar serie por serie quita casi toda la dispersión que viene de la serie y deja la que viene del algoritmo. Una diferencia menor que dos errores estándar no se distingue del ruido. En los 10 bloques el error es grande (cerca de 240 entre dos reglas parecidas), así que la condición a decide poco por sí sola: sirve para descartar lo que empeora claramente.
 
 ### Meseta
 
@@ -169,7 +169,7 @@ python3 ref/series.py saltos --n 2000 --semilla 3 -o build/series/saltos_3.csv
 python3 ref/protocolo.py                        # regla base
 python3 ref/protocolo.py --estrategia sma64
 python3 ref/protocolo.py --estrategia base:k=5,entra=3,sale=0
-python3 ref/protocolo.py --comparar sma64       # candidata contra la base, con veredicto
+python3 ref/protocolo.py --comparar sma64       # candidato contra la base, con veredicto
 python3 ref/protocolo.py --comparar cand:max_media        # un candidato de ref/candidatos.py
 python3 ref/protocolo.py --estrategia trader:E=96,X=0,J=8 # la familia paramétrica con esos parámetros
 python3 ref/protocolo.py --semilla 1                      # con la semilla reservada
@@ -191,4 +191,4 @@ Una estrategia nueva es una clase con un método `decidir(precio)` que devuelve 
 
 **¿Por qué bloques de 100?** Porque la ganancia está en horizontes de 10 a 50 ticks, y el bloque tiene que contenerlos. Con bloques mucho más largos quedan muy pocos bloques distintos.
 
-**¿Cuánto del resultado es suerte?** En los remuestreos el patrimonio final va de 6 520 a 15 637 con la misma regla. La diferencia entre la media (10 772) y la caja inicial es chica frente a esa dispersión: en una sola ronda la suerte pesa más que la regla. En tres rondas pesa menos, pero sigue pesando.
+**¿Cuánto del resultado es suerte?** En los remuestreos el patrimonio final va de 6 520 a 15 637 con la misma regla. La diferencia entre la media (10 772) y la caja inicial es pequeña frente a esa dispersión: en una sola ronda la suerte pesa más que la regla. En tres rondas pesa menos, pero sigue pesando.

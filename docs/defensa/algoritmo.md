@@ -12,7 +12,7 @@ En cada tick la maestra manda un precio entre 1 y 255 y el programa responde com
 
 | Medida sobre la serie de práctica | Valor | Qué significa | Fuente |
 |-----------------------------------|-------|---------------|--------|
-| Razón de varianza a 10, 50 y 100 ticks | 0,77, 0,62 y 0,53 | Menor que 1: los cambios largos son más chicos de lo que serían si fuera un paseo aleatorio. El precio vuelve | `docs/estado.md`, tramo 1 (`make hallazgos`) |
+| Razón de varianza a 10, 50 y 100 ticks | 0,77, 0,62 y 0,53 | Menor que 1: los cambios largos son menores de lo que serían si fuera un paseo aleatorio. El precio vuelve | `docs/estado.md`, tramo 1 (`make hallazgos`) |
 | Bloques de 1000 ticks con VR < 1 | 20 de 20, en los tres horizontes | No es un tramo: pasa en toda la serie | idem |
 | Autocorrelación de los cambios | -0,112 en el rezago 1, ruido desde el rezago 3 | Una subida tiende a seguirse de una bajada | idem |
 | Seguir tendencia, 336 configuraciones | Mediana 5 566; solo 10 de 336 terminan sobre 10 000 | La tendencia pierde | idem |
@@ -55,11 +55,11 @@ S   = S + (dev >>> 5)
 | `sw/trade.s:64` | `UMBRAL_COMPRA = -96`: la única línea que cambia respecto de la regla base (-128) |
 | `sw/trade.s:109` a `:115` | La decisión sin saltos |
 
-**Cómo decide la cantidad.** No la decide: siempre 63, el máximo. La maestra recorta la compra a lo que alcanza con la caja y la venta a las acciones que se tienen, y una orden que queda en cero no paga comisión (`tb/tb_proyecto_4.sv:73` y `:78`). Entonces "comprar 63" repetido no cuesta nada una vez gastada la caja. El programa expresa una **posición objetivo** (todo adentro o todo afuera) y no lleva contabilidad, que así no se puede desincronizar de la oficial.
+**Cómo decide la cantidad.** No la decide: siempre 63, el máximo. La maestra recorta la compra a lo que alcanza con la caja y la venta a las acciones que se tienen, y una orden que queda en cero no paga comisión (`tb/tb_proyecto_4.sv:73` y `:78`). Entonces "comprar 63" repetido no cuesta nada una vez gastada la caja. El programa expresa una **posición objetivo** (todo comprado o todo en caja) y no lleva contabilidad, que así no se puede desincronizar de la oficial.
 
 **Por qué los parámetros son esos.**
 
-- **Alfa 1/32.** Con alfa más grande la media sigue al precio y no queda desviación que operar; con más chico mejora el modelo y empeora el remuestreo (`docs/algoritmo.md`, sección 5.2). Además 1/32 son cables en la extensión (k = 5).
+- **Alfa 1/32.** Con alfa más grande la media sigue al precio y no queda desviación que operar; con uno menor mejora el modelo y empeora el remuestreo (`docs/algoritmo.md`, sección 5.2). Además, en la extensión, el desplazamiento por 5 de alfa 1/32 se implementa solo con cableado.
 - **Entrar a 3 unidades (E = 96).** Bandas más angostas suben la media en el modelo y bajan el percentil 5 en todas partes. El remuestreo tiene su máximo en E entre 96 y 128; el modelo en E = 48. Donde coinciden las dos evidencias es E = 96 (`docs/algoritmo.md`, sección 5.1).
 - **Salir al recuperar la media (X = 0).** Es la forma que da la política óptima: entrar bajo un umbral, salir sobre otro, no hacer nada entre los dos. La comisión es la que abre la banda.
 
@@ -94,7 +94,7 @@ Tabla del punto 3.1, serie completa viendo todos los precios (`docs/mediciones/t
 | Estrategia | Patrimonio | Órdenes | Comisiones | Pérdida máxima |
 |------------|------------|---------|------------|----------------|
 | No operar | 10 000 | 0 | 0 | 0 |
-| Comprar y mantener | 6 497 | 1 | 5 | |
+| Comprar y mantener | 6 497 | 1 | 5 | 7 788 (`informe/generado/t31.tex`) |
 | Regla base | 27 062 | 388 | 1 940 | 2 929 |
 | `max_media` | 25 973 | 624 | 3 120 | 6 295 |
 
@@ -106,10 +106,10 @@ Cada idea se midió cambiando una sola pieza (`make exploracion`, `docs/medicion
 |------|-----------|---------|
 | Filtro de Kalman de dos estados (el estimador óptimo del modelo) | Empata, cuesta unas 140 instrucciones contra 27 | Después de filtrar, la incertidumbre de la transitoria baja de 1,19 a 1,11: no hay señal que sacar |
 | Suma móvil de 32 o 64 | No mejora a la media exponencial y ocupa 32 o 64 palabras | |
-| Política óptima del modelo | +4 puntos en el modelo, -7 en el remuestreo | Es óptima para el modelo gaussiano, no para la serie: en la práctica las caídas chicas no rebotan lo suficiente |
+| Política óptima del modelo | +4 puntos en el modelo, -7 en el remuestreo | Es óptima para el modelo gaussiano, no para la serie: en la práctica las caídas pequeñas no rebotan lo suficiente |
 | Bandas escaladas con la volatilidad | 11 028 contra 11 029 de la banda fija | La banda fija de 3 a 4 unidades ya es ancha para el régimen tranquilo y justa para el ruidoso |
 | Tope de tiempo y de precio | Suben el peor caso en tendencia y cuestan media | En una serie que revierte, vender después de una caída es vender en el peor momento |
-| Entrada escalonada, órdenes más chicas | Bajan media y suben percentil 5 | Es moverse por la misma frontera, con peor relación que las bandas |
+| Entrada escalonada, órdenes más pequeñas | Bajan media y suben percentil 5 | Es moverse por la misma frontera, con peor relación que las bandas |
 | Población de traders, adaptación en vivo, perceptrón | -57, -16 y -199 en el remuestreo | Hay una unidad de log-verosimilitud de evidencia por ronda: adaptarse en vivo es ajustar con casi nada de información |
 | Guardia de régimen | Cuesta 1 % en el remuestreo y 2 % en las plausibles; protege en tendencia | Quedó fuera de la competencia (T50) con sus números |
 
@@ -125,7 +125,7 @@ La guardia como test estadístico no se puede hacer: con 2000 ticks la razón de
 ## 9. Preguntas típicas
 
 1. **¿Por qué reversión y no tendencia?** VR menor que 1 en todos los horizontes y en los 20 bloques de 1000 ticks, autocorrelación de -0,11, y seguir tendencia termina con mediana 5 566 en 336 configuraciones (`ref/hallazgos.py:42` y `:55`; resultados en `docs/estado.md`, tramo 1).
-2. **¿Cuánta reversión hay de verdad?** Menos de la que parece: la mitad de la caída de VR es redondeo. La otra mitad es una transitoria de 1,2 unidades de desviación estándar con vida media de 17,5 ticks.
+2. **¿Cuánta reversión hay realmente?** Menos de la que parece: la mitad de la caída de VR es redondeo. La otra mitad es una transitoria de 1,2 unidades de desviación estándar con vida media de 17,5 ticks.
 3. **¿Cómo decide la cantidad?** Siempre 63: la maestra recorta, y una orden en cero no paga. El programa expresa una posición objetivo (`sw/trade.s:113` a `:115`).
 4. **¿Por qué la tabla del 3.1 muestra menos con `max_media` que con la regla base?** Porque 27 062 está sesgado por haber elegido los parámetros mirando esa serie. Fuera de muestra `max_media` gana 0,7 % y 1,4 % (T51).
 5. **¿Cómo saben que no es sobreajuste?** Semilla reservada, meseta de parámetros y el modelo independiente de la trayectoria (`docs/algoritmo.md`, sección 9).

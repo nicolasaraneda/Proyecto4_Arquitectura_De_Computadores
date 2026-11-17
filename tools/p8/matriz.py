@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """matriz.py: matriz de estrés de R0, R1 y R2 en las dimensiones que faltaban
-(paquete P8, frente E del plan).
+(paquete P8, anticipación al día de la evaluación).
 
 Grupo: Nicolás Araneda, Vicente Calderón y Santiago Muñoz.
 Arquitectura de Computadores, Universidad de los Andes, 2026-2.

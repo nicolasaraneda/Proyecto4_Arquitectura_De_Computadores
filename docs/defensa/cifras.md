@@ -9,7 +9,7 @@ Una hoja. Cada cifra con su fuente. Si una cifra de aquí no calza con la fuente
 | Cifra | Valor | Fuente |
 |-------|-------|--------|
 | FPGA | iCE40 HX1K VQ100: 1280 celdas lógicas, 16 BRAM, 25 MHz, sin PLL | `docs/mediciones/pll_nextpnr.txt` |
-| Transacción SPI del testbench | 9,5 us (1 us, 8 bits a 1 MHz, 0,5 us) | `tb/tb_proyecto_4.sv:19` |
+| Transacción SPI del testbench | 9,5 µs (1 µs, 8 bits a 1 MHz, 0,5 µs) | `tb/tb_proyecto_4.sv:19` |
 | Presupuesto por tick, (T - 9500 ns) / 40 ns | Ronda 1 (10 ms): 249 762. Ronda 2 (1 ms): 24 762. Ronda 3 (0,1 ms): 2 262 ciclos | `tb/tb_proyecto_4.sv:133` |
 | Límite de la puerta (mitad de la ronda 3) | 1131 ciclos | `docs/puertas.md` |
 | Caja y comisión | 10 000 y 5 | `tb/tb_proyecto_4.sv:17` y `:18` |
@@ -35,9 +35,9 @@ Todas cierran 25 MHz en 10 de 10 semillas.
 | Segmentado | 22,0 | 26 | 27 | | `docs/mediciones/p7/variantes.txt`, `docs/espino_barrel.md` |
 | Barrel, `trade.s` en un hilo | 75,0 | 83 | 88 | | idem |
 | Barrel con extensión, `trade_xd.s` | 55,0 | 63 | | | `docs/mediciones/p7/variantes.txt` |
-| R1 y R2 (fondo) | 223,01 (8,92 us) | 443 | 444 | 568 con plazo agotado; 679 con voto atrasado | `docs/mediciones/fondo/r1/ticks.txt`, `fases.txt`, `degradacion.txt` |
+| R1 y R2 (fondo) | 223,01 (8,92 µs) | 443 | 444 | 568 con plazo agotado; 679 con voto atrasado | `docs/mediciones/fondo/r1/ticks.txt`, `fases.txt`, `degradacion.txt` |
 
-Uso del presupuesto de la ronda 3 en el peor caso: R0 2,2 % (49 ciclos); **R1 19,6 %** (444 ciclos), 80 % de holgura.
+Uso del presupuesto de la ronda 3 en el peor caso barriendo fases: R0 2,2 % (49 ciclos; con los 44 del testbench, 1,95 %, que es la cifra del informe); **R1 19,6 %** (444 ciclos), 80 % de holgura.
 
 ## CPI, IC y desempeño
 
@@ -72,7 +72,7 @@ Uso del presupuesto de la ronda 3 en el peor caso: R0 2,2 % (49 ciclos); **R1 19
 | `max_media` contra la regla base, semilla reservada | +0,7 % en remuestreos (10 833 contra 10 754); +1,4 % en plausibles (11 103 contra 10 954) | `docs/algoritmo.md`, sección 7.2 |
 | `max_media` supera a comprar y mantener | 71 % de los remuestreos, 64 % de las plausibles | idem |
 | Fondo contra `max_media`, puntos esperados del torneo (factibilidad) | +0,007 a 2 000 ticks; -0,005 a 20 000 | decisión T50 |
-| Fondo contra `max_media` en bytes | Práctica: los mismos 20 000. Una serie de reversión: 1816 bytes distintos | `docs/estado.md`, tramo 10; `docs/fondo.md`, sección 10 |
+| Fondo contra `max_media` en bytes | Práctica, testbench a 0,1 ms: los mismos 20 000 (los dos 26 070). A 1 ms y 10 ms no: fondo 25 031, `max_media` 26 070. Viendo todos los precios: `ref/fondo.py` 26 388, `ref/trader.py` 25 973. Una serie de reversión: 1816 bytes distintos | `docs/mediciones/fondo/r1/equiv.txt`; `docs/mediciones/p7/gemelo.txt`; `docs/mediciones/tabla_3_1.txt`; `docs/fondo.md`, sección 10 |
 | Techo del modelo (política óptima) | 8,4 % por ronda; la regla base saca 5,2 % en el modelo | `docs/algoritmo.md`, sección 4 |
 | Dispersión con la misma regla, remuestreos | 6 520 a 15 637 | `docs/protocolo.md`, sección 8 |
 
@@ -90,14 +90,14 @@ Uso del presupuesto de la ronda 3 en el peor caso: R0 2,2 % (49 ciclos); **R1 19
 | Cifra | Valor | Fuente |
 |-------|-------|--------|
 | SCLK mínimo a 0,1 ms | R0 100 kHz; R1 110 kHz; el árbol usa 115 kHz | `docs/mediciones/fondo/r1/sclk_minimo.txt`, T124 |
-| Período mínimo con SCLK de 1 MHz | R0 11,34 us (8,82 veces la ronda 3); R1 26,94 us (3,71 veces) | `docs/mediciones/fondo/r1/sclk_minimo.txt` |
+| Período mínimo con SCLK de 1 MHz | R0 11,34 µs (8,82 veces la ronda 3); R1 26,94 µs (3,71 veces) | `docs/mediciones/fondo/r1/sclk_minimo.txt` |
 | SCLK máximo que funciona | 4 MHz; a 5 MHz el esclavo pierde bits en todos los diseños | decisión T53 |
 | Vigilante | Dispara al 5.º precio seguido sin escritura (K = 4); cuenta máxima en corridas sanas: 1 | `docs/tabla_vigilante.md`, secciones 4 y 7 |
 | Reconfiguración por warm boot | **35,50 ms medidos en la placa** (16/11, una medición; la hoja de datos da 53 ms típicos): 361 ticks sin decisión nueva a 0,1 ms, 40 a 1 ms, 8 a 10 ms (con 53 ms eran 536, 58 y 10) | `docs/mediciones/placa_16nov.md`, `docs/mediciones/vigilante/relevo.txt` (sección 2b) |
 | Cambio de tabla con `icebram` | 0,32 s; R0 desde su molde 0,10 s; simular el `.asc` nuevo unos 40 minutos | `docs/tabla_vigilante.md`, sección 3; `docs/mediciones/p8/r0_molde.txt` |
 | Imagen múltiple | 64 600 de 131 072 bytes de la flash | `docs/tabla_vigilante.md`, sección 6 |
 | Tamaño de `sw/fondo.s` | 213 de 512 palabras; `sw/trade.s` 40 | `docs/mediciones/fondo/r1/tamano.txt`, `docs/trade_s.md` |
-| Reset de encendido | 4095 ciclos, 164 us | `rtl/pochoco_soc.v:114` |
+| Reset de encendido | 4095 ciclos, 164 µs | `rtl/pochoco_soc.v:114` |
 
 ## Verificación
 

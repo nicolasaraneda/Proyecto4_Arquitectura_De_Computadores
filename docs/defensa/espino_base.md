@@ -50,7 +50,7 @@ Dónde se ve en el RTL:
 
 | Pieza | Dónde | Lo que hay que saber |
 |-------|-------|----------------------|
-| Reset de encendido de 4095 ciclos (164 us) | `rtl/pochoco_soc.v:114` | Viene del Proyecto 2: con el reset original de 15 ciclos la BRAM entregaba ceros en la placa (decisión T3). En el testbench hace que el programa no vea los primeros precios |
+| Reset de encendido de 4095 ciclos (164 µs) | `rtl/pochoco_soc.v:114` | Viene del Proyecto 2: con el reset original de 15 ciclos la BRAM entregaba ceros en la placa (decisión T3). En el testbench hace que el programa no vea los primeros precios |
 | Instancia del core base (sin definiciones) | `rtl/pochoco_soc.v:156` | Con `-DESPINO_BARREL` se instancia el barrel en `:140` |
 | Decodificación de direcciones (`spi_sel`, `per_sel`) | `rtl/pochoco_soc.v:176` y `:177` | Está en la ruta crítica de todos los cores |
 | Esclavo SPI | `rtl/pochoco_soc.v:262` | El testbench lo mira por jerarquía (`dut.u_spi.byte_done`): no se renombra |
@@ -115,7 +115,7 @@ La ruta crítica pasa por el banco de registros, la ALU y la decodificación de 
 3. **¿Y el salto tomado?** La instrucción buscada detrás del salto se marca inválida (`rtl/espino_core/espino_if_stage.v:50`) y se pierde un ciclo.
 4. **¿Cómo saben que el CPI es ese?** `make cpi` y `make medir-espino` cuentan IC y ciclos en simulación y comprueban `ciclos = 2 × IC + loads + tomados` con diferencia 0 en todos los programas (`docs/mediciones/base.txt`, sección 4).
 5. **¿Cuál es el CPI de `trade.s`?** 2,10 en la respuesta y 2,21 en el tick completo (`docs/mediciones/ticks_software.txt`). Medido con el sondeo, 2,652 (`docs/mediciones/espino_segmentado.txt`), porque el lazo de espera tiene un load y un salto tomado por vuelta.
-6. **¿Qué parte del tick consume más ciclos?** Actualizar la media: 17 de 58 ciclos sin la espera, por el desplazamiento hecho con `sw` y `lbu` (`sw/trade.s:125` y `:126`). En el tick completo a 0,1 ms, esperar: 98 % (`docs/codiseno.md`, sección 1).
+6. **¿Qué parte del tick consume más ciclos?** En el kernel de R0 (de leer `PRICE` a volver al sondeo, 51 ciclos), la fase más larga es actualizar la media, `S = S + (dev >>> 5)`: 17 ciclos (33,3 %), por el desplazamiento hecho con `sw` y `lbu`. Con la desviación a la media (12 ciclos), el estimador completo suma 29 de 51 ciclos (56,9 %), que es la fracción que usa Amdahl. En la respuesta, la fase más larga es decidir y armar el byte (14 de 41 ciclos). En el tick completo a 0,1 ms, esperar el precio: 98 % (`docs/mediciones/p7/perfil.txt`; el desplazamiento está en `sw/trade.s:125` y `:126`).
 7. **¿Cómo desplazan a la derecha sin shifter?** Multiplicando por 8 con tres sumas, guardando la palabra y leyendo su segundo byte con `lbu`: `x >> 5 = (8 x) >> 8` (`sw/trade.s:121` a `:126`). Para el número con signo usan la identidad `(32 p - S) >> 5 = p - ((S + 31) >> 5)`.
 8. **¿Por qué el testbench dice 44 y ustedes 49?** El testbench solo recorre 4 de las 8 fases del sondeo. Barriendo todas, el primer precio, que pasa por el bloque `primero` (`sw/trade.s:77`), llega a 49 (`docs/gemelo.md`, sección 4).
 9. **¿Qué cambiaron del core del curso?** Para R0, nada en la lógica: `make formal-base` lo prueba. El SoC tiene el reset de encendido largo (`rtl/pochoco_soc.v:114`) y tres salidas nuevas del esclavo SPI que solo usa el vigilante.

@@ -37,8 +37,8 @@ No reemplaza a nada. La referencia del algoritmo sigue siendo `ref/trader.py`, y
 | Aritmética, `lui`, `auipc` | | `c + 1` | `c + 2` |
 | Store | `c + 1` | | `c + 2` |
 | Load | `c + 1` | `c + 2` | `c + 3` |
-| Branch no tomado | | | `c + 2` |
-| Branch tomado, `jal`, `jalr` | | `c + 1` (el enlace) | `c + 3` |
+| Salto condicional no tomado | | | `c + 2` |
+| Salto condicional tomado, `jal`, `jalr` | | `c + 1` (el enlace) | `c + 3` |
 
 Es el modelo de costo de 2 ciclos por instrucción, más 1 en cada load y 1 en cada salto tomado, leído de `espino_id_stage.v`, `espino_controller.v` y `espino_load_store_unit.v`. El gemelo decodifica igual que `espino_decoder.v`, incluidos los casos que un programa normal no usa: los shifts se ejecutan como una suma, una instrucción desconocida no hace nada, un load con `funct3` inválido se comporta como `lw`, y los campos de registro tienen 4 bits.
 
@@ -49,8 +49,8 @@ Es el modelo de costo de 2 ciclos por instrucción, más 1 en cada load y 1 en c
 | Aritmética, `lui`, `auipc` | | `c` | `c + 1` |
 | Store | `c` | | `c + 1` |
 | Load | `c` | `c + 1` | `c + 2` |
-| Branch no tomado | | | `c + 1` |
-| Branch tomado, `jal`, `jalr` | | `c` (el enlace) | `c + 2` |
+| Salto condicional no tomado | | | `c + 1` |
+| Salto condicional tomado, `jal`, `jalr` | | `c` (el enlace) | `c + 2` |
 
 Además el contador de programa tiene 11 bits, como en el RTL, y una vuelta del lazo de sondeo dura 5 ciclos en vez de 8. `make cosim-seg` valida este modo contra el RTL del core segmentado con las mismas pruebas del base: 1 007 124 eventos de `trade.hex` en cuatro configuraciones de tiempos, 846 705 escrituras de 4 programas aleatorios, los 20 000 ticks del testbench y las mediciones por tick.
 
@@ -108,8 +108,8 @@ Si las dos trazas son iguales, el gemelo hizo lo mismo que el RTL en el mismo ci
 |--------|-------------|-----------|
 | A | `trade.hex`, timing oficial, 300 ticks | 282 210 eventos idénticos |
 | B1 | Período 100 010 ns, SCLK de 500 kHz, otros tiempos de CS, inicio en 3999 ns | 93 069 eventos idénticos |
-| B2 | Período 400 us, SCLK de 100 kHz, reset de 63 ciclos | 225 509 eventos idénticos |
-| B3 | Período 30 us, tiempos de SPI que no son múltiplos de 40 ns | 29 289 eventos idénticos |
+| B2 | Período 400 µs, SCLK de 100 kHz, reset de 63 ciclos | 225 509 eventos idénticos |
+| B3 | Período 30 µs, tiempos de SPI que no son múltiplos de 40 ns | 29 289 eventos idénticos |
 | C | 4 programas aleatorios con tráfico SPI, 150 ticks cada uno | 555 966 eventos idénticos, 469 343 de ellos escrituras de registro o de memoria |
 | D | Testbench oficial (copia), 20 000 ticks | `decisiones.csv` y resumen idénticos |
 | E | Mediciones por tick, 20 000 ticks, con el atajo | 19 998 ticks idénticos: ciclo de llegada, ciclos e IC |
@@ -118,7 +118,7 @@ Si las dos trazas son iguales, el gemelo hizo lo mismo que el RTL en el mismo ci
 
 Las pruebas B existen porque el timing oficial es muy regular: el período son 2500 ciclos exactos y la fase del lazo de sondeo solo toma cuatro valores. Con el período de 100 010 ns la fase recorre todos los casos. Así apareció el único error del gemelo que la prueba A no veía: el conteo de instrucciones por tick fallaba por uno cuando el precio llegaba justo en el ciclo en que se completaba un load.
 
-Los programas aleatorios cubren lo que `trade.hex` no usa: toda la ISA base, los shifts, loads y stores de los tres tamaños con cualquier desplazamiento, los seis branches, `jal`, `jalr`, palabras que el decodificador no reconoce y accesos a todos los registros del esclavo SPI y de los periféricos. Los saltos van siempre hacia adelante y el cuerpo se repite para siempre, así que cada vuelta toma caminos distintos. Más semillas: `SEMILLAS="1 2 3 4 5 6 7 8" tools/cosim.sh`.
+Los programas aleatorios cubren lo que `trade.hex` no usa: toda la ISA base, los shifts, loads y stores de los tres tamaños con cualquier desplazamiento, los seis saltos condicionales, `jal`, `jalr`, palabras que el decodificador no reconoce y accesos a todos los registros del esclavo SPI y de los periféricos. Los saltos van siempre hacia adelante y el cuerpo se repite para siempre, así que cada vuelta toma caminos distintos. Más semillas: `SEMILLAS="1 2 3 4 5 6 7 8" tools/cosim.sh`.
 
 Además, `make equiv-gemelo` corre `trade.hex` en el gemelo sobre las 3810 series del protocolo, a los tres períodos, y compara patrimonio, órdenes y pérdida máxima con `ref/trader.py`: cero diferencias en 23 millones de ticks.
 
@@ -131,7 +131,7 @@ Además, `make equiv-gemelo` corre `trade.hex` en el gemelo sobre las 3810 serie
 
 ## 4. Qué se encontró con el gemelo
 
-**El peor caso del testbench no es el peor caso.** El testbench oficial informa 44 ciclos. Barriendo las 8 fases posibles del lazo de sondeo (moviendo el inicio de a 40 ns), la respuesta va de 37 a 44 ciclos en régimen, y de 42 a 49 para el primer precio, que pasa por el bloque de inicialización (5 ciclos más). El peor caso real es 49 ciclos. No cambia nada frente a los 2 262 disponibles, pero es el número correcto para el informe.
+**El peor caso del testbench no es el peor caso.** El testbench oficial informa 44 ciclos. Barriendo las 8 fases posibles del lazo de sondeo (moviendo el inicio en pasos de 40 ns), la respuesta va de 37 a 44 ciclos en régimen, y de 42 a 49 para el primer precio, que pasa por el bloque de inicialización (5 ciclos más). El peor caso real es 49 ciclos. No cambia nada frente a los 2 262 disponibles, pero es el número correcto para el informe.
 
 **El programa responde todos los precios en todas las series.** En las 3810 series y los tres períodos no hay ningún precio sin respuesta ni perdido.
 
@@ -153,7 +153,7 @@ La salida normal son las mismas líneas del testbench oficial, más dos líneas 
 
 ## 6. Preguntas que nos pueden hacer
 
-**¿Por qué confiar en un simulador escrito por ustedes?** Porque no se confía: se compara. La traza del gemelo es idéntica a la del RTL evento por evento y ciclo por ciclo, en 8 configuraciones y más de un millón de eventos, y hay un control negativo que muestra que la comparación detecta un error de un solo ciclo.
+**¿Por qué confiar en un simulador escrito por ustedes?** Porque sus resultados no se aceptan sin compararlos con el RTL. La traza del gemelo es idéntica a la del RTL evento por evento y ciclo por ciclo, en 8 configuraciones y más de un millón de eventos, y hay un control negativo que muestra que la comparación detecta un error de un solo ciclo.
 
 **¿Por qué en C y no en Python?** Por velocidad. La referencia del algoritmo sí está en Python, porque ahí importa que se lea fácil. El gemelo ejecuta instrucción por instrucción y tiene que correr millones de ticks.
 
@@ -185,9 +185,9 @@ El IC que informa por tick es el del hilo 0, el que decide. Sale de una fórmula
 
 El atajo del core base reconoce el lazo de sondeo y salta vueltas. En el barrel no basta: mientras el supervisor sondea STATUS, los gestores sondean PUB, y un hilo de prueba puede estar en cualquier lazo. El gemelo usa una regla general:
 
-1. Cada vez que el hilo 0 está por leer STATUS en el lazo `lw / andi 1 / beqz` y no hay precio nuevo, saca una foto del estado: registros y contadores de programa de los cuatro hilos, palabras ya buscadas, LED y dígitos, y cuántas escrituras cambiaron la memoria.
-2. Si la foto es igual a una anterior, y entre las dos el único acceso al SPI o a los periféricos fue esa lectura de STATUS (que el `andi` reduce a la bandera, que valió 0), todo el sistema es periódico: cada P ciclos vuelve al mismo estado. Con `sw/fondo.s` P = 24 ciclos (el lazo del supervisor dura 12 y el de los gestores 8).
-3. Se adelanta el esclavo SPI hasta que se levante la bandera, se calcula la primera lectura de STATUS que la ve, y se salta a ella reponiendo la foto de esa fase del período. Los conteos de instrucciones por clase se suman por períodos completos.
+1. Cada vez que el hilo 0 está por leer STATUS en el lazo `lw / andi 1 / beqz` y no hay precio nuevo, toma una instantánea del estado: registros y contadores de programa de los cuatro hilos, palabras ya buscadas, LED y dígitos, y cuántas escrituras cambiaron la memoria.
+2. Si la instantánea es igual a una anterior, y entre las dos el único acceso al SPI o a los periféricos fue esa lectura de STATUS (que el `andi` reduce a la bandera, que valió 0), todo el sistema es periódico: cada P ciclos vuelve al mismo estado. Con `sw/fondo.s` P = 24 ciclos (el lazo del supervisor dura 12 y el de los gestores 8).
+3. Se adelanta el esclavo SPI hasta que se levante la bandera, se calcula la primera lectura de STATUS que la ve, y se salta a ella reponiendo la instantánea de esa fase del período. Los conteos de instrucciones por clase se suman por períodos completos.
 
 Si un programa nunca llega a un estado periódico (un contador que siempre avanza, como el gestor colgado de las pruebas de degradación) no se salta nada y el resultado sigue siendo exacto, solo más lento.
 
@@ -233,6 +233,6 @@ Son 21 configuraciones y 18,3 millones de eventos, todos iguales. Dos controles 
 
 **¿Cómo sabemos que el atajo no tapa un error?** La validación contra el RTL de los grupos A a H se hace sin atajo, porque pedir la traza lo desactiva. Y el gemelo con atajo da lo mismo que sin atajo en la práctica completa a los tres períodos: decisiones, mediciones por tick y conteos de instrucciones.
 
-**¿Por qué una foto del estado completo y no reconocer el lazo de los gestores, como en el base?** Porque así el atajo no depende de `sw/fondo.s`. Sirve para cualquier programa que, mientras espera el precio, quede en un ciclo; y si no queda, no salta.
+**¿Por qué una instantánea del estado completo y no reconocer el lazo de los gestores, como en el base?** Porque así el atajo no depende de `sw/fondo.s`. Sirve para cualquier programa que, mientras espera el precio, quede en un ciclo; y si no queda, no salta.
 
 **¿El gemelo modela el código que se modifica a sí mismo?** Sí: cada hilo busca su instrucción en el ciclo que corresponde y con la memoria de antes de las escrituras de ese flanco, que es lo que hace la BRAM. Los programas aleatorios con memoria compartida, que pueden ejecutar datos, dan la misma traza que el RTL.

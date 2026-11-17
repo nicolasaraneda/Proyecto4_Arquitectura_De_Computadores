@@ -2,7 +2,7 @@
 
 Grupo: Nicolás Araneda, Vicente Calderón y Santiago Muñoz.
 
-Encargo de Nicolás: "último intento de identificar el generador, acotado a esta noche. Objetivo distinto al de antes: probabilidad de ganarle cabeza a cabeza a `max_media`, y puntos esperados contra un campo de rivales que también operan reversión con parámetros variados. Mismo protocolo contra el sobreajuste. Un candidato solo se acepta si además gana sobre la serie que se registre el 26/11. Si nada gana, documéntalo y cierra el tema." Con la corrección del 16/11: el rival a vencer es el mejor entre `max_media` y `zscore`; como `zscore` no le gana a `max_media` (T129), el rival es `max_media`. Rama `generador`.
+Objetivo, acordado el 16/11 como último intento de identificar el generador, acotado a esa noche: la probabilidad de ganarle cabeza a cabeza a `max_media` y los puntos esperados contra un campo de rivales que también operan reversión con parámetros variados, con el mismo protocolo contra el sobreajuste. Un candidato solo se acepta si además gana sobre la serie que se registre el 26/11; si nada gana, se documenta y se cierra el tema. Con la corrección del 16/11: el rival a vencer es el mejor entre `max_media` y `zscore`; como `zscore` no le gana a `max_media` (T129), el rival es `max_media`. Rama `generador`.
 
 ## 1. Herramienta
 

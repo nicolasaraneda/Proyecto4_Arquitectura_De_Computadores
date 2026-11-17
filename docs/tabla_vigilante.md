@@ -34,7 +34,7 @@ El contenido es `sw/fondo_tabla.hex`, que genera `python3 ref/fondo.py --tabla-h
 
 Antes de este paquete la tabla estaba al final de la memoria de datos y se leía con `x0` como base. Ahora necesita un registro con `0x80020000`. El supervisor carga esa base en `x1` una vez por tick, justo después de publicar el precio, y la conserva hasta el voto: una instrucción más por tick. Cada gestor lee sus dos umbrales una sola vez, al arrancar.
 
-Con la tabla afuera, la memoria de datos del programa parte entera en cero: `sw/fondo.s` ya no toma ningún valor inicial de su imagen. Ocupa 200 palabras de programa y 13 de estado, 213 de 512.
+Con la tabla en su propia BRAM, la memoria de datos del programa parte entera en cero: `sw/fondo.s` ya no toma ningún valor inicial de su imagen. Ocupa 200 palabras de programa y 13 de estado, 213 de 512.
 
 ### 2.3 Costo
 
@@ -52,9 +52,9 @@ Es el argumento más concreto que tenemos de por qué el criterio 8 existe: lo q
 
 ### 3.1 El molde
 
-`icebram` reemplaza el contenido de una memoria dentro de un `.asc` ya ruteado. Para ubicarla necesita saber qué había: busca el contenido anterior en las BRAM. Si el contenido anterior es la tabla de verdad, no puede: tiene 236 valores en cero y muchos bits iguales en todas las palabras, y `icebram` se niega con "Conflicting from pattern". Con el programa de verdad pasaría algo parecido en las zonas en cero.
+`icebram` reemplaza el contenido de una memoria dentro de un `.asc` ya ruteado. Para ubicarla necesita saber qué había: busca el contenido anterior en las BRAM. Si el contenido anterior es la tabla definitiva, no puede: tiene 236 valores en cero y muchos bits iguales en todas las palabras, y `icebram` se niega con "Conflicting from pattern". Con el programa definitivo pasaría algo parecido en las zonas en cero.
 
-La solución es la de siempre: se sintetiza un **molde**, el mismo diseño con las dos memorias llenas de un patrón al azar (`icebram -g`), y los cambios se hacen siempre desde el molde. `tools/fondo/bitstreams.sh` construye los dos, el molde y la síntesis directa con el contenido de verdad, y comprueba que el molde con `icebram` da **el mismo `.asc`, byte por byte**, que la síntesis directa, en R1 y en R2. El reemplazo de las dos memorias más `icepack` demora 0,26 s.
+La solución es la de siempre: se sintetiza un **molde**, el mismo diseño con las dos memorias llenas de un patrón al azar (`icebram -g`), y los cambios se hacen siempre desde el molde. `tools/fondo/bitstreams.sh` construye los dos, el molde y la síntesis directa con el contenido definitivo, y comprueba que el molde con `icebram` da **el mismo `.asc`, byte por byte**, que la síntesis directa, en R1 y en R2. El reemplazo de las dos memorias más `icepack` demora 0,26 s.
 
 Por eso en `bitstreams/moldes/` quedan guardados los moldes de R1 y de R2 (el `.asc` comprimido) y los dos patrones. Sin ellos, cambiar algo obligaría a sintetizar de nuevo, y una síntesis nueva puede dar otra ubicación (le pasó a R0, decisión T62).
 
@@ -98,7 +98,7 @@ Propiedades que salen de contar precios y no tiempo:
 
 ### 4.2 Por qué K = 4
 
-El plan pide un K que no dispare en ninguna simulación sana, incluida la matriz de estrés. En todas las corridas sanas de R2 (sección 7) la cuenta máxima fue 1: el programa responde cada precio antes de que llegue el siguiente. Cualquier K de 2 o más cumple. Se dejó 4, el de la factibilidad, que da margen de sobra sin alargar mucho el relevo: a 0,1 ms el vigilante gasta 5 ticks de los 536 que dura el relevo completo.
+El criterio es un K que no dispare en ninguna simulación sana, incluida la matriz de estrés. En todas las corridas sanas de R2 (sección 7) la cuenta máxima fue 1: el programa responde cada precio antes de que llegue el siguiente. Cualquier K de 2 o más cumple. Se dejó 4, el de la factibilidad, que da margen de sobra sin alargar mucho el relevo: a 0,1 ms el vigilante gasta 5 ticks de los 361 que dura el relevo completo con los 35,50 ms medidos en la placa (536 con los 53 ms de la hoja de datos).
 
 ### 4.3 Qué se tocó del esclavo SPI
 
@@ -141,9 +141,9 @@ Las cuatro primeras filas usan los 53 ms típicos de la hoja de datos. El 16/11 
 
 Tres cosas que conviene saber para la defensa:
 
-- **El relevo cuesta posición.** `max_media` parte sin posición y su primera decisión suele ser vender. Si el fondo estaba adentro, la imagen de respaldo liquida.
-- **Una transacción puede quedar cortada** por el fin de la reconfiguración. Se barrió ese instante en 40 corridas: la maestra lee `80`, `c0`, `e0`, `f0`, `f8`, `fc` o `fe`, y ninguno es una orden (acción 11, o vender 0). Eso vale si el pin suelto se lee como 1 y la imagen 1 mantiene MISO en 0 durante su reset.
-- **Qué no demuestra la simulación**: cuánto dura de verdad la reconfiguración (se midió en la placa el 16/11: 35,50 ms), qué nivel tiene el pin mientras tanto, y que `SB_WARMBOOT` cargue la imagen correcta. El modelo de simulación de esa primitiva está vacío: aquí se comprueba que `BOOT` suba cuando debe y con `S1 S0 = 01`. Lo demás es de la puerta de placa.
+- **El relevo cuesta posición.** `max_media` parte sin posición y su primera decisión suele ser vender. Si el fondo estaba comprado, la imagen de respaldo liquida.
+- **Una transacción puede quedar cortada** por el fin de la reconfiguración. Se barrió ese instante en 40 corridas: la maestra lee `80`, `c0`, `e0`, `f0`, `f8`, `fc` o `fe`, y ninguno es una orden (acción 11, o vender 0). Eso vale si el pin flotante (en alta impedancia) se lee como 1 y la imagen 1 mantiene MISO en 0 durante su reset.
+- **Qué no demuestra la simulación**: cuánto dura realmente la reconfiguración (se midió en la placa el 16/11: 35,50 ms), qué nivel tiene el pin mientras tanto, y que `SB_WARMBOOT` cargue la imagen correcta. El modelo de simulación de esa primitiva está vacío: aquí se comprueba que `BOOT` suba cuando debe y con `S1 S0 = 01`. Lo demás es de la puerta de placa.
 
 ## 6. Bitstreams e imagen múltiple
 
@@ -162,7 +162,7 @@ Lo que se comprobó sobre los bitstreams, no sobre el RTL:
 - **El vigilante dentro del bitstream.** Con el programa del supervisor colgado en el tick 100 puesto con `icebram` en el molde de R2, `BOOT` sube con `S1 S0 = 01` y `CS_n` en alto al terminar la transacción 105, la quinta sin respuesta. Es el mismo instante que en el RTL (sección 5).
 - **La imagen múltiple.** `icemulti -p0` con R2 y `bitstreams/r0_base_max_media.bin`. `tools/ver_multi.py` decodifica los cinco vectores de arranque: el de encendido y los de `S1 S0` = 00, 10 y 11 apuntan a R2, y el de 01 apunta a R0. Las dos imágenes están copiadas sin un bit de diferencia (R0 conserva su sha256). Ocupa 64 600 bytes de los 131 072 de la flash de la Go Board.
 
-Para grabar (lo hace una persona, con la Go Board conectada; el detalle está en `docs/autoprueba.md`, sección 9): `iceprog bitstreams/r1_fondo.bin` para R1, o `iceprog -b bitstreams/r2_multi.bin` para R2 con su respaldo. El `-b` borra la flash entera antes de escribir: el archivo de dos imágenes ocupa más de 32 kB y, si la flash de la placa borra en sectores de 32 kB, el borrado por bloques de `iceprog` dejaría la segunda mitad sin borrar (lo advirtió la factibilidad del warm boot).
+Para grabar (lo hace Nicolás, con la Go Board conectada; el detalle está en `docs/autoprueba.md`, sección 9): `iceprog bitstreams/r1_fondo.bin` para R1, o `iceprog -b bitstreams/r2_multi.bin` para R2 con su respaldo. El `-b` borra la flash entera antes de escribir: el archivo de dos imágenes ocupa más de 32 kB y, si la flash de la placa borra en sectores de 32 kB, el borrado por bloques de `iceprog` dejaría la segunda mitad sin borrar (lo advirtió la factibilidad del warm boot).
 
 ## 7. La puerta de simulación de R1 y R2
 
@@ -181,17 +181,17 @@ Detalle en `docs/puertas.md`. Las dos columnas se corrieron por separado, cada u
 
 **El vigilante en las corridas sanas de R2.** En las 1 201 corridas sanas del lote de series, del barrido de fases y de la degradación (que tiene gestores colgados, pero el supervisor sano), en la equivalencia de 20 000 ticks a los tres períodos y en los 56 casos de la matriz de estrés, `BOOT` no subió nunca y la cuenta del vigilante nunca pasó de 1. El disparo necesita 5.
 
-Fuera de la puerta, en dos casos de exploración con períodos de 11,5 y 13,5 us (ocho veces más rápido que la ronda 3, donde el fondo ya no alcanza a responder cada precio), la cuenta llegó a 2. Tampoco disparó.
+Fuera de la puerta, en dos casos de exploración con períodos de 11,5 y 13,5 µs (ocho veces más rápido que la ronda 3, donde el fondo ya no alcanza a responder cada precio), la cuenta llegó a 2. Tampoco disparó.
 
 **Criterio 5.** La campaña de P2 había corrido con las tres instrucciones. Se repitió con la máscara de `emad` y `devk` y con la tabla (R1) y la tabla y el vigilante (R2) puestos en los dos SoC de la comparación. Las palabras de `mulstep` que genera el banco de pruebas aparecen ahora como custom-0 sin efecto: 268 689 en la campaña de lazos, todas tratadas como ilegales, que es lo que este hardware tiene que hacer.
 
 ## 8. Límites y lo que falta
 
-- **Nada se ha probado en la placa.** La puerta de placa (autoprueba de P6) y la de la maestra real siguen pendientes para R1 y R2.
-- **El tiempo de reconfiguración y el nivel de MISO durante el relevo no están medidos.** De eso depende cuántos ticks se pierden y si la maestra de verdad lee mantener.
+- **La puerta de placa está incompleta.** El 16/11 R2 pasó la firma a 0,1 ms y la media hora sin disparo, y el relevo se midió en 35,50 ms por la UART; faltan la firma de R2 a 1 ms y 10 ms, ver la imagen testigo después del relevo y las tres firmas de R1 (`docs/mediciones/placa_16nov.md`). La maestra real se prueba el 26/11.
+- **El tiempo de reconfiguración tiene una sola medición (35,50 ms) y el nivel de MISO durante el relevo no está medido.** De eso depende cuántos ticks se pierden y si la maestra realmente lee mantener.
 - **Reconfigurar durante una ronda está cubierto por la respuesta general del profesor** (16/11: cualquier decisión de diseño es válida), sin confirmación específica (T126). Si el ayudante lo prohibiera de forma explícita, R2 no compite y el titular es R1.
 - **El vigilante no cubre un programa que escribe basura.** Solo ve que se escribió `DECISION`, no qué se escribió. Es lo que pide la especificación: disparar por falla dura y nunca por una condición del algoritmo.
-- **SCLK de 100 kHz con período de 0,1 ms.** Esa combinación deja 237 ciclos entre transacciones y el fondo necesita hasta 444 para responder. En la simulación los bytes igual coinciden, porque el esclavo toma el byte al empezar la transacción siguiente, pero el caso queda fuera de la puerta. R0 sí cabe ahí (49 ciclos). A 1 ms el fondo funciona con SCLK de 100 kHz.
+- **SCLK de 100 kHz con período de 0,1 ms.** Esa combinación deja 237 ciclos entre transacciones y el fondo necesita hasta 444 para responder. En la simulación los bytes coinciden aun así, porque el esclavo toma el byte al empezar la transacción siguiente, pero el caso queda fuera de la puerta. R0 sí cabe ahí (49 ciclos). A 1 ms el fondo funciona con SCLK de 100 kHz.
 - **Cambiar la tabla exige simular el bitstream nuevo**, unos 40 minutos. No es un cambio de último minuto.
 - **Esta puerta corrió por el RTL con Verilator y por el `.asc` con Icarus**: el gemelo digital todavía no modelaba el barrel. Desde P4 lo modela, con la tabla (`--tabla`), aunque no el vigilante.
 
@@ -210,8 +210,8 @@ Fuera de la puerta, en dos casos de exploración con períodos de 11,5 y 13,5 us
 
 1. **¿La tabla decide algo?** No. Es una memoria de solo lectura. El que lee, compara y decide es el programa en el core.
 2. **¿Por qué una BRAM aparte y no la memoria de datos?** Porque así se cambia con `icebram` sin tocar el programa, y porque el programa no puede escribirla ni por error.
-3. **¿Qué habría pasado si no se simulaba el bitstream?** La tabla habría salido en cero y el diseño habría fallado en la placa habiendo pasado todas las pruebas del RTL. Sección 2.4.
-4. **¿Por qué no se puede cambiar la tabla directamente en el bitstream final?** Porque `icebram` ubica la memoria por su contenido y la tabla de verdad no es distinguible. Sección 3.1.
+3. **¿Qué habría pasado si no se hubiera simulado el bitstream?** La tabla habría salido en cero y el diseño habría fallado en la placa habiendo pasado todas las pruebas del RTL. Sección 2.4.
+4. **¿Por qué no se puede cambiar la tabla directamente en el bitstream final?** Porque `icebram` ubica la memoria por su contenido y la tabla definitiva no es distinguible. Sección 3.1.
 5. **¿Cuándo dispara el vigilante?** Al quinto precio seguido sin escritura en `DECISION`, y espera a que `CS_n` suba.
 6. **¿Puede disparar con el programa sano?** En ninguna corrida sana la cuenta pasó de 1, y el disparo necesita 5. Sección 7.
 7. **¿Qué pierde el fondo si dispara?** 361 ticks sin decisión nueva a 0,1 ms con los 35,50 ms medidos en la placa (536 con los 53 ms de la hoja de datos), y probablemente la posición. Sección 5.

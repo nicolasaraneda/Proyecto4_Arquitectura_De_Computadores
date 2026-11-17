@@ -6,7 +6,7 @@ Documento de estudio del paquete P8. Parte de la pregunta de fondo (qué puede s
 
 ## 1. La idea
 
-El testbench del curso fija un SPI (SCLK de 1 MHz, 1 us antes del primer bit), una caja (10 000), una comisión (5) y tres períodos. La maestra real puede no ser exactamente así, y las reglas pueden cambiar el mismo día. Para cada cosa que puede cambiar hay que saber, antes del 1/12:
+El testbench del curso fija un SPI (SCLK de 1 MHz, 1 µs antes del primer bit), una caja (10 000), una comisión (5) y tres períodos. La maestra real puede no ser exactamente así, y las reglas pueden cambiar el mismo día. Para cada cosa que puede cambiar hay que saber, antes del 1/12:
 
 1. **Si el diseño sigue funcionando.** Es la matriz de estrés: cada celda es una combinación de parámetros y se exige lo mismo que en la puerta de simulación (bytes iguales a la referencia, ningún precio perdido, respuesta dentro del presupuesto).
 2. **Cómo se sabe qué cambió.** Si la maestra usa otro SCLK, nadie lo va a anunciar. Para eso está el medidor.
@@ -20,7 +20,7 @@ La que agrega P8 (`make p8-matriz`, `docs/mediciones/p8/matriz.txt`) corre en el
 
 | Dimensión | Celdas | Resultado |
 |-----------|--------|-----------|
-| A. Período, de 10 ms a 11,5 us | 9 | R0 pasa en todas. R1 hasta 30 us; el mínimo exacto es 26,94 us (`sclk_minimo.txt`) |
+| A. Período, de 10 ms a 11,5 µs | 9 | R0 pasa en todas. R1 hasta 30 µs; el mínimo exacto es 26,94 µs (`sclk_minimo.txt`) |
 | B. SCLK de 100 kHz a 1 MHz, en los tres períodos | 15 | R0 pasa en todas. R1 falla solo con 100 kHz a 0,1 ms: el límite documentado |
 | C. Rondas de 500, 2 000, 20 000 y 200 000 ticks | 4 | Pasan los tres peldaños |
 | D. Comisión de 0 a 50 y caja de 1 000 a 100 000 | 15 por conjunto | Ver abajo |
@@ -39,7 +39,7 @@ En A y B cuentan las celdas que dejan al menos 600 ciclos entre transacciones, i
 | 20 | 1 000 | 0,590 | 0,243 | 0,959 | 0 de 10 |
 | 50 | 10 000 | 0,897 | 0,703 | 0,971 | 4 de 10 |
 
-Con caja chica la comisión pesa mucho más: con 1 000 y "comprar 63" la maestra compra unas 6 acciones, y cada orden de 5 cuesta lo mismo que con 10 000. Con caja de 100 000 pasa lo contrario: "comprar 63" se repite cada tick hasta gastar la caja, porque la maestra ejecuta lo que encuentra en `DECISION` en cada tick. El diseño sigue funcionando, con más órdenes.
+Con una caja inicial pequeña la comisión pesa mucho más: con 1 000 y "comprar 63" la maestra compra unas 6 acciones, y cada orden de 5 cuesta lo mismo que con 10 000. Con caja de 100 000 pasa lo contrario: "comprar 63" se repite cada tick hasta gastar la caja, porque la maestra ejecuta lo que encuentra en `DECISION` en cada tick. El diseño sigue funcionando, con más órdenes.
 
 ## 3. El medidor del SPI
 
@@ -55,7 +55,7 @@ Pruebas (`make medidor`, `docs/mediciones/medidor_spi.txt`): un testbench con la
 
 ### 4.1 Moldes
 
-`icebram` cambia el contenido de una BRAM en un bitstream ya ruteado, sin sintetizar. Para ubicar la memoria busca lo que había, y con el contenido de verdad no siempre puede (muchos ceros). Por eso se sintetiza un **molde**: el mismo diseño con la memoria llena de un patrón al azar (`docs/tabla_vigilante.md`, sección 3.1). R1 y R2 tenían sus moldes desde P5. P8 agrega el de R0 (`make r0-molde`): se construye desde el commit de R0, como `make r0-reproducir`, y se comprueba que el molde con `sw/trade.hex` puesto con `icebram` es R0 byte por byte (0,10 s).
+`icebram` cambia el contenido de una BRAM en un bitstream ya ruteado, sin sintetizar. Para ubicar la memoria busca lo que había, y con el contenido definitivo no siempre puede (muchos ceros). Por eso se sintetiza un **molde**: el mismo diseño con la memoria llena de un patrón al azar (`docs/tabla_vigilante.md`, sección 3.1). R1 y R2 tenían sus moldes desde P5. P8 agrega el de R0 (`make r0-molde`): se construye desde el commit de R0, como `make r0-reproducir`, y se comprueba que el molde con `sw/trade.hex` puesto con `icebram` es R0 byte por byte (0,10 s).
 
 ### 4.2 `tools/retune.py`
 

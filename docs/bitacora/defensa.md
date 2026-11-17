@@ -4,7 +4,7 @@ Grupo: Nicolás Araneda, Vicente Calderón y Santiago Muñoz.
 
 Rama `defensa`, desde `p8-anticipacion` (`9ad1c40`, con P1 a P5, P7 y P8). Todo el trabajo queda en `docs/defensa/`. No se cambia código.
 
-## Encargo
+## Objetivo
 
 1. Un documento de estudio por pieza: `espino_base.md`, `segmentado.md`, `barrel.md`, `extension.md`, `fondo.md`, `tabla_vigilante.md`, `algoritmo.md` y `verificacion.md`. Cada uno parte de lo básico, llega al detalle con `archivo:línea` y cierra con 5 a 10 preguntas.
 2. `preguntas.md`: banco de al menos 100 preguntas con respuesta corta y `archivo:línea`, agrupadas por pieza, con las incómodas.
@@ -30,7 +30,7 @@ Se anotan con los dos lugares. Ninguna cambia una conclusión.
 4. Estado del algoritmo: `docs/algoritmo.md`, párrafo "Estado" del comienzo, dice que la regla base sigue siendo el algoritmo de `sw/trade.s`; la sección 7.6 del mismo documento y T51 dicen que desde el 15/11 es `max_media`.
 5. Gemelo y barrel: `docs/fondo.md` (secciones 7 y 13), `docs/tabla_vigilante.md` (sección 8), `docs/espino_barrel.md` (sección 8.5) y `docs/extension_isa.md` (sección 7.3) dicen que el gemelo no modela el barrel; `docs/gemelo.md` (sección 7) y el tramo 12 de `docs/estado.md` dicen que sí desde P4.
 6. Peor caso con los gestores colgados: `docs/fondo.md`, pregunta 2 de la sección 15, dice 564 ciclos (cifra de P3); la tabla de la sección 1 y la sección 9 del mismo documento dicen 568 (R1).
-7. SCLK mínimo y período mínimo de R1: 115 kHz y 26,66 us en el tramo 12 de `docs/estado.md` (programa de P3), contra 110 kHz y 26,94 us en el tramo 13 y en `docs/mediciones/fondo/r1/sclk_minimo.txt`. El árbol usa 115 a propósito (T124).
+7. SCLK mínimo y período mínimo de R1: 115 kHz y 26,66 µs en el tramo 12 de `docs/estado.md` (programa de P3), contra 110 kHz y 26,94 µs en el tramo 13 y en `docs/mediciones/fondo/r1/sclk_minimo.txt`. El árbol usa 115 a propósito (T124).
 8. `docs/gemelo.md`, sección 7.4, atribuye el arreglo de la variable estática de los testbenches a la "decisión T70"; en `docs/decisiones.md` es T81 (T70 es la de los moldes).
 9. `docs/peldano.md` cita `docs/mediciones/peldano_probar_r1.txt`, que no existe en esta rama. `docs/gemelo.md`, sección 7.5, cita `docs/mediciones/fondo/gemelo_series.txt`; el archivo está en `docs/mediciones/fondo/r1/gemelo_series.txt`.
 
@@ -38,9 +38,9 @@ Se anotan con los dos lugares. Ninguna cambia una conclusión.
 
 - Se integró `origin/p8-anticipacion` (informe, README nuevo, `docs/comandos.md`) en la rama: las referencias se volvieron a comprobar; cambió `tools/autoprueba.py:60` a `:61` y la cita del README en `cifras.md` pasó a `docs/gemelo.md`, porque el README nuevo ya no trae esa tabla.
 
-- `espino_base.md`, `segmentado.md`, `barrel.md`: hechos y empujados.
-- `extension.md`, `fondo.md`, `tabla_vigilante.md`: hechos y empujados.
-- `algoritmo.md`, `verificacion.md`: hechos y empujados.
+- `espino_base.md`, `segmentado.md`, `barrel.md`: hechos y subidos.
+- `extension.md`, `fondo.md`, `tabla_vigilante.md`: hechos y subidos.
+- `algoritmo.md`, `verificacion.md`: hechos y subidos.
 - `cifras.md`: hecho. Cuando dos mediciones del mismo diseño difieren por ruido de síntesis (R0 1083 y 1091 celdas; segmentado 51,13 y 45,34 MHz) se dan las dos con su fuente.
 - `preguntas.md`: 155 preguntas (53 [B], 78 [A], 24 [I]) en 12 secciones, cada una con `archivo:línea`.
 - `resumen.md`, `plan_estudio.md` y `README.md`: hechos.

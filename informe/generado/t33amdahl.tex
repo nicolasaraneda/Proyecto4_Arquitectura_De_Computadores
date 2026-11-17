@@ -3,20 +3,20 @@
 \toprule
 Ventana & Cambio & $S$ predicho & $S$ medido & Ciclos pred. / med. \\
 \midrule
-Respuesta & R0 $\to$ segmentado, con el CPI que estimo la clase 7 & 1{,}745 & 1{,}864 & 23{,}50 / 22{,}00 \\
+Respuesta & R0 $\to$ segmentado, con el CPI que estimó la clase 7 & 1{,}745 & 1{,}864 & 23{,}50 / 22{,}00 \\
 Respuesta & R0 $\to$ segmentado, con el modelo de costo medido & 1{,}843 & 1{,}864 & 22{,}25 / 22{,}00 \\
 Respuesta & R0 $\to$ barrel, sw/trade.s en un hilo & 0{,}547 & 0{,}547 & 75{,}00 / 75{,}00 \\
-Respuesta & barrel $\to$ barrel con emad y devk (la extension sola) & 1{,}364 & 1{,}364 & 55{,}00 / 55{,}00 \\
-Respuesta & R0 $\to$ barrel con la extension & 0{,}745 & 0{,}745 & 55{,}00 / 55{,}00 \\
-Respuesta & R0 $\to$ Espino base con la extension (no existe en el RTL) & 1{,}323 & no construida & 31{,}00 / -- \\
-Respuesta & R0 $\to$ segmentado con la extension (no existe en el RTL) & 2{,}377 & no construida & 17{,}25 / -- \\
-Kernel & R0 $\to$ segmentado, con el CPI que estimo la clase 7 & 1{,}821 & 1{,}889 & 28{,}00 / 27{,}00 \\
+Respuesta & barrel $\to$ barrel con emad y devk (la extensión sola) & 1{,}364 & 1{,}364 & 55{,}00 / 55{,}00 \\
+Respuesta & R0 $\to$ barrel con la extensión & 0{,}745 & 0{,}745 & 55{,}00 / 55{,}00 \\
+Respuesta & R0 $\to$ Espino base con la extensión (no existe en el RTL) & 1{,}323 & no construida & 31{,}00 / sin medir \\
+Respuesta & R0 $\to$ segmentado con la extensión (no existe en el RTL) & 2{,}377 & no construida & 17{,}25 / sin medir \\
+Kernel & R0 $\to$ segmentado, con el CPI que estimó la clase 7 & 1{,}821 & 1{,}889 & 28{,}00 / 27{,}00 \\
 Kernel & R0 $\to$ segmentado, con el modelo de costo medido & 1{,}889 & 1{,}889 & 27{,}00 / 27{,}00 \\
 Kernel & R0 $\to$ barrel, sw/trade.s en un hilo & 0{,}531 & 0{,}531 & 96{,}00 / 96{,}00 \\
-Kernel & barrel $\to$ barrel con emad y devk (la extension sola) & 2{,}000 & 2{,}000 & 48{,}00 / 48{,}00 \\
-Kernel & R0 $\to$ barrel con la extension & 1{,}062 & 1{,}062 & 48{,}00 / 48{,}00 \\
-Kernel & R0 $\to$ Espino base con la extension (no existe en el RTL) & 1{,}962 & no construida & 26{,}00 / -- \\
-Kernel & R0 $\to$ segmentado con la extension (no existe en el RTL) & 3{,}643 & no construida & 14{,}00 / -- \\
+Kernel & barrel $\to$ barrel con emad y devk (la extensión sola) & 2{,}000 & 2{,}000 & 48{,}00 / 48{,}00 \\
+Kernel & R0 $\to$ barrel con la extensión & 1{,}062 & 1{,}062 & 48{,}00 / 48{,}00 \\
+Kernel & R0 $\to$ Espino base con la extensión (no existe en el RTL) & 1{,}962 & no construida & 26{,}00 / sin medir \\
+Kernel & R0 $\to$ segmentado con la extensión (no existe en el RTL) & 3{,}643 & no construida & 14{,}00 / sin medir \\
 \bottomrule
 \end{tabular}
-\par\smallskip{\footnotesize Amdahl generalizado, $S = 1 / \sum_i (f_i / F_i)$, con las fracciones del perfil medido de la variante de partida (T105). Fuente: \texttt{docs/mediciones/p7/amdahl.txt} (\texttt{make p7-amdahl}).}
+\par\smallskip{\footnotesize Amdahl generalizado, $S = 1 / \sum_i (f_i / F_i)$, con las fracciones del perfil medido de la variante de partida. Fuente: \texttt{docs/mediciones/p7/amdahl.txt} (\texttt{make p7-amdahl}).}

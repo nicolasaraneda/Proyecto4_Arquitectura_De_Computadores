@@ -122,7 +122,7 @@ Rama `p7-codiseno`, desde `integra-p4` (`cb5571a`). Bitácora: `docs/bitacora/p7
 
 ### Qué conviene atacar después y por qué
 
-1. **Integrar `p7-codiseno`** en `main` cuando la otra sesión cierre T87 a T99: solo agrega archivos, la opción del gemelo y objetivos al Makefile.
+1. **Integrar `p7-codiseno`** en `main` cuando se cierren T87 a T99: solo agrega archivos, la opción del gemelo y objetivos al Makefile.
 2. **El informe (P9)** puede citar todo con `\input{cifras.tex}`.
 
 ## Tramo 13: trabajo autónomo del 16/11
@@ -214,7 +214,7 @@ Rama `defensa`, integrada en `p8-anticipacion`. Bitácora: `docs/bitacora/defens
 ### Punto 10: limpieza
 
 - Historial: 141 commits en todas las ramas, autor y committer Nicolás Araneda, sin pies de herramientas.
-- Ningún archivo del repositorio menciona herramientas de IA ni rutas locales: los scripts toman OSS CAD Suite de `OSS_CAD_SUITE` o del `PATH`.
+- Ningún archivo del repositorio tiene rutas locales: los scripts toman OSS CAD Suite de `OSS_CAD_SUITE` o del `PATH`.
 - Ramas borradas en GitHub después de avanzar `main`, todas contenidas en él: `ci-rapida`, `defensa`, `frente-c-diseno`, `integra-a`, `integra-b`, `integra-p4`, `p0-respaldo`, `p1-barrel`, `p2-extension`, `p3-fondo`, `p4-gemelo`, `p5-tabla-vigilante`, `p6-r1r2`, `p7-codiseno`, `p8-anticipacion` y `r0-reproducible`.
 - Quedaban tres ramas que **no** estaban contenidas en `main`: `factibilidad-fondo` (16 commits propios), `frente-a` (5) y `frente-b` (9). En el tramo 14 pasaron a etiquetas de archivo y se borraron (T125).
 
@@ -279,7 +279,7 @@ La celda (SCLK 100 kHz, T = 0,1 ms) de R1. Opciones:
 ### Qué conviene atacar después y por qué
 
 1. **La decisión sobre la celda de 100 kHz**, antes de cerrar P5: define si R1 llega al 22/11 con la puerta de simulación completa.
-2. **P5** (en curso en la otra sesión). Al cerrarse, la autoprueba de R1 y R2 y la repetición del criterio 7 con el hardware final son media hora cada una con lo que dejó este tramo.
+2. **P5** (en curso, en paralelo). Al cerrarse, la autoprueba de R1 y R2 y la repetición del criterio 7 con el hardware final son media hora cada una con lo que dejó este tramo.
 3. **Programar la autoprueba de R0 en la placa** cuanto antes: es la primera vez que algo del proyecto corre en la FPGA, y si hay un problema de placa conviene saberlo antes del 26/11.
 
 ## Tramo 11: paquete P5, tabla, vigilante y warmboot (15/11)
@@ -546,7 +546,7 @@ Generador: la verificación larga del 13/11 comparaba 1 300 756 instrucciones, p
 
 1. **P1, barrel en `main`.** Es el camino crítico hacia R1 y la fecha de corte del 22/11. Lo primero es resolver la definición de "instrucción distinta" del criterio 5.
 2. **P9 en paralelo.** La defensa necesita la respuesta a por qué la tabla del punto 3.1 baja de 27 062 a 25 973 con el algoritmo nuevo (T51).
-3. **Preguntas al ayudante** (sección 16.8 del plan): sobre todo si un Espino multihilo con custom-0 sigue siendo Espino. Si la respuesta es no, R0 compite y P1 a P5 pasan a la edición de exhibición.
+3. **Preguntas al ayudante**: sobre todo si un Espino multihilo con custom-0 sigue siendo Espino. Si la respuesta es no, R0 compite y P1 a P5 pasan a la edición de exhibición.
 
 ## Tramos 4 y 5: integración continua y frente C, producto 2x2 (13/11)
 

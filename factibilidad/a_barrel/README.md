@@ -4,7 +4,7 @@ Grupo: Nicolás Araneda, Vicente Calderón y Santiago Muñoz. Arquitectura de Co
 
 Prototipo de factibilidad. Nada de esta carpeta está integrado en `rtl/`, en el `Makefile` de la raíz ni en la integración continua. Todos los números de este documento salen de un script de esta carpeta y su salida está guardada en `mediciones/`. Al final está el comando de cada uno.
 
-El documento tiene dos partes. La primera construyó y midió el prototipo. La segunda (sección 6) es una verificación independiente: se intentó romper el core, se repitieron las mediciones de la primera parte y se dejó escrito hasta dónde está verificado. No se encontró ningún error en el barrel y el RTL no cambió entre las dos partes. La segunda parte se hizo en dos sesiones: la primera dejó la comparación contra el Espino base y los controles negativos, y la segunda volvió a correr todo, cerró las propiedades formales, el período de 10 ms y el cambio de programa con `icebram` (secciones 6.11 y 6.12).
+El documento tiene dos partes. La primera construyó y midió el prototipo. La segunda (sección 6) es una verificación independiente: se intentó romper el core, se repitieron las mediciones de la primera parte y se dejó escrito hasta dónde está verificado. No se encontró ningún error en el barrel y el RTL no cambió entre las dos partes. La segunda parte se hizo en dos etapas: la primera dejó la comparación contra el Espino base y los controles negativos, y la segunda volvió a correr todo, cerró las propiedades formales, el período de 10 ms y el cambio de programa con `icebram` (secciones 6.11 y 6.12).
 
 ## 1. Resumen
 

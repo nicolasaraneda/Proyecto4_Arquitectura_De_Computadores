@@ -15,7 +15,7 @@ Herramienta para la prueba con la maestra real del 26/11. Es un bitstream aparte
 
 ## 1. Para qué sirve
 
-1. **La puerta de maestra pide comparar el patrimonio que muestra la maestra con el que predice el gemelo "para la misma serie, si la serie es conocida"** (plan, sección 16.4). Si la maestra del 26/11 usa una serie que no conocemos, el registrador la hace conocida: con el CSV, `build/gemelo --serie` y `ref/fondo.py` dan el patrimonio que R0, R1 y R2 deberían obtener, y se compara con la pantalla.
+1. **La puerta de maestra pide comparar el patrimonio que muestra la maestra con el que predice el gemelo "para la misma serie, si la serie es conocida"** (`docs/puertas.md` y decisión T50). Si la maestra del 26/11 usa una serie que no conocemos, el registrador la hace conocida: con el CSV, `build/gemelo --serie` y `ref/fondo.py` dan el patrimonio que R0, R1 y R2 deberían obtener, y se compara con la pantalla.
 2. Mide además el período real entre precios, tick por tick, y marca las transacciones que no tuvieron 8 bits. Complementa al medidor del SPI (`docs/checklist_26nov.md`, sección 3), que da mínimos y máximos pero no la serie.
 
 ## 2. Cómo funciona
@@ -26,7 +26,7 @@ maestra --SCLK, MOSI, CS_n--> sincronizadores --> registro de desplazamiento -->
 ```
 
 - **Muestreo**, igual que el esclavo SPI del SoC (`rtl/pochoco_spi_slave.v`): tres flip-flops en cada línea, flanco de subida de SCLK con `CS_n` en bajo, el primer bit es el más significativo. La transacción termina cuando `CS_n` sube.
-- **MISO** queda en 0: la maestra lee `0x00`, que es mantener. Se registra igual lo que se leyó por MISO, para poder usar el mismo núcleo junto a un SoC.
+- **MISO** queda en 0: la maestra lee `0x00`, que es mantener. Aun así se registra lo que se leyó por MISO, para poder usar el mismo núcleo junto a un SoC.
 - **Registro de 5 bytes por transacción.** El primer byte tiene el bit 7 en 1 y los otros en 0, así el computador se puede sincronizar aunque empiece a leer a mitad de un registro.
 
   | Byte | Contenido |
@@ -37,9 +37,9 @@ maestra --SCLK, MOSI, CS_n--> sincronizadores --> registro de desplazamiento -->
   | b3 | `0`, precio[0], MISO[0], error (no fueron 8 bits), período[10:7] |
   | b4 | `0`, período[6:0] |
 
-  El período es el tiempo desde la bajada de `CS_n` de la transacción anterior, en unidades de 128 ciclos (5,12 us), redondeado hacia abajo y saturado en 2047 (10,48 ms). A 10 ms da 1953.
-- **UART a 1 Mbaud** (25 ciclos por bit, sin error de reloj). Un registro tarda 50 us. A 0,1 ms la UART está ocupada la mitad del tiempo; la cola de 4 registros absorbe cualquier irregularidad.
-- **Si la cola se llena** (precios cada menos de 50 us, sostenidos), el registro nuevo se descarta, LED4 queda encendido y la secuencia salta: la pérdida siempre se ve en el CSV.
+  El período es el tiempo desde la bajada de `CS_n` de la transacción anterior, en unidades de 128 ciclos (5,12 µs), redondeado hacia abajo y saturado en 2047 (10,48 ms). A 10 ms da 1953.
+- **UART a 1 Mbaud** (25 ciclos por bit, sin error de reloj). Un registro tarda 50 µs. A 0,1 ms la UART está ocupada la mitad del tiempo; la cola de 4 registros absorbe cualquier irregularidad.
+- **Si la cola se llena** (precios cada menos de 50 µs, sostenidos), el registro nuevo se descarta, LED4 queda encendido y la secuencia salta: la pérdida siempre se ve en el CSV.
 - **En la placa**: los 7 segmentos muestran la cuenta de registros (byte bajo; con SW4, el alto). SW3 borra la cuenta y la secuencia. LED1 cambia con cada registro, LED2 se enciende si la UART está transmitiendo, LED3 si hubo una transacción con error y LED4 si se perdió un registro.
 
 ## 3. Verificación
@@ -52,14 +52,14 @@ maestra --SCLK, MOSI, CS_n--> sincronizadores --> registro de desplazamiento -->
 | Ronda 2: 1 ms con SCLK de 100 kHz, 200 precios | Igual, período 195 |
 | Ronda 1: 10 ms, 12 precios | Igual, período 1953 |
 | Una transacción de 7 bits | Ese registro con la marca de error, LED3 encendido, los demás intactos |
-| 60 us entre precios, 1000 precios | Ninguno perdido |
-| Control: 30 us entre precios | Se pierden registros, la secuencia lo muestra, los que llegan están intactos y LED4 se enciende |
+| 60 µs entre precios, 1000 precios | Ninguno perdido |
+| Control: 30 µs entre precios | Se pierden registros, la secuencia lo muestra, los que llegan están intactos y LED4 se enciende |
 | Controles negativos (errores puestos a propósito) | 7 de 7 detectados |
 | Timing | 10 de 10 semillas a 25 MHz: 478 celdas, ninguna BRAM, mínima 118,40 MHz |
 | Bitstream ruteado, simulado por los pines | Los mismos casos en versión corta: 28 comprobaciones sin fallas |
 | `tools/registrador.py --prueba` | Los bytes del testbench dan la serie de práctica exacta; pérdida, basura, byte dañado y borrado con SW3 se detectan; de punta a punta por un pseudoterminal a 1 Mbaud |
 
-**Un error encontrado por los controles negativos.** La primera versión comparaba `esc - lec` (punteros de 3 bits) con un entero: Verilog hace esa resta en 32 bits y, cuando los punteros dan la vuelta, la cola llena no se veía y un registro nuevo sobrescribía al que se estaba transmitiendo. A 0,1 ms no ocurre (la cola nunca pasa de un registro), pero a 30 us aparecían registros con la secuencia de uno y el precio de otro. El control negativo que debía demostrar que la secuencia delata las pérdidas no falló, y eso llevó al error. Se corrigió guardando la resta en 3 bits, se agregó al testbench la comprobación de que cada registro que llega tiene el precio de su transacción, y la versión antigua quedó como control negativo (`cola_llena_en_32_bits`).
+**Un error encontrado por los controles negativos.** La primera versión comparaba `esc - lec` (punteros de 3 bits) con un entero: Verilog hace esa resta en 32 bits y, cuando los punteros dan la vuelta, la cola llena no se veía y un registro nuevo sobrescribía al que se estaba transmitiendo. A 0,1 ms no ocurre (la cola nunca pasa de un registro), pero a 30 µs aparecían registros con la secuencia de uno y el precio de otro. El control negativo que debía demostrar que la secuencia delata las pérdidas no falló, y eso llevó al error. Se corrigió guardando la resta en 3 bits, se agregó al testbench la comprobación de que cada registro que llega tiene el precio de su transacción, y la versión antigua quedó como control negativo (`cola_llena_en_32_bits`).
 
 ## 4. Uso el 26/11
 
@@ -76,13 +76,13 @@ La maestra ve a nuestro grupo manteniendo durante toda la ronda (`0x00`). Si la 
 ## 5. Límites
 
 - **128 registros perdidos seguidos no se ven en la secuencia** (es módulo 128). Para eso está la cuenta de los 7 segmentos, que tiene que coincidir con las filas del CSV.
-- **El período se redondea hacia abajo** a múltiplos de 5,12 us: a 0,1 ms se informa 97,3 us. Para el período exacto está el medidor del SPI.
+- **El período se redondea hacia abajo** a múltiplos de 5,12 µs: a 0,1 ms se informa 97,3 µs. Para el período exacto está el medidor del SPI.
 - **1 Mbaud tiene que funcionar en el computador.** El conversor de la Go Board lo admite, y `tools/registrador.py --prueba` lo prueba con un pseudoterminal, no con el conversor. Si `/dev/ttyUSB1` no acepta 1 Mbaud, se construye el bitstream con `CICLOS_BIT = 27` (926 kbaud) y se lee con `--baudios 921600`: el error de 0,5 % está dentro de lo que tolera una UART. No está construido: es un cambio de parámetro y `make registrador`.
 - **No se usa la serie para elegir nada mientras el ayudante no diga que no es la de la competencia** (`docs/pendientes_nicolas.md`, decisión 2).
 
 ## 6. Preguntas que nos pueden hacer
 
-**¿Esto no es guardar la serie en el diseño?** No. El bitstream no tiene dónde guardarla: escucha y retransmite cada precio en 50 us. La serie queda en el computador. Ninguno de los peldaños que compiten lleva el registrador.
+**¿Esto no es guardar la serie en el diseño?** No. El bitstream no tiene dónde guardarla: escucha y retransmite cada precio en 50 µs. La serie queda en el computador. Ninguno de los peldaños que compiten lleva el registrador.
 
 **¿Para qué lo necesitan?** Para la puerta de maestra: comparar el patrimonio que muestra la maestra con el que predice el gemelo para la misma serie. Sin la serie, solo se puede comparar R0 con R1.
 

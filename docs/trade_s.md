@@ -9,7 +9,7 @@ Archivos relacionados:
 | `sw/trade.s` | El programa. |
 | `sw/trade.hex` | El programa ensamblado, 512 palabras. Es lo que queda dentro del bitstream. |
 | `ref/trader.py` | Referencia en Python, con las mismas operaciones. |
-| `ref/market.py` | Mercado de la maestra, porte del testbench. |
+| `ref/market.py` | Mercado de la maestra, traducido del testbench a Python. |
 | `tools/equiv.sh` | Compara el `decisiones.csv` del testbench con el de la referencia. |
 | `tb/tb_cpi.sv` | Mide IC, ciclos y CPI por tick. |
 | `docs/mediciones/ticks_software.txt` | Resultado de `make medir-ticks`. |
@@ -18,8 +18,8 @@ Archivos relacionados:
 
 En cada tick la maestra manda un precio `p` entre 1 y 255. El programa mantiene una media exponencial del precio y compara el precio con esa media:
 
-- si el precio está más de 3 unidades bajo la media, quiere estar adentro (con acciones);
-- si el precio volvió a quedar sobre la media, quiere estar afuera (con caja);
+- si el precio está más de 3 unidades bajo la media, quiere estar comprado (con acciones);
+- si el precio volvió a quedar sobre la media, quiere estar en caja (sin acciones);
 - si no pasa ninguna de las dos cosas, se queda como estaba.
 
 Es `max_media`, la regla base de reversión a la media con el umbral de entrada en 3 unidades en vez de 4 (decisión T51). Hasta el 15/11 el programa usaba 4 unidades; el único cambio en el código es la constante `UMBRAL_COMPRA`, de -128 a -96, así que todo lo que sigue sobre estructura, ciclos y mediciones por tick vale igual para las dos. La idea es que la serie de práctica tiende a volver a su nivel reciente: razón de varianza 0,77 a 10 ticks y 0,53 a 100 ticks, en los 20 bloques de 1000 ticks (`make hallazgos`). Comprar cuando el precio cayó respecto a su media y vender cuando la recupera gana justo cuando eso se cumple.
@@ -28,10 +28,10 @@ Es `max_media`, la regla base de reversión a la media con el umbral de entrada 
 
 No decide una cantidad variable. La orden es siempre por 63 acciones, el máximo:
 
-- adentro: `0x7F`, acción 01 (comprar) y cantidad 63;
-- afuera: `0xBF`, acción 10 (vender) y cantidad 63.
+- comprado: `0x7F`, acción 01 (comprar) y cantidad 63;
+- en caja: `0xBF`, acción 10 (vender) y cantidad 63.
 
-La maestra recorta la compra a lo que alcanza con la caja y la venta a las acciones que se tienen, y una orden que queda en cero no se ejecuta ni paga comisión (tarea `ejecutar` de `tb/tb_proyecto_4.sv`). Por eso repetir "comprar 63" tick tras tick no cuesta nada una vez que la caja se acabó. El programa expresa una posición objetivo (todo adentro o todo afuera) y la maestra hace el resto. Esto tiene dos ventajas: el programa no necesita llevar la contabilidad, y no hay forma de que su contabilidad se desincronice de la oficial.
+La maestra recorta la compra a lo que alcanza con la caja y la venta a las acciones que se tienen, y una orden que queda en cero no se ejecuta ni paga comisión (tarea `ejecutar` de `tb/tb_proyecto_4.sv`). Por eso repetir "comprar 63" tick tras tick no cuesta nada una vez que la caja se acabó. El programa expresa una posición objetivo (todo comprado o todo en caja) y la maestra hace el resto. Esto tiene dos ventajas: el programa no necesita llevar la contabilidad, y no hay forma de que su contabilidad se desincronice de la oficial.
 
 El límite de 63 acciones por orden hace que entrar o salir tome varios ticks. En la serie de práctica el precio va de 72 a 190 (media 128): con la caja inicial de 10 000 se compran unas 80 acciones, o sea dos órdenes en dos ticks seguidos y dos comisiones. Cuando el patrimonio crece hacen falta más: al final de la serie de práctica se llegan a tener 339 acciones, que son seis órdenes para entrar y seis para salir. En total `max_media` entra 123 veces y ejecuta 624 órdenes (la regla base entraba 75 veces, con 388 órdenes). Este costo de entrada es un dato para el frente del algoritmo.
 
@@ -116,7 +116,7 @@ La media se actualiza después de escribir la decisión, para que la respuesta s
 |----------|-----|
 | `x2` | Base del esclavo SPI, `0x8001_0000`. |
 | `x3` | `S`, la media por 32. |
-| `x4` | `pos`: 0 afuera, 1 adentro. |
+| `x4` | `pos`: 0 en caja, 1 comprado. |
 | `x5` | `p`, el último precio. |
 | `x6` | `32 p`, y después `dev`. |
 | `x7`, `x9` | Temporales. |
@@ -147,7 +147,7 @@ Control negativo: si la referencia no modela los precios que se pierden en el re
 
 **Nota del 16/11.** Las cifras de patrimonio de esta tabla son de la regla base, que `sw/trade.s` corrió hasta el 15/11. Con `max_media` (T51), el gemelo da 26 070 a 0,1 ms, 1 ms y 10 ms (`build/gemelo --hex sw/trade.hex --periodo-ns N`), idéntico a `ref/trader.py`; la estructura y los ciclos no cambian.
 
-La regla base da 27 062 sobre la serie completa cuando el programa ve todos los precios (`python3 ref/trader.py tb/practica.csv`). En el testbench da 26 795 a 0,1 ms y 27 306 a 1 ms. La diferencia es el reset largo de la placa (decisión T3): dura 4095 ciclos, 164 us, y el testbench manda el primer precio a los 4 us. A 0,1 ms el programa no ve los precios de los ticks 0 y 1, y a 1 ms y 10 ms no ve el del tick 0. La media parte entonces en otro precio y las primeras operaciones cambian.
+La regla base da 27 062 sobre la serie completa cuando el programa ve todos los precios (`python3 ref/trader.py tb/practica.csv`). En el testbench da 26 795 a 0,1 ms y 27 306 a 1 ms. La diferencia es el reset largo de la placa (decisión T3): dura 4095 ciclos, 164 µs, y el testbench manda el primer precio a los 4 µs. A 0,1 ms el programa no ve los precios de los ticks 0 y 1, y a 1 ms y 10 ms no ve el del tick 0. La media parte entonces en otro precio y las primeras operaciones cambian.
 
 `ref/trader.py` modela esto con `ticks_perdidos(periodo_ns)`: los primeros precios no se entregan a la estrategia, y la maestra sigue leyendo `0x00` (mantener) hasta que el programa responde al primer precio que sí ve. En la competencia la placa está encendida antes del primer precio y no se pierde ninguno.
 
@@ -160,8 +160,8 @@ La regla base da 27 062 sobre la serie completa cuando el programa ve todos los 
 
 | Ventana | IC promedio | IC peor caso | Ciclos promedio | Ciclos peor caso | CPI | Tiempo promedio | Tiempo peor caso |
 |---------|-------------|--------------|-----------------|------------------|-----|-----------------|------------------|
-| Respuesta | 19,5 | 21 | 41,0 | 44 | 2,10 | 1,64 us | 1,76 us |
-| Tick completo | 28,5 | 30 | 63,0 | 66 | 2,21 | 2,52 us | 2,64 us |
+| Respuesta | 19,5 | 21 | 41,0 | 44 | 2,10 | 1,64 µs | 1,76 µs |
+| Tick completo | 28,5 | 30 | 63,0 | 66 | 2,21 | 2,52 µs | 2,64 µs |
 
 Los valores son los mismos en las tres rondas, porque el trabajo por tick no depende del período. Contra el T de cada ronda:
 
@@ -196,7 +196,7 @@ Además el testbench cambia `SCLK` justo en un flanco del reloj de 25 MHz, y el 
 
 ### El peor caso sobre todas las fases
 
-El testbench oficial solo recorre cuatro de las ocho fases del lazo. Con el gemelo digital (`docs/gemelo.md`) se barrieron las ocho, moviendo el inicio de la primera transacción de a 40 ns, con las dos formas de resolver la coincidencia de `SCLK`:
+El testbench oficial solo recorre cuatro de las ocho fases del lazo. Con el gemelo digital (`docs/gemelo.md`) se barrieron las ocho, moviendo el inicio de la primera transacción en pasos de 40 ns, con las dos formas de resolver la coincidencia de `SCLK`:
 
 | Caso | Respuesta (ciclos) | Tick completo (ciclos) |
 |------|--------------------|------------------------|

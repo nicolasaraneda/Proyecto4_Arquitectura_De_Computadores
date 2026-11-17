@@ -3,7 +3,7 @@
 Grupo: Nicolás Araneda, Vicente Calderón y Santiago Muñoz.
 Arquitectura de Computadores, Universidad de los Andes, 2026-2.
 
-Documento de estudio del paquete P6: un bitstream que prueba en la Go Board, sin la maestra del curso, que el SoC de cada peldaño decide lo mismo que su referencia. Es lo que pide la puerta de placa del plan (sección 16.4): "la firma de las decisiones que muestra la placa coincide con la calculada por el gemelo, en los tres períodos".
+Documento de estudio del paquete P6: un bitstream que prueba en la Go Board, sin la maestra del curso, que el SoC de cada peldaño decide lo mismo que su referencia. Es lo que pide la puerta de placa (`docs/puertas.md`, sección "Puerta de placa"): "la firma de las decisiones que muestra la placa coincide con la calculada por el gemelo, en los tres períodos".
 
 | Archivo | Qué es |
 |---------|--------|
@@ -21,7 +21,7 @@ La maestra real existe un solo día (26/11). Si ese día algo falla, hay que sab
 
 No reemplaza a la prueba con la maestra: la autoprueba genera los precios dentro de la FPGA, con el mismo reloj, así que no prueba la sincronización con una maestra externa ni los cables del PMOD.
 
-## 2. Qué hay adentro
+## 2. Qué contiene
 
 ```
             Go Board
@@ -38,7 +38,7 @@ No reemplaza a la prueba con la maestra: la autoprueba genera los precios dentro
 
 - **El SoC**: `pochoco_soc` tal cual, con el programa del peldaño. Sus salidas de LED y 7 segmentos quedan sin conectar, así que la síntesis elimina los registros que las manejan: la telemetría de `sw/fondo.s` no se ve en esta versión. Sus botones se leen en 0, como en el testbench.
 - **La maestra interna** manda un precio por período y lee el byte de DECISION, con una transacción SPI modo 0 como la del testbench oficial.
-- **Los precios**: una caminata aleatoria. Parte en 128 y en cada tick sube o baja 1 según el bit nuevo de un LFSR de 16 bits (x^16 + x^14 + x^13 + x^11 + 1, semilla 0xACE1 en R0 y 0x3CA1 en R1 y R2, sección 8), sin salir de 1 a 255. Con 2000 ticks y la semilla de R0 va de 105 a 151 y `max_media` cambia de decisión 57 veces: se ejercita el algoritmo, no solo la comunicación.
+- **Los precios**: un paseo aleatorio. Parte en 128 y en cada tick sube o baja 1 según el bit nuevo de un LFSR de 16 bits (x^16 + x^14 + x^13 + x^11 + 1, semilla 0xACE1 en R0 y 0x3CA1 en R1 y R2, sección 8), sin salir de 1 a 255. Con 2000 ticks y la semilla de R0 va de 105 a 151 y `max_media` cambia de decisión 57 veces: se ejercita el algoritmo, no solo la comunicación.
 - **La firma**: CRC-16/CCITT (polinomio 0x1021, valor inicial 0xFFFF) de los 2000 bytes leídos por MISO, bit a bit en el orden en que llegan. Un solo bit distinto en cualquier byte cambia la firma.
 - **La firma esperada** va dentro del bitstream como parámetro. Al terminar, un LED dice si coinciden.
 
@@ -54,7 +54,7 @@ La maestra se diseñó para costar lo menos posible, porque R0 ocupa el 85 % de 
 | 288 | Última bajada de SCLK |
 | 304 | Sube CS_n |
 
-Con un medio período de 16 ciclos, `t[4]` es el nivel de SCLK y `t[8:5]` el número de bit: no hace falta contador de fase ni de bit. SCLK queda en 781 kHz, dentro del rango de 100 kHz a 1 MHz que pide la puerta. La transacción dura 12,16 us (la del oficial, 9,5 us).
+Con un medio período de 16 ciclos, `t[4]` es el nivel de SCLK y `t[8:5]` el número de bit: no hace falta contador de fase ni de bit. SCLK queda en 781 kHz, dentro del rango de 100 kHz a 1 MHz que pide la puerta. La transacción dura 12,16 µs (la del oficial, 9,5 µs).
 
 La primera versión copiaba los tiempos del oficial (SCLK de 1 MHz con medio período de 12,5 ciclos, redondeado a 13) con contadores de fase y bit y un CRC byte a byte: 233 LUT solo la maestra, y el total con R0 llegaba a 1340 celdas de 1280. La versión actual cuesta unas 186 celdas sobre R0 (sección 4).
 
@@ -81,7 +81,7 @@ Después de una corrida los botones de período no hacen nada. Para probar otro 
 1. **Con el gemelo digital** (`docs/gemelo.md`), corriendo el mismo `.hex` con la misma serie y los tiempos de la maestra interna (`--cs-setup-ns 1280 --sclk-medio-ns 640 --cs-hold-ns 640`), a los tres períodos. El gemelo está validado ciclo a ciclo contra el RTL.
 2. **Con la referencia del algoritmo** (`ref/trader.py` para R0, `ref/fondo.py` para R1 y R2), sin modelo de hardware.
 
-Para R0 las cuatro dan `a23c`; para R1 y R2, con su caminata, `15d7` (sección 8). Que la firma sea la misma a los tres períodos es la prueba de que el programa responde siempre antes del tick siguiente: si una decisión llegara tarde, la maestra leería el byte anterior y la firma cambiaría.
+Para R0 las cuatro dan `a23c`; para R1 y R2, con su paseo, `15d7` (sección 8). Que la firma sea la misma a los tres períodos es la prueba de que el programa responde siempre antes del tick siguiente: si una decisión llegara tarde, la maestra leería el byte anterior y la firma cambiaría.
 
 ## 4. Verificación y recursos
 
@@ -99,7 +99,7 @@ El testbench hace lo que haría una persona: espera medio milisegundo, aprieta e
 
 ## 5. Comandos para la placa
 
-Estos los corre Nicolás (el plan no permite que una sesión ejecute `iceprog`). Desde la raíz del repositorio, en WSL:
+Estos los corre Nicolás (la grabación de la placa la hace siempre él). Desde la raíz del repositorio, en WSL:
 
 1. **Comprobar el archivo.** `cd bitstreams && sha256sum -c SHA256SUMS && cd ..`. Debe decir `autoprueba_r0.bin: OK`: es el bitstream que pasó todo lo de la sección 4, y su sha256 (`901c0eac...`) está también en `docs/mediciones/autoprueba_r0.txt`. `make autoprueba-r0` lo reconstruye desde las fuentes (unos 20 minutos), pero desde que P5 cambió `rtl/*.v` sale con la misma lógica en otra ubicación y otro hash, como le pasó a R0 de competencia (T62). Vale el archivo guardado.
 2. **Conectar la placa a WSL**, si `iceprog` no la encuentra. En una PowerShell de Windows como administrador: `usbipd list` muestra los dispositivos USB; la Go Board aparece como un FTDI (0403:6010). `usbipd bind --busid X-Y` la comparte (una sola vez), y `usbipd attach --wsl --busid X-Y` la pasa a WSL (cada vez que se conecta). En WSL, `lsusb` debe mostrar el FTDI.
@@ -152,11 +152,11 @@ El top y la maestra son los mismos. Todo lo nuevo son parámetros, con el valor 
 |-------------------|----|----|----|----------|
 | Definiciones del SoC | ninguna | `-DESPINO_BARREL -DESPINO_XD_EMAD -DESPINO_XD_DEVK -DESPINO_TABLA` | las de R1 y `-DESPINO_VIGILANTE` | El hardware del peldaño, como en `docs/tabla_vigilante.md` |
 | Programa y tabla | `sw/trade.s` | `sw/fondo.s` y `sw/fondo_tabla.hex` | igual que R1 | `TablaFile` llega a la BRAM de la tabla |
-| `SEMILLA` del LFSR | 0xACE1 | 0x3CA1 | 0x3CA1 | Con la caminata de R0 el fondo decide igual que `max_media` y no se vería un gestor colgado (T87) |
+| `SEMILLA` del LFSR | 0xACE1 | 0x3CA1 | 0x3CA1 | Con el paseo de R0 el fondo decide igual que `max_media` y no se vería un gestor colgado (T87) |
 | `CONTINUO` | 0 | 0 | 1 | En R2 la maestra sigue mandando precios después de la firma, para la prueba de media hora (T90) |
 | Eco de la UART y MISO del PMOD en 0 | sí | sí | sí | Para medir el relevo (sección 10). No usa lógica |
 
-La caminata de 0x3CA1 va de 87 a 152. En ella el fondo cambia de decisión 44 veces y difiere de `max_media` en 51 ticks. Por eso la firma dice algo de los gestores:
+El paseo de 0x3CA1 va de 87 a 152. En ella el fondo cambia de decisión 44 veces y difiere de `max_media` en 51 ticks. Por eso la firma dice algo de los gestores:
 
 | Lo que corre en la FPGA | Firma |
 |-------------------------|-------|
@@ -186,7 +186,7 @@ La imagen con el supervisor colgado sale de la misma síntesis que la autoprueba
 | Supervisor colgado en el tick 100 | | Con SW3, SW2 y SW1, BOOT sube con S1 S0 = 01 al terminar la transacción 103 (la quinta sin respuesta, 99 + 4), 12 320 ns después del comienzo del tick: con CS_n ya en alto y lejos de la transacción siguiente. Es lo que predice `tools/vigilante/relevo_ref.py` |
 | Bitstream ruteado (icebox_vlog y Verilator) | SW3: firma `15d7`, LED2 y LED3 | SW3: firma `15d7`, 2 s en modo continuo sin disparo. La imagen con la falla: BOOT en el mismo instante que el RTL. La testigo: LED, "--", "00" con SW4, eco y MISO |
 | Testigo en RTL (minuto de 1000 ciclos) | | LED, "--", y con SW4 "00", "01", "02" y "99" al pasar 122 minutos (se detiene) |
-| Media hora en el gemelo (T90) | | La caminata de la media hora completa: 180 000, 1 800 000 y 18 000 000 precios, entre 1 y 255 (toca los dos topes). Peor caso de respuesta 442 ciclos, con 2 196 disponibles a 0,1 ms: todo precio se responde antes del siguiente, así que la cuenta del vigilante no pasa de 1 |
+| Media hora en el gemelo (T90) | | El paseo de la media hora completa: 180 000, 1 800 000 y 18 000 000 precios, entre 1 y 255 (toca los dos topes). Peor caso de respuesta 442 ciclos, con 2 196 disponibles a 0,1 ms: todo precio se responde antes del siguiente, así que la cuenta del vigilante no pasa de 1 |
 | Imágenes múltiples | | `tools/ver_multi.py`: encendido y S1 S0 = 00, 10 y 11 apuntan a la imagen 0, 01 a la testigo; las dos copiadas sin cambios; 64 600 de 131 072 bytes |
 
 ### 8.3 Recursos
@@ -254,11 +254,11 @@ Si aparece la testigo, el relevo funciona en la placa: el vigilante dentro del b
 
 ## 10. Medir el tiempo del relevo
 
-La hoja de datos da 53 ms típicos para configurar la HX1K desde la flash, sin máximo. **El 16/11 se midió por la UART: 35,50 ms** (35,42 a 35,59, una medición; `docs/mediciones/placa_16nov.md`). Faltan las otras dos mediciones del paso 4 de 10.1. Es lo que más pesa en cuántos ticks pierde R2 si dispara: el vigilante gasta 5 y el reset de R0 0,164 ms. La FPGA pierde todo su estado al reconfigurarse, así que la medición tiene que ser externa. `relevo_r2_multi.bin` está preparado para tres formas, de la más exacta a la más simple. Las tres miden lo mismo: el tiempo en que los pines quedan sueltos, desde que sube BOOT hasta que arranca la testigo (T92).
+La hoja de datos da 53 ms típicos para configurar la HX1K desde la flash, sin máximo. **El 16/11 se midió por la UART: 35,50 ms** (35,42 a 35,59, una medición; `docs/mediciones/placa_16nov.md`). Faltan las otras dos mediciones del paso 4 de 10.1. Es lo que más pesa en cuántos ticks pierde R2 si dispara: el vigilante gasta 5 ticks y el reset de R0, 0,164 ms. La FPGA pierde todo su estado al reconfigurarse, así que la medición tiene que ser externa. `relevo_r2_multi.bin` está preparado para tres formas, de la más exacta a la más simple. Las tres miden lo mismo: el tiempo en que los pines quedan flotantes (en alta impedancia), desde que sube BOOT hasta que arranca la testigo (T92).
 
 ### 10.1 Por la UART (eco)
 
-Las dos imágenes conectan el pin de recepción de la UART con el de transmisión. El script manda bytes sin pausa y cuenta los que no vuelven; a 115 200 baudios cada uno es 86,8 us.
+Las dos imágenes conectan el pin de recepción de la UART con el de transmisión. El script manda bytes sin pausa y cuenta los que no vuelven; a 115 200 baudios cada uno es 86,8 µs.
 
 1. Programar `relevo_r2_multi.bin` (9.4, paso 1), o desconectar y conectar para partir de la imagen 0 si ya está programado.
 2. `ls /dev/ttyUSB*`. La Go Board aparece como dos puertos: el segundo (normalmente `/dev/ttyUSB1`) es la UART. Si no aparece ninguno, falta `usbipd attach`.
@@ -273,7 +273,7 @@ Filmar la placa en cámara lenta (240 cuadros por segundo) y apretar SW3. En el 
 
 ### 10.3 Con un analizador lógico u osciloscopio
 
-El pin de MISO del PMOD (pin 63 de la FPGA, el mismo que usa la maestra real) está en 0 en las dos imágenes. Durante el relevo queda suelto y el pull-up interno lo sube: el ancho del pulso en alto es el tiempo buscado. Disparar con el flanco de subida y apretar SW3.
+El pin de MISO del PMOD (pin 63 de la FPGA, el mismo que usa la maestra real) está en 0 en las dos imágenes. Durante el relevo queda flotante (en alta impedancia) y el pull-up interno lo sube: el ancho del pulso en alto es el tiempo buscado. Disparar con el flanco de subida y apretar SW3.
 
 ### 10.4 Qué hacer con el número
 

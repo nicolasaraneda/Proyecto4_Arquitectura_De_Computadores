@@ -20,7 +20,7 @@ El enunciado dice que en la defensa "se harán preguntas sobre cualquier parte d
 
 La propuesta del encargo (Nicolás el RTL y la verificación, Vicente el algoritmo y el co-diseño, Santiago el fondo, el vigilante y la operación del día) se mantiene, con dos ajustes:
 
-1. **`sw/trade.s` pasa a Vicente.** El punto 3.2 del enunciado (assembly y mediciones por tick) está pegado al algoritmo: punto fijo, cómo se hace la división sin shifter, por qué no hay saltos que dependan del precio, y qué parte consume más ciclos, que es la entrada del perfil y de Amdahl del punto 3.3. Así Vicente cubre de punta a punta los puntos 3.1, 3.2 y 3.3 del informe.
+1. **`sw/trade.s` pasa a Vicente.** El punto 3.2 del enunciado (assembly y mediciones por tick) está pegado al algoritmo: punto fijo, cómo se hace la división sin shifter, por qué no hay saltos que dependan del precio, y qué parte consume más ciclos, que es la entrada del perfil y de Amdahl del punto 3.3. Así Vicente cubre completos los puntos 3.1, 3.2 y 3.3 del informe.
 2. **`sw/fondo.s` es de Santiago entero**, incluido el assembly y no solo el protocolo. Y Santiago acompaña a Nicolás el 26/11: es el dueño de la operación del día y del árbol de decisión, y lo que se vea con la maestra es lo que va a tener que defender.
 
 | Persona | Dueño de | Documentos de estudio | Preguntas del banco que responde en profundidad |
@@ -35,12 +35,12 @@ La propuesta del encargo (Nicolás el RTL y la verificación, Vicente el algorit
 
 Sin mirar nada, cada uno de los tres:
 
-1. **Las preguntas [B] y [I] de todo el banco.** Son 77 de las 155: 53 [B] y 24 [I]. Las [I] tienen respuestas honestas ya escritas: hay que decirlas así, sin esconder lo que se aceptó a sabiendas.
-2. **El recorrido de un tick**, de punta a punta: la maestra baja `CS_n` y manda el precio; `byte_done`; el programa sale del sondeo, lee `PRICE`, calcula `dev`, decide sin saltos, escribe `DECISION` una vez; el byte sale en la transacción siguiente y la maestra lo ejecuta al precio de ese tick. En R0 (`sw/trade.s:91` a `:129`) y en R1 (supervisor, gestores y votos, `docs/defensa/fondo.md`, sección 3).
+1. **Las preguntas [B] y [I] de todo el banco.** Son 77 de las 155: 53 [B] y 24 [I]. Las [I] tienen respuestas ya escritas: hay que decirlas así, sin esconder lo que se aceptó a sabiendas.
+2. **El recorrido completo de un tick**: la maestra baja `CS_n` y manda el precio; `byte_done`; el programa sale del sondeo, lee `PRICE`, calcula `dev`, decide sin saltos, escribe `DECISION` una vez; el byte sale en la transacción siguiente y la maestra lo ejecuta al precio de ese tick. En R0 (`sw/trade.s:91` a `:129`) y en R1 (supervisor, gestores y votos, `docs/defensa/fondo.md`, sección 3).
 3. **La escalera R0, R1 y R2**, qué hardware tiene cada peldaño y el árbol de decisión del 1/12 (`docs/arbol_decision.md`).
 4. **La ley de hierro aplicada a cada pieza**: segmentado y barrel atacan el CPI, la extensión el IC, el PLL atacaría Tclk y no existe en el VQ100.
 5. **Las cifras de `docs/defensa/cifras.md`** que están en negrita o que aparecen en las preguntas [B]: celdas y frecuencia de R0, R1 y R2; 41/44/49 y 223/443/444 ciclos; presupuestos 249 762, 24 762 y 2 262; 19,6 %; CPI 2, 1,350, 1 y 4; 25 973, 27 062, 6 497 y 10 000; +0,007 y -0,005; 0,7 % y 1,4 %; 35,50 ms medidos (53 de la hoja de datos) y 361 ticks; 110 y 115 kHz.
-6. **Qué está probado y qué no** (`docs/defensa/resumen.md`): todo es simulación hasta el 26/11.
+6. **Qué está probado y qué no** (`docs/defensa/resumen.md`): la puerta de simulación completa en los tres peldaños; en la placa, R2 a 0,1 ms y media hora sin disparo, el relevo medido en 35,50 ms y la mitad baja de la firma de R0 (`docs/mediciones/placa_16nov.md`); la maestra real, el 26/11.
 
 ## 4. Calendario de estudio
 
