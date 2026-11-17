@@ -10,7 +10,9 @@
 # inducción (prove) y alcanzabilidad de un precio normal (cover). Con el RTL de
 # main la prueba falla y deja el contraejemplo en
 # build/p10/formal_spi/spi_prove/engine_0/trace.vcd: es la reproducción formal
-# del hallazgo. Con RTL=build/p10/wt1/rtl (rama p10-arreglo-1) pasa.
+# del hallazgo. Con el arreglo de la rama p10-arreglo-1 (parámetro CsLimpia
+# del esclavo, que el SoC pone en 1 con el barrel) pasa:
+#   CSLIMPIA=1 RTL=build/p10/wt1/rtl O=build/p10/formal_spi_arreglo tools/p10/formal_spi.sh
 #
 # Uso: tools/p10/formal_spi.sh   (o make p10-formal-spi). Variables: RTL y O
 # (carpeta de trabajo, por defecto build/p10/formal_spi). Termina con error si
@@ -39,6 +41,7 @@ smtbmc yices
 [script]
 read_verilog -formal pochoco_spi_slave.v
 read_verilog -formal spi_byte.v
+$( [ "${CSLIMPIA:-0}" = 1 ] && echo "chparam -set CsLimpia 1 pochoco_spi_slave" )
 prep -top spi_byte
 
 [files]
