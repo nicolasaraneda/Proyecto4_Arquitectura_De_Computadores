@@ -33,7 +33,7 @@ La prueba se hizo dos veces. La primera corrida (madrugada del 17/11) llegó has
 | 10 | `:68` | `make tb` | 1.ª | Funciona | 155 s | 4/4. |
 | 11 | `:68` | `make fondo-oficial HW=r1` | 1.ª | Funciona | 268 s | "PASS: 4/4", `decisiones.csv` idéntico al de `ref/fondo.py` (2001 líneas), peor caso 443 de 2 262. **Reescribe un archivo versionado**: `docs/mediciones/fondo/r1/oficial.txt` (solo cambia la línea "Commit de partida"). Ver H4. |
 | 12 | `:68` | `make fondo-oficial HW=r2` | 1.ª | Funciona | 312 s | Código de salida 0. El registro detallado se perdió con la caída. |
-| 13 | `:72` | `make check` | | No corrido | | Ver sección 4. |
+| 13 | `:72` | `make check` | 2.ª, por partes | Funciona | 5,3 s más los pasos 3, 8 y 20 | No se corrió de una vez para no repetir el testbench oficial. Sus cinco partes sí: `test-asm` (paso 3), `test-ref` (paso 20), `test-candidatos` (15 tests, OK, 5,1 s), `check-hex` (`cmp` sin diferencias) y `tb` (pasos 8 y 10). |
 | 14 | `:73` | `make equiv` | | No corrido | | Ver sección 4. |
 | 15 | `:74` | `make check-fondo HW=r1` | | No corrido | | Ver sección 4. |
 | 16 | `:75` | `make fondo-puerta HW=r1` | | No corrido | | Ver sección 4. |
@@ -48,7 +48,7 @@ La prueba se hizo dos veces. La primera corrida (madrugada del 17/11) llegó has
 | 25 | `:106` | `make prog` | | No ejecutable en este entorno | | Llama a `iceprog`. |
 | 26 | `:107` | `make r0-reproducir` | | No corrido | | Ver sección 4. |
 | 27 | `:108` | `make fondo-bitstreams` | | No corrido | | Documentado en unos 25 minutos en el `Makefile`; el README no lo dice. Lanza 4 síntesis y después 6 simulaciones en paralelo (`tools/fondo/bitstreams.sh:90` a `:93` y `:132` a `:137`), más que el límite de 4 procesos de esta auditoría. Ver sección 4 y H2. |
-| 28 | `:111` | `make sim-bitstream` | | (en la cola) | | Documentado en unos 8 minutos en el `Makefile`. Es el comando largo representativo de esta corrida. |
+| 28 | `:111` | `make sim-bitstream` | 2.ª | Funciona | 438 s | "PASS bitstream build/pochoco_soc.asc: 2000 ticks a 100000 ns identicos a ref/trader.py, patrimonio 9661". Es el comando largo representativo de esta corrida; la demora coincide con los 8 minutos del `Makefile`. Simula el `.asc` que dejó el paso 24 (fuentes actuales), no el bitstream guardado de R0. |
 | 29 | `:119` | `make tabla-3-1` | 2.ª | Funciona | 0,1 s | Reescribe `docs/mediciones/tabla_3_1.txt` idéntico (sin diferencias en `git status`). |
 | 30 | `:179` | `make retune-control` | 2.ª | Funciona | 1,2 s | "PASS control: con las reglas publicadas no cambia nada"; arma R0, R1, R2 y la imagen múltiple con `icebram` y los cuatro `.bin` tienen el mismo sha256 que los de `bitstreams/` (confirma `README.md:180`). Avisa que los `.asc` no se simularon por los pines (eso es `--simular`). |
 | 31 | `:173` | `make p7-rapido` | 2.ª | Funciona | 0,2 s | "282 macros en docs/mediciones/p7/cifras.tex"; todos los archivos de `docs/mediciones/p7/` quedan idénticos. |
@@ -76,7 +76,6 @@ Por la regla de esta auditoría (los comandos pesados se corren de a uno por la 
 
 | Comando | README | Demora documentada | Por qué no |
 |---------|--------|--------------------|------------|
-| `make check` | `:72` | Unos 3 minutos (incluye el testbench oficial) | Pesado; el testbench oficial ya se corrió (pasos 8 a 10). Lo corre la integración continua en cada push. |
 | `make equiv` | `:73` | No documentada (Verilator sobre 20 000 ticks dos veces y 13 series) | Pesado. |
 | `make check-fondo HW=r1` | `:74` | No documentada | Pesado. |
 | `make fondo-puerta HW=r1` | `:75` | No documentada en el README; incluye `fondo-equiv-ronda1` (35 minutos según el `Makefile`) | Largo. Se intentó en la primera corrida como comando representativo y la caída de la máquina lo interrumpió. |
@@ -98,7 +97,7 @@ Por la regla de esta auditoría (los comandos pesados se corren de a uno por la 
 
 ## 5. Resumen
 
-- Comandos distintos corridos: 22 (12 en la primera corrida y 18 en la segunda, 8 de ellos repetidos). Funcionaron todos menos uno.
+- Comandos distintos corridos: 24, contando `make check` por partes (12 en la primera corrida y 20 en la segunda, 8 de ellos repetidos). Funcionaron todos menos uno.
 - Comando que falló: `python3 tools/pochoasm.py sw/fondo.s -o build/fondo/fondo.hex` (`README.md:56`), en las dos corridas.
 - Hallazgos: 1 error (H1) y 6 sugerencias (H2 a H7).
-- No corridos: 26 comandos del README, por la regla de la cola; 3 no ejecutables en este entorno.
+- No corridos: 25 comandos del README, por la regla de la cola; 3 no ejecutables en este entorno.
