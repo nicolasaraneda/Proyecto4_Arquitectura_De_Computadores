@@ -854,8 +854,11 @@ exhibicion:
 #                     colgado o atrasado, por el RTL de R1
 #   p10-formal-spi    propiedad formal del esclavo SPI: un precio solo se completa
 #                     con CS_n en bajo (falla con el RTL de main: hallazgo 1)
-.PHONY: p10 p10-ro-custom0 p10-spi-7flancos p10-vuelta-tick p10-largo p10-sclk-degradado p10-formal-spi
-p10: p10-ro-custom0 p10-vuelta-tick p10-largo p10-sclk-degradado p10-spi-7flancos p10-formal-spi
+#   p10-rondas-sin-reset  costo de no reiniciar la placa entre rondas, con las
+#                     referencias (docs/mediciones/p10/rondas_sin_reset.txt)
+.PHONY: p10 p10-ro-custom0 p10-spi-7flancos p10-vuelta-tick p10-largo p10-sclk-degradado p10-formal-spi \
+        p10-rondas-sin-reset
+p10: p10-ro-custom0 p10-vuelta-tick p10-largo p10-sclk-degradado p10-rondas-sin-reset p10-spi-7flancos p10-formal-spi
 p10-ro-custom0:
 	tools/p10/ro_custom0.sh
 p10-spi-7flancos:
@@ -868,3 +871,7 @@ p10-sclk-degradado:
 	tools/p10/sclk_degradado.sh
 p10-formal-spi:
 	tools/p10/formal_spi.sh
+p10-rondas-sin-reset:
+	mkdir -p docs/mediciones/p10
+	$(PYTHON) tools/p10/rondas_sin_reset.py > docs/mediciones/p10/rondas_sin_reset.txt; \
+	  r=$$?; cat docs/mediciones/p10/rondas_sin_reset.txt; exit $$r
