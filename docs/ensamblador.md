@@ -6,7 +6,7 @@ Este documento describe el ensamblador del proyecto, que traduce programas en as
 
 El testbench oficial del Proyecto 4 espera el comando `python3 tools/pochoasm.py sw/trade.s -o sw/trade.hex`, pero el repositorio base del curso no trae ese archivo. Usamos el ensamblador que el grupo escribió para el Proyecto 2 y amplió en el Proyecto 3 (ahí se llamaba `assembler/asm.py`), con el nombre y la interfaz que pide el testbench. Del Proyecto 3 vienen las salidas en Verilog (`--vh` y `--rom`). En este proyecto se agregó la directiva `.org`. El punto de entrada es `tools/pochoasm.py` y los módulos están en `tools/asm/`.
 
-Está escrito en Python 3 sin dependencias y no invoca ninguna herramienta externa, así que no hace falta instalar un toolchain de RISC-V. Por eso se eliminó `sw/Makefile` del repositorio base, que llamaba a `riscv64-unknown-elf-as`: ahora existe una sola regla para generar los `.hex`, en el `Makefile` de la raíz.
+Está escrito en Python 3 sin dependencias y no invoca ninguna herramienta externa, así que no hace falta instalar las herramientas de compilación de RISC-V. Por eso se eliminó `sw/Makefile` del repositorio base, que llamaba a `riscv64-unknown-elf-as`: ahora existe una sola regla para generar los `.hex`, en el `Makefile` de la raíz.
 
 Para comprobar que el ensamblador es correcto, el repositorio base trae tres programas de ejemplo con su `.hex` ya generado (`blink`, `7seg` y `buttons_leds`). `tools/asm/tests/test_golden.py` los ensambla y verifica que salen idénticos, palabra por palabra, a los originales.
 
@@ -35,9 +35,9 @@ python3 tools/pochoasm.py sw/trade.s -o sw/trade.hex
 python3 tools/pochoasm.py sw/trade.s -o build/trade_prueba.hex -D COMPRAR_63=0x41
 ```
 
-El valor de `-D` acepta los mismos literales que el assembler: decimal, `0x` y `0b`. Si el nombre no existe como `.equ` en el archivo, `-D` igual lo define, de modo que se puede usar para pasar constantes que el programa solo lee. Un `-D` mal formado (sin `=`, o con valor no numérico) termina con error y código de salida 1. Al terminar, el assembler imprime cuántas palabras generó.
+El valor de `-D` acepta los mismos literales que el ensamblador: decimal, `0x` y `0b`. Si el nombre no existe como `.equ` en el archivo, `-D` lo define de todos modos, de modo que se puede usar para pasar constantes que el programa solo lee. Un `-D` mal formado (sin `=`, o con valor no numérico) termina con error y código de salida 1. Al terminar, el ensamblador imprime cuántas palabras generó.
 
-**Por qué los shifts se rechazan por defecto.** La ALU del Espino Core, para ahorrar LUTs, ejecuta `sll`, `srl` y `sra` (y sus variantes con inmediato) como una suma. El decodificador los reconoce bien, pero el resultado es el de un `add`. Si el assembler los emitiera sin avisar, se obtendría un binario que ensambla sin errores y corre mal, que es el peor tipo de falla porque no deja pistas. Por eso el assembler los rechaza con un mensaje explicativo, y `--allow-shifts` existe solo para quien sepa lo que hace, por ejemplo con una ALU propia. Mientras el core no tenga shifter, un desplazamiento a la izquierda se hace sumando un registro consigo mismo (`add x7, x7, x7`).
+**Por qué los shifts se rechazan por defecto.** La ALU del Espino Core, para ahorrar LUTs, ejecuta `sll`, `srl` y `sra` (y sus variantes con inmediato) como una suma. El decodificador los reconoce bien, pero el resultado es el de un `add`. Si el ensamblador los emitiera sin avisar, se obtendría un binario que ensambla sin errores y corre mal, que es el peor tipo de falla porque no deja pistas. Por eso el ensamblador los rechaza con un mensaje explicativo, y `--allow-shifts` existe solo para quien sepa lo que hace, por ejemplo con una ALU propia. Mientras el core no tenga shifter, un desplazamiento a la izquierda se hace sumando un registro consigo mismo (`add x7, x7, x7`).
 
 ## 3. Sintaxis aceptada
 
@@ -84,7 +84,7 @@ Cualquier otra directiva es un error. Un `.equ` con un nombre repetido también 
 
 ### Dos pasadas
 
-El assembler recorre el archivo dos veces.
+El ensamblador recorre el archivo dos veces.
 
 1. **Primera pasada.** Va con un contador de dirección que parte en 0. Cada instrucción real ocupa 4 bytes. Cada etiqueta se anota en la tabla de símbolos con la dirección actual y cada `.equ` con su valor. Para saber cuánto ocupa cada línea, se calcula el largo de cada pseudo-instrucción (`li` puede ocupar 4 u 8 bytes, según el valor).
 2. **Segunda pasada.** Con la tabla completa, codifica cada línea. En este punto una etiqueta ya tiene dirección aunque esté más adelante en el archivo, y así se resuelven las **referencias hacia adelante**: un `beq x9, x0, fin` puede aparecer antes de `fin:` porque en la primera pasada `fin` ya quedó registrada. Para un salto o bifurcación, el desplazamiento codificado es `dirección de la etiqueta - dirección de la instrucción`.
@@ -154,13 +154,13 @@ lui  x4, 0x04C12
 addi x4, x4, -585
 ```
 
-7. Verificación: `lui` deja `0x04C12000`, y `addi` le suma -585 (`-0x249`): `0x04C12000 - 0x249 = 0x04C11DB7`. ✓
+7. Verificación: `lui` deja `0x04C12000`, y `addi` le suma -585 (`-0x249`): `0x04C12000 - 0x249 = 0x04C11DB7`, que es el valor pedido.
 
 Las dos instrucciones se codifican como `04c12237` y `db720213`. `tools/asm/tests/test_pseudo.py` verifica este caso.
 
 ## 7. Instrucciones soportadas
 
-Las instrucciones base de RV32I que el assembler codifica, listadas abajo. No hay `ecall`, `ebreak`, `fence` ni instrucciones de CSR. Los mnemónicos están en `tools/asm/isa.py`.
+Las instrucciones base de RV32I que el ensamblador codifica, listadas abajo. No hay `ecall`, `ebreak`, `fence` ni instrucciones de CSR. Los mnemónicos están en `tools/asm/isa.py`.
 
 | Formato | Instrucciones                                                        |
 |---------|----------------------------------------------------------------------|
@@ -180,7 +180,7 @@ Más las pseudo-instrucciones de la sección 6.
 
 ## 8. Validaciones y suite de tests
 
-El assembler rechaza con un mensaje de error, indicando el número de línea, los casos siguientes: registro fuera de x0 a x15 o desconocido, shift sin `--allow-shifts`, instrucción de la extensión sin habilitar o con `k` distinto de 5, extensión desconocida, mnemónico o directiva desconocidos, etiqueta o constante repetida o no definida, inmediato fuera de rango, número incorrecto de operandos, operando de memoria mal formado, salto a dirección impar o fuera de alcance, y programa de más de 512 palabras.
+El ensamblador rechaza con un mensaje de error, indicando el número de línea, los casos siguientes: registro fuera de x0 a x15 o desconocido, shift sin `--allow-shifts`, instrucción de la extensión sin habilitar o con `k` distinto de 5, extensión desconocida, mnemónico o directiva desconocidos, etiqueta o constante repetida o no definida, inmediato fuera de rango, número incorrecto de operandos, operando de memoria mal formado, salto a dirección impar o fuera de alcance, y programa de más de 512 palabras.
 
 La suite se corre con `make test-asm` y tiene **124 tests**, repartidos así:
 
@@ -236,7 +236,7 @@ Concatenando de izquierda a derecha:
 0000000 01001 00010 010 00100 0100011
 ```
 
-Agrupado de a 4 bits:
+En grupos de 4 bits:
 
 ```
 0000 0000 1001 0001 0010 0010 0010 0011
@@ -248,11 +248,14 @@ El resultado es **`0x00912223`**.
 Se puede verificar con el propio ensamblador:
 
 ```
+$ mkdir -p build
 $ printf '.equ OFF_LEDS, 4\nsw x9, OFF_LEDS(x2)\n' > build/ejemplo.s
 $ python3 tools/pochoasm.py build/ejemplo.s -o build/ejemplo.hex && cat build/ejemplo.hex
 build/ejemplo.s -> build/ejemplo.hex (1 palabras, 4 bytes)
 00912223
 ```
+
+El mensaje se copia tal como lo imprime el ensamblador, que escribe siempre "palabras" en plural; el archivo generado no cambia por eso.
 
 ## 10. Extensión xd: instrucciones propias en custom-0
 

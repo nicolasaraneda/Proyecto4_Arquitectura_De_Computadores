@@ -35,13 +35,13 @@ Sin ninguna definición. Hoy eso da R0: el Espino base con `max_media`. Si compi
 ```
 git checkout main && git pull
 make peldano-probar PELDANO=r1         # otra vez, con el main de ese día
-make peldano-fijar PELDANO=r1          # el cambio de verdad
+make peldano-fijar PELDANO=r1          # el cambio definitivo
 git status                             # revisar: rtl/00_peldano.v, sw/trade.s, sw/max_media.s y las referencias
 make check                             # todo en verde
 git commit -m "El diseño por defecto es R1"
 ```
 
-Empujar a una rama, esperar la integración continua y recién entonces avanzar `main`. Para deshacer antes del commit: `git checkout -- . && git clean -fd rtl/ sw/`.
+Subir los cambios (push) a una rama, esperar la integración continua y recién entonces avanzar `main`. Para deshacer antes del commit: `git checkout -- . && git clean -fd rtl/ sw/`.
 
 Si compite R0 no hay nada que hacer: ya es el diseño por defecto.
 

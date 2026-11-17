@@ -16,7 +16,7 @@ Un bitstream sube a la escalera solo si pasa tres puertas, en orden: simulación
 |-----|----------|-------------------|
 | 1 | Testbench oficial sin modificar: 4/4 | `make tb` |
 | 2 | Decisiones idénticas a la referencia en los 20 000 ticks de práctica a los tres períodos, y en al menos 1 000 series sintéticas | `make equiv` (gemelo a los tres períodos, Verilator a 0,1 y 1 ms, 13 familias), `make equiv-r3` (Icarus a 0,1 ms), `make equiv-largo` (Verilator a 10 ms) y `make equiv-gemelo` (3810 series del protocolo a los tres períodos) |
-| 3 | Timing a 25 MHz en 10 de 10 semillas, reportando la mínima | `EXIGIR=1 tools/medir_variante.sh base 10` |
+| 3 | Timing a 25 MHz en 10 de 10 semillas, informando la mínima | `EXIGIR=1 tools/medir_variante.sh base 10` |
 | 4 | Peor caso de respuesta barriendo las 8 fases del sondeo y las 4 alineaciones de hilo, menor que la mitad del presupuesto de la ronda 3 (1131 ciclos) | `make fases` (`tools/estres.py --solo fases`). En el core base no hay alineaciones de hilo |
 | 5 | Verificación del core que compite contra el core base, con el generador corregido: al menos 5 millones de instrucciones con más de 90 % distintas, y todas las mutaciones detectadas | Para el barrel, `make barrel-verif` y `make barrel-mutaciones` (decisión T57). Para R0 ver la nota |
 | 6 | Degradación: un hilo gestor en lazo infinito, un voto que nunca llega, un voto atrasado | Para el fondo, P3. No aplica a R0 |
@@ -40,7 +40,7 @@ Medido el 15/11 (paquete P0). Los registros completos están en `docs/mediciones
 | 7 | 60 casos en el rango pedido, todos pasan (`docs/mediciones/estres_base.txt`). SCLK funciona hasta 4 MHz; a 5 MHz no (exploración, decisión T53). Repetido el 15/11 en P4 después de corregir `tb_estres.sv`, cuyas rondas seguidas no cambiaban de período (T81): siguen pasando los 60 |
 | 8 | 2 000 ticks a 0,1 ms del `.asc` ruteado idénticos a la referencia |
 
-R0 pasó la puerta de simulación. Le faltan la de placa (la corre Nicolás con la autoprueba de P6, `docs/autoprueba.md`, sección 5) y la de la maestra real el 26/11.
+R0 pasó la puerta de simulación. De la de placa (la corre Nicolás con la autoprueba de P6, `docs/autoprueba.md`, sección 5) le falta la mitad alta de la firma (sección "Puerta de placa"), y le falta la de la maestra real el 26/11.
 
 
 ## Espino barrel con un programa de un hilo
@@ -87,7 +87,7 @@ Medido el 15/11 (paquete P5). R1 es el barrel con `emad`, `devk` y la tabla de p
 
 Comandos: `make fondo-puerta HW=r1` (criterios 1, 2, 3, 4, 6 y 7), `make fondo-criterio5 HW=r1` y `make fondo-bitstreams` (criterio 8 de los dos peldaños). Con `HW=r2` para R2.
 
-**R1 y R2 pasaron la puerta de simulación.** Les faltan la de placa (autoprueba de P6) y la de la maestra real el 26/11.
+**R1 y R2 pasaron la puerta de simulación.** La de placa (autoprueba de P6) está incompleta: R2 pasó el 16/11 la firma a 0,1 ms y la media hora sin disparo, y R1 no se ha corrido (sección "Puerta de placa"). Les falta la de la maestra real el 26/11.
 
 Lo propio de R2:
 
@@ -112,9 +112,9 @@ La corre Nicolás con las autopruebas de P6 (`docs/autoprueba.md`, secciones 5, 
 
 | Criterio | R0 | R1 | R2 |
 |----------|----|----|----|
-| 1. Firma a 0,1 ms | "3C" con LED2 y LED3 (mitad baja, vista antes); falta la mitad alta, "A2" con SW4 | **Pendiente** | **PASS**: "D7" con LED1 a LED3, LED4 apagado |
+| 1. Firma a 0,1 ms | "3C" con LED2 y LED3 (mitad baja, vista antes); falta la mitad alta, "A2" con SW4 | **Pendiente** | **Pasa**: "D7" con LED1 a LED3, LED4 apagado |
 | 1. Firma a 1 ms y 10 ms | "3C" con LED2 y LED3 en los dos; falta "A2" | **Pendiente** | **Pendiente** |
-| 2. Sin relevo en media hora | No aplica | No aplica | **PASS**: al final "D7" con LED1 a LED3 y "15" con SW4, sin disparo |
+| 2. Sin relevo en media hora | No aplica | No aplica | **Pasa**: al final "D7" con LED1 a LED3 y "15" con SW4, sin disparo |
 | 2. Relevo al inyectar la falla | No aplica | No aplica | **Parcial**: la UART midió un hueco de 35,50 ms, así que hubo reconfiguración, pero no se anotó si apareció la imagen testigo (cuatro LED y "--"). El eco vuelve con cualquiera de las dos imágenes: solo la testigo prueba que cargó la imagen 1 |
 | Tiempo del relevo | No aplica | No aplica | 35,50 ms (35,42 a 35,59), una medición de tres pedidas |
 

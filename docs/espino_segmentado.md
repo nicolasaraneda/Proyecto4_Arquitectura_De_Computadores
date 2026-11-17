@@ -122,7 +122,7 @@ Costo: 32 flip-flops y 64 LUT de multiplexor, que es parte de las 91 celdas que 
 
 Solución: durante el primer ciclo de la carga el core está detenido (`stall`) y el banco no lee (`rf_rd_en_o = ~stall_i`). La lectura de operandos de la instrucción siguiente ocurre en el flanco en que la carga escribe, y el adelantamiento de 5.1 entrega el dato recién cargado. No hace falta un ciclo extra de burbuja: la carga cuesta 2 ciclos haya o no un uso inmediato.
 
-El mismo enable resuelve otro problema: la unidad de carga alinea el byte o la media palabra con los dos bits bajos de la dirección, que salen de la ALU. Si el banco releyera durante la espera, la ALU perdería los operandos de la carga y la alineación usaría una dirección equivocada.
+La misma habilitación resuelve otro problema: la unidad de carga alinea el byte o la media palabra con los dos bits bajos de la dirección, que salen de la ALU. Si el banco releyera durante la espera, la ALU perdería los operandos de la carga y la alineación usaría una dirección equivocada.
 
 ### 5.3 `jal` o `jalr` seguido de uso del enlace
 
@@ -152,7 +152,7 @@ La memoria del fetch es una copia que recibe las mismas escrituras que la de dat
 | `rtl/pochoco_ram.v` | Parámetro `FetchMode`. Con 1, el puerto de instrucciones lee en el flanco de bajada desde una copia propia de la memoria (`mem_f`) y entrega `a_next_o`. Con 2 no hay puerto de instrucciones. |
 | `rtl/espino_core/espino_core.v` | Pasa `Pipeline` y `PcW`, puerto `instr_next_i`, señal `instr_ex` para los testbenches. |
 | `rtl/espino_core/espino_if_stage.v` | Contador de programa de `PcW` bits. |
-| `rtl/espino_core/espino_id_stage.v` | Bloque `g_pipe`: decodificación registrada, sin ciclo de espera, enable de lectura del banco. Bloque `g_base`: el código original. Destino del salto y enlace con `PcW` bits. |
+| `rtl/espino_core/espino_id_stage.v` | Bloque `g_pipe`: decodificación registrada, sin ciclo de espera, habilitación de lectura del banco. Bloque `g_base`: el código original. Destino del salto y enlace con `PcW` bits. |
 | `rtl/espino_core/espino_register_file.v` | Entrada `rd_en_i` y adelantamiento (`Bypass`). |
 
 No cambiaron `espino_decoder.v`, `espino_alu.v`, `espino_load_store_unit.v`, `espino_controller.v`, `pochoco_periph.v` ni `pochoco_spi_slave.v`. Con `Pipeline = 0` cada módulo genera la lógica original.
@@ -205,7 +205,7 @@ nextpnr sí analiza esas rutas con medio período. Se comprobó con un diseño d
 
 En el segmentado la ruta crítica no es de medio ciclo. Es de un ciclo completo, de 18,4 a 19,6 ns según la semilla. En la semilla más lenta es: salida del banco de registros, multiplexor de adelantamiento, sumador de la ALU (dirección de memoria), decodificación de la dirección y habilitación del registro que recuerda de qué periférico se lee. Como nextpnr cuenta doble las rutas de medio ciclo y la frecuencia mínima es 51,1 MHz, ninguna ruta de medio ciclo pasa de 9,8 ns, y dispone de 20.
 
-En el base la ruta crítica mide 22 a 23,6 ns porque incluye la decodificación: la instrucción sale de la BRAM, pasa por el decodificador y recién entonces llega a la ALU. En el segmentado la decodificación está registrada y queda fuera. Por eso el pipeline, que agrega un multiplexor, igual sube la frecuencia máxima.
+En el base la ruta crítica mide 22 a 23,6 ns porque incluye la decodificación: la instrucción sale de la BRAM, pasa por el decodificador y recién entonces llega a la ALU. En el segmentado la decodificación está registrada y queda fuera. Por eso el pipeline, que agrega un multiplexor, aun así sube la frecuencia máxima.
 
 Qué no cubre este análisis: nextpnr supone un reloj con ciclo de trabajo de 50 %. Con los 9,8 ns medidos el diseño tolera un ciclo de trabajo entre 25 % y 75 %. El oscilador de la Go Board está muy lejos de eso, pero es lo primero que hay que mirar el 26/11 si el segmentado falla en la placa y el base no.
 
@@ -247,7 +247,7 @@ Se corre en dos configuraciones. Con el contador de programa de 11 bits, que es 
 
 ### Controles negativos
 
-Una prueba que siempre pasa no prueba nada. `tools/mutaciones.sh` activa, de a una, cinco mutaciones que están en el RTL bajo `ifdef`:
+Una prueba que siempre pasa no prueba nada. `tools/mutaciones.sh` activa, una a la vez, cinco mutaciones que están en el RTL bajo `ifdef`:
 
 | Mutación | Qué rompe | Quién la detecta |
 |----------|-----------|------------------|
@@ -261,7 +261,7 @@ Una prueba que siempre pasa no prueba nada. `tools/mutaciones.sh` activa, de a u
 
 Se evaluó y no se hizo en este tramo. Qué faltaría:
 
-- Agregar al core la interfaz RVFI: por cada instrucción completada, su código, el contador de programa antes y después, los registros leídos con su valor, el registro escrito y el acceso a memoria. Las señales ya existen dentro de `espino_id_stage.v`. Lo delicado es entregar el valor de `rs1` y `rs2` que la instrucción usó de verdad, después del adelantamiento.
+- Agregar al core la interfaz RVFI: por cada instrucción completada, su código, el contador de programa antes y después, los registros leídos con su valor, el registro escrito y el acceso a memoria. Las señales ya existen dentro de `espino_id_stage.v`. Lo delicado es entregar el valor de `rs1` y `rs2` que la instrucción usó realmente, después del adelantamiento.
 - Un envoltorio para SymbiYosys con el banco de registros en flip-flops, porque las BRAM con contenido inicial hacen muy lenta la prueba.
 - Excluir los chequeos de los shifts: la ALU de Espino no los implementa y los ejecuta como una suma, así que fallarían por diseño. También los de excepciones, que Espino no tiene.
 - Restringir los índices de registro a 16: riscv-formal está pensado para 32 registros y Espino es RV32E.
@@ -291,10 +291,10 @@ Las mismas ventanas del punto 3.2 del enunciado (`docs/mediciones/ticks_segmenta
 
 | Ventana | Core | IC promedio | Ciclos promedio | Ciclos peor caso | CPI | Tiempo peor caso |
 |---------|------|-------------|-----------------|------------------|-----|------------------|
-| Respuesta (hasta `DECISION`) | base | 19,5 | 41,0 | 44 | 2,10 | 1,76 us |
-| Respuesta (hasta `DECISION`) | segmentado | 19,2 | 22,0 | 26 | 1,15 | 1,04 us |
-| Tick completo | base | 28,5 | 63,0 | 66 | 2,21 | 2,64 us |
-| Tick completo | segmentado | 28,2 | 34,0 | 38 | 1,21 | 1,52 us |
+| Respuesta (hasta `DECISION`) | base | 19,5 | 41,0 | 44 | 2,10 | 1,76 µs |
+| Respuesta (hasta `DECISION`) | segmentado | 19,2 | 22,0 | 26 | 1,15 | 1,04 µs |
+| Tick completo | base | 28,5 | 63,0 | 66 | 2,21 | 2,64 µs |
+| Tick completo | segmentado | 28,2 | 34,0 | 38 | 1,21 | 1,52 µs |
 
 El peor caso del testbench depende de en qué punto del lazo de sondeo llega el precio. Barriendo todas las fases con el gemelo, el peor caso real es 49 ciclos en el base y 27 en el segmentado. El lazo de sondeo baja de 8 a 5 ciclos, así que la incertidumbre por la fase también baja.
 

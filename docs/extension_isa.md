@@ -102,17 +102,17 @@ La regla de reversión guarda la media por 32 (S) para no perder precisión, y e
 1. La desviación: `dev = 32 p - S`. El Espino no tiene desplazamientos (el shifter completo no cabe en la FPGA), así que 32 p se arma con cinco sumas. Con la resta son 6 instrucciones.
 2. El paso de la media: `S = S + (dev >>> 5)`. Sin desplazamiento a la derecha, `sw/trade.s` lo hace multiplicando por 8 con tres sumas, guardando en memoria y leyendo el segundo byte. Son 8 instrucciones, con un store y un load.
 
-Las dos cosas son un desplazamiento por una constante seguido de una suma o una resta. Un desplazamiento por una constante en hardware no es lógica: son cables. Lo único que hace falta es que el operando A del sumador de la ALU pueda venir desplazado. Eso es toda la extensión.
+Las dos cosas son un desplazamiento por una constante seguido de una suma o una resta. En hardware, un desplazamiento por una constante no necesita compuertas: se implementa solo con cableado. Basta con que el operando A del sumador de la ALU pueda venir desplazado, y eso es lo único que agrega la extensión.
 
-`mulstep` tiene la misma forma (desplazar uno a la izquierda y sumar) y sale casi gratis una vez que existe el multiplexor. Sirve para la contabilidad (acciones por precio). En la sección 9 está la discusión de si llega o no al bitstream de competencia.
+`mulstep` tiene la misma forma (desplazar uno a la izquierda y sumar) y cuesta muy poco una vez que existe el multiplexor. Sirve para la contabilidad (acciones por precio). En la sección 9 está la discusión de si llega o no al bitstream de competencia.
 
 Por qué no un `ema` de una sola instrucción (`rd = rs2 + ((rs1 - rs2) >>> k)`): encadena una resta, un desplazamiento y una suma en un ciclo y necesita un segundo sumador. La factibilidad lo midió sobre el segmentado: 60 a 167 celdas contra 37 de `emad`. Además el programa necesita la desviación de todas formas, para decidir.
 
-Por qué k fijo en 5: con un solo k el desplazamiento son cables. Con k de 0 a 31 hace falta un desplazador delante del sumador, que cuesta unas 160 celdas más y baja la frecuencia máxima (medido en la factibilidad sobre el segmentado: de 51,6 a 39,2 MHz). El alfa de `max_media` y de las tres bandas del fondo es 1/32.
+Por qué k fijo en 5: con un solo k el desplazamiento se implementa solo con cableado. Con k de 0 a 31 hace falta un desplazador delante del sumador, que cuesta unas 160 celdas más y baja la frecuencia máxima (medido en la factibilidad sobre el segmentado: de 51,6 a 39,2 MHz). El alfa de `max_media` y de las tres bandas del fondo es 1/32.
 
 ## 5. Cómo está construida
 
-Dos módulos chicos en `rtl/espino_core/espino_xd.v` y cuatro puntos de contacto en `rtl/espino_core/espino_barrel_core.v`. El decodificador, la ALU y la unidad de carga del Espino no se tocaron.
+Dos módulos pequeños en `rtl/espino_core/espino_xd.v` y cuatro puntos de contacto en `rtl/espino_core/espino_barrel_core.v`. El decodificador, la ALU y la unidad de carga del Espino no se tocaron.
 
 ```
         etapa R                                etapa X
@@ -195,7 +195,7 @@ La parte B usa los pases `equiv_make`, `equiv_simple` y `equiv_induct` de Yosys,
 
 Es la campaña del barrel de P1 (`tb/barrel/tb_verif.sv`: cada hilo contra un Espino base, comparando contador de programa, escritura al banco, acceso al bus, los 16 registros y la memoria en cada instrucción), con un cambio: la referencia pasa a ser el Espino base más la especificación. El Espino base no hace nada con una palabra de custom-0. Cuando completa una que la especificación reconoce, el testbench calcula el resultado con la fórmula, usando los valores de `rs1` y `rs2` del banco del propio Espino base, y lo escribe en `rd` directamente en las BRAM de ese banco. La instrucción siguiente ya lee el valor nuevo.
 
-Así los programas mezclan RV32E y la extensión, con resultados de unas que alimentan a las otras (un `devk` cuyo resultado decide un branch, un producto de 8 pasos que termina como dirección de un load), y todo lo demás de la comparación sigue igual. `tools/barrel/prog_hilos.py --xd 7` genera instrucciones sueltas, con el destino igual a un operando, el par `devk` y `emad`, productos completos de 8 pasos, y palabras que casi son una instrucción (otro `funct7`, otro `funct3`) que no deben hacer nada. Las codifica el generador por su cuenta, sin pasar por el ensamblador.
+Así los programas mezclan RV32E y la extensión, con resultados de unas que alimentan a las otras (un `devk` cuyo resultado decide un salto condicional, un producto de 8 pasos que termina como dirección de un load), y todo lo demás de la comparación sigue igual. `tools/barrel/prog_hilos.py --xd 7` genera instrucciones sueltas, con el destino igual a un operando, el par `devk` y `emad`, productos completos de 8 pasos, y palabras que casi son una instrucción (otro `funct7`, otro `funct3`) que no deben hacer nada. Las codifica el generador por su cuenta, sin pasar por el ensamblador.
 
 Resultado de `make xd-verif` con las tres instrucciones (`docs/mediciones/xd/verificacion.txt`):
 
@@ -209,7 +209,7 @@ Cumple el criterio 5 de la puerta de simulación (al menos 5 millones de instruc
 **Lo que encontró la campaña.** Dos cosas, ninguna en el RTL de la extensión:
 
 1. En la primera corrida todas las instrucciones nuevas fallaban: el core no escribía `rd`. La señal de escritura corregida (`rf_we_r`) estaba calculada pero el registro hacia X seguía tomando la del decodificador. Era un error de la integración, la comparación lo mostró en la primera instrucción nueva de cada programa y se corrigió antes de cualquier medición.
-2. En la primera campaña completa fallaron 2 corridas de 20 600. El generador incluye palabras de custom-0 al azar entre sus "instrucciones raras", y con la extensión una de cada 340 resulta ser una instrucción de verdad. En esos dos programas era un `mulstep` con destino `x14`, la dirección base del SPI. Los stores siguientes de ese hilo cayeron en la tabla de arranque de otro hilo. Los dos lados hicieron lo mismo con el hilo que escribía. La diferencia apareció en el hilo cuyo código se pisó, porque en ese grupo cada Espino base de referencia corre con su propia memoria. Es un hueco del generador, del mismo tipo que el que encontró P1. Se corrigió limitando el destino de esas palabras a `x1` a `x10` y la campaña se repitió completa.
+2. En la primera campaña completa fallaron 2 corridas de 20 600. El generador incluye palabras de custom-0 al azar entre sus "instrucciones raras", y con la extensión una de cada 340 resulta ser una instrucción válida. En esos dos programas era un `mulstep` con destino `x14`, la dirección base del SPI. Los stores siguientes de ese hilo cayeron en la tabla de arranque de otro hilo. Los dos lados hicieron lo mismo con el hilo que escribía. La diferencia apareció en el hilo cuyo código se pisó, porque en ese grupo cada Espino base de referencia corre con su propia memoria. Es un hueco del generador, del mismo tipo que el que encontró P1. Se corrigió limitando el destino de esas palabras a `x1` a `x10` y la campaña se repitió completa.
 
 ### 7.3 Qué no cubre
 
@@ -217,7 +217,7 @@ Cumple el criterio 5 de la puerta de simulación (al menos 5 millones de instruc
 - **La equivalencia B compara contra el core de P1 con el banco de registros como caja negra.** El banco no cambió (no se tocó su archivo).
 - **La prueba A deja libre lo que entrega el banco.** Que el banco entregue el valor que se escribió antes es del barrel y lo cubren la campaña de simulación y las propiedades P10 y P11.
 - **No hay prueba formal de un producto completo de 8 pasos.** Está probado un paso, que es lo que hace el hardware. El producto se comprueba en el modelo (exhaustivo con 8 por 8 bits) y en la campaña.
-- **Nada se probó en la placa.**
+- **La placa, en parte.** El 16/11 R2, que usa `emad` y `devk`, pasó en la placa la firma a 0,1 ms y la media hora sin disparo (`docs/mediciones/placa_16nov.md`). Faltan la firma de R2 a 1 ms y 10 ms y las tres firmas de R1.
 
 ## 8. Controles negativos
 
@@ -237,7 +237,7 @@ Nueve errores puestos a propósito, como bloques `ifdef MUTA_XD_*` que solo se a
 
 ## 9. Qué entra al bitstream de competencia
 
-El plan pide que al bitstream entren solo las instrucciones que `sw/fondo.s` usa de verdad. Ese programa se escribe en el paquete P3, así que este paquete deja las tres construidas y verificadas, cada una elegible por separado, y los 7 subconjuntos medidos y probados (decisión T58).
+El criterio del grupo es que al bitstream entren solo las instrucciones que `sw/fondo.s` usa realmente. Ese programa se escribe en el paquete P3, así que este paquete deja las tres construidas y verificadas, cada una elegible por separado, y los 7 subconjuntos medidos y probados (decisión T58).
 
 - `emad` y `devk` las usan los cuatro hilos: el supervisor calcula `max_media` por su cuenta y cada gestor corre una banda de la misma regla. Entran seguro.
 - `mulstep` solo tiene uso si el supervisor lleva la contabilidad de la cuenta (el "espejo" del prototipo). El fondo mínimo no la necesita para decidir: su voto es todo o nada y las órdenes son idempotentes. Si P3 no la lleva, el bitstream se compila con `-DESPINO_XD_EMAD -DESPINO_XD_DEVK` (990 celdas, 48,92 MHz de mínima) y `mulstep` queda para la edición de exhibición y el ASIC.
@@ -260,7 +260,7 @@ Riesgos:
 2. **k cableado en 5.** Si después del 25/11 el algoritmo necesitara otro alfa, el hardware no sirve y hay que volver a las sumas. El ensamblador rechaza cualquier otro k y el core lo trata como ilegal, así que no hay forma de ejecutar otro k en silencio.
 3. **Un programa con la extensión no corre en el base ni en el segmentado.** Ahí las instrucciones no hacen nada. Por eso el ensamblador exige `.extension xd`. R0 no usa la extensión.
 4. **El comando del encabezado del testbench oficial no lleva definiciones.** Compila el Espino base. Si R1 compite, el valor por defecto del SoC tiene que pasar a ser el barrel con la extensión (pendiente de P5, decisión T55).
-5. **Nada probado en la placa.** Todo lo que quiera competir pasa por la maestra el 26/11.
+5. **La placa, en parte.** En la placa solo se comprobó R2 a 0,1 ms y la media hora sin disparo (16/11, `docs/mediciones/placa_16nov.md`). Todo lo que quiera competir pasa por la maestra el 26/11.
 
 ## 11. Cómo reproducir
 
@@ -282,7 +282,7 @@ Desde la raíz, con OSS CAD Suite en el `PATH`.
 ## 12. Preguntas para la defensa
 
 1. **¿Por qué custom-0?** Es uno de los opcodes que RISC-V reserva para extensiones propias: ninguna extensión estándar lo va a ocupar. `espino_xd.v`, línea del `OPCODE_CUSTOM0`.
-2. **¿Por qué no agregaron el shifter?** El completo no cabe: 1491 celdas en el base. Un desplazamiento por una constante son cables. La extensión cuesta 96 celdas.
+2. **¿Por qué no agregaron el shifter?** El completo no cabe: 1491 celdas en el base. Un desplazamiento por una constante se implementa solo con cableado. La extensión cuesta 96 celdas.
 3. **¿Por qué `emad` y `devk` y no un `ema` de una instrucción?** Sección 4: un solo sumador en vez de dos, y el programa necesita la desviación igual.
 4. **¿Qué pasa si el programa usa k = 4?** El ensamblador lo rechaza. Si la palabra llega igual a la memoria, el core la trata como ilegal: no hace nada. Probado formalmente (X4) y por la mutación `MUTA_XD_K`.
 5. **¿Cómo saben que no rompieron RV32E?** Formal B: el core con la extensión es equivalente al de P1 en 1890 puntos cuando no hay palabras de custom-0. Y la campaña compara cada instrucción contra el Espino base.

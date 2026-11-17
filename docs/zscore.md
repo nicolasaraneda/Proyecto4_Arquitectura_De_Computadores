@@ -115,7 +115,7 @@ Nicolás observó que, remuestreando la práctica en trozos de 10 a 100 ticks, `
 
 Los puntos (dH3a y dH3b) son del torneo con el campo mixto y 10 rivales, con 5000 series de cada largo (`build/zscore/arnes hipotesis` sobre lotes armados con esos trozos). **La observación de Nicolás se reproduce**: desde 250 ticks el signo cambia y crece con el largo del trozo.
 
-Cuidado con los errores de las filas de trozos largos: todas las series salen de la misma práctica, que tiene solo 20 000 / trozo pedazos distintos. Con trozos de 1000 hay 19, así que mil series no son mil muestras independientes y el error real es mucho mayor que el de la tabla. La única fila con muestras independientes de verdad es la de los 10 bloques: +346 +- 321, un error.
+Cuidado con los errores de las filas de trozos largos: todas las series salen de la misma práctica, que tiene solo 20 000 / trozo pedazos distintos. Con trozos de 1000 hay 19, así que mil series no son mil muestras independientes y el error real es mucho mayor que el de la tabla. La única fila con muestras realmente independientes es la de los 10 bloques: +346 +- 321, un error.
 
 **Ajuste en una mitad, prueba en la otra.** Con trozos largos el remuestreo se parece cada vez más a la serie con que se eligieron los parámetros, así que la tabla anterior no separa estructura real de sobreajuste. Para separarlos se eligen los parámetros de las dos reglas en una mitad de la práctica (la mejor media en sus 5 bloques, 27 combinaciones de `zscore` y 8 de reversión) y se prueban en la otra:
 

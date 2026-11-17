@@ -6,9 +6,9 @@ Documento de estudio de la tarea B del 16 y 17/11 (rama `generador`, bitácora `
 
 **Resultado en una línea.** Ninguna candidata mejora a `max_media` en todo. Una, `max_media` con la salida media unidad sobre la media (`entra 3, sale +0,5`), pasa el criterio de corte con la semilla reservada **si los rivales hacen todos reversión**, y pierde si el campo es el mixto. Queda condicionada a lo que se sepa el 26/11.
 
-## 1. El encargo
+## 1. El objetivo
 
-Objetivo distinto al del frente A: no el patrimonio medio, sino la probabilidad de ganarle cabeza a cabeza a la mejor regla nuestra (`max_media`, porque `zscore` no le ganó con el criterio fijado, T129) y los puntos esperados contra un campo de rivales que también operan reversión con parámetros variados. Mismo protocolo contra el sobreajuste. Una candidata solo se acepta si además gana en la serie que se registre el 26/11.
+Objetivo distinto al del frente A: no el patrimonio medio, sino la probabilidad de ganarle cabeza a cabeza a la mejor regla nuestra (`max_media`, porque `zscore` no le ganó con el criterio fijado, T129) y los puntos esperados contra un campo de rivales que también operan reversión con parámetros variados. Mismo protocolo contra el sobreajuste. Un candidato solo se acepta si además gana en la serie que se registre el 26/11.
 
 ## 2. Cómo se hizo
 
@@ -27,7 +27,7 @@ Objetivo distinto al del frente A: no el patrimonio medio, sino la probabilidad 
 
 Lo que se lee:
 
-1. **El campo decide.** Contra rivales que hacen todos reversión, conviene salir un poco más tarde que ellos: se queda con el tramo final de la recuperación, que es justo donde los demás ya vendieron. Contra un campo mixto, donde muchos rivales no compiten por el mismo movimiento, esa ventaja no existe y se paga el riesgo de quedarse adentro.
+1. **El campo decide.** Contra rivales que hacen todos reversión, conviene salir un poco más tarde que ellos: se queda con el tramo final de la recuperación, que es justo donde los demás ya vendieron. Contra un campo mixto, donde muchos rivales no compiten por el mismo movimiento, esa ventaja no existe y se paga el riesgo de quedarse comprado.
 2. **En la práctica no gana.** En los 10 bloques pierde 173 +- 137 y en los remuestreos 22 +- 16. Gana en las familias plausibles (+28 a +160). Es el mismo patrón de `zscore` al revés: lo que el modelo premia, la práctica no lo confirma.
 3. **Cabeza a cabeza** gana entre el 51 % (remuestreos) y el 58 % (plausibles) de las rondas de 2000 ticks, y el 67 % de las de 20 000 en las plausibles.
 

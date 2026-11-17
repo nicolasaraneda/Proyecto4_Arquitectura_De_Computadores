@@ -3,7 +3,7 @@
 Grupo: Nicolás Araneda, Vicente Calderón y Santiago Muñoz.
 Arquitectura de Computadores, Universidad de los Andes, 2026-2.
 
-Documento de estudio del paquete P7. Parte de las definiciones de la clase 7 (Métricas de Desempeño) y llega al detalle de cada variante: cuánto cuesta en la FPGA, cuántos ciclos usa por tick, dónde se van esos ciclos, qué predice Amdahl y qué se midió, dónde queda en el roofline y por qué compite la que compite. Todas las cifras salen de un objetivo de `make` y quedan en `docs/mediciones/p7/`. La sección 13 dice cuál.
+Documento de estudio del paquete P7. Parte de las definiciones de la clase 7 (Métricas de Desempeño) y llega al detalle de cada variante: cuánto cuesta en la FPGA, cuántos ciclos usa por tick, en qué se gastan esos ciclos, qué predice Amdahl y qué se midió, dónde queda en el roofline y por qué compite la que compite. Todas las cifras salen de un objetivo de `make` y quedan en `docs/mediciones/p7/`. La sección 13 dice cuál.
 
 ```
 make p7          # todo: síntesis de las seis variantes, gemelo, RTL, PLL y duplicador (unos 25 minutos)
@@ -26,8 +26,8 @@ make p7-rapido   # tablas, figuras, CSV y cifras.tex desde las mediciones guarda
 Lo que hay que saber decir:
 
 1. **La más rápida por hilo es el segmentado.** Responde en 22 ciclos, 1,86 veces antes que R0. El barrel con un solo hilo útil es la más lenta: cada instrucción de un hilo ocupa 4 ciclos.
-2. **La que compite (R1) no es la más rápida, y la tabla lo muestra.** Responde 5,4 veces más lento que R0. Pero hace 56 operaciones útiles por tick y no 8: su desempeño logrado es 5,34 MOPS contra 3,92 de R0. Usa el 19,6 % del presupuesto de la ronda 3 en el peor caso.
-3. **Amdahl predice casi exacto, y donde falla se sabe por qué.** En el barrel y en la extensión la predicción coincide con la medición al ciclo, porque todas las instrucciones cuestan lo mismo. En el segmentado la estimación de la clase (salto tomado de 3 ciclos) se queda 6,4 % corta; con el costo medido (2 ciclos) la diferencia baja a 1,1 %, y es la detección del sondeo.
+2. **La que compite (R1) no es la más rápida, y la tabla lo muestra.** Tarda 5,4 veces más que R0 en responder. Pero hace 56 operaciones útiles por tick y no 8: su desempeño logrado es 5,34 MOPS contra 3,92 de R0. Usa el 19,6 % del presupuesto de la ronda 3 en el peor caso.
+3. **Amdahl predice casi con exactitud, y donde falla se sabe por qué.** En el barrel y en la extensión la predicción coincide con la medición al ciclo, porque todas las instrucciones cuestan lo mismo. En el segmentado la estimación de la clase (salto tomado de 3 ciclos) se queda 6,4 % corta; con el costo medido (2 ciclos) la diferencia baja a 1,1 %, y es la detección del sondeo.
 4. **Todo está a la derecha del quiebre del roofline**: el kernel mueve entre 8 y 13 bytes por tick y hace 8 operaciones, de 0,6 a 1 Op/B contra un quiebre de 0,125. El límite es el cómputo, no la memoria.
 5. **Subir la frecuencia no sirve aquí.** El VQ100 no tiene PLL (nextpnr no lo puede ubicar) y el duplicador de reloj por lógica cierra 1 de 10 semillas con un oscilador real. Y aunque funcionara, el peor caso ya usa menos del 20 % del presupuesto más corto.
 
@@ -195,7 +195,7 @@ El Ppeak del barrel con un solo hilo útil es la cuarta parte del de la máquina
 
 El peor caso de R1 (443) es un tick de frontera de ventana, cada 512 ticks, en que el supervisor ajusta los pesos. En un tick común responde entre 219 y 227 ciclos (`docs/mediciones/fondo/r1/ticks.txt`).
 
-## 6. Perfilado: dónde se van los ciclos
+## 6. Perfilado: en qué se gastan los ciclos
 
 El enunciado pide medir qué parte del tick consume más ciclos, no estimarlo. Para eso el gemelo tiene la opción `--perfil` (`ref/gemelo/gemelo.c`): cuenta, por hilo y por dirección del programa, cuántas veces se ejecutó cada instrucción y cuántos ciclos ocupó. No cambia nada de la simulación (`make cosim` y `make cosim-barrel-corta` siguen en verde). `tools/p7/fuentes.py` ensambla el programa con el mismo `tools/pochoasm.py` y asigna cada dirección a una fase leyendo el programa: en `sw/trade.s` recorre el lazo principal (sondeo, lectura, cálculo de dev, decisión, store, media), en `sw/fondo.s` usa las secciones numeradas de sus comentarios.
 
@@ -255,7 +255,7 @@ Y sobre el kernel (los MOPS): segmentado 1,889 predicho y medido con el costo me
 **Por qué la diferencia.**
 
 - **Con la estimación de la clase** el salto tomado del pipeline cuesta 3 ciclos. En nuestro segmentado cuesta 2: la instrucción se lee en el flanco de bajada, medio ciclo después de que cambia el contador de programa, y no hay que anular una etapa de fetch completa (`docs/espino_segmentado.md`). El kernel tiene un solo salto (`j esperar`), pero el lazo de sondeo tiene uno por vuelta: la detección predicha (7,5 ciclos) se pasa de la medida (6).
-- **Con el costo medido** lo único que no se predice exacto es la detección: 6,25 predichos contra 6,00 medidos. La detección depende de en qué punto de la vuelta del lazo cae el precio, y eso no escala en proporción exacta con la duración de la vuelta: el primer ciclo en que STATUS se ve en 1 depende de la sincronización del esclavo SPI.
+- **Con el costo medido** lo único que no se predice con exactitud es la detección: 6,25 predichos contra 6,00 medidos. La detección depende de en qué punto de la vuelta del lazo cae el precio, y eso no escala en proporción exacta con la duración de la vuelta: el primer ciclo en que STATUS se ve en 1 depende de la sincronización del esclavo SPI.
 - **En el barrel y en la extensión** la predicción es exacta, porque cada instrucción de un hilo cuesta 4 ciclos, sin excepción: no hay riesgos, ni burbujas, ni diferencias entre clases. La extensión sola acelera la fase de dev 6 veces (6 instrucciones a 1) y la de la media S 8 veces, y no toca las demás.
 
 **Amdahl clásico sobre la fase más pesada.** La media es f = 29 / 51 = 0,569 del kernel de R0. Con la extensión en el Espino base esas 14 instrucciones pasan a 2 (`devk` y `emad`, 4 ciclos en vez de 29): F = 7,25 y S = 1 / ((1 - 0,569) + 0,569 / 7,25) = 1,96. Aunque la media costara cero, el kernel no iría más de 1 / (1 - 0,569) = 2,32 veces más rápido: el resto (decidir, leer, escribir) queda igual.
@@ -335,29 +335,29 @@ La edición ASIC (pieza G de la factibilidad, LibreLane con GF180MCU) existe par
 | | Espino base | Segmentado |
 |---|---|---|
 | Dado | 0,359 mm² | 0,304 mm² |
-| Celdas estándar | 176 975 um² | 149 757 um² |
+| Celdas estándar | 176 975 µm² | 149 757 µm² |
 | Frecuencia máxima con cierre (esquina lenta) | 42,6 MHz | 42,6 MHz |
 | Potencia esperando / calculando | 27,97 / 28,79 mW | 26,18 / 27,38 mW |
 | Kernel a 25 MHz / a 42,6 MHz | 3,92 / 6,68 MOPS | 7,41 / 12,61 MOPS |
 | Ops/W del kernel | 136 MOPS/W | 271 MOPS/W |
 | Ppeak por watt | 434 MOPS/W | 913 MOPS/W |
-| Energía por decisión, ronda 3 (calculada) | 2,80 uJ | 2,63 uJ |
-| Energía por decisión, rondas 2 y 1 (estimadas) | 28,0 y 280 uJ | 26,2 y 262 uJ |
+| Energía por decisión, ronda 3 (calculada) | 2,80 µJ | 2,63 µJ |
+| Energía por decisión, rondas 2 y 1 (estimadas) | 28,0 y 280 µJ | 26,2 y 262 µJ |
 | Costo marginal de decidir | 2,62 nJ, 0,33 nJ por operación | 3,84 nJ, 0,48 nJ por operación |
 
 - La clase supuso 10 mW para Pochoco, que dan 1 250 MOPS/W de Ppeak. El macro a 5 V consume casi 3 veces eso.
-- **La energía por decisión la pone la espera, no el cálculo.** Decidir cuesta unos nJ por sobre los 2,6 a 2,8 uJ que se gastan esperando 0,1 ms con el reloj corriendo. Ningún peldaño de la escalera cambia eso; detener el reloj entre precios sí.
+- **La energía por decisión la pone la espera, no el cálculo.** Decidir cuesta unos nJ por sobre los 2,6 a 2,8 µJ que se gastan esperando 0,1 ms con el reloj corriendo. Ningún peldaño de la escalera cambia eso; detener el reloj entre precios sí.
 - El barrel, la extensión y el fondo no pasaron por el flujo: su Ops/W no se informa (sección 12).
 
 ## 11. La variante elegida y por qué
 
-**Compite R1** (y R2 si pasa la placa y la maestra; reconfigurar durante una ronda está cubierto por la respuesta general del profesor, T126), por la decisión T50 de Nicolás: "opción b, tomemos riesgos". La tabla muestra con honestidad lo que eso significa:
+**Compite R1** (y R2 si pasa la placa y la maestra; reconfigurar durante una ronda está cubierto por la respuesta general del profesor, T126), por la decisión T50 del grupo, que prioriza el diseño integrado aunque agregue riesgo. La tabla muestra lo que eso implica:
 
 - **No es la más rápida por hilo.** El segmentado responde en 22 ciclos y R1 en 223 en promedio. Si la métrica fuera la latencia del kernel de una regla, ganaría el segmentado, y con la extensión ganaría todavía más (17 ciclos predichos).
 - **Hace más trabajo útil por segundo.** 56 operaciones por tick contra 8, 5,34 MOPS contra 3,92 de R0 y 7,41 del segmentado con una sola regla. Es la única variante que usa los cuatro hilos del barrel y las instrucciones de dos operaciones.
 - **Cabe y tiene margen.** 1029 de 1280 celdas, 13 de 16 BRAM, 51,59 MHz de mínima en 10 semillas (más del doble de los 25 MHz del oscilador), y usa el 19,6 % del presupuesto de la ronda 3 en el peor caso: 80 % de holgura, por encima del 50 % que pide la puerta.
-- **La latencia no da patrimonio.** El byte que la maestra lee en el tick n se ejecuta al precio n, sea que el programa respondió en 22 ciclos o en 443: mientras la respuesta llegue antes del tick siguiente, la misma estrategia da los mismos bytes en cualquier core (R0, el segmentado, el barrel y el barrel con la extensión dan con `max_media` los mismos 20 000 bytes que `ref/trader.py`). Por eso el criterio para elegir no es la velocidad sino qué algoritmo cabe y cuánto riesgo agrega.
-- **Lo que se acepta a sabiendas.** Según el protocolo, el fondo no suma puntos esperados contra `max_media` sola (+0,007 a 2 000 ticks, -0,005 a 20 000; decisión T50) y agrega riesgo de falla en vivo. El respaldo es R0, que decide `max_media` en 44 ciclos con el core base. La elección es por lo que el diseño representa como co-diseño: un procesador rediseñado, una extensión propia de la ISA usada de verdad y cuatro reglas en paralelo, todo medido.
+- **La latencia no da patrimonio.** El byte que la maestra lee en el tick n se ejecuta al precio n, ya sea que el programa responda en 22 ciclos o en 443: mientras la respuesta llegue antes del tick siguiente, la misma estrategia da los mismos bytes en cualquier core (R0, el segmentado, el barrel y el barrel con la extensión dan con `max_media` los mismos 20 000 bytes que `ref/trader.py`). Por eso el criterio para elegir no es la velocidad, sino qué algoritmo cabe y cuánto riesgo agrega.
+- **Lo que se acepta a sabiendas.** Según el protocolo, el fondo no suma puntos esperados contra `max_media` sola (+0,007 a 2 000 ticks, -0,005 a 20 000; decisión T50) y agrega riesgo de falla en vivo. El respaldo es R0, que decide `max_media` en 44 ciclos con el core base. La elección es por lo que el diseño representa como co-diseño: un procesador rediseñado, una extensión propia de la ISA usada realmente y cuatro reglas en paralelo, todo medido.
 
 ## 12. Lo que no se midió y por qué
 
@@ -366,7 +366,7 @@ La edición ASIC (pieza G de la factibilidad, LibreLane con GF180MCU) existe par
 - **Consumo de la Go Board**: no hay medidor. La potencia es la del flujo ASIC, y solo del base y del segmentado.
 - **Edición ASIC del barrel, la extensión y el fondo**: no se pasaron por LibreLane. Es un punto posterior (la factibilidad estima más del doble de área por los cuatro bancos de registros).
 - **R2 con el gemelo**: el gemelo no modela el vigilante. Sus ciclos son los de R1, confirmados contra la medición del RTL de P5 con el mismo programa y la misma tabla.
-- **La caída de frecuencia del segmentado** desde P1 (sección 5): medida, no investigada.
+- **La caída de frecuencia del segmentado** desde P1 (sección 5): medida e investigada hasta la síntesis (la lógica es la misma, con equivalencia formal); no se buscó una forma de evitarla, porque todas las variantes cierran a 25 MHz.
 
 ## 13. Cómo se reproduce cada número
 
@@ -400,11 +400,11 @@ Archivos de P7:
 
 ## 14. Preguntas para la defensa
 
-1. **¿Por qué compiten con una variante más lenta?** Porque la latencia no da patrimonio mientras la respuesta llegue antes del tick siguiente, y R1 usa el 19,6 % del plazo. Lo que se elige es el algoritmo y el riesgo. La tabla lo muestra: el segmentado es 1,86 veces más rápido que R0, R1 es 5,4 veces más lento, y hace 7 veces más trabajo útil por tick.
+1. **¿Por qué compiten con una variante más lenta?** Porque la latencia no da patrimonio mientras la respuesta llegue antes del tick siguiente, y R1 usa el 19,6 % del plazo. Lo que se elige es el algoritmo y el riesgo. La tabla lo muestra: el segmentado es 1,86 veces más rápido que R0, R1 tarda 5,4 veces más en responder, y hace 7 veces más trabajo útil por tick.
 2. **¿Qué es una operación útil en su kernel?** Las 8 operaciones de la regla escrita en su forma matemática: 4 para la media, 4 para decidir. Sección 3.
 3. **¿Qué parte del tick consume más ciclos?** En R0, actualizar la media: 29 de 51 ciclos del kernel. En la respuesta, decidir (14 de 41). En el tick completo, esperar: 98 %. Sección 6.
 4. **¿Por qué Amdahl acierta exacto en el barrel y no en el segmentado?** En el barrel toda instrucción cuesta 4 ciclos. En el segmentado el salto tomado cuesta 2 y no 3 como estimó la clase, y la detección del sondeo no escala exacto con la vuelta del lazo. Sección 7.
 5. **¿Por qué el kernel está a la derecha del quiebre del roofline?** Porque mueve 8 a 13 bytes por tick y hace 8 operaciones: 0,6 a 1 Op/B contra 0,125. Está limitado por el cómputo. Sección 8.
 6. **¿Por qué no usaron el PLL?** El VQ100 no lo tiene: nextpnr no lo puede ubicar. En un TQ144 R1 cerraría a 50 MHz, pero no ganaría patrimonio. Sección 9.
 7. **¿Por qué no hay base con la extensión?** Porque `emad` y `devk` están en el core barrel y llevarlas al base toca el RTL de R0, que ya pasó la puerta. Está predicho: 31 ciclos de respuesta, 1,32 veces R0. Sección 4.
-8. **¿Dónde se va la energía?** En esperar. Decidir cuesta 2,6 nJ sobre 2,8 uJ por tick en el ASIC. Sección 10.
+8. **¿En qué se gasta la energía?** En esperar. Decidir cuesta 2,6 nJ sobre 2,8 µJ por tick en el ASIC. Sección 10.

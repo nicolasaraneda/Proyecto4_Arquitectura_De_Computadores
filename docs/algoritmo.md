@@ -21,7 +21,7 @@ Todos los patrimonios de este documento son el patrimonio final de una serie de 
 
 ## 1. Resumen
 
-1. **La serie de práctica es un nivel que pasea más una componente transitoria chica, redondeado a enteros, con dos regímenes de volatilidad y saltos poco frecuentes.** El modelo ajustado reproduce la varianza, la razón de varianza a todos los horizontes, la curtosis y la persistencia de la volatilidad.
+1. **La serie de práctica es un nivel que pasea más una componente transitoria pequeña, redondeado a enteros, con dos regímenes de volatilidad y saltos poco frecuentes.** El modelo ajustado reproduce la varianza, la razón de varianza a todos los horizontes, la curtosis y la persistencia de la volatilidad.
 2. **Cerca de la mitad de la reversión que se ve es redondeo.** La razón de varianza a 100 ticks es 0,53. Un paseo aleatorio sin ninguna reversión, redondeado a enteros, da 0,77. Descontando el redondeo, la serie de práctica queda en 0,67.
 3. **La señal es débil.** El modelo con reversión supera al paseo aleatorio en 10 unidades de log-verosimilitud sobre 20 000 ticks: una unidad por ronda. Dentro de una ronda no se puede saber si la serie revierte.
 4. **El techo está cerca.** La política óptima del modelo gana 8,4 % por ronda. La regla base gana 5,2 % en el modelo y 7,5 % en los remuestreos. No hay una mejora grande escondida: lo que queda es del orden de 1 a 3 puntos.
@@ -49,7 +49,7 @@ nivel(t)       = nivel(t-1) + ruido de varianza q_nivel            paseo aleator
 transitoria(t) = phi * transitoria(t-1) + ruido de varianza q_trans    AR(1)
 ```
 
-En el régimen ruidoso las dos varianzas se multiplican por una misma razón. El nivel además salta con una probabilidad chica por tick. El redondeo se trata como un ruido de observación de varianza 1/12, que es la de un error uniforme entre -0,5 y 0,5.
+En el régimen ruidoso las dos varianzas se multiplican por una misma razón. El nivel además salta con una probabilidad pequeña por tick. El redondeo se trata como un ruido de observación de varianza 1/12, que es la de un error uniforme entre -0,5 y 0,5.
 
 Los parámetros se ajustan por máxima verosimilitud. La verosimilitud se calcula con el filtro de Kalman (recorre los 20 000 ticks) y se maximiza con Nelder-Mead, partiendo de tres puntos distintos que llegan al mismo resultado:
 
@@ -223,7 +223,7 @@ Las bandas de la política óptima se probaron con el filtro de Kalman en punto 
 | Regla base | 10 515 | 10 996 | 10 813 | 11 069 |
 | Bandas óptimas del modelo | 10 943 | 11 824 | 10 119 | 10 308 |
 
-En el modelo gana 4 puntos más que la regla base, que es lo que predice la programación dinámica. En el remuestreo pierde 7 puntos. Las bandas óptimas entran con caídas chicas y salen tarde, y eso depende de que la transitoria sea gaussiana y simétrica. En la práctica las caídas chicas no rebotan lo suficiente. Por eso la política óptima se usa como cota y como guía de la forma, y los umbrales se eligen donde las dos evidencias coinciden.
+En el modelo gana 4 puntos más que la regla base, que es lo que predice la programación dinámica. En el remuestreo pierde 7 puntos. Las bandas óptimas entran con caídas pequeñas y salen tarde, y eso depende de que la transitoria sea gaussiana y simétrica. En la práctica las caídas pequeñas no rebotan lo suficiente. Por eso la política óptima se usa como cota y como guía de la forma, y los umbrales se eligen donde las dos evidencias coinciden.
 
 ## 5. Ideas probadas, una por una
 
@@ -259,7 +259,7 @@ Con 5000 series el error estándar de una diferencia pareada entre dos configura
 | Kalman de dos estados | E=250, X=-40 | 11 102, 10 000 | 10 840, 9 034 | 10 503 | 10 980 |
 | Kalman de dos estados | E=190, X=-40 | 11 002, 9 678 | 10 908, 8 869 | 10 635 | 11 202 |
 
-- **Alfa 1/32 es el mejor compromiso.** Con alfa más grande la media sigue al precio y no queda desviación que operar. Con alfa más chica mejora el modelo y empeora el remuestreo y el percentil 5.
+- **Alfa 1/32 es el mejor compromiso.** Con alfa más grande la media sigue al precio y no queda desviación que operar. Con un alfa menor mejora el modelo y empeora el remuestreo y el percentil 5.
 - **La suma móvil no mejora a la media exponencial** y ocupa 32 o 64 palabras de memoria.
 - **El Kalman de dos estados empata.** Con las bandas E=250, X=-40 se parece a la regla base y con E=190, X=-40 se parece a E=96. La comparación formal está en la sección 7.3.
 
@@ -267,7 +267,7 @@ Es lo que anticipa la sección 4.1: si el filtro óptimo casi no reduce la incer
 
 ### 5.3 Bandas escaladas con la volatilidad
 
-La política óptima usa bandas distintas en cada régimen. Se probó hacer las bandas proporcionales a la volatilidad medida (media exponencial del valor absoluto del cambio): 368 combinaciones. La mejor da 11 028 de promedio de las tres medias, contra 11 029 de la mejor banda fija. **No agrega nada.** La banda fija de 3 a 4 unidades ya queda ancha para el régimen tranquilo y justa para el ruidoso, que es lo que haría la banda escalada.
+La política óptima usa bandas distintas en cada régimen. Se probó hacer las bandas proporcionales a la volatilidad medida (media exponencial del valor absoluto del cambio): 368 combinaciones. La mejor da 11 028 de promedio de las tres medias, contra 11 029 de la mejor banda fija, así que la banda escalada no mejora el resultado. La banda fija de 3 a 4 unidades ya queda ancha para el régimen tranquilo y justa para el ruidoso, que es lo que haría la banda escalada.
 
 ### 5.4 Asimetría entre caídas y subidas
 
@@ -283,7 +283,7 @@ La política óptima usa bandas distintas en cada régimen. Se probó hacer las 
 
 - **Para desviaciones moderadas la respuesta es simétrica** y parecida a la del modelo.
 - **Las caídas grandes rebotan el doble que en el modelo.** Son 287 ticks que vienen de pocos episodios, así que la evidencia es poca, pero es la razón por la que el remuestreo prefiere umbrales de entrada más altos que el modelo.
-- **No hay una asimetría que se pueda explotar más allá de eso.** El mercado no permite vender lo que no se tiene, así que cuando el precio está sobre la media lo único que se puede hacer es estar afuera, y eso ya lo hace la regla.
+- **No hay una asimetría que se pueda explotar más allá de eso.** El mercado no permite vender lo que no se tiene, así que cuando el precio está sobre la media lo único que se puede hacer es estar en caja, y eso ya lo hace la regla.
 
 ### 5.5 Saltos
 
@@ -390,7 +390,7 @@ Sobre el candidato de E = 96 (sección 7), con la semilla reservada:
 - **En los 10 bloques de práctica la guardia no pausa nunca y el tope no salta nunca.** El tope de tiempo sí corta 13 posiciones en los 10 bloques, que es su trabajo normal.
 - **La guardia cuesta 1 % en el remuestreo y 2 % en las plausibles**, y sube el percentil 5 de `tendencia` de 4 631 a 6 375 y el de `cambio_de_caracter` de 2 136 a 5 692. No pone piso al peor caso.
 - **El tope sí pone piso**: el peor caso de `tendencia`, `paseo` y `cambio_de_caracter` queda sobre 5 200. Cuesta otro 0,2 % en el remuestreo y 1,6 % en las plausibles.
-- **El tope se paga caro si la serie es más volátil que la de práctica.** En `volatil` y `nivel_bajo` la regla sin tope gana 20 790 y 19 051 de media, y con tope 12 225 y 11 008. En esas series las caídas de medio precio son parte del camino normal y después se recuperan. Si la serie oculta tuviera el doble de volatilidad, el tope dejaría sobre la mesa la mayor parte de la ganancia.
+- **El tope se paga caro si la serie es más volátil que la de práctica.** En `volatil` y `nivel_bajo` la regla sin tope gana 20 790 y 19 051 de media, y con tope 12 225 y 11 008. En esas series las caídas de medio precio son parte del camino normal y después se recuperan. Si la serie oculta tuviera el doble de volatilidad, el tope haría perder la mayor parte de la ganancia.
 - **Los saltos grandes no los cubre nada.** Un salto de -30 con la posición abierta se pierde completo: el peor caso de `saltos` sigue cerca de 1 000 con todas las protecciones.
 
 Un tope más ajustado (25 % del precio) salta en el 9 % de los remuestreos y cuesta 1 % de media en el remuestreo y 5 % en el vecino (`docs/mediciones/exploracion.txt`). El motivo es que vende en el fondo de caídas que después se recuperan: es el mismo efecto del tope de precio de la sección 5.6.
@@ -421,8 +421,8 @@ El costo es una estimación con el modelo de `docs/trade_s.md` hasta que el cand
 
 ### 7.3 Qué se pierde con cada uno
 
-- **`max_media`.** Es la regla base con el umbral de entrada en 3 unidades en vez de 4: en `trade.s` cambia una constante. Gana 0,7 % en el remuestreo y 1,4 % en las plausibles, con diferencias de 7 y 10 errores estándar. Se pierde 170 en el percentil 5 del remuestreo y 120 en el de las plausibles, y queda sin ninguna defensa si la serie no revierte: en `tendencia` el percentil 5 es 4 631 y en `cambio_de_caracter` 2 136. En los 10 bloques queda 26 abajo de la regla base, con un error de 238: no se distinguen.
-- **`guardia`.** Lo mismo con manejo de saltos y guardia de régimen. Entrega casi toda la ventaja de `max_media` sobre la regla base (queda 20 abajo en el remuestreo y 60 en las plausibles) a cambio de subir el percentil 5 del estrés de 5 071 a 6 658. No pone piso al peor caso. El peor bloque de práctica baja a 9 024.
+- **`max_media`.** Es la regla base con el umbral de entrada en 3 unidades en vez de 4: en `trade.s` cambia una constante. Gana 0,7 % en el remuestreo y 1,4 % en las plausibles, con diferencias de 7 y 10 errores estándar. Se pierde 170 en el percentil 5 del remuestreo y 120 en el de las plausibles, y queda sin ninguna defensa si la serie no revierte: en `tendencia` el percentil 5 es 4 631 y en `cambio_de_caracter` 2 136. En los 10 bloques queda 26 por debajo de la regla base, con un error de 238: no se distinguen.
+- **`guardia`.** Lo mismo con manejo de saltos y guardia de régimen. Entrega casi toda la ventaja de `max_media` sobre la regla base (queda 20 por debajo en el remuestreo y 60 en las plausibles) a cambio de subir el percentil 5 del estrés de 5 071 a 6 658. No pone piso al peor caso. El peor bloque de práctica baja a 9 024.
 - **`guardia_tope`.** Agrega el tope de pérdida. El peor caso de las familias con tendencia queda sobre 5 200. Se pierde 2,2 % en las plausibles frente a la regla base y casi toda la ganancia si la serie resulta más volátil que la de práctica.
 - **`prudente`.** Entra solo con caídas de 6 unidades y sale antes de recuperar la media. Es el mejor percentil 5 en remuestreo y plausibles (350 y 300 más que la regla base) y el único que no pierde en ningún bloque de práctica. Se pierde 1,1 % de media en el remuestreo y 3,1 % en las plausibles.
 
@@ -466,7 +466,7 @@ Desde el 15/11 `sw/trade.s` y `ref/trader.py` corren `max_media` (decisiones T50
 
 **¿Por qué reversión y no tendencia?** Porque la razón de varianza es menor que 1 en todos los horizontes y en los 20 bloques de 1000 ticks, y porque el modelo ajustado tiene una componente transitoria con vida media de 17,5 ticks. Seguir tendencia pierde en la serie de práctica (`make hallazgos`).
 
-**¿Cuánta reversión hay de verdad?** Menos de la que parece. La mitad de la caída de la razón de varianza es redondeo y no se puede operar. La otra mitad es una transitoria de 1,2 unidades de desviación estándar, contra un nivel que se mueve 0,4 por tick.
+**¿Cuánta reversión hay realmente?** Menos de la que parece. La mitad de la caída de la razón de varianza es redondeo y no se puede operar. La otra mitad es una transitoria de 1,2 unidades de desviación estándar, contra un nivel que se mueve 0,4 por tick.
 
 **¿Cómo saben que no es sobreajuste?** Por tres cosas. Los candidatos se evaluaron con una semilla que no se usó para elegir nada. Los parámetros están en una meseta: E entre 80 y 128 da medias dentro de 60 puntos. Y el modelo, que no usa los cambios de la práctica uno por uno, coincide en el signo de la mejora.
 

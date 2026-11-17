@@ -4,7 +4,7 @@ Grupo: Nicolás Araneda, Vicente Calderón y Santiago Muñoz.
 
 La maestra existe un solo día. Este es el orden de las pruebas, qué se mide en cada una y qué hacer si algo falla. Lo que se anota va en la plantilla de la sección 7, que después se pasa a `docs/mediciones/maestra_26nov.md`. Con eso se decide el peldaño que compite (`docs/arbol_decision.md`).
 
-Puerta de maestra (plan del proyecto, sección 16.4): cada peldaño tiene que correr las tres rondas sin perder precios ni decisiones, y su patrimonio tiene que coincidir con el que predice el gemelo si la serie es conocida. Si la serie no es conocida, R0 y R1 tienen que comportarse de forma coherente entre sí.
+Puerta de maestra (`docs/puertas.md` y decisión T50): cada peldaño tiene que correr las tres rondas sin perder precios ni decisiones, y su patrimonio tiene que coincidir con el que predice el gemelo si la serie es conocida. Si la serie no es conocida, R0 y R1 tienen que comportarse de forma coherente entre sí.
 
 ## 1. Antes de salir (25/11 en la noche)
 
@@ -31,7 +31,7 @@ Puerta de maestra (plan del proyecto, sección 16.4): cada peldaño tiene que co
 
 La Go Board se conecta a la maestra por el PMOD (pines del `goboard.pcf` del curso):
 
-| Señal | Pin del FPGA | PMOD de la Go Board |
+| Señal | Pin de la FPGA | PMOD de la Go Board |
 |-------|-------------|---------------------|
 | `CS_n` | 65 | 1 |
 | `MOSI` | 64 | 2 |
@@ -41,7 +41,7 @@ La Go Board se conecta a la maestra por el PMOD (pines del `goboard.pcf` del cur
 
 Verificar los números del PMOD con el ayudante antes de conectar. **La tierra se conecta primero.** No se conecta 3,3 V entre placas: cada una se alimenta por su USB.
 
-**Con los cables puestos y la maestra encendida, desconectar y conectar el USB de la Go Board antes de la primera ronda de cada peldaño.** Los pines del SPI no tienen pull-up: con los cables sueltos pueden captar ruido y el SoC recibiría precios falsos que quedan en su media. Al reconectar, la FPGA se configura de nuevo desde la flash y parte de cero con las líneas ya conducidas por la maestra (`docs/mediciones/placa_16nov.md`). Sin maestra, `r1_fondo.bin` debe mostrar "00" con los cuatro LED apagados.
+**Con los cables puestos y la maestra encendida, desconectar y conectar el USB de la Go Board antes de la primera ronda de cada peldaño.** Los pines del SPI no tienen pull-up: con los cables desconectados pueden captar ruido y el SoC recibiría precios falsos que quedan en su media. Al reconectar, la FPGA se configura de nuevo desde la flash y parte de cero con la maestra ya fijando el nivel de las líneas (`docs/mediciones/placa_16nov.md`). Sin maestra, `r1_fondo.bin` debe mostrar "00" con los cuatro LED apagados.
 
 ## 3. Medir el SPI real con el medidor (primera prueba, unos 10 minutos)
 
@@ -54,10 +54,10 @@ Es lo primero porque decide entre R0 y R1 (regla 3 del árbol). `medidor_spi.bin
    |--------|--------|---------------------|-------------|
    | 0 | Período mínimo de SCLK, en ciclos de 40 ns | `0x0019` (25) | SCLK en kHz = 25 000 / valor |
    | 1 | Período máximo de SCLK | `0x0019` | Si es muy distinto de la medida 0, el SCLK no es estable |
-   | 2 | Período entre precios, último, en unidades de 0,64 us | `0x3D09` en la ronda 1, `0x061A` en la 2, `0x009C` en la 3 | T en us = valor x 0,64 |
+   | 2 | Período entre precios, último, en unidades de 0,64 µs | `0x3D09` en la ronda 1, `0x061A` en la 2, `0x009C` en la 3 | T en µs = valor x 0,64 |
    | 3 | Período mínimo entre precios | Igual | |
-   | 4 | Duración de `CS_n` en bajo, en ciclos | `0x00ED` (9,5 us) | |
-   | 5 | De la bajada de `CS_n` al primer flanco de SCLK, en ciclos | `0x0025` (1,5 us) | |
+   | 4 | Duración de `CS_n` en bajo, en ciclos | `0x00ED` (9,5 µs) | |
+   | 5 | De la bajada de `CS_n` al primer flanco de SCLK, en ciclos | `0x0025` (1,5 µs) | |
    | 6 | Tiempo libre mínimo entre transacciones, en ciclos | `0xFFFF` en las rondas 1 y 2, `0x08D6` (2262) en la 3 | Es el presupuesto de la respuesta. R1 necesita 444 y R0 44 |
    | 7 | Transacciones contadas | Las de la ronda | Número de precios por ronda (pregunta 1 al ayudante) |
 
@@ -86,7 +86,7 @@ build/gemelo --barrel --xd 3 --tabla sw/fondo_tabla.hex --hex build/fondo/fondo.
 
 con el período de cada ronda (10 000 000, 1 000 000 y 100 000 ns) y el SCLK medido (`--sclk-medio-ns`, la mitad del período de SCLK en ns). Si la maestra parte con la placa ya encendida, los precios perdidos en el reset son 0: usar `--inicio-ns 200000`.
 
-Si la serie no es conocida: en las series de práctica R0 y R1 escriben los mismos bytes, así que en una serie parecida sus patrimonios deben ser parecidos. Una diferencia grande entre R0 y R1 en la misma ronda se anota y se revisa con el gemelo esa noche.
+Si la serie no es conocida: en la serie de práctica R0 y R1 escriben los mismos bytes a 0,1 ms (los dos terminan con 26 070), pero no a 1 ms ni a 10 ms, donde R1 termina con 25 031 (`docs/mediciones/fondo/r1/equiv.txt`) y R0 con 26 070 (`docs/mediciones/p7/gemelo.txt` y decisión T51). En una serie parecida sus patrimonios deben ser parecidos, no iguales. Una diferencia grande entre R0 y R1 en la misma ronda se anota y se revisa con el gemelo esa noche.
 
 ## 4b. Registrar la serie de la maestra (registrador, unos 10 minutos por ronda)
 
@@ -116,7 +116,7 @@ Reconfigurar durante una ronda está cubierto por la respuesta general del profe
 Se hacen ese día, con la maestra delante. Cada respuesta va a la plantilla.
 
 1. Cuántos precios manda la maestra en cada ronda.
-2. Si la maestra usa el timing del testbench (SCLK de 1 MHz, 1 us antes del primer bit). Ya medido con el medidor: confirmarlo.
+2. Si la maestra usa el timing del testbench (SCLK de 1 MHz, 1 µs antes del primer bit). Ya medido con el medidor: confirmarlo.
 3. Si caja 10 000 y comisión 5 son definitivas.
 4. Si la placa se reinicia entre rondas.
 5. Ya no se pregunta: el profesor confirmó el 16/11 que el Espino multihilo es válido (T126).

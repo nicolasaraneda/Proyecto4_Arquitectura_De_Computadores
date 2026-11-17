@@ -174,13 +174,13 @@ El módulo suelto no cuenta el multiplexor de 32 bits en la escritura del banco 
 | Con `kal2`, factorizada, C = 4 | 1345 | 105 % | +271 | No cabe |
 | Con `kal2`, factorizada, C = 6 | 1442 | 113 % | +368 | No cabe |
 
-Integrar cuesta entre 55 y 77 celdas más que el módulo suelto. La versión más barata se pasa por 11 celdas incluso junto al core base, que deja 206 libres, y la calibrada se pasa por 122. Como no cabe, no hay frecuencia máxima que informar.
+Integrar cuesta entre 55 y 77 celdas más que el módulo suelto. La versión más barata excede en 11 celdas lo disponible incluso junto al core base, que deja 206 libres, y la calibrada, en 122. Como no cabe, no hay frecuencia máxima que informar.
 
 ### ASIC, GF180MCU
 
 Síntesis con Yosys y abc contra el liberty típico de la biblioteca de 7 pistas. Es solo síntesis: sin place and route, sin reparación de timing y sin relleno.
 
-| Versión | Celdas | Área (um²) | Respecto del SoC del Proyecto 3 |
+| Versión | Celdas | Área (µm²) | Respecto del SoC del Proyecto 3 |
 |---------|--------|------------|---------------------------------|
 | Fija, k1 = 1/32, k2 = 1/2, phi = 7/8 | 402 | 7 971 | 4 % |
 | **Fija, calibrada** | 742 | 14 776 | 7 % |
@@ -190,7 +190,7 @@ Síntesis con Yosys y abc contra el liberty típico de la biblioteca de 7 pistas
 | Multiplicadores de 17 x 14 | 6 373 | 123 978 | 59 % |
 | Multiplicadores de 17 x 14 y 4 registros | 6 599 | 129 804 | 62 % |
 
-El SoC completo del Proyecto 3 ocupó 208 439 um² de celdas en este mismo proceso. La versión programable con coeficientes de 14 bits cuesta más de la mitad de un SoC. La fija con la misma precisión cuesta la sexta parte de eso.
+El SoC completo del Proyecto 3 ocupó 208 439 µm² de celdas en este mismo proceso. La versión programable con coeficientes de 14 bits cuesta más de la mitad de un SoC. La fija con la misma precisión cuesta la sexta parte de eso.
 
 ## 7. Qué significa para la edición de competencia
 

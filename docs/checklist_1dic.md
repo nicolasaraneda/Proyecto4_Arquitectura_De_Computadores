@@ -11,13 +11,13 @@ Entrega en GitHub a las 10:00. Competencia y defensa desde las 10:30. El peldañ
 El repositorio `nicolasaraneda/Proyecto4_Arquitectura_De_Computadores` es privado hasta la entrega, porque es una competencia. El profesor y los ayudantes necesitan acceso de lectura **antes de las 10:00 del 1/12**, y GitHub no da el acceso hasta que cada uno acepta la invitación (le llega un correo y queda pendiente hasta que la acepta, hasta 7 días). Por eso se hace el 29/11 y no el mismo día.
 
 1. Pedir al profesor y a cada ayudante su usuario de GitHub (por correo o en clases).
-2. Invitar a cada uno con permiso de lectura. Desde la terminal, con la sesión de `gh` de Nicolás:
+2. Invitar a cada uno con permiso de lectura. Desde la terminal, con la cuenta de `gh` de Nicolás:
 
    ```
    gh api -X PUT repos/nicolasaraneda/Proyecto4_Arquitectura_De_Computadores/collaborators/USUARIO -f permission=pull
    ```
 
-   `pull` es solo lectura: pueden ver y clonar, no empujar. Lo mismo por la web: Settings, Collaborators, Add people, elegir el usuario y el rol Read.
+   `pull` es solo lectura: pueden ver y clonar, no subir cambios (push). Lo mismo por la web: Settings, Collaborators, Add people, elegir el usuario y el rol Read.
 3. Comprobar las invitaciones pendientes y los que ya aceptaron:
 
    ```
@@ -58,7 +58,7 @@ Hacerlo público no es la opción: a las 10:00 los demás grupos todavía no han
 
 Se graba con `iceprog bitstreams/ARCHIVO.bin` (Nicolás, con la placa conectada a WSL por `usbipd`); las imágenes múltiples (`r2_multi.bin` y las `*_multi.bin`) con `iceprog -b`, que borra la flash entera. Al terminar debe decir "VERIFY OK".
 
-Con los cables del PMOD puestos y la maestra encendida, desconectar y conectar el USB de la Go Board antes de la primera ronda: los pines del SPI no tienen pull-up, y así la FPGA parte de cero con las líneas ya conducidas por la maestra (`docs/checklist_26nov.md`, sección 2).
+Con los cables del PMOD puestos y la maestra encendida, desconectar y conectar el USB de la Go Board antes de la primera ronda: los pines del SPI no tienen pull-up, y así la FPGA parte de cero con la maestra ya fijando el nivel de las líneas (`docs/checklist_26nov.md`, sección 2).
 
 ## 4. Durante la competencia
 
