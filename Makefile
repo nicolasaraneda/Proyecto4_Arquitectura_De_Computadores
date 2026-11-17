@@ -856,9 +856,11 @@ exhibicion:
 #                     con CS_n en bajo (falla con el RTL de main: hallazgo 1)
 #   p10-rondas-sin-reset  costo de no reiniciar la placa entre rondas, con las
 #                     referencias (docs/mediciones/p10/rondas_sin_reset.txt)
+#   p10-modo-spi      exploración: lo que lee una maestra de modo 0 y de modo 3
 .PHONY: p10 p10-ro-custom0 p10-spi-7flancos p10-vuelta-tick p10-largo p10-sclk-degradado p10-formal-spi \
-        p10-rondas-sin-reset
-p10: p10-ro-custom0 p10-vuelta-tick p10-largo p10-sclk-degradado p10-rondas-sin-reset p10-spi-7flancos p10-formal-spi
+        p10-rondas-sin-reset p10-modo-spi
+p10: p10-ro-custom0 p10-vuelta-tick p10-largo p10-sclk-degradado p10-rondas-sin-reset p10-modo-spi \
+     p10-spi-7flancos p10-formal-spi
 p10-ro-custom0:
 	tools/p10/ro_custom0.sh
 p10-spi-7flancos:
@@ -875,3 +877,5 @@ p10-rondas-sin-reset:
 	mkdir -p docs/mediciones/p10
 	$(PYTHON) tools/p10/rondas_sin_reset.py > docs/mediciones/p10/rondas_sin_reset.txt; \
 	  r=$$?; cat docs/mediciones/p10/rondas_sin_reset.txt; exit $$r
+p10-modo-spi:
+	tools/p10/modo_spi.sh
