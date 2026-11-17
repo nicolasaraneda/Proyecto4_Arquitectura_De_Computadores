@@ -1,0 +1,46 @@
+Duelo cabeza a cabeza contra max_media: rondas de 20000 ticks, semilla 4.
+Generado por ref/zscore/duelo.py --largo 20000 --semilla 4 --candidatas zscore;zscore:km=5,kd=7,num=6,den=4;fondoz:c=5,w0=6,w1=5,w2=5,vt=8,g0=cand:max_media,g1=zscore:km~5/kd~6/den~4/num~8,g2=zscore:km~5/kd~7/den~4/num~6;fondoz:c=5,w0=6,w1=5,w2=5,m=2,v=9,mg=5,d=4,pp=1,vt=8,g0=zscore:km~5/kd~6/den~4/num~9,g1=zscore:km~5/kd~6/den~4/num~8,g2=zscore:km~5/kd~6/den~4/num~10 --salida docs/mediciones/zscore/duelo_n20000_s4.txt.
+ronda: P(candidata > referencia) en una serie. competencia: P(suma de tres rondas mayor). 2 de 3: P(gana al menos dos rondas). +-: error estandar binomial.
+
+--- remuestreo, todas: 4000 series ---
+candidata                                 ronda    +- empate | tríos compet.    +- 2 de 3    +- |  W media    W ref
+zscore                                    36.8%  0.8   0.0% |  1333   31.5%  1.3  30.8%  1.3 |    39776    44790
+zscore:km=5,kd=7,num=6,den=4              56.1%  0.8   0.0% |  1333   70.1%  1.3  58.6%  1.3 |    57280    44790
+fondoz:c=5,w0=6,w1=5,w2=5,vt=8,g0=cand:max_media,g1=zscore:km~5/kd~6/den~4/num~8,g2=zscore:km~5/kd~7/den~4/num~6  54.5%  0.8   0.0% |  1333   64.1%  1.3  57.2%  1.4 |    51433    44790
+fondoz:c=5,w0=6,w1=5,w2=5,m=2,v=9,mg=5,d=4,pp=1,vt=8,g0=zscore:km~5/kd~6/den~4/num~9,g1=zscore:km~5/kd~6/den~4/num~8,g2=zscore:km~5/kd~6/den~4/num~10  46.0%  0.8   0.0% |  1333   46.8%  1.4  43.6%  1.4 |    44919    44790
+
+--- remuestreo, interiores: 1996 series ---
+candidata                                 ronda    +- empate | tríos compet.    +- 2 de 3    +- |  W media    W ref
+zscore                                    37.6%  1.1   0.0% |   665   33.4%  1.8  30.8%  1.8 |    24181    26477
+zscore:km=5,kd=7,num=6,den=4              44.1%  1.1   0.0% |   665   42.1%  1.9  42.9%  1.9 |    25728    26477
+fondoz:c=5,w0=6,w1=5,w2=5,vt=8,g0=cand:max_media,g1=zscore:km~5/kd~6/den~4/num~8,g2=zscore:km~5/kd~7/den~4/num~6  46.1%  1.1   0.0% |   665   45.3%  1.9  43.9%  1.9 |    26094    26477
+fondoz:c=5,w0=6,w1=5,w2=5,m=2,v=9,mg=5,d=4,pp=1,vt=8,g0=zscore:km~5/kd~6/den~4/num~9,g1=zscore:km~5/kd~6/den~4/num~8,g2=zscore:km~5/kd~6/den~4/num~10  44.1%  1.1   0.0% |   665   41.4%  1.9  41.7%  1.9 |    25417    26477
+
+--- plausibles, todas: 4000 series ---
+candidata                                 ronda    +- empate | tríos compet.    +- 2 de 3    +- |  W media    W ref
+zscore                                    21.8%  0.7   0.0% |  1333   12.8%  0.9  14.1%  1.0 |    29571    56716
+zscore:km=5,kd=7,num=6,den=4              62.1%  0.8   0.0% |  1333   66.5%  1.3  66.1%  1.3 |    59439    56716
+fondoz:c=5,w0=6,w1=5,w2=5,vt=8,g0=cand:max_media,g1=zscore:km~5/kd~6/den~4/num~8,g2=zscore:km~5/kd~7/den~4/num~6  58.7%  0.8   0.0% |  1333   59.9%  1.3  62.0%  1.3 |    54642    56716
+fondoz:c=5,w0=6,w1=5,w2=5,m=2,v=9,mg=5,d=4,pp=1,vt=8,g0=zscore:km~5/kd~6/den~4/num~9,g1=zscore:km~5/kd~6/den~4/num~8,g2=zscore:km~5/kd~6/den~4/num~10  35.2%  0.8   0.0% |  1333   26.6%  1.2  29.0%  1.2 |    39128    56716
+
+--- plausibles, interiores: 2025 series ---
+candidata                                 ronda    +- empate | tríos compet.    +- 2 de 3    +- |  W media    W ref
+zscore                                    25.6%  1.0   0.0% |   675   16.3%  1.4  18.4%  1.5 |    18491    25762
+zscore:km=5,kd=7,num=6,den=4              64.8%  1.1   0.0% |   675   74.1%  1.7  71.0%  1.7 |    28260    25762
+fondoz:c=5,w0=6,w1=5,w2=5,vt=8,g0=cand:max_media,g1=zscore:km~5/kd~6/den~4/num~8,g2=zscore:km~5/kd~7/den~4/num~6  62.3%  1.1   0.0% |   675   68.9%  1.8  67.3%  1.8 |    26937    25762
+fondoz:c=5,w0=6,w1=5,w2=5,m=2,v=9,mg=5,d=4,pp=1,vt=8,g0=zscore:km~5/kd~6/den~4/num~9,g1=zscore:km~5/kd~6/den~4/num~8,g2=zscore:km~5/kd~6/den~4/num~10  40.8%  1.1   0.0% |   675   33.2%  1.8  38.8%  1.9 |    22018    25762
+
+--- estres, todas: 2800 series ---
+candidata                                 ronda    +- empate | tríos compet.    +- 2 de 3    +- |  W media    W ref
+zscore                                    40.1%  0.9   0.0% |   933   35.6%  1.6  39.8%  1.6 |    63120   196465
+zscore:km=5,kd=7,num=6,den=4              62.8%  0.9   0.1% |   933   65.9%  1.6  65.2%  1.6 |   164853   196465
+fondoz:c=5,w0=6,w1=5,w2=5,vt=8,g0=cand:max_media,g1=zscore:km~5/kd~6/den~4/num~8,g2=zscore:km~5/kd~7/den~4/num~6  58.9%  0.9   0.0% |   933   60.8%  1.6  61.5%  1.6 |   148631   196465
+fondoz:c=5,w0=6,w1=5,w2=5,m=2,v=9,mg=5,d=4,pp=1,vt=8,g0=zscore:km~5/kd~6/den~4/num~9,g1=zscore:km~5/kd~6/den~4/num~8,g2=zscore:km~5/kd~6/den~4/num~10  51.0%  0.9   0.0% |   933   48.1%  1.6  51.6%  1.6 |    97156   196465
+
+--- estres, interiores: 603 series ---
+candidata                                 ronda    +- empate | tríos compet.    +- 2 de 3    +- |  W media    W ref
+zscore                                    57.5%  2.0   0.0% |   201   53.2%  3.5  61.2%  3.4 |    46841    49467
+zscore:km=5,kd=7,num=6,den=4              81.3%  1.6   0.0% |   201   78.1%  2.9  80.1%  2.8 |   126238    49467
+fondoz:c=5,w0=6,w1=5,w2=5,vt=8,g0=cand:max_media,g1=zscore:km~5/kd~6/den~4/num~8,g2=zscore:km~5/kd~7/den~4/num~6  81.1%  1.6   0.0% |   201   80.6%  2.8  81.1%  2.8 |   102655    49467
+fondoz:c=5,w0=6,w1=5,w2=5,m=2,v=9,mg=5,d=4,pp=1,vt=8,g0=zscore:km~5/kd~6/den~4/num~9,g1=zscore:km~5/kd~6/den~4/num~8,g2=zscore:km~5/kd~6/den~4/num~10  80.8%  1.6   0.0% |   201   78.6%  2.9  83.1%  2.6 |    80082    49467
+

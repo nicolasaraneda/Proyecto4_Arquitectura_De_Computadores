@@ -839,3 +839,34 @@ r2-falla:
 .PHONY: exhibicion
 exhibicion:
 	tools/p9/exhibicion.sh
+
+# --- Evaluación de la regla zscore de Vicente (docs/zscore.md) -------------------
+# zscore-arnes      compila build/zscore/arnes (el arnés de factibilidad/retorno con zscore y el fondo por nombre)
+# zscore-series     series de la semilla 4, la reservada (T128), en build/zscore/series (unos 3 minutos)
+# zscore-validar    zscore.c contra ref/zscore.py, contra la referencia de Vicente (si está su repositorio) y
+#                   el fondo por nombre contra el de la factibilidad
+# zscore            exploración con la semilla 0: protocolo, meseta a 2000 y 20 000 ticks, fondos, duelo y
+#                   la grilla en la serie de práctica (unos 6 minutos)
+# zscore-reservada  los cuatro finalistas con la semilla 4. Se corrió una vez (docs/bitacora/zscore.md)
+.PHONY: zscore zscore-arnes zscore-series zscore-validar zscore-reservada
+ZSCORE_ENV = RETORNO_SERIES=$(CURDIR)/build/zscore/series HILOS=20
+ZSCORE_M = docs/mediciones/zscore
+zscore-arnes:
+	$(MAKE) -C ref/zscore
+zscore-series:
+	$(PYTHON) ref/zscore/series_reservadas.py
+zscore-validar: zscore-arnes
+	$(PYTHON) ref/zscore/validar.py
+zscore: zscore-arnes zscore-series zscore-validar
+	mkdir -p $(ZSCORE_M)
+	$(PYTHON) ref/protocolo.py --estrategia oficial --comparar zscore > $(ZSCORE_M)/protocolo_s0.txt
+	$(ZSCORE_ENV) $(PYTHON) ref/zscore/meseta.py --largo 2000 --semilla 0 > /dev/null
+	$(ZSCORE_ENV) $(PYTHON) ref/zscore/meseta.py --largo 20000 --semilla 0 --interior > /dev/null
+	$(ZSCORE_ENV) $(PYTHON) ref/zscore/meseta.py --largo 20000 --semilla 0 --parada > /dev/null
+	$(ZSCORE_ENV) $(PYTHON) ref/zscore/tabla.py --largo 2000 --semilla 0 --salida $(ZSCORE_M)/tabla_n2000_s0.txt > /dev/null
+	$(ZSCORE_ENV) $(PYTHON) ref/zscore/duelo.py --largo 2000 --semilla 0 --salida $(ZSCORE_M)/duelo_n2000_s0.txt \
+	  --candidatas "zscore;zscore:km=5,kd=7,num=6,den=4;zscore:km=5,kd=6,num=7,den=4;zscore:km=5,kd=6,num=8,den=4" > /dev/null
+	$(ZSCORE_ENV) $(PYTHON) ref/zscore/practica.py > /dev/null
+	@echo "Resultados en $(ZSCORE_M)/"
+zscore-reservada: zscore-arnes zscore-series
+	ref/zscore/reservada.sh

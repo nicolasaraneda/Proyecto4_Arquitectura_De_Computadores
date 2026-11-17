@@ -1,0 +1,67 @@
+zscore y fondos de gestores zscore contra max_media: rondas de 20000 ticks, semilla 4, parada, campo mixto, G = 10.
+Generado por ref/zscore/tabla.py --largo 20000 --semilla 4 --parada --salida docs/mediciones/zscore/tabla_n20000_s4_parada.txt.
+
+--- evidencia: 8000 series. max_media: W 21263, H3a 1.723, H3b 1.709, p5 de H3a en tres rondas 1.235 ---
+candidata                                             W    dif +-ee |    dH3a  +-ee    dH3b  +-ee | dp5 H3a  +-ee | ordenes
+zscore de Vicente (z 2,5; 32 y 64)                18223  -3040  131 |  -0.167 0.005  -0.061 0.004 |  -0.208 0.017 |   325.7
+zscore z 2,0 (32 y 64)                            20262  -1001  106 |  -0.092 0.004  -0.017 0.003 |  -0.114 0.015 |   580.7
+zscore z 1,75 (32 y 64)                           20692   -572  101 |  -0.095 0.004  -0.021 0.003 |  -0.119 0.017 |   715.9
+zscore z 1,5 (32 y 128), centro de la meseta      21314    +51   96 |  -0.086 0.004  -0.020 0.003 |  -0.111 0.016 |   791.4
+fondo zscore 2,0/2,25/2,5, mayoria                19522  -1741  117 |  -0.113 0.004  -0.029 0.003 |  -0.144 0.016 |   449.1
+fondo zscore 2,0/2,25/2,5, pesos aprendidos       19657  -1607  114 |  -0.110 0.004  -0.027 0.003 |  -0.141 0.017 |   469.2
+fondo zscore 1,25/1,5/1,75, mayoria               21314    +51   96 |  -0.086 0.004  -0.020 0.003 |  -0.111 0.016 |   791.4
+fondo zscore 1,25/1,5/1,75, aprendidos            21332    +69   96 |  -0.088 0.004  -0.021 0.003 |  -0.112 0.016 |   805.0
+fondo max_media + zscore 2,0 + zscore 1,5         21266     +3   86 |  -0.063 0.003  -0.008 0.003 |  -0.073 0.015 |   672.9
+fondo de R1 (fondo_min, gestores de reversion)    21482   +219   42 |  -0.019 0.001  -0.007 0.002 |  -0.019 0.010 |   630.3
+
+--- remuestreo: 4000 series. max_media: W 21384, H3a 1.791, H3b 1.761, p5 de H3a en tres rondas 1.341 ---
+candidata                                             W    dif +-ee |    dH3a  +-ee    dH3b  +-ee | dp5 H3a  +-ee | ordenes
+zscore de Vicente (z 2,5; 32 y 64)                20174  -1210  119 |  -0.110 0.005  -0.032 0.004 |  -0.130 0.021 |   381.1
+zscore z 2,0 (32 y 64)                            20435   -949  120 |  -0.123 0.005  -0.043 0.004 |  -0.159 0.021 |   624.9
+zscore z 1,75 (32 y 64)                           19673  -1710  118 |  -0.175 0.005  -0.079 0.004 |  -0.240 0.023 |   740.7
+zscore z 1,5 (32 y 128), centro de la meseta      20001  -1383  115 |  -0.177 0.005  -0.083 0.004 |  -0.249 0.021 |   800.4
+fondo zscore 2,0/2,25/2,5, mayoria                20782   -601  118 |  -0.096 0.005  -0.025 0.004 |  -0.117 0.021 |   504.1
+fondo zscore 2,0/2,25/2,5, pesos aprendidos       20717   -666  117 |  -0.099 0.005  -0.026 0.004 |  -0.119 0.020 |   515.6
+fondo zscore 1,25/1,5/1,75, mayoria               20001  -1383  115 |  -0.177 0.005  -0.083 0.004 |  -0.249 0.021 |   800.4
+fondo zscore 1,25/1,5/1,75, aprendidos            19928  -1456  115 |  -0.179 0.005  -0.085 0.004 |  -0.249 0.022 |   807.5
+fondo max_media + zscore 2,0 + zscore 1,5         20602   -782  103 |  -0.126 0.004  -0.055 0.004 |  -0.179 0.019 |   695.1
+fondo de R1 (fondo_min, gestores de reversion)    21101   -283   42 |  -0.035 0.002  -0.021 0.002 |  -0.040 0.015 |   594.5
+
+--- plausibles: 4000 series. max_media: W 21143, H3a 1.655, H3b 1.658, p5 de H3a en tres rondas 1.128 ---
+candidata                                             W    dif +-ee |    dH3a  +-ee    dH3b  +-ee | dp5 H3a  +-ee | ordenes
+zscore de Vicente (z 2,5; 32 y 64)                16272  -4871  230 |  -0.224 0.008  -0.091 0.006 |  -0.246 0.027 |   270.3
+zscore z 2,0 (32 y 64)                            20089  -1054  176 |  -0.059 0.006  +0.009 0.005 |  -0.045 0.024 |   536.5
+zscore z 1,75 (32 y 64)                           21710   +567  163 |  -0.015 0.006  +0.037 0.005 |  +0.003 0.025 |   691.1
+zscore z 1,5 (32 y 128), centro de la meseta      22627  +1484  149 |  +0.004 0.005  +0.044 0.005 |  +0.029 0.023 |   782.4
+fondo zscore 2,0/2,25/2,5, mayoria                18262  -2881  200 |  -0.130 0.007  -0.035 0.006 |  -0.127 0.025 |   394.2
+fondo zscore 2,0/2,25/2,5, pesos aprendidos       18596  -2547  194 |  -0.119 0.007  -0.032 0.006 |  -0.112 0.026 |   422.8
+fondo zscore 1,25/1,5/1,75, mayoria               22627  +1484  149 |  +0.004 0.005  +0.044 0.005 |  +0.029 0.023 |   782.4
+fondo zscore 1,25/1,5/1,75, aprendidos            22737  +1594  151 |  +0.004 0.005  +0.043 0.005 |  +0.023 0.024 |   802.5
+fondo max_media + zscore 2,0 + zscore 1,5         21930   +787  136 |  +0.001 0.005  +0.040 0.005 |  +0.037 0.023 |   650.6
+fondo de R1 (fondo_min, gestores de reversion)    21864   +721   73 |  -0.002 0.002  +0.009 0.002 |  +0.011 0.015 |   666.2
+
+--- estres: 2800 series. max_media: W 20567, H3a 1.112, H3b 1.187, p5 de H3a en tres rondas 0.381 ---
+candidata                                             W    dif +-ee |    dH3a  +-ee    dH3b  +-ee | dp5 H3a  +-ee | ordenes
+zscore de Vicente (z 2,5; 32 y 64)                18665  -1902  421 |  +0.012 0.012  +0.053 0.011 |  +0.056 0.035 |   226.4
+zscore z 2,0 (32 y 64)                            28451  +7884  552 |  -0.010 0.010  +0.021 0.009 |  -0.012 0.034 |   496.8
+zscore z 1,75 (32 y 64)                           33358 +12791  773 |  -0.027 0.009  +0.003 0.009 |  -0.029 0.030 |   650.1
+zscore z 1,5 (32 y 128), centro de la meseta      36923 +16356  957 |  -0.027 0.009  -0.000 0.009 |  -0.036 0.030 |   754.9
+fondo zscore 2,0/2,25/2,5, mayoria                23380  +2813  406 |  +0.008 0.010  +0.042 0.010 |  +0.020 0.033 |   351.7
+fondo zscore 2,0/2,25/2,5, pesos aprendidos       26205  +5638  495 |  +0.011 0.010  +0.044 0.010 |  +0.021 0.031 |   418.5
+fondo zscore 1,25/1,5/1,75, mayoria               36923 +16356  957 |  -0.027 0.009  -0.000 0.009 |  -0.036 0.030 |   754.9
+fondo zscore 1,25/1,5/1,75, aprendidos            38960 +18393 1077 |  -0.026 0.009  +0.001 0.009 |  -0.035 0.029 |   814.0
+fondo max_media + zscore 2,0 + zscore 1,5         31821 +11254  671 |  -0.012 0.008  +0.013 0.008 |  -0.015 0.029 |   570.8
+fondo de R1 (fondo_min, gestores de reversion)    29531  +8964  549 |  +0.030 0.003  +0.028 0.003 |  +0.012 0.015 |   501.8
+
+Especificaciones:
+  max_media: max_media
+  zscore de Vicente (z 2,5; 32 y 64): zscore
+  zscore z 2,0 (32 y 64): zscore:km=5,kd=6,num=8,den=4
+  zscore z 1,75 (32 y 64): zscore:km=5,kd=6,num=7,den=4
+  zscore z 1,5 (32 y 128), centro de la meseta: zscore:km=5,kd=7,num=6,den=4
+  fondo zscore 2,0/2,25/2,5, mayoria: fondoz:c=5,w0=6,w1=5,w2=5,vt=8,g0=zscore:km~5/kd~6/den~4/num~9,g1=zscore:km~5/kd~6/den~4/num~8,g2=zscore:km~5/kd~6/den~4/num~10
+  fondo zscore 2,0/2,25/2,5, pesos aprendidos: fondoz:c=5,w0=6,w1=5,w2=5,m=2,v=9,mg=5,d=4,pp=1,vt=8,g0=zscore:km~5/kd~6/den~4/num~9,g1=zscore:km~5/kd~6/den~4/num~8,g2=zscore:km~5/kd~6/den~4/num~10
+  fondo zscore 1,25/1,5/1,75, mayoria: fondoz:c=5,w0=6,w1=5,w2=5,vt=8,g0=zscore:km~5/kd~7/den~4/num~6,g1=zscore:km~5/kd~7/den~4/num~5,g2=zscore:km~5/kd~7/den~4/num~7
+  fondo zscore 1,25/1,5/1,75, aprendidos: fondoz:c=5,w0=6,w1=5,w2=5,m=2,v=9,mg=5,d=4,pp=1,vt=8,g0=zscore:km~5/kd~7/den~4/num~6,g1=zscore:km~5/kd~7/den~4/num~5,g2=zscore:km~5/kd~7/den~4/num~7
+  fondo max_media + zscore 2,0 + zscore 1,5: fondoz:c=5,w0=6,w1=5,w2=5,vt=8,g0=cand:max_media,g1=zscore:km~5/kd~6/den~4/num~8,g2=zscore:km~5/kd~7/den~4/num~6
+  fondo de R1 (fondo_min, gestores de reversion): cand:fondoz_min
