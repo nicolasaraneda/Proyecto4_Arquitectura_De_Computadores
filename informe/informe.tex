@@ -36,7 +36,7 @@
 \begin{document}
 \maketitle
 
-\noindent Diseño que compite: \textbf{\cifraPeldano}. \ifpeldanofondo Es el Espino barrel de cuatro hilos con dos instrucciones propias (\texttt{emad} y \texttt{devk}), una tabla de parámetros en BRAM\ifpeldanodos{} y un vigilante que reconfigura la FPGA con un respaldo\fi, corriendo \arch{sw/trade.s}, que es el fondo de cuatro hilos de \arch{sw/fondo.s}.\else Es el Espino base del curso corriendo \arch{sw/trade.s} con la regla \texttt{max\_media}.\fi{} Cada número de este informe se regenera con \texttt{make report} desde el repositorio (commit \texttt{\commitinforme}); el README indica el comando que produce cada uno.
+\noindent Diseño que compite: \textbf{\cifraPeldano}. \ifpeldanofondo Es el Espino barrel de cuatro hilos con dos instrucciones propias (\texttt{emad} y \texttt{devk}), una tabla de parámetros en BRAM\ifpeldanodos{} y un vigilante que reconfigura la FPGA con un respaldo\fi, corriendo \arch{sw/trade.s}, que es el fondo de cuatro hilos de \arch{sw/fondo.s}.\else Es el Espino base del curso corriendo \arch{sw/trade.s} con la regla \texttt{max\_media}.\fi{} Cada número de este informe se regenera con \texttt{make report} desde el repositorio (commit \texttt{\commitinforme}); cada tabla indica su archivo de medición, y \arch{docs/comandos.md} el comando que produce cada uno.
 
 % ==============================================================================
 \section{Algoritmo de predicción y decisión (3.1)}
@@ -51,7 +51,7 @@ La regla, que llamamos \texttt{max\_media}, mantiene la media $m$ con $\alpha = 
   \item si $p > m$, quiere estar vendido;
   \item en otro caso conserva la posición.
 \end{itemize}
-Se validó fuera de la placa, en Python (\arch{ref/trader.py}), con la serie de práctica en bloques de 2\,000 ticks y con familias sintéticas calibradas contra ella (\arch{docs/algoritmo.md}).
+Se validó fuera de la placa, en Python (\arch{ref/trader.py}), con la serie de práctica en bloques de 2\,000 ticks y con familias sintéticas calibradas contra ella (\arch{docs/algoritmo.md}). El umbral de entrada está en una meseta: los umbrales vecinos dan medias parecidas, así que la elección no depende de un punto afinado a la serie. $\alpha = 1/32$ fue el mejor compromiso entre los estimadores probados: con un $\alpha$ mayor la media sigue al precio y no queda desviación que operar, y con uno menor empeoran los remuestreos (\arch{docs/algoritmo.md}, secciones 5.1 y 5.2).
 
 \ifpeldanofondo
 El diseño que compite corre esta regla en un \emph{fondo} de cuatro hilos (\arch{ref/fondo.py}). Tres gestores corren cada uno una banda de la misma regla (entrar 3, 4 y 2 unidades bajo la media) y votan por memoria compartida; un supervisor combina los votos con pesos que se ajustan cada 512 ticks según lo que habría ganado cada gestor, y escribe la decisión. El supervisor calcula además \texttt{max\_media} por su cuenta y la usa en lugar de cualquier voto que no llegue a tiempo, de modo que la decisión nunca depende de que otro hilo esté vivo.
@@ -65,7 +65,7 @@ La cantidad $q$ no se calcula: la orden es siempre por 63 acciones, \emph{compra
 
 \subsection{Comparación con las referencias}
 
-La tabla~\ref{tab:31} compara el algoritmo con no operar, con comprar al inicio y mantener, y con la regla base de clases, en la serie de práctica completa y en los primeros 2\,000 ticks con el período y los precios perdidos del testbench. La pérdida máxima es la mayor caída del patrimonio desde un máximo anterior.
+La tabla~\ref{tab:31} compara el algoritmo con no operar, con comprar al inicio y mantener, y con la regla base que el grupo usó hasta el 15/11 (entrar 4 unidades bajo la media en vez de 3), en la serie de práctica completa y en los primeros 2\,000 ticks con el período y los precios perdidos del testbench. La pérdida máxima es la mayor caída del patrimonio desde un máximo anterior.
 
 \begin{table}[H]\centering
 \caption{Patrimonio final, órdenes, comisiones y pérdida máxima en la serie de práctica.}\label{tab:31}
@@ -73,6 +73,8 @@ La tabla~\ref{tab:31} compara el algoritmo con no operar, con comprar al inicio 
 \end{table}
 
 En la serie completa el algoritmo termina con \cifraPatrimonioVeinte, contra \cifraCymVeinte{} de comprar y mantener y 10\,000 de no operar. Para no elegir con una sola serie, la tabla~\ref{tab:31b} lo mide en los 10 bloques de 2\,000 ticks: en promedio \cifraBloquesMedia, en el peor bloque \cifraBloquesPeor, y supera a comprar y mantener en \cifraBloquesGana{} de los 10.
+
+La regla base del grupo termina sobre \texttt{max\_media} en la serie completa y en los bloques. Sus parámetros se eligieron mirando esta misma serie, así que esa ventaja está sesgada a su favor. Evaluadas con una semilla reservada, que no se usó para elegir nada, en remuestreos por bloques de la práctica y en familias sintéticas plausibles, \texttt{max\_media} gana a la regla base, y en los 10 bloques la diferencia entre las dos queda dentro del error (\arch{docs/algoritmo.md}, sección 7, y \arch{docs/mediciones/frontera.txt}). Por eso se eligió \texttt{max\_media}.
 
 \begin{table}[H]\centering
 \caption{Patrimonio final en los 10 bloques de 2\,000 ticks de la serie de práctica.}\label{tab:31b}
@@ -98,7 +100,7 @@ Cada gestor (hilos 1 a 3) espera a que cambie el número de tick publicado, actu
 \begin{enumerate}
   \item \textbf{Esperar el precio}: lazo de tres instrucciones (\texttt{lw}, \texttt{andi}, \texttt{beq}) sobre el bit de precio nuevo del registro de estado del esclavo SPI.
   \item \textbf{Leer}: \texttt{lw} de \texttt{PRICE}, que además baja la bandera.
-  \item \textbf{Actualizar el estado y predecir}: la desviación $\mathit{dev} = 32p - S$.
+  \item \textbf{Predecir}: la desviación $\mathit{dev} = 32p - S$.
   \item \textbf{Decidir}: dos comparaciones con los umbrales y la posición nueva.
   \item \textbf{Escribir \texttt{DECISION}} y actualizar la media para el tick siguiente.
 \end{enumerate}
@@ -110,14 +112,30 @@ La media se lleva como $S = 32\,m$ (13 bits) y la desviación como $\mathit{dev}
 \ifpeldanofondo
 Cada hilo tiene su banco de 16 registros en las BRAM del banco de registros. La memoria compartida tiene una zona por hilo: el supervisor escribe el precio y el tick, cada gestor su voto y su puntaje, y nadie escribe en la zona de otro (\arch{docs/fondo.md}, sección 3).
 \else
-El programa usa 8 registros y una palabra de trabajo en la última dirección de la RAM (\arch{docs/trade\_s.md}).
+El programa usa 8 registros y una palabra de trabajo (\arch{docs/trade\_s.md}):
+\begin{center}\small
+\begin{tabular}{ll}
+\toprule
+Registro o dirección & Contenido \\
+\midrule
+\texttt{x2} & Base del esclavo SPI (\texttt{0x8001\_0000}) \\
+\texttt{x3} & $S$, la media por 32 \\
+\texttt{x4} & $\mathit{pos}$: 0 en caja, 1 comprado \\
+\texttt{x5} & $p$, el último precio \\
+\texttt{x6} & $32p$, y después $\mathit{dev}$ \\
+\texttt{x7}, \texttt{x9} & Temporales \\
+\texttt{x8} & Byte de decisión \\
+\texttt{TMP} (\texttt{0x7FC}) & Palabra de trabajo para el desplazamiento, última de la RAM \\
+\bottomrule
+\end{tabular}
+\end{center}
 \fi
 
 \textbf{Operaciones que Espino no tiene.} Los desplazamientos están deshabilitados y no hay multiplicación ni división. \ifpeldanofondo En el diseño que compite se resolvieron en hardware: \texttt{emad} calcula $r_d = r_{s2} + (r_{s1} \gg 5)$ y \texttt{devk} calcula $r_d = (r_{s1} \ll 5) - r_{s2}$ usando el mismo sumador de la ALU con un operando desplazado, sin estado y sin cambiar el control del pipeline (\arch{docs/extension\_isa.md}). En software, sin la extensión, \fi Multiplicar por 32 son cinco sumas. El desplazamiento aritmético de un número con signo se evita con la identidad $(32p - S) \gg 5 = p - ((S + 31) \gg 5)$, donde $S + 31$ es positivo, y $x \gg 5$ con $x$ positivo se obtiene como $(8x) \gg 8$: se guarda $8x$ en una palabra y se lee su segundo byte con \texttt{lbu}.
 
 \subsection{Mismas decisiones que la referencia}
 
-El testbench del curso, sin modificar, da 4/4 y su \texttt{decisiones.csv} es idéntico byte a byte al de la referencia. Además, con el gemelo digital del SoC (un simulador exacto al ciclo, validado contra el RTL), la serie de práctica completa a los tres períodos y \cifraEqSeries{} series sintéticas de 2\,000 ticks dan \cifraEqDistintas{} diferencias en \cifraEqTicks{} ticks. \ifpeldanofondo Por el RTL, con Verilator, el fondo además se comparó en \cifraSeriesRTL{} series y en la práctica a los tres períodos, incluido el estado interno en cada decisión (\arch{docs/mediciones/fondo/r1/series.txt}).\fi
+El testbench del curso, sin modificar, da 4/4 y su \texttt{decisiones.csv} es idéntico byte a byte al de la referencia. Además, con el gemelo digital del SoC (un simulador exacto al ciclo, validado contra el RTL), la serie de práctica completa a los tres períodos y \cifraEqSeries{} series sintéticas de 2\,000 ticks dan \cifraEqDistintas{} diferencias en \cifraEqTicks{} ticks. \ifpeldanofondo\else Por el RTL, \texttt{make equiv} compara además con Verilator los 20\,000 ticks de la práctica a 0,1~ms y a 1~ms, con cero diferencias (\arch{docs/puertas.md}, criterio 2 de R0).\fi\ifpeldanofondo Por el RTL, con Verilator, el fondo además se comparó en \cifraSeriesRTL{} series y en la práctica a los tres períodos, incluido el estado interno en cada decisión (\arch{docs/mediciones/fondo/r1/series.txt}).\fi
 
 \subsection{Mediciones por tick}\label{sec:ticks}
 
@@ -135,13 +153,13 @@ La tabla~\ref{tab:32} da, para cada ronda, las instrucciones, los ciclos, el CPI
 \end{table}
 En el barrel cada hilo ejecuta una instrucción cada 4 ciclos: CPI 4 por hilo y 1 agregado, por construcción. La respuesta peor es de \cifraRespPeor{} ciclos (\cifraUsoRondaTres\,\% del período de la ronda 3), y ocurre en los ticks donde se ajustan los pesos.
 \else
-El CPI medido del programa es \cifraCPIPrograma: 2 ciclos por instrucción más uno en cada \texttt{load} y en cada salto tomado. La respuesta peor es de \cifraRespPeor{} ciclos, el \cifraUsoRondaTres\,\% del período de la ronda 3.
+Contando también el lazo de sondeo, el CPI medido de todo el programa es \cifraCPIPrograma: 2 ciclos por instrucción más uno en cada \texttt{load} y en cada salto tomado. La respuesta peor es de \cifraRespPeor{} ciclos, el \cifraUsoRondaTres\,\% del período de la ronda 3.
 \fi
 
 % ==============================================================================
 \section{Co-diseño hardware/software (3.3)}
 
-\subsection{Dónde se van los ciclos y qué predice Amdahl}
+\subsection{En qué se gastan los ciclos y qué predice Amdahl}
 
 El perfil se midió con el gemelo digital, que cuenta instrucciones y ciclos por dirección del programa (tabla~\ref{tab:perfil}). Una operación útil es una de las \pSieteOpsTrade{} operaciones aritméticas o de comparación que \texttt{max\_media} necesita por tick (4 para la media y 4 para decidir); el fondo hace \pSieteOpsFondo. El \emph{kernel} va de leer \texttt{PRICE} a volver al sondeo.
 
@@ -150,7 +168,7 @@ El perfil se midió con el gemelo digital, que cuenta instrucciones y ciclos por
 \input{generado/t33perfil.tex}
 \end{table}
 
-En R0 actualizar la media se lleva la mayor parte del kernel. Con Amdahl, si se acelera solo esa parte ($f = \pSieteAmdahlFmedia$) por un factor $F = \pSieteAmdahlFfactor$, el kernel ganaría $S = 1/((1-f) + f/F)$; el límite con $F$ infinito es \pSieteAmdahlLimite. La tabla~\ref{tab:amdahl} compara el speedup que predice Amdahl generalizado, fase por fase, con el medido en cada variante construida.
+En R0 el estimador, es decir, la desviación a la media y su actualización, concentra la mayor parte del kernel. Con Amdahl, si se aceleran solo esas dos fases ($f = \pSieteAmdahlFmedia$, la suma de sus fracciones en la tabla~\ref{tab:perfil}) por un factor $F = \pSieteAmdahlFfactor$, el kernel ganaría $S = 1/((1-f) + f/F)$; el límite con $F$ infinito es \pSieteAmdahlLimite. La tabla~\ref{tab:amdahl} compara el speedup que predice Amdahl generalizado, fase por fase, con el medido en cada variante construida.
 
 \begin{table}[H]\centering
 \caption{Speedup predicho por Amdahl contra el medido.}\label{tab:amdahl}
@@ -174,9 +192,9 @@ Se construyeron, verificaron y midieron cuatro alternativas además de la versi�
 \tablaancha{generado/t33variantes.tex}
 \end{table}
 
-Las frecuencias de la tabla salen de una sola síntesis de cada variante, y eso tiene un límite que medimos. El segmentado daba \cifraFminSegPuno{}~MHz de mínima en P1 y da \cifraFminSeg{}~MHz ahora, sin ningún cambio de lógica: la equivalencia formal entre las dos versiones del SoC pasa, y la diferencia aparece porque Yosys entrega otra netlist equivalente que nextpnr rutea peor. Con exactamente el mismo RTL leído en otro orden, la mediana del segmentado va de \cifraSintMedMin{} a \cifraSintMedMax{}~MHz y la mínima de \cifraSintMinMin{} a \cifraSintMinMax{}~MHz. Por eso no atribuimos al diseño diferencias de frecuencia de unos pocos MHz entre variantes; lo que sí es del diseño es que todas cierran a 25~MHz.
+Las frecuencias de la tabla salen de una sola síntesis de cada variante, y eso tiene un límite que medimos. El segmentado daba \cifraFminSegPuno{}~MHz de mínima en su primera medición y da \cifraFminSeg{}~MHz ahora, sin ningún cambio de lógica: la equivalencia formal entre las dos versiones del SoC pasa, y la diferencia aparece porque Yosys entrega otra netlist equivalente que nextpnr rutea peor. Con exactamente el mismo RTL leído en otro orden, la mediana del segmentado va de \cifraSintMedMin{} a \cifraSintMedMax{}~MHz y la mínima de \cifraSintMinMin{} a \cifraSintMinMax{}~MHz. Por eso no atribuimos al diseño diferencias de frecuencia de unos pocos MHz entre variantes; lo que sí es del diseño es que todas cierran a 25~MHz.
 
-El Espino base y el segmentado con la extensión no se construyeron, porque habría que cambiar el RTL de R0, que ya pasó todas las pruebas; su speedup queda predicho en la tabla~\ref{tab:amdahl}.
+El Espino base y el segmentado con la extensión no se construyeron, porque habría que cambiar el RTL de R0, que ya pasó la puerta de simulación (\arch{docs/puertas.md}); su speedup queda predicho en la tabla~\ref{tab:amdahl}.
 
 \subsection{La escalera de la clase y el roofline}
 
@@ -187,7 +205,7 @@ La tabla~\ref{tab:escalera} aplica a nuestro kernel la escalera de la clase 7 (e
 \tablaancha{generado/t33escalera.tex}
 \end{table}
 
-En el roofline (figura~\ref{fig:roofline}) el ancho de banda de Pochoco es $B_s = 4$~B por ciclo a 25~MHz, \pSieteBs~MB/s, y el quiebre queda en \pSieteQuiebre~Op/B. Cada variante tiene su techo $P_{peak} = f \times \text{instrucciones por ciclo}$. Todos los kernels quedan a la derecha del quiebre, entre \cifraIntMin{} y \cifraIntMax~Op/B: están limitados por cómputo, y ninguno llega a su techo porque el sondeo y las comparaciones no son trabajo útil.
+En el roofline (figura~\ref{fig:roofline}) el ancho de banda de Pochoco es $B_s = 4$~B por ciclo a 25~MHz, \pSieteBs~MB/s, y el quiebre queda en \pSieteQuiebre~Op/B. Cada variante tiene su techo $P_{peak} = f \times \text{instrucciones por ciclo}$. Todos los kernels quedan a la derecha del quiebre, entre \cifraIntMin{} y \cifraIntMax~Op/B: están limitados por cómputo, y ninguno llega a su techo porque no todas las instrucciones del kernel son trabajo útil: leer \texttt{PRICE}, escribir \texttt{DECISION}, armar el byte de la orden, volver al sondeo y las instrucciones que reemplazan a los desplazamientos que Espino no tiene no cuentan como operaciones (\arch{docs/codiseno.md}, sección 3).
 
 \begin{figure}[H]\centering
 \resizebox{0.9\linewidth}{!}{\input{generado/roofline.tex}}
@@ -203,14 +221,14 @@ Como referencia de eficiencia, la versión ASIC del SoC (GF180MCU, LibreLane) co
 
 \subsection{PLL y doble frecuencia}
 
-El encapsulado VQ100 de la Go Board no tiene PLL: nextpnr termina con \emph{PLL couldn't be placed anywhere, no suitable BEL found}, con R0 y con R1 (\arch{docs/mediciones/p7/pll.txt}). Como alternativa se probó un duplicador de reloj por lógica: con un oscilador real de 45 a 55\,\% de ciclo de trabajo cierra en \pSieteDobleSemillas{} semillas, sin margen. Si se pudiera llegar a 50~MHz el presupuesto de la ronda 3 pasaría de \pSietePresupuestoRtres{} a \pSietePresupuestoDobleRtres{} ciclos; el diseño que compite usa el \cifraUsoRondaTres\,\% del actual, así que el patrimonio no cambiaría. Los dos quedan como resultados negativos documentados.
+El encapsulado VQ100 de la Go Board no tiene PLL: nextpnr termina con \emph{PLL couldn't be placed anywhere, no suitable BEL found}, con R0 y con R1 (\arch{docs/mediciones/p7/pll.txt}). Como alternativa se probó un duplicador de reloj por lógica: con un oscilador real de 45 a 55\,\% de ciclo de trabajo y en la esquina de retardo máximo, el segmentado con el reloj doblado cierra en \pSieteDobleSemillas{} de \pSieteDobleSemillasTotal{} semillas y el Espino base en \pSieteDobleSemillasBase{}, sin margen (\arch{docs/mediciones/p7/negativos.txt}). Si se pudiera llegar a 50~MHz el presupuesto de la ronda 3 pasaría de \pSietePresupuestoRtres{} a \pSietePresupuestoDobleRtres{} ciclos; el diseño que compite usa en el peor caso el \cifraUsoPresuRondaTres\,\% del presupuesto actual, así que el patrimonio no cambiaría. Los dos quedan como resultados negativos documentados.
 
 \subsection{Variante final}
 
 \ifpeldanofondo
-Compite el diseño integrado. No es la más rápida por hilo: lo es el segmentado, que responde en \pSieteRespPeorSeg{} ciclos contra \pSieteRespPeorRuno. Lo elegimos porque hace \pSieteOpsFondo{} operaciones útiles por tick contra \pSieteOpsTrade{} de R0 (\pSieteMopsRuno{} MOPS contra \pSieteMopsRcero), cabe con margen (\pSieteCeldasRuno{} de 1\,280 celdas) y la latencia no cambia el patrimonio mientras la decisión llegue antes del tick siguiente. Medido en la serie de práctica, el fondo no gana más que \texttt{max\_media} sola: la elección pesa el co-diseño sobre los puntos esperados, y el riesgo queda cubierto con una escalera de respaldo (R0, el Espino base, listo para grabar).
+Compite el diseño integrado. No es la más rápida por hilo: lo es el segmentado, que responde en \pSieteRespPeorSeg{} ciclos contra \pSieteRespPeorRuno. Lo elegimos porque hace \pSieteOpsFondo{} operaciones útiles por tick contra \pSieteOpsTrade{} de R0 (\pSieteMopsRuno{} MOPS contra \pSieteMopsRcero), cabe con margen (\pSieteCeldasRuno{} de 1\,280 celdas) y la latencia no cambia el patrimonio mientras la decisión llegue antes del tick siguiente. Medido en la serie de práctica, el fondo no gana más que \texttt{max\_media} sola: la elección privilegia el co-diseño por sobre los puntos esperados, y el riesgo queda cubierto con una escalera de respaldo (R0, el Espino base, listo para grabar).
 \else
-Compite el Espino base con \texttt{max\_media}. Es el que pasó todas las pruebas, incluida la maestra del curso, y responde en \pSieteRespPeorRcero{} ciclos, el \pSieteUsoRtresRcero\,\% de la ronda 3. Las otras variantes son más rápidas por instrucción o hacen más trabajo, pero ninguna cambia el patrimonio: todas responden antes del tick siguiente. Quedan en el repositorio, medidas y verificadas, como edición de exhibición.
+Compite el Espino base con \texttt{max\_media}. En los términos del enunciado, ninguna variante gana más patrimonio: las que corren \arch{sw/trade.s} toman las mismas decisiones, porque todas responden antes del tick siguiente, y el fondo de R1 no gana más que \texttt{max\_media} sola en la serie de práctica: empata a 0,1~ms y pierde a 1~ms y 10~ms (\arch{docs/mediciones/fondo/r1/equiv.txt}). La más rápida es el segmentado (\pSieteRespPeorSeg{} ciclos en el peor caso), y la que hace más operaciones útiles por tick es el fondo (\pSieteOpsFondo{} contra \pSieteOpsTrade). R0 se elige por balance: responde en \pSieteRespPeorRcero{} ciclos, el \pSieteUsoRtresRcero\,\% del presupuesto de la ronda 3, no agrega hardware al core del curso y pasó la puerta de simulación completa (\arch{docs/puertas.md}); la prueba con la maestra real está programada para el 26/11. Las otras variantes quedan en el repositorio, medidas y verificadas, como edición de exhibición.
 \fi
 
 \end{document}
