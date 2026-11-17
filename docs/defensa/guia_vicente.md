@@ -2,7 +2,7 @@
 
 Grupo: Nicolás Araneda, Vicente Calderón y Santiago Muñoz.
 
-Según `docs/defensa/plan_estudio.md`, sección 2, Vicente es dueño de **el algoritmo, el protocolo de evaluación, `sw/trade.s` y el co-diseño** (variantes, Amdahl, roofline, PLL, ASIC). Cubre de punta a punta los puntos 3.1, 3.2 y 3.3 del informe. En la presentación de 5 minutos dice el primer bloque (`docs/defensa/guiones.md`).
+Según `docs/defensa/plan_estudio.md`, sección 2, Vicente es dueño de **el algoritmo, el protocolo de evaluación, `sw/trade.s` y el co-diseño** (variantes, Amdahl, roofline, PLL, ASIC). Cubre completos los puntos 3.1, 3.2 y 3.3 del informe. En la presentación de 5 minutos dice el primer bloque (`docs/defensa/guiones.md`).
 
 ## 1. Qué leer, en orden
 

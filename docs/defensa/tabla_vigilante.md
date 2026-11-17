@@ -15,7 +15,7 @@ Documento de estudio para la defensa. Resume y ordena `docs/tabla_vigilante.md` 
 
 | Peldaño | Hardware | Celdas | BRAM | Fmax mín. (10 semillas) |
 |---------|----------|--------|------|-------------------------|
-| R0 | Espino base | 1083 | 12 | 42,43 MHz |
+| R0 | Espino base | 1091 | 12 | 41,93 MHz |
 | R1 | Barrel, `emad`, `devk` y tabla | 1029 | 13 | 51,59 MHz |
 | R2 | R1 más vigilante y `SB_WARMBOOT` | 1045 | 13 | 47,86 MHz |
 
@@ -41,7 +41,7 @@ Contenido: `sw/fondo_tabla.hex`, que genera `python3 ref/fondo.py --tabla-hex`; 
 
 ## 3. Cambiar la tabla o el programa con `icebram`
 
-`icebram` reemplaza el contenido de una BRAM dentro de un `.asc` ya ruteado. Para ubicarla busca el contenido anterior. Con la tabla de verdad (236 valores en cero) no puede distinguirla y se niega. La solución es un **molde**: el mismo diseño sintetizado con las memorias llenas de un patrón al azar (`icebram -g`). Los cambios se hacen siempre desde el molde (decisión T70).
+`icebram` reemplaza el contenido de una BRAM dentro de un `.asc` ya ruteado. Para ubicarla busca el contenido anterior. Con la tabla definitiva (236 valores en cero) no puede distinguirla y se niega. La solución es un **molde**: el mismo diseño sintetizado con las memorias llenas de un patrón al azar (`icebram -g`). Los cambios se hacen siempre desde el molde (decisión T70).
 
 - `tools/fondo/bitstreams.sh` construye el molde y la síntesis directa, y comprueba que el molde con `icebram` da **el mismo `.asc` byte por byte** que la síntesis directa, en R1 y en R2.
 - Los moldes quedan guardados en `bitstreams/moldes/` (`r0_molde.asc.gz`, `r1_molde.asc.gz`, `r2_molde.asc.gz` y los patrones).
@@ -49,7 +49,7 @@ Contenido: `sw/fondo_tabla.hex`, que genera `python3 ref/fondo.py --tabla-hex`; 
 
 | Medido | Valor | Fuente |
 |--------|-------|--------|
-| Cambio de tabla de punta a punta (generar, `icebram`, `icepack`) | 0,32 s | `docs/tabla_vigilante.md`, sección 3.2 |
+| Cambio de tabla completo (generar, `icebram`, `icepack`) | 0,32 s | `docs/tabla_vigilante.md`, sección 3.2 |
 | `icebram` con `sw/trade.hex` sobre el molde de R0, igual a R0 byte por byte | 0,10 s | `docs/mediciones/p8/r0_molde.txt` |
 | Simular el bitstream nuevo desde su `.asc` antes de grabarlo | unos 40 minutos | `docs/tabla_vigilante.md`, sección 3.2 |
 
@@ -70,13 +70,13 @@ Un bitstream cambiado con `icebram` **no hereda la puerta**: hay que simularlo d
 
 **Dispara solo por falla dura.** No mira precios, votos ni el plazo del supervisor. Un gestor colgado no lo dispara, porque el supervisor sigue decidiendo. Por contar precios y no tiempo: con la maestra detenida no pasa nada, durante el reset no pasa nada y funciona igual con cualquier período.
 
-**Por qué K = 4 (dispara al quinto).** El plan pide un K que no dispare en ninguna simulación sana. En todas las corridas sanas de R2, incluida la matriz de estrés, **la cuenta nunca pasó de 1**. Cualquier K de 2 o más cumple; 4 da margen y gasta solo 5 ticks de los 536 del relevo (decisión T71).
+**Por qué K = 4 (dispara al quinto).** El criterio es un K que no dispare en ninguna simulación sana. En todas las corridas sanas de R2, incluida la matriz de estrés, **la cuenta nunca pasó de 1**. Cualquier K de 2 o más cumple; 4 da margen y gasta solo 5 ticks de los 361 del relevo a 0,1 ms, con los 35,50 ms medidos en la placa (con los 53 ms de la hoja de datos eran 536; decisión T71 y `docs/mediciones/placa_16nov.md`).
 
 **Por qué espera `CS_n` en alto.** Para que la maestra nunca vea soltarse MISO a mitad de un byte.
 
 **Por qué la imagen de respaldo no tiene vigilante.** Es R0 tal cual, el mismo archivo que pasó su puerta (decisión T72). Sin vigilante no puede haber un ciclo de reinicios.
 
-## 5. El relevo de punta a punta
+## 5. El relevo completo
 
 `make vig-relevo` pone las dos imágenes en un mismo testbench: R2 con el supervisor colgado a propósito y R0 con `sw/trade.hex` (`docs/mediciones/vigilante/relevo.txt`). Lo que lee la maestra, en orden:
 
@@ -96,8 +96,8 @@ Con los **35,50 ms de reconfiguración medidos en la placa** el 16/11 por el eco
 
 Lo que hay que saber decir:
 
-- **El relevo cuesta posición.** `max_media` parte sin media y sin posición, y su primera decisión suele ser vender: si el fondo estaba adentro, R0 liquida.
-- **Lo que la simulación no demuestra:** cuánto dura de verdad la reconfiguración, qué nivel tiene MISO mientras tanto, y que `SB_WARMBOOT` cargue la imagen correcta (su modelo de simulación está vacío). Eso es de la puerta de placa: el relevo tiene que ocurrir al inyectar la falla y no ocurrir en media hora de funcionamiento normal.
+- **El relevo cuesta posición.** `max_media` parte sin media y sin posición, y su primera decisión suele ser vender: si el fondo estaba comprado, R0 liquida.
+- **Lo que la simulación no demuestra:** cuánto dura realmente la reconfiguración, qué nivel tiene MISO mientras tanto, y que `SB_WARMBOOT` cargue la imagen correcta (su modelo de simulación está vacío). Eso es de la puerta de placa: el relevo tiene que ocurrir al inyectar la falla y no ocurrir en media hora de funcionamiento normal.
 - **Reconfigurar durante una ronda está cubierto por la respuesta general del profesor** del 16/11, sin confirmación específica (T126). Solo si el ayudante lo prohíbe de forma explícita, R2 no compite y compite R1 (`docs/arbol_decision.md`, regla 5).
 
 ## 6. La imagen múltiple
@@ -109,7 +109,7 @@ Lo que hay que saber decir:
 1. **¿La tabla decide algo?** No. Es memoria de solo lectura (`rtl/pochoco_tabla.v:43` a `:45`). El que lee, compara y decide es el programa en el core.
 2. **¿Por qué una BRAM aparte?** Para cambiarla con `icebram` sin tocar el programa, y para que el programa no pueda escribirla (T69).
 3. **¿Qué habría pasado si no se simulaba el bitstream?** La tabla habría salido en cero y el diseño habría fallado en la placa después de pasar todas las pruebas del RTL (`rtl/pochoco_tabla.v:36`).
-4. **¿Por qué no se cambia la tabla directamente en el bitstream final?** Porque `icebram` ubica la memoria por su contenido y la tabla de verdad no es distinguible. Por eso los moldes (T70).
+4. **¿Por qué no se cambia la tabla directamente en el bitstream final?** Porque `icebram` ubica la memoria por su contenido y la tabla definitiva no es distinguible. Por eso los moldes (T70).
 5. **¿Cuándo dispara el vigilante?** Al quinto precio seguido sin escritura en `DECISION`, y espera a que `CS_n` suba (`rtl/vigilante.v:65` y `:81`).
 6. **¿Puede disparar con el programa sano?** En ninguna corrida sana la cuenta pasó de 1; el disparo necesita 5 (`docs/puertas.md`, lo propio de R2).
 7. **¿Qué pasa si se cuelga un gestor y no el supervisor?** Nada que vea el vigilante: el supervisor decide sin ese voto.

@@ -28,7 +28,7 @@ Un bloque por persona, en el orden de la pauta. Cada uno dice su parte en unos 9
 
 ### Nicolás: los procesadores y la verificación (punto 3.3 y verificación)
 
-> El Espino base tiene CPI 2 porque el banco de registros es una BRAM con lectura registrada: cada instrucción espera un flanco por sus operandos. Atacamos el CPI de dos formas. El segmentado lee la memoria en el flanco de bajada y hace IF, ID y EX en dos ciclos: CPI 1,35 con `trade.s`. El barrel tiene cuatro hilos en un pipeline de cuatro etapas: cada BRAM cae justo en una frontera entre etapas, no hay riesgos ni adelantamiento, y por eso es el core más chico, 932 celdas.
+> El Espino base tiene CPI 2 porque el banco de registros es una BRAM con lectura registrada: cada instrucción espera un flanco por sus operandos. Atacamos el CPI de dos formas. El segmentado lee la memoria en el flanco de bajada y hace IF, ID y EX en dos ciclos: CPI 1,35 con `trade.s`. El barrel tiene cuatro hilos en un pipeline de cuatro etapas: cada BRAM cae justo en una frontera entre etapas, no hay riesgos ni adelantamiento, y por eso es el core más pequeño, 932 celdas.
 >
 > La extensión agrega dos instrucciones en custom-0: `devk` calcula el desvío `32 p - S` y `emad` el paso de la media, `S + (dev >>> 5)`, cada una en una instrucción en vez de cinco sumas. Ataca el IC, no el CPI.
 >

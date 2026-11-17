@@ -8,7 +8,7 @@ Documento de estudio para la defensa. Resume y ordena `docs/fondo.md`, que es la
 
 El barrel tiene cuatro hilos. Con un solo programa (`sw/trade.s`) tres hilos quedan ociosos y el core es el más lento de los tres (`docs/defensa/barrel.md`, sección 6). El fondo les da trabajo: **un supervisor y tres gestores**, como un fondo de inversión con tres analistas y un jefe que vota.
 
-Lo que **no** resuelve: no gana más patrimonio. Según la factibilidad, contra `max_media` sola suma +0,007 puntos esperados a 2 000 ticks y -0,005 a 20 000, y agrega riesgo de falla en vivo. Compite por la decisión T50 de Nicolás ("opción b, tomemos riesgos"), tomada a sabiendas, por lo que representa como co-diseño (`docs/decisiones.md`, T50). Hay que decirlo así en la defensa.
+Lo que **no** resuelve: no gana más patrimonio. Según la factibilidad, contra `max_media` sola suma +0,007 puntos esperados a 2 000 ticks y -0,005 a 20 000, y agrega riesgo de falla en vivo. Compite por decisión del grupo (T50), tomada a sabiendas: se priorizó el diseño integrado aunque agregue riesgo, por lo que representa como co-diseño (`docs/decisiones.md`, T50). Hay que decirlo así en la defensa.
 
 ## 2. Qué calcula
 
@@ -20,14 +20,14 @@ Lo que **no** resuelve: no gana más patrimonio. Según la factibilidad, contra 
 | 2 | `base` | 4 unidades | vuelve a la media |
 | 3 | `activo` | 2 unidades | queda medio punto sobre la media |
 
-Son tres bandas de la misma regla, centradas en `max_media`. Cada gestor lleva además un **puntaje en papel**: lo que habría ganado por acción operando solo (32 veces el cambio de precio mientras tiene la acción, menos 2 por cada cambio de posición).
+Son tres bandas de la misma regla, centradas en `max_media`. Cada gestor lleva además un **puntaje simulado**: lo que habría ganado por acción operando solo (32 veces el cambio de precio mientras tiene la acción, menos 2 por cada cambio de posición).
 
 **El supervisor** (hilo 0):
 
 - Es **el único que toca el SPI**: lee `PRICE` y escribe `DECISION`.
 - Publica el precio con el número de tick en una sola palabra.
 - **Calcula su propia `max_media`** en todos los ticks: es su respaldo.
-- Recoge los tres votos y suma los pesos de los gestores que votan adentro. Con 8/16 o más escribe `0x7F` (comprar 63); si no, `0xBF` (vender 63). Pesos iniciales 6/5/5.
+- Recoge los tres votos y suma los pesos de los gestores que votan comprar. Con 8/16 o más escribe `0x7F` (comprar 63); si no, `0xBF` (vender 63). Pesos iniciales 6/5/5.
 - Cada 512 ticks pasa 1/16 de peso del gestor que menos ganó al que más ganó, con tope y piso alrededor del peso inicial.
 
 Las órdenes son idempotentes: la maestra recorta la compra a lo que alcanza y la venta a lo que se tiene. El programa no lleva contabilidad.
@@ -41,7 +41,7 @@ Las órdenes son idempotentes: la maestra recorta la compra a lo que alcanza y l
 | `PUB = tick * 256 + precio`, en un solo store | 0 | `sw/fondo.s:197` a `:199` |
 | `max_media` propia: `devk`, dos comparaciones, `or`, `and`, `emad` | 0 | `sw/fondo.s:202` a `:209` |
 | Espera que `PUB` cambie | 1 a 3 | `sw/fondo.s:401` a `:403` |
-| Puntaje en papel y regla de reversión, sin saltos | 1 a 3 | `sw/fondo.s:410` a `:426` |
+| Puntaje simulado y regla de reversión, sin saltos | 1 a 3 | `sw/fondo.s:410` a `:426` |
 | Publica el puntaje (`DES_k`) y después el voto con su tick (`EST_k`) | 1 a 3 | `sw/fondo.s:430` y `:434` |
 | Actualiza su media con `emad` | 1 a 3 | `sw/fondo.s:438` |
 | Lee los tres votos, con plazo | 0 | `sw/fondo.s:216` a `:228` |
@@ -82,15 +82,15 @@ Con los gestores sanos, **la decisión no depende de cuántos ciclos demora cada
 
 La decisión **nunca depende de que otro hilo esté vivo**. Sin ningún voto, los bytes son exactamente los de `sw/trade.s`. Con los gestores sanos el lazo da a lo más 3 vueltas de 8 (en 1 122 corridas sanas el plazo no venció nunca).
 
-Probado (`make fondo-degradacion`, `docs/mediciones/fondo/r1/degradacion.txt`): 30 corridas de 20 000 ticks con un gestor en lazo infinito, un voto que nunca llega y un voto atrasado. Decisión esperada en todas, peor caso 679 ciclos, contra el límite de 1131. Las fallas se ponen **en el programa** (`tools/fondo/variante.py`), no forzando señales en el simulador: un gestor colgado de verdad sigue ocupando su turno, como pasaría en la placa (decisión T68).
+Probado (`make fondo-degradacion`, `docs/mediciones/fondo/r1/degradacion.txt`): 30 corridas de 20 000 ticks con un gestor en lazo infinito, un voto que nunca llega y un voto atrasado. Decisión esperada en todas, peor caso 679 ciclos, contra el límite de 1131. Las fallas se ponen **en el programa** (`tools/fondo/variante.py`), no forzando señales en el simulador: un gestor realmente colgado sigue ocupando su turno, como pasaría en la placa (decisión T68).
 
 **El supervisor colgado.** Es la falla que el programa no puede cubrir: nadie escribe `DECISION` y la maestra repite el último byte. En R1 no hay defensa. En R2 la cubre el **vigilante**: al quinto precio seguido sin escritura en `DECISION` reconfigura la FPGA con R0 (`docs/defensa/tabla_vigilante.md`).
 
-## 6. Qué aportan los otros tres hilos si deciden igual que `max_media`
+## 6. Qué aportan los otros tres hilos si deciden casi igual que `max_media`
 
-La pregunta incómoda tiene respuesta honesta:
+La pregunta incómoda se responde así:
 
-- **En la serie de práctica, nada en los bytes.** El fondo sano escribe los mismos 20 000 bytes que `max_media` (`docs/estado.md`, tramo 10, hallazgo 2).
+- **En la serie de práctica, poco o nada en los bytes.** El fondo sano en el testbench a 0,1 ms escribe los mismos 20 000 bytes que `max_media` (los dos terminan con 26 070); a 1 ms y 10 ms no: el fondo termina con 25 031 y `max_media` con 26 070 (`docs/mediciones/fondo/r1/equiv.txt`, `docs/mediciones/p7/gemelo.txt`). Viendo todos los precios, `ref/fondo.py` da 26 388 y `ref/trader.py` 25 973 (`docs/mediciones/tabla_3_1.txt`).
 - **Por qué.** Con los pesos en 6/5/5 la mayoría de 8/16 la define la banda del medio, que es `max_media`. Lo único que separa al fondo de `max_media` es el **ajuste de pesos**: cuando los pesos se alejan de 6/5/5 otra banda puede inclinar el voto.
 - **En otras series sí difieren.** En una serie de la familia de reversión el fondo sano y `max_media` difieren en 1816 bytes; con fallas parciales difieren de los dos (`docs/fondo.md`, sección 10). Por eso las pruebas de degradación corren sobre dos series.
 - **Lo que sí aportan:** usan los cuatro hilos del barrel y las instrucciones de dos operaciones. El fondo hace 56 operaciones útiles por tick contra 8 de `max_media`: 5,34 MOPS contra 3,92 de R0 (`docs/mediciones/p7/variantes.txt`). Es co-diseño medido, no más patrimonio.
@@ -107,8 +107,8 @@ La pregunta incómoda tiene respuesta honesta:
 
 | Respuesta (de `byte_done` a `DECISION`) | Ciclos | Tiempo |
 |------------------------------------------|--------|--------|
-| Promedio | 223,01 | 8,92 us |
-| Peor caso del testbench oficial | 443 | 17,72 us |
+| Promedio | 223,01 | 8,92 µs |
+| Peor caso del testbench oficial | 443 | 17,72 µs |
 | Peor caso barriendo la fase | 444 | 19,6 % de la ronda 3 |
 | Peor caso con el plazo agotado | 568 | 25,1 % |
 | Peor caso de todo lo medido (voto atrasado 200 ciclos) | 679 | 30,0 % |
@@ -134,7 +134,7 @@ El fondo responde 3 veces más lento que `max_media` sola en el mismo barrel (22
 3. **¿Y si se cuelga el supervisor?** Nadie escribe `DECISION` y la maestra repite el último byte. En R1 no hay defensa; en R2 el vigilante reconfigura con R0 al quinto precio sin respuesta.
 4. **¿Cómo sabe el supervisor que un voto es viejo sin un bit de listo?** El voto lleva el número de tick que el gestor procesó; la resta contra el tick del supervisor da 0 o 1 solo si es fresco (`sw/fondo.s:217` y `:225`).
 5. **¿Por qué no hay carreras?** Una palabra, un escritor; un store es atómico; el barrel ejecuta un acceso por ciclo en orden fijo (`docs/fondo.md`, sección 3.5).
-6. **¿Qué aportan los otros tres hilos si deciden igual que `max_media`?** En la práctica escriben los mismos bytes. Difieren en otras series (1816 bytes en una de reversión). Lo que los separa es el ajuste de pesos. Aportan co-diseño: 56 operaciones útiles por tick en vez de 8.
+6. **¿Qué aportan los otros tres hilos si deciden casi igual que `max_media`?** En la práctica, en el testbench a 0,1 ms, escriben los mismos bytes; a 1 ms y 10 ms no (el fondo da 25 031 y `max_media` 26 070). Difieren en otras series (1816 bytes en una de reversión). Lo que los separa es el ajuste de pesos. Aportan co-diseño: 56 operaciones útiles por tick en vez de 8.
 7. **¿Por qué el fondo responde más lento si usa cuatro hilos?** Cada hilo avanza una instrucción cada 4 ciclos y el supervisor espera a los otros tres. El barrel reparte el trabajo, no lo acelera para un hilo.
 8. **¿Por qué compiten con algo que no suma puntos?** Decisión T50, tomada a sabiendas: +0,007 a 2 000 ticks y -0,005 a 20 000 según la factibilidad. El riesgo está acotado por la escalera: R0 es el respaldo y el árbol de decisión dice cuándo competir con él.
 9. **¿Cómo se sabe que las pruebas detectan errores?** 15 controles negativos (13 en el programa, 2 en la tabla), 15 detectados. Uno mostró que una prueba mal elegida no detectaba nada: el margen de la frontera corrido sobre una serie donde el margen nunca decide (`docs/fondo.md`, sección 11).

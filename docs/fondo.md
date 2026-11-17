@@ -333,7 +333,7 @@ Cuántas vueltas da el lazo de lectura con los gestores sanos, en las 1 122 corr
 
 Las 30 corridas pasan: bytes, estado, ticks con plazo vencido, telemetría y protocolo iguales a lo esperado, y **peor caso 679 ciclos**.
 
-Por qué dos series. En la serie de práctica el fondo sano, el fondo con fallas y `max_media` sola escriben los mismos 20 000 bytes, así que ahí la prueba solo distingue los casos por el estado interno. En la de reversión el fondo sano y `max_media` difieren en 1816 bytes, y los casos con fallas parciales difieren de los dos (por ejemplo 276 del sano y 1540 de `max_media` con el gestor 3 sin voto entre los ticks 1000 y 2600). La última columna de cada línea de `degradacion.txt` lo informa.
+Por qué dos series. En la serie de práctica, a 0,1 ms, que es el período de estas pruebas, el fondo sano, el fondo con fallas y `max_media` sola escriben los mismos 20 000 bytes, así que ahí la prueba solo distingue los casos por el estado interno. En la de reversión el fondo sano y `max_media` difieren en 1816 bytes, y los casos con fallas parciales difieren de los dos (por ejemplo 276 del sano y 1540 de `max_media` con el gestor 3 sin voto entre los ticks 1000 y 2600). La última columna de cada línea de `degradacion.txt` lo informa.
 
 Lo que no se probó: atrasos entre 200 y 600 ciclos, donde el voto llega cerca del plazo y el resultado depende del ciclo exacto. El programa decide bien en cualquiera de los dos casos (con el voto o con el reemplazo), pero la referencia no modela cuál de los dos toca.
 

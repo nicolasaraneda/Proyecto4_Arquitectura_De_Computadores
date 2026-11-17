@@ -8,7 +8,7 @@ Según `docs/defensa/plan_estudio.md`, sección 2, Nicolás es dueño de **los p
 
 1. `docs/defensa/espino_base.md` y `docs/defensa/diagramas.md`, secciones 1 y 2: por qué CPI 2 (la espera del banco en BRAM).
 2. `docs/defensa/segmentado.md` y diagramas, sección 3: IF con la BRAM en el flanco de bajada, escritura adelantada.
-3. `docs/defensa/barrel.md` y diagramas, sección 4: por qué no hay riesgos y por qué es el core más chico.
+3. `docs/defensa/barrel.md` y diagramas, sección 4: por qué no hay riesgos y por qué es el core más pequeño.
 4. `docs/defensa/extension.md`: `emad` y `devk`, la codificación, y por qué toda otra palabra de custom-0 no hace nada.
 5. `docs/defensa/verificacion.md`, `docs/verificacion_exhaustiva.md` (nuevo) y `docs/puertas.md`.
 6. `docs/revision_p10.md` cuando esté integrado: lo que encontró el revisor adversarial, en particular el hallazgo del esclavo SPI con el contador de bits en 7.
@@ -24,8 +24,8 @@ Según `docs/defensa/plan_estudio.md`, sección 2, Nicolás es dueño de **los p
 | Cifra | Valor | Fuente |
 |-------|-------|--------|
 | CPI | Base 2 (ALU), 3 (load, salto tomado); segmentado 1,350 con `trade.s`; barrel 4 por hilo y 1 agregado | `docs/defensa/cifras.md` |
-| Celdas | R0 1083; segmentado 990; barrel solo 932; R1 1029; R2 1045 | `docs/puertas.md`, `docs/mediciones/p7/variantes.txt` |
-| Frecuencia mínima en 10 semillas | R0 42,43; R1 51,59; R2 47,86 MHz | `docs/puertas.md` |
+| Celdas | R0 1091; segmentado 990; barrel solo 932; R1 1029; R2 1045 | `docs/puertas.md`, `docs/mediciones/p7/variantes.txt` |
+| Frecuencia mínima en 10 semillas | R0 41,93; R1 51,59; R2 47,86 MHz | `docs/mediciones/p7/variantes.txt` (R0 da 42,43 en la medición de la puerta, `docs/puertas.md`) |
 | Respuesta de `trade.s` | 41 ciclos promedio, 44 peor; segmentado 22 y 26 | `docs/defensa/cifras.md` |
 | Verificación del barrel con la máscara de R1 | 50,8 millones de instrucciones, cero diferencias (17/11); 7,97 millones en la puerta | `docs/mediciones/noche/barrel_r1_50m.txt` |
 | Exhaustivo de R0 | 16 254 estados alcanzables por 255 precios = 4 144 770 combinaciones | `docs/verificacion_exhaustiva.md` |

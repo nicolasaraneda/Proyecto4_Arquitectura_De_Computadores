@@ -40,7 +40,7 @@ hilo 3     R   X   M   F   R   X   M   F
 
 Por columnas: en cada ciclo hay un hilo en cada etapa. Por filas: cada hilo completa una instrucción cada 4 ciclos, sea ALU, load, store o salto.
 
-**Por qué es el core más chico.** Las tres memorias del SoC (instrucciones, datos y banco) son BRAM con lectura registrada. En el base esa lectura cuesta un ciclo de espera; en el segmentado obligó a leer en el flanco de bajada. En el barrel cada BRAM cae justo en una frontera entre etapas, y su registro de salida **es** el registro de pipeline. Todo usa el flanco de subida.
+**Por qué es el core más pequeño.** Las tres memorias del SoC (instrucciones, datos y banco) son BRAM con lectura registrada. En el base esa lectura cuesta un ciclo de espera; en el segmentado obligó a leer en el flanco de bajada. En el barrel cada BRAM cae justo en una frontera entre etapas, y su registro de salida **es** el registro de pipeline. Todo usa el flanco de subida.
 
 ## 3. Por qué no hay riesgos
 
@@ -51,7 +51,7 @@ Para un mismo hilo, la instrucción i ocupa los ciclos 1 a 4 y la i+1 los ciclos
 | Leer un registro que la anterior no escribió | i escribe al cerrar el ciclo 4; i+1 lee al cerrar el ciclo 6 |
 | Load seguido de uso | El dato del load se escribe en ese mismo flanco del ciclo 4 |
 | Salto que todavía no se resuelve | El próximo contador se calcula en el ciclo 3 y se usa en el 5: nunca se busca una instrucción especulativa |
-| Efectos en el SPI de una instrucción anulada | No hay instrucciones especulativas: un `lw PRICE` o `sw DECISION` que llega a X siempre es de verdad |
+| Efectos en el SPI de una instrucción anulada | No hay instrucciones especulativas: un `lw PRICE` o `sw DECISION` que llega a X siempre se ejecuta |
 | Leer y escribir el banco en el mismo flanco | El hilo que lee (R) y el que escribe (M) difieren en 2: las direcciones `{hilo, registro}` no pueden coincidir |
 
 ## 4. Dónde se ve en el RTL
@@ -118,7 +118,7 @@ Ruta crítica: salida de la BRAM del banco, multiplexor de operandos, sumador de
 
 Fuentes: `docs/mediciones/barrel/verificacion.txt`, `mutaciones.txt` y `formal.txt`. Para la configuración exacta de R1 y R2 (con `emad`, `devk`, tabla y vigilante) la campaña se repitió: 7 974 963 instrucciones, 92,80 % distintas, cero diferencias (`docs/puertas.md`, criterio 5).
 
-Qué falta: no hay prueba formal de lo que calcula cada instrucción de RV32E (eso se apoya en la comparación contra el base); nada se ha probado en la placa.
+Qué falta: no hay prueba formal de lo que calcula cada instrucción de RV32E (eso se apoya en la comparación contra el base); en la placa, el 16/11 R2, que usa este core, pasó la firma a 0,1 ms y la media hora sin disparo, y faltan R1 y R2 a 1 ms y 10 ms (`docs/mediciones/placa_16nov.md`).
 
 ## 9. Preguntas típicas
 

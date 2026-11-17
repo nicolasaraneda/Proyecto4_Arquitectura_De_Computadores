@@ -28,7 +28,7 @@ Cinco dibujos para explicar el diseño en la pizarra, cada uno con los números 
 
 - Todo es BRAM con lectura registrada: la memoria, el banco de registros y la tabla. Eso define el CPI de cada core (secciones 2 a 4).
 - El testbench oficial entra por jerarquía a `u_spi`; por eso ningún peldaño cambia el esclavo ni esos nombres (`docs/defensa/espino_base.md`, sección 3).
-- R0: base sin tabla ni vigilante, 1083 celdas, 12 BRAM. R1: barrel, `emad` y `devk`, tabla: 1029 celdas, 13 BRAM. R2: R1 más el vigilante: 1045 celdas (`docs/puertas.md`).
+- R0: base sin tabla ni vigilante, 1091 celdas, 12 BRAM. R1: barrel, `emad` y `devk`, tabla: 1029 celdas, 13 BRAM. R2: R1 más el vigilante: 1045 celdas (`docs/mediciones/p7/variantes.txt`).
 
 ## 2. Espino base: dos fases por instrucción (CPI 2)
 
@@ -90,7 +90,7 @@ R: sale la instrucción, banco con {hilo, reg}  M: llega el dato del load, se es
 ```
 
 - **No hay riesgos**: cuando un hilo vuelve a F, su instrucción anterior ya escribió en M. No hay adelantamiento ni burbujas (`docs/defensa/barrel.md`, sección 3).
-- **Cada BRAM cae en una frontera entre etapas**: su registro de salida es el registro de pipeline. Por eso es el core más chico (932 celdas solo, contra 1083 del base).
+- **Cada BRAM cae en una frontera entre etapas**: su registro de salida es el registro de pipeline. Por eso es el core más pequeño (932 celdas solo, contra 1091 del base en la misma medición, `docs/mediciones/p7/variantes.txt`).
 - CPI 4 por hilo y 1 agregado, sin excepciones.
 
 ## 5. Un tick por los cuatro hilos del fondo (R1)
@@ -115,7 +115,7 @@ Cómo se lee:
 3. Los tres gestores, que sondeaban `PUB` (lazo de 8 ciclos), corren cada uno su regla con su umbral y publican primero su puntaje (`DES_k`) y al final su voto (`EST_k = tick * 256 + posición`).
 4. Mientras tanto el supervisor calcula su propia `max_media` (44 ciclos), que reemplaza cualquier voto que no llegue.
 5. Lee los tres `EST_k` en un lazo de 48 ciclos y les resta `tick * 256`: 0 o 1 es un voto de este tick; 2 o más es viejo. Con los tres sanos sale en la segunda o tercera vuelta; a la octava se rinde y decide sin los que faltan.
-6. Suma los pesos de los votos adentro (6, 5 y 5 dieciseisavos al comenzar, ajustados cada 512 ticks) y compara con 8: comprar 63 o vender 63. Escribe `DECISION` una vez y un registro de telemetría.
+6. Suma los pesos de los votos de compra (6, 5 y 5 dieciseisavos al comenzar, ajustados cada 512 ticks) y compara con 8: comprar 63 o vender 63. Escribe `DECISION` una vez y un registro de telemetría.
 7. La maestra lee ese byte en la transacción siguiente y lo ejecuta al precio de ese tick.
 
 Números: 223,01 ciclos en promedio, 444 de peor caso barriendo la fase (19,6 % de los 2262 de la ronda 3), 568 con el plazo agotado, 679 con un gestor atrasado a propósito; límite de la puerta 1131 (`docs/fondo.md`, sección 1). La decisión no depende de cuántos ciclos demora cada hilo, solo de los valores: por eso `ref/fondo.py` no modela ciclos y coincide byte por byte.

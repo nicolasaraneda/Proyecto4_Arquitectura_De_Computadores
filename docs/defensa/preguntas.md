@@ -6,7 +6,7 @@ Preguntas que el profesor o un ayudante pueden hacer a cualquiera de los tres so
 
 - **[B]** básica: los tres tienen que poder responderla sin mirar nada.
 - **[A]** avanzada: la responde con soltura el dueño de la pieza (`docs/defensa/plan_estudio.md`), y los otros dos al menos en una frase.
-- **[I]** incómoda: pregunta que puede poner en duda una decisión. La respuesta es honesta y dice lo que se aceptó a sabiendas.
+- **[I]** incómoda: pregunta que puede poner en duda una decisión. La respuesta dice lo que se aceptó a sabiendas.
 - "Dato" apunta a un `archivo:línea` de la rama de entrega, o a una sección de un documento. Si una cifra de aquí no calza con su fuente, manda la fuente.
 
 Los documentos de estudio que desarrollan cada sección son los de esta carpeta (`docs/defensa/*.md`), y las cifras de memoria están en `docs/defensa/cifras.md`.
@@ -20,11 +20,11 @@ Una escalera de tres bitstreams: R0 (Espino base con `max_media`), R1 (Espino ba
 Dato: `docs/puertas.md:7` a `:11`, `docs/decisiones.md:326`.
 
 **2. [B] ¿Cómo se elige el peldaño el día de la competencia?**
-Con un árbol de una página: R0 si R1 falla con la maestra, si el SCLK de la ronda 3 es menor que 115 kHz o el período menor que 27 us; R2 si pasó sus puertas y nadie prohibió reconfigurar durante una ronda; si no, R1. Que el barrel sea Espino ya no es una condición: lo confirmó el profesor el 16/11.
+Con un árbol de una página: R0 si R1 falla con la maestra, si el SCLK de la ronda 3 es menor que 115 kHz o el período menor que 27 µs; R2 si pasó sus puertas y nadie prohibió reconfigurar durante una ronda; si no, R1. Que el barrel sea Espino ya no es una condición: lo confirmó el profesor el 16/11.
 Dato: `docs/arbol_decision.md:11` a `:16`.
 
 **3. [I] ¿Por qué compiten con un diseño que, según ustedes mismos, no suma puntos?**
-Es la decisión T50, tomada a sabiendas: según la factibilidad el fondo suma +0,007 puntos esperados a 2 000 ticks y -0,005 a 20 000 contra `max_media` sola, y agrega riesgo en vivo. Se elige por lo que representa como co-diseño (procesador rediseñado, extensión usada de verdad, cuatro reglas en paralelo, todo medido). El riesgo está acotado: R0 es el respaldo y el árbol dice cuándo usarlo.
+Es la decisión T50, tomada a sabiendas: según la factibilidad el fondo suma +0,007 puntos esperados a 2 000 ticks y -0,005 a 20 000 contra `max_media` sola, y agrega riesgo en vivo. Se elige por lo que representa como co-diseño (procesador rediseñado, extensión usada realmente, cuatro reglas en paralelo, todo medido). El riesgo está acotado: R0 es el respaldo y el árbol dice cuándo usarlo.
 Dato: `docs/decisiones.md:330`.
 
 **4. [I] Entonces, ¿no habría sido más sensato competir con R0 o con el segmentado?**
@@ -36,8 +36,8 @@ La regla base de reversión a la media con el umbral de entrada en 3 unidades ba
 Dato: `sw/trade.s:64`, `docs/decisiones.md:335`.
 
 **6. [B] ¿Qué está probado y qué no?**
-R0, R1 y R2 pasaron los ocho criterios de la puerta de simulación. Falta la puerta de placa (autoprueba; la de R0 está lista para grabar) y la de la maestra real del 26/11. Nada se ha probado todavía en la placa.
-Dato: `docs/puertas.md:43` y `:90`.
+R0, R1 y R2 pasaron los ocho criterios de la puerta de simulación. La puerta de placa está incompleta: el 16/11, en la placa, R2 pasó la firma a 0,1 ms y la media hora sin disparo, y el relevo se midió en 35,50 ms por la UART; R0 mostró a los tres períodos la mitad baja de su firma ("3C") y le falta la mitad alta ("A2"); faltan además las tres firmas de R1, la de R2 a 1 ms y 10 ms y ver la imagen testigo después del relevo (`docs/mediciones/placa_16nov.md`). Falta la puerta de la maestra real del 26/11.
+Dato: `docs/puertas.md`, secciones de R0, R1 y R2 y "Puerta de placa"; `docs/mediciones/placa_16nov.md`.
 
 **7. [B] ¿Qué es la puerta de simulación?**
 Ocho criterios: testbench oficial 4/4, equivalencia con la referencia, timing en 10 semillas, peor caso barriendo fases bajo la mitad del presupuesto, core contra el base, degradación, estrés y simulación del bitstream ruteado.
@@ -71,7 +71,7 @@ Dato: `ref/hallazgos.py:42` y `:55`, resultados en `docs/estado.md`, tramo 1 (ta
 La varianza del cambio a k ticks dividida por k veces la varianza del cambio a 1 tick. En un paseo aleatorio vale 1; menor que 1 indica que los movimientos se deshacen.
 Dato: `ref/hallazgos.py:42`.
 
-**14. [A] ¿Cuánta reversión hay de verdad?**
+**14. [A] ¿Cuánta reversión hay realmente?**
 Menos de la que parece: un paseo aleatorio redondeado a enteros da VR(100) = 0,77. La mitad de la caída es redondeo y no se puede explotar porque la orden se ejecuta un tick después. Lo real es una transitoria con vida media de 17,5 ticks.
 Dato: `docs/algoritmo.md:71`.
 
@@ -80,7 +80,7 @@ Precio = redondeo(nivel + transitoria): nivel como paseo aleatorio, transitoria 
 Dato: `ref/generador.py:187`, `docs/algoritmo.md:44`.
 
 **16. [B] ¿Cómo decide la cantidad?**
-No la decide: siempre 63. La maestra recorta la compra a lo que alcanza con la caja y la venta a lo que se tiene, y una orden que queda en cero no paga comisión. El programa expresa una posición objetivo, todo adentro o todo afuera.
+No la decide: siempre 63. La maestra recorta la compra a lo que alcanza con la caja y la venta a lo que se tiene, y una orden que queda en cero no paga comisión. El programa expresa una posición objetivo: todo comprado o todo en caja.
 Dato: `tb/tb_proyecto_4.sv:73` y `:78`, `docs/trade_s.md:27`.
 
 **17. [B] ¿Por qué no lleva contabilidad?**
@@ -92,7 +92,7 @@ Porque el 27 062 está sesgado: los parámetros de la regla base se eligieron mi
 Dato: `docs/mediciones/tabla_3_1.txt:6` y `:7`, `docs/decisiones.md:339`.
 
 **19. [A] ¿Por qué alfa 1/32?**
-Con alfa más grande la media sigue al precio y no queda desviación que operar; con más chica mejora el modelo y empeora el remuestreo. 1/32 es el mejor compromiso, y además son cables en la extensión (k = 5).
+Con alfa más grande la media sigue al precio y no queda desviación que operar; con una menor mejora el modelo y empeora el remuestreo. 1/32 es el mejor compromiso, y además en la extensión el desplazamiento fijo (k = 5) se implementa solo con cableado.
 Dato: `docs/algoritmo.md:248`.
 
 **20. [A] ¿Por qué entrar a 3 unidades?**
@@ -204,7 +204,7 @@ Dato: `sw/trade.s:77` a `:88`.
 Dato: `tools/equiv.sh:69`, `docs/puertas.md:35`.
 
 **46. [B] ¿Cuáles son las mediciones por tick?**
-Respuesta: IC 19,5 en promedio y 21 en el peor caso, 41 y 44 ciclos, CPI 2,10. Tick completo: IC 28,5 y 30, 63 y 66 ciclos. En la ronda 3, 44 de 2262 ciclos: 1,9 %.
+Respuesta: IC 19,5 en promedio y 21 en el peor caso, 41 y 44 ciclos, CPI 2,10. Tick completo: IC 28,5 y 30, 63 y 66 ciclos. En la ronda 3, 44 de los 2262 ciclos del presupuesto: 1,95 % (1,76 % del período completo de 2500 ciclos).
 Dato: `docs/mediciones/ticks_software.txt`, `docs/trade_s.md`, sección 6.
 
 **47. [A] ¿Por qué hay peor caso si el programa no tiene saltos que dependan del precio?**
@@ -260,7 +260,7 @@ Escribir `DECISION` solo deja el byte en `tx_hold`; pasa al registro de desplaza
 Dato: `rtl/pochoco_spi_slave.v:81` a `:82` y `:113`.
 
 **59. [A] ¿Para qué sirve el reset de encendido largo?**
-Las BRAM del iCE40 no entregan datos válidos hasta un tiempo después de configurar la FPGA: con el reset original de 15 ciclos el core arrancaba leyendo ceros (medido en el Proyecto 2). Son 4095 ciclos, 164 us.
+Las BRAM del iCE40 no entregan datos válidos hasta un tiempo después de configurar la FPGA: con el reset original de 15 ciclos el core arrancaba leyendo ceros (medido en el Proyecto 2). Son 4095 ciclos, 164 µs.
 Dato: `rtl/pochoco_soc.v:114` a `:124`, `docs/decisiones.md:41`.
 
 **60. [A] ¿Cambiaron el Espino base?**
@@ -343,7 +343,7 @@ Dato: `docs/codiseno.md:353`, `docs/mediciones/p7/variantes.txt:41`.
 El byte que la maestra lee en el tick n se ejecuta al precio n, sea que el programa respondió en 22 ciclos o en 443. R0, el segmentado y el barrel dan con `max_media` los mismos 20 000 bytes.
 Dato: `docs/codiseno.md:353`.
 
-**78. [A] ¿Por qué el barrel es el core más chico?**
+**78. [A] ¿Por qué el barrel es el core más pequeño?**
 Cada BRAM (instrucciones, banco, datos) cae en una frontera entre etapas y su registro de salida es el registro de pipeline. Sin espera, sin adelantamiento y con contador de 11 bits.
 Dato: `docs/espino_barrel.md`, sección 3.3; `docs/mediciones/p7/variantes.txt:12`.
 
@@ -384,11 +384,11 @@ Es uno de los opcodes que RISC-V reserva para extensiones propias: ninguna exten
 Dato: `rtl/espino_core/espino_xd.v:44`.
 
 **87. [A] ¿Cómo están construidas?**
-Un desplazamiento por una constante son cables. `espino_xd_dec` reconoce la palabra en la etapa R, `espino_xd_opa` entrega el operando A desplazado en X, y el resultado sale del sumador de la ALU como un `add`. Sin sumador nuevo ni estado.
+Un desplazamiento por una constante se implementa solo con cableado. `espino_xd_dec` reconoce la palabra en la etapa R, `espino_xd_opa` entrega el operando A desplazado en X, y el resultado sale del sumador de la ALU como un `add`. Sin sumador nuevo ni estado.
 Dato: `rtl/espino_core/espino_xd.v:92` y `:98`, `rtl/espino_core/espino_barrel_core.v:198`.
 
 **88. [I] ¿Por qué k fijo en 5?**
-Con un solo k el desplazamiento son cables. Con k de 0 a 31 hace falta un desplazador de unas 160 celdas, y la frecuencia mínima bajaba de 51,6 a 39,2 MHz en la factibilidad. El alfa de las cuatro reglas es 1/32.
+Con un solo k el desplazamiento se implementa solo con cableado. Con k de 0 a 31 hace falta un desplazador de unas 160 celdas, y la frecuencia mínima bajaba de 51,6 a 39,2 MHz en la factibilidad. El alfa de las cuatro reglas es 1/32.
 Dato: `tools/asm/isa.py:91`, `docs/extension_isa.md`, sección 4.
 
 **89. [A] ¿Qué pasa si alguien escribe `emad` con k = 4?**
@@ -404,7 +404,7 @@ Dato: `docs/extension_isa.md`, sección 4.
 Dato: `docs/mediciones/xd/timing.txt`, `docs/decisiones.md:383`.
 
 **92. [I] ¿Por qué `mulstep` está en el RTL si no se usa?**
-Se construyeron y verificaron las tres antes de escribir `sw/fondo.s`. El fondo no lleva contabilidad, así que no la usa, y por la regla de Nicolás ("no quiero piezas sin uso en el chip que compite") R1 se compila sin ella.
+Se construyeron y verificaron las tres antes de escribir `sw/fondo.s`. El fondo no lleva contabilidad, así que no la usa, y por decisión del grupo (ninguna pieza sin uso en el chip que compite, T58) R1 se compila sin ella.
 Dato: `docs/decisiones.md:389`.
 
 **93. [A] ¿Cómo verificaron una instrucción que el Espino base no tiene?**
@@ -432,11 +432,11 @@ El hilo 0, supervisor, lee el precio, lo publica, calcula su propia `max_media`,
 Dato: `sw/fondo.s:165` y `:385`.
 
 **98. [B] ¿Cómo combina los votos el supervisor?**
-Suma los pesos (en dieciseisavos, iniciales 6/5/5) de los gestores que votan adentro; con 8/16 o más escribe comprar 63 y si no vender 63.
+Suma los pesos (en dieciseisavos, iniciales 6/5/5) de los gestores que votan comprar; con 8/16 o más escribe comprar 63 y si no vender 63.
 Dato: `sw/fondo.s:252` a `:266`.
 
 **99. [A] ¿Cómo se ajustan los pesos?**
-Cada 512 ticks se pasa 1/16 de peso del gestor que menos ganó en papel al que más ganó, si la ventaja supera 1/32 del precio, sin salir del tope y el piso de cada peso.
+Cada 512 ticks se pasa 1/16 de peso del gestor que menos ganó en su puntaje simulado al que más ganó, si la ventaja supera 1/32 del precio, sin salir del tope y el piso de cada peso.
 Dato: `sw/fondo.s:308`, `ref/fondo.py:212`.
 
 **100. [A] ¿Cómo se publica el precio sin que un gestor vea un precio con el tick de otro?**
@@ -455,24 +455,24 @@ Dato: `sw/fondo.s:430` y `:434`, `docs/fondo.md:138`.
 Si es un gestor: su voto queda viejo, el supervisor espera a lo más 8 vueltas y usa su propia `max_media` en ese lugar; la decisión sale siempre (30 de 30 corridas, peor caso 679 ciclos). Si es el supervisor, nadie escribe `DECISION`: en R1 la maestra repite el último byte; en R2 el vigilante reconfigura con R0 al quinto precio.
 Dato: `sw/fondo.s:230` a `:241`, `rtl/vigilante.v:81`.
 
-**104. [I] ¿Qué aportan los otros tres hilos si deciden igual que `max_media`?**
-En la serie de práctica, nada en los bytes: escriben los mismos 20 000. Con pesos 6/5/5 la banda del medio define la mayoría; lo que los separa es el ajuste de pesos. En otras series difieren: 1816 bytes en una de reversión. Lo que aportan es co-diseño: 56 operaciones útiles por tick en vez de 8.
-Dato: `docs/fondo.md:377` y `:336`.
+**104. [I] ¿Qué aportan los otros tres hilos si deciden casi igual que `max_media`?**
+En la serie de práctica, poco o nada en los bytes: en el testbench a 0,1 ms escribe los mismos 20 000 bytes que `max_media` (los dos terminan con 26 070); a 1 ms y 10 ms no: el fondo termina con 25 031 y `max_media` con 26 070 (`docs/mediciones/fondo/r1/equiv.txt`, `docs/mediciones/p7/gemelo.txt`). Viendo todos los precios, `ref/fondo.py` da 26 388 y `ref/trader.py` 25 973. Con pesos 6/5/5 la banda del medio define la mayoría; lo que los separa es el ajuste de pesos. En otras series difieren: 1816 bytes en una de reversión. Lo que aportan es co-diseño: 56 operaciones útiles por tick en vez de 8.
+Dato: `docs/fondo.md:377` y `:336`, `docs/mediciones/fondo/r1/equiv.txt`.
 
 **105. [A] ¿Por qué el supervisor calcula `max_media` si el gestor 1 ya la calcula?**
 La del gestor 1 llega por memoria y puede no llegar. La del supervisor está en sus registros: es la única que no depende de otro hilo.
 Dato: `sw/fondo.s:202` a `:209`.
 
 **106. [A] ¿Cómo probaron la degradación?**
-Con fallas puestas en el programa (un gestor en lazo infinito, un voto que nunca llega, un voto atrasado), no forzando señales: un gestor colgado de verdad sigue ocupando su turno. 30 corridas de 20 000 ticks sobre dos series.
+Con fallas puestas en el programa (un gestor en lazo infinito, un voto que nunca llega, un voto atrasado), no forzando señales: un gestor realmente colgado sigue ocupando su turno. 30 corridas de 20 000 ticks sobre dos series.
 Dato: `docs/decisiones.md:453`, `docs/mediciones/fondo/r1/degradacion.txt`.
 
 **107. [A] ¿Por qué corren la degradación sobre dos series?**
-En la práctica el fondo sano, el fondo con fallas y `max_media` escriben los mismos bytes: la prueba solo distinguiría por el estado interno. En una serie de reversión sí difieren.
+Las pruebas de degradación corren a 0,1 ms, y ahí, en la práctica, el fondo sano, el fondo con fallas y `max_media` escriben los mismos bytes (`docs/mediciones/fondo/r1/degradacion.txt`): la prueba solo distinguiría por el estado interno. En una serie de reversión sí difieren.
 Dato: `docs/fondo.md:336`.
 
 **108. [B] ¿Cuánto demora el fondo en responder?**
-223,01 ciclos en promedio (8,92 us), 443 en el peor caso del testbench y 444 barriendo fases: 19,6 % de la ronda 3. Con el plazo agotado, 568.
+223,01 ciclos en promedio (8,92 µs), 443 en el peor caso del testbench y 444 barriendo fases: 19,6 % de la ronda 3. Con el plazo agotado, 568.
 Dato: `docs/fondo.md:318`, `docs/mediciones/p7/variantes.txt:23`.
 
 **109. [A] ¿Por qué el fondo responde más lento si usa cuatro hilos?**
@@ -496,7 +496,7 @@ Un store por tick, después de `DECISION`: en ticks pares los 7 segmentos muestr
 Dato: `sw/fondo.s:268` a `:297`, `docs/decisiones.md:441`.
 
 **114. [A] ¿Hay algún borde no probado en el fondo?**
-Sí: atrasos de un gestor entre 200 y 600 ciclos, donde el voto llega justo al vencer el plazo y la decisión depende del ciclo exacto; y la vuelta del contador de ticks (16,7 millones de ticks), donde un gestor que nunca votó contaría como afuera durante un tick.
+Sí: atrasos de un gestor entre 200 y 600 ciclos, donde el voto llega justo al vencer el plazo y la decisión depende del ciclo exacto; y la vuelta del contador de ticks (16,7 millones de ticks), donde un gestor que nunca votó contaría como en caja durante un tick.
 Dato: `docs/fondo.md:105`, `docs/decisiones.md:453`.
 
 ---
@@ -516,7 +516,7 @@ La primera versión llenaba la memoria con ceros en un lazo antes del `$readmemh
 Dato: `rtl/pochoco_tabla.v:36` a `:41`.
 
 **118. [A] ¿Qué es un molde y por qué hace falta?**
-El mismo diseño sintetizado con las memorias llenas de un patrón al azar. `icebram` ubica una memoria por su contenido, y la tabla de verdad (236 ceros) no es distinguible. Se comprueba que el molde con `icebram` da el bitstream directo byte por byte.
+El mismo diseño sintetizado con las memorias llenas de un patrón al azar. `icebram` ubica una memoria por su contenido, y la tabla definitiva (236 ceros) no es distinguible. Se comprueba que el molde con `icebram` da el bitstream directo byte por byte.
 Dato: `docs/tabla_vigilante.md:53`, `docs/decisiones.md:467`.
 
 **119. [B] ¿Cuándo dispara el vigilante?**
@@ -592,20 +592,20 @@ Una maestra configurable (`tb/tb_estres.sv`) que recorre SCLK de 100 kHz a 1 MHz
 Dato: `docs/decisiones.md:349`, `docs/puertas.md:85`.
 
 **136. [A] ¿Qué es la autoprueba en placa?**
-El SoC del peldaño con una maestra SPI dentro de la FPGA que manda 2000 precios de una caminata aleatoria a los tres períodos y muestra una firma CRC-16 de las decisiones. La firma esperada de R0 es `a23c`, igual en gemelo, referencia, RTL y bitstream.
+El SoC del peldaño con una maestra SPI dentro de la FPGA que manda 2000 precios de un paseo aleatorio a los tres períodos y muestra una firma CRC-16 de las decisiones. La firma esperada de R0 es `a23c`, igual en gemelo, referencia, RTL y bitstream.
 Dato: `tools/autoprueba.py:61`, `docs/decisiones.md:532`.
 
 **137. [I] ¿Qué no está probado?**
-Nada se ha probado en la placa todavía. Falta la puerta de placa de los tres peldaños (la autoprueba de R0 está lista; la de R1 y R2 pendiente), el relevo de R2 en la placa, el tiempo real de reconfiguración, y la maestra real el 26/11.
-Dato: `docs/puertas.md:43` y `:90`, `docs/autoprueba.md:126` y `:127`.
+La puerta de placa está incompleta. El 16/11, en la placa, R2 pasó la firma a 0,1 ms y la media hora sin disparo, y el relevo se midió en 35,50 ms por la UART; R0 mostró a los tres períodos la mitad baja de su firma ("3C") y le falta la mitad alta ("A2"); faltan además las tres firmas de R1, la de R2 a 1 ms y 10 ms y ver la imagen testigo después del relevo (`docs/mediciones/placa_16nov.md`). El tiempo de reconfiguración tiene una sola medición de tres pedidas. Falta la maestra real el 26/11.
+Dato: `docs/puertas.md`, sección "Puerta de placa"; `docs/mediciones/placa_16nov.md`.
 
 ---
 
 ## 11. Co-diseño (punto 3.3)
 
 **138. [B] ¿Qué parte del algoritmo consume más ciclos?**
-En R0, actualizar la media (29 de 51 ciclos del kernel), por el desplazamiento con la memoria. En la respuesta, decidir. En el tick completo a 0,1 ms, esperar el precio: 98 %.
-Dato: `docs/codiseno.md`, sección 14, pregunta 3.
+En el kernel de R0 (de leer `PRICE` a volver al sondeo, 51 ciclos), la fase más larga es actualizar la media, `S = S + (dev >>> 5)`: 17 ciclos (33,3 %), por el desplazamiento hecho con `sw` y `lbu`. Con la desviación a la media (12 ciclos), el estimador completo suma 29 de 51 ciclos (56,9 %), que es la fracción que usa Amdahl. En la respuesta, la fase más larga es decidir y armar el byte (14 de 41 ciclos). En el tick completo a 0,1 ms, esperar el precio: 98 %.
+Dato: `docs/mediciones/p7/perfil.txt`; `docs/codiseno.md`, sección 14, pregunta 3.
 
 **139. [B] ¿Qué cuenta como operación útil?**
 Las 8 operaciones de la regla en su forma matemática: 4 para la media (32 p, la resta, el desplazamiento y la suma) y 4 para decidir. En el fondo, 56. `emad` y `devk` valen 2 cada una, como el MAC de la clase.
@@ -636,7 +636,7 @@ Ninguna de las tres en sentido estricto, y lo decimos: la más rápida por hilo 
 Dato: `docs/codiseno.md:346`.
 
 **146. [A] ¿Dónde se va la energía en el ASIC?**
-En esperar: decidir cuesta 2,6 nJ sobre 2,8 uJ por tick a 0,1 ms. Ningún peldaño de la escalera cambia eso; detener el reloj entre precios sí.
+En esperar: decidir cuesta 2,6 nJ sobre 2,8 µJ por tick a 0,1 ms. Ningún peldaño de la escalera cambia eso; detener el reloj entre precios sí.
 Dato: `docs/codiseno.md:343`.
 
 ---
@@ -652,7 +652,7 @@ Con el medidor del SPI: un bitstream aparte que escucha a la maestra y muestra e
 Dato: `rtl/medidor/medidor_spi.v:15`, `docs/decisiones.md:589`.
 
 **149. [A] ¿Cuál es el período mínimo que soporta cada peldaño?**
-Con SCLK de 1 MHz: R0 11,34 us (8,82 veces más rápido que la ronda 3), R1 26,94 us (3,71 veces).
+Con SCLK de 1 MHz: R0 11,34 µs (8,82 veces más rápido que la ronda 3), R1 26,94 µs (3,71 veces).
 Dato: `docs/mediciones/fondo/r1/sclk_minimo.txt:27` y `:52`.
 
 **150. [A] ¿Qué pasa con rondas seguidas sin reset?**

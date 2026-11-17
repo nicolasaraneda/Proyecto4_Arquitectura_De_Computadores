@@ -64,9 +64,10 @@ Dos detalles que suelen preguntar:
 | Base | 1083 | 42,43 | `docs/mediciones/espino_segmentado.txt`, sección 1 |
 | Segmentado con contador de 32 bits | 1174 | 48,43 | idem |
 | Segmentado final, contador de 11 bits | 994 | 51,13 | idem |
+| Base en P7 (mismo core, SoC con más variantes) | 1091 | 41,93 | `docs/mediciones/p7/variantes.txt` |
 | Segmentado en P7 (mismo core, SoC con más variantes) | 990 | 45,34 | `docs/mediciones/p7/variantes.txt` |
 
-El pipeline cuesta 91 celdas (adelantamiento: 32 flip-flops y 64 LUT). Recortar el contador de programa al ancho real de la memoria (11 bits para 512 palabras) recupera 180. El resultado es más chico que el base y más rápido: la decodificación salió de la ruta crítica. La clase advertía que el multiplexor de adelantamiento podía bajar la frecuencia; medido, queda en la ruta crítica pero la ruta completa es más corta.
+El pipeline cuesta 91 celdas (adelantamiento: 32 flip-flops y 64 LUT). Recortar el contador de programa al ancho real de la memoria (11 bits para 512 palabras) recupera 180. El resultado es más pequeño que el base y más rápido: la decodificación salió de la ruta crítica. La clase advertía que el multiplexor de adelantamiento podía bajar la frecuencia; medido, queda en la ruta crítica pero la ruta completa es más corta.
 
 La caída a 45,34 MHz de mínima (51,59 en P1, `docs/mediciones/barrel/recursos.txt`) no es de diseño. Se investigó (T127, `docs/mediciones/p7/caida_segmentado.txt`): la lógica es la misma (equivalencia formal), pero desde el commit `c293cf4` Yosys entrega otra netlist equivalente que nextpnr rutea peor. Con el mismo RTL leído en otro orden la mediana va de 47,88 a 53,59 MHz. Sigue cerrando 40 de 40 semillas a 25 MHz.
 

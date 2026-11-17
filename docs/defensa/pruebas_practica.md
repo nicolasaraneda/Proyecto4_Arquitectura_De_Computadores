@@ -47,13 +47,13 @@ Sugerencia de uso con el plan de estudio: la prueba 1 en el repaso del 21/11, la
 ## Prueba 3
 
 1. [B] ¿Qué idea hay detrás del algoritmo? *(pregunta 11, sección 2)*
-2. [A] ¿Cuánta reversión hay de verdad? *(pregunta 14, sección 2)*
+2. [A] ¿Cuánta reversión hay realmente? *(pregunta 14, sección 2)*
 3. [B] ¿Qué hace el bloque `primero`? *(pregunta 44, sección 3)*
 4. [B] ¿Por qué no tiene riesgos de datos ni de control? *(pregunta 72, sección 6)*
 5. [I] ¿Por qué un barrel si cada hilo responde más lento? *(pregunta 76, sección 6)*
 6. [B] ¿Por qué custom-0? *(pregunta 86, sección 7)*
 7. [A] ¿Cuánto cuestan? *(pregunta 91, sección 7)*
-8. [I] ¿Qué aportan los otros tres hilos si deciden igual que `max_media`? *(pregunta 104, sección 8)*
+8. [I] ¿Qué aportan los otros tres hilos si deciden casi igual que `max_media`? *(pregunta 104, sección 8)*
 9. [A] ¿Por qué el fondo responde más lento si usa cuatro hilos? *(pregunta 109, sección 8)*
 10. [B] ¿Cuándo dispara el vigilante? *(pregunta 119, sección 9)*
 11. [I] ¿Está permitido reconfigurar la FPGA durante una ronda? *(pregunta 125, sección 9)*
@@ -101,7 +101,7 @@ No: las decisiones son las mismas bit a bit. Aporta ciclos libres y co-diseño m
 Dato: `docs/puertas.md:66`.
 
 **10. [B] ¿Cuánto demora el fondo en responder?** (pregunta 108)
-223,01 ciclos en promedio (8,92 us), 443 en el peor caso del testbench y 444 barriendo fases: 19,6 % de la ronda 3. Con el plazo agotado, 568.
+223,01 ciclos en promedio (8,92 µs), 443 en el peor caso del testbench y 444 barriendo fases: 19,6 % de la ronda 3. Con el plazo agotado, 568.
 Dato: `docs/fondo.md:318`, `docs/mediciones/p7/variantes.txt:23`.
 
 **11. [B] ¿Qué es la tabla de parámetros?** (pregunta 115)
@@ -127,8 +127,8 @@ Dato: `docs/zscore.md:101` (largo del trozo), `:131` (las dos lecturas) y `:142`
 ## Pauta de la prueba 2
 
 **1. [B] ¿Qué está probado y qué no?** (pregunta 6)
-R0, R1 y R2 pasaron los ocho criterios de la puerta de simulación. Falta la puerta de placa (autoprueba; la de R0 está lista para grabar) y la de la maestra real del 26/11. Nada se ha probado todavía en la placa.
-Dato: `docs/puertas.md:43` y `:90`.
+R0, R1 y R2 pasaron los ocho criterios de la puerta de simulación. La puerta de placa está incompleta: el 16/11, en la placa, R2 pasó la firma a 0,1 ms y la media hora sin disparo, y el relevo se midió en 35,50 ms por la UART; R0 mostró a los tres períodos la mitad baja de su firma ("3C") y le falta la mitad alta ("A2"); faltan además las tres firmas de R1, la de R2 a 1 ms y 10 ms y ver la imagen testigo después del relevo (`docs/mediciones/placa_16nov.md`). Falta la puerta de la maestra real del 26/11.
+Dato: `docs/puertas.md`, secciones de R0, R1 y R2 y "Puerta de placa"; `docs/mediciones/placa_16nov.md`.
 
 **2. [I] ¿Un Espino de cuatro hilos con instrucciones propias sigue siendo Espino?** (pregunta 9)
 Sí. El profesor Jorge Gómez nos confirmó en persona el 16/11 que se puede modificar lo que uno quiera y que cualquier decisión de diseño es válida; le describimos el Espino multihilo y dijo que estaba perfecto. Además, técnicamente: misma ISA RV32E, mismo decodificador, ALU, LSU y bus, sin modificar; cambia la microarquitectura, y la extensión usa custom-0, que RISC-V reserva para esto.
@@ -171,7 +171,7 @@ Mirar la instrucción equivocada: mientras una está en X, lo que sale de la mem
 Dato: `rtl/espino_core/espino_barrel_core.v:50` a `:53`.
 
 **12. [B] ¿Cómo combina los votos el supervisor?** (pregunta 98)
-Suma los pesos (en dieciseisavos, iniciales 6/5/5) de los gestores que votan adentro; con 8/16 o más escribe comprar 63 y si no vender 63.
+Suma los pesos (en dieciseisavos, iniciales 6/5/5) de los gestores que votan comprar; con 8/16 o más escribe comprar 63 y si no vender 63.
 Dato: `sw/fondo.s:252` a `:266`.
 
 **13. [I] ¿Qué pasa si un hilo se cuelga?** (pregunta 103)
@@ -179,7 +179,7 @@ Si es un gestor: su voto queda viejo, el supervisor espera a lo más 8 vueltas y
 Dato: `sw/fondo.s:230` a `:241`, `rtl/vigilante.v:81`.
 
 **14. [A] ¿Qué es un molde y por qué hace falta?** (pregunta 118)
-El mismo diseño sintetizado con las memorias llenas de un patrón al azar. `icebram` ubica una memoria por su contenido, y la tabla de verdad (236 ceros) no es distinguible. Se comprueba que el molde con `icebram` da el bitstream directo byte por byte.
+El mismo diseño sintetizado con las memorias llenas de un patrón al azar. `icebram` ubica una memoria por su contenido, y la tabla definitiva (236 ceros) no es distinguible. Se comprueba que el molde con `icebram` da el bitstream directo byte por byte.
 Dato: `docs/tabla_vigilante.md:53`, `docs/decisiones.md:467`.
 
 **15. [B] ¿Cuál es el Ppeak de cada core?** (pregunta 143)
@@ -192,7 +192,7 @@ Dato: `docs/mediciones/barrel/cpi.txt:37`, `docs/mediciones/espino_segmentado.tx
 Reversión a la media: si el precio cae lo suficiente bajo su media reciente, tiende a volver. Se compra cuando el precio está más de 3 unidades bajo la media exponencial y se vende cuando la recupera.
 Dato: `ref/trader.py:74`, `docs/trade_s.md`, sección 1.
 
-**2. [A] ¿Cuánta reversión hay de verdad?** (pregunta 14)
+**2. [A] ¿Cuánta reversión hay realmente?** (pregunta 14)
 Menos de la que parece: un paseo aleatorio redondeado a enteros da VR(100) = 0,77. La mitad de la caída es redondeo y no se puede explotar porque la orden se ejecuta un tick después. Lo real es una transitoria con vida media de 17,5 ticks.
 Dato: `docs/algoritmo.md:71`.
 
@@ -216,9 +216,9 @@ Dato: `rtl/espino_core/espino_xd.v:44`.
 `emad` y `devk`: 52 celdas, 0 BRAM, frecuencia mínima 48,92 MHz. Las tres: 96 celdas. El costo es el multiplexor del operando A.
 Dato: `docs/mediciones/xd/timing.txt`, `docs/decisiones.md:383`.
 
-**8. [I] ¿Qué aportan los otros tres hilos si deciden igual que `max_media`?** (pregunta 104)
-En la serie de práctica, nada en los bytes: escriben los mismos 20 000. Con pesos 6/5/5 la banda del medio define la mayoría; lo que los separa es el ajuste de pesos. En otras series difieren: 1816 bytes en una de reversión. Lo que aportan es co-diseño: 56 operaciones útiles por tick en vez de 8.
-Dato: `docs/fondo.md:377` y `:336`.
+**8. [I] ¿Qué aportan los otros tres hilos si deciden casi igual que `max_media`?** (pregunta 104)
+En la serie de práctica, poco o nada en los bytes: en el testbench a 0,1 ms escribe los mismos 20 000 bytes que `max_media` (los dos terminan con 26 070); a 1 ms y 10 ms no: el fondo termina con 25 031 y `max_media` con 26 070 (`docs/mediciones/fondo/r1/equiv.txt`, `docs/mediciones/p7/gemelo.txt`). Viendo todos los precios, `ref/fondo.py` da 26 388 y `ref/trader.py` 25 973. Con pesos 6/5/5 la banda del medio define la mayoría; lo que los separa es el ajuste de pesos. En otras series difieren: 1816 bytes en una de reversión. Lo que aportan es co-diseño: 56 operaciones útiles por tick en vez de 8.
+Dato: `docs/fondo.md:377` y `:336`, `docs/mediciones/fondo/r1/equiv.txt`.
 
 **9. [A] ¿Por qué el fondo responde más lento si usa cuatro hilos?** (pregunta 109)
 Cada hilo avanza una instrucción cada 4 ciclos y el supervisor espera los votos. El barrel reparte el trabajo; no lo acelera para un hilo. Además el lazo de votos con plazo y la tabla cuestan ciclos.
@@ -237,7 +237,7 @@ La referencia en Python (valores), el RTL (lo que se sintetiza) y el gemelo en C
 Dato: `docs/defensa/verificacion.md`, sección 1.
 
 **13. [A] ¿Qué es la autoprueba en placa?** (pregunta 136)
-El SoC del peldaño con una maestra SPI dentro de la FPGA que manda 2000 precios de una caminata aleatoria a los tres períodos y muestra una firma CRC-16 de las decisiones. La firma esperada de R0 es `a23c`, igual en gemelo, referencia, RTL y bitstream.
+El SoC del peldaño con una maestra SPI dentro de la FPGA que manda 2000 precios de un paseo aleatorio a los tres períodos y muestra una firma CRC-16 de las decisiones. La firma esperada de R0 es `a23c`, igual en gemelo, referencia, RTL y bitstream.
 Dato: `tools/autoprueba.py:61`, `docs/decisiones.md:532`.
 
 **14. [B] ¿Qué desempeño logra cada variante?** (pregunta 144)
