@@ -17,7 +17,7 @@ Se actualiza al cerrar cada tramo de trabajo. La versión anterior queda en el h
 | 5. Banco de contingencia | Cinco juegos nuevos en la cola | rama `contingencia-ampliada` |
 | 6. `make ensayo` | Hecho: 9 de 9 con 4/4 | `docs/mediciones/ensayo.txt` |
 | 7. Material de estudio | Hecho: diagramas, guiones, tres pruebas con pauta, guías por integrante | `docs/defensa/` |
-| A. Registrador | RTL, testbench y herramienta listos; la corrida completa en la cola | rama `registrador` |
+| A. Registrador | Hecho: `make registrador` PASS (478 celdas, 10 de 10 semillas, 7 de 7 controles negativos, bitstream ruteado simulado); en el checklist del 26/11 | `docs/registrador.md`, `bitstreams/registrador.bin` |
 | B. Generador | Semilla 0 hecha; semilla 5 en la cola | rama `generador` |
 
 Lo pesado corre de a un trabajo por vez con una cola global (`flock`), revisando el espacio libre antes de cada uno. `main` no se pudo avanzar a `integra-noche` (CI en verde) porque esta sesión no tiene permiso para empujar a `main`.
