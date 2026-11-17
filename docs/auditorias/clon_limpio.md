@@ -47,8 +47,8 @@ La prueba se hizo dos veces. La primera corrida (madrugada del 17/11) llegó has
 | 24 | `:105` | `make bin` | 2.ª | Funciona | 5,5 s | Yosys, nextpnr e icepack; 42,49 MHz con la semilla por defecto (pasa a 25 MHz); 2 advertencias por las restricciones `i_UART_RX` y `o_UART_TX` de `goboard.pcf` sin uso. El `.bin` (sha256 `4c1d845f...`) **no es** el `bitstreams/r0_base_max_media.bin` guardado (`67f6f1c4...`, 44,6 MHz). Ver H7. |
 | 25 | `:106` | `make prog` | | No ejecutable en este entorno | | Llama a `iceprog`. |
 | 26 | `:107` | `make r0-reproducir` | | No corrido | | Ver sección 4. |
-| 27 | `:108` | `make fondo-bitstreams` | | (en la cola) | | Documentado en unos 25 minutos en el `Makefile` (comentario sobre el objetivo); el README no lo dice. |
-| 28 | `:111` | `make sim-bitstream` | | No corrido | | Documentado en unos 8 minutos en el `Makefile`. |
+| 27 | `:108` | `make fondo-bitstreams` | | No corrido | | Documentado en unos 25 minutos en el `Makefile`; el README no lo dice. Lanza 4 síntesis y después 6 simulaciones en paralelo (`tools/fondo/bitstreams.sh:90` a `:93` y `:132` a `:137`), más que el límite de 4 procesos de esta auditoría. Ver sección 4 y H2. |
+| 28 | `:111` | `make sim-bitstream` | | (en la cola) | | Documentado en unos 8 minutos en el `Makefile`. Es el comando largo representativo de esta corrida. |
 | 29 | `:119` | `make tabla-3-1` | 2.ª | Funciona | 0,1 s | Reescribe `docs/mediciones/tabla_3_1.txt` idéntico (sin diferencias en `git status`). |
 | 30 | `:179` | `make retune-control` | 2.ª | Funciona | 1,2 s | "PASS control: con las reglas publicadas no cambia nada"; arma R0, R1, R2 y la imagen múltiple con `icebram` y los cuatro `.bin` tienen el mismo sha256 que los de `bitstreams/` (confirma `README.md:180`). Avisa que los `.asc` no se simularon por los pines (eso es `--simular`). |
 | 31 | `:173` | `make p7-rapido` | 2.ª | Funciona | 0,2 s | "282 macros en docs/mediciones/p7/cifras.tex"; todos los archivos de `docs/mediciones/p7/` quedan idénticos. |
@@ -82,7 +82,7 @@ Por la regla de esta auditoría (los comandos pesados se corren de a uno por la 
 | `make fondo-puerta HW=r1` | `:75` | No documentada en el README; incluye `fondo-equiv-ronda1` (35 minutos según el `Makefile`) | Largo. Se intentó en la primera corrida como comando representativo y la caída de la máquina lo interrumpió. |
 | `make algoritmo` | `:88`, `:119` | Unos 3 minutos | Pesado y reescribe 13 archivos de `docs/mediciones/`. |
 | `make r0-reproducir` | `:107` | Unos 2 minutos | Pesado (síntesis). |
-| `make sim-bitstream` | `:111` | Unos 8 minutos | Pesado. |
+| `make fondo-bitstreams` | `:108` | Unos 25 minutos | Largo y con 6 simulaciones en paralelo, sin opción para limitarlas (el script no lee `JOBS`). |
 | `make cosim`, `make cosim-barrel` | `:125` | 2 y 6 minutos | Pesados. |
 | `make check-seg`, `make paralelo-largo` | `:131` | No documentadas | Pesados. |
 | `make check-barrel`, `make barrel-verif`, `make barrel-mutaciones` | `:137` | `barrel-verif` unos 6 minutos con 12 procesos | Pesados. |
