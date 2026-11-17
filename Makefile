@@ -839,3 +839,10 @@ r2-falla:
 .PHONY: exhibicion
 exhibicion:
 	tools/p9/exhibicion.sh
+
+# Registrador de la maestra para el 26/11 (docs/registrador.md): testbench, controles
+# negativos, 10 semillas, bitstream, simulación del bitstream ruteado y prueba de
+# tools/registrador.py (unos 6 minutos). Resultado en docs/mediciones/registrador.txt.
+.PHONY: registrador
+registrador:
+	tools/registrador.sh

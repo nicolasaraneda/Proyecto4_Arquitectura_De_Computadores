@@ -10,7 +10,7 @@ Herramienta para la prueba con la maestra real del 26/11. Es un bitstream aparte
 | `tb/registrador/tb_registrador.sv` | Testbench: maestra SPI, receptor UART y comparación |
 | `tools/registrador.sh` | Testbench, controles negativos, timing en 10 semillas, bitstream y simulación del bitstream ruteado (`make registrador`) |
 | `tools/registrador.py` | Lee el puerto y escribe los CSV; `--prueba` sin placa |
-| `bitstreams/registrador.bin` | El bitstream, con su hash en `bitstreams/SHA256SUMS` |
+| `bitstreams/registrador.bin` | El bitstream (sha256 `231a0c6d...`, también en `bitstreams/SHA256SUMS`) |
 | `docs/mediciones/registrador.txt` | Resultado de `make registrador` |
 
 ## 1. Para qué sirve
@@ -48,15 +48,15 @@ maestra --SCLK, MOSI, CS_n--> sincronizadores --> registro de desplazamiento -->
 
 | Prueba | Resultado |
 |--------|-----------|
-| Ronda 3: 0,1 ms, SCLK 1 MHz, 2000 precios de la práctica | 2000 registros, ninguno perdido, precio, secuencia y período (19 unidades) exactos |
+| Ronda 3: 0,1 ms, SCLK 1 MHz, 2000 precios de la práctica (34 comprobaciones en total en el testbench) | 2000 registros, ninguno perdido, precio, secuencia y período (19 unidades) exactos |
 | Ronda 2: 1 ms con SCLK de 100 kHz, 200 precios | Igual, período 195 |
 | Ronda 1: 10 ms, 12 precios | Igual, período 1953 |
 | Una transacción de 7 bits | Ese registro con la marca de error, LED3 encendido, los demás intactos |
 | 60 us entre precios, 1000 precios | Ninguno perdido |
 | Control: 30 us entre precios | Se pierden registros, la secuencia lo muestra, los que llegan están intactos y LED4 se enciende |
-| Controles negativos (errores puestos a propósito) | Todos detectados |
-| Timing | 10 de 10 semillas a 25 MHz |
-| Bitstream ruteado, simulado por los pines | Los mismos casos en versión corta |
+| Controles negativos (errores puestos a propósito) | 7 de 7 detectados |
+| Timing | 10 de 10 semillas a 25 MHz: 478 celdas, ninguna BRAM, mínima 118,40 MHz |
+| Bitstream ruteado, simulado por los pines | Los mismos casos en versión corta: 28 comprobaciones sin fallas |
 | `tools/registrador.py --prueba` | Los bytes del testbench dan la serie de práctica exacta; pérdida, basura, byte dañado y borrado con SW3 se detectan; de punta a punta por un pseudoterminal a 1 Mbaud |
 
 **Un error encontrado por los controles negativos.** La primera versión comparaba `esc - lec` (punteros de 3 bits) con un entero: Verilog hace esa resta en 32 bits y, cuando los punteros dan la vuelta, la cola llena no se veía y un registro nuevo sobrescribía al que se estaba transmitiendo. A 0,1 ms no ocurre (la cola nunca pasa de un registro), pero a 30 us aparecían registros con la secuencia de uno y el precio de otro. El control negativo que debía demostrar que la secuencia delata las pérdidas no falló, y eso llevó al error. Se corrigió guardando la resta en 3 bits, se agregó al testbench la comprobación de que cada registro que llega tiene el precio de su transacción, y la versión antigua quedó como control negativo (`cola_llena_en_32_bits`).

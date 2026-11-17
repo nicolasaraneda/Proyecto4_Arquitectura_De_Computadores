@@ -1,0 +1,80 @@
+Registrador de la maestra SPI: testbench, controles negativos, timing, bitstream y herramienta
+Generado por tools/registrador.sh (make registrador). No editar a mano.
+
+Herramientas:
+  Yosys 0.68+195 (git sha1 435977e97-dirty, Release, Clang /usr/bin/clang++ 21.1.8)
+  "nextpnr-ice40" -- Next Generation Place and Route (Version nextpnr-0.11.1-19-g8dbcee5c)
+  Icarus Verilog version 14.0 (devel) (s20260301-403-g5ab23063f-dirty)
+Commit de partida: dc83903
+
+== 1. Testbench
+PASS ronda 3 (0,1 ms, SCLK 1 MHz): 2000 registros de 2000 precios
+PASS ronda 3 (0,1 ms, SCLK 1 MHz): 0 bytes fuera de un registro
+PASS ronda 3 (0,1 ms, SCLK 1 MHz): secuencia, precio, MISO y marca de error iguales a lo enviado (0 distintos)
+PASS ronda 3 (0,1 ms, SCLK 1 MHz): periodo de 19 unidades de 5,12 us en todos (0 distintos)
+PASS ronda 3 (0,1 ms, SCLK 1 MHz): LED4 (registro perdido) apagado
+PASS ronda 3 (0,1 ms, SCLK 1 MHz): LED3 (transaccion con error) apagado
+PASS ronda 2 (1 ms, SCLK 100 kHz): 200 registros de 200 precios
+PASS ronda 2 (1 ms, SCLK 100 kHz): 0 bytes fuera de un registro
+PASS ronda 2 (1 ms, SCLK 100 kHz): secuencia, precio, MISO y marca de error iguales a lo enviado (0 distintos)
+PASS ronda 2 (1 ms, SCLK 100 kHz): periodo de 195 unidades de 5,12 us en todos (0 distintos)
+PASS ronda 2 (1 ms, SCLK 100 kHz): LED4 (registro perdido) apagado
+PASS ronda 2 (1 ms, SCLK 100 kHz): LED3 (transaccion con error) apagado
+PASS ronda 1 (10 ms): 12 registros de 12 precios
+PASS ronda 1 (10 ms): 0 bytes fuera de un registro
+PASS ronda 1 (10 ms): secuencia, precio, MISO y marca de error iguales a lo enviado (0 distintos)
+PASS ronda 1 (10 ms): periodo de 1953 unidades de 5,12 us en todos (0 distintos)
+PASS ronda 1 (10 ms): LED4 (registro perdido) apagado
+PASS ronda 1 (10 ms): LED3 (transaccion con error) apagado
+PASS 0,1 ms con una transaccion de 7 bits: 100 registros de 100 precios
+PASS 0,1 ms con una transaccion de 7 bits: 0 bytes fuera de un registro
+PASS 0,1 ms con una transaccion de 7 bits: secuencia, precio, MISO y marca de error iguales a lo enviado (0 distintos)
+PASS 0,1 ms con una transaccion de 7 bits: periodo de 19 unidades de 5,12 us en todos (0 distintos)
+PASS 0,1 ms con una transaccion de 7 bits: LED4 (registro perdido) apagado
+PASS 0,1 ms con una transaccion de 7 bits: LED3 (transaccion con error) encendido
+PASS 60 us: 1000 registros de 1000 precios
+PASS 60 us: 0 bytes fuera de un registro
+PASS 60 us: secuencia, precio, MISO y marca de error iguales a lo enviado (0 distintos)
+PASS 60 us: periodo de 11 unidades de 5,12 us en todos (0 distintos)
+PASS 60 us: LED4 (registro perdido) apagado
+PASS 60 us: LED3 (transaccion con error) apagado
+PASS control: 30 us: los 122 registros que llegaron tienen el precio de su transaccion (0 distintos)
+PASS control: 30 us: se perdieron registros (78 de 200)
+PASS control: 30 us: la secuencia salta 77 veces
+PASS control: 30 us: LED4 (registro perdido) encendido
+RESUMEN: 34 comprobaciones, 0 fallas
+PASS: 34 comprobaciones, cero fallas
+
+== 2. Controles negativos
+PASS flanco_de_bajada: detectado (6 comprobaciones fallan)
+PASS primero_el_bit_menor: detectado (6 comprobaciones fallan)
+PASS sin_marca_de_error: detectado (1 comprobaciones fallan)
+PASS secuencia_no_avanza_si_se_pierde: detectado (2 comprobaciones fallan)
+PASS baudios_mal: detectado (13709 comprobaciones fallan)
+PASS periodo_sin_escala: detectado (5 comprobaciones fallan)
+PASS cola_llena_en_32_bits: detectado (1 comprobaciones fallan)
+
+== 3. Timing en 10 semillas (nextpnr --hx1k --package vq100 --freq 25)
+Celdas: ICESTORM_LC: 478/ 1280. BRAM: ICESTORM_RAM: 0/ 16
+Frecuencia maxima por semilla (MHz): 129.80 135.72 135.72 118.40 142.33 132.57 128.29 122.99 125.80 132.57
+Minima 118.40 MHz, mediana 131.19 MHz, maxima 142.33 MHz
+PASS: 10 de 10 semillas cierran a 25 MHz
+
+== 4. Bitstream (semilla 1)
+build/registrador/registrador.bin: 32220 bytes, sha256 231a0c6d2a69a78d6bde91a2cb66690924815fd07a9459b576543a46cc5ab715
+
+== 5. Bitstream ruteado simulado por los pines (testbench corto, construido con REBOTE = 8)
+PASS: 28 comprobaciones por los pines del bitstream, cero fallas
+
+== 6. Herramienta (tools/registrador.py --prueba)
+PASS bytes del testbench (ronda 3): 2000 registros, precios iguales a tb/practica.csv, 0 perdidos, 0 bytes sueltos
+PASS bytes del testbench: periodo de 19 unidades (97,3 us)
+PASS basura al comienzo: se descartan 2 bytes y quedan 300 registros
+PASS 10 registros que no llegaron: la secuencia los cuenta
+PASS limite conocido: 128 perdidos seguidos no se ven en la secuencia (modulo 128). Para eso esta la cuenta de los 7 segmentos: tiene que coincidir con las filas del CSV
+PASS un byte dañado: se pierde ese registro y la secuencia lo cuenta
+PASS un borrado con SW3 a mitad: dos rondas, ningun perdido
+PASS pseudoterminal a 1 Mbaud: 300 registros, la serie escrita en build/registrador/prueba_pty_serie.csv es igual a la enviada
+RESULTADO prueba PASS
+
+PASS: registrador listo
