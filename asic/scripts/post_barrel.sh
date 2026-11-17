@@ -14,7 +14,8 @@
 #                en 0 y en 1 (modelo de factibilidad/g_asic/tb/dffq_func_init.v):
 #                los dos tienen que dar los bytes de ref/fondo.py. Así se ve que la
 #                decisión no depende del estado de encendido.
-#   4. potencia  asic/scripts/potencia_barrel.sh (actividad real, VCD en /dev/shm)
+#   4. potencia  asic/scripts/potencia_barrel.sh (actividad real, VCD en /dev/shm) y
+#                la tabla de potencia y energía (asic/scripts/tabla_potencia_barrel.py)
 # Mismos pasos que factibilidad/g_asic para el base (cierre, drc-klayout, puertos y
 # potencia). Las salidas quedan en asic/mediciones/TAG/.
 set -uo pipefail
@@ -83,6 +84,7 @@ done
 
 echo "== 4. potencia"
 asic/scripts/potencia_barrel.sh "$TAG" todo || fallas=$((fallas+1))
+python3 asic/scripts/tabla_potencia_barrel.py "$TAG"
 
 echo "RESULTADO $TAG: $fallas pasos con falla"
 exit $fallas
