@@ -689,6 +689,67 @@ def roofline(R, pasos):
 
 
 # ---------------------------------------------------------------------------- ASIC
+def barrel_asic(R, w, filas):
+    """Edicion ASIC del barrel con xd=3 y sw/fondo.s (asic/mediciones/, asic/README.md)."""
+    res_p = "asic/mediciones/resumen.txt"
+    pot_p = "asic/mediciones/potencia/barrel_xd3_t40/tabla.md"
+    if not (os.path.exists(res_p) and os.path.exists(pot_p)):
+        w("== Espino barrel con la extension (R1): sin mediciones en asic/mediciones/")
+        w("")
+        return
+    res = {}
+    for linea in open(res_p, encoding="utf-8"):
+        if " = " in linea:
+            k, v = linea.strip().split(" = ")
+            res[k] = float(v)
+    txt = open(pot_p, encoding="utf-8").read()
+    m = re.search(r"^\| típica \(.*?\) \| ([\d.]+) \| ([\d.]+) \| ([\d.]+) \| ([\d.]+) \|$", txt, re.M)
+    sondeo, ronda3, calc = float(m.group(2)), float(m.group(3)), float(m.group(4))
+    m = re.search(r"^\| típica \(.*?\) \| [\d.]+ \| ([\d.]+) \| ([\d.]+) \| ([\d.]+) \| ([\d.]+) \|$", txt, re.M)
+    e3, e2, e1, marg = (float(m.group(i)) for i in range(1, 5))
+    fmax = res["fmax_cierre_mhz"]
+    kc = R["r1"]["k_c"]
+    mops = OPS_FONDO * F_CLK / kc
+    mops_f = OPS_FONDO * fmax / kc
+    pp = VAR["r1"]["ppeak"]
+    opw = mops / (calc / 1000.0)
+    ppw = pp / (calc / 1000.0)
+    dado, std = res["xd3_dado_um2"], res["xd3_std_um2"]
+    w("== Espino barrel con emad y devk, sw/fondo.s: el hardware de R1 (corrida barrel_xd3_t40)")
+    w(f"   dado {dado:.0f} um2 ({dado / 1e6:.3f} mm2), celdas estandar {std:.0f} um2, {res['xd3_celdas']:.0f} celdas,"
+      f" {res['xd3_ff']:.0f} flip-flops (el banco de registros de cuatro contextos son 2048)")
+    w(f"   frecuencia: cierra en la esquina lenta hasta T = {res['t_min_cierra_ns']:g} ns ({fmax:.1f} MHz)"
+      f" (asic/mediciones/corridas.md)")
+    w(f"   potencia, esquina tipica: sondeo {sondeo:.3f} mW, calculo {calc:.3f} mW, ronda 3 {ronda3:.3f} mW")
+    w(f"   kernel: {kc:.2f} ciclos, {OPS_FONDO} ops: {mops:.3f} MOPS a 25 MHz, {mops_f:.3f} MOPS a {fmax:.1f} MHz;"
+      f" Ppeak {pp} MOPS")
+    w(f"   Ops/W: kernel {opw:.1f} MOPS/W, Ppeak {ppw:.1f} MOPS/W")
+    w(f"   energia por decision: ronda 3 {e3 / 1000:.3f} uJ (flujo), ronda 2 {e2 / 1000:.2f} uJ y ronda 1"
+      f" {e1 / 1000:.1f} uJ (estimadas: mas sondeo)")
+    w(f"   costo marginal de decidir sobre el de esperar: {marg:.2f} nJ, {marg / OPS_FONDO:.3f} nJ por operacion util")
+    w("   (los cuatro hilos ejecutan una instruccion por ciclo tambien mientras sondean: esperar ya cuesta casi")
+    w("   lo mismo que calcular)")
+    w("")
+    filas.append(["barrel_r1", round(dado), round(std), int(res["xd3_celdas"]), int(res["xd3_ff"]), f2(fmax, 1),
+                  sondeo, f2(calc, 3), ronda3, f2(kc), f2(mops, 3), f2(mops_f, 3), pp, f2(opw, 1), f2(ppw, 1),
+                  f2(e3 / 1000, 3), f2(e2 / 1000, 2), f2(e1 / 1000, 1), f2(marg, 3), f2(marg / OPS_FONDO, 3)])
+    mk = "Barrel"
+    macro(f"pSieteAsicDado{mk}", dado / 1e6, 3)
+    macro(f"pSieteAsicStd{mk}", round(std))
+    macro(f"pSieteAsicFmax{mk}", fmax, 1)
+    macro(f"pSieteAsicPsondeo{mk}", sondeo, 1)
+    macro(f"pSieteAsicPcalculo{mk}", calc, 1)
+    macro(f"pSieteAsicMops{mk}", mops, 2)
+    macro(f"pSieteAsicMopsFmax{mk}", mops_f, 2)
+    macro(f"pSieteAsicMopsW{mk}", opw, 0)
+    macro(f"pSieteAsicPpeakW{mk}", ppw, 0)
+    macro(f"pSieteAsicErtres{mk}", e3 / 1000, 2)
+    macro(f"pSieteAsicErdos{mk}", e2 / 1000, 1)
+    macro(f"pSieteAsicEruno{mk}", e1 / 1000, 0)
+    macro(f"pSieteAsicMarginal{mk}", marg, 2)
+    macro(f"pSieteAsicMarginalOp{mk}", marg / OPS_FONDO, 3)
+
+
 def tabla_asic(R):
     def potencias(ruta):
         txt = open(ruta, encoding="utf-8").read()
@@ -720,8 +781,9 @@ def tabla_asic(R):
     w("Generado por tools/p7/tablas.py (make p7-rapido) desde docs/mediciones/asic/. No editar a mano.")
     w("")
     w("Procedencia: docs/mediciones/asic/LEEME.md. Son calculos del flujo (OpenSTA con actividad de la simulacion")
-    w("del netlist final ejecutando sw/trade.s), no mediciones de silicio. Solo existen el Espino base y el")
-    w("segmentado (ROM combinacional): el barrel, la extension y el fondo no pasaron por el flujo.")
+    w("del netlist final ejecutando el programa), no mediciones de silicio. El base y el segmentado vienen de la")
+    w("factibilidad (sw/trade.s); el barrel con la extension y el fondo (sw/fondo.s, el hardware de R1) es la")
+    w("edicion ASIC del 17/11 (asic/README.md), con sus mediciones en asic/mediciones/.")
     w(f"Ops/s con la definicion de P7: {OPS_TRADE} operaciones utiles por tick y los ciclos del kernel medidos en la FPGA")
     w("(el core del macro son los mismos archivos de rtl/espino_core; el segmentado del macro usa la ROM")
     w("combinacional, con el mismo modelo de costo). Esquina tipica (tt, 25 C, 5,0 V), reloj de 25 MHz.")
@@ -773,6 +835,7 @@ def tabla_asic(R):
         macro(f"pSieteAsicEruno{mk}", e["e1"] / 1000, 0)
         macro(f"pSieteAsicMarginal{mk}", e["marg"], 2)
         macro(f"pSieteAsicMarginalOp{mk}", e["marg"] / OPS_TRADE, 3)
+    barrel_asic(R, w, filas)
     w("Lectura: la energia por decision la pone la espera, no el calculo. Decidir cuesta unos nJ sobre los")
     w("2,6 a 2,8 uJ que se gastan esperando 0,1 ms con el reloj corriendo. Detener el reloj entre precios es")
     w("la mejora de energia mas grande disponible; ningun peldaño de la escalera la cambia.")
