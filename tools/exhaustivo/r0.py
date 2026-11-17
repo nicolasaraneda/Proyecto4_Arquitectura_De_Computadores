@@ -97,8 +97,9 @@ def rtl_serie(args):
     c = re.sub(r"NTICKS     = [0-9]*;", f"NTICKS     = {nticks};", c)
     c = c.replace("int precio [20000];", "int precio [NTICKS];").replace('"decisiones.csv"', f'"{d}/tb.csv"')
     cambiadas = sum(1 for a, b in zip(tb.splitlines(), c.splitlines()) if a != b)
-    if cambiadas != 6:
-        return ruta, nticks, False, f"FAIL {etiqueta}: la copia del testbench cambia {cambiadas} lineas (se esperaban 6)"
+    # 5 o 6 líneas: el programa del oficial ya es sw/trade.hex; el arreglo tiene que cambiar siempre
+    if cambiadas not in (5, 6) or "int precio [NTICKS];" not in c:
+        return ruta, nticks, False, f"FAIL {etiqueta}: la copia del testbench cambia {cambiadas} lineas (se esperaban 5 o 6)"
     open(f"{d}/tb_p4.sv", "w").write(c)
     fuentes = [f"rtl/{f}" for f in sorted(os.listdir(os.path.join(RAIZ, "rtl"))) if f.endswith(".v") and not f.startswith("00_")] + \
         [f"rtl/espino_core/{f}" for f in sorted(os.listdir(os.path.join(RAIZ, "rtl/espino_core"))) if f.endswith(".v")]
