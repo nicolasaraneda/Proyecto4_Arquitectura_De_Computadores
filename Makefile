@@ -839,3 +839,24 @@ r2-falla:
 .PHONY: exhibicion
 exhibicion:
 	tools/p9/exhibicion.sh
+
+# --- Revisión adversarial P10 (docs/revision_p10.md) --------------------------
+# Pruebas que agregó la revisión de R1 y R2. No son parte de check ni de la
+# integración continua: algunas reproducen un defecto y terminan con error a
+# propósito mientras el defecto siga en el RTL.
+#   p10-ro-custom0    tabla de solo lectura, custom-0 sin efecto y bordes de emad
+#                     y devk en el hardware de R1 y R2, con dos controles negativos
+#   p10-spi-7flancos  precios fantasma del esclavo SPI con bit_cnt en 7 y CS_n en
+#                     alto; en R2 disparan el vigilante (reproduce el hallazgo 1)
+#   p10-vuelta-tick   el número de tick de sw/fondo.s da la vuelta (24 bits)
+#   p10-largo         dos rondas de 200 000 ticks por el RTL de R2
+.PHONY: p10 p10-ro-custom0 p10-spi-7flancos p10-vuelta-tick p10-largo
+p10: p10-ro-custom0 p10-vuelta-tick p10-largo p10-spi-7flancos
+p10-ro-custom0:
+	tools/p10/ro_custom0.sh
+p10-spi-7flancos:
+	tools/p10/spi_7flancos.sh
+p10-vuelta-tick:
+	tools/p10/vuelta_tick.sh
+p10-largo:
+	tools/p10/largo.sh
