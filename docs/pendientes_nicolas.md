@@ -14,6 +14,11 @@ Decisiones y acciones que solo Nicolás puede tomar o hacer, acumuladas mientras
    - Tu decisión anunciada en el próximo mensaje manda sobre esta recomendación.
 2. **Usar la serie que se registre el 26/11 para aceptar algoritmos (tarea B).** El registrador solo escucha, y la serie no entra al diseño. Pero si la maestra del 26/11 usa la misma serie que la competencia, aceptar o rechazar un algoritmo por su resultado en ella es elegir con la serie oculta, que choca con el espíritu de la regla de no usar información externa a la serie. Opciones: (a) usarla solo como control de que el gemelo predice el patrimonio de la maestra (puerta de maestra, criterio 2) y no para elegir algoritmos; (b) usarla para aceptar candidatos solo si el ayudante confirma que la serie del 26/11 no es la de la competencia. **Recomendación: preguntar al ayudante el 26/11 y, mientras tanto, (a).**
 
+3. **Salida de `max_media` a +0,5 unidades (tarea B, T131, `docs/generador_b.md`).** Pasa el criterio de corte con la semilla reservada si los otros grupos operan todos reversión; si el campo es variado, pierde (H3a -0,011 a 2000 ticks). En la práctica pierde 173 +- 137 por bloque. Cambiarla es una constante: el umbral de salida de 1 a 17 (`sw/trade.s` en R0, `S_SALE` y `G1_SALE` en la tabla de R1 y R2), cargable con `icebram` sin sintetizar.
+   - **(a) No cambiar.** Es lo robusto si no se sabe qué hacen los otros grupos.
+   - **(b) Cambiar después del 26/11** si se ve que los otros grupos operan reversión y la candidata gana en la serie registrada (si el ayudante dice que no es la de la competencia).
+   - **Recomendación: (a)**, y mirar el 26/11 qué hacen los otros grupos. Si se adopta `zscore` (decisión 1), esta candidata deja de aplicar: habría que repetir la tarea B contra `zscore`.
+
 ## Acciones
 
 1. **Usuarios de GitHub** de Santiago, del profesor y de cada ayudante, para invitarlos el 29/11 con permiso de lectura (`docs/checklist_1dic.md`, sección 1). Las invitaciones tardan en aceptarse.

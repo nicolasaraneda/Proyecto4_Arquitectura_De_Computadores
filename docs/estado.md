@@ -18,7 +18,7 @@ Se actualiza al cerrar cada tramo de trabajo. La versión anterior queda en el h
 | 6. `make ensayo` | Hecho: 9 de 9 con 4/4 | `docs/mediciones/ensayo.txt` |
 | 7. Material de estudio | Hecho: diagramas, guiones, tres pruebas con pauta, guías por integrante | `docs/defensa/` |
 | A. Registrador | Hecho: `make registrador` PASS (478 celdas, 10 de 10 semillas, 7 de 7 controles negativos, bitstream ruteado simulado); en el checklist del 26/11 | `docs/registrador.md`, `bitstreams/registrador.bin` |
-| B. Generador | Semilla 0 hecha; semilla 5 en la cola | rama `generador` |
+| B. Generador | Cerrado (T131): ninguna candidata mejora en todo; la salida a +0,5 pasa solo contra un campo de reversiones, condicionada al 26/11 | `docs/generador_b.md` |
 
 Lo pesado corre de a un trabajo por vez con una cola global (`flock`), revisando el espacio libre antes de cada uno. `main` no se pudo avanzar a `integra-noche` (CI en verde) porque esta sesión no tiene permiso para empujar a `main`.
 
