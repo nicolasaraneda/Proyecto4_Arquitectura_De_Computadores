@@ -839,3 +839,10 @@ r2-falla:
 .PHONY: exhibicion
 exhibicion:
 	tools/p9/exhibicion.sh
+
+# Ensayo general (docs/checklist_1dic.md): las tres rondas para cada peldaño con series
+# nuevas, por el RTL, mostrando lo que vería la maestra (docs/mediciones/ensayo.txt).
+# Unos 5 minutos con 5 procesos.
+.PHONY: ensayo
+ensayo:
+	$(PYTHON) tools/ensayo.py --jobs 5

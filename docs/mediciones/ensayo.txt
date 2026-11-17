@@ -1,0 +1,31 @@
+Ensayo general: las tres rondas para cada peldano, con series nuevas, por el RTL (Verilator)
+Generado por tools/ensayo.py --jobs 5 (make ensayo).
+Series: familia `modelo` de ref/series.py, semilla 20261130 (no se uso para elegir nada), 2000 ticks por ronda, una serie distinta por ronda; quedan en build/ensayo/.
+Cada corrida es una copia del testbench oficial que solo cambia el programa, la serie, el periodo, el largo y
+el nombre de decisiones.csv. Lo que se muestra es lo que imprime el testbench: lo que veria la maestra.
+
+--- Ronda 1: periodo 10 ms, serie build/ensayo/serie_1.csv (precio inicial 158, final 163, minimo 154, maximo 191) ---
+peldano  patrimonio  ordenes perdida max comprar y mant.  peor caso presupuesto chequeos  referencia
+R0             9656       13        1499           10310         44      249762      4/4  PASS: decisiones.csv identico a ref/trader.py
+R1             9656       13        1499           10310        391      249762      4/4  PASS: decisiones.csv identico a ref/fondo.py
+R2             9656       13        1499           10310        391      249762      4/4  PASS: decisiones.csv identico a ref/fondo.py
+
+--- Ronda 2: periodo 1 ms, serie build/ensayo/serie_2.csv (precio inicial 86, final 44, minimo 39, maximo 91) ---
+peldano  patrimonio  ordenes perdida max comprar y mant.  peor caso presupuesto chequeos  referencia
+R0            10014       72        1935            5123         44       24762      4/4  PASS: decisiones.csv identico a ref/trader.py
+R1            10014       72        1935            5123        435       24762      4/4  PASS: decisiones.csv identico a ref/fondo.py
+R2            10014       72        1935            5123        435       24762      4/4  PASS: decisiones.csv identico a ref/fondo.py
+
+--- Ronda 3: periodo 0.1 ms, serie build/ensayo/serie_3.csv (precio inicial 170, final 139, minimo 123, maximo 194) ---
+peldano  patrimonio  ordenes perdida max comprar y mant.  peor caso presupuesto chequeos  referencia
+R0             8125       60        2657            8197         44        2262      4/4  PASS: decisiones.csv identico a ref/trader.py
+R1             8125       60        2657            8197        443        2262      4/4  PASS: decisiones.csv identico a ref/fondo.py
+R2             8125       60        2657            8197        443        2262      4/4  PASS: decisiones.csv identico a ref/fondo.py
+
+Patrimonio de las tres rondas por peldano (suma) y diferencia con R0:
+  R0: 27795 (+0)
+  R1: 27795 (+0)
+  R2: 27795 (+0)
+
+Tiempo: 290 s.
+PASS: 9 de 9 corridas con 4/4 y decisiones iguales a su referencia
