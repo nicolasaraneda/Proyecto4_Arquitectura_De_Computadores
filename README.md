@@ -25,7 +25,7 @@ Hoy el diseño por defecto (el que ejercita el testbench oficial sin opciones) e
 - El punto de partida es el repositorio base del curso, [nic0villegasc/pochoco_soc](https://github.com/nic0villegasc/pochoco_soc), de Nicolás Villegas, importado sin cambios desde su commit `33e8b5a`. Esa copia quedó marcada con la etiqueta `base-curso`. Los archivos del repositorio base conservan su encabezado de autor y su licencia (Solderpad Hardware License 0.51). Cuando modificamos uno de esos archivos, lo indicamos debajo del encabezado original.
 - El ensamblador `tools/pochoasm.py` es el que escribió este grupo para el Proyecto 2 y amplió en el Proyecto 3, con el nombre y la interfaz que espera el testbench del Proyecto 4.
 - Del Proyecto 3 del grupo vienen también el formato de la traza de `tb/tb_cpi.sv` y el método de comparar trazas ciclo a ciclo.
-- El power-on reset largo de `rtl/pochoco_soc.v` también viene de nuestro Proyecto 2.
+- El reset de encendido largo de `rtl/pochoco_soc.v` también viene de nuestro Proyecto 2.
 - El core segmentado parte del diseño con lectura anticipada de nuestro Proyecto 3 (`nicolasaraneda/Proyecto3_Arquitectura_De_Computadores`). De ahí vienen también `sw/hazard_test.s` y `sw/hazard_review.s` (sin cambios), `sw/hazard_cycles.s` (adaptado), `tb/core_trace_tb.v`, `tb/comparar_trazas.py` y el método de los controles negativos por mutación.
 - `tb/tb_proyecto_4.sv` y `tb/practica.csv` son el testbench y la serie de práctica entregados por el curso. No se modifican.
 
@@ -43,9 +43,11 @@ Todo se corre con [OSS CAD Suite](https://github.com/YosysHQ/oss-cad-suite-build
 | Python         | 3.11 o superior            |
 | icepack, iceprog | los de OSS CAD Suite     |
 
-No se necesita un toolchain de RISC-V: el ensamblador es propio y está en el repositorio.
+No se necesitan herramientas de compilación de RISC-V: el ensamblador es propio y está en el repositorio. Se usan además `make` y `git`.
 
-Todos los comandos se ejecutan desde la raíz del repositorio, con las herramientas de OSS CAD Suite en el `PATH` (`export PATH=<carpeta de OSS CAD Suite>/bin:$PATH`). La integración continua (`.github/workflows/ci.yml`) instala la misma versión y corre las pruebas en cada push. El informe necesita además LaTeX (`texlive` con los paquetes en español); si no está instalado, la integración continua compila el PDF y lo deja como artefacto.
+El repositorio se obtiene con `git clone` y con su historial completo: `make r0-reproducir` y `make r0-molde` reconstruyen R0 desde el commit en que se guardó, así que no funcionan con un clon superficial (`--depth`) ni con el ZIP que descarga GitHub. Mientras el repositorio sea privado, clonarlo requiere acceso de lectura.
+
+Todos los comandos se ejecutan desde la raíz del repositorio, con las herramientas de OSS CAD Suite en el `PATH` (`export PATH=<carpeta de OSS CAD Suite>/bin:$PATH`). La integración continua (`.github/workflows/ci.yml`) instala la misma versión y corre las pruebas en cada push. Las demoras que se indican abajo son aproximadas, medidas en la máquina del grupo o en un clon limpio (`docs/auditorias/clon_limpio.md`); varias pruebas toman minutos. El informe necesita además LaTeX (`texlive` con los paquetes en español); si no está instalado, la integración continua compila el PDF y lo deja como artefacto.
 
 ## Cómo ensamblar `trade.s`
 
@@ -53,7 +55,7 @@ Todos los comandos se ejecutan desde la raíz del repositorio, con las herramien
 python3 tools/pochoasm.py sw/trade.s -o sw/trade.hex
 ```
 
-o `make asm`. El ensamblador es propio (`tools/pochoasm.py`); su sintaxis está en `docs/ensamblador.md` y sus tests se corren con `make test-asm`. El programa del fondo usa la extensión de la ISA, que se declara en el mismo archivo con `.extension xd`: `python3 tools/pochoasm.py sw/fondo.s -o build/fondo/fondo.hex` (o `make fondo-hex`). Los programas están explicados en `docs/trade_s.md` y `docs/fondo.md`.
+o `make asm`. El ensamblador es propio (`tools/pochoasm.py`); su sintaxis está en `docs/ensamblador.md` y sus tests se corren con `make test-asm`. El programa del fondo usa la extensión de la ISA, que se declara en el mismo archivo con `.extension xd`: `mkdir -p build/fondo && python3 tools/pochoasm.py sw/fondo.s -o build/fondo/fondo.hex`, o `make fondo-hex`, que crea la carpeta. El ensamblador no crea la carpeta de salida. Los programas están explicados en `docs/trade_s.md` y `docs/fondo.md`.
 
 ## Cómo correr los testbenches
 
@@ -65,20 +67,21 @@ iverilog -g2012 -s tb_proyecto_4 -o /tmp/tb_p4 $(yosys-config --datdir)/ice40/ce
 vvp -n /tmp/tb_p4
 ```
 
-Da 4/4 y deja `decisiones.csv`. Lo mismo, comprobando además que `decisiones.csv` es idéntico al de la referencia: `make peldano-oficial` (diseño por defecto), `make tb` (R0) y `make fondo-oficial HW=r1` (R1; `HW=r2` para R2).
+Da 4/4 y deja `decisiones.csv`; `vvp` demora de 1 a 2 minutos. Lo mismo, comprobando además que `decisiones.csv` es idéntico al de la referencia: `make peldano-oficial` (diseño por defecto, unos 2 minutos), `make tb` (R0, unos 3 minutos) y `make fondo-oficial HW=r1` (R1; `HW=r2` para R2; de 4 a 5 minutos). `make fondo-oficial` reescribe `docs/mediciones/fondo/<peldaño>/oficial.txt`, y en una corrida sin cambios solo cambia su línea "Commit de partida".
 
-| Comando | Qué prueba |
-|---------|-----------|
-| `make check` | Ensamblador, referencia, `trade.hex` al día y testbench oficial con 4/4. |
-| `make equiv` | R0 contra la referencia, byte a byte, en los 20 000 ticks a los tres períodos y en series sintéticas. |
-| `make check-fondo HW=r1` | R1: testbench oficial, equivalencia, series, fases, degradación, controles negativos y estrés, en versión corta. |
-| `make fondo-puerta HW=r1` | Los criterios de la puerta de simulación de R1 en versión completa. |
+| Comando | Qué prueba | Demora aproximada |
+|---------|-----------|-------------------|
+| `make check` | Ensamblador, referencia, `trade.hex` al día y testbench oficial con 4/4. | Unos 3 minutos, casi todos del testbench oficial |
+| `make equiv` | R0 contra la referencia, byte a byte: los 20 000 ticks a 0,1 ms y 1 ms por el RTL (Verilator) y a los tres períodos en el gemelo, más una serie de cada familia sintética. Los 20 000 ticks a 10 ms por el RTL son `make equiv-largo`. | Sin medir; `make equiv-largo`, unos 25 minutos |
+| `make check-fondo HW=r1` | R1: testbench oficial, equivalencia, series, fases, degradación, controles negativos y estrés, en versión corta. | Sin medir |
+| `make fondo-puerta HW=r1` | Los criterios de la puerta de simulación de R1 en versión completa. | Más de 35 minutos: incluye los 20 000 ticks a 10 ms |
 
 La lista completa, pieza por pieza, está en `docs/comandos.md`.
 
 ## Cómo correr la versión de referencia del algoritmo
 
 ```bash
+mkdir -p build                                              # carpeta de salida, si no existe
 python3 ref/trader.py tb/practica.csv                       # max_media contra no operar y comprar y mantener
 python3 ref/trader.py tb/practica.csv -o build/ref.csv      # decisiones.csv de referencia de R0
 python3 ref/fondo.py tb/practica.csv -o build/ref_fondo.csv # decisiones.csv de referencia de R1 y R2
@@ -102,27 +105,29 @@ iceprog -b bitstreams/r2_multi.bin                  # imagen múltiple: -b borra
 Para construir desde las fuentes:
 
 ```bash
-make bin                 # R0: yosys, nextpnr e icepack, deja build/pochoco_soc.bin
+make bin                 # R0: yosys, nextpnr e icepack, deja build/pochoco_soc.bin (segundos)
 make prog                # iceprog build/pochoco_soc.bin
-make r0-reproducir       # R0 bit a bit igual al guardado, desde las fuentes de su commit
-make fondo-bitstreams    # R1, R2 y la imagen múltiple, simulados desde el .asc
+make r0-reproducir       # R0 bit a bit igual al guardado, desde las fuentes de su commit (unos 2 minutos)
+make fondo-bitstreams    # R1, R2 y la imagen múltiple, simulados desde el .asc (unos 25 minutos)
 ```
 
-Antes de grabar un bitstream nuevo se simula lo que se graba, reconstruido desde el `.asc`: `make sim-bitstream`.
+`make bin` produce el mismo diseño que R0, pero no el mismo archivo: con las fuentes actuales Yosys entrega otra netlist equivalente, y el `.bin` tiene otro sha256 y otra frecuencia máxima que `bitstreams/r0_base_max_media.bin` (`docs/mediciones/p7/caida_segmentado.txt`). Para la placa se usa el archivo guardado o el que deja `make r0-reproducir`, que sí coincide byte a byte.
+
+Antes de grabar un bitstream nuevo se simula lo que se graba, reconstruido desde el `.asc`: `make sim-bitstream` (unos 8 minutos).
 
 ## Piezas
 
 Una sección por pieza: qué es, el comando que la prueba y el número que la respalda. El detalle de cada una está en su documento de estudio.
 
 ### Algoritmo y protocolo de evaluación
-Reversión a la media: la serie de práctica tiene razón de varianza 0,77 a 10 ticks. `max_media` compra cuando el precio cae 3 unidades bajo su media exponencial y vende al recuperarla, con órdenes de 63 acciones. Se eligió con 10 bloques de práctica, 1 000 remuestreos y 14 familias sintéticas calibradas.
-- Prueba: `make tabla-3-1` y `make algoritmo`.
+Reversión a la media: la serie de práctica tiene razón de varianza 0,77 a 10 ticks. `max_media` compra cuando el precio cae más de 3 unidades bajo su media exponencial y vende al recuperarla, con órdenes de 63 acciones. Se eligió con 10 bloques de práctica, 1 000 remuestreos y 14 familias sintéticas calibradas.
+- Prueba: `make tabla-3-1` (segundos) y `make algoritmo` (unos 3 minutos; reescribe archivos de `docs/mediciones/`).
 - Número: 25 973 de patrimonio en los 20 000 ticks de práctica, contra 6 497 de comprar y mantener (`docs/mediciones/tabla_3_1.txt`).
 - Documento: `docs/algoritmo.md`, `docs/protocolo.md`.
 
 ### Gemelo digital
 Simulador en C del SoC, exacto al ciclo, para el Espino base, el segmentado y el barrel con la extensión y la tabla. Corre el mismo `.hex` que el bitstream.
-- Prueba: `make cosim` y `make cosim-barrel`.
+- Prueba: `make cosim` (unos 2 minutos) y `make cosim-barrel` (unos 6 minutos).
 - Número: traza idéntica al RTL en 21 configuraciones del barrel, 18,3 millones de eventos; la ronda de 10 ms del fondo en 0,14 s contra 35 minutos de Verilator.
 - Documento: `docs/gemelo.md`.
 
@@ -134,7 +139,7 @@ Pipeline de 3 etapas con la memoria de instrucciones leída en el flanco de baja
 
 ### Espino barrel
 Cuatro hilos que rotan por un pipeline de 4 etapas, sin riesgos de datos ni de control. Se elige con `-DESPINO_BARREL`. Es el core de R1 y R2.
-- Prueba: `make check-barrel`, `make barrel-verif` y `make barrel-mutaciones`.
+- Prueba: `make check-barrel`, `make barrel-verif` (unos 6 minutos con 12 procesos) y `make barrel-mutaciones`.
 - Número: CPI 1 agregado y 4 por hilo; 7,9 millones de instrucciones comparadas con el base, cero diferencias; 21 de 21 mutaciones detectadas.
 - Documento: `docs/espino_barrel.md`.
 
@@ -146,43 +151,43 @@ Cuatro hilos que rotan por un pipeline de 4 etapas, sin riesgos de datos ni de c
 
 ### Fondo en un chip
 `sw/fondo.s`: un supervisor y tres gestores que votan por memoria compartida, con pesos que se ajustan y degradación si un voto no llega.
-- Prueba: `make check-fondo` y `make fondo-puerta`.
+- Prueba: `make check-fondo` y `make fondo-puerta` (más de 35 minutos).
 - Número: idéntico a `ref/fondo.py` en 1 050 series y en la práctica a los tres períodos; peor caso 443 ciclos de 2 262; 30 de 30 corridas con fallas puestas a propósito.
 - Documento: `docs/fondo.md`.
 
 ### Tabla de parámetros, vigilante y relevo
 Las 20 constantes del fondo en una BRAM de solo lectura que se cambia con `icebram`, y un vigilante que reconfigura la FPGA con R0 si llegan 5 precios sin respuesta.
-- Prueba: `make check-vigilante` y `make fondo-bitstreams`.
+- Prueba: `make check-vigilante` y `make fondo-bitstreams` (unos 25 minutos).
 - Número: cambio de tabla en 0,32 s sin sintetizar; el vigilante no se dispara en ninguna corrida sana y sí en la transacción esperada con el supervisor colgado.
 - Documento: `docs/tabla_vigilante.md`.
 
 ### Puertas y matriz de estrés
 Ocho criterios que un bitstream debe pasar antes de la placa, más una matriz de SCLK, tiempos de `CS_n`, reset, rondas seguidas, períodos, largo de ronda, comisión y caja.
-- Prueba: `make fondo-estres HW=r1`, `make estres` y `make p8-matriz`.
+- Prueba: `make fondo-estres HW=r1`, `make estres` (unos 2 minutos con 16 núcleos) y `make p8-matriz` (10 segundos).
 - Número: R0 60 de 60 casos, R1 y R2 56 de 56; R1 responde a 0,1 ms desde SCLK de 110 kHz.
 - Documento: `docs/puertas.md`, `docs/contingencia.md`.
 
 ### Autoprueba en placa
 El SoC de cada peldaño con una maestra SPI dentro de la FPGA y una firma CRC-16 de las decisiones en los 7 segmentos. Es la puerta de placa: prueba la placa sin la maestra del curso.
-- Prueba: `make autoprueba-r0`, `make autoprueba-r1` y `make autoprueba-r2`.
-- Número: R0, firma `a23c` en el gemelo, la referencia, el RTL y el bitstream ruteado, vista en la placa a los tres períodos. R1 y R2, firma `15d7`; en R2, 18 millones de precios en el gemelo (media hora a 0,1 ms) sin que el vigilante pueda dispararse, y el relevo con la falla inyectada en la transacción esperada. El tiempo real del relevo se mide en la placa con `tools/medir_relevo.py`.
+- Prueba: `make autoprueba-r0` (unos 20 minutos), `make autoprueba-r1` y `make autoprueba-r2` (unos 25 minutos cada uno).
+- Número: R0, firma `a23c` en el gemelo, la referencia, el RTL y el bitstream ruteado. R1 y R2, firma `15d7`; en R2, 18 millones de precios en el gemelo (media hora a 0,1 ms) sin que el vigilante pueda dispararse, y el relevo con la falla inyectada en la transacción esperada. En la placa, el 16/11: R0 mostró a los tres períodos la mitad baja de su firma (`3C`) y falta la mitad alta (`A2`); R2 pasó la firma a 0,1 ms y media hora sin disparo, y el relevo se midió en 35,50 ms por la UART con `tools/medir_relevo.py`; faltan R1, R2 a 1 ms y 10 ms, y ver la imagen testigo de R2 después del relevo (`docs/mediciones/placa_16nov.md`, `docs/puertas.md`).
 - Documento: `docs/autoprueba.md`.
 
 ### Co-diseño: variantes, Amdahl, escalera y roofline
 Las seis variantes medidas con las definiciones de la clase 7, el perfil del tick, Amdahl predicho contra medido, la escalera de la clase, el roofline, la edición ASIC y los resultados negativos del PLL y del duplicador de reloj.
-- Prueba: `make p7` (o `make p7-rapido` desde lo guardado).
+- Prueba: `make p7` (unos 25 minutos) o `make p7-rapido` desde lo guardado (segundos).
 - Número: el segmentado acelera la respuesta 1,86 veces (Amdahl predice 1,84); R1 hace 56 operaciones útiles por tick contra 8 de R0.
 - Documento: `docs/codiseno.md`.
 
 ### Anticipación: medidor, contingencia y árbol de decisión
 Un bitstream que mide el SPI real de la maestra, `tools/retune.py` para un cambio de comisión, juegos de bitstreams ya construidos y el árbol de decisión del 1/12.
-- Prueba: `make medidor`, `make retune-control` y `make contingencia`.
+- Prueba: `make medidor` (1 minuto), `make retune-control` (segundos) y `make contingencia` (45 minutos).
 - Número: el medidor pasa 66 comprobaciones por los pines del bitstream; `retune` con las reglas publicadas reproduce R0, R1 y R2 byte por byte.
 - Documento: `docs/contingencia.md`, `docs/checklist_26nov.md`, `docs/checklist_1dic.md`.
 
 ### Informe
 Todas las cifras del informe salen de `make report`, que también compila el PDF si hay LaTeX.
-- Prueba: `make report`.
+- Prueba: `make report` (segundos, sin LaTeX). Reescribe `informe/generado/peldano.tex`, y en una corrida sin cambios solo cambia el commit que imprime el informe.
 - Documento: `informe/informe.tex`.
 
 ## Estructura
