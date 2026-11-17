@@ -2,7 +2,7 @@
 
 Se actualiza al cerrar cada tramo de trabajo. La versión anterior queda en el historial de git.
 
-## Tramo 15: trabajo autónomo del 16 al 17/11 (en curso)
+## Tramo 15: trabajo del 16 al 17/11 (en curso)
 
 ### Estado al 17/11 en la mañana (después de dos caídas de WSL)
 
@@ -20,7 +20,7 @@ Se actualiza al cerrar cada tramo de trabajo. La versión anterior queda en el h
 | A. Registrador | Hecho: `make registrador` PASS (478 celdas, 10 de 10 semillas, 7 de 7 controles negativos, bitstream ruteado simulado); en el checklist del 26/11 | `docs/registrador.md`, `bitstreams/registrador.bin` |
 | B. Generador | Cerrado (T131): ninguna candidata mejora en todo; la salida a +0,5 pasa solo contra un campo de reversiones, condicionada al 26/11 | `docs/generador_b.md` |
 
-Lo pesado corre de a un trabajo por vez con una cola global (`flock`), revisando el espacio libre antes de cada uno. `main` no se pudo avanzar a `integra-noche` (CI en verde) porque esta sesión no tiene permiso para empujar a `main`.
+Lo pesado corre de a un trabajo por vez con una cola global (`flock`), revisando el espacio libre antes de cada uno. `main` todavía no avanza a `integra-noche`: lo hace Nicolás. Desde el 17/11 en la tarde la integración continua no corre (GitHub no inicia los trabajos por la facturación de la cuenta); mientras tanto las mismas pruebas se corren en la máquina.
 
 ### Resultado de la tarea prioritaria: la regla `zscore` de Vicente
 
@@ -45,9 +45,9 @@ Rama `archivo-ramas`. Decisiones T124 (confirmada), T125, T126 y T127. Bitácora
 - **Frecuencia del segmentado.** No es un cambio de diseño. El salto está en `c293cf4` (tabla y vigilante en `pochoco_soc.v`); la equivalencia formal entre el SoC de P1 y el actual pasa, y Yosys entrega otra netlist equivalente que nextpnr rutea peor (mediana 53,45 MHz antes y 47,88 después, 40 semillas, sin solapamiento). El mismo RTL leído en diez órdenes da medianas de 47,88 a 53,59 MHz. La tabla de co-diseño y el informe usan el valor actual (45,34 y 47,20) y dicen que diferencias de unos 6 MHz entre variantes no se atribuyen al diseño; el informe toma esas cifras de `make report`. `make p7-caida-seg`. T127.
 - **Respuesta del profesor.** El 16/11 confirmó en persona que se puede modificar lo que uno quiera y que el Espino multihilo está bien. El barrel puede competir sin depender de una respuesta pendiente; la reconfiguración durante una ronda queda cubierta por la respuesta general, sin confirmación específica. Árbol, checklist del 26/11, banco de preguntas (9, 68, 125 y 154) y documentos de estudio al día. T126.
 
-## Resumen del trabajo autónomo del 16/11 (para Nicolás)
+## Resumen del trabajo del 16/11
 
-Los diez puntos de la lista, en orden. El detalle de cada uno está en el tramo 13, más abajo. Las decisiones y acciones que te tocan están en `docs/pendientes_nicolas.md`.
+Los diez puntos de la lista, en orden. El detalle de cada uno está en el tramo 13, más abajo. Las decisiones y acciones de Nicolás están en `docs/pendientes_nicolas.md`.
 
 ### Qué quedó hecho
 
@@ -65,11 +65,11 @@ Los diez puntos de la lista, en orden. El detalle de cada uno está en el tramo 
 ### Qué falló o quedó a medias
 
 - **El ASIC del barrel con el fondo (punto 9)**. Exige portar el SoC al flujo del Proyecto 3 (banco de registros de 4 contextos y memorias a flip-flops) y una corrida de LibreLane de más de una hora. No alcanzó con lo anterior cerrado a tiempo.
-- **Dos errores míos, corregidos y probados**: un barrido de `retune` borró la carpeta de una simulación que estaba corriendo (se rehízo entera), y el primer cambio de las listas de fuentes partía el comando de Yosys en la integración continua (se corrigió y se repitió todo).
+- **Dos errores del trabajo, corregidos y probados**: un barrido de `retune` borró la carpeta de una simulación que estaba corriendo (se rehízo entera), y el primer cambio de las listas de fuentes partía el comando de Yosys en la integración continua (se corrigió y se repitió todo).
 - **La frecuencia mínima del segmentado bajó de 51,6 a 45,3 MHz** desde P1. Investigado en el tramo 14: es de la síntesis, no del diseño (T127).
 - Nada se probó en la placa: eso lo haces tú (`docs/pendientes_nicolas.md`).
 
-### Pendientes tuyos (detalle en `docs/pendientes_nicolas.md`)
+### Pendientes de Nicolás (detalle en `docs/pendientes_nicolas.md`)
 
 1. Usuarios de GitHub de Santiago, del profesor y de los ayudantes, para invitarlos el 29/11.
 2. Confirmar los números del PMOD antes del 26/11.
@@ -125,9 +125,9 @@ Rama `p7-codiseno`, desde `integra-p4` (`cb5571a`). Bitácora: `docs/bitacora/p7
 1. **Integrar `p7-codiseno`** en `main` cuando se cierren T87 a T99: solo agrega archivos, la opción del gemelo y objetivos al Makefile.
 2. **El informe (P9)** puede citar todo con `\input{cifras.tex}`.
 
-## Tramo 13: trabajo autónomo del 16/11
+## Tramo 13: lista de diez puntos del 16/11
 
-Nicolás dejó una lista de diez puntos para trabajar sin él. Cada punto se cierra aquí con lo hecho, lo medido y lo que falta. Las decisiones que necesitan su opinión van en `docs/pendientes_nicolas.md`.
+Nicolás fijó una lista de diez puntos. Cada punto se cierra aquí con lo hecho, lo medido y lo que falta. Las decisiones que necesitan su opinión van en `docs/pendientes_nicolas.md`.
 
 ### Punto 1: `p4-gemelo` integrada en `main`
 

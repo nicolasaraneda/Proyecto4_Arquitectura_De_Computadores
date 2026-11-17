@@ -2,7 +2,7 @@
 
 Cada bitstream que puede llegar a la placa queda aquí con su hash, el commit del que salió y las pruebas que pasó. `SHA256SUMS` se comprueba con `sha256sum -c SHA256SUMS` desde esta carpeta.
 
-Los dos primeros usan la regla base, que `trade.s` corrió hasta el 15/11. Desde entonces `make bin` produce R0.
+Los dos primeros usan la regla base, que `trade.s` corrió hasta el 15/11. Desde entonces `make bin` construye el diseño de R0, pero no el mismo archivo byte por byte: los cambios de `rtl/*.v` de P5 movieron la ubicación. El archivo que vale es el guardado aquí, el que pasó las puertas; `make r0-reproducir` lo reconstruye igual desde su commit.
 
 Regla del proyecto: el bitstream de la competencia solo puede contener hardware que haya pasado por la maestra real el 26/11.
 
@@ -70,3 +70,5 @@ make autoprueba-r2    # build/autoprueba/r2/: autoprueba_r2_multi.bin, relevo_r2
 ```
 
 Se copiaron a esta carpeta con su nombre y `SHA256SUMS` se rehízo con `sha256sum *.bin moldes/*`. Los tres archivos de R2 tienen dos imágenes y ocupan 64 600 bytes: se graban con `iceprog -b`, igual que `r2_multi.bin`.
+
+`registrador.bin` (17/11) no es un peldaño: escucha el SPI de la maestra, responde siempre mantener y manda cada precio por la UART, para registrar la serie del 26/11 (`docs/registrador.md`). 478 celdas, ninguna BRAM, 10 de 10 semillas (`make registrador`).
