@@ -99,6 +99,8 @@ def rtl(args):
     c = re.sub(r'SERIE      = "[^"]*";', f'SERIE      = "{ruta}";', c)
     c = re.sub(r"PERIODO_NS = [0-9]*;", f"PERIODO_NS = {per};", c)
     c = re.sub(r"NTICKS     = [0-9]*;", f"NTICKS     = {nticks};", c).replace('"decisiones.csv"', f'"{d}/tb.csv"')
+    # el arreglo de la serie del oficial tiene 20 000 precios fijos (tb/tb_proyecto_4.sv:37)
+    c = c.replace("int precio [20000];", "int precio [NTICKS];")
     open(f"{d}/tb_p4.sv", "w").write(c)
     fuentes = [f"rtl/{f}" for f in sorted(os.listdir(os.path.join(RAIZ, "rtl"))) if f.endswith(".v") and not f.startswith("00_")] + \
         [f"rtl/espino_core/{f}" for f in sorted(os.listdir(os.path.join(RAIZ, "rtl/espino_core"))) if f.endswith(".v")]

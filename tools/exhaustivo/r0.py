@@ -23,6 +23,7 @@ Salida: docs/mediciones/noche/exhaustivo_r0.txt
 import argparse
 import os
 import random
+import re
 import subprocess
 import sys
 import time
@@ -79,20 +80,46 @@ def gemelo_serie(args):
 
 
 def rtl_serie(args):
-    ruta, periodo, nticks, etiqueta = args
-    env = dict(os.environ, SIM="verilator")
-    r = subprocess.run(["tools/equiv.sh", etiqueta, str(periodo), str(nticks), ruta], cwd=RAIZ, env=env,
-                       capture_output=True, text=True)
-    salida = (r.stdout.strip().splitlines() or ["FAIL sin salida"])[-1]
-    d = os.path.join(RAIZ, "build", "equiv", etiqueta)
-    log = open(os.path.join(d, "tb.log")).read() if os.path.exists(os.path.join(d, "tb.log")) else ""
-    cuatro = "Testbenchs aprobados: 4/4" in log
-    decisiones = (os.path.exists(os.path.join(d, "tb.csv")) and os.path.exists(os.path.join(d, "ref.csv")) and
-                  columnas_decision(os.path.join(d, "tb.csv")) == columnas_decision(os.path.join(d, "ref.csv")))
-    if cuatro and decisiones and not salida.startswith("PASS"):
-        salida = f"PASS {etiqueta}: 4/4 y bytes de decision identicos a ref/trader.py en {nticks} ticks (el patrimonio de 32 bits del testbench se desborda en esta serie)"
-    return ruta, nticks, cuatro and decisiones, salida
+    """La serie por el RTL con Verilator, con una copia del testbench oficial.
 
+    La copia cambia las cinco líneas de tools/equiv.sh (programa, serie, período, largo y
+    archivo de salida) y una más: el arreglo de la serie, que en el oficial tiene 20 000
+    precios fijos (tb/tb_proyecto_4.sv:37). Con series más largas Verilator escribe fuera
+    del arreglo y el testbench manda otros precios: así falló la primera corrida.
+    """
+    ruta, periodo, nticks, etiqueta = args
+    d = os.path.join(RAIZ, "build", "exhaustivo", "rtl_r0", etiqueta)
+    os.makedirs(d, exist_ok=True)
+    tb = open(os.path.join(RAIZ, "tb", "tb_proyecto_4.sv")).read()
+    c = re.sub(r'PROGRAMA   = "[^"]*";', 'PROGRAMA   = "sw/trade.hex";', tb)
+    c = re.sub(r'SERIE      = "[^"]*";', f'SERIE      = "{ruta}";', c)
+    c = re.sub(r"PERIODO_NS = [0-9]*;", f"PERIODO_NS = {periodo};", c)
+    c = re.sub(r"NTICKS     = [0-9]*;", f"NTICKS     = {nticks};", c)
+    c = c.replace("int precio [20000];", "int precio [NTICKS];").replace('"decisiones.csv"', f'"{d}/tb.csv"')
+    cambiadas = sum(1 for a, b in zip(tb.splitlines(), c.splitlines()) if a != b)
+    if cambiadas != 6:
+        return ruta, nticks, False, f"FAIL {etiqueta}: la copia del testbench cambia {cambiadas} lineas (se esperaban 6)"
+    open(f"{d}/tb_p4.sv", "w").write(c)
+    fuentes = [f"rtl/{f}" for f in sorted(os.listdir(os.path.join(RAIZ, "rtl"))) if f.endswith(".v") and not f.startswith("00_")] + \
+        [f"rtl/espino_core/{f}" for f in sorted(os.listdir(os.path.join(RAIZ, "rtl/espino_core"))) if f.endswith(".v")]
+    celdas = subprocess.run(["yosys-config", "--datdir"], capture_output=True, text=True).stdout.strip() + "/ice40/cells_sim.v"
+    if subprocess.run(["verilator", "--binary", "--timing", "-Wno-fatal", "-Wno-lint", "-Wno-style", "--top-module", "tb_proyecto_4",
+                       "-DNO_ICE40_DEFAULT_ASSIGNMENTS", "-O3", "--Mdir", f"{d}/obj", "-o", "sim", celdas, *fuentes, f"{d}/tb_p4.sv"],
+                      cwd=RAIZ, capture_output=True).returncode:
+        return ruta, nticks, False, f"FAIL {etiqueta}: Verilator no compila"
+    sal = subprocess.run([f"{d}/obj/sim"], cwd=RAIZ, capture_output=True, text=True).stdout
+    subprocess.run([sys.executable, "ref/trader.py", ruta, "--nticks", str(nticks), "--periodo-ns", str(periodo),
+                    "-o", f"{d}/ref.csv"], cwd=RAIZ, capture_output=True)
+    m = re.search(r"Testbenchs aprobados: (\d+)/(\d+)", sal)
+    pc = re.search(r"Peor caso precio->decision: (\d+) ciclos \(disponibles: (\d+)\)", sal)
+    cuatro = bool(m) and m.group(1) == m.group(2) == "4"
+    iguales = os.path.exists(f"{d}/tb.csv") and columnas_decision(f"{d}/tb.csv") == columnas_decision(f"{d}/ref.csv")
+    completo = iguales and open(f"{d}/tb.csv", "rb").read() == open(f"{d}/ref.csv", "rb").read()
+    txt = (f"{'PASS' if cuatro and iguales else 'FAIL'} {etiqueta}: {nticks} ticks a {periodo} ns, {m.group(0) if m else '?'}, "
+           f"peor caso {pc.group(1) if pc else '?'} de {pc.group(2) if pc else '?'} ciclos, bytes de decision "
+           f"{'identicos' if iguales else 'DISTINTOS'} a ref/trader.py"
+           + ("" if completo or not iguales else " (la contabilidad de 32 bits del testbench se desborda en esta serie)"))
+    return ruta, nticks, cuatro and iguales, txt
 
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
