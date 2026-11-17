@@ -12,22 +12,27 @@
 # en bitstreams/contingencia/<umbrales>/ con su SHA256SUMS. Así el 1/12 no hay
 # que esperar los 40 minutos de la simulación.
 #
-# Uso: tools/p8/contingencia.sh   (o make contingencia). Unos 45 minutos.
+# Uso: tools/p8/contingencia.sh   (o make contingencia). Unos 45 minutos por juego, PARALELO a la vez
+# (3 por defecto). JUEGOS="comision:caja:carpeta ..." para construir solo algunos.
 set -euo pipefail
 cd "$(dirname "$0")/../.."
 O=bitstreams/contingencia
 mkdir -p "$O"
 # comisión caja -> carpeta (los umbrales que elige retune; se comprueba abajo)
-JUEGOS="20:10000:e7_s4 50:10000:e16_s4 50:100000:e16_s3"
+JUEGOS=${JUEGOS:-"20:10000:e7_s4 50:10000:e16_s4 50:100000:e16_s3 20:5000:e7_s3 20:20000:e10_s4 15:10000:e4_s1 10:2000:e3_s1 15:2000:e3_s2"}
+PARALELO=${PARALELO:-3}
 make -s build/gemelo fondo-hex > /dev/null
 pids=""
+fallas=0
+n_act=0
 for j in $JUEGOS; do
   IFS=: read -r c k n <<< "$j"
   python3 tools/retune.py --comision "$c" --caja "$k" --simular > "build/contingencia_$n.log" 2>&1 &
   pids="$pids $!"
+  n_act=$((n_act + 1))
+  if [ "$n_act" -ge "$PARALELO" ]; then wait -n || fallas=$((fallas + 1)); n_act=$((n_act - 1)); fi
 done
-fallas=0
-for p in $pids; do wait "$p" || fallas=$((fallas + 1)); done
+while [ "$n_act" -gt 0 ]; do wait -n || fallas=$((fallas + 1)); n_act=$((n_act - 1)); done
 for j in $JUEGOS; do
   IFS=: read -r c k n <<< "$j"
   d=build/retune/c${c}_k${k}_n2000
