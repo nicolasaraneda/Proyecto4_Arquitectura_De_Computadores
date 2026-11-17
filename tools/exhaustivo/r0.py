@@ -148,16 +148,15 @@ def main(argv=None):
         lineas.append("FAIL sw/trade.hex no corresponde a sw/trade.s")
     # 1. cobertura con la referencia
     datos = [(leer_csv(r), perd) for r in largas] + [(s, perd) for s in esquina]
+    # Se acumula a medida que llega cada serie: guardar los mapas de bits de las 15 834
+    # series a la vez ocupaba unos 8 GB.
+    acumulado, pasos = 0, 0
     with Pool(a.jobs * 2) as pool:
-        res = pool.map(cobertura, datos)
-    total = bytearray(len(res[0][0]))
-    pasos = 0
-    for v, n in res:
-        pasos += n
-        for i, b in enumerate(v):
-            if b:
-                total[i] |= b
-    cubiertas = sum(bin(b).count("1") for b in total)
+        for v, n in pool.imap_unordered(cobertura, datos, chunksize=16):
+            acumulado |= int.from_bytes(v, "little")
+            pasos += n
+    total = acumulado.to_bytes((SMAX + 1) * 2 * 32, "little")
+    cubiertas = bin(acumulado).count("1")
     # alcanzables: se recalculan aquí por anchura, independiente del generador
     alc = set(2 * 32 * p0 for p0 in range(1, 256))
     cola = list(alc)

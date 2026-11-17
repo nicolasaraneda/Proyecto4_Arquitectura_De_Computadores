@@ -156,23 +156,23 @@ def main(argv=None):
               f"Generado por tools/exhaustivo/r1.py {' '.join(argv if argv is not None else sys.argv[1:])}.",
               f"{len(largas)} series largas y {len(esquina)} cortas de tools/exhaustivo/r0_cubrir.c, {sum(map(len, datos))} ticks. "
               f"Periodo {per} ns: se pierden {perd} precios en el reset.", ""]
+    # Se acumula a medida que llega cada serie: guardar los cuatro mapas de bits de las
+    # 15 834 series a la vez ocupaba más de 30 GB (así se detuvo la segunda corrida).
+    acum = [0, 0, 0, 0]
+    votos = set()
     with Pool(a.jobs * 2) as pool:
-        res = pool.map(cobertura, [(d, perd) for d in datos], chunksize=1)
+        for vs, vot in pool.imap_unordered(cobertura, [(d, perd) for d in datos], chunksize=16):
+            for h in range(4):
+                acum[h] |= int.from_bytes(vs[h], "little")
+            votos |= vot
     q = fondo.Fondo().q
     reglas = [("supervisor (max_media)", q["S_ENTRA"], q["S_SALE"]), ("gestor 1", q["G1_ENTRA"], q["G1_SALE"]),
               ("gestor 2", q["G2_ENTRA"], q["G2_SALE"]), ("gestor 3", q["G3_ENTRA"], q["G3_SALE"])]
-    votos = set()
-    for _, v in res:
-        votos |= v
     lineas.append("1. Cobertura contada con ref/fondo.py (combinaciones (S, pos, p) de cada hilo contra las alcanzables con sus umbrales):")
     for h, (nombre, e, s) in enumerate(reglas):
-        total = bytearray(len(res[0][0][h]))
-        for v, _ in res:
-            for i, b in enumerate(v[h]):
-                if b:
-                    total[i] |= b
         alc = alcanzables(e, s)
-        cub = sum(1 for i in range(len(total) * 8) if (total[i >> 3] >> (i & 7)) & 1 and (i >> 8) in alc)
+        total = acum[h].to_bytes(8161 * 2 * 32, "little")
+        cub = sum(1 for est in alc for p in range(1, 256) if (total[((est << 8) | p) >> 3] >> (p & 7)) & 1)
         lineas.append(f"   {nombre:24s} entra {e:5d}, sale {s:3d}: {cub} de {len(alc) * 255} ({100 * cub / (len(alc) * 255):.2f} %)")
     pesos = {v[3] for v in votos}
     lineas.append(f"   Votos de los tres gestores por pesos que llegaron a la decision: {len(votos)} combinaciones distintas "
