@@ -44,7 +44,7 @@ La prueba se hizo dos veces. La primera corrida (madrugada del 17/11) llegó has
 | 21 | `:88` | `make algoritmo` | | No corrido | | Documentado en unos 3 minutos (`docs/comandos.md:20`); reescribe 13 archivos de `docs/mediciones/`. Ver sección 4. |
 | 22 | `:95` | `cd bitstreams && sha256sum -c SHA256SUMS && cd ..` | 2.ª | Funciona | < 0,1 s | Los 12 archivos dicen OK. |
 | 23 | `:96` y `:97` | `iceprog bitstreams/r1_fondo.bin`; `iceprog -b bitstreams/r2_multi.bin` | | No ejecutable en este entorno | | Necesita la placa conectada por USB (y `usbipd` en WSL). |
-| 24 | `:105` | `make bin` | | (en la cola) | | |
+| 24 | `:105` | `make bin` | 2.ª | Funciona | 5,5 s | Yosys, nextpnr e icepack; 42,49 MHz con la semilla por defecto (pasa a 25 MHz); 2 advertencias por las restricciones `i_UART_RX` y `o_UART_TX` de `goboard.pcf` sin uso. El `.bin` (sha256 `4c1d845f...`) **no es** el `bitstreams/r0_base_max_media.bin` guardado (`67f6f1c4...`, 44,6 MHz). Ver H7. |
 | 25 | `:106` | `make prog` | | No ejecutable en este entorno | | Llama a `iceprog`. |
 | 26 | `:107` | `make r0-reproducir` | | No corrido | | Ver sección 4. |
 | 27 | `:108` | `make fondo-bitstreams` | | (en la cola) | | Documentado en unos 25 minutos en el `Makefile` (comentario sobre el objetivo); el README no lo dice. |
@@ -66,6 +66,7 @@ Los comandos de las secciones "Piezas" del README (`:119` a `:185`) que no apare
 | H4 | Sugerencia | `README.md:68`, `:185` | Correr las pruebas deja el árbol modificado: `make fondo-oficial HW=r1` reescribe `docs/mediciones/fondo/r1/oficial.txt` (cambia solo la línea del commit) y `make report` reescribe `informe/generado/peldano.tex` (cambia solo el commit impreso). Un alumno que siga el README termina con archivos versionados cambiados sin haber tocado nada. | Escribir esas salidas en `build/` y copiarlas a `docs/` solo con un objetivo explícito, o no registrar el commit en archivos versionados. |
 | H5 | Sugerencia | `README.md:73` | "`make equiv`: R0 contra la referencia, byte a byte, en los 20 000 ticks a los tres períodos". Según el `Makefile` (objetivos `equiv-gemelo-20k`, `equiv-verilator`, `equiv-r1`), los 20 000 ticks a 10 ms solo se corren en el gemelo digital; por el RTL son 20 ticks a 10 ms con Icarus. | "a 0,1 ms y 1 ms por el RTL, y a los tres períodos en el gemelo". |
 | H6 | Sugerencia | `README.md:48` frente a `docs/fondo.md:390` | El README dice bien que OSS CAD Suite tiene que estar en el `PATH` (y con eso todo funcionó con un `PATH` limpio), pero `docs/fondo.md:390` dice que "los scripts agregan OSS CAD Suite al `PATH`", lo que ya no es cierto. Un lector que llegue por ese documento no lo exportaría. | Corregir `docs/fondo.md:390`. |
+| H7 | Sugerencia | `README.md:105` y `bitstreams/README.md:5` | "`make bin` # R0 ... deja build/pochoco_soc.bin" y "Desde entonces `make bin` produce R0". Con las fuentes actuales `make bin` da el mismo diseño, pero no el mismo archivo: otro sha256 y otra frecuencia (42,49 contra 44,6 MHz), porque desde el commit `c293cf4` Yosys recibe más archivos y entrega otra netlist equivalente (`docs/mediciones/p7/caida_segmentado.txt`). Un alumno que compare con `SHA256SUMS` creerá que algo salió mal. El README sí dice que la copia exacta sale de `make r0-reproducir` (`:107`). | Decir en `:105` que el `.bin` no coincide byte a byte con el guardado y que para la placa se usa `bitstreams/r0_base_max_media.bin` o `make r0-reproducir`. |
 
 Positivo: con un `PATH` limpio y solo la línea `export` del README, todas las herramientas se encontraron; no hizo falta ninguna variable de entorno adicional, ningún repositorio hermano ni acceso a la red fuera del `git clone`. Los resultados coinciden con lo que el README y las mediciones guardadas dicen (4/4, 9 661, 25 973, 443 ciclos, 62 cifras).
 
@@ -97,7 +98,7 @@ Por la regla de esta auditoría (los comandos pesados se corren de a uno por la 
 
 ## 5. Resumen
 
-- Comandos distintos corridos: 20 (12 en la primera corrida y 16 en la segunda, 8 de ellos repetidos). Funcionaron todos menos uno.
+- Comandos distintos corridos: 21 (12 en la primera corrida y 17 en la segunda, 8 de ellos repetidos). Funcionaron todos menos uno.
 - Comando que falló: `python3 tools/pochoasm.py sw/fondo.s -o build/fondo/fondo.hex` (`README.md:56`), en las dos corridas.
-- Hallazgos: 1 error (H1) y 5 sugerencias (H2 a H6).
+- Hallazgos: 1 error (H1) y 6 sugerencias (H2 a H7).
 - No corridos: 26 comandos del README, por la regla de la cola; 3 no ejecutables en este entorno.
