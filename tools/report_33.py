@@ -144,9 +144,11 @@ def punto_33(c, peldano, tabla, num, leer):
         for a in asic:
             fila.append(num(float(a[k]) / 1e6, 3) if k == "dado_um2" else f(a[k], d))
         filas.append(fila)
-    tabla(os.path.join(G, "t33asic.tex"), ["", "Espino base", "Segmentado"], filas, "lrr",
-          "Flujo LibreLane en GF180MCU, esquina típica, 25 MHz. Fuente: \\texttt{docs/mediciones/p7/asic.txt} y "
-          "\\texttt{docs/mediciones/asic/}.")
+    nombres = {"base": "Espino base", "seg": "Segmentado", "barrel_r1": "Barrel (R1)"}
+    tabla(os.path.join(G, "t33asic.tex"), [""] + [nombres[a["core"]] for a in asic], filas, "l" + "r" * len(asic),
+          "Flujo LibreLane en GF180MCU, esquina típica, 25 MHz. El base y el segmentado ejecutan \\texttt{sw/trade.s}; "
+          "el barrel, \\texttt{sw/fondo.s} con los cuatro hilos. Fuente: \\texttt{docs/mediciones/p7/asic.txt}, "
+          "\\texttt{docs/mediciones/asic/} y \\texttt{asic/mediciones/}.")
 
     # Figura y macros de P7
     shutil.copyfile(os.path.join(P7, "roofline.tex"), os.path.join(G, "roofline.tex"))
