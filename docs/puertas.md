@@ -93,7 +93,7 @@ Lo propio de R2:
 
 - El vigilante no se disparó en ninguna corrida sana, y su cuenta nunca pasó de 1 (el disparo necesita 5).
 - Con el supervisor colgado a propósito, `BOOT` sube al terminar la quinta transacción sin respuesta, con `CS_n` en alto y `S1 S0 = 01`, en el RTL y dentro del bitstream simulado desde su `.asc`.
-- El relevo completo (R2, reconfiguración y R0) coincide byte por byte con lo esperado en 130 simulaciones (`make vig-relevo`). A 0,1 ms son 536 ticks sin decisión nueva, con los 53 ms de la hoja de datos, que no están medidos en la placa.
+- El relevo completo (R2, reconfiguración y R0) coincide byte por byte con lo esperado en las simulaciones de `make vig-relevo`. Con los 35,50 ms de reconfiguración medidos en la placa el 16/11 son 361 ticks sin decisión nueva a 0,1 ms, 40 a 1 ms y 8 a 10 ms (con los 53 ms de la hoja de datos eran 536, 58 y 10).
 - La imagen múltiple tiene los vectores de arranque correctos y las dos imágenes copiadas sin cambios (`tools/ver_multi.py`).
 
 Notas:
@@ -105,3 +105,17 @@ Notas:
 - **Un bitstream cambiado con `icebram`** (otra tabla u otro programa) no hereda esta puerta: hay que simularlo desde su `.asc` antes de grabarlo.
 
 Las mediciones del paquete P3, con la tabla todavía en la memoria de datos, quedaron en `docs/mediciones/fondo/p3/`.
+
+## Puerta de placa
+
+La corre Nicolás con las autopruebas de P6 (`docs/autoprueba.md`, secciones 5, 9 y 10). Lo que informó del 16/11 está copiado en `docs/mediciones/placa_16nov.md`.
+
+| Criterio | R0 | R1 | R2 |
+|----------|----|----|----|
+| 1. Firma a 0,1 ms | "3C" con LED2 y LED3 (mitad baja, vista antes); falta la mitad alta, "A2" con SW4 | **Pendiente** | **PASS**: "D7" con LED1 a LED3, LED4 apagado |
+| 1. Firma a 1 ms y 10 ms | "3C" con LED2 y LED3 en los dos; falta "A2" | **Pendiente** | **Pendiente** |
+| 2. Sin relevo en media hora | No aplica | No aplica | **PASS**: al final "D7" con LED1 a LED3 y "15" con SW4, sin disparo |
+| 2. Relevo al inyectar la falla | No aplica | No aplica | **Parcial**: la UART midió un hueco de 35,50 ms, así que hubo reconfiguración, pero no se anotó si apareció la imagen testigo (cuatro LED y "--"). El eco vuelve con cualquiera de las dos imágenes: solo la testigo prueba que cargó la imagen 1 |
+| Tiempo del relevo | No aplica | No aplica | 35,50 ms (35,42 a 35,59), una medición de tres pedidas |
+
+Ningún peldaño pasó todavía la puerta de placa completa. A R2 le falta la firma a 1 ms y 10 ms y ver la testigo después del relevo; a R1 las tres firmas; a R0 la mitad alta de su firma. La lista con los comandos está en `docs/pendientes_nicolas.md`.

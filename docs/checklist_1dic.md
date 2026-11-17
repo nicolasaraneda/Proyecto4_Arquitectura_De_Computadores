@@ -58,6 +58,8 @@ Hacerlo público no es la opción: a las 10:00 los demás grupos todavía no han
 
 Se graba con `iceprog bitstreams/ARCHIVO.bin` (Nicolás, con la placa conectada a WSL por `usbipd`); las imágenes múltiples (`r2_multi.bin` y las `*_multi.bin`) con `iceprog -b`, que borra la flash entera. Al terminar debe decir "VERIFY OK".
 
+Con los cables del PMOD puestos y la maestra encendida, desconectar y conectar el USB de la Go Board antes de la primera ronda: los pines del SPI no tienen pull-up, y así la FPGA parte de cero con las líneas ya conducidas por la maestra (`docs/checklist_26nov.md`, sección 2).
+
 ## 4. Durante la competencia
 
 - **Entre rondas no se reprograma** si todo funciona: los tres peldaños pasaron las rondas seguidas sin reset en la matriz de estrés, con los tres períodos en los dos órdenes.

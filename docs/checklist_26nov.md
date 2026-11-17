@@ -40,6 +40,8 @@ La Go Board se conecta a la maestra por el PMOD (pines del `goboard.pcf` del cur
 
 Verificar los números del PMOD con el ayudante antes de conectar. **La tierra se conecta primero.** No se conecta 3,3 V entre placas: cada una se alimenta por su USB.
 
+**Con los cables puestos y la maestra encendida, desconectar y conectar el USB de la Go Board antes de la primera ronda de cada peldaño.** Los pines del SPI no tienen pull-up: con los cables sueltos pueden captar ruido y el SoC recibiría precios falsos que quedan en su media. Al reconectar, la FPGA se configura de nuevo desde la flash y parte de cero con las líneas ya conducidas por la maestra (`docs/mediciones/placa_16nov.md`). Sin maestra, `r1_fondo.bin` debe mostrar "00" con los cuatro LED apagados.
+
 ## 3. Medir el SPI real con el medidor (primera prueba, unos 10 minutos)
 
 Es lo primero porque decide entre R0 y R1 (regla 3 del árbol). `medidor_spi.bin` no tiene el SoC: escucha la maestra, responde siempre `0x00` (mantener) y muestra lo que mide en los 7 segmentos (`rtl/medidor/medidor_spi.v`).
@@ -90,7 +92,7 @@ Si la serie no es conocida: en las series de práctica R0 y R1 escriben los mism
 `bitstreams/r2_falla_multi.bin` es R2 con el supervisor colgado a propósito en el tick 100 y R0 de respaldo: a los 100 precios deja de escribir `DECISION`, el vigilante dispara al quinto precio sin respuesta y la placa pasa a R0. Su `.asc` es el mismo que la puerta de simulación de R2 probó por los pines (`make r2-falla`).
 
 1. `iceprog -b bitstreams/r2_falla_multi.bin` y correr la ronda 3.
-2. Anotar cuántos ticks quedó nuestro grupo sin decisión nueva según la maestra, y filmar la placa en cámara lenta. La predicción, con los 53 ms de la hoja de datos, es de unos 536 ticks a 0,1 ms (5 sin respuesta que esperan al vigilante y 531 de reconfiguración), unos 58 a 1 ms y unos 10 a 10 ms. Si antes se midió el tiempo del relevo en la placa (`docs/autoprueba.md`, sección 10), `python3 tools/medir_relevo.py --traducir MS` da la predicción con ese tiempo.
+2. Anotar cuántos ticks quedó nuestro grupo sin decisión nueva según la maestra, y filmar la placa en cámara lenta. La predicción, con los 35,50 ms medidos en la placa el 16/11 (`docs/mediciones/placa_16nov.md`), es de 361 ticks a 0,1 ms (5 sin respuesta que esperan al vigilante y 356 de reconfiguración y reset), 40 a 1 ms y 8 a 10 ms. Con los 53 ms de la hoja de datos eran 536, 58 y 10. Si se repite la medición, `python3 tools/medir_relevo.py --traducir MS` da la predicción con el nuevo tiempo.
 3. Anotar qué hace la maestra mientras la FPGA se reconfigura (MISO queda con pull-up: se espera que lea `0xFF`, que es mantener) y que, después, R0 opere normalmente.
 
 Reconfigurar durante una ronda está cubierto por la respuesta general del profesor del 16/11 (cualquier decisión de diseño es válida), sin una confirmación específica (T126). Solo si el ayudante lo prohíbe de forma explícita, R2 no compite (árbol, regla 5) y esta prueba se salta.

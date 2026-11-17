@@ -109,6 +109,9 @@ export -f correr; export D TV SERIE VIG_N PYTHON TABLA_HEX
 #          que empieza la fase 2, y ese flanco llega 1500 ns después del
 #          comienzo de la transacción).
 CORTE=$(seq 1991340 500 2000840)
+# Tiempo de reconfiguración medido en la placa por el eco de la UART el 16/11
+# (docs/mediciones/placa_16nov.md): 35,50 ms, una medición.
+T_MEDIDO=${T_MEDIDO:-35500000}
 RESET=$(seq 2027660 20 2028460)
 if [ $SIM_OK = 1 ] && [ $PROG_OK = 1 ]; then
   {
@@ -118,6 +121,9 @@ if [ $SIM_OK = 1 ] && [ $PROG_OK = 1 ]; then
     echo "f100_r1     100 160   10000000 4000 53000000"
     echo "f3_r3       3   700   100000   4000 53000000"
     echo "f100_r3_10  100 800   100000   4010 53000000"
+    echo "med_r3      100 800   100000   4000 $T_MEDIDO"
+    echo "med_r2      100 250   1000000  4000 $T_MEDIDO"
+    echo "med_r1      100 160   10000000 4000 $T_MEDIDO"
     echo "f100_corto  100 300   100000   4000 2000000"
     echo "f1_corto    1   200   100000   4000 2000000"
     for t in $CORTE; do echo "corte_$t 3 60 100000 4000 $t --breve"; echo "corte10_$t 3 60 100000 4010 $t --breve"; done
@@ -149,7 +155,8 @@ barrido() {
   echo "Imagen 1: pochoco_soc sin definiciones (Espino base) con sw/trade.hex (sha256 $(sha256sum sw/trade.hex | cut -c1-16)...)."
   echo "Serie: $SERIE. Referencia: tools/vigilante/relevo_ref.py, con ref/fondo.py y ref/trader.py."
   echo "Modelo de la reconfiguracion: desde BOOT y durante T_RECONF el pin MISO vale 1 (pull-up) y"
-  echo "ningun SoC tiene reloj. T_RECONF = 53 ms es el valor estimado con la hoja de datos, sin medir."
+  echo "ningun SoC tiene reloj. T_RECONF = 53 ms es el valor tipico de la hoja de datos; $T_MEDIDO ns es el"
+  echo "medido en la placa el 16/11 por el eco de la UART (docs/mediciones/placa_16nov.md, una medicion)."
   echo "Las transacciones se cuentan desde 0. La maestra usa los tiempos del testbench oficial."
   echo
   echo "=== 0. Preparacion ==="
@@ -172,6 +179,10 @@ barrido() {
     titulo "falla en el tick 100, T = 10 ms (ronda 1), 160 ticks" f100_r1
     titulo "falla temprana, tick 3, T = 0,1 ms, 700 ticks" f3_r3
     titulo "falla en el tick 100, T = 0,1 ms, maestra corrida 10 ns (INICIO_NS = 4010)" f100_r3_10
+    echo "=== 2b. Relevos con T_RECONF = $T_MEDIDO ns, medido en la placa el 16/11 ==="
+    titulo "falla en el tick 100, T = 0,1 ms (ronda 3), 800 ticks" med_r3
+    titulo "falla en el tick 100, T = 1 ms (ronda 2), 250 ticks" med_r2
+    titulo "falla en el tick 100, T = 10 ms (ronda 1), 160 ticks" med_r1
     echo "=== 3. Relevos con T_RECONF = 2 ms ==="
     titulo "falla en el tick 100, T = 0,1 ms, 300 ticks" f100_corto
     titulo "el programa no escribe nunca (falla en el tick 1), T = 0,1 ms, 200 ticks" f1_corto
