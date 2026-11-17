@@ -1,0 +1,33 @@
+# Configuración de LibreLane para el macro ASIC del fondo en un chip (R1), edición de
+# exhibición. Grupo: Nicolás Araneda, Vicente Calderón y Santiago Muñoz.
+# Arquitectura de Computadores, Universidad de los Andes, 2026-2.
+#
+# Copia de factibilidad/g_asic/config.yaml (la del Espino base y el segmentado, que
+# viene de asic/rom/config.yaml del Proyecto 3). Cambian el diseño, las fuentes y los
+# parámetros; las perillas del flujo son las mismas. Se corre con
+# asic/scripts/correr.sh, que elige la extensión (Xd) y el período.
+DESIGN_NAME: asic_top_barrel
+PDK: gf180mcuD
+# El core, los periféricos y el esclavo SPI son los archivos de rtl/ del
+# repositorio, sin copiar. Las cuatro copias modificadas están en rtl/ de esta
+# carpeta (ver README.md) y la ROM del programa se genera desde sw/trade.s
+# (scripts/fuentes.sh, función generar_rom).
+VERILOG_FILES:
+  - dir::rtl/asic_top_barrel.v
+  - dir::rtl/pochoco_soc_asic_barrel.v
+  - dir::rtl/espino_barrel_regfile.v
+  - dir::../factibilidad/g_asic/rtl/pochoco_mem_asic.v
+  - dir::../rtl/pochoco_periph.v
+  - dir::../rtl/pochoco_spi_slave.v
+  - dir::../rtl/espino_core/espino_alu.v
+  - dir::../rtl/espino_core/espino_decoder.v
+  - dir::../rtl/espino_core/espino_load_store_unit.v
+  - dir::../rtl/espino_core/espino_xd.v
+  - dir::../rtl/espino_core/espino_barrel_core.v
+  - dir::build/gen/pochoco_rom.v
+  - dir::build/gen/pochoco_tabla_rom.v
+# Xd: extensión (3 emad y devk, la de R1; 7 agrega mulstep). DataWords: palabras de
+# datos en flip-flops (sw/fondo.s usa las de 0x7C0 a 0x7FC).
+SYNTH_PARAMETERS:
+  - Xd=3
+  - DataWords=16
