@@ -20,6 +20,7 @@ Puerta de maestra (plan del proyecto, sección 16.4): cada peldaño tiene que co
    | `r2_falla_multi.bin` | R2 con el supervisor colgado y R0 de respaldo: el relevo con la maestra real (sección 5) |
    | `autoprueba_r0.bin`, `autoprueba_r1.bin`, `autoprueba_r2_multi.bin` | Si algo falla, separar placa de maestra (`docs/autoprueba.md`, sección 9). Deberían haberse probado antes del 26 |
    | `relevo_r2_multi.bin` y `relevo_r2_multi_sin_dormir.bin` | Tiempo del relevo en la placa, sin maestra (`docs/autoprueba.md`, sección 10) |
+   | `registrador.bin` | Registrar la serie de la maestra en cada ronda (sección 4b) |
 
    Las imágenes múltiples (`*_multi.bin`) se graban con `iceprog -b`.
 
@@ -86,6 +87,19 @@ build/gemelo --barrel --xd 3 --tabla sw/fondo_tabla.hex --hex build/fondo/fondo.
 con el período de cada ronda (10 000 000, 1 000 000 y 100 000 ns) y el SCLK medido (`--sclk-medio-ns`, la mitad del período de SCLK en ns). Si la maestra parte con la placa ya encendida, los precios perdidos en el reset son 0: usar `--inicio-ns 200000`.
 
 Si la serie no es conocida: en las series de práctica R0 y R1 escriben los mismos bytes, así que en una serie parecida sus patrimonios deben ser parecidos. Una diferencia grande entre R0 y R1 en la misma ronda se anota y se revisa con el gemelo esa noche.
+
+## 4b. Registrar la serie de la maestra (registrador, unos 10 minutos por ronda)
+
+Para la puerta de maestra hace falta la serie que mandó la maestra: con ella el gemelo predice el patrimonio de cada peldaño y se compara con la pantalla. `bitstreams/registrador.bin` escucha el SPI, responde siempre mantener y manda cada precio por la UART (`docs/registrador.md`). No guarda nada en la placa.
+
+1. `iceprog bitstreams/registrador.bin`. Al terminar: `00` en los 7 segmentos y los LED apagados.
+2. Con los cables del PMOD puestos, desconectar y conectar el USB; repetir `usbipd attach` si hace falta. `ls /dev/ttyUSB*`: el segundo puerto (normalmente `/dev/ttyUSB1`) es la UART.
+3. Antes de que la maestra empiece: `python3 tools/registrador.py /dev/ttyUSB1 -o build/maestra/ronda3`. Pedir la ronda 3.
+4. Al terminar la ronda, Ctrl+C. Anotar lo que imprime: registros, **perdidos (tiene que ser 0)**, transacciones con error, período mínimo y máximo. Comprobar que los 7 segmentos muestran la cuenta que dice el programa (con SW4, el byte alto). LED4 encendido significa que se perdió algún registro.
+5. SW3 (borra la cuenta y la secuencia) y repetir con las rondas 2 y 1 (`-o build/maestra/ronda2`, `ronda1`).
+6. Esa noche, con cada serie: `build/gemelo --hex sw/trade.hex --serie build/maestra/ronda3_serie.csv --periodo-ns 100000 --inicio-ns 200000` para R0, y con `--barrel --xd 3 --tabla sw/fondo_tabla.hex --hex build/fondo/fondo.hex` para R1 y R2. El patrimonio tiene que ser el que mostró la maestra en la sección 4.
+
+Si dice "Permission denied", falta el grupo `dialout`. Si el puerto no acepta 1 Mbaud, ver `docs/registrador.md`, sección 5. Las series quedan en el computador: no se usan para elegir algoritmos mientras el ayudante no confirme que no son las de la competencia (`docs/pendientes_nicolas.md`).
 
 ## 5. Relevo de R2 con la falla inyectada
 
