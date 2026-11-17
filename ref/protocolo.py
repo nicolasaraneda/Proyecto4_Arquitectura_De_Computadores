@@ -57,6 +57,7 @@ import candidatos       # noqa: E402
 import market           # noqa: E402
 import series           # noqa: E402
 import trader           # noqa: E402
+import zscore           # noqa: E402
 
 LARGO = 2000
 TOLERANCIA_FAMILIA = 0.01
@@ -98,7 +99,7 @@ class NoOperar:
 
 
 FABRICAS = {"base": trader.ReglaBase, "oficial": trader.Oficial, "sma64": SumaMovil, "comprar63": Comprar63, "nada": NoOperar,
-            "trader": candidatos.Trader}
+            "trader": candidatos.Trader, "zscore": zscore.ZScore}
 
 
 def fabrica(nombre):

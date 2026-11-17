@@ -1,0 +1,32 @@
+Duelo cabeza a cabeza contra max_media: rondas de 2000 ticks, semilla 0.
+Generado por ref/zscore/duelo.py --largo 2000 --semilla 0 --candidatas zscore;zscore:km=5,kd=7,num=6,den=4;zscore:km=5,kd=6,num=7,den=4;zscore:km=5,kd=6,num=8,den=4 --salida docs/mediciones/zscore/duelo_n2000_s0.txt.
+ronda: P(candidata > referencia) en una serie. competencia: P(suma de tres rondas mayor). 2 de 3: P(gana al menos dos rondas). +-: error estandar binomial.
+
+--- bloques de practica, todas: 10 series ---
+candidata                                 ronda    +- empate | tríos compet.    +- 2 de 3    +- |  W media    W ref
+zscore                                    70.0% 14.5   0.0% |     3   66.7% 27.2 100.0%  0.0 |    11389    11043
+zscore:km=5,kd=7,num=6,den=4              30.0% 14.5   0.0% |     3   33.3% 27.2  33.3% 27.2 |    10591    11043
+zscore:km=5,kd=6,num=7,den=4              60.0% 15.5   0.0% |     3   33.3% 27.2 100.0%  0.0 |    11034    11043
+zscore:km=5,kd=6,num=8,den=4              60.0% 15.5   0.0% |     3   66.7% 27.2 100.0%  0.0 |    11146    11043
+
+--- remuestreo, todas: 5000 series ---
+candidata                                 ronda    +- empate | tríos compet.    +- 2 de 3    +- |  W media    W ref
+zscore                                    45.6%  0.7   0.0% |  1666   45.1%  1.2  43.7%  1.2 |    10797    10868
+zscore:km=5,kd=7,num=6,den=4              44.6%  0.7   0.0% |  1666   40.9%  1.2  42.0%  1.2 |    10740    10868
+zscore:km=5,kd=6,num=7,den=4              44.6%  0.7   0.0% |  1666   41.8%  1.2  42.3%  1.2 |    10740    10868
+zscore:km=5,kd=6,num=8,den=4              46.5%  0.7   0.0% |  1666   44.4%  1.2  45.3%  1.2 |    10787    10868
+
+--- plausibles, todas: 10000 series ---
+candidata                                 ronda    +- empate | tríos compet.    +- 2 de 3    +- |  W media    W ref
+zscore                                    40.6%  0.5   0.1% |  3333   35.2%  0.8  36.6%  0.8 |    10671    11066
+zscore:km=5,kd=7,num=6,den=4              53.4%  0.5   0.1% |  3333   54.4%  0.9  54.7%  0.9 |    11100    11066
+zscore:km=5,kd=6,num=7,den=4              52.7%  0.5   0.0% |  3333   53.5%  0.9  53.8%  0.9 |    11044    11066
+zscore:km=5,kd=6,num=8,den=4              50.1%  0.5   0.1% |  3333   48.4%  0.9  50.2%  0.9 |    10955    11066
+
+--- estres, todas: 7000 series ---
+candidata                                 ronda    +- empate | tríos compet.    +- 2 de 3    +- |  W media    W ref
+zscore                                    48.8%  0.6   0.3% |  2333   46.8%  1.0  47.4%  1.0 |    11467    13174
+zscore:km=5,kd=7,num=6,den=4              52.2%  0.6   0.1% |  2333   49.6%  1.0  51.1%  1.0 |    12987    13174
+zscore:km=5,kd=6,num=7,den=4              52.2%  0.6   0.1% |  2333   49.9%  1.0  51.4%  1.0 |    12754    13174
+zscore:km=5,kd=6,num=8,den=4              51.6%  0.6   0.2% |  2333   49.7%  1.0  51.1%  1.0 |    12248    13174
+
