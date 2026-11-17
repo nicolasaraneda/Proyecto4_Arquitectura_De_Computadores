@@ -1,0 +1,34 @@
+Corrida local equivalente a la integracion continua (trabajos verificar, extension y fondo de .github/workflows/ci.yml, mas make report)
+Motivo: desde el 17/11 en la tarde GitHub no inicia los trabajos (facturacion de la cuenta).
+Script: ~/proyectos/cola/ci_local.sh, sobre una copia separada de integra-noche. Sin el PDF del informe (no hay LaTeX).
+Commit: e9fd653. Inicio 14:04:57, fin 14:35:08 del 17/11 (30 minutos).
+
+PASS: make test-asm
+PASS: make test-ref
+PASS: make test-candidatos
+PASS: make check-hex
+PASS: make tb
+PASS: make -j4 equiv
+PASS: make fases
+PASS: bash -c make tabla-3-1 && git diff --exit-code docs/mediciones/tabla_3_1.txt
+PASS: make cosim
+PASS: make equiv-gemelo
+PASS: make cpi
+PASS: make tb-mv2x2
+PASS: make bin
+PASS: make check-seg
+PASS: make check-barrel
+PASS: make r0-reproducir
+PASS: make check-xd BARREL_JOBS=4
+PASS: make r0-molde check-p8
+PASS: make check-fondo HW=r1 FONDO_JOBS=4
+PASS: make check-fondo HW=r2 FONDO_JOBS=4
+PASS: make check-vigilante
+PASS: make cosim-barrel-corta FONDO_JOBS=4
+PASS: make fondo-gemelo-series
+PASS: make report
+RESULTADO: 0 pasos con FAIL
+
+Unica diferencia numerica con los archivos versionados (las demas son commit y tiempos):
+  docs/mediciones/barrel/timing.txt (medido en P1, 0fb8ae8): 933 celdas, minima 52,62 MHz; esta corrida: 932 celdas, minima 53,45 MHz.
+  Es el ruido de sintesis del mismo circuito (decisiones T6 y T127); el archivo de la puerta no se reescribe.
