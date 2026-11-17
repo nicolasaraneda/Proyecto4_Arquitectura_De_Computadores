@@ -27,3 +27,14 @@ Encargo de Nicolás del 16/11 en la noche, con prioridad sobre el resto de la li
 4. El fondo del ejemplo de Nicolás: tres gestores zscore de 2,0, 2,25 y 2,5 con los pesos aprendidos de R1.
 
 Se corren una vez con la semilla 4, a 2000 y 20 000 ticks: protocolo, criterio de corte del arnés con la vista de parada, duelo cabeza a cabeza y tabla de puntos.
+
+## 4. Semilla reservada (corrida una vez, 17/11)
+
+`ref/zscore/reservada.sh`, salida en `docs/mediciones/zscore/reservada_s4.txt`, `tabla_n*_s4*.txt` y `duelo_n*_s4.txt`.
+
+- Los cuatro finalistas: **NO PASA** el criterio de corte a 2000 y a 20 000 ticks. El protocolo tampoco los acepta (finalistas 1 y 2).
+- `zscore` de Vicente: -0,094 (2000) y -0,222 (20 000, interiores) en H3a; -0,167 con la vista de parada.
+- Centro de la meseta: -0,055 y -0,060 en H3a; en H3b -0,024 y +0,007 (igual).
+- Fondo mixto: -0,040 y -0,052. Fondo `zscore` 2,0/2,25/2,5 aprendido: -0,072 y -0,134.
+- Hallazgo que no estaba previsto: en las plausibles a 20 000 ticks el centro de la meseta gana en H3b (+0,050 interiores, +0,044 parada) y el 65 % de las rondas. En los remuestreos del mismo largo pierde. No cambia el veredicto (criterio fijado sobre la evidencia completa) y queda como decisión de Nicolás.
+- Cierre: T129, `docs/zscore.md`.

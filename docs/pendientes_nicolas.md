@@ -6,7 +6,12 @@ Decisiones y acciones que solo Nicolás puede tomar o hacer, acumuladas mientras
 
 ## Decisiones
 
-Ninguna abierta. Las del 16/11 quedaron tomadas: la regla del árbol sigue en 115 kHz (T124) y las tres ramas sin integrar pasaron a etiquetas de archivo (T125).
+1. **`zscore` a 20 000 ticks (T129, `docs/zscore.md`, sección 7).** La regla de Vicente no gana bajo el protocolo y `max_media` sigue en todo. Queda un solo resultado a favor de una variante (z = 1,5 con la desviación de memoria 128): en las familias plausibles a 20 000 ticks gana el 65 % de las rondas y +0,044 a +0,050 puntos H3b, con empate en H3a; en los remuestreos del mismo largo y a 2000 ticks pierde.
+   - **(a) Cerrar el tema.** `max_media` en los tres peldaños. No se pierde nada medido: el criterio fijado antes de medir dice que no pasa.
+   - **(b) Reabrir solo si el 26/11 el ayudante confirma rondas de 20 000 ticks o más y series del mismo generador.** Se fijaría antes un criterio restringido a las plausibles a 20 000 ticks, con una semilla nueva (5), y la serie registrada el 26/11 como prueba adicional. Si pasa, se cambia el programa (sin tocar hardware): unos 3 días para R0 y 4 a 5 más para R1 y R2, dentro del congelamiento del 29/11 pero con poco margen para el informe y la defensa. Se pierde ese tiempo, y el riesgo de elegir un subconjunto después de mirar.
+   - **Recomendación: (a).** La ventaja aparece solo en H3b (el puesto) y no en el patrimonio, se da vuelta en los remuestreos, y opera 40 % más (1 017 órdenes por ronda contra 736: más expuesta si cambia la comisión).
+   - Mientras tanto: nada cambió en R0, R1 ni R2.
+2. **Usar la serie que se registre el 26/11 para aceptar algoritmos (tarea B).** El registrador solo escucha, y la serie no entra al diseño. Pero si la maestra del 26/11 usa la misma serie que la competencia, aceptar o rechazar un algoritmo por su resultado en ella es elegir con la serie oculta, que choca con el espíritu de la regla de no usar información externa a la serie. Opciones: (a) usarla solo como control de que el gemelo predice el patrimonio de la maestra (puerta de maestra, criterio 2) y no para elegir algoritmos; (b) usarla para aceptar candidatos solo si el ayudante confirma que la serie del 26/11 no es la de la competencia. **Recomendación: preguntar al ayudante el 26/11 y, mientras tanto, (a).**
 
 ## Acciones
 

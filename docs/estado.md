@@ -2,6 +2,21 @@
 
 Se actualiza al cerrar cada tramo de trabajo. La versión anterior queda en el historial de git.
 
+## Tramo 15: trabajo autónomo del 16 al 17/11 (en curso)
+
+### Resultado de la tarea prioritaria: la regla `zscore` de Vicente
+
+**No reemplaza a `max_media`.** Rama `zscore`, documento de estudio `docs/zscore.md`, decisiones T128 y T129, mediciones en `docs/mediciones/zscore/`.
+
+- **Equivalencia.** `ref/zscore.py` da 40 957 con 578 órdenes en la práctica completa y los mismos bytes que `tools/referencia.py` del repositorio de Vicente (clonado fuera de esta carpeta) en 81 series.
+- **Protocolo.** Gana en los 10 bloques (+346 +- 321, ruido) y pierde en los remuestreos (-110 +- 37) y en las cuatro familias plausibles. No reemplaza.
+- **Torneo, semilla reservada (4).** Pierde 0,094 puntos H3a por ronda a 2000 ticks y 0,222 a 20 000. Cabeza a cabeza gana el 41 % de las rondas de 2000 ticks y el 35 % de las competencias de tres rondas en las familias plausibles (26 % y 16 % a 20 000 ticks).
+- **Meseta.** Ninguno de los 81 puntos (z de 1 a 3, memorias de 16 a 64 y de 32 a 128) le gana a `max_media`. El centro está en z = 1,5 con la desviación de memoria 128. Sobre 2,5 pierde cada vez más.
+- **Fondo de tres gestores `zscore`.** No supera al mejor `zscore` solo: tres bandas anidadas con la misma salida votan igual que la del medio.
+- **Por qué 40 957.** Es el máximo de la grilla en la serie con que se eligió; su vecino a 2,75 da 22 421. La ventaja por bloque, compuesta sobre una sola trayectoria, se vuelve un 58 %.
+- **Diferencia con las bandas del frente A.** `zscore` mide el desvío respecto de la media y no el cambio de un tick: se ensancha en tendencia (gana en `tendencia` y `cambio_de_caracter`) pero ignora la comisión fija y pierde mucho en series volátiles y de precio bajo.
+- **Queda abierto** un solo resultado a favor (z = 1,5 en las plausibles a 20 000 ticks, +0,05 en H3b y empate en H3a), anotado como decisión en `docs/pendientes_nicolas.md`, con la recomendación de cerrar el tema.
+
 ## Tramo 14: decisiones de Nicolás, ramas archivadas, frecuencia del segmentado y respuesta del profesor (16/11, tarde)
 
 Rama `archivo-ramas`. Decisiones T124 (confirmada), T125, T126 y T127. Bitácora de la investigación: `docs/bitacora/caida_segmentado.md`.
