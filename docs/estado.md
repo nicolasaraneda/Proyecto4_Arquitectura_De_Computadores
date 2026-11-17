@@ -12,7 +12,7 @@ Se actualiza al cerrar cada tramo de trabajo. La versión anterior queda en el h
 | Prioritario: `zscore` | Hecho; corregido el 17/11 con el largo del trozo (T130). Falta la decisión de Nicolás | `docs/zscore.md`, `docs/pendientes_nicolas.md` |
 | 1. Revisión adversarial P10 | Hecha: ningún hallazgo crítico ni alto; uno bajo a medio en el esclavo SPI del curso (arreglo en `p10-arreglo-1`, sin integrar, decisión 4); puerta de R1 y R2 repetida desde cero, idéntica a la registrada; medidor mejorado (integrado) | `docs/revision_p10.md` |
 | 2. Campañas largas | Barrel 50,8 M de instrucciones y gemelo 90 M de ticks por peldaño: PASS. Exhaustivo de R0: cobertura completa y gemelo PASS; RTL en la cola | rama `campanas-noche` |
-| 3. Auditorías | Hechas las cuatro (`docs/auditorias/`): clon limpio 1 error, informe 7, cifras 13, estilo 23. Las correcciones las aplica otro agente en la rama `correcciones-auditoria` | `docs/auditorias/README.md` |
+| 3. Auditorías | Hechas las cuatro (`docs/auditorias/`): clon limpio 1 error, informe 7, cifras 13, estilo 23. Corregidos todos los errores salvo el PDF del informe en el repositorio (necesita LaTeX) | `docs/auditorias/correcciones.md` |
 | 4. ASIC del barrel | Envoltorio y scripts listos; equivalencia y síntesis en la cola | rama `asic-barrel` |
 | 5. Banco de contingencia | Cinco juegos nuevos en la cola | rama `contingencia-ampliada` |
 | 6. `make ensayo` | Hecho: 9 de 9 con 4/4 | `docs/mediciones/ensayo.txt` |

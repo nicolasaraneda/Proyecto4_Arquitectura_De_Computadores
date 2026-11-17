@@ -28,6 +28,8 @@ Decisiones y acciones que dependen de Nicolás. Cada una dice las opciones, qué
 
 ## Acciones
 
+0. **La integración continua de GitHub dejó de correr el 17/11 en la tarde.** Todos los trabajos fallan en segundos con "The job was not started because recent account payments have failed or your spending limit needs to be increased" (corridas 44109393726 en adelante). Se arregla en GitHub, Settings, Billing and plans: revisar el medio de pago o subir el límite de gasto de Actions. Mientras tanto, `~/proyectos/cola/ci_local.sh` corre en la máquina los mismos pasos de los trabajos `verificar`, `extension` y `fondo` (sin el PDF del informe, que necesita LaTeX).
+0b. **Avanzar `main` a `integra-noche`** cuando la integración continua (o la corrida local) esté en verde: `git push origin <sha de integra-noche>:refs/heads/main`. No se hizo porque requiere tu permiso.
 1. **Usuarios de GitHub** de Santiago, del profesor y de cada ayudante, para invitarlos el 29/11 con permiso de lectura (`docs/checklist_1dic.md`, sección 1). Las invitaciones tardan en aceptarse.
 2. **Números del PMOD.** `docs/checklist_26nov.md`, sección 2, asume PMOD 1 = `CS_n`, 2 = `MOSI`, 3 = `MISO`, 4 = `SCLK` (pines 65, 64, 63 y 62 de la FPGA) y tierra en 5 u 11. Confirmarlo con la serigrafía de la placa o el esquemático de la Go Board antes del 26.
 3. **Puerta de placa, en la placa** (`docs/autoprueba.md`, secciones 9 y 10, con lo que se debe ver en cada paso):
