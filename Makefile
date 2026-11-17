@@ -841,7 +841,7 @@ exhibicion:
 	tools/p9/exhibicion.sh
 
 # Grilla de comisión y caja: qué umbrales elige retune en cada caso y qué juego de
-# bitstreams/contingencia/ corresponde (docs/mediciones/p8/retune_grilla.txt, unos 7 minutos).
+# bitstreams/contingencia/ corresponde (docs/mediciones/p8/retune_grilla.txt, un minuto).
 .PHONY: contingencia-grilla
 contingencia-grilla:
 	$(PYTHON) tools/p8/grilla.py

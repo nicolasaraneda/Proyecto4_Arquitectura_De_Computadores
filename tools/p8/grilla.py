@@ -6,7 +6,7 @@ Grupo: Nicolás Araneda, Vicente Calderón y Santiago Muñoz.
 Arquitectura de Computadores, Universidad de los Andes, 2026-2.
 
 Corre retune (sin simular) para 14 comisiones y 7 cajas y escribe la tabla del árbol de
-decisión (docs/arbol_decision.md, sección 2). Unos 7 minutos.
+decisión (docs/arbol_decision.md, sección 2). Un poco más de un minuto.
 
 Uso: python3 tools/p8/grilla.py   (o make contingencia-grilla)
 Salida: docs/mediciones/p8/retune_grilla.txt

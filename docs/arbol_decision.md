@@ -21,20 +21,33 @@ R0 es el respaldo de toda la escalera y no depende de ninguna respuesta del curs
 
 | Si cambia... | Hacer | Tiempo |
 |--------------|-------|--------|
-| Nada, o el largo de las rondas, o la caja con comisión de 10 o menos | Nada. Las decisiones no dependen de la caja ni del largo, y `retune` deja los umbrales actuales en todas esas combinaciones | 0 |
-| Comisión de 20 o más | Usar el juego ya construido de `bitstreams/contingencia/` que corresponda (tabla de abajo). Si la combinación no está, `python3 tools/retune.py --comision C --caja K --simular` | 0, o 45 min |
+| Nada, o el largo de las rondas, o la comisión con 8 o menos | Nada. Las decisiones no dependen del largo, y `retune` deja los umbrales actuales con cualquier caja | 0 |
+| La comisión (más de 8) o la caja | Buscar la celda en la tabla de abajo y usar ese juego de `bitstreams/contingencia/` ("actuales": no cambiar nada). Si la combinación no está en la tabla, `python3 tools/retune.py --comision C --caja K --simular` | 0, o 45 min |
 | SCLK mayor que 1 MHz | Hasta 4 MHz los tres peldaños responden igual. A 5 MHz el esclavo SPI del curso pierde bits en todos los diseños: avisar al ayudante | 0 |
 | Período entre 27 us y 0,1 ms | Ninguno: R1 cabe | 0 |
 
-Juegos de contingencia (umbrales de `max_media` que elige `retune`; los gestores 2 y 3 se corren igual):
+Juego que corresponde a cada comisión y caja (umbrales de `max_media` que elige `retune`, "entra" y "sale"; los gestores 2 y 3 se corren igual). Cada juego trae R0, R1 y R2 simulados por los pines y su `SHA256SUMS` (`bitstreams/contingencia/LEEME.md`). Si la comisión o la caja no están en la tabla, correr `retune --simular` con los valores exactos y, mientras termina, usar la celda más cercana.
 
-| Comisión | Caja 1 000 | Caja 10 000 | Caja 100 000 |
-|----------|------------|-------------|--------------|
-| 0 a 10 | actuales (3, 0) | actuales (3, 0) | actuales (3, 0) |
-| 20 | (16, 4) | (7, 4) | actuales (3, 0) |
-| 50 | (16, 4) | (16, 4) | (16, 3) |
+| Comisión | Caja 1 000 | Caja 2 000 | Caja 5 000 | Caja 10 000 | Caja 20 000 | Caja 50 000 | Caja 100 000 |
+|---|---|---|---|---|---|---|---|
+| 0 | actuales | actuales | actuales | actuales | actuales | actuales | actuales |
+| 2 | actuales | actuales | actuales | actuales | actuales | actuales | actuales |
+| 5 | actuales | actuales | actuales | actuales | actuales | actuales | actuales |
+| 8 | actuales | actuales | actuales | actuales | actuales | actuales | actuales |
+| 10 | actuales | `e3_s1` | actuales | actuales | actuales | actuales | actuales |
+| 12 | `e16_s4` | `e3_s1` | actuales | actuales | actuales | actuales | actuales |
+| 15 | `e16_s4` | `e3_s2` | actuales | `e4_s1` | actuales | actuales | actuales |
+| 20 | `e16_s4` | `e16_s4` | `e7_s3` | `e7_s4` | `e10_s4` | `e7_s3` | actuales |
+| 25 | `e16_s4` | `e16_s4` | `e3_s1` | `e7_s4` | `e7_s4` | `e7_s3` | `e7_s3` |
+| 30 | `e16_s4` | `e16_s4` | `e10_s4` | `e7_s4` | `e7_s4` | `e7_s3` | `e7_s3` |
+| 40 | `e16_s4` | `e16_s4` | `e16_s4` | `e16_s4` | `e16_s3` | `e7_s3` | `e7_s3` |
+| 50 | `e16_s4` | `e16_s4` | `e16_s4` | `e16_s4` | `e16_s3` | `e16_s3` | `e16_s3` |
+| 75 | `e16_s4` | `e16_s4` | `e16_s4` | `e16_s4` | `e16_s4` | `e16_s3` | `e16_s3` |
+| 100 | `e63_s-1` (no construido) | `e16_s4` | `e16_s4` | `e16_s4` | `e16_s4` | `e16_s3` | `e16_s3` |
 
-(16, 4) casi no opera: con comisión alta lo que más rinde es no pagarla.
+- `e16_s4` y `e16_s3` casi no operan: con comisión alta lo que más rinde es no pagarla.
+- Comisión 100 con caja 1 000: `retune` elige no operar nunca (63, -1). No se construyó: con esa caja una sola compra cuesta el 10 % y el resultado es mantener la caja. Si pasa, competir con `e16_s4`, que opera casi nunca.
+- La tabla sale de `make contingencia-grilla` (`docs/mediciones/p8/retune_grilla.txt`).
 
 ## 3. Durante la ronda
 
