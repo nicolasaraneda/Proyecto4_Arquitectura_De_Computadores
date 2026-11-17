@@ -25,10 +25,12 @@
 //   SW4   mientras se mantiene apretado, los 7 segmentos muestran el byte alto
 //   LED1 a LED3   número de la medida en binario (LED1 es el bit 0)
 //   LED4  alarma: alguna transacción no tuvo exactamente 8 flancos de subida
-//         de SCLK, o hubo un flanco de subida de SCLK con CS_n en alto (bus
-//         compartido con otro esclavo o SCLK en reposo alto). El esclavo del
-//         SoC toma cada uno de esos flancos como un precio si su contador de
-//         bits quedó en 7 (revisión P10, docs/revision_p10.md, hallazgo 1)
+//         de SCLK, hubo un flanco de subida de SCLK con CS_n en alto (bus
+//         compartido con otro esclavo), o SCLK estaba en alto al bajar CS_n
+//         (maestra de modo 2 o 3). El esclavo del SoC toma cada flanco con
+//         CS_n en alto como un precio si su contador de bits quedó en 7, y con
+//         una maestra de modo 3 la decisión se lee corrida un bit (revisión
+//         P10, docs/revision_p10.md, hallazgo 1 y observación 4)
 //
 // Medidas, en hexadecimal (16 bits; byte bajo sin SW4 y alto con SW4):
 //   0  período mínimo de SCLK, en ciclos. kHz = 25 000 / valor
@@ -152,6 +154,7 @@ module medidor_spi #(
     end
 
     if (sclk_sube && !cs_activo) alarma <= 1'b1;
+    if (cs_baja && sclk_s[1])    alarma <= 1'b1;
 
     if (borrar) begin
       sclk_min  <= 16'hFFFF;

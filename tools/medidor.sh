@@ -7,7 +7,7 @@
 #
 # 1. tb/medidor/tb_medidor.sv con el módulo tal cual: todas las medidas iguales
 #    a las que corresponden a los tiempos de la maestra del testbench.
-# 2. Controles negativos: cinco errores puestos a propósito en una copia del
+# 2. Controles negativos: seis errores puestos a propósito en una copia del
 #    módulo. El testbench tiene que fallar con cada uno.
 # 3. Síntesis y nextpnr en 10 semillas a 25 MHz. Celdas, BRAM y frecuencia.
 # 4. Bitstream con la semilla 1 en build/medidor/medidor_spi.bin.
@@ -66,6 +66,7 @@ periodo_sin_escala|t_per\[19:4\];|t_per[15:0];
 sin_primera_subida|if (primera) begin|if (1'b0) begin
 sin_alarma|if (bits != 4'd8) alarma <= 1'b1;|if (bits == 4'd15) alarma <= 1'b1;
 sin_alarma_cs_alto|if (sclk_sube .. !cs_activo) alarma|if (1'b0) alarma
+sin_alarma_modo|if (cs_baja .. sclk_s\[1\])    alarma|if (1'b0) alarma
 EOF
 echo
 

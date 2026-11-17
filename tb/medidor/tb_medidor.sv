@@ -7,8 +7,8 @@
 // medidor, y se compara cada medida con la que corresponde a esos tiempos
 // (con un ciclo de tolerancia por la sincronización). Los casos cubren las
 // tres rondas del testbench oficial, SCLK de 100 kHz y 115 kHz, tiempos de
-// CS_n distintos, una transacción de 7 bits y flancos de SCLK con CS_n en
-// alto, que deben encender la alarma. Las
+// CS_n distintos, y tres casos que deben encender la alarma: una transacción
+// de 7 bits, flancos de SCLK con CS_n en alto y una maestra de modo 3. Las
 // medidas se leen por los 7 segmentos, apretando los botones como en la
 // placa, y no por jerarquía. Con -DCHIP el mismo testbench corre sobre el
 // bitstream ruteado (tools/medidor.sh, paso 5).
@@ -192,6 +192,24 @@ module tb_medidor;
     pruebas = pruebas + 1;
     if (!led[3]) begin fallas = fallas + 1; $display("FAIL SCLK con CS_n en alto: alarma apagada"); end
     else $display("PASS SCLK con CS_n en alto: alarma encendida");
+    apretar(2);
+    // SCLK en reposo alto (modo 3): enciende la alarma al bajar CS_n
+    sclk = 1'b1;
+    #(2000);
+    apretar(2);
+    pruebas = pruebas + 1;
+    if (led[3]) begin fallas = fallas + 1; $display("FAIL antes de la transaccion de modo 3: alarma encendida"); end
+    else $display("PASS antes de la transaccion de modo 3: alarma apagada");
+    cs_n = 1'b0;
+    #(1000);
+    repeat (8) begin #(500); sclk = 1'b0; #(500); sclk = 1'b1; end
+    #(500); cs_n = 1'b1;
+    #(2000);
+    pruebas = pruebas + 1;
+    if (!led[3]) begin fallas = fallas + 1; $display("FAIL transaccion de modo 3: alarma apagada"); end
+    else $display("PASS transaccion de modo 3: alarma encendida");
+    sclk = 1'b0;
+    #(2000);
     apretar(2);
     // MISO siempre en 0
     pruebas = pruebas + 1;

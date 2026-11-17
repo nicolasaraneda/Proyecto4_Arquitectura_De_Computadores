@@ -5,11 +5,11 @@ Herramientas:
   Yosys 0.68+195 (git sha1 435977e97-dirty, Release, Clang /usr/bin/clang++ 21.1.8)
   "nextpnr-ice40" -- Next Generation Place and Route (Version nextpnr-0.11.1-19-g8dbcee5c)
   Icarus Verilog version 14.0 (devel) (s20260301-403-g5ab23063f-dirty)
-Commit de partida: b04b0e0
+Commit de partida: ff61971
 
 == 1. Testbench
-RESUMEN pruebas=68 fallas=0
-PASS: 68 comprobaciones, cero fallas
+RESUMEN pruebas=70 fallas=0
+PASS: 70 comprobaciones, cero fallas
 
 == 2. Controles negativos
 PASS flanco_de_bajada: detectado (8 comprobaciones fallan)
@@ -17,17 +17,18 @@ PASS periodo_sin_escala: detectado (15 comprobaciones fallan)
 PASS sin_primera_subida: detectado (15 comprobaciones fallan)
 PASS sin_alarma: detectado (2 comprobaciones fallan)
 PASS sin_alarma_cs_alto: detectado (2 comprobaciones fallan)
+PASS sin_alarma_modo: detectado (2 comprobaciones fallan)
 
 == 3. Timing en 10 semillas (nextpnr --hx1k --package vq100 --freq 25)
-Celdas: ICESTORM_LC: 610/ 1280. BRAM: ICESTORM_RAM: 0/ 16
-Frecuencia maxima por semilla (MHz): 132.45 112.52 121.42 129.22 110.52 129.33 131.48 114.51 127.71 110.01
-Minima 110.01 MHz, mediana 124.56 MHz, maxima 132.45 MHz
+Celdas: ICESTORM_LC: 627/ 1280. BRAM: ICESTORM_RAM: 0/ 16
+Frecuencia maxima por semilla (MHz): 127.26 133.92 118.79 122.46 112.52 124.27 117.04 126.25 122.77 121.94
+Minima 112.52 MHz, mediana 122.61 MHz, maxima 133.92 MHz
 PASS: 10 de 10 semillas cierran a 25 MHz
 
 == 4. Bitstream (semilla 1)
-build/medidor/medidor_spi.bin: 32220 bytes, sha256 e8a62522d19b95bb115ca6e84e8abadfd627c6f68c0a5032e521a85af2696b34
+build/medidor/medidor_spi.bin: 32220 bytes, sha256 09bc30b5208b1abcca9f90c4119ed03ad23985d9da7b2fe13158684900ff0596
 
 == 5. Bitstream ruteado simulado por los pines (el mismo testbench, construido con REBOTE = 8)
-PASS: 68 comprobaciones por los pines del bitstream, cero fallas
+PASS: 70 comprobaciones por los pines del bitstream, cero fallas
 
 PASS: medidor listo
