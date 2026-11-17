@@ -19,6 +19,13 @@ Decisiones y acciones que solo Nicolás puede tomar o hacer, acumuladas mientras
    - **(b) Cambiar después del 26/11** si se ve que los otros grupos operan reversión y la candidata gana en la serie registrada (si el ayudante dice que no es la de la competencia).
    - **Recomendación: (a)**, y mirar el 26/11 qué hacen los otros grupos. Si se adopta `zscore` (decisión 1), esta candidata deja de aplicar: habría que repetir la tarea B contra `zscore`.
 
+4. **Precios fantasma del esclavo SPI del curso (revisión P10, hallazgo 1, `docs/revision_p10.md`).** Si el contador de bits del esclavo queda en 7 (una transacción de 7 flancos, o el reset de encendido terminando a mitad de una transacción) y después hay flancos de SCLK con `CS_n` en alto (bus compartido o ruido), cada flanco es un precio. En R2 dispara el vigilante con el programa sano; en R0 y R1 mete precios falsos en la media. Reproducción: `make p10-spi-7flancos` y `make p10-formal-spi`. El testbench oficial nunca lo produce.
+   - **(a) Adoptar el arreglo** de la rama `p10-arreglo-1` (un parámetro en el esclavo, activo solo con el barrel; R0 no cambia). Pasa sus pruebas y el testbench oficial da 4/4 con los tres peldaños, pero cambia el hardware de R1 y R2: hay que repetir su puerta completa, los bitstreams, las autopruebas y los moldes antes del 25/11 (unas 4 horas de cola).
+   - **(b) No cambiar el hardware y medir el 26/11** con el medidor nuevo (ya integrado: LED4 avisa flancos de SCLK con `CS_n` en alto). Si aparecen, competir con R1 en vez de R2 (el vigilante es el único que convierte el problema en un relevo).
+   - **Recomendación: (b)**, porque la condición necesita un bus que la maestra del enunciado no tiene y (a) cambia hardware que ya pasó su puerta; si el 26/11 el medidor la ve, R1.
+5. **Reiniciar la placa entre rondas (revisión P10, observación 2).** Si la maestra reinicia la caja entre rondas y la placa no, la ronda nueva parte con la última orden y la media de la serie anterior: cuesta en promedio 63 por ronda con series del mismo generador y 1 922 si la serie nueva tiene otro nivel (peor caso -57 552). Hoy `docs/checklist_1dic.md` dice no reprogramar entre rondas.
+   - **Recomendación:** preguntar el 26/11 si la caja se reinicia y si las series son independientes; si las dos respuestas son sí, desconectar y conectar el USB entre rondas (un minuto, sin reprogramar).
+
 ## Acciones
 
 1. **Usuarios de GitHub** de Santiago, del profesor y de cada ayudante, para invitarlos el 29/11 con permiso de lectura (`docs/checklist_1dic.md`, sección 1). Las invitaciones tardan en aceptarse.

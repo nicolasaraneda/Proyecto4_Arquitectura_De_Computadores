@@ -745,3 +745,10 @@ Las decisiones T87 a T99 son del paquete P6 de R1 y R2 y las T100 a T119 del paq
 - **Método** (`docs/generador_b.md`). Campo nuevo `variados` (todos los rivales son reversiones). Exploración con la semilla 0 (78 candidatas), tres finalistas fijados antes, semilla 5 (nueva) una sola vez.
 - **Resultado.** `max_media` con salida a +0,5 unidades pasa el criterio de corte en `variados` a 2000 y 20 000 ticks y no pasa en el campo mixto; pierde en los bloques de la práctica (-173 +- 137) y en los remuestreos (-22 +- 16). Las otras dos finalistas no pasan.
 - **Decisión.** No cambia nada. La candidata queda condicionada a dos datos del 26/11 (que los rivales operen reversión y que gane en la serie registrada, si se puede usar) y es decisión de Nicolás (`docs/pendientes_nicolas.md`, decisión 3). El intento de identificar mejor el generador no dio un modelo nuevo: el tema se cierra.
+
+### T132. Revisión adversarial P10: sin hallazgos críticos ni altos; el arreglo del esclavo SPI queda sin integrar (17/11)
+
+- **Resultado** (`docs/revision_p10.md`, `docs/bitacora/p10.md`). Un revisor que no participó en el diseño leyó el barrel, la extensión, la tabla, el vigilante y `sw/fondo.s`, agregó pruebas (`make p10-*`, fuera de la integración continua) y repitió la puerta de simulación de R1 y R2 desde cero: todas las mediciones y los sha256 de los bitstreams son los registrados.
+- **Hallazgo 1 (bajo, medio si la maestra mueve SCLK con `CS_n` en alto).** El esclavo SPI del curso puede contar precios fuera de una transacción. Arreglo en `p10-arreglo-1`, sin integrar: cambia hardware que ya pasó su puerta. Decisión de Nicolás (`docs/pendientes_nicolas.md`, decisión 4).
+- **Hallazgo 2.** El medidor del 26/11 no veía esa condición. El arreglo (`p10-arreglo-2`) se integró: el medidor no es parte de ningún peldaño, y pasó `make medidor` (70 comprobaciones, 6 de 6 controles negativos, 10 de 10 semillas, bitstream ruteado).
+- **Observaciones.** Vuelta del número de tick a los 16,7 millones de ticks (no afecta la competencia), costo de no reiniciar la placa entre rondas (decisión 5), entradas del SPI sin pull-up y supuesto de maestra de modo 0.
