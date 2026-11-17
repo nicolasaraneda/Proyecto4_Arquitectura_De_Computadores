@@ -28,7 +28,7 @@ La prueba se hizo dos veces. La primera corrida (madrugada del 17/11) llegó has
 | 5 | `:56` | `make fondo-hex` | 1.ª y 2.ª | Funciona | 0,1 s | Crea `build/fondo` y ensambla. Después de esto el comando 4 sí funciona. |
 | 6 | `:63` | `python3 tools/pochoasm.py sw/trade.s -o sw/trade.hex` | 1.ª y 2.ª | Funciona | 0,1 s | |
 | 7 | `:64` | `iverilog -g2012 -s tb_proyecto_4 -o /tmp/tb_p4 $(yosys-config --datdir)/ice40/cells_sim.v rtl/*.v rtl/espino_core/*.v tb/tb_proyecto_4.sv` | 1.ª y 2.ª | Funciona | 0,1 s | Sin advertencias. |
-| 8 | `:65` | `vvp -n /tmp/tb_p4` | 1.ª | Funciona | 115 s | "Testbenchs aprobados: 4/4"; patrimonio 9 661, 74 órdenes, pérdida máxima 1 846, comprar y mantener 6 695, peor caso 44 de 2 262 ciclos. |
+| 8 | `:65` | `vvp -n /tmp/tb_p4` | 1.ª y 2.ª | Funciona | 115 s y 74 s | "Testbenchs aprobados: 4/4"; patrimonio 9 661, 74 órdenes, pérdida máxima 1 846, comprar y mantener 6 695, peor caso 44 de 2 262 ciclos. |
 | 9 | `:68` | `make peldano-oficial` | 1.ª | Funciona | 125 s | "PASS: el comando oficial da 4/4 con el diseno por defecto"; `decisiones.csv` idéntico al de `ref/trader.py`. |
 | 10 | `:68` | `make tb` | 1.ª | Funciona | 155 s | 4/4. |
 | 11 | `:68` | `make fondo-oficial HW=r1` | 1.ª | Funciona | 268 s | "PASS: 4/4", `decisiones.csv` idéntico al de `ref/fondo.py` (2001 líneas), peor caso 443 de 2 262. **Reescribe un archivo versionado**: `docs/mediciones/fondo/r1/oficial.txt` (solo cambia la línea "Commit de partida"). Ver H4. |
@@ -97,7 +97,7 @@ Por la regla de esta auditoría (los comandos pesados se corren de a uno por la 
 
 ## 5. Resumen
 
-- Comandos distintos corridos: 20 (12 en la primera corrida y 15 en la segunda, 7 de ellos repetidos). Funcionaron todos menos uno.
+- Comandos distintos corridos: 20 (12 en la primera corrida y 16 en la segunda, 8 de ellos repetidos). Funcionaron todos menos uno.
 - Comando que falló: `python3 tools/pochoasm.py sw/fondo.s -o build/fondo/fondo.hex` (`README.md:56`), en las dos corridas.
 - Hallazgos: 1 error (H1) y 5 sugerencias (H2 a H6).
 - No corridos: 26 comandos del README, por la regla de la cola; 3 no ejecutables en este entorno.
