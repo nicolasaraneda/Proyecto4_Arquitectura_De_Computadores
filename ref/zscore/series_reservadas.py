@@ -5,7 +5,7 @@ Grupo: Nicolás Araneda, Vicente Calderón y Santiago Muñoz.
 Arquitectura de Computadores, Universidad de los Andes, 2026-2.
 
 Usa el mismo generador del estudio de retorno (factibilidad/retorno/generar_series.py)
-con la semilla 4, que nadie había usado (decisión T128), en los dos largos y con
+con una semilla (por defecto 4, la reservada de T128; la tarea B usa la 5, que nadie había usado), en los dos largos y con
 las mismas cantidades. Deja los archivos en build/zscore/series/ junto con enlaces
 a las series ya generadas de las semillas 0 a 3, para que el arnés las encuentre
 todas con RETORNO_SERIES=build/zscore/series.
@@ -32,7 +32,8 @@ def main():
             if not os.path.lexists(enlace):
                 os.symlink(os.path.join(origen, nombre), enlace)
     g.DESTINO = DESTINO
-    g.SEMILLAS = {2000: (4,), 20000: (4,)}
+    s = int(os.environ.get("SEMILLA", "4"))
+    g.SEMILLAS = {2000: (s,), 20000: (s,)}
     g.PROCESOS = int(os.environ.get("PROCESOS", "16"))
     return g.main([])
 
