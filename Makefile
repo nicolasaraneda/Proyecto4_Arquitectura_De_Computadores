@@ -850,8 +850,10 @@ exhibicion:
 #                     alto; en R2 disparan el vigilante (reproduce el hallazgo 1)
 #   p10-vuelta-tick   el número de tick de sw/fondo.s da la vuelta (24 bits)
 #   p10-largo         dos rondas de 200 000 ticks por el RTL de R2
-.PHONY: p10 p10-ro-custom0 p10-spi-7flancos p10-vuelta-tick p10-largo
-p10: p10-ro-custom0 p10-vuelta-tick p10-largo p10-spi-7flancos
+#   p10-sclk-degradado  exploración: SCLK de 105 a 130 kHz a 0,1 ms con un gestor
+#                     colgado o atrasado, por el RTL de R1
+.PHONY: p10 p10-ro-custom0 p10-spi-7flancos p10-vuelta-tick p10-largo p10-sclk-degradado
+p10: p10-ro-custom0 p10-vuelta-tick p10-largo p10-sclk-degradado p10-spi-7flancos
 p10-ro-custom0:
 	tools/p10/ro_custom0.sh
 p10-spi-7flancos:
@@ -860,3 +862,5 @@ p10-vuelta-tick:
 	tools/p10/vuelta_tick.sh
 p10-largo:
 	tools/p10/largo.sh
+p10-sclk-degradado:
+	tools/p10/sclk_degradado.sh
