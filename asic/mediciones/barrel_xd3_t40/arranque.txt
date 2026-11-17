@@ -1,0 +1,2 @@
+PASS: flip-flops sin reset en 0: 29 bytes identicos a ref/fondo.py
+PASS: flip-flops sin reset en 1: 29 bytes identicos a ref/fondo.py

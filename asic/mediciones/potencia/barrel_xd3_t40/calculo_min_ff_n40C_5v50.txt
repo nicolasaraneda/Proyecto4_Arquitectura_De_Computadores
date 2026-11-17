@@ -1,0 +1,42 @@
+potencia.tcl: esquina min_ff_n40C_5v50, modo vcd
+  liberty: /home/nicolasaraneda/.ciel/ciel/gf180mcu/versions/54435919abffb937387ec956209f9cf5fd2dfbee/gf180mcuD/libs.ref/gf180mcu_fd_sc_mcu7t5v0/lib/gf180mcu_fd_sc_mcu7t5v0__ff_n40C_5v50.lib
+  netlist: asic/runs/barrel_xd3_t40/final/nl/asic_top_barrel.nl.v
+  sdc:     asic/runs/barrel_xd3_t40/final/sdc/asic_top_barrel.sdc
+  spef:    asic/runs/barrel_xd3_t40/final/spef/min/asic_top_barrel.min.spef
+
+=== clocks ===
+clock clk: periodo 40.000000, propagado 1
+
+MODO vcd: read_vcd -scope tb_asic_barrel_puertos/dut /dev/shm/asic_barrel_barrel_xd3_t40/calculo.vcd
+Annotated 61028 pin activities.
+
+=== report_activity_annotation ===
+vcd         61028
+unannotated     0
+
+=== report_activity_annotation -report_unannotated ===
+vcd         61028
+unannotated     0
+Unannotated pins:
+
+=== report_power -corner min_ff_n40C_5v50 ===
+Group                    Internal    Switching      Leakage        Total
+                            Power        Power        Power        Power (Watts)
+------------------------------------------------------------------------
+Sequential           4.658226e-02 2.945838e-04 1.473690e-06 4.687832e-02  40.0%
+Combinational        1.299449e-02 1.419134e-02 2.645056e-06 2.718848e-02  23.2%
+Clock                2.467570e-02 1.846327e-02 2.549288e-06 4.314151e-02  36.8%
+Macro                0.000000e+00 0.000000e+00 0.000000e+00 0.000000e+00   0.0%
+Pad                  0.000000e+00 0.000000e+00 0.000000e+00 0.000000e+00   0.0%
+------------------------------------------------------------------------
+Total                8.425261e-02 3.294924e-02 6.667934e-06 1.172085e-01 100.0%
+                            71.9%        28.1%         0.0%
+
+=== sonda: actividad de puertos (densidad 1/s, duty, origen) ===
+sonda puerto clk: 5.00000e+07 0.500 clock
+sonda puerto rst_n: 0.00000e+00 1.000 vcd
+sonda puerto spi_sclk: 5.55556e+04 0.028 vcd
+sonda puerto spi_cs_n: 5.55556e+04 0.944 vcd
+sonda puerto spi_miso: 5.55556e+04 0.033 vcd
+
+=== design_power (W): interna 0.08425261080265045 conmutacion 0.032949239015579224 fuga 6.667934485449223e-6 total 0.11720851808786392 ===

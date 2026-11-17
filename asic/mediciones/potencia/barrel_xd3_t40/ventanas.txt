@@ -1,0 +1,4 @@
+ronda3 t0=2004000 ns t1=2404000 ns ciclos=10000 vcd=130750135 bytes
+sondeo t0=2034000 ns t1=2094000 ns ciclos=1500 vcd=23454613 bytes
+calculo t0=2012500 ns t1=2030500 ns ciclos=450 vcd=10579882 bytes
+PASS: los 19 primeros bytes de la netlist final son los de ref/fondo.py

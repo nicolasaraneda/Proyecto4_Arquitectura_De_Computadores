@@ -1,0 +1,84 @@
+# Configuración de LibreLane para el macro ASIC del fondo en un chip (R1), edición de
+# exhibición. Grupo: Nicolás Araneda, Vicente Calderón y Santiago Muñoz.
+# Arquitectura de Computadores, Universidad de los Andes, 2026-2.
+#
+# Copia de factibilidad/g_asic/config.yaml (la del Espino base y el segmentado, que
+# viene de asic/rom/config.yaml del Proyecto 3). Cambian el diseño, las fuentes y los
+# parámetros; las perillas del flujo son las mismas. Se corre con
+# asic/scripts/correr.sh, que elige la extensión (Xd) y el período.
+DESIGN_NAME: asic_top_barrel
+PDK: gf180mcuD
+# El core, los periféricos y el esclavo SPI son los archivos de rtl/ del
+# repositorio, sin copiar. Las cuatro copias modificadas están en rtl/ de esta
+# carpeta (ver README.md) y la ROM del programa se genera desde sw/trade.s
+# (scripts/fuentes.sh, función generar_rom).
+VERILOG_FILES:
+  - dir::rtl/asic_top_barrel.v
+  - dir::rtl/pochoco_soc_asic_barrel.v
+  - dir::rtl/espino_barrel_regfile.v
+  - dir::rtl/pochoco_mem_asic_barrel.v
+  - dir::../rtl/pochoco_periph.v
+  - dir::../rtl/pochoco_spi_slave.v
+  - dir::../rtl/espino_core/espino_alu.v
+  - dir::../rtl/espino_core/espino_decoder.v
+  - dir::../rtl/espino_core/espino_load_store_unit.v
+  - dir::../rtl/espino_core/espino_xd.v
+  - dir::../rtl/espino_core/espino_barrel_core.v
+  - dir::build/gen/pochoco_rom.v
+  - dir::build/gen/pochoco_tabla_rom.v
+# Xd: extensión (3 emad y devk, la de R1; 7 agrega mulstep). DataWords: palabras de
+# datos en flip-flops (sw/fondo.s usa las de 0x7C0 a 0x7FC).
+SYNTH_PARAMETERS:
+  - Xd=3
+  - DataWords=16
+# Celdas excluidas, igual que en el Proyecto 3: las de retardo y el buffer más
+# chico, que allá explicaba la mayoría de las violaciones de slew.
+EXTRA_EXCLUDED_CELLS:
+  - gf180mcu_fd_sc_mcu7t5v0__dly*
+  - gf180mcu_fd_sc_mcu7t5v0__buf_1
+# El resizer redimensiona hasta dejar 10 ns de holgura durante el placement.
+PL_RESIZER_SETUP_SLACK_MARGIN: 10
+# Terminales por función: interruptores, reloj y reset al oeste, displays al
+# este, LEDs al norte y SPI al sur (el pines.cfg del base: los puertos son los mismos).
+IO_PIN_ORDER_CFG: dir::../factibilidad/g_asic/pines.cfg
+CLOCK_PORT: clk
+# 25 MHz, el reloj de la Go Board. scripts/correr.sh lo cambia en los barridos.
+CLOCK_PERIOD: 40
+FP_CORE_UTIL: 40
+# Reparación de slew y capacitancia y resizer de timing después del ruteo
+# global, con los parásitos del ruteo global.
+RUN_POST_GRT_DESIGN_REPAIR: true
+GRT_DESIGN_REPAIR_MAX_SLEW_PCT: 30
+GRT_DESIGN_REPAIR_MAX_CAP_PCT: 30
+RUN_POST_GRT_RESIZER_TIMING: true
+# A lo más 2 hilos por corrida en los pasos que paralelizan: la máquina se
+# comparte y scripts/barrido.sh lanza hasta 3 corridas a la vez.
+DRT_THREADS: 2
+STA_THREADS: 2
+KLAYOUT_DRC_THREADS: 2
+KLAYOUT_XOR_THREADS: 2
+# RC de cable por capa y por esquina para el resizer. Son los valores que el
+# Proyecto 3 derivó de la extracción de su corrida (asic/modelo_cable.py):
+# los del tech LEF escalados para que la estimación se parezca a lo que
+# después extrae OpenRCX. Se copiaron tal cual y NO se volvieron a derivar con
+# este diseño: queda como pendiente de la edición ASIC. Unidades: ohm/um y
+# pF/um.
+LAYERS_RC:
+  "max_*":
+    Metal1: {res: 0.85199, cap: 0.00026941}
+    Metal2: {res: 0.69985, cap: 0.00024598}
+    Metal3: {res: 0.69985, cap: 0.00022958}
+    Metal4: {res: 0.69985, cap: 0.00022712}
+    Metal5: {res: 0.29691, cap: 0.000050766}
+  "nom_*":
+    Metal1: {res: 0.78028, cap: 0.00023788}
+    Metal2: {res: 0.64095, cap: 0.00021719}
+    Metal3: {res: 0.64095, cap: 0.00020271}
+    Metal4: {res: 0.64095, cap: 0.00020054}
+    Metal5: {res: 0.27192, cap: 0.000044824}
+  "min_*":
+    Metal1: {res: 0.70858, cap: 0.00021165}
+    Metal2: {res: 0.58205, cap: 0.00019324}
+    Metal3: {res: 0.58205, cap: 0.00018036}
+    Metal4: {res: 0.58205, cap: 0.00017843}
+    Metal5: {res: 0.24693, cap: 0.000039882}
