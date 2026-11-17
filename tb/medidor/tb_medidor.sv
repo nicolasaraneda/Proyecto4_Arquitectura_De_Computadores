@@ -7,7 +7,8 @@
 // medidor, y se compara cada medida con la que corresponde a esos tiempos
 // (con un ciclo de tolerancia por la sincronización). Los casos cubren las
 // tres rondas del testbench oficial, SCLK de 100 kHz y 115 kHz, tiempos de
-// CS_n distintos y una transacción de 7 bits que debe encender la alarma. Las
+// CS_n distintos, una transacción de 7 bits y flancos de SCLK con CS_n en
+// alto, que deben encender la alarma. Las
 // medidas se leen por los 7 segmentos, apretando los botones como en la
 // placa, y no por jerarquía. Con -DCHIP el mismo testbench corre sobre el
 // bitstream ruteado (tools/medidor.sh, paso 5).
@@ -179,6 +180,19 @@ module tb_medidor;
     pruebas = pruebas + 1;
     if (led[3]) begin fallas = fallas + 1; $display("FAIL SW3 no borra la alarma"); end
     else $display("PASS SW3 borra la alarma");
+    // Flancos de SCLK con CS_n en alto (revisión P10): encienden la alarma
+    apretar(2);
+    #(1000);
+    ronda(3, 100000, 1500, 500, 500);
+    pruebas = pruebas + 1;
+    if (led[3]) begin fallas = fallas + 1; $display("FAIL antes de SCLK con CS_n en alto: alarma encendida"); end
+    else $display("PASS antes de SCLK con CS_n en alto: alarma apagada");
+    repeat (20) begin #(500); sclk = 1'b1; #(500); sclk = 1'b0; end
+    #(2000);
+    pruebas = pruebas + 1;
+    if (!led[3]) begin fallas = fallas + 1; $display("FAIL SCLK con CS_n en alto: alarma apagada"); end
+    else $display("PASS SCLK con CS_n en alto: alarma encendida");
+    apretar(2);
     // MISO siempre en 0
     pruebas = pruebas + 1;
     if (miso !== 1'b0) begin fallas = fallas + 1; $display("FAIL MISO no es 0"); end
