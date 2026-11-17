@@ -678,3 +678,9 @@ Dato: `docs/decisiones.md`, T126; `docs/checklist_26nov.md:98` a `:109`.
 **155. [A] ¿Cómo se sabe que un bitstream hecho con `icebram` es correcto?**
 Por el control: con los parámetros de siempre, `icebram` sobre el molde da los bitstreams guardados byte por byte. Y cada juego nuevo se simula por los pines antes de guardarse (unos 40 minutos).
 Dato: `docs/contingencia.md:82`, `docs/decisiones.md:595`.
+
+## 13. La regla de Vicente
+
+**156. [I] ¿Por qué no usaron la regla que da 40 957 en la práctica?**
+Porque 40 957 es el resultado en la misma serie con que se eligieron sus parámetros, compuesto sobre 20 000 ticks: en los 10 bloques de 2000 la ventaja sobre `max_media` es +346 +- 321 por bloque, un error, y su vecino a 2,75 desviaciones da 22 421 en la misma serie. Con el criterio que fijamos antes de medir (remuestreos de trozos de 100 ticks y el modelo calibrado, con una semilla reservada) pierde 0,09 puntos por ronda. Lo que no ocultamos: con trozos de 250 ticks o más, y eligiendo los parámetros en una mitad de la práctica para probarlos en la otra, `zscore` gana; en series del modelo, no. Depende de si la serie oculta se parece a la práctica en escalas de cientos de ticks, y eso no se sabe. La decisión y su razón están en `docs/decisiones.md` (T129 y siguientes).
+Dato: `docs/zscore.md:101` (largo del trozo), `:131` (las dos lecturas) y `:142` (la grilla en la práctica); `docs/mediciones/zscore/trozos.txt`, `reservada_s4.txt`.

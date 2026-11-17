@@ -867,9 +867,11 @@ zscore: zscore-arnes zscore-series zscore-validar
 	$(ZSCORE_ENV) $(PYTHON) ref/zscore/duelo.py --largo 2000 --semilla 0 --salida $(ZSCORE_M)/duelo_n2000_s0.txt \
 	  --candidatas "zscore;zscore:km=5,kd=7,num=6,den=4;zscore:km=5,kd=6,num=7,den=4;zscore:km=5,kd=6,num=8,den=4" > /dev/null
 	$(ZSCORE_ENV) $(PYTHON) ref/zscore/practica.py > /dev/null
+	$(ZSCORE_ENV) $(PYTHON) ref/zscore/trozos.py --puntos > /dev/null
 	@echo "Resultados en $(ZSCORE_M)/"
 zscore-reservada: zscore-arnes zscore-series
 	ref/zscore/reservada.sh
+
 # Ensayo general (docs/checklist_1dic.md): las tres rondas para cada peldaño con series
 # nuevas, por el RTL, mostrando lo que vería la maestra (docs/mediciones/ensayo.txt).
 # Unos 5 minutos con 5 procesos.

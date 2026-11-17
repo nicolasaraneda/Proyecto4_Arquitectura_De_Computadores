@@ -15,7 +15,8 @@ Se actualiza al cerrar cada tramo de trabajo. La versión anterior queda en el h
 - **Fondo de tres gestores `zscore`.** No supera al mejor `zscore` solo: tres bandas anidadas con la misma salida votan igual que la del medio.
 - **Por qué 40 957.** Es el máximo de la grilla en la serie con que se eligió; su vecino a 2,75 da 22 421. La ventaja por bloque, compuesta sobre una sola trayectoria, se vuelve un 58 %.
 - **Diferencia con las bandas del frente A.** `zscore` mide el desvío respecto de la media y no el cambio de un tick: se ensancha en tendencia (gana en `tendencia` y `cambio_de_caracter`) pero ignora la comisión fija y pierde mucho en series volátiles y de precio bajo.
-- **Queda abierto** un solo resultado a favor (z = 1,5 en las plausibles a 20 000 ticks, +0,05 en H3b y empate en H3a), anotado como decisión en `docs/pendientes_nicolas.md`, con la recomendación de cerrar el tema.
+- **Corrección del 17/11 (T130): el largo del trozo cambia el signo.** El remuestreo del protocolo usa trozos de 100 ticks. Con trozos de 250 o más, en tramos reales contiguos y eligiendo en una mitad de la práctica para probar en la otra, `zscore` gana (+313 +- 43 con trozos de 1000; +0,107 puntos H3b). En series del modelo no. Con muestras independientes, +346 +- 321 en 10 bloques. La explicación de los 40 957 ya no es solo sobreajuste (`docs/zscore.md`, sección 4.5; pregunta 156 del banco).
+- **Decisión de Nicolás pendiente**: qué algoritmo compite (`docs/pendientes_nicolas.md`, decisión 1).
 
 ## Tramo 14: decisiones de Nicolás, ramas archivadas, frecuencia del segmentado y respuesta del profesor (16/11, tarde)
 

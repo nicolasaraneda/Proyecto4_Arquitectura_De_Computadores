@@ -4,7 +4,7 @@ Grupo: Nicolás Araneda, Vicente Calderón y Santiago Muñoz.
 
 Documento de estudio de la evaluación del 16 y 17/11 (rama `zscore`, decisiones T128 y T129, bitácora `docs/bitacora/zscore.md`). Todas las cifras salen de `docs/mediciones/zscore/` y se regeneran con `make zscore` (semilla 0) y `make zscore-reservada` (semilla 4, que se corrió una sola vez).
 
-**Resultado en una línea.** `zscore` gana en la serie de práctica completa (40 957 contra 25 973) porque es la serie con que se eligieron sus parámetros. Fuera de ella pierde contra `max_media` en el protocolo, en los puntos esperados del torneo y en el duelo cabeza a cabeza, a 2000 y a 20 000 ticks, con la semilla de exploración y con la reservada. No reemplaza a `max_media`, y un fondo de gestores `zscore` tampoco.
+**Resultado en una línea.** Con el criterio fijado antes de medir, `zscore` no reemplaza a `max_media`: pierde en el protocolo, en los puntos esperados del torneo y en el duelo cabeza a cabeza, a 2000 y a 20 000 ticks, con la semilla de exploración y con la reservada. Pero ese criterio usa remuestreos de trozos de 100 ticks y series del modelo calibrado, y los dos son ciegos a algo que la serie de práctica sí tiene: **con trozos de 250 ticks o más, y en tramos reales contiguos, `zscore` le gana a `max_media`, también eligiendo sus parámetros en una mitad de la práctica y probándolos en la otra** (sección 4.5, agregada el 17/11 a partir de una prueba de Nicolás). En series del modelo ese efecto no aparece. La evidencia con tramos reales independientes es débil (+346 +- 321 por bloque de 2000). Un fondo de gestores `zscore` no agrega nada sobre el mejor `zscore` solo.
 
 ## 1. La regla
 
@@ -98,11 +98,50 @@ Veredicto del criterio de corte: **NO PASA** a los dos largos (`reservada_s4.txt
 
 **Un fondo de tres bandas de la misma regla, con la misma salida, decide igual que su banda del medio.** Con umbrales anidados, si entra la banda más exigente entran las tres, y la mayoría de dos de tres se forma exactamente cuando entra la del medio; las tres salen juntas al cruzar la media. Por eso el fondo 1,25/1,5/1,75 da los mismos números que `zscore` 1,5 solo, y los pesos aprendidos casi no lo mueven. El fondo no puede ser mejor que la mejor de sus bandas, y ninguna de las bandas le gana a `max_media`. El fondo mixto pierde menos porque una de sus bandas es `max_media`, pero tampoco pasa (`reservada_s4.txt`).
 
+### 4.5 Largo del trozo del remuestreo (17/11)
+
+Nicolás observó que, remuestreando la práctica en trozos de 10 a 100 ticks, `zscore` empata con `max_media`, y que con trozos de 250 o más y en tramos reales contiguos gana entre +150 y +430 a 2000 ticks. El remuestreo del protocolo usa **trozos de 100 incrementos** (`ref/series.py:75`, `bloque=100`), con el nivel inicial tomado al azar de la serie. `ref/zscore/trozos.py` (`docs/mediciones/zscore/trozos.txt`) repite la comparación con otros largos: `zscore` de Vicente contra `max_media`, 1000 series de 2000 ticks por largo, diferencia pareada.
+
+| Trozo (ticks) | Trozos distintos en la práctica | `zscore` | `max_media` | Diferencia | Gana `zscore` | dH3a | dH3b |
+|---------------|-------------------------------|----------|-------------|------------|---------------|------|------|
+| 10 | 1 999 | 9 832 | 9 734 | +98 +- 38 | 51 % | | |
+| 50 | 399 | 10 422 | 10 479 | -56 +- 32 | 46 % | -0,028 +- 0,006 | +0,001 +- 0,007 |
+| **100 (el del protocolo)** | 199 | 10 827 | 10 820 | +7 +- 37 | 48 % | | |
+| 250 | 79 | 11 114 | 10 954 | **+160 +- 36** | 57 % | -0,050 +- 0,006 | +0,011 +- 0,006 |
+| 1 000 | 19 | 11 600 | 11 287 | **+313 +- 43** | 64 % | +0,019 +- 0,005 | **+0,107 +- 0,006** |
+| 2 000 (un tramo real, inicio al azar) | 9 | 11 682 | 11 269 | +413 +- 37 | 74 % | | |
+| 181 ventanas reales contiguas, cada 100 ticks | | 11 506 | 11 121 | +385 +- 72 | 76 % | | |
+| 10 bloques reales sin solapar | | 11 389 | 11 043 | +346 +- 321 | 70 % | | |
+
+Los puntos (dH3a y dH3b) son del torneo con el campo mixto y 10 rivales, con 5000 series de cada largo (`build/zscore/arnes hipotesis` sobre lotes armados con esos trozos). **La observación de Nicolás se reproduce**: desde 250 ticks el signo cambia y crece con el largo del trozo.
+
+Cuidado con los errores de las filas de trozos largos: todas las series salen de la misma práctica, que tiene solo 20 000 / trozo pedazos distintos. Con trozos de 1000 hay 19, así que mil series no son mil muestras independientes y el error real es mucho mayor que el de la tabla. La única fila con muestras independientes de verdad es la de los 10 bloques: +346 +- 321, un error.
+
+**Ajuste en una mitad, prueba en la otra.** Con trozos largos el remuestreo se parece cada vez más a la serie con que se eligieron los parámetros, así que la tabla anterior no separa estructura real de sobreajuste. Para separarlos se eligen los parámetros de las dos reglas en una mitad de la práctica (la mejor media en sus 5 bloques, 27 combinaciones de `zscore` y 8 de reversión) y se prueban en la otra:
+
+| Ajuste en | Elegidas | Prueba: 5 bloques | Trozo 50 | Trozo 250 | Trozo 1000 |
+|-----------|----------|-------------------|----------|-----------|------------|
+| Primera mitad | `zscore` z 2,5 con desviación de 128; reversión entra 4, sale 0 | +80 +- 461 | -71 +- 35 | +137 +- 49 | +424 +- 40 |
+| Segunda mitad | `zscore` z 2,25 con desviación de 32; reversión entra 2, sale 0 | +542 +- 445 | +30 +- 58 | +307 +- 62 | +567 +- 61 |
+
+En las dos direcciones `zscore` gana fuera de la mitad de ajuste con trozos largos, y empata con trozos de 50. Eso no se explica solo por haber elegido los parámetros en la misma serie.
+
+**En series del modelo el efecto no aparece.** Con 6 series de 20 000 ticks de `modelo` y de `cambio_volatilidad` como base, remuestreadas con trozos de 50, 250, 1000 y 2000, `max_media` gana siempre (entre -707 y -1 921 para `zscore`) y la diferencia no crece con el trozo. Las razones de varianza de la práctica a 250, 500 y 1000 ticks (0,51, 0,54 y 0,51) están dentro de lo que da el modelo (0,49, 0,46 y 0,44 en promedio), así que no es una reversión lenta que el modelo no tenga. Lo que el modelo no reproduce es otra cosa, que no alcanzamos a identificar; la candidata más probable es cómo se suceden los tramos tranquilos y ruidosos en la práctica (cuatro tramos ruidosos de 457 a 927 ticks, `docs/algoritmo.md`, sección 2), que un trozo de 100 parte en pedazos y uno de 1000 conserva, y a los que `zscore` se adapta porque su banda sigue a la dispersión.
+
+**Qué significa para la decisión.** Las dos lecturas son defendibles:
+
+- Si la serie oculta se parece a la práctica en escalas de cientos de ticks (mismo generador, misma forma de alternar regímenes), la evidencia apunta a que `zscore` le gana a `max_media`: tramos reales contiguos, trozos largos y la prueba por mitades van en la misma dirección, y con trozos de 1000 también en puntos.
+- Si no, el modelo calibrado y los remuestreos cortos dicen que pierde, y por bastante en series volátiles o de precio bajo (sección 4.1).
+
+La evidencia independiente a favor es un error en 10 bloques. La decisión es de Nicolás (`docs/pendientes_nicolas.md`).
+
 ## 5. Por qué gana 40 957 en la práctica
 
-1. **Es la serie con que se eligieron sus parámetros.** En la grilla de 81 puntos sobre la serie de práctica completa, la regla de Vicente es el máximo (`practica.txt`). Sus vecinos inmediatos dan 22 421 (z = 2,75), 37 004 (z = 2,25), 32 873 (memoria de la media 16) y 23 152 (memoria 64). Una cima aislada en la serie de elección, que no se repite fuera de ella, es la firma del sobreajuste (`docs/protocolo.md`, sección 1). `max_media` también se eligió mirando la práctica, pero su vecindario es plano (`docs/protocolo.md`, meseta).
-2. **Veinte mil ticks son una sola trayectoria con interés compuesto.** En los 10 bloques de 2000, la ventaja es +346 +- 321 por bloque: menos de dos errores. Compuesta diez veces sobre la misma trayectoria se convierte en 40 957 contra 25 973.
-3. **Lo que gana en la práctica no aparece en series con la misma estadística.** En las familias plausibles, que salen del modelo ajustado a la práctica, gana el 41 % de las rondas de 2000 ticks y el 26 % de las de 20 000.
+Hay tres causas, y la sección 4.5 obliga a repartir el peso entre ellas de otra forma que la versión del 16/11 de este documento:
+
+1. **Parte es la elección en la misma serie.** En la grilla de 81 puntos sobre la práctica completa, la regla de Vicente es el máximo (`practica.txt`). Sus vecinos inmediatos dan 22 421 (z = 2,75), 37 004 (z = 2,25), 32 873 (memoria de la media 16) y 23 152 (memoria 64). Una cima así de aguda es la firma del sobreajuste (`docs/protocolo.md`, sección 1).
+2. **Veinte mil ticks son una sola trayectoria con interés compuesto.** En los 10 bloques de 2000, la ventaja es +346 +- 321 por bloque. Compuesta diez veces sobre la misma trayectoria se convierte en 40 957 contra 25 973.
+3. **Parte es estructura real de la práctica a escalas de cientos de ticks**, que el remuestreo de trozos de 100 y el modelo calibrado no reproducen (sección 4.5): con parámetros elegidos en una mitad, `zscore` gana en la otra. Lo que no se sabe es si las series ocultas tienen esa estructura.
 
 ## 6. Bandas escaladas con la volatilidad: por qué se descartaron y qué tiene de distinto `zscore` (punto d)
 
@@ -148,7 +187,7 @@ Las series de la semilla 4 no se versionan: `make zscore-series` las genera en `
 
 ## 10. Preguntas que nos pueden hacer
 
-**El algoritmo de Vicente gana 40 957 y el de ustedes 25 973. ¿Por qué compiten con el peor?** Porque 40 957 es el resultado en la serie con que se eligieron sus parámetros. Su vecino a 2,75 desviaciones da 22 421. En series que no se usaron para elegir pierde: gana el 41 % de las rondas de 2000 ticks en las familias que imitan la práctica, y en el torneo pierde 0,09 puntos por ronda.
+**El algoritmo de Vicente gana 40 957 y el de ustedes 25 973. ¿Por qué no usaron la regla que da 40 957 en la práctica?** La respuesta completa está en la pregunta 156 del banco (`docs/defensa/preguntas.md`) y depende de la decisión que se tome (`docs/pendientes_nicolas.md`). Los hechos: 40 957 es el resultado en la serie con que se eligieron sus parámetros, y su vecino a 2,75 desviaciones da 22 421; en los 10 bloques gana +346 +- 321 por bloque; con el criterio fijado antes de medir (remuestreos de 100 ticks y el modelo calibrado) pierde 0,09 puntos por ronda; con trozos de 250 o más y eligiendo en una mitad para probar en la otra, gana (sección 4.5).
 
 **¿Y si la serie oculta es la misma de práctica?** Entonces gana `zscore`. Pero el enunciado prohíbe guardar la serie en el diseño, y elegir los parámetros por su resultado en una serie que después se repite es lo mismo por otro camino.
 
