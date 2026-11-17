@@ -257,9 +257,13 @@ module pochoco_soc #(
     .seg2_o    (seg2)
   );
 
-  // SPI Slave
+  // SPI Slave. Con el barrel (R1 y R2), bit_cnt vuelve a 0 con CS_n en alto:
+  // sin eso, un contador que queda en 7 hace de cada flanco de SCLK con CS_n
+  // en alto un precio, y en R2 el vigilante se dispara (revisión P10,
+  // docs/revision_p10.md, hallazgo 1). Los demás núcleos conservan el
+  // esclavo del curso tal cual.
   wire spi_precio, spi_decision_wr, spi_cs_activo;
-  pochoco_spi_slave u_spi (
+  pochoco_spi_slave #(.CsLimpia(Pipeline == 3)) u_spi (
     .clk_i      (clk),
     .rst_ni     (rst_ni),
     .sel_i      (spi_sel),

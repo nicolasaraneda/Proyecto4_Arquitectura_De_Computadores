@@ -870,7 +870,7 @@ p10-largo:
 p10-sclk-degradado:
 	tools/p10/sclk_degradado.sh
 p10-formal-spi:
-	tools/p10/formal_spi.sh
+	CSLIMPIA=1 tools/p10/formal_spi.sh
 p10-rondas-sin-reset:
 	mkdir -p docs/mediciones/p10
 	$(PYTHON) tools/p10/rondas_sin_reset.py > docs/mediciones/p10/rondas_sin_reset.txt; \

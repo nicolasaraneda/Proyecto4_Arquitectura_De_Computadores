@@ -9,8 +9,17 @@
 // - Nicolás Villegas <navillegas@miuandes.cl>
 //
 // This is a WORK IN PROGRESS module. It is provided "AS IS", without warranty of any kind.
+//
+// Modificado para el Proyecto 4 por Nicolás Araneda, Vicente Calderón y
+// Santiago Muñoz: salidas para el vigilante, y con CsLimpia = 1 bit_cnt vuelve
+// a 0 con CS_n en alto (revisión P10, docs/revision_p10.md, hallazgo 1).
 
-module pochoco_spi_slave (
+module pochoco_spi_slave #(
+  // 1: bit_cnt vuelve a 0 con CS_n en alto (arreglo P10). 0: el esclavo del
+  // curso tal cual. El SoC lo pone en 1 solo con el barrel (R1 y R2); R0
+  // conserva el esclavo original.
+  parameter CsLimpia = 0
+) (
   input  wire        clk_i,
   input  wire        rst_ni,
 
@@ -89,6 +98,15 @@ module pochoco_spi_slave (
       if (sclk_f) begin
         tx_shift <= {tx_shift[6:0], 1'b0};
       end
+    end else if (CsLimpia != 0) begin
+      // Arreglo propuesto en la revisión P10 (docs/revision_p10.md, hallazgo
+      // 1): con CS_n en alto no hay byte en curso. Sin esto bit_cnt conserva
+      // su valor, y si queda en 7 (transacción de 7 flancos, o reset que
+      // termina a mitad de una) cada flanco de SCLK con CS_n en alto es un
+      // precio. Solo cambia lo que pasa desde el segundo ciclo con CS_n en
+      // alto: un octavo flanco que se ve en el mismo ciclo en que sube CS_n
+      // sigue completando el byte, como antes.
+      bit_cnt <= 4'd0;
     end
   end
 
