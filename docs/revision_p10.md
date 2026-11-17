@@ -52,7 +52,7 @@ Hoy el medidor del 26/11 no puede ver esa condición (hallazgo 2).
 
 **Reproducción.** Lectura del código. En la rama `p10-arreglo-2` el testbench del medidor tiene el caso nuevo; con el módulo de `main` ese caso falla (es el control negativo `sin_alarma_cs_alto` de `tools/medidor.sh`).
 
-**Arreglo propuesto: rama `p10-arreglo-2`, commit `ff61971`.** LED4 se enciende también con un flanco de subida de SCLK con `CS_n` en alto. `make medidor` en la rama: 68 comprobaciones sin fallas, 5 de 5 controles negativos detectados, 10 de 10 semillas a 25 MHz (mínima 110,01 MHz, 610 celdas), el mismo testbench sobre el bitstream ruteado, y `bitstreams/medidor_spi.bin` nuevo con su hash. `docs/checklist_26nov.md` explica la nueva lectura de LED4. El medidor no es hardware de competencia: este arreglo no toca ningún peldaño. La alarma por modo 3 (observación 4) se agregó después y su resultado está en la sección 3.2.
+**Arreglo propuesto: rama `p10-arreglo-2`, commits `ff61971` y `d88c748`.** LED4 se enciende también con un flanco de subida de SCLK con `CS_n` en alto, y con SCLK en alto al bajar `CS_n` (observación 4). `docs/checklist_26nov.md` explica la nueva lectura de LED4. El medidor no es hardware de competencia: este arreglo no toca ningún peldaño. Resultados en la sección 3.3.
 
 ### Observaciones
 
@@ -125,13 +125,13 @@ No se repitió la puerta completa con el arreglo: cambia el hardware de R1 y R2,
 | `make p10-spi-7flancos` | 6 de 6 casos: cero precios fantasma y ningún disparo del vigilante |
 | `make p10-formal-spi` (`CSLIMPIA=1`) | Prueba por inducción y cover alcanzable. Con `CsLimpia = 0` la misma prueba falla, como en `main` |
 | `make tb` (R0, comando oficial sin definiciones) | 4/4, peor caso 44 ciclos |
-| `tools/fondo/oficial.sh` con R1 y con R2 | ARREGLO_OFICIAL |
+| `tools/fondo/oficial.sh` con R1 y con R2 (testbench oficial sin modificar) | 4/4 en los dos, peor caso 443 ciclos, `decisiones.csv` idéntico al de `ref/fondo.py` |
 
-Falta, si se adopta: `make fondo-puerta` y `make fondo-criterio5` con `HW=r1` y `HW=r2`, `make fondo-bitstreams` con `GUARDAR=1`, las autopruebas de R1 y R2, los moldes y el kit de contingencia de R1 y R2, y la puerta de placa. R0 no cambia.
+Lo de arriba corrió sobre `b99205d`, salvo `p10-spi-7flancos`, `p10-formal-spi` y `make tb`, que corrieron sobre la misma versión del RTL antes del commit. No se corrió: timing de R1 y R2 con el arreglo, matriz de estrés, degradación, fases, series ni criterio 5. Falta, si se adopta: `make fondo-puerta` y `make fondo-criterio5` con `HW=r1` y `HW=r2`, `make fondo-bitstreams` con `GUARDAR=1`, las autopruebas de R1 y R2, los moldes y el kit de contingencia de R1 y R2, y la puerta de placa. R0 no cambia.
 
 ### 3.3 Arreglo 2 (rama `p10-arreglo-2`)
 
-ARREGLO2
+Dos commits: `ff61971` (LED4 con flancos de SCLK con `CS_n` en alto) y `d88c748` (LED4 también si SCLK está en alto al bajar `CS_n`). `make medidor` sobre `d88c748`, por la cola: 70 comprobaciones sin fallas, 6 de 6 controles negativos detectados (uno por cada alarma nueva), 10 de 10 semillas a 25 MHz (627 celdas, mínima 112,52 MHz), y el mismo testbench sobre el bitstream ruteado sin fallas. `bitstreams/medidor_spi.bin` de la rama tiene sha256 `09bc30b5...`, con `SHA256SUMS`, `bitstreams/README.md` y `docs/checklist_26nov.md` al día. No toca ningún peldaño.
 
 ## 4. Pruebas agregadas
 
