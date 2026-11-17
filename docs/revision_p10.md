@@ -97,7 +97,41 @@ Con series del mismo generador la pérdida media es chica (menos de 1 %), pero l
 
 ## 3. Puerta de simulación repetida desde cero
 
-PENDIENTE: se completa al terminar las corridas.
+### 3.1 R1 y R2, sin cambios en el diseño
+
+Se repitió entera, el 17/11, con el RTL, el programa y la tabla de `main` (`sw/fondo.s` sha256 `19773517830a2e16...`, `sw/fondo_tabla.hex` sha256 `f792588c9cc823cb...`), con 4 procesos por corrida. La máquina se cayó dos veces durante la primera noche y se perdieron las corridas en curso; las de esta tabla se hicieron después, una a la vez por la cola de la máquina. Comandos: `make fondo-puerta HW=r1` (53 min), `make fondo-puerta HW=r2` (60 min), `make fondo-criterio5 HW=r1` (13 min) y `HW=r2` (25 min), y `make fondo-bitstreams` (10 min).
+
+**Cada archivo que escriben esos objetivos en `docs/mediciones/fondo/r1/` y `r2/` quedó idéntico al versionado, salvo la línea "Commit de partida" y, en el criterio 5, el tiempo de simulación.** Los dos `timing.txt` no tienen esa línea y quedaron byte por byte iguales. En `docs/mediciones/fondo/bitstreams.txt` cambian además los tiempos de `icebram` (0,09 s en vez de 0,26 s). Por eso cada resultado de abajo coincide con el registrado en `docs/puertas.md`. Además, **los bitstreams reconstruidos son byte por byte los guardados**: `r1.bin`, `r2.bin` y `r2_multi.bin` de `build/fondo/bitstreams/` tienen el sha256 de `bitstreams/r1_fondo.bin` (`b61c8dc0...`), `r2_fondo_vigilante.bin` (`a9c107a1...`) y `r2_multi.bin` (`29365357...`).
+
+| N.º | Criterio | R1 ahora | R2 ahora | Registrado en `docs/puertas.md` |
+|-----|----------|----------|----------|------|
+| 1 | Testbench oficial sin modificar | 4/4, peor caso 443 de 2262, `decisiones.csv` idéntico a `ref/fondo.py` | Igual | Igual en los dos |
+| 2 | Equivalencia con la referencia | 21 de 21 casos: práctica a 0,1, 1 y 10 ms por la copia del oficial (4/4 en las tres) y por `tb_fondo`, más una serie de 20 000 ticks de cada una de las 15 familias; 1 050 de 1 050 series sintéticas (2,1 millones de ticks) | Igual | Igual en los dos |
+| 3 | Timing en 10 semillas | 10 de 10; 1029 celdas, 13 BRAM, mínima 51,59 MHz, mediana 52,57 | 10 de 10; 1045 celdas, 13 BRAM, mínima 47,86 MHz, mediana 50,33 | Igual en los dos |
+| 4 | Peor caso barriendo la fase | 444 sano y 568 con el plazo agotado, contra 1131 | Igual | Igual en los dos |
+| 5 | Core en la configuración exacta | 7 974 963 instrucciones en 20 600 programas, 92,80 % distintas, cero diferencias; 6 de 6 mutaciones de la extensión, 21 de 21 del barrel, prueba formal de las 3 de `mulstep` | Igual | Igual en los dos |
+| 6 | Degradación | 30 de 30, peor caso 679; 15 de 15 controles negativos | Igual | Igual en los dos |
+| 7 | Estrés | 56 de 56 | 56 de 56, sin disparo del vigilante | Igual en los dos |
+| 8 | Bitstream simulado desde el `.asc` | 2000 ticks idénticos en las dos series (práctica y reversión); otra tabla puesta con `icebram` también idéntica | 2000 ticks idénticos en las dos series, sin disparo; con el supervisor colgado, BOOT con S1 S0 = 01 al terminar la transacción 105 (quinta sin respuesta); imagen múltiple correcta | 2000 ticks idénticos en dos series; en R2 sin disparo, y disparo correcto con el supervisor colgado |
+
+Un detalle que no cambia nada: en la matriz de R2 la cuenta del vigilante llega a 2 en dos casos de exploración (períodos de 11,5 y 13,5 us, fuera de la puerta). En todos los casos de la puerta queda en 1 o menos, como dice `docs/puertas.md`.
+
+### 3.2 Arreglo 1 (rama `p10-arreglo-1`)
+
+No se repitió la puerta completa con el arreglo: cambia el hardware de R1 y R2, y la puerta completa de los dos cuesta unas 4 horas de máquina. Se corrió lo que muestra que el arreglo hace lo que dice y no rompe el comando oficial:
+
+| Prueba | Resultado |
+|--------|-----------|
+| `make p10-spi-7flancos` | 6 de 6 casos: cero precios fantasma y ningún disparo del vigilante |
+| `make p10-formal-spi` (`CSLIMPIA=1`) | Prueba por inducción y cover alcanzable. Con `CsLimpia = 0` la misma prueba falla, como en `main` |
+| `make tb` (R0, comando oficial sin definiciones) | 4/4, peor caso 44 ciclos |
+| `tools/fondo/oficial.sh` con R1 y con R2 | ARREGLO_OFICIAL |
+
+Falta, si se adopta: `make fondo-puerta` y `make fondo-criterio5` con `HW=r1` y `HW=r2`, `make fondo-bitstreams` con `GUARDAR=1`, las autopruebas de R1 y R2, los moldes y el kit de contingencia de R1 y R2, y la puerta de placa. R0 no cambia.
+
+### 3.3 Arreglo 2 (rama `p10-arreglo-2`)
+
+ARREGLO2
 
 ## 4. Pruebas agregadas
 

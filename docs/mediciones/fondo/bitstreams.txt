@@ -5,7 +5,7 @@ Herramientas:
   Yosys 0.68+195 (git sha1 435977e97-dirty, Release, Clang /usr/bin/clang++ 21.1.8)
   "nextpnr-ice40" -- Next Generation Place and Route (Version nextpnr-0.11.1-19-g8dbcee5c)
   Icarus Verilog version 14.0 (devel) (s20260301-403-g5ab23063f-dirty)
-Commit de partida: 05b3b7e (rama p5-tabla-vigilante)
+Commit de partida: 66e3855 (rama p10-revision)
   Verilator 5.053 devel rev v5.052-22-g7cf8c5cca (mod)
 R1: -DESPINO_BARREL -DESPINO_XD_EMAD -DESPINO_XD_DEVK -DESPINO_TABLA
 R2: -DESPINO_BARREL -DESPINO_XD_EMAD -DESPINO_XD_DEVK -DESPINO_TABLA -DESPINO_VIGILANTE
@@ -22,8 +22,8 @@ PASS r1: cierra a 25 MHz
 PASS r2: cierra a 25 MHz
 
 2. icebram sobre el molde (programa y tabla), contra la sintesis directa
-PASS r1: el .asc del molde con icebram es identico al de la sintesis directa (0.26 s con icepack)
-PASS r2: el .asc del molde con icebram es identico al de la sintesis directa (0.24 s con icepack)
+PASS r1: el .asc del molde con icebram es identico al de la sintesis directa (0.09 s con icepack)
+PASS r2: el .asc del molde con icebram es identico al de la sintesis directa (0.09 s con icepack)
 
 3. Criterio 8: bitstream simulado desde el .asc por los pines (Icarus, tb/tb_bitstream.sv), periodo de 0,1 ms
 PASS R1, serie de practica: 2000 ticks identicos a la referencia, patrimonio 9661
@@ -41,7 +41,7 @@ PASS R2, serie de reversion: SB_WARMBOOT no se dispara
   Lineas del .asc que cambian respecto de R1: 2
 PASS R1 con la otra tabla, serie de reversion, contra ref/fondo.py con esos parametros: 2000 ticks identicos a la referencia, patrimonio 15011
   Bytes en que la referencia con la otra tabla difiere de la referencia con la tabla original: 53 de 2000
-  Tiempo de punta a punta (generar la tabla, icebram e icepack): 0.32 s
+  Tiempo de punta a punta (generar la tabla, icebram e icepack): 0.13 s
   sha256 de r1_otra.bin: 7ddf1a0150ab9fcd8a6c1d1abd5e0a369d6ef396b408ad89165d992e823af2bb
 
 5. Vigilante dentro del bitstream de R2: supervisor colgado en el tick 100 (programa puesto con icebram en el molde de R2)
