@@ -1,0 +1,35 @@
+potencia.tcl: esquina max_ss_125C_4v50, modo defecto
+  liberty: /home/nicolasaraneda/.ciel/ciel/gf180mcu/versions/54435919abffb937387ec956209f9cf5fd2dfbee/gf180mcuD/libs.ref/gf180mcu_fd_sc_mcu7t5v0/lib/gf180mcu_fd_sc_mcu7t5v0__ss_125C_4v50.lib
+  netlist: asic/runs/barrel_xd3_t40/final/nl/asic_top_barrel.nl.v
+  sdc:     asic/runs/barrel_xd3_t40/final/sdc/asic_top_barrel.sdc
+  spef:    asic/runs/barrel_xd3_t40/final/spef/max/asic_top_barrel.max.spef
+
+=== clocks ===
+clock clk: periodo 40.000000, propagado 1
+
+MODO defecto: sin actividad anotada (actividad por defecto de OpenSTA en las entradas, propagada)
+
+=== report_activity_annotation ===
+unannotated 61028
+
+=== report_power -corner max_ss_125C_4v50 ===
+Group                    Internal    Switching      Leakage        Total
+                            Power        Power        Power        Power (Watts)
+------------------------------------------------------------------------
+Sequential           3.157142e-02 7.670552e-05 3.399145e-06 3.165152e-02  52.4%
+Combinational        1.413591e-04 7.291125e-05 9.819333e-06 2.240897e-04   0.4%
+Clock                1.481815e-02 1.372583e-02 2.079940e-05 2.856478e-02  47.3%
+Macro                0.000000e+00 0.000000e+00 0.000000e+00 0.000000e+00   0.0%
+Pad                  0.000000e+00 0.000000e+00 0.000000e+00 0.000000e+00   0.0%
+------------------------------------------------------------------------
+Total                4.653094e-02 1.387545e-02 3.401679e-05 6.044040e-02 100.0%
+                            77.0%        23.0%         0.1%
+
+=== sonda: actividad de puertos (densidad 1/s, duty, origen) ===
+sonda puerto clk: 5.00000e+07 0.500 clock
+sonda puerto rst_n: 2.50000e+06 0.500 input
+sonda puerto spi_sclk: 2.50000e+06 0.500 input
+sonda puerto spi_cs_n: 2.50000e+06 0.500 input
+sonda puerto spi_miso: 4.22385e+06 0.098 propagated
+
+=== design_power (W): interna 0.046530935913324356 conmutacion 0.013875446282327175 fuga 3.401678986847401e-5 total 0.06044039875268936 ===
