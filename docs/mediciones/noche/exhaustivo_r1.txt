@@ -1,0 +1,19 @@
+Cobertura de la regla de decision de R1 (sw/fondo.s) con las series exhaustivas de R0
+Generado por tools/exhaustivo/r1.py --rtl 4 --jobs 3.
+24 series largas y 15810 cortas de tools/exhaustivo/r0_cubrir.c, 19534562 ticks. Periodo 30000 ns: se pierden 6 precios en el reset.
+
+1. Cobertura contada con ref/fondo.py (combinaciones (S, pos, p) de cada hilo contra las alcanzables con sus umbrales):
+   supervisor (max_media)   entra   -96, sale   1: 4144770 de 4144770 (100.00 %)
+   gestor 1                 entra   -96, sale   1: 4144770 de 4144770 (100.00 %)
+   gestor 2                 entra  -128, sale   1: 3574305 de 4144515 (86.24 %)
+   gestor 3                 entra   -64, sale  17: 4132787 de 4145025 (99.70 %)
+   Votos de los tres gestores por pesos que llegaron a la decision: 168 combinaciones distintas (4 de 8 votos, 42 juegos de pesos).
+2. Gemelo con el hardware de R1: 24 series largas (19116872 ticks) y 15810 cortas; con algun byte de decision distinto a ref/fondo.py: 0 largas y 0 cortas
+   PASS gemelo
+   PASS RTL serie_11 (226141 ticks): Testbenchs aprobados: 4/4, peor caso 441 de 512, bytes de decision identicos a ref/fondo.py
+   PASS RTL serie_12 (227589 ticks): Testbenchs aprobados: 4/4, peor caso 441 de 512, bytes de decision identicos a ref/fondo.py
+   PASS RTL serie_10 (254169 ticks): Testbenchs aprobados: 4/4, peor caso 441 de 512, bytes de decision identicos a ref/fondo.py
+   PASS RTL serie_13 (255451 ticks): Testbenchs aprobados: 4/4, peor caso 441 de 512, bytes de decision identicos a ref/fondo.py
+3. RTL: 4 de 4 series (963350 ticks) con 4/4 y bytes identicos
+
+Tiempo: 299 s.

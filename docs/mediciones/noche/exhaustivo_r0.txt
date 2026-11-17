@@ -1,0 +1,39 @@
+Verificacion exhaustiva de la regla de decision de R0 (sw/trade.s, max_media)
+Generado por tools/exhaustivo/r0.py --periodo-ns 12000 --rtl --rtl-esquina 300 --jobs 3.
+Series de tools/exhaustivo/r0_cubrir.c: 24 largas y 15810 cortas (la esquina). Periodo 12000 ns: el programa pierde los primeros 14 precios durante el reset.
+
+1. Cobertura, contada con ref/trader.py: 19297052 decisiones en estado conocido, 4144770 combinaciones (S, pos, p) distintas de 4144770 alcanzables (16254 estados por 255 precios); fuera del conjunto alcanzable: 0.
+   PASS cobertura completa
+2. Gemelo, series largas: 24 series, 19116872 ticks; con algun byte de decision distinto a ref/trader.py: 0. Con la contabilidad de 32 bits desbordada (decisiones iguales): serie_00.csv, serie_01.csv
+   Gemelo, esquina: 15810 series cortas; distintas a ref/trader.py: 0
+   PASS gemelo
+3. RTL con Verilator, copia del testbench oficial a 12000 ns: 24 series, 19116872 ticks; con 4/4 y decisiones.csv identico a ref/trader.py: 24
+   PASS ex_r0_00: 3752709 ticks a 12000 ns, Testbenchs aprobados: 4/4, peor caso 44 de 62 ciclos, bytes de decision identicos a ref/trader.py (la contabilidad de 32 bits del testbench se desborda en esta serie)
+   PASS ex_r0_01: 1363260 ticks a 12000 ns, Testbenchs aprobados: 4/4, peor caso 44 de 62 ciclos, bytes de decision identicos a ref/trader.py (la contabilidad de 32 bits del testbench se desborda en esta serie)
+   PASS ex_r0_02: 897922 ticks a 12000 ns, Testbenchs aprobados: 4/4, peor caso 44 de 62 ciclos, bytes de decision identicos a ref/trader.py
+   PASS ex_r0_03: 684715 ticks a 12000 ns, Testbenchs aprobados: 4/4, peor caso 44 de 62 ciclos, bytes de decision identicos a ref/trader.py
+   PASS ex_r0_04: 556381 ticks a 12000 ns, Testbenchs aprobados: 4/4, peor caso 44 de 62 ciclos, bytes de decision identicos a ref/trader.py
+   PASS ex_r0_05: 467711 ticks a 12000 ns, Testbenchs aprobados: 4/4, peor caso 44 de 62 ciclos, bytes de decision identicos a ref/trader.py
+   PASS ex_r0_06: 408240 ticks a 12000 ns, Testbenchs aprobados: 4/4, peor caso 44 de 62 ciclos, bytes de decision identicos a ref/trader.py
+   PASS ex_r0_07: 354642 ticks a 12000 ns, Testbenchs aprobados: 4/4, peor caso 44 de 62 ciclos, bytes de decision identicos a ref/trader.py
+   PASS ex_r0_08: 319624 ticks a 12000 ns, Testbenchs aprobados: 4/4, peor caso 44 de 62 ciclos, bytes de decision identicos a ref/trader.py
+   PASS ex_r0_09: 287358 ticks a 12000 ns, Testbenchs aprobados: 4/4, peor caso 44 de 62 ciclos, bytes de decision identicos a ref/trader.py
+   PASS ex_r0_10: 254169 ticks a 12000 ns, Testbenchs aprobados: 4/4, peor caso 44 de 62 ciclos, bytes de decision identicos a ref/trader.py
+   PASS ex_r0_11: 226141 ticks a 12000 ns, Testbenchs aprobados: 4/4, peor caso 44 de 62 ciclos, bytes de decision identicos a ref/trader.py
+   PASS ex_r0_12: 227589 ticks a 12000 ns, Testbenchs aprobados: 4/4, peor caso 44 de 62 ciclos, bytes de decision identicos a ref/trader.py
+   PASS ex_r0_13: 255451 ticks a 12000 ns, Testbenchs aprobados: 4/4, peor caso 44 de 62 ciclos, bytes de decision identicos a ref/trader.py
+   PASS ex_r0_14: 289060 ticks a 12000 ns, Testbenchs aprobados: 4/4, peor caso 44 de 62 ciclos, bytes de decision identicos a ref/trader.py
+   PASS ex_r0_15: 320643 ticks a 12000 ns, Testbenchs aprobados: 4/4, peor caso 44 de 62 ciclos, bytes de decision identicos a ref/trader.py
+   PASS ex_r0_16: 360425 ticks a 12000 ns, Testbenchs aprobados: 4/4, peor caso 44 de 62 ciclos, bytes de decision identicos a ref/trader.py
+   PASS ex_r0_17: 415089 ticks a 12000 ns, Testbenchs aprobados: 4/4, peor caso 44 de 62 ciclos, bytes de decision identicos a ref/trader.py
+   PASS ex_r0_18: 477937 ticks a 12000 ns, Testbenchs aprobados: 4/4, peor caso 44 de 62 ciclos, bytes de decision identicos a ref/trader.py
+   PASS ex_r0_19: 570805 ticks a 12000 ns, Testbenchs aprobados: 4/4, peor caso 44 de 62 ciclos, bytes de decision identicos a ref/trader.py
+   PASS ex_r0_20: 706614 ticks a 12000 ns, Testbenchs aprobados: 4/4, peor caso 44 de 62 ciclos, bytes de decision identicos a ref/trader.py
+   PASS ex_r0_21: 935389 ticks a 12000 ns, Testbenchs aprobados: 4/4, peor caso 44 de 62 ciclos, bytes de decision identicos a ref/trader.py
+   PASS ex_r0_22: 1451395 ticks a 12000 ns, Testbenchs aprobados: 4/4, peor caso 44 de 62 ciclos, bytes de decision identicos a ref/trader.py
+   PASS ex_r0_23: 3533603 ticks a 12000 ns, Testbenchs aprobados: 4/4, peor caso 44 de 62 ciclos, bytes de decision identicos a ref/trader.py
+   PASS RTL, series largas
+   RTL, esquina: 300 series cortas al azar (semilla 17) de 15810; con 4/4 e identicas: 300
+   PASS RTL, esquina
+
+Tiempo: 1343 s.

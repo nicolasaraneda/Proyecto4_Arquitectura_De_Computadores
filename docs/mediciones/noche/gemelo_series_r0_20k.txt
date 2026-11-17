@@ -1,0 +1,60 @@
+R0: sw/trade.s en el Espino base, en el gemelo digital, contra ref/trader.py
+Generado por tools/fondo/gemelo_series.py (make fondo-gemelo-series). No editar a mano.
+100 series por familia de 20000 ticks, semilla 5, 1500 series en total. Primera transaccion a los 4 us, como el testbench oficial.
+
+Periodo 100000 ns (presupuesto 2262 ciclos, 2 precios perdidos en el reset):
+  familia              series  pasan     ticks    prom   peor
+  remuestreo              100    100   2000000    41.0     44
+  borde_alto              100    100   2000000    41.0     44
+  borde_bajo              100    100   2000000    41.0     44
+  cambio_de_caracter      100    100   2000000    41.0     44
+  cambio_volatilidad      100    100   2000000    41.0     44
+  dos_componentes         100    100   2000000    41.0     44
+  modelo                  100    100   2000000    41.0     44
+  modelo_vecino           100    100   2000000    41.0     44
+  nivel_bajo              100    100   2000000    41.0     44
+  paseo                   100    100   2000000    41.0     44
+  plana                   100    100   2000000    41.0     44
+  reversion               100    100   2000000    41.0     44
+  saltos                  100    100   2000000    41.0     44
+  tendencia               100    100   2000000    41.0     44
+  volatil                 100    100   2000000    41.0     44
+
+Periodo 1000000 ns (presupuesto 24762 ciclos, 1 precios perdidos en el reset):
+  familia              series  pasan     ticks    prom   peor
+  remuestreo              100    100   2000000    41.0     44
+  borde_alto              100    100   2000000    41.0     44
+  borde_bajo              100    100   2000000    41.0     44
+  cambio_de_caracter      100    100   2000000    41.0     44
+  cambio_volatilidad      100    100   2000000    41.0     44
+  dos_componentes         100    100   2000000    41.0     44
+  modelo                  100    100   2000000    41.0     44
+  modelo_vecino           100    100   2000000    41.0     44
+  nivel_bajo              100    100   2000000    41.0     44
+  paseo                   100    100   2000000    41.0     44
+  plana                   100    100   2000000    41.0     44
+  reversion               100    100   2000000    41.0     44
+  saltos                  100    100   2000000    41.0     44
+  tendencia               100    100   2000000    41.0     44
+  volatil                 100    100   2000000    41.0     44
+
+Periodo 10000000 ns (presupuesto 249762 ciclos, 1 precios perdidos en el reset):
+  familia              series  pasan     ticks    prom   peor
+  remuestreo              100    100   2000000    41.0     44
+  borde_alto              100    100   2000000    41.0     44
+  borde_bajo              100    100   2000000    41.0     44
+  cambio_de_caracter      100    100   2000000    41.0     44
+  cambio_volatilidad      100    100   2000000    41.0     44
+  dos_componentes         100    100   2000000    41.0     44
+  modelo                  100    100   2000000    41.0     44
+  modelo_vecino           100    100   2000000    41.0     44
+  nivel_bajo              100    100   2000000    41.0     44
+  paseo                   100    100   2000000    41.0     44
+  plana                   100    100   2000000    41.0     44
+  reversion               100    100   2000000    41.0     44
+  saltos                  100    100   2000000    41.0     44
+  tendencia               100    100   2000000    41.0     44
+  volatil                 100    100   2000000    41.0     44
+
+Ticks comparados: 90000000 (1500 series por 3 periodos). Tiempo del gemelo: 190.4 s en total.
+PASS: 0 corridas con diferencias

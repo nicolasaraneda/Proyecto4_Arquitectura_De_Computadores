@@ -1,0 +1,13 @@
+Verificacion exhaustiva de la regla de decision de R0 (sw/trade.s, max_media)
+Generado por tools/exhaustivo/r0.py --periodo-ns 12000 --jobs 6 --salida docs/mediciones/noche/exhaustivo_r0_gemelo.txt.
+Series de tools/exhaustivo/r0_cubrir.c: 24 largas y 15810 cortas (la esquina). Periodo 12000 ns: el programa pierde los primeros 14 precios durante el reset.
+
+1. Cobertura, contada con ref/trader.py: 19297052 decisiones en estado conocido, 4144770 combinaciones (S, pos, p) distintas de 4144770 alcanzables (16254 estados por 255 precios); fuera del conjunto alcanzable: 0.
+   PASS cobertura completa
+2. Gemelo, series largas: 24 series, 19116872 ticks; distintas a ref/trader.py: 2
+   FAIL build/exhaustivo/series/serie_00.csv
+   FAIL build/exhaustivo/series/serie_01.csv
+   Gemelo, esquina: 15810 series cortas; distintas a ref/trader.py: 0
+   FAIL gemelo
+
+Tiempo: 419 s.
