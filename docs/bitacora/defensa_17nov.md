@@ -1,8 +1,8 @@
-# Bitácora: material de estudio adicional (punto 7 del trabajo autónomo, 17/11)
+# Bitácora: material de estudio adicional (punto 7 de la lista de trabajo, 17/11)
 
 Grupo: Nicolás Araneda, Vicente Calderón y Santiago Muñoz.
 
-Encargo: diagramas de la arquitectura de cada core y del recorrido de un tick por los 4 hilos; guion de 5 minutos y de 1 minuto; tres pruebas de práctica de 15 preguntas del banco con su pauta; una guía por integrante según el plan de estudio. Rama `integra-noche`.
+Objetivo: diagramas de la arquitectura de cada core y del recorrido de un tick por los 4 hilos; guion de 5 minutos y de 1 minuto; tres pruebas de práctica de 15 preguntas del banco con su pauta; una guía por integrante según el plan de estudio. Rama `integra-noche`.
 
 - `docs/defensa/diagramas.md`: el SoC, el Espino base (dos fases), el segmentado (tres etapas en dos ciclos), el barrel (tabla de cuatro hilos por cuatro etapas y camino de datos), un tick por los cuatro hilos del fondo con los ciclos medidos, y el relevo de R2 con el tiempo medido en la placa. En texto, para copiarlos en la pizarra. Cada número tiene su fuente.
 - `docs/defensa/guiones.md`: 1 minuto y 5 minutos (un bloque por integrante en el orden de la pauta, más el cierre). Las frases que cambian si cambia el peldaño o el algoritmo están marcadas con (*).

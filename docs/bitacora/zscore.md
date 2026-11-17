@@ -2,7 +2,7 @@
 
 Grupo: Nicolás Araneda, Vicente Calderón y Santiago Muñoz.
 
-Encargo de Nicolás del 16/11 en la noche, con prioridad sobre el resto de la lista. Rama `zscore`. Decisión de método: T128. Nada de esto toca R0, R1 ni R2.
+Trabajo acordado el 16/11 en la noche, con prioridad sobre el resto de la lista. Rama `zscore`. Decisión de método: T128. Nada de esto toca R0, R1 ni R2.
 
 ## 1. Implementación y equivalencia
 
