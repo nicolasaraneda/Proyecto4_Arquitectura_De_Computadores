@@ -69,7 +69,7 @@ Estas cifras solo están escritas en documentos de texto (`docs/*.md`, `docs/est
 | `docs/defensa/algoritmo.md:89` | +0,04 puntos sobre la regla base a 2 000 ticks | `docs/decisiones.md`, T51 | Sin archivo de medición. |
 | `docs/defensa/extension.md:62` a `:64`, `:83`; `preguntas.md:391` y `:399` | k variable: 51,6 a 39,2 MHz y unas 160 celdas; `ema` de 60 a 167 celdas contra 37; multiplicador de 1338 celdas; 35 instrucciones por gestor | `docs/extension_isa.md`, secciones 4 y 12 (medido en la factibilidad) | Hay cifras parecidas en `factibilidad/d_isa/mediciones/`, pero no se encontró cada una de forma exacta. |
 | `docs/defensa/segmentado.md:40` | "16 000 flip-flops" | `docs/decisiones.md`, T34 | Aproximación (512 × 32 = 16 384). |
-| `README.md:180` | `retune` con las reglas publicadas reproduce R0, R1 y R2 byte por byte | Solo la salida de `make retune-control` | No hay archivo en `docs/mediciones/p8/`. El comando se corrió en esta auditoría (ver `docs/auditorias/clon_limpio.md`). |
+| `README.md:180` | `retune` con las reglas publicadas reproduce R0, R1 y R2 byte por byte | Solo la salida de `make retune-control` | No hay archivo en `docs/mediciones/p8/`. El comando se corrió en esta auditoría y la afirmación se cumple: los cuatro `.bin` tienen el sha256 de `bitstreams/` (`docs/auditorias/clon_limpio.md`, paso 30). |
 
 ## 6. Lo que sí se comprobó y calza
 

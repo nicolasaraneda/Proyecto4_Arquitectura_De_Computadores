@@ -42,7 +42,7 @@ La prueba se hizo dos veces. La primera corrida (madrugada del 17/11) llegó has
 | 19 | `:84` | `python3 ref/fondo.py tb/practica.csv -o build/ref_fondo.csv` | 2.ª | Funciona | 0,1 s | Patrimonio 26 388, 614 órdenes, pesos finales 6/6/4. Misma observación que el 18 sobre `build/`. |
 | 20 | `:85` | `make test-ref test-fondo` | 2.ª | Funciona | 2,6 s | Compila `build/gemelo` con `cc`; 23 y 8 tests, OK. |
 | 21 | `:88` | `make algoritmo` | | No corrido | | Documentado en unos 3 minutos (`docs/comandos.md:20`); reescribe 13 archivos de `docs/mediciones/`. Ver sección 4. |
-| 22 | `:95` | `cd bitstreams && sha256sum -c SHA256SUMS && cd ..` | 2.ª | Funciona | < 0,1 s | Los 12 archivos dicen OK. |
+| 22 | `:95` | `cd bitstreams && sha256sum -c SHA256SUMS && cd ..` | 2.ª | Funciona | < 0,1 s | Los 17 archivos de `SHA256SUMS` dicen OK. |
 | 23 | `:96` y `:97` | `iceprog bitstreams/r1_fondo.bin`; `iceprog -b bitstreams/r2_multi.bin` | | No ejecutable en este entorno | | Necesita la placa conectada por USB (y `usbipd` en WSL). |
 | 24 | `:105` | `make bin` | 2.ª | Funciona | 5,5 s | Yosys, nextpnr e icepack; 42,49 MHz con la semilla por defecto (pasa a 25 MHz); 2 advertencias por las restricciones `i_UART_RX` y `o_UART_TX` de `goboard.pcf` sin uso. El `.bin` (sha256 `4c1d845f...`) **no es** el `bitstreams/r0_base_max_media.bin` guardado (`67f6f1c4...`, 44,6 MHz). Ver H7. |
 | 25 | `:106` | `make prog` | | No ejecutable en este entorno | | Llama a `iceprog`. |
@@ -50,7 +50,7 @@ La prueba se hizo dos veces. La primera corrida (madrugada del 17/11) llegó has
 | 27 | `:108` | `make fondo-bitstreams` | | (en la cola) | | Documentado en unos 25 minutos en el `Makefile` (comentario sobre el objetivo); el README no lo dice. |
 | 28 | `:111` | `make sim-bitstream` | | No corrido | | Documentado en unos 8 minutos en el `Makefile`. |
 | 29 | `:119` | `make tabla-3-1` | 2.ª | Funciona | 0,1 s | Reescribe `docs/mediciones/tabla_3_1.txt` idéntico (sin diferencias en `git status`). |
-| 30 | `:179` | `make retune-control` | | (en la cola) | | |
+| 30 | `:179` | `make retune-control` | 2.ª | Funciona | 1,2 s | "PASS control: con las reglas publicadas no cambia nada"; arma R0, R1, R2 y la imagen múltiple con `icebram` y los cuatro `.bin` tienen el mismo sha256 que los de `bitstreams/` (confirma `README.md:180`). Avisa que los `.asc` no se simularon por los pines (eso es `--simular`). |
 | 31 | `:173` | `make p7-rapido` | 2.ª | Funciona | 0,2 s | "282 macros en docs/mediciones/p7/cifras.tex"; todos los archivos de `docs/mediciones/p7/` quedan idénticos. |
 | 32 | `:185` | `make report` | 2.ª | Funciona | 3,3 s | "62 cifras y tablas en informe/generado/"; sin LaTeX no compila el PDF y lo avisa. Solo cambia `informe/generado/peldano.tex` (el commit impreso). Ver H4. |
 
@@ -98,7 +98,7 @@ Por la regla de esta auditoría (los comandos pesados se corren de a uno por la 
 
 ## 5. Resumen
 
-- Comandos distintos corridos: 21 (12 en la primera corrida y 17 en la segunda, 8 de ellos repetidos). Funcionaron todos menos uno.
+- Comandos distintos corridos: 22 (12 en la primera corrida y 18 en la segunda, 8 de ellos repetidos). Funcionaron todos menos uno.
 - Comando que falló: `python3 tools/pochoasm.py sw/fondo.s -o build/fondo/fondo.hex` (`README.md:56`), en las dos corridas.
 - Hallazgos: 1 error (H1) y 6 sugerencias (H2 a H7).
 - No corridos: 26 comandos del README, por la regla de la cola; 3 no ejecutables en este entorno.
