@@ -29,3 +29,13 @@ Regla de elección escrita antes de mirar la vista de parada: las tres mejores p
 (Entra 2, sale +0,5 quedó fuera: pierde en H3b a 2000 ticks.)
 
 La semilla 5 no se había usado. Se corre una vez: criterio de corte en el campo `variados` y en el mixto, a los dos largos con la vista de parada, duelo cabeza a cabeza y el protocolo de `ref/protocolo.py`.
+
+## 4. Semilla 5 (corrida una vez, 17/11, por la cola de trabajos pesados)
+
+`docs/mediciones/generador_b/reservada_s5.txt`, `duelo_n2000_s5.txt`, `duelo_n20000_s5.txt`. La primera corrida murió con la caída de WSL después de la primera de seis filas; se repitió entera (es determinista: la fila que se alcanzó a ver es igual).
+
+- Entra 2,5, sale +0,5: no pasa en `variados` (a 2000 ticks el percentil 5 de H3b baja), no pasa en el mixto.
+- Entra 2,5, sale 0: no pasa en ninguno.
+- **Entra 3, sale +0,5: pasa en `variados`** (las cuatro filas), no pasa en el mixto (H3a -0,011 y -0,019).
+- Protocolo: las tres pierden en los bloques y en los remuestreos y ganan en las familias plausibles.
+- Cierre: T131, `docs/generador_b.md`.

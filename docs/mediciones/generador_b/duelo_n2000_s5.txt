@@ -1,0 +1,28 @@
+Duelo cabeza a cabeza contra max_media: rondas de 2000 ticks, semilla 5.
+Generado por ref/zscore/duelo.py --largo 2000 --semilla 5 --candidatas param:k=5,E=80,X=16;param:k=5,E=80,X=0;param:k=5,E=96,X=16 --salida docs/mediciones/generador_b/duelo_n2000_s5.txt.
+ronda: P(candidata > referencia) en una serie. competencia: P(suma de tres rondas mayor). 2 de 3: P(gana al menos dos rondas). +-: error estandar binomial.
+
+--- bloques de practica, todas: 10 series ---
+candidata                                 ronda    +- empate | tríos compet.    +- 2 de 3    +- |  W media    W ref
+param:k=5,E=80,X=16                       30.0% 14.5   0.0% |     3   66.7% 27.2  33.3% 27.2 |    10840    11043
+param:k=5,E=80,X=0                        50.0% 15.8   0.0% |     3   66.7% 27.2  33.3% 27.2 |    11036    11043
+param:k=5,E=96,X=16                       40.0% 15.5   0.0% |     3   33.3% 27.2  33.3% 27.2 |    10869    11043
+
+--- remuestreo, todas: 5000 series ---
+candidata                                 ronda    +- empate | tríos compet.    +- 2 de 3    +- |  W media    W ref
+param:k=5,E=80,X=16                       49.0%  0.7   0.0% |  1666   46.0%  1.2  48.4%  1.2 |    10787    10840
+param:k=5,E=80,X=0                        47.0%  0.7   0.1% |  1666   45.0%  1.2  46.0%  1.2 |    10809    10840
+param:k=5,E=96,X=16                       51.3%  0.7   0.6% |  1666   47.4%  1.2  51.1%  1.2 |    10801    10840
+
+--- plausibles, todas: 10000 series ---
+candidata                                 ronda    +- empate | tríos compet.    +- 2 de 3    +- |  W media    W ref
+param:k=5,E=80,X=16                       58.7%  0.5   0.1% |  3333   61.3%  0.8  62.4%  0.8 |    11181    11047
+param:k=5,E=80,X=0                        53.8%  0.5   0.1% |  3333   55.6%  0.9  55.4%  0.9 |    11097    11047
+param:k=5,E=96,X=16                       58.4%  0.5   1.8% |  3333   60.3%  0.8  62.5%  0.8 |    11114    11047
+
+--- estres, todas: 7000 series ---
+candidata                                 ronda    +- empate | tríos compet.    +- 2 de 3    +- |  W media    W ref
+param:k=5,E=80,X=16                       57.0%  0.6   0.1% |  2333   57.9%  1.0  58.1%  1.0 |    13491    12875
+param:k=5,E=80,X=0                        54.8%  0.6   0.2% |  2333   55.1%  1.0  55.8%  1.0 |    13199    12875
+param:k=5,E=96,X=16                       56.2%  0.6   3.3% |  2333   57.4%  1.0  58.8%  1.0 |    13130    12875
+
