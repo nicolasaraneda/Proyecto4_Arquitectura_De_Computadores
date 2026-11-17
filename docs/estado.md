@@ -4,6 +4,24 @@ Se actualiza al cerrar cada tramo de trabajo. La versión anterior queda en el h
 
 ## Tramo 15: trabajo autónomo del 16 al 17/11 (en curso)
 
+### Estado al 17/11 en la mañana (después de dos caídas de WSL)
+
+| Punto | Estado | Dónde |
+|-------|--------|-------|
+| 0. Placa del 16/11 | Hecho, en `main` | `docs/mediciones/placa_16nov.md`, `docs/puertas.md` |
+| Prioritario: `zscore` | Hecho; corregido el 17/11 con el largo del trozo (T130). Falta la decisión de Nicolás | `docs/zscore.md`, `docs/pendientes_nicolas.md` |
+| 1. Revisión adversarial P10 | Hallazgos escritos (ninguno crítico ni alto; uno medio en el esclavo SPI del curso); repitiendo la puerta | rama del agente, `docs/revision_p10.md` |
+| 2. Campañas largas | Barrel 50,8 M de instrucciones y gemelo 90 M de ticks por peldaño: PASS. Exhaustivo de R0: cobertura completa y gemelo PASS; RTL en la cola | rama `campanas-noche` |
+| 3. Auditorías | Informe contra enunciado escrito; el resto en curso | rama `auditorias` |
+| 4. ASIC del barrel | Envoltorio y scripts listos; equivalencia y síntesis en la cola | rama `asic-barrel` |
+| 5. Banco de contingencia | Cinco juegos nuevos en la cola | rama `contingencia-ampliada` |
+| 6. `make ensayo` | Hecho: 9 de 9 con 4/4 | `docs/mediciones/ensayo.txt` |
+| 7. Material de estudio | Hecho: diagramas, guiones, tres pruebas con pauta, guías por integrante | `docs/defensa/` |
+| A. Registrador | RTL, testbench y herramienta listos; la corrida completa en la cola | rama `registrador` |
+| B. Generador | Semilla 0 hecha; semilla 5 en la cola | rama `generador` |
+
+Lo pesado corre de a un trabajo por vez con una cola global (`flock`), revisando el espacio libre antes de cada uno. `main` no se pudo avanzar a `integra-noche` (CI en verde) porque esta sesión no tiene permiso para empujar a `main`.
+
 ### Resultado de la tarea prioritaria: la regla `zscore` de Vicente
 
 **No reemplaza a `max_media`.** Rama `zscore`, documento de estudio `docs/zscore.md`, decisiones T128 y T129, mediciones en `docs/mediciones/zscore/`.
