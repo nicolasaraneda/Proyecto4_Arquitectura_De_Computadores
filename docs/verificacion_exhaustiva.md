@@ -54,7 +54,12 @@ Resultado: 24 series largas con 19 116 872 precios y 15 810 cortas con 417 690. 
 |--------|-----------|
 | Cobertura, contada con la referencia | 4 144 770 de 4 144 770 combinaciones; ninguna fuera del conjunto alcanzable |
 | Gemelo (Espino base con `sw/trade.hex`), 12 us por precio | Las 24 series y las 15 810 cortas: todos los bytes de decisión iguales a `ref/trader.py` |
-| RTL con Verilator, copia del testbench oficial a 12 us | (ver el archivo de mediciones) |
+| RTL con Verilator, copia del testbench oficial a 12 us | Las 24 series largas (19 116 872 ticks): 4/4 en cada una, peor caso 44 ciclos de 62, todos los bytes de decisión iguales a `ref/trader.py` |
+| RTL, esquina (300 de las 15 810 series cortas, al azar con semilla 17) | 300 de 300 con 4/4 e idénticas |
+
+**Qué cubre el RTL y qué no.** Las 24 series largas recorren todas las combinaciones salvo la esquina S ≥ 8129, a la que solo se llega con 255 como primer precio. Esa esquina está entera en el gemelo (15 810 series) y en una muestra de 300 por el RTL; el gemelo está validado ciclo a ciclo contra el RTL (`make cosim`). Correr las 15 810 por el RTL cuesta una compilación de Verilator por serie y no agrega una combinación nueva.
+
+**Dos errores de las herramientas, no del diseño, encontrados al correr el RTL.** (1) El testbench oficial guarda la serie en `int precio [20000]`: con series más largas Verilator pliega los índices y la simulación manda otros precios. La copia que usa `r0.py` cambia también ese arreglo (`int precio [NTICKS]`) y comprueba que no cambia ninguna otra línea. (2) El gemelo, en modo lote, lee cada serie con un búfer de 4 MB por línea y corta las series largas; `r1.py` las corre con `--serie`. Los dos se corrigieron antes de tomar los resultados de esta tabla. Además, la primera versión de la cobertura juntaba los mapas de bits de todas las series en memoria (8 GB en R0, más de 30 GB en R1); ahora se acumulan a medida que llegan.
 
 **Un detalle de la comparación.** En dos de las series (las de precios bajos) el testbench y el gemelo desbordan el patrimonio: lo llevan en enteros de 32 bits, como el testbench oficial, y una serie que compra a 1 y vende a 253 millones de veces llega a más de 2 147 483 647. La referencia en Python no tiene ese límite. Por eso se comparan los bytes de decisión, que es lo que se verifica, y no las columnas de contabilidad. En la competencia no puede pasar: con 63 acciones por orden y 20 000 ticks el patrimonio no sale de unos pocos millones.
 
