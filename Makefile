@@ -870,3 +870,9 @@ zscore: zscore-arnes zscore-series zscore-validar
 	@echo "Resultados en $(ZSCORE_M)/"
 zscore-reservada: zscore-arnes zscore-series
 	ref/zscore/reservada.sh
+# Ensayo general (docs/checklist_1dic.md): las tres rondas para cada peldaño con series
+# nuevas, por el RTL, mostrando lo que vería la maestra (docs/mediciones/ensayo.txt).
+# Unos 5 minutos con 5 procesos.
+.PHONY: ensayo
+ensayo:
+	$(PYTHON) tools/ensayo.py --jobs 5
