@@ -878,3 +878,16 @@ zscore-reservada: zscore-arnes zscore-series
 .PHONY: ensayo
 ensayo:
 	$(PYTHON) tools/ensayo.py --jobs 5
+
+# === Edición ASIC del barrel (asic/README.md) =================================
+# Necesita Docker con la imagen de LibreLane 3.0.16, el PDK GF180MCU instalado con
+# ciel y, para el cierre y el DRC de KLayout, un clon del Proyecto 3 en P3.
+.PHONY: asic-barrel-equiv asic-barrel-flujo asic-barrel-post asic-barrel-imagen
+asic-barrel-equiv:
+	asic/scripts/equiv_rtl.sh 3 100000 2000 && asic/scripts/equiv_rtl.sh 7 100000 2000
+asic-barrel-flujo:
+	asic/scripts/correr.sh barrel_xd3_t40 3 40 && asic/scripts/correr.sh barrel_xd7_t40 7 40
+asic-barrel-post:
+	asic/scripts/post_barrel.sh barrel_xd3_t40 && asic/scripts/post_barrel.sh barrel_xd7_t40
+asic-barrel-imagen:
+	asic/layout/imagen.sh asic/runs/barrel_xd3_t40
