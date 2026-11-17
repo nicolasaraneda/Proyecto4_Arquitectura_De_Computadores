@@ -75,6 +75,20 @@ El fondo guarda mucho más estado (cuatro posiciones, tres pesos, tres puntajes 
 
 `tools/exhaustivo/r1.py` corre todas las series en el gemelo con el hardware de R1 (a 30 us, porque R1 necesita al menos 26,94 us) y las cuatro series largas más cortas por el RTL. Los números están en `docs/mediciones/noche/exhaustivo_r1.txt`.
 
+| Prueba | Resultado |
+|--------|-----------|
+| Cobertura del supervisor (`max_media`, entra -96, sale 1) | 4 144 770 de 4 144 770 (100 %) |
+| Cobertura del gestor 1 (los mismos umbrales) | 4 144 770 de 4 144 770 (100 %) |
+| Cobertura del gestor 2 (entra -128, sale 1) | 3 574 305 de 4 144 515 (86,24 %) |
+| Cobertura del gestor 3 (entra -64, sale 17) | 4 132 787 de 4 145 025 (99,70 %) |
+| Votación | 168 combinaciones de votos por pesos (4 de los 8 juegos de votos, 42 juegos de pesos) |
+| Gemelo con el hardware de R1, 30 us | Las 24 largas (19 116 872 ticks) y las 15 810 cortas: todos los bytes iguales a `ref/fondo.py` |
+| RTL con Verilator, las 4 series largas más cortas | 963 350 ticks, 4/4 en cada una, peor caso 441 ciclos de 512, bytes iguales a `ref/fondo.py` |
+
+**Por qué el gestor 2 queda en 86 %.** Las series se construyeron para recorrer los estados de la regla de R0. Con entrada a -128 el gestor 2 necesita caídas más profundas para entrar, y las series no se armaron para buscarlas. No es un hueco de la verificación de R0, que es la que compite como respaldo; para R1 es una cobertura alta pero no completa, y así se informa.
+
+**La votación no es exhaustiva.** Los tres gestores comparten la media, así que sus votos están correlacionados: con estas series aparecen 4 de los 8 juegos de votos posibles. La votación con cualquier combinación de votos y pesos se prueba aparte en `make check-fondo` (controles y degradación).
+
 ## 6. Cómo se reproduce
 
 ```bash
