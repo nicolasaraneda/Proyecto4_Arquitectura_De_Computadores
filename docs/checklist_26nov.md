@@ -61,7 +61,7 @@ Es lo primero porque decide entre R0 y R1 (regla 3 del árbol). `medidor_spi.bin
    | 6 | Tiempo libre mínimo entre transacciones, en ciclos | `0xFFFF` en las rondas 1 y 2, `0x08D6` (2262) en la 3 | Es el presupuesto de la respuesta. R1 necesita 444 y R0 44 |
    | 7 | Transacciones contadas | Las de la ronda | Número de precios por ronda (pregunta 1 al ayudante) |
 
-   LED4 encendido significa que alguna transacción no tuvo 8 flancos de SCLK: anotarlo, porque el esclavo del SoC perdería ese precio.
+   LED4 encendido significa que alguna transacción no tuvo 8 flancos de SCLK, que hubo flancos de SCLK con `CS_n` en alto (bus compartido con otro esclavo), o que SCLK estaba en alto al bajar `CS_n` (maestra de modo 2 o 3). Anotarlo: en el primer caso el esclavo del SoC perdería ese precio; en el segundo puede tomar cada flanco como un precio si su contador de bits quedó en 7, lo que en R2 dispara el vigilante (`docs/revision_p10.md`, hallazgo 1); en el tercero la maestra lee la decisión corrida un bit y "vender 63" llega como "comprar 62" (observación 4), y ningún peldaño debe competir sin hablarlo con el ayudante. Para saber cuál de los dos casos es, mirar el PMOD con el osciloscopio o el analizador lógico.
 3. Apretar SW3 (borra), pedir la ronda 2 y repetir. Lo mismo con la ronda 3.
 4. **Decisión inmediata.** Si en la ronda 3 la medida 0 es mayor que 217 (`0x00D9`, es decir, SCLK menor que 115 kHz), o la medida 6 es menor que 600, R1 no tiene margen: se prueba igual, pero el titular es R0 (árbol, reglas 3 y 4).
 
@@ -150,4 +150,4 @@ Respuestas del ayudante: 1 ___ 2 ___ 3 ___ 4 ___ 5 ___ 6 ___ 7 ___ 8 ___ 9 ___
 | R1 y R0 operan distinto en la misma ronda | Puede ser normal en una serie que no es la de práctica | Anotar la serie si se puede y comparar con el gemelo esa noche |
 | R2 cambia a R0 sin falla inyectada | El vigilante se disparó en funcionamiento normal | R2 no compite. Anotar la ronda y el momento |
 | `iceprog` falla | La placa no está conectada a WSL | `usbipd attach --wsl --busid X-Y` en PowerShell, y repetir |
-| LED4 del medidor encendido | Alguna transacción con un número de flancos distinto de 8 | Anotar en qué ronda. Repetir con SW3 para ver si se repite |
+| LED4 del medidor encendido | Alguna transacción con un número de flancos distinto de 8, flancos de SCLK con `CS_n` en alto, o SCLK en alto al bajar `CS_n` | Anotar en qué ronda. Repetir con SW3 para ver si se repite. Si hay flancos con `CS_n` en alto, preguntar al ayudante si el bus es compartido y no competir con R2 sin el arreglo de la rama `p10-arreglo-1` |
