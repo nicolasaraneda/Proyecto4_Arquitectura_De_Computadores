@@ -85,6 +85,19 @@ def gemelo_lote(args):
     return [bytes.fromhex(l.split()[8]) for l in r.stdout.splitlines()]
 
 
+def gemelo_larga(args):
+    """Una serie larga en el gemelo con --serie y --csv, contra ref/fondo.py (bytes de decisión)."""
+    ruta, per, perd = args
+    base = os.path.join(RAIZ, "build", "exhaustivo", "r1", os.path.basename(ruta)[:-4])
+    precios = market.leer_serie(os.path.join(RAIZ, ruta))
+    g = subprocess.run(GEMELO + ["--serie", ruta, "--nticks", str(len(precios)), "--periodo-ns", str(per), "--csv",
+                                 base + "_gemelo.csv", "--callado"], cwd=RAIZ, capture_output=True, text=True)
+    if g.returncode != 0:
+        return False
+    leido = bytes(int(l.split(",")[2], 16) for l in open(base + "_gemelo.csv").read().splitlines()[1:])
+    return leido == bytes(trader.decisiones(precios, fondo.Fondo(), perd))
+
+
 def esperado(args):
     precios, perd = args
     return bytes(trader.decisiones(precios, fondo.Fondo(), perd))
@@ -164,8 +177,13 @@ def main(argv=None):
     pesos = {v[3] for v in votos}
     lineas.append(f"   Votos de los tres gestores por pesos que llegaron a la decision: {len(votos)} combinaciones distintas "
                   f"({len({v[:3] for v in votos})} de 8 votos, {len(pesos)} juegos de pesos).")
-    # 2. gemelo
+    # 2. gemelo. Las series largas van una por una con --serie: el modo lote del gemelo lee
+    # cada serie con un búfer de 4 MB por línea (ref/gemelo/gemelo.c:1002) y una serie de
+    # millones de precios no cabe (así falló la primera corrida). Las cortas van en lotes.
     os.makedirs("build/exhaustivo/r1", exist_ok=True)
+    with Pool(a.jobs) as pool:
+        largas_ok = pool.map(gemelo_larga, [(r, per, perd) for r in largas], chunksize=1)
+    datos_largas, datos = datos[:len(largas)], datos[len(largas):]
     lotes = []
     for i in range(0, len(datos), 400):
         ruta = f"build/exhaustivo/r1/lote_{i:05d}.txt"
@@ -177,7 +195,10 @@ def main(argv=None):
         leidos = [b for parte in pool.map(gemelo_lote, [(r, per) for r in lotes], chunksize=1) for b in parte]
         esperados = pool.map(esperado, [(d, perd) for d in datos], chunksize=4)
     malas = sum(1 for x, y in zip(leidos, esperados) if x != y) + abs(len(leidos) - len(datos))
-    lineas.append(f"2. Gemelo con el hardware de R1: {len(datos)} series; con algun byte de decision distinto a ref/fondo.py: {malas}")
+    malas_largas = sum(1 for ok in largas_ok if not ok)
+    lineas.append(f"2. Gemelo con el hardware de R1: {len(datos_largas)} series largas ({sum(map(len, datos_largas))} ticks) y "
+                  f"{len(datos)} cortas; con algun byte de decision distinto a ref/fondo.py: {malas_largas} largas y {malas} cortas")
+    malas += malas_largas
     lineas.append(f"   {'PASS' if malas == 0 else 'FAIL'} gemelo")
     # 3. RTL
     if a.rtl:
