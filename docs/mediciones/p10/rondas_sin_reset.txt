@@ -1,0 +1,12 @@
+Ronda B fresca contra ronda B seguida de la ronda A sin reiniciar la placa (caja reiniciada)
+Generado por tools/p10/rondas_sin_reset.py. Series de 2000 ticks, 40 pares por grupo.
+
+grupo                            programa   media fresca media seguida dif. media peor dif. mejor dif. pares peor
+modelo seguida de modelo         R1 y R2         10675.8       10613.2      -62.6     -4582        745     16/40
+modelo seguida de modelo         R0              10679.1       10591.6      -87.6     -4582        745     15/40
+modelo seguida de nivel_bajo     R1 y R2         21572.5       19650.3    -1922.3    -57552       5880     26/40
+modelo seguida de nivel_bajo     R0              21580.4       19582.4    -1998.0    -57552       5880     27/40
+nivel_bajo seguida de modelo     R1 y R2         10675.8       10701.1       25.3     -1536       1232     14/40
+nivel_bajo seguida de modelo     R0              10679.1       10627.1      -52.0     -1536       1154     17/40
+modelo seguida de saltos         R1 y R2         13130.4       13325.9      195.5     -2020       4539     17/40
+modelo seguida de saltos         R0              13117.0       13257.8      140.8     -2020       2573     16/40

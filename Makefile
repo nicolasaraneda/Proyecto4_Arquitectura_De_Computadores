@@ -885,3 +885,43 @@ ensayo:
 .PHONY: registrador
 registrador:
 	tools/registrador.sh
+
+# --- Revisión adversarial P10 (docs/revision_p10.md) --------------------------
+# Pruebas que agregó la revisión de R1 y R2. No son parte de check ni de la
+# integración continua: algunas reproducen un defecto y terminan con error a
+# propósito mientras el defecto siga en el RTL.
+#   p10-ro-custom0    tabla de solo lectura, custom-0 sin efecto y bordes de emad
+#                     y devk en el hardware de R1 y R2, con dos controles negativos
+#   p10-spi-7flancos  precios fantasma del esclavo SPI con bit_cnt en 7 y CS_n en
+#                     alto; en R2 disparan el vigilante (reproduce el hallazgo 1)
+#   p10-vuelta-tick   el número de tick de sw/fondo.s da la vuelta (24 bits)
+#   p10-largo         dos rondas de 200 000 ticks por el RTL de R2
+#   p10-sclk-degradado  exploración: SCLK de 105 a 130 kHz a 0,1 ms con un gestor
+#                     colgado o atrasado, por el RTL de R1
+#   p10-formal-spi    propiedad formal del esclavo SPI: un precio solo se completa
+#                     con CS_n en bajo (falla con el RTL de main: hallazgo 1)
+#   p10-rondas-sin-reset  costo de no reiniciar la placa entre rondas, con las
+#                     referencias (docs/mediciones/p10/rondas_sin_reset.txt)
+#   p10-modo-spi      exploración: lo que lee una maestra de modo 0 y de modo 3
+.PHONY: p10 p10-ro-custom0 p10-spi-7flancos p10-vuelta-tick p10-largo p10-sclk-degradado p10-formal-spi \
+        p10-rondas-sin-reset p10-modo-spi
+p10: p10-ro-custom0 p10-vuelta-tick p10-largo p10-sclk-degradado p10-rondas-sin-reset p10-modo-spi \
+     p10-spi-7flancos p10-formal-spi
+p10-ro-custom0:
+	tools/p10/ro_custom0.sh
+p10-spi-7flancos:
+	tools/p10/spi_7flancos.sh
+p10-vuelta-tick:
+	tools/p10/vuelta_tick.sh
+p10-largo:
+	tools/p10/largo.sh
+p10-sclk-degradado:
+	tools/p10/sclk_degradado.sh
+p10-formal-spi:
+	tools/p10/formal_spi.sh
+p10-rondas-sin-reset:
+	mkdir -p docs/mediciones/p10
+	$(PYTHON) tools/p10/rondas_sin_reset.py > docs/mediciones/p10/rondas_sin_reset.txt; \
+	  r=$$?; cat docs/mediciones/p10/rondas_sin_reset.txt; exit $$r
+p10-modo-spi:
+	tools/p10/modo_spi.sh
