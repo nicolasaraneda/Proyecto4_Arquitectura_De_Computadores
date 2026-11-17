@@ -4,23 +4,23 @@ Se actualiza al cerrar cada tramo de trabajo. La versión anterior queda en el h
 
 ## Tramo 15: trabajo del 16 al 17/11 (en curso)
 
-### Estado al 17/11 en la mañana (después de dos caídas de WSL)
+### Estado al 17/11, 14:30
 
 | Punto | Estado | Dónde |
 |-------|--------|-------|
 | 0. Placa del 16/11 | Hecho, en `main` | `docs/mediciones/placa_16nov.md`, `docs/puertas.md` |
 | Prioritario: `zscore` | Hecho; corregido el 17/11 con el largo del trozo (T130). Falta la decisión de Nicolás | `docs/zscore.md`, `docs/pendientes_nicolas.md` |
 | 1. Revisión adversarial P10 | Hecha: ningún hallazgo crítico ni alto; uno bajo a medio en el esclavo SPI del curso (arreglo en `p10-arreglo-1`, sin integrar, decisión 4); puerta de R1 y R2 repetida desde cero, idéntica a la registrada; medidor mejorado (integrado) | `docs/revision_p10.md` |
-| 2. Campañas largas | Barrel 50,8 M de instrucciones y gemelo 90 M de ticks por peldaño: PASS. Exhaustivo de R0: cobertura completa y gemelo PASS; RTL en la cola | rama `campanas-noche` |
+| 2. Campañas largas | Barrel 50,8 M de instrucciones y gemelo 90 M de ticks por peldaño: PASS. Exhaustivo de R0: cobertura completa y gemelo PASS. RTL de R0 y cobertura de R1 de nuevo en la cola: la corrida de R1 llegó a 30,6 GB de memoria y se detuvo a mano (se corrigió la forma de juntar la cobertura) | rama `campanas-noche` |
 | 3. Auditorías | Hechas las cuatro (`docs/auditorias/`): clon limpio 1 error, informe 7, cifras 13, estilo 23. Corregidos todos los errores salvo el PDF del informe en el repositorio (necesita LaTeX) | `docs/auditorias/correcciones.md` |
-| 4. ASIC del barrel | Envoltorio y scripts listos; equivalencia y síntesis en la cola | rama `asic-barrel` |
-| 5. Banco de contingencia | Cinco juegos nuevos en la cola | rama `contingencia-ampliada` |
+| 4. ASIC del barrel | Equivalencia del RTL del macro con `xd` 3 y 7: PASS. El primer flujo completo salió sin reloj (a la configuración le faltaban las perillas del base, incluido `CLOCK_PORT`): DRC y LVS limpios, pero sin timing ni árbol de reloj, no vale. Corregida; los dos flujos de nuevo en la cola | rama `asic-barrel` |
+| 5. Banco de contingencia | Cinco juegos nuevos construidos y simulados por los pines (13 comprobaciones cada uno, PASS). Falta la grilla del árbol (en la cola) | rama `contingencia-ampliada` |
 | 6. `make ensayo` | Hecho: 9 de 9 con 4/4 | `docs/mediciones/ensayo.txt` |
 | 7. Material de estudio | Hecho: diagramas, guiones, tres pruebas con pauta, guías por integrante | `docs/defensa/` |
 | A. Registrador | Hecho: `make registrador` PASS (478 celdas, 10 de 10 semillas, 7 de 7 controles negativos, bitstream ruteado simulado); en el checklist del 26/11 | `docs/registrador.md`, `bitstreams/registrador.bin` |
 | B. Generador | Cerrado (T131): ninguna candidata mejora en todo; la salida a +0,5 pasa solo contra un campo de reversiones, condicionada al 26/11 | `docs/generador_b.md` |
 
-Lo pesado corre de a un trabajo por vez con una cola global (`flock`), revisando el espacio libre antes de cada uno. `main` todavía no avanza a `integra-noche`: lo hace Nicolás. Desde el 17/11 en la tarde la integración continua no corre (GitHub no inicia los trabajos por la facturación de la cuenta); mientras tanto las mismas pruebas se corren en la máquina.
+Lo pesado corre de a un trabajo por vez con una cola global (`flock`), revisando el espacio libre antes de cada uno y deteniendo el trabajo si la memoria disponible baja de 3 GB. `main` todavía no avanza a `integra-noche`: lo hace Nicolás. Desde el 17/11 en la tarde la integración continua no corre (GitHub no inicia los trabajos por la facturación de la cuenta); mientras tanto las mismas pruebas se corren en la máquina.
 
 ### Resultado de la tarea prioritaria: la regla `zscore` de Vicente
 
