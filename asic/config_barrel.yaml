@@ -16,7 +16,7 @@ VERILOG_FILES:
   - dir::rtl/asic_top_barrel.v
   - dir::rtl/pochoco_soc_asic_barrel.v
   - dir::rtl/espino_barrel_regfile.v
-  - dir::../factibilidad/g_asic/rtl/pochoco_mem_asic.v
+  - dir::rtl/pochoco_mem_asic_barrel.v
   - dir::../rtl/pochoco_periph.v
   - dir::../rtl/pochoco_spi_slave.v
   - dir::../rtl/espino_core/espino_alu.v

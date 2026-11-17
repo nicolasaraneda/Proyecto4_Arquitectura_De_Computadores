@@ -8,7 +8,7 @@
 # esclavo SPI son los archivos de rtl/, sin copiar. Las copias modificadas están en
 # asic/rtl/ (el SoC, el tope y el banco de cuatro contextos en flip-flops) y la
 # memoria del programa es la de la edición ASIC del base
-# (factibilidad/g_asic/rtl/pochoco_mem_asic.v). Las ROM del programa y de la tabla
+# (asic/rtl/pochoco_mem_asic_barrel.v). Las ROM del programa y de la tabla
 # se generan desde sw/fondo.s y sw/fondo_tabla.hex.
 A=asic
 GEN=$A/build/gen
@@ -17,7 +17,7 @@ TABLA_ROM=$GEN/pochoco_tabla_rom.v
 FUENTES_REPO="rtl/pochoco_periph.v rtl/pochoco_spi_slave.v \
 rtl/espino_core/espino_alu.v rtl/espino_core/espino_decoder.v \
 rtl/espino_core/espino_load_store_unit.v rtl/espino_core/espino_xd.v \
-rtl/espino_core/espino_barrel_core.v factibilidad/g_asic/rtl/pochoco_mem_asic.v"
+rtl/espino_core/espino_barrel_core.v asic/rtl/pochoco_mem_asic_barrel.v"
 FUENTES_ASIC="$A/rtl/asic_top_barrel.v $A/rtl/pochoco_soc_asic_barrel.v $A/rtl/espino_barrel_regfile.v"
 FUENTES="$FUENTES_ASIC $FUENTES_REPO $ROM $TABLA_ROM"
 export PATH=${OSS_CAD_SUITE:+$OSS_CAD_SUITE/bin:}$PATH

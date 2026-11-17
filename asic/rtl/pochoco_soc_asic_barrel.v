@@ -35,8 +35,9 @@
 //     inicial de un registro (en silicio no hay valores iniciales) y existía
 //     para esperar a las BRAM del iCE40. El reset entra por el puerto rst_ni,
 //     ya sincronizado por asic_top.
-//   - Memoria: pochoco_mem_asic en vez de pochoco_ram (programa en una ROM
-//     combinacional y datos en flip-flops). Desaparecen MemFile y NumWords.
+//   - Memoria: pochoco_mem_asic_barrel en vez de pochoco_ram (programa en una ROM
+//     combinacional y datos en flip-flops que parten en 0 con el reset, como la
+//     BRAM). Desaparecen MemFile y NumWords.
 //   - Variante del core: el parámetro Pipeline vale 0 (Espino base) o 2
 //     (pipeline de 3 etapas con ROM combinacional). La variante 1, que lee
 //     una BRAM en el flanco de bajada, no tiene sentido sin BRAM.
@@ -134,8 +135,9 @@ module pochoco_soc_asic_barrel #(
     .rdata_o (tab_rdata)
   );
 
-  pochoco_mem_asic #(.DataWords(DataWords), .FetchMode(0)) u_ram (
+  pochoco_mem_asic_barrel #(.DataWords(DataWords), .FetchMode(0)) u_ram (
     .clk_i     (clk),
+    .rst_ni    (rst_ni),
     .a_req_i   (instr_req),
     .a_addr_i  (instr_addr),
     .a_rdata_o (instr_rdata),

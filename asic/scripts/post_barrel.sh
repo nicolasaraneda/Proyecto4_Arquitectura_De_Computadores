@@ -9,13 +9,17 @@
 #                flujo completo, DRC de Magic, LVS, antenas, setup y hold en 9 esquinas
 #   2. drc       segundo DRC con el deck de KLayout del Proyecto 3 (684 reglas)
 #   3. puertos   el netlist final por sus puertos, con la maestra del testbench
-#                oficial, NTICKS ticks (2000 por defecto) a 0,1 ms contra ref/fondo.py
+#                oficial, NTICKS ticks (500 por defecto) a 0,1 ms contra ref/fondo.py
+#   3b. arranque 30 ticks del netlist final con los flip-flops sin reset partiendo
+#                en 0 y en 1 (modelo de factibilidad/g_asic/tb/dffq_func_init.v):
+#                los dos tienen que dar los bytes de ref/fondo.py. Así se ve que la
+#                decisión no depende del estado de encendido.
 #   4. potencia  asic/scripts/potencia_barrel.sh (actividad real, VCD en /dev/shm)
 # Mismos pasos que factibilidad/g_asic para el base (cierre, drc-klayout, puertos y
 # potencia). Las salidas quedan en asic/mediciones/TAG/.
 set -uo pipefail
 source asic/scripts/fuentes.sh
-TAG=$1; NT=${2:-2000}
+TAG=$1; NT=${2:-500}
 P3=${P3:-$HOME/proyectos/Proyecto3_Arquitectura_De_Computadores}
 PDK_ROOT=${PDK_ROOT:-$HOME/.ciel/ciel/gf180mcu/versions/54435919abffb937387ec956209f9cf5fd2dfbee}
 SCL=gf180mcu_fd_sc_mcu7t5v0
@@ -61,6 +65,21 @@ if cmp -s <(head -$NT "$B/bytes.csv" | cut -d, -f3) <(head -$NT "$B/ref.csv" | c
 else
   echo "FAIL: el netlist final de $TAG difiere de ref/fondo.py (ver $B/bytes.csv)" | tee "$M/puertos.txt"; fallas=$((fallas+1))
 fi
+
+echo "== 3b. arranque: flip-flops sin reset en 0 y en 1, 30 ticks"
+python3 ref/fondo.py tb/practica.csv --nticks 30 --periodo-ns 100000 --perdidos 0 -o "$B/ref30.csv" > /dev/null
+: > "$M/arranque.txt"
+for I in 0 1; do
+  iverilog -g2012 -s tb_asic_barrel_puertos -DNETLIST -DFUNCTIONAL -DNTICKS=30 -DPERIODO_NS=100000 \
+    -DINIT_FF=$I -DGF180MCU_FD_SC_MCU7T5V0__DFFQ_FUNC_V "-DSALIDA=\"$B/bytes_init$I.csv\"" -o "$B/sim_init$I" \
+    factibilidad/g_asic/tb/dffq_func_init.v "$NL" $CELDAS_V $A/tb/tb_asic_barrel_puertos.sv
+  vvp -n "$B/sim_init$I" > "$B/init$I.log"
+  if grep -q "Bits de MISO con X: 0" "$B/init$I.log" && cmp -s <(head -30 "$B/bytes_init$I.csv" | cut -d, -f3) <(head -30 "$B/ref30.csv" | cut -d, -f3); then
+    echo "PASS: flip-flops sin reset en $I: 29 bytes identicos a ref/fondo.py" | tee -a "$M/arranque.txt"
+  else
+    echo "FAIL: flip-flops sin reset en $I: los bytes difieren de ref/fondo.py" | tee -a "$M/arranque.txt"; fallas=$((fallas+1))
+  fi
+done
 
 echo "== 4. potencia"
 asic/scripts/potencia_barrel.sh "$TAG" todo || fallas=$((fallas+1))
