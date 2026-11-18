@@ -65,7 +65,7 @@ precio) es la respuesta medida menos las fases que van antes de la escritura: no
    sondeo en todo el tick (de 2500 ciclos)            2451.99      613.00     98.1 % del periodo
    Fase mas larga de la respuesta: decidir y armar el byte (28.00 ciclos); del kernel: decidir y armar el byte (28.00).
 
-== R1: barrel, extensión y tabla, sw/fondo.s (4 hilos)
+== R1: barrel, extensión y tabla, el fondo que vota (4 hilos, hasta el 17/11)
    fase                                           ciclos/tick instr./tick  % resp. % kernel
    esperar el precio: deteccion por el sondeo           14.64           -      6.6        -
    leer PRICE                                            4.00        1.00      1.8      1.5

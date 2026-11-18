@@ -38,7 +38,7 @@ programas() {
   $PYTHON tools/pochoasm.py "$B/sw/trade_h0.s" -o "$B/sw/trade_h0.hex" > /dev/null
   $PYTHON tools/barrel/tabla.py 0 sw/xd/trade_xd.s > "$B/sw/trade_xd_h0.s"
   $PYTHON tools/pochoasm.py "$B/sw/trade_xd_h0.s" -o "$B/sw/trade_xd_h0.hex" > /dev/null
-  $PYTHON tools/pochoasm.py sw/fondo.s -o "$B/sw/fondo.hex" > /dev/null
+  $PYTHON tools/pochoasm.py sw/historico/fondo_votos.s -o "$B/sw/fondo.hex" > /dev/null
 }
 
 versiones() {

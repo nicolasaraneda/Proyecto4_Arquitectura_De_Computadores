@@ -84,10 +84,10 @@ VAR = {
     "barrel_xd": dict(nombre="Barrel con emad y devk, sw/xd/trade_xd.s en un hilo", corto="Barrel 1 hilo + ext.",
                       fuente="build/p7/sw/trade_xd_h0.s", ops=OPS_TRADE, ppeak=12.5, ppeak_hw=50.0, hilos=1,
                       macro="BarrelXd"),
-    "r1": dict(nombre="R1: barrel, extensión y tabla, sw/fondo.s (4 hilos)", corto="R1 fondo", fuente="sw/fondo.s",
+    "r1": dict(nombre="R1: barrel, extensión y tabla, el fondo que vota (4 hilos, hasta el 17/11)", corto="R1 fondo", fuente="sw/historico/fondo_votos.s",
                ops=OPS_FONDO, ppeak=50.0, ppeak_hw=50.0, hilos=4, macro="Runo"),
     "r2": dict(nombre="R2: R1 con el vigilante, sw/fondo.s (4 hilos)", corto="R2 fondo + vigilante",
-               fuente="sw/fondo.s", ops=OPS_FONDO, ppeak=50.0, ppeak_hw=50.0, hilos=4, macro="Rdos"),
+               fuente="sw/historico/fondo_votos.s", ops=OPS_FONDO, ppeak=50.0, ppeak_hw=50.0, hilos=4, macro="Rdos"),
 }
 ORDEN = ["r0", "seg", "barrel", "barrel_xd", "r1", "r2"]
 
@@ -154,7 +154,7 @@ def analizar(etq):
     """Ciclos, instrucciones y bytes por tick de cada fase, con el perfil a 0,1 ms."""
     v = VAR["r1" if etq == "r2" else etq]
     filas = leer_perfil("r1" if etq == "r2" else etq)
-    fondo = v["fuente"] == "sw/fondo.s"
+    fondo = v["fuente"].endswith("fondo_votos.s")
     fase, mapa = fuentes.fases_fondo(v["fuente"]) if fondo else fuentes.fases_trade(v["fuente"])
     esc = [d for d in fase if fase[d] == "escribir"]
     nref = sum(n for h, d, w, n, c in filas if h == 0 and d in esc)

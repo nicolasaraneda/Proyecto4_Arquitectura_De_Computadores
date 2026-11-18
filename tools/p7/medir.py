@@ -40,7 +40,7 @@ VARIANTES = [
     ("seg", ["--pipeline"], f"{B}/sw/trade_max_media.hex"),
     ("barrel", ["--barrel"], f"{B}/sw/trade_h0.hex"),
     ("barrel_xd", ["--barrel", "--xd", "3"], f"{B}/sw/trade_xd_h0.hex"),
-    ("r1", ["--barrel", "--xd", "3", "--tabla", "sw/fondo_tabla.hex"], f"{B}/sw/fondo.hex"),
+    ("r1", ["--barrel", "--xd", "3", "--tabla", "sw/historico/fondo_votos_tabla.hex"], f"{B}/sw/fondo.hex"),
 ]
 RONDAS = [("r1", 10000000, 2000), ("r2", 1000000, 20000), ("r3", 100000, 20000)]
 
