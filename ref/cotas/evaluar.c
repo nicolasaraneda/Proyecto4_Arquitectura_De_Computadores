@@ -21,6 +21,9 @@
  *                                  es hacia abajo, dir 1 si es hacia arriba; vende N precios despues
  *   tendencia k1 k2 d              medias exponenciales de 2^k1 y 2^k2 precios: compra si la rapida
  *                                  supera a la lenta por mas de d, vende si queda d por debajo
+ *   unavez L H                     parte en caja; al ver p <= L compra 63 (repetido) y, ya adentro, al ver
+ *                                  p >= H vende 63 (repetido) y no vuelve a entrar (el rival de la ronda
+ *                                  de Tesla del 18/11 es unavez 100 220; ref/cotas/planb.py, UnaVez)
  *
  * Ventanas: archivo binario con "int32 n" y después n veces "int32 largo, largo bytes".
  * Salida (stdout): una línea por ventana con el patrimonio de cada estrategia, separados
@@ -33,7 +36,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-enum { COTAS, MEDIA, ZSCORE, NADA, SIEMPRE, RANGO, SALTO, TENDENCIA };
+enum { COTAS, MEDIA, ZSCORE, NADA, SIEMPRE, RANGO, SALTO, TENDENCIA, UNAVEZ };
 #define MANTENER 0x00
 #define COMPRAR 0x7F
 #define VENDER 0xBF
@@ -123,6 +126,12 @@ static int decidir(const Estrategia *e, Estado *s, int p) {
     else if (dif < -um) s->q = VENDER;
     return s->q;
   }
+  case UNAVEZ: {                       /* s->pos: 0 esperando, 1 adentro, 2 terminado */
+    int L = a[0], H = a[1];
+    if (s->pos == 0 && p <= L) { s->pos = 1; s->q = COMPRAR; }
+    else if (s->pos == 1 && p >= H) { s->pos = 2; s->q = VENDER; }
+    return s->q;
+  }
   case ZSCORE: {
     int km = a[0], kd = a[1], num = a[2], den = a[3], w = a[4], sx2 = a[5];
     if (s->primero) { s->M = (long)p << km; s->primero = 0; return MANTENER; }
@@ -184,6 +193,7 @@ static int leer_estrategias(const char *ruta, Estrategia **out) {
     else if (!strcmp(tipo, "rango")) e->tipo = RANGO;
     else if (!strcmp(tipo, "salto")) e->tipo = SALTO;
     else if (!strcmp(tipo, "tendencia")) e->tipo = TENDENCIA;
+    else if (!strcmp(tipo, "unavez")) e->tipo = UNAVEZ;
     else { fprintf(stderr, "tipo desconocido: %s\n", tipo); exit(1); }
     n++;
   }
@@ -192,6 +202,7 @@ static int leer_estrategias(const char *ruta, Estrategia **out) {
   return n;
 }
 
+#ifndef EVALUAR_SIN_MAIN   /* ventanas.c reutiliza las estrategias sin este main */
 int main(int argc, char **argv) {
   if (argc < 3) { fprintf(stderr, "uso: evaluar ESTRATEGIAS VENTANAS [caja comision] [ORDENES]\n"); return 1; }
   long caja0 = argc > 3 ? atol(argv[3]) : 10000, com = argc > 4 ? atol(argv[4]) : 5;
@@ -227,3 +238,4 @@ int main(int argc, char **argv) {
   if (fo) fclose(fo);
   return 0;
 }
+#endif

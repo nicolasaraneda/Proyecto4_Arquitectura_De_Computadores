@@ -1,4 +1,4 @@
-Puente diario (ref/cotas/poblacion.py) contra la serie Meta real, misma ventana (23/2/2022 15:10 a 9/5/2022)
+Puente diario (ref/cotas/poblacion.py) contra la serie Meta real, misma ventana (23/2/2022 15:20 a 9/5/2022)
 Generado por ref/cotas/validar_modelo.py. 50 replicas de cada forma con los diarios de Yahoo.
 Con la forma 'molde' los dias son dias reales de la misma serie, sorteados: la comparacion es optimista para
 la forma intradiaria; lo que se valida es el camino de varios dias y los extremos.

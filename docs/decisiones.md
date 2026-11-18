@@ -761,3 +761,17 @@ Las decisiones T87 a T99 son del paquete P6 de R1 y R2 y las T100 a T119 del paq
 - **Alternativas y lo que se pierde** (`docs/pendientes_nicolas.md`, decisión 0): comprar 20 al inicio con banda 70 (mejor percentil 5, pierde hasta 2 100 si la hipótesis es falsa); compra con banda 40 (32 149 en la serie Meta, peor en la población); mantener el fondo que vota (sin ganancia medida, más puntos de falla); no cambiar (9 722 en la serie Meta).
 - **Pendiente**: preguntar el 18/11 si cada ronda se normaliza por separado; con los minutos reales de Alpaca, repetir el paso 5 antes del 22/11 y ver si cambia la banda.
 - `make report` y `make tabla-3-1` leen la serie nueva (`data/practica_meta.csv`). El informe, el README y la defensa no se reescriben hasta que la regla esté fija en los peldaños y se sepa cómo se normaliza (`docs/obsoleto_serie_meta.md`).
+
+### T134. Población real: todas las ventanas de 20 000 minutos, con los datos fuera del repositorio (18/11)
+
+- **Pedido de Nicolás:** bajar los minutos de 2022 a 2024 con Alpaca, armar todas las ventanas de 20 000 ticks normalizadas con sus extremos y repetir el paso 5.
+- **Datos.** `tools/datos/alpaca.py` lee la clave de `~/.alpaca.env` (o del entorno) y escribe en `$P4_DATOS/minuto`, fuera de cualquier repositorio; en el repositorio solo quedan el descargador, los programas y las cifras agregadas. Serie de cada empresa: un precio por minuto de la sesión regular (9:30 a 15:59 de Nueva York), cierre del minuto, ajustado por splits, y los minutos sin operaciones repiten el último precio. Es la construcción que reproduce `data/practica_meta.csv` y la captura de Tesla del 18/11 byte a byte (`docs/mediciones/clase_18nov.md`).
+- **Ventanas.** Todas las posiciones de inicio (paso 1): 1 368 253 ventanas en las cinco empresas. Solo largo 20 000, porque la clase confirmó que cada ronda dura 20 000 ticks; los largos 2 000 y 5 000 del 17/11 dejan de ser el caso.
+- **Alternativas y lo que se pierde.** Una ventana por día o cada 39 minutos: 10 a 400 veces menos cálculo, sin cambiar las medias (ventanas vecinas son casi iguales). Se eligió paso 1 porque el evaluador en C con OpenMP lo corre en unos 12 minutos y así no hay que elegir un inicio. Lo que no cambia con ninguna opción: con 20 000 minutos, cada empresa tiene unas 15 ventanas que no se solapan, así que las conclusiones se informan también por empresa, por año y sin solapar.
+- **El caso d (la ronda como trozo de una ventana más larga) no se repite**: la ronda de Tesla tiene 20 000 precios y toca 100 y 255.
+
+### T135. El rival de la ronda de Tesla entra al campo del torneo como `unavez 100 220` (18/11)
+
+- **Pedido de Nicolás:** agregar al campo de rivales al grupo que ganó la ronda de Tesla ("compra al ver el 100, vende con precio de 220 o más y no vuelve a entrar").
+- **Cuál de las lecturas.** Comprar 63 repetido desde el primer 100 hasta ver 220 o más, y desde ahí vender 63 repetido, da 21 467 en la serie de Tesla: la cifra exacta de la maestra. Comprar solo en los ticks con precio 100 da 21 500, y comprar y vender una sola vez da 17 550. Se usa la primera (`planb.UnaVez`, tipo `unavez` de `evaluar.c`, validada contra Python).
+- **Dónde entra.** En el campo "con extremos" del torneo de `ref/cotas/reales_experimento.py`, y en un campo nuevo donde uno de los 9 rivales es siempre él. `ref/cotas/experimento.py` (la población modelada del 17/11) no se cambia, para que sus mediciones sigan reproduciéndose tal como están.

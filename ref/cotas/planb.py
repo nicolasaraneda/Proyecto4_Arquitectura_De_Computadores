@@ -71,3 +71,19 @@ class Tendencia:
         elif dif < -um:
             self.q = V
         return self.q
+
+
+class UnaVez:
+    """Rival de la ronda de Tesla del 18/11 (UnaVez(100, 220) dio 21 467): parte en caja, al ver
+    p <= L compra 63 (repetido) y, ya adentro, al ver p >= H vende 63 (repetido) y no vuelve a entrar."""
+
+    def __init__(self, L=100, H=220):
+        self.L, self.H = L, H
+        self.estado, self.q = 0, M         # 0 esperando, 1 adentro, 2 terminado
+
+    def decidir(self, p):
+        if self.estado == 0 and p <= self.L:
+            self.estado, self.q = 1, C
+        elif self.estado == 1 and p >= self.H:
+            self.estado, self.q = 2, V
+        return self.q

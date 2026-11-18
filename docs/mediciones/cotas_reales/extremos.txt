@@ -1,0 +1,7 @@
+Orden de los extremos en las ventanas de 20 000 (primer 100 y primer 255 de cada ventana)
+
+META  el 100 aparece antes que el 255 en  59.0 % de 273648 ventanas
+AAPL  el 100 aparece antes que el 255 en  56.1 % de 273670 ventanas
+NFLX  el 100 aparece antes que el 255 en  69.7 % de 273597 ventanas
+AMD   el 100 aparece antes que el 255 en  52.6 % de 273667 ventanas
+TSLA  el 100 aparece antes que el 255 en  51.3 % de 273671 ventanas

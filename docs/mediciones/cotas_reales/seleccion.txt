@@ -1,0 +1,44 @@
+Seleccion con separacion de ajuste y validacion, minutos reales, ventanas de 20 000
+(ref/cotas/reales_experimento.py). Se elige la variante de cotas con mayor patrimonio medio en el ajuste
+y se informa en la validacion junto con sus vecinas y las de referencia. La familia del rival (unavez)
+no es candidata: se informa aparte.
+
+== por anos (ajuste: empiezan en 2022-2023; validacion: enteras en 2024): ajuste 976933 ventanas, validacion 391320
+   cinco mejores en el ajuste: espera_banda40 20835, espera_banda30 20797, espera_banda35 20792, espera_banda45 20776, espera_banda50 20749
+   mejor banda con 'espera' en el ajuste: espera_banda40; meseta (2 %): 10, 20, 30, 35, 40, 45, 50, 55, 60, 65, 70, 73, 76
+   en la validacion:
+   == validacion (391320 ventanas)
+   estrategia                  media  mediana      p5    peor  >nada >c y m >max_m
+   espera_banda40              22422    24582   11214    9472   99.6   99.8   99.7
+   espera_banda50              22201    24575   11214    9472   99.6   99.8   99.7
+   espera_banda60              22164    24575   11214    9472   99.6   99.7   99.7
+   espera_banda70              22285    24525   11214    9472   99.6   99.7   99.7
+   espera_banda76              22256    24572   11214    9472   99.6   99.7   99.7
+   parte20_banda70             21464    22005   12459    9824  100.0   99.8  100.0
+   compra                      19285    19364   11692    9862  100.0   97.4   93.5
+   espera                      21687    24572   11214    9472   99.6   99.8   99.7
+   compra_banda40              20091    19583   11700    9862  100.0   97.4   94.3
+   unavez100_220               19631    21411   11214    9472   99.6   91.8   99.7
+   max_media                   10240     9968    6496    4139   49.3   35.9    0.0
+   siempre                     13463    12806    5585    3989   67.5    0.0   64.1
+   nada                        10000    10000   10000   10000    0.0   32.5   50.7
+
+== por empresa (ajuste META AAPL NFLX, validacion AMD TSLA): ajuste 820915 ventanas, validacion 547338
+   cinco mejores en el ajuste: espera_banda40 21900, espera_banda30 21883, espera_banda45 21876, espera_banda50 21855, espera_banda35 21846
+   mejor banda con 'espera' en el ajuste: espera_banda40; meseta (2 %): 10, 20, 30, 35, 40, 45, 50, 55, 60, 65, 70, 73, 76
+   en la validacion:
+   == validacion (547338 ventanas)
+   estrategia                  media  mediana      p5    peor  >nada >c y m >max_m
+   espera_banda40              20372    23714   10422    9372   98.8   99.9   99.9
+   espera_banda50              20128    22592   10422    9372   98.8   99.9   99.9
+   espera_banda60              20058    22533   10422    9372   98.8   99.9   99.9
+   espera_banda70              20076    21836   10437    9372   98.8   99.9   99.9
+   espera_banda76              20114    21845   10437    9372   98.8   99.9   99.9
+   parte20_banda70             19593    20480   11278    9659   99.9   99.9  100.0
+   compra                      18207    18060   11235    9488   99.9   98.6   99.5
+   espera                      19767    24198   10422    9372   98.8   99.9   99.9
+   compra_banda40              18760    18220   11256    9488   99.9   98.6   99.5
+   unavez100_220               18228    21338   10422    9372   98.8   95.9   99.9
+   max_media                    9033     8947    5973    2407   32.3   38.2    0.0
+   siempre                     11326     9799    4752    3950   48.7    0.0   61.8
+   nada                        10000    10000   10000   10000    0.0   51.3   67.7

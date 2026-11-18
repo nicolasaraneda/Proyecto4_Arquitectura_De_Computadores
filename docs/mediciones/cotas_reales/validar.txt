@@ -1,0 +1,2 @@
+ventanas.c contra Python: 55 ventanas de META (una cada 4999), 4 estrategias, extremos y patrimonio: 0 diferencias
+PASS

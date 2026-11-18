@@ -49,7 +49,7 @@ No hay datos por minuto gratuitos de 2022 a 2024 sin cuenta (`docs/pendientes_ni
 - **Precios diarios reales** de META, AAPL, NFLX, AMD y TSLA de diciembre de 2021 a enero de 2025 (Yahoo, sin clave; quedan en `data/externos/`, fuera del repositorio).
 - **Minutos rellenados con la forma de días reales de la serie Meta** (`ref/cotas/poblacion.py`): cada día toma la forma de un día de la serie del profesor, sorteado, llevada de la apertura al cierre y estirada hacia el 89 % del exceso del máximo y del mínimo (la fracción medida en la serie Meta contra sus diarios). Los saltos de apertura, la tendencia de varios días y el día de cada extremo son reales.
 - **Días de la serie Meta sorteados** y encadenados por sus retornos, como segunda población.
-- **La serie del profesor ubicada en el calendario**: son los minutos de Meta del 23/2/2022 a las 15:10 al 9/5/2022, sin ajustes. Sus cierres diarios caen sobre la serie con error cuadrático medio de 0,31 unidades (el redondeo), y la normalización es lineal con los extremos de la ventana: 171,61 USD es 100 y 236,56 USD es 255.
+- **La serie del profesor ubicada en el calendario**: son los minutos de Meta del 23/2/2022 a las 15:20 al 9/5/2022 a las 10:39, sin ajustes (el 17/11 se escribió 15:10; el índice usado, minuto 350, ya era 15:20, y los minutos reales lo confirman: sección 7). Sus cierres diarios caen sobre la serie con error cuadrático medio de 0,31 unidades (el redondeo), y la normalización es lineal con los extremos de la ventana: 171,61 USD es 100 y 236,56 USD es 255.
 
 **Validación del modelo** (`docs/mediciones/cotas/modelo.txt`, 50 réplicas de la misma ventana de la serie del profesor):
 
@@ -156,3 +156,60 @@ Con una madre de 50 000 el ajuste elige la misma regla en los cuatro cortes (med
 **Si la ronda fuera un trozo cualquiera** (no el primero), los extremos aparecen en el 8 a 21 % de las rondas y "espera con banda 60" queda apenas sobre no operar (10 070 a 10 280). Ahí las de mayor media son "comprar al inicio si el primer precio es 190 o menos, y operar un rango" (de 10 200 a 11 300), pero con pérdidas de hasta 50 % en el peor caso y bajo 10 000 en una de cada cuatro rondas.
 
 **Conclusión del plan B.** Ninguna de las familias nuevas le gana a la regla elegida cuando la ronda es el primer trozo, que es lo que hace el testbench oficial. **La opción de bajo riesgo para el plan B es la misma regla ya elegida**: no hay que cambiar nada. Si se confirmara que las rondas son trozos tomados al azar en medio de la serie, la regla queda como "casi no operar" (no pierde), y la alternativa de más media (comprar al inicio con precio bajo, más un rango) cambia esa seguridad por un riesgo grande.
+
+## 7. Paso 5 con minutos reales (18/11)
+
+Pedido de Nicolás del 18/11, con la cuenta de Alpaca ya creada: bajar los minutos reales, armar la población con todas las ventanas de 20 000 minutos y repetir el paso 5 (sección 5) para ver si cambia la banda de 60. Decisiones T134 y T135; bitácora `docs/bitacora/minutos_reales.md`.
+
+### 7.1 Datos y comprobación
+
+- `python3 tools/datos/alpaca.py` (la clave se lee de `~/.alpaca.env`) baja las barras de un minuto de META, AAPL, NFLX, AMD y TSLA de 2022 a 2024 (feed SIP, ajustadas por splits) a `$P4_DATOS/minuto`, fuera del repositorio. Cada empresa queda como una serie de un precio por minuto de la sesión regular: 753 días y unos 293 600 minutos.
+- `python3 ref/cotas/reales.py comprobar --captura ronda_10ms_clase.csv` (`docs/mediciones/cotas_reales/comprobacion.txt`):
+  - **La serie de práctica es META del 23/2/2022 a las 15:20 al 9/5/2022 a las 10:39** (hora de Nueva York): 20 000 de 20 000 precios iguales, con extremos 171,6391 y 236,55 USD. Ninguna otra ventana de las cinco empresas coincide.
+  - **La ronda de 10 ms de la clase es TSLA del 10/1/2022 a las 10:20 al 24/3/2022 a las 12:09**: 20 000 de 20 000.
+  - Con eso la construcción del profesor queda identificada: cierre de cada minuto de la sesión regular, normalizado con `int(100 + (p - min) × 155 / (max - min) + 0,5)` sobre la ventana de la ronda (`comun.normalizar`).
+- La población es el conjunto de **todas** las ventanas de 20 000 minutos seguidos de cada empresa: 1 368 253 ventanas. `ref/cotas/ventanas.c` las normaliza y corre cada estrategia con la contabilidad del testbench (las mismas funciones de `evaluar.c`); `python3 ref/cotas/reales.py validar` lo compara con las referencias en Python (0 diferencias).
+- Ventanas vecinas comparten casi todos sus precios: con 20 000 minutos cada empresa tiene unas 15 ventanas que no se solapan. Las conclusiones se dan además por empresa, por año de inicio y con la separación de ajuste y validación.
+
+### 7.2 Resultados (`python3 ref/cotas/reales_experimento.py`, unos 12 minutos; salidas en `docs/mediciones/cotas_reales/`)
+
+Todas las ventanas de 20 000 minutos de las cinco empresas (`variantes.txt`):
+
+| Estrategia | media | mediana | p5 | peor | > nada | > `max_media` |
+|------------|-------|---------|----|------|--------|---------------|
+| no operar | 10 000 | 10 000 | 10 000 | 10 000 | | 59,0 % |
+| comprar y mantener | 12 701 | 11 778 | 4 830 | 3 950 | 58,7 % | 64,2 % |
+| `max_media` | 9 662 | 9 536 | 6 117 | 2 046 | 40,9 % | |
+| espera | 20 589 | 24 564 | 10 578 | 8 948 | 99,1 % | 99,4 % |
+| compra | 18 926 | 18 871 | 11 372 | 9 488 | 99,9 % | 97,6 % |
+| espera, banda 40 | 21 289 | 24 645 | 10 578 | 8 948 | 99,1 % | 99,4 % |
+| **espera, banda 60 (los peldaños)** | **21 084** | **24 538** | **10 578** | **8 948** | **99,1 %** | **99,5 %** |
+| espera, banda 70 | 21 134 | 24 443 | 10 578 | 8 948 | 99,1 % | 99,5 % |
+| comprar 20, banda 70 | 20 617 | 21 599 | 11 449 | 9 374 | 99,9 % | 99,8 % |
+| rival de Tesla (`unavez 100 220`) | 18 896 | 21 509 | 10 578 | 8 948 | 99,1 % | 99,3 % |
+
+Las cifras se parecen a las de la población modelada del 17/11 a 20 000 ticks (espera con banda 60: 20 511 allí, 21 084 aquí): el modelo de la sección 5.1 era bueno. Con las 70 ventanas que no se solapan el orden es el mismo (`variantes.txt`, segunda tabla).
+
+**La banda** (`banda.txt`), patrimonio medio según w:
+
+| Corte | w = 10 | 20 | 30 | 40 | 50 | 60 | 70 | 76 | Mejor | Meseta (2 %) |
+|-------|--------|----|----|----|----|----|----|----|-------|--------------|
+| Cinco empresas | 20 915 | 20 973 | 21 237 | **21 289** | 21 164 | 21 084 | 21 134 | 21 109 | 40 | 10 a 76 |
+| META | 22 161 | 21 970 | 22 422 | 22 338 | 22 099 | 21 889 | 22 443 | 22 287 | 70 | 10 a 76 |
+| AAPL | 20 413 | 20 533 | 21 054 | 21 171 | 21 195 | 20 983 | 20 664 | 20 692 | 50 | 30 a 65 |
+| NFLX | 22 049 | 22 159 | 22 174 | 22 191 | 22 270 | 22 435 | 22 410 | 22 339 | 60 | 10 a 76 |
+| AMD | 20 089 | 20 283 | 20 438 | 20 547 | 20 268 | 20 263 | 20 266 | 20 267 | 40 | 20 a 76 |
+| TSLA | 19 862 | 19 921 | 20 097 | 20 197 | 19 987 | 19 852 | 19 886 | 19 961 | 40 | 10 a 76 |
+
+**Ajuste y validación** (`seleccion.txt`): eligiendo con las ventanas que empiezan en 2022 y 2023, o con META, AAPL y NFLX, la mejor variante del ajuste es en los dos casos **espera con banda 40**. En la validación da 22 422 contra 22 164 de la banda 60 (por años, +258) y 20 372 contra 20 058 (por empresa, +314), con el mismo percentil 5 y el mismo peor caso.
+
+**Torneo** (`torneo.txt`, con el rival de Tesla en el campo): con dos tercios del campo usando extremos, banda 40 saca 0,866 puntos y queda primera en el 58,3 % de las rondas; banda 60, 0,851 y 55,8 %. Con el rival de Tesla siempre presente, 0,864 contra 0,849. "Comprar 20, banda 70" queda primera solo en el 16 %, y el rival de Tesla en el 8 %.
+
+**Cara a cara** (`cara_a_cara.txt`): banda 60 y banda 40 terminan igual en el 75,9 % de las ventanas (la banda no se usa o se usa igual); donde difieren, 40 gana en el 15,0 % y 60 en el 9,1 %. Contra el rival de Tesla, nuestra regla gana en el 62,1 % de las ventanas, empata en el 28,6 % y pierde en el 9,3 %, con +2 188 de diferencia media: la ronda de Tesla fue de ese 9,3 %. El rival vende al llegar a 220 y no vuelve a entrar; nuestra regla, en esa serie, vende con 195 y vuelve a comprar con 160.
+
+### 7.3 Conclusión: ¿cambia la banda de 60?
+
+- **La hipótesis de la familia queda confirmada con datos reales**: la serie de práctica y la ronda de Tesla son ventanas de minutos reales normalizadas con sus propios extremos, y en la población real "espera con banda" duplica el patrimonio y supera a `max_media` en el 99,5 % de las ventanas.
+- **La banda 60 sigue en la meseta, pero el mejor valor con minutos reales es 40.** Las dos separaciones de ajuste y validación eligen 40, y en la validación 40 supera a 60 por 258 y 314 con el mismo percentil 5 y el mismo peor caso. Le gana en 4 de 5 empresas y en los 3 años, y suma 0,015 puntos en el torneo.
+- **Por qué no es un cambio obvio**: la curva es plana (de 10 a 76, todo a menos del 2 % de la mejor), la diferencia es del 1 %, en tres de cada cuatro ventanas las dos bandas terminan igual, y sin solapar la población tiene 70 ventanas. La población modelada del 17/11 ponía el centro en 60.
+- **No se cambió la regla de los peldaños** (pedido de Nicolás). La decisión queda en `docs/estado.md`, tramo 17. Cambiarla es una constante en `sw/trade.s` y en la tabla de R1 y R2, con `icebram` sobre los mismos moldes, más la puerta de simulación de los tres peldaños.

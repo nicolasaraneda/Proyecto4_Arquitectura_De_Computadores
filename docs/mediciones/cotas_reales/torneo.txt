@@ -1,0 +1,31 @@
+Caso e: torneo con minutos reales. En cada ronda, 9 rivales sorteados del campo; puntos lineales entre
+el peor y el mejor de la ronda (0 a 1) y porcentaje de rondas en primer lugar.
+35087 rondas: una ventana de 20 000 cada 39 minutos de cada empresa.
+Campos: 'sin extremos' (nada, siempre, max_media, regla_base, media_e2, media_e6, zscore, zscore_z2); con extremos, sorteados de: espera, compra, compra_banda40, espera_banda40, umbral170, compra_a2_b2_banda40, unavez100_220.
+'rival de Tesla y dos tercios': uno de los 9 es siempre unavez100_220 (el rival que gano la ronda de Tesla
+del 18/11) y los otros 8 se sortean del campo con dos tercios con extremos.
+
+estrategia                                  sin extremos          un tercio con extremos        dos tercios con extremos    rival de Tesla y dos tercios
+nada                                0.499 pts  30.8 % 1o            0.200 pts   1.1 % 1o            0.150 pts   0.1 % 1o            0.145 pts   0.2 % 1o
+siempre                             0.625 pts  52.0 % 1o            0.333 pts   2.3 % 1o            0.275 pts   0.3 % 1o            0.267 pts   0.2 % 1o
+max_media                           0.382 pts   7.9 % 1o            0.143 pts   0.4 % 1o            0.092 pts   0.1 % 1o            0.087 pts   0.1 % 1o
+zscore                              0.390 pts   9.8 % 1o            0.148 pts   0.5 % 1o            0.097 pts   0.1 % 1o            0.092 pts   0.1 % 1o
+espera                              0.995 pts  97.1 % 1o            0.884 pts  63.8 % 1o            0.842 pts  55.6 % 1o            0.840 pts  56.4 % 1o
+compra                              0.982 pts  94.3 % 1o            0.823 pts  50.9 % 1o            0.763 pts  39.0 % 1o            0.757 pts  38.7 % 1o
+parte20                             0.998 pts  98.8 % 1o            0.873 pts  31.0 % 1o            0.825 pts  10.7 % 1o            0.825 pts  12.7 % 1o
+umbral170                           0.995 pts  96.5 % 1o            0.840 pts  40.6 % 1o            0.769 pts  24.8 % 1o            0.762 pts  25.2 % 1o
+espera_banda20                      0.995 pts  97.2 % 1o            0.890 pts  65.2 % 1o            0.850 pts  57.1 % 1o            0.848 pts  58.0 % 1o
+espera_banda40                      0.995 pts  97.2 % 1o            0.903 pts  66.3 % 1o            0.866 pts  58.3 % 1o            0.864 pts  59.0 % 1o
+espera_banda50                      0.995 pts  97.2 % 1o            0.897 pts  63.7 % 1o            0.858 pts  55.8 % 1o            0.856 pts  56.6 % 1o
+espera_banda60                      0.996 pts  97.4 % 1o            0.890 pts  63.3 % 1o            0.851 pts  55.8 % 1o            0.849 pts  56.6 % 1o
+espera_banda70                      0.995 pts  97.3 % 1o            0.888 pts  63.3 % 1o            0.850 pts  56.0 % 1o            0.848 pts  56.8 % 1o
+espera_banda76                      0.996 pts  97.3 % 1o            0.889 pts  63.3 % 1o            0.850 pts  55.9 % 1o            0.849 pts  56.9 % 1o
+compra_banda40                      0.983 pts  94.6 % 1o            0.844 pts  54.7 % 1o            0.790 pts  42.7 % 1o            0.783 pts  42.1 % 1o
+compra_banda60                      0.983 pts  94.7 % 1o            0.828 pts  49.6 % 1o            0.771 pts  37.8 % 1o            0.765 pts  37.6 % 1o
+parte20_banda70                     0.999 pts  98.9 % 1o            0.881 pts  35.1 % 1o            0.836 pts  16.3 % 1o            0.836 pts  18.3 % 1o
+espera_a2                           0.994 pts  96.2 % 1o            0.870 pts  34.3 % 1o            0.824 pts  20.9 % 1o            0.821 pts  22.6 % 1o
+espera_b2                           0.995 pts  97.1 % 1o            0.881 pts  40.1 % 1o            0.838 pts  23.2 % 1o            0.836 pts  25.2 % 1o
+espera_a2_b2_banda60                0.995 pts  96.2 % 1o            0.875 pts  33.0 % 1o            0.830 pts  19.9 % 1o            0.827 pts  21.3 % 1o
+unavez100_200                       0.977 pts  86.2 % 1o            0.745 pts  16.9 % 1o            0.662 pts   4.9 % 1o            0.655 pts   4.7 % 1o
+unavez100_220                       0.989 pts  91.5 % 1o            0.809 pts  24.4 % 1o            0.734 pts   7.6 % 1o            0.730 pts   9.7 % 1o
+unavez100_240                       0.994 pts  95.4 % 1o            0.853 pts  27.8 % 1o            0.796 pts   9.1 % 1o            0.793 pts  11.3 % 1o

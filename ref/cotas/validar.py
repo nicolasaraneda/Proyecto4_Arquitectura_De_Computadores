@@ -31,6 +31,8 @@ ESTR = [
     ("salto3_60_baja", "salto", (3, 60, 0), lambda: planb.Salto(3, 60, 0)),
     ("salto5_200_sube", "salto", (5, 200, 1), lambda: planb.Salto(5, 200, 1)),
     ("tendencia4_8_1", "tendencia", (4, 8, 1), lambda: planb.Tendencia(4, 8, 1)),
+    ("unavez100_220", "unavez", (100, 220), lambda: planb.UnaVez(100, 220)),
+    ("unavez110_200", "unavez", (110, 200), lambda: planb.UnaVez(110, 200)),
     ("nada", "nada", (), None),
     ("siempre", "siempre", (), None),
 ]

@@ -1,0 +1,10 @@
+Comprobacion de la poblacion real (ref/cotas/reales.py comprobar)
+
+1. data/practica_meta.csv contra la ventana de Meta que empieza el 2022-02-23 a las 15:20:
+   20000 de 20000 precios iguales; extremos 171.6391 y 236.5500 USD; fin 2022-05-09 10:39.
+   PASS
+   Busqueda en las cinco empresas: META desde 2022-02-23 15:20 hasta 2022-05-09 10:39 (hora de Nueva York): 20000 de 20000 precios iguales; otras ventanas exactas: 0
+
+2. Captura ronda_10ms_clase.csv (20000 precios, minimo 100, maximo 255):
+   TSLA desde 2022-01-10 10:20 hasta 2022-03-24 12:09 (hora de Nueva York): 20000 de 20000 precios iguales
+   PASS; otras ventanas exactas: 0

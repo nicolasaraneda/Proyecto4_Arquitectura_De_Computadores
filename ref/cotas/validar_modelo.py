@@ -3,7 +3,7 @@
 
 Grupo: Nicolás Araneda, Vicente Calderón y Santiago Muñoz.
 Arquitectura de Computadores, Universidad de los Andes, 2026-2.
-La serie del profesor son los minutos de Meta del 23/2/2022 a las 15:10 al 9/5/2022.
+La serie del profesor son los minutos de Meta del 23/2/2022 a las 15:20 al 9/5/2022.
 Se generan 50 réplicas de esa misma ventana con el puente (poblacion.py) y se comparan
 estadísticas por minuto y el patrimonio de cada regla. Uso: python3 ref/cotas/validar_modelo.py
 """
@@ -35,7 +35,7 @@ def estadisticas(p):
 
 def main():
     real = cotas.leer(os.path.join(comun.RAIZ, "data", "practica_meta.csv"))
-    L = ["Puente diario (ref/cotas/poblacion.py) contra la serie Meta real, misma ventana (23/2/2022 15:10 a 9/5/2022)",
+    L = ["Puente diario (ref/cotas/poblacion.py) contra la serie Meta real, misma ventana (23/2/2022 15:20 a 9/5/2022)",
          "Generado por ref/cotas/validar_modelo.py. 50 replicas de cada forma con los diarios de Yahoo.",
          "Con la forma 'molde' los dias son dias reales de la misma serie, sorteados: la comparacion es optimista para",
          "la forma intradiaria; lo que se valida es el camino de varios dias y los extremos."]
@@ -51,7 +51,7 @@ def comparar(real, forma):
     replicas = []
     for s in range(50):
         precios, fechas = poblacion.puente("META", s, forma)
-        i = fechas.index(dt.date(2022, 2, 23)) + 350          # 15:10 del 23/2: 40 minutos antes del cierre
+        i = fechas.index(dt.date(2022, 2, 23)) + 350          # 15:20 del 23/2 (minuto 350): 40 minutos antes del cierre
         replicas.append(comun.normalizar(precios[i:i + 20000]))
     nombres, filas = comun.evaluar(ESTR, [real] + replicas, "modelo")
     L = []

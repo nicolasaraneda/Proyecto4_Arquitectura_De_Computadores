@@ -1,0 +1,38 @@
+Cara a cara en todas las ventanas de 20 000: porcentaje de ventanas en que A termina sobre B, empates
+y diferencia media A - B (ref/cotas/reales_experimento.py).
+
+== espera_banda60 contra unavez100_220
+   cinco empresas  A gana  62.1 %  empata  28.6 %  pierde   9.3 %  diferencia media    +2188
+   META            A gana  69.3 %  empata  22.6 %  pierde   8.2 %  diferencia media    +2331
+   AAPL            A gana  60.7 %  empata  27.3 %  pierde  11.9 %  diferencia media    +2116
+   NFLX            A gana  73.3 %  empata  20.0 %  pierde   6.7 %  diferencia media    +2836
+   AMD             A gana  53.8 %  empata  36.2 %  pierde  10.0 %  diferencia media    +1936
+   TSLA            A gana  53.2 %  empata  36.9 %  pierde   9.9 %  diferencia media    +1724
+== espera_banda60 contra espera
+   cinco empresas  A gana  15.7 %  empata  75.7 %  pierde   8.6 %  diferencia media     +495
+   META            A gana  19.9 %  empata  74.1 %  pierde   6.0 %  diferencia media     +704
+   AAPL            A gana  17.0 %  empata  73.9 %  pierde   9.1 %  diferencia media     +602
+   NFLX            A gana  11.2 %  empata  81.9 %  pierde   6.9 %  diferencia media     +588
+   AMD             A gana  17.5 %  empata  71.9 %  pierde  10.6 %  diferencia media     +464
+   TSLA            A gana  12.9 %  empata  76.6 %  pierde  10.5 %  diferencia media     +118
+== espera_banda60 contra parte20_banda70
+   cinco empresas  A gana  56.5 %  empata   1.6 %  pierde  41.9 %  diferencia media     +468
+   META            A gana  53.5 %  empata   2.6 %  pierde  43.9 %  diferencia media     -288
+   AAPL            A gana  60.7 %  empata   1.4 %  pierde  37.9 %  diferencia media     +851
+   NFLX            A gana  64.9 %  empata   1.7 %  pierde  33.3 %  diferencia media     +846
+   AMD             A gana  53.6 %  empata   1.1 %  pierde  45.2 %  diferencia media     +399
+   TSLA            A gana  49.8 %  empata   1.4 %  pierde  48.8 %  diferencia media     +530
+== espera_banda60 contra espera_banda70
+   cinco empresas  A gana  15.3 %  empata  72.5 %  pierde  12.2 %  diferencia media      -50
+   META            A gana  10.6 %  empata  70.6 %  pierde  18.8 %  diferencia media     -554
+   AAPL            A gana  21.8 %  empata  71.5 %  pierde   6.7 %  diferencia media     +319
+   NFLX            A gana  11.8 %  empata  79.2 %  pierde   9.0 %  diferencia media      +25
+   AMD             A gana  19.6 %  empata  66.0 %  pierde  14.4 %  diferencia media       -3
+   TSLA            A gana  12.8 %  empata  75.0 %  pierde  12.2 %  diferencia media      -34
+== espera_banda60 contra espera_banda40
+   cinco empresas  A gana   9.1 %  empata  75.9 %  pierde  15.0 %  diferencia media     -205
+   META            A gana  10.4 %  empata  74.2 %  pierde  15.4 %  diferencia media     -449
+   AAPL            A gana   8.4 %  empata  74.6 %  pierde  17.0 %  diferencia media     -189
+   NFLX            A gana   9.5 %  empata  82.0 %  pierde   8.4 %  diferencia media     +244
+   AMD             A gana  10.2 %  empata  71.9 %  pierde  17.9 %  diferencia media     -284
+   TSLA            A gana   6.9 %  empata  76.6 %  pierde  16.4 %  diferencia media     -345
