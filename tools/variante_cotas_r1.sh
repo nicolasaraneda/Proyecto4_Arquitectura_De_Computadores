@@ -30,6 +30,7 @@ git worktree add -q --detach "$W" HEAD
 cp sw/variantes/fondo_p20b70.s "$W/sw/fondo.s"
 cp sw/variantes/trade_p20b70.s "$W/sw/trade.s"
 cd "$W"
+mkdir -p build
 python3 - <<'PY'
 def rep(p, pares):
     s = open(p, encoding="utf-8").read()

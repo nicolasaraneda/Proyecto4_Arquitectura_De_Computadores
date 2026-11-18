@@ -111,7 +111,8 @@ def preparar():
     with open(os.path.join(RAIZ, f"{p}/trade_barrel.s"), "w") as f:
         f.write(tabla)
     ensamblar(f"{p}/trade_barrel.s", f"{p}/trade_barrel.hex")
-    for fallas, nombre in (("cuelgue:2:5", "cuelgue"), ("atraso:1:300", "atraso"), ("sin_voto:3:3:40", "sin_voto")):
+    # Fallas de los hilos 1 a 3 del programa de R1 desde el 17/11 (T133, tools/fondo/variante.py)
+    for fallas, nombre in (("ocupado:2", "ocupado"), ("escribe:1", "escribe"), ("programa:3", "programa")):
         sh([sys.executable, "tools/fondo/variante.py", fallas, "-o", f"{p}/fondo_{nombre}.s"])
         ensamblar(f"{p}/fondo_{nombre}.s", f"{p}/fondo_{nombre}.hex")
     for sem, modo, xd in ((1, "separado", 3), (2, "separado", 3), (3, "compartido", 3), (4, "spi1", 3),
@@ -146,9 +147,9 @@ def preparar():
         ("C7_aleatorio_trade_xd7", "xd7", f"{p}/al7.hex", pr, dict(NTICKS=150, PERIODO_NS=30000)),
         ("C8_aleatorio_xd7_en_core_sin_extension", "sin_xd", f"{p}/al8.hex", pr, dict(NTICKS=150, PERIODO_NS=30000)),
         ("D_trade_un_hilo", "sin_xd", f"{p}/trade_barrel.hex", pr, dict(NTICKS=300)),
-        ("E1_fondo_gestor_colgado", "fondo", f"{p}/fondo_cuelgue.hex", f"{s}/reversion.csv", dict(NTICKS=300)),
-        ("E2_fondo_voto_atrasado", "fondo", f"{p}/fondo_atraso.hex", f"{s}/reversion.csv", dict(NTICKS=300)),
-        ("E3_fondo_voto_ausente", "fondo", f"{p}/fondo_sin_voto.hex", f"{s}/saltos.csv", dict(NTICKS=300)),
+        ("E1_fondo_hilo_ocupado", "fondo", f"{p}/fondo_ocupado.hex", f"{s}/reversion.csv", dict(NTICKS=300)),
+        ("E2_fondo_hilo_escribe_ram", "fondo", f"{p}/fondo_escribe.hex", f"{s}/reversion.csv", dict(NTICKS=300)),
+        ("E3_fondo_hilo_lee_programa", "fondo", f"{p}/fondo_programa.hex", f"{s}/saltos.csv", dict(NTICKS=300)),
         ("F_fondo_rondas_10ms_1ms_01ms", "fondo", fondo, f"{s}/rondas.csv",
          dict(NTICKS=120, RONDA_TICKS=40, PAUSA_NS=2000000, PERIODO_NS=10000000, PERIODO2_NS=1000000, PERIODO3_NS=100000)),
         ("G1_fondo_reset_desde_0", "fondo", fondo, pr, dict(NTICKS=150, INICIO_NS=0)),
@@ -181,14 +182,20 @@ def correr(caso):
             continue
         n = sum(1 for _ in open(a))
         res.append((ext, filecmp.cmp(a, b, shallow=False), n))
-    # control negativo en el caso A: --borde 0 y la máscara equivocada deben notarse
+    # controles negativos: --borde 0 en el caso A y la máscara equivocada de la extensión
+    # en el C1 (programas al azar con emad y devk; desde el 17/11 sw/fondo.s no usa la
+    # extensión, así que en el caso A la máscara no se notaría)
     neg = []
+    controles = []
     if nombre == "A_fondo_oficial":
         sh(gem + ["--borde", "0", "--traza", f"{d}/neg_borde.traza"])
+        controles.append("neg_borde")
+    if nombre == "C1_aleatorio_separado_xd3":
         sh([g if g != str(xd) else "1" for g in gem] + ["--traza", f"{d}/neg_xd.traza"])
-        for t in ("neg_borde", "neg_xd"):
-            neg.append((t, not filecmp.cmp(os.path.join(RAIZ, f"{d}/rtl.traza"), os.path.join(RAIZ, f"{d}/{t}.traza"),
-                                           shallow=False)))
+        controles.append("neg_xd")
+    for t in controles:
+        neg.append((t, not filecmp.cmp(os.path.join(RAIZ, f"{d}/rtl.traza"), os.path.join(RAIZ, f"{d}/{t}.traza"),
+                                       shallow=False)))
     eventos = {}
     if os.path.exists(os.path.join(RAIZ, f"{d}/rtl.traza")):
         for linea in open(os.path.join(RAIZ, f"{d}/rtl.traza")):
