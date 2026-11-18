@@ -11,7 +11,7 @@ de una transacción, rondas seguidas sin reset y series pegadas en 1 y en 255),
 con tb/fondo/tb_fondo.sv y el hardware de R1 o de R2. Dos diferencias:
 
   - Hasta el 17/11 el fondo respondía en 220 a 480 ciclos; con la regla de cotas
-    el hilo 0 responde en unos 130 y R0 en unos 60. Los casos que
+    el hilo 0 responde en unos 130 y R0 en unos 60. Desde el 17/11 los casos que
     dejan menos de 600 ciclos entre transacciones (SCLK de 100 kHz con período
     de 0,1 ms, y los períodos de 11,5 y 13,5 us) no caben: se corren igual y
     se informan como exploración, sin contar para la puerta.
@@ -50,7 +50,7 @@ import fondo               # noqa: E402
 import series              # noqa: E402
 import trader              # noqa: E402
 
-MINIMO = 600               # ciclos entre transacciones bajo los cuales el caso es exploración
+MINIMO = 200               # ciclos entre transacciones bajo los cuales el caso es exploración (600 hasta el 17/11)
 
 
 def presupuesto(c):
