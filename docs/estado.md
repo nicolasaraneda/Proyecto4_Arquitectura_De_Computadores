@@ -8,10 +8,11 @@ Se actualiza al cerrar cada tramo de trabajo. La versión anterior queda en el h
 
 | Bitstream | Estado | Dónde |
 |-----------|--------|-------|
-| `registrador.bin` (y `registrador_921k.bin` de respaldo) | Listo, en `main` | `bitstreams/` |
-| `r0_cotas.bin`, R0 con "espera" y banda 60 | Puerta de simulación completa; pasa a `main` cuando la corrida local quede en verde | `bitstreams/` |
-| R1 y R2 con la regla nueva | En verificación (rama `regla-cotas-r1`); si no alcanzan, se usan `r1_fondo.bin` y `r2_multi.bin`, que tienen el mismo hardware | `docs/clase_18nov.md`, arriba |
-| Variante "comprar 20 al inicio, banda 70" | R0 listo con su puerta (`bitstreams/variantes/r0_p20b70.bin`); R1 y R2 después de sus programas nuevos | `bitstreams/variantes/LEEME.md` |
+| `registrador.bin` (y `registrador_921k.bin` de respaldo) | Listo | `bitstreams/` |
+| `r0_cotas.bin`, R0 con "espera" y banda 60 | Listo: puerta de simulación completa; en `main` desde las 03:45 | `bitstreams/` |
+| `r1_cotas.bin` y `r2_cotas_multi.bin`, R1 y R2 con la regla en el hilo 0 | Listos: puertas completas de R1 y R2 (rama `regla-cotas-r1`, integrada); llegan a `main` cuando la corrida local de `4da78ca` quede en verde | `bitstreams/` |
+| Anteriores (`r0_base_max_media.bin`, `r1_fondo.bin`, `r2_multi.bin`) | Alternativa: mismo hardware, programa anterior | `bitstreams/` |
+| Variante "comprar 20 al inicio, banda 70" | R0 listo con su puerta (`bitstreams/variantes/r0_p20b70.bin`); R1 y R2 en la cola (unas 2 horas) | `bitstreams/variantes/LEEME.md` |
 
 **Plan B, si las rondas son trozos de una serie normalizada más larga** (`docs/cotas.md`, sección 6). Se probaron 145 variantes de cinco familias: posición en el rango sin tocar los extremos, saltos de apertura, tendencia, reversión y cotas con márgenes. Se ajustaron en 2022 y 2023 o con tres empresas y se validaron en 2024 o con las otras dos.
 
