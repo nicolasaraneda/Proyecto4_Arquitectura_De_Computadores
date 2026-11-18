@@ -1,0 +1,40 @@
+Puente diario (ref/cotas/poblacion.py) contra la serie Meta real, misma ventana (23/2/2022 15:10 a 9/5/2022)
+Generado por ref/cotas/validar_modelo.py. 50 replicas de cada forma con los diarios de Yahoo.
+Con la forma 'molde' los dias son dias reales de la misma serie, sorteados: la comparacion es optimista para
+la forma intradiaria; lo que se valida es el camino de varios dias y los extremos.
+
+== forma browniano
+estadistica                                    real  puente: mediana      p10      p90
+cambio absoluto medio dentro del dia          0.437            0.546    0.521    0.573
+salto absoluto medio en la apertura           6.385            5.827    5.827    5.827
+autocorrelacion de los cambios, rezago 1     -0.079           -0.071   -0.098   -0.060
+ticks en 100                                  6.000            2.000    1.000    5.000
+ticks en 255                                  1.000            2.500    1.000    8.000
+primer tick en 100                        17084.000        16970.500 16827.000 17139.000
+primer tick en 255                        10965.000        11061.000 10981.000 11247.000
+
+regla                    real  puente: mediana      p10      p90
+espera                  15894            16538    15888    17019
+compra                  23906            24688    23370    25671
+compra_banda40          32149            31624    30274    32930
+max_media                9722            15000    10582    21949
+zscore                   7340            10245     8514    15503
+siempre                  9695            10008     9628    10320
+
+== forma molde
+estadistica                                    real  puente: mediana      p10      p90
+cambio absoluto medio dentro del dia          0.437            0.364    0.340    0.389
+salto absoluto medio en la apertura           6.385            5.827    5.827    5.827
+autocorrelacion de los cambios, rezago 1     -0.079           -0.136   -0.170   -0.108
+ticks en 100                                  6.000            3.500    1.000   10.000
+ticks en 255                                  1.000            4.000    1.000   10.000
+primer tick en 100                        17084.000        16886.000 16813.000 17084.000
+primer tick en 255                        10965.000        10993.500 10966.000 11256.000
+
+regla                    real  puente: mediana      p10      p90
+espera                  15894            16387    15160    17217
+compra                  23906            24934    22836    25849
+compra_banda40          32149            31797    29070    32467
+max_media                9722             9848     5978    12033
+zscore                   7340             7220     5371    11054
+siempre                  9695            10113     9582    10443
