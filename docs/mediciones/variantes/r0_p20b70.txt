@@ -1,0 +1,150 @@
+Puerta de simulacion de R0 con la variante p20b70 de la regla de cotas: Cotas("parte", k=20, banda=70)
+Generado por tools/variante_cotas.sh sobre 25dda60. Programa: sw/variantes/trade_p20b70.s.
+
+== make tb
+PASS: make tb
+Patrimonio final:          9050
+Peor caso precio->decision: 78 ciclos (disponibles: 2262)
+PASS MISO sin valores X
+PASS el programa escribe DECISION
+PASS el programa lee todos los precios
+PASS la decision llega antes del siguiente tick
+Testbenchs aprobados: 4/4
+== make equiv
+PASS: make equiv
+PASS gemelo: periodo 100000 ns, 20000 ticks, tb/practica.csv, Peor caso precio->decision: 78 ciclos (disponibles: 2262), 4/4, 20000 filas identicas a ref/trader.py, patrimonio 8784
+PASS gemelo: periodo 1000000 ns, 20000 ticks, tb/practica.csv, Peor caso precio->decision: 78 ciclos (disponibles: 24762), 4/4, 20000 filas identicas a ref/trader.py, patrimonio 8764
+PASS gemelo: periodo 10000000 ns, 20000 ticks, tb/practica.csv, Peor caso precio->decision: 78 ciclos (disponibles: 249762), 4/4, 20000 filas identicas a ref/trader.py, patrimonio 8764
+PASS r2: periodo 1000000 ns, 200 ticks, tb/practica.csv, Peor caso precio->decision: 78 ciclos (disponibles: 24762), 4/4, 200 filas identicas a ref/trader.py, patrimonio 10135
+PASS r1: periodo 10000000 ns, 20 ticks, tb/practica.csv, Peor caso precio->decision: 78 ciclos (disponibles: 249762), 4/4, 20 filas identicas a ref/trader.py, patrimonio 9915
+PASS v_r3: periodo 100000 ns, 20000 ticks, tb/practica.csv, Peor caso precio->decision: 78 ciclos (disponibles: 2262), 4/4, 20000 filas identicas a ref/trader.py, patrimonio 8784
+PASS v_r2: periodo 1000000 ns, 20000 ticks, tb/practica.csv, Peor caso precio->decision: 78 ciclos (disponibles: 24762), 4/4, 20000 filas identicas a ref/trader.py, patrimonio 8764
+PASS serie_remuestreo: periodo 100000 ns, 2000 ticks, build/series/remuestreo.csv, Peor caso precio->decision: 78 ciclos (disponibles: 2262), 4/4, 2000 filas identicas a ref/trader.py, patrimonio 1338
+PASS serie_modelo: periodo 100000 ns, 2000 ticks, build/series/modelo.csv, Peor caso precio->decision: 78 ciclos (disponibles: 2262), 4/4, 2000 filas identicas a ref/trader.py, patrimonio 11167
+PASS serie_paseo: periodo 100000 ns, 2000 ticks, build/series/paseo.csv, Peor caso precio->decision: 78 ciclos (disponibles: 2262), 4/4, 2000 filas identicas a ref/trader.py, patrimonio 11115
+PASS serie_tendencia: periodo 100000 ns, 2000 ticks, build/series/tendencia.csv, Peor caso precio->decision: 78 ciclos (disponibles: 2262), 4/4, 2000 filas identicas a ref/trader.py, patrimonio 17250
+PASS serie_reversion: periodo 100000 ns, 2000 ticks, build/series/reversion.csv, Peor caso precio->decision: 78 ciclos (disponibles: 2262), 4/4, 2000 filas identicas a ref/trader.py, patrimonio 8850
+PASS serie_dos_componentes: periodo 100000 ns, 2000 ticks, build/series/dos_componentes.csv, Peor caso precio->decision: 78 ciclos (disponibles: 2262), 4/4, 2000 filas identicas a ref/trader.py, patri
+PASS serie_saltos: periodo 100000 ns, 2000 ticks, build/series/saltos.csv, Peor caso precio->decision: 78 ciclos (disponibles: 2262), 4/4, 2000 filas identicas a ref/trader.py, patrimonio 9315
+PASS serie_cambio_volatilidad: periodo 100000 ns, 2000 ticks, build/series/cambio_volatilidad.csv, Peor caso precio->decision: 78 ciclos (disponibles: 2262), 4/4, 2000 filas identicas a ref/trader.py,
+PASS serie_cambio_de_caracter: periodo 100000 ns, 2000 ticks, build/series/cambio_de_caracter.csv, Peor caso precio->decision: 78 ciclos (disponibles: 2262), 4/4, 2000 filas identicas a ref/trader.py,
+PASS serie_nivel_bajo: periodo 100000 ns, 2000 ticks, build/series/nivel_bajo.csv, Peor caso precio->decision: 78 ciclos (disponibles: 2262), 4/4, 2000 filas identicas a ref/trader.py, patrimonio 7495
+PASS serie_plana: periodo 100000 ns, 2000 ticks, build/series/plana.csv, Peor caso precio->decision: 78 ciclos (disponibles: 2262), 4/4, 2000 filas identicas a ref/trader.py, patrimonio 9920
+PASS serie_borde_bajo: periodo 100000 ns, 2000 ticks, build/series/borde_bajo.csv, Peor caso precio->decision: 78 ciclos (disponibles: 2262), 4/4, 2000 filas identicas a ref/trader.py, patrimonio 2483
+PASS serie_borde_alto: periodo 100000 ns, 2000 ticks, build/series/borde_alto.csv, Peor caso precio->decision: 78 ciclos (disponibles: 2262), 4/4, 2000 filas identicas a ref/trader.py, patrimonio 1003
+== make equiv-gemelo
+PASS: make equiv-gemelo
+periodo 0,1 ms: 3810 series, 7620000 ticks. Distintas a la referencia: 0. Series con algun precio sin respuesta: 0. Peor caso de respuesta: 78 ciclos
+periodo 1 ms: 3810 series, 7620000 ticks. Distintas a la referencia: 0. Series con algun precio sin respuesta: 0. Peor caso de respuesta: 78 ciclos
+periodo 10 ms: 3810 series, 7620000 ticks. Distintas a la referencia: 0. Series con algun precio sin respuesta: 0. Peor caso de respuesta: 78 ciclos
+PASS el binario coincide con la referencia en todas las series
+== make fases
+PASS: make fases
+PASS fase_0: perdidos en reset 2, respuestas 1998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 74.5 peor 78 de 2262
+PASS fase_1: perdidos en reset 2, respuestas 1998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 74.5 peor 78 de 2262
+PASS fase_2: perdidos en reset 2, respuestas 1998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 74.5 peor 78 de 2262
+PASS fase_3: perdidos en reset 2, respuestas 1998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 74.5 peor 78 de 2262
+PASS fase_4: perdidos en reset 2, respuestas 1998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 74.5 peor 78 de 2262
+PASS fase_5: perdidos en reset 2, respuestas 1998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 74.5 peor 78 de 2262
+PASS fase_6: perdidos en reset 2, respuestas 1998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 74.5 peor 78 de 2262
+PASS fase_7: perdidos en reset 2, respuestas 1998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 74.5 peor 78 de 2262
+PASS fase_0_mas13ns: perdidos en reset 2, respuestas 1998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 74.5 peor 78 de 2262
+PASS fase_1_mas13ns: perdidos en reset 2, respuestas 1998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 74.5 peor 78 de 2262
+PASS fase_2_mas13ns: perdidos en reset 2, respuestas 1998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 74.5 peor 78 de 2262
+PASS fase_3_mas13ns: perdidos en reset 2, respuestas 1998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 74.5 peor 78 de 2262
+PASS fase_4_mas13ns: perdidos en reset 2, respuestas 1998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 74.5 peor 78 de 2262
+PASS fase_5_mas13ns: perdidos en reset 2, respuestas 1998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 74.5 peor 78 de 2262
+PASS fase_6_mas13ns: perdidos en reset 2, respuestas 1998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 74.5 peor 78 de 2262
+PASS fase_7_mas13ns: perdidos en reset 2, respuestas 1998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 74.5 peor 78 de 2262
+PASS fase_todas_periodo_2501_ciclos: perdidos en reset 2, respuestas 1998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 74.0 peor 77 de 2263
+PASS peor caso en todas las fases: 78 ciclos, limite con 50 % de holgura 1131 (presupuesto ronda 3: 2262)
+== make estres
+PASS: make estres
+PASS fase_0: perdidos en reset 2, respuestas 1998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 74.5 peor 78 de 2262
+PASS fase_1: perdidos en reset 2, respuestas 1998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 74.5 peor 78 de 2262
+PASS fase_2: perdidos en reset 2, respuestas 1998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 74.5 peor 78 de 2262
+PASS fase_3: perdidos en reset 2, respuestas 1998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 74.5 peor 78 de 2262
+PASS fase_4: perdidos en reset 2, respuestas 1998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 74.5 peor 78 de 2262
+PASS fase_5: perdidos en reset 2, respuestas 1998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 74.5 peor 78 de 2262
+PASS fase_6: perdidos en reset 2, respuestas 1998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 74.5 peor 78 de 2262
+PASS fase_7: perdidos en reset 2, respuestas 1998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 74.5 peor 78 de 2262
+PASS fase_0_mas13ns: perdidos en reset 2, respuestas 1998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 74.5 peor 78 de 2262
+PASS fase_1_mas13ns: perdidos en reset 2, respuestas 1998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 74.5 peor 78 de 2262
+PASS fase_2_mas13ns: perdidos en reset 2, respuestas 1998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 74.5 peor 78 de 2262
+PASS fase_3_mas13ns: perdidos en reset 2, respuestas 1998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 74.5 peor 78 de 2262
+PASS fase_4_mas13ns: perdidos en reset 2, respuestas 1998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 74.5 peor 78 de 2262
+PASS fase_5_mas13ns: perdidos en reset 2, respuestas 1998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 74.5 peor 78 de 2262
+PASS fase_6_mas13ns: perdidos en reset 2, respuestas 1998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 74.5 peor 78 de 2262
+PASS fase_7_mas13ns: perdidos en reset 2, respuestas 1998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 74.5 peor 78 de 2262
+PASS fase_todas_periodo_2501_ciclos: perdidos en reset 2, respuestas 1998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 74.0 peor 77 de 2263
+PASS peor caso en todas las fases: 78 ciclos, limite con 50 % de holgura 1131 (presupuesto ronda 3: 2262)
+PASS sclk_100k: perdidos en reset 2, respuestas 1998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 74.5 peor 78 de 237
+PASS sclk_200k: perdidos en reset 2, respuestas 1998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 74.5 peor 78 de 1362
+PASS sclk_500k: perdidos en reset 2, respuestas 1998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 74.5 peor 78 de 2037
+PASS sclk_1M: perdidos en reset 2, respuestas 1998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 74.5 peor 78 de 2262
+PASS cs_setup500_hold40: perdidos en reset 2, respuestas 998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 74.5 peor 78 de 2299
+PASS cs_setup500_hold100: perdidos en reset 2, respuestas 998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 74.5 peor 78 de 2297
+PASS cs_setup500_hold500: perdidos en reset 2, respuestas 998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 74.5 peor 78 de 2287
+PASS cs_setup500_hold5000: perdidos en reset 2, respuestas 998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 74.5 peor 78 de 2175
+PASS cs_setup600_hold40: perdidos en reset 2, respuestas 998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 74.5 peor 78 de 2296
+PASS cs_setup600_hold100: perdidos en reset 2, respuestas 998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 74.5 peor 78 de 2295
+PASS cs_setup600_hold500: perdidos en reset 2, respuestas 998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 74.5 peor 78 de 2285
+PASS cs_setup600_hold5000: perdidos en reset 2, respuestas 998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 74.5 peor 78 de 2172
+PASS cs_setup1000_hold40: perdidos en reset 2, respuestas 998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 74.5 peor 78 de 2286
+PASS cs_setup1000_hold100: perdidos en reset 2, respuestas 998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 74.5 peor 78 de 2285
+PASS cs_setup1000_hold500: perdidos en reset 2, respuestas 998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 74.5 peor 78 de 2275
+PASS cs_setup1000_hold5000: perdidos en reset 2, respuestas 998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 74.5 peor 78 de 2162
+PASS cs_setup5000_hold40: perdidos en reset 2, respuestas 998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 74.5 peor 78 de 2186
+PASS cs_setup5000_hold100: perdidos en reset 2, respuestas 998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 74.5 peor 78 de 2185
+PASS cs_setup5000_hold500: perdidos en reset 2, respuestas 998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 74.5 peor 78 de 2175
+PASS cs_setup5000_hold5000: perdidos en reset 2, respuestas 998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 74.5 peor 78 de 2062
+PASS cs_setup20000_hold40: perdidos en reset 2, respuestas 998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 74.5 peor 78 de 1811
+PASS cs_setup20000_hold100: perdidos en reset 2, respuestas 998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 74.5 peor 78 de 1810
+PASS cs_setup20000_hold500: perdidos en reset 2, respuestas 998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 74.5 peor 78 de 1800
+PASS cs_setup20000_hold5000: perdidos en reset 2, respuestas 998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 74.5 peor 78 de 1687
+PASS reset_flanco_0: perdidos en reset 0, respuestas 500, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 74.5 peor 78 de 2262
+PASS reset_flanco_1: perdidos en reset 1, respuestas 499, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 74.5 peor 78 de 2262
+PASS reset_flanco_2: perdidos en reset 1, respuestas 499, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 74.5 peor 78 de 2262
+PASS reset_flanco_3: perdidos en reset 1, respuestas 499, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 74.5 peor 78 de 2262
+PASS reset_flanco_4: perdidos en reset 1, respuestas 499, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 74.5 peor 78 de 2262
+PASS reset_flanco_5: perdidos en reset 1, respuestas 499, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 74.5 peor 78 de 2262
+PASS reset_flanco_6: perdidos en reset 1, respuestas 499, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 74.5 peor 78 de 2262
+PASS reset_flanco_7: perdidos en reset 1, respuestas 499, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 74.5 peor 78 de 2262
+PASS reset_flanco_8: perdidos en reset 1, respuestas 499, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 74.5 peor 78 de 2262
+PASS reset_inicio_0: perdidos en reset 2, respuestas 498, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 74.5 peor 78 de 2262
+PASS reset_inicio_1: perdidos en reset 2, respuestas 498, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 74.5 peor 78 de 2262
+PASS reset_inicio_20: perdidos en reset 2, respuestas 498, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 74.5 peor 78 de 2262
+PASS reset_inicio_100000: perdidos en reset 1, respuestas 499, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 74.5 peor 78 de 2262
+PASS reset_inicio_163000: perdidos en reset 0, respuestas 500, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 74.5 peor 78 de 2262
+PASS reset_inicio_162440: perdidos en reset 0, respuestas 500, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 74.5 peor 78 de 2262
+PASS reset_inicio_162441: perdidos en reset 0, respuestas 500, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 74.5 peor 78 de 2262
+PASS reset_inicio_162480: perdidos en reset 0, respuestas 500, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 74.5 peor 78 de 2262
+PASS pegada_1: perdidos en reset 2, respuestas 998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 74.5 peor 78 de 2262
+PASS pegada_255: perdidos en reset 2, respuestas 998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 74.5 peor 78 de 2262
+PASS alterna_1_255: perdidos en reset 2, respuestas 998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 74.5 peor 78 de 2262
+PASS pegada_1_luego_255: perdidos en reset 2, respuestas 998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 74.5 peor 78 de 2262
+PASS al_azar_1_255: perdidos en reset 2, respuestas 1998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 74.5 peor 78 de 2262
+PASS familia_plana: perdidos en reset 2, respuestas 1998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 74.5 peor 78 de 2262
+PASS familia_borde_bajo: perdidos en reset 2, respuestas 1998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 74.5 peor 78 de 2262
+PASS familia_borde_alto: perdidos en reset 2, respuestas 1998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 74.5 peor 78 de 2262
+PASS familia_saltos: perdidos en reset 2, respuestas 1998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 74.5 peor 78 de 2262
+PASS familia_tendencia: perdidos en reset 2, respuestas 1998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 74.5 peor 78 de 2262
+PASS familia_paseo: perdidos en reset 2, respuestas 1998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 74.5 peor 78 de 2262
+PASS rondas_10ms_1ms_01ms: perdidos en reset 1, respuestas 599, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 74.5 peor 78 de 2262
+PASS rondas_01ms_1ms_10ms: perdidos en reset 2, respuestas 598, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 74.5 peor 78 de 2262
+PASS rondas_3x2000_01ms: perdidos en reset 2, respuestas 5998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 74.5 peor 78 de 2262
+FAIL periodo_11500ns: perdidos en reset 14, respuestas 1985, bytes distintos 2, X 0, sin leer 0, sin respuesta 1, ciclos prom 74.5 peor 78 de 50
+PASS periodo_13500ns: perdidos en reset 12, respuestas 1988, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, ciclos prom 74.5 peor 78 de 100
+FAIL: 1 casos fallidos
+== python3 tools/exhaustivo/r0_cotas.py
+PASS: python3 tools/exhaustivo/r0_cotas.py
+PASS
+== tools/sim_bitstream.sh build/r0_variante/r0.asc 2000
+PASS: tools/sim_bitstream.sh build/r0_variante/r0.asc 2000
+PASS bitstream build/r0_variante/r0.asc: 2000 ticks a 100000 ns identicos a ref/trader.py, patrimonio 9050
+== env SERIE=build/cotas/meta_ventana.csv tools/sim_bitstream.sh build/r0_variante/r0.asc 2000
+PASS: env SERIE=build/cotas/meta_ventana.csv tools/sim_bitstream.sh build/r0_variante/r0.asc 2000
+PASS bitstream build/r0_variante/r0.asc: 2000 ticks a 100000 ns identicos a ref/trader.py, patrimonio 22450
+bitstreams/variantes/r0_p20b70.bin: sha256 ca24bf18eceabe77c114e9208ef1f7f98976fc11eca6f6a78c99085c555057b0
+
+PASS: la variante p20b70 paso la puerta de R0
