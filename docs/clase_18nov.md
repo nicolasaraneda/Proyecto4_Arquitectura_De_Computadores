@@ -4,10 +4,10 @@ Grupo: Nicolás Araneda, Vicente Calderón y Santiago Muñoz.
 
 El profesor lleva la FPGA maestra a clases. Objetivo principal: grabar la serie que manda la maestra con el registrador (`docs/registrador.md`) para tener precios reales del formato de la competencia. Objetivo secundario, si hay tiempo: medir el SPI real y pasar R0, R1 y R2 por la maestra (`docs/checklist_26nov.md`, secciones 3 y 4).
 
-Todo se corre en WSL desde la carpeta `~/proyectos/P4_wt_int`, que tiene la rama `integra-noche` con el registrador y su herramienta (`main` todavía no los tiene). Antes de salir, en WSL:
+Todo se corre en WSL desde la carpeta del proyecto, `~/proyectos/Proyecto4_Arquitectura_De_Computadores` (`main` tiene el registrador y su herramienta desde el 17/11 en la noche). Antes de salir, en WSL:
 
 ```
-cd ~/proyectos/P4_wt_int
+cd ~/proyectos/Proyecto4_Arquitectura_De_Computadores
 git log --oneline -1                                  # anotar el commit
 cd bitstreams && sha256sum -c SHA256SUMS --ignore-missing | grep -E 'registrador|medidor|r0_|r1_|r2_' ; cd ..
 python3 tools/registrador.py --prueba                 # sin placa: tiene que terminar en "RESULTADO prueba PASS"
@@ -56,7 +56,7 @@ Si después de `iceprog` desaparece `/dev/ttyUSB1`, en PowerShell: `usbipd detac
 1. **Conectar a la maestra** según `docs/checklist_26nov.md`, sección 2: la tierra primero, después `CS_n` al PMOD 1, `MOSI` al 2, `MISO` al 3 y `SCLK` al 4. Confirmar los números con el ayudante antes de conectar. No unir los 3,3 V.
 2. **Grabar el registrador**:
    ```
-   cd ~/proyectos/P4_wt_int
+   cd ~/proyectos/Proyecto4_Arquitectura_De_Computadores
    sha256sum bitstreams/registrador.bin        # anotar; tiene que coincidir con bitstreams/SHA256SUMS
    iceprog bitstreams/registrador.bin
    ```
