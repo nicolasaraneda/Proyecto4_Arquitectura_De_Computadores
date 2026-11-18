@@ -17,7 +17,9 @@
 #      hardware que pasó las puertas.
 #   1. Con los programas nuevos: r0_cotas.bin, r1_cotas.bin, r2_cotas.bin y la
 #      imagen múltiple r2_cotas_multi.bin (imagen 0 R2, imagen 1 R0), revisada con
-#      tools/ver_multi.py. Se mide el tiempo de icebram e icepack.
+#      tools/ver_multi.py. Se mide el tiempo de icebram e icepack, y icetime da la
+#      misma frecuencia máxima en el .asc nuevo y en el anterior de cada peldaño
+#      (misma ubicación y mismo ruteo; solo cambia el contenido de las BRAM).
 #   2. Criterio 8: los tres .asc simulados por los pines (tb/tb_bitstream.sv sin
 #      modificar, Icarus, 0,1 ms) con dos series: los primeros 2000 ticks de la
 #      serie Meta (lo que corre el testbench oficial por defecto) y una ventana
@@ -80,6 +82,13 @@ $PYTHON tools/fondo/variante.py cuelgue_sup:100 -o "$O/colgado.s"
 $PYTHON tools/pochoasm.py "$O/colgado.s" -o "$O/colgado_asm.hex" > /dev/null && completar "$O/colgado_asm.hex" "$O/colgado.hex"
 icebram "$M/molde_prog.hex" "$O/colgado.hex" < "$O/r2_molde.asc" | icebram "$M/molde_tabla.hex" "$O/tabla.hex" > "$O/r2_colgado.asc"
 
+# --- 1b. icetime: la misma ubicación y el mismo ruteo dan la misma frecuencia ------
+for r in r0 r1 r2; do
+  icetime -d hx1k -P vq100 -p goboard.pcf -t "$O/viejo/$r.asc" 2>/dev/null | grep 'Total path delay' > "$O/viejo/$r.icetime" &
+  icetime -d hx1k -P vq100 -p goboard.pcf -t "$O/${r}_cotas.asc" 2>/dev/null | grep 'Total path delay' > "$O/${r}_cotas.icetime" &
+done
+wait
+
 # --- 2 y 3. Simulaciones desde el .asc --------------------------------------------
 sim() {   # sim NOMBRE ASC SERIE NTICKS [mon]
   local n=$1 asc=$2 ser=$3 nt=$4 mon=${5:-}
@@ -137,6 +146,11 @@ echo
 echo "1. Bitstreams nuevos (icebram e icepack de los tres: $(echo "$a $b" | awk '{printf "%.2f", $2 - $1}') s)"
 for f in r0_cotas r1_cotas r2_cotas r2_cotas_multi; do echo "  $f.bin: $(stat -c %s "$O/$f.bin") bytes, sha256 $(sha256sum "$O/$f.bin" | cut -d' ' -f1)"; done
 for r in r0 r1 r2; do echo "  lineas del .asc que cambian respecto del anterior en $r: $(diff "$O/viejo/$r.asc" "$O/${r}_cotas.asc" | grep -c '^>')"; done
+for r in r0 r1 r2; do
+  v=$(cat "$O/viejo/$r.icetime"); c=$(cat "$O/${r}_cotas.icetime")
+  if [ -n "$v" ] && [ "$v" = "$c" ]; then echo "PASS icetime $r: $c, igual que el bitstream anterior"
+  else echo "FAIL icetime $r: anterior '$v', nuevo '$c'"; fi
+done
 sed 's/^/  /' "$O/ver_multi.txt"
 if [ $multi_ok = 0 ]; then echo "PASS imagen multiple correcta (imagen 0 R2, imagen 1 R0) y cabe en la flash de $FLASH bytes"; else echo "FAIL imagen multiple"; fi
 echo
