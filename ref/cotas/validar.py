@@ -15,6 +15,7 @@ import comun  # noqa: E402
 import cotas  # noqa: E402
 import trader  # noqa: E402
 import zscore  # noqa: E402
+import planb  # noqa: E402
 
 ESTR = [
     ("espera", "cotas", (0, 0, 0, 0, 0, 178), lambda: cotas.Cotas("espera")),
@@ -25,6 +26,11 @@ ESTR = [
     ("max_media", "media", (5, 3, 0), lambda: trader.MaxMedia()),
     ("regla_base", "media", (5, 4, 0), lambda: trader.ReglaBase()),
     ("zscore", "zscore", (5, 6, 5, 2, 64, 0), lambda: zscore.ZScore()),
+    ("rango140_215", "rango", (140, 215, 0, 0), lambda: planb.Rango(140, 215)),
+    ("rango130_200_i170", "rango", (130, 200, 1, 170), lambda: planb.Rango(130, 200, 1, 170)),
+    ("salto3_60_baja", "salto", (3, 60, 0), lambda: planb.Salto(3, 60, 0)),
+    ("salto5_200_sube", "salto", (5, 200, 1), lambda: planb.Salto(5, 200, 1)),
+    ("tendencia4_8_1", "tendencia", (4, 8, 1), lambda: planb.Tendencia(4, 8, 1)),
     ("nada", "nada", (), None),
     ("siempre", "siempre", (), None),
 ]

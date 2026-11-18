@@ -1,0 +1,97 @@
+Plan B: rondas que son trozos de una ventana de 20000 normalizada (ref/cotas/planb_experimento.py)
+Cinco empresas, dos rellenos, 60 ventanas madre por empresa y relleno. Patrimonio final desde 10 000.
+'>nada' y '<nada': porcentaje de rondas que terminan sobre y bajo no operar.
+
+== primer trozo de cada ventana (lo que corre el testbench oficial), largo 2000: 600 rondas, 44 % tocan algun extremo
+   diez mejores por media: cotas_espera_b60 10659, cotas_espera_a5_b5_banda60 10615, cotas_espera_a5_b5_banda0 10615, rango140_180 10591, rango110_180 10586, rango140_170 10586, rango140_190 10575, rango140_220 10575, rango140_250 10573, rango140_240 10573
+   estrategia                      media      p5    peor  >nada  <nada
+   nada                            10000   10000   10000    0.0    0.0
+   siempre                         10203    7435    5688   49.5   50.5
+   max_media                       10115    8523    4879   53.5   43.2
+   cotas_espera_b60                10659   10000    9800   23.8    0.5
+   cotas_espera_a5_b5_banda60      10615   10000    9515   25.8    2.0
+   cotas_espera_a5_b5_banda0       10615   10000    9515   25.8    2.0
+   rango140_180                    10591    8898    7247   34.2   17.3
+   rango110_180                    10586    9968    8952   25.0    6.0
+   rango140_170                    10586    8898    7247   34.3   17.2
+
+== primer trozo de cada ventana (lo que corre el testbench oficial), largo 5000: 600 rondas, 67 % tocan algun extremo
+   diez mejores por media: cotas_espera_b60 11694, cotas_espera_a5_b5_banda60 11615, cotas_espera_a5_b5_banda0 11615, rango110_190 11584, rango110_180 11566, rango110_200 11534, rango110_210 11520, rango110_220 11520, rango110_230 11520, rango110_240 11519
+   estrategia                      media      p5    peor  >nada  <nada
+   nada                            10000   10000   10000    0.0    0.0
+   siempre                         10625    6260    4028   53.2   46.8
+   max_media                       10332    7567    4270   59.5   39.8
+   cotas_espera_b60                11694   10000    9830   36.5    0.2
+   cotas_espera_a5_b5_banda60      11615   10000    9610   38.8    1.2
+   cotas_espera_a5_b5_banda0       11615   10000    9610   38.8    1.2
+   rango110_190                    11584   10000    8208   40.2    2.7
+   rango110_180                    11566   10000    8208   40.2    2.7
+   rango110_200                    11534   10000    8208   40.2    2.7
+
+== cualquier trozo, largo 2000: 6000 rondas, 21 % tocan algun extremo
+   diez mejores por media: inicio190_rango130_220 10484, inicio170_rango130_220 10482, inicio190_rango140_230 10471, inicio170_rango140_230 10467, inicio190_rango120_200 10465, inicio170_rango120_200 10462, inicio190_rango150_240 10462, inicio150_rango130_220 10461, inicio150_rango120_200 10457, inicio170_rango150_240 10448
+   estrategia                      media      p5    peor  >nada  <nada
+   nada                            10000   10000   10000    0.0    0.0
+   siempre                         10259    7349    4661   51.9   48.0
+   max_media                       10118    8592    4879   55.2   42.5
+   cotas_espera_b60                10281   10000    9798    9.9    0.4
+   inicio190_rango130_220          10484    8000    5252   39.1   24.4
+   inicio170_rango130_220          10482    8403    6000   32.1   18.5
+   inicio190_rango140_230          10471    7980    5252   39.2   25.3
+   inicio170_rango140_230          10467    8349    6000   32.9   19.8
+   inicio190_rango120_200          10465    8100    5252   40.3   22.4
+   inicio170_rango120_200          10462    8446    6000   31.6   17.5
+
+== cualquier trozo, largo 5000: 2400 rondas, 50 % tocan algun extremo
+   diez mejores por media: inicio190_rango130_220 11305, inicio170_rango130_220 11298, inicio150_rango120_200 11288, inicio130_rango120_200 11284, inicio150_rango130_220 11281, rango120_220 11274, inicio190_rango120_200 11259, inicio170_rango120_200 11258, rango120_210 11258, rango120_190 11250
+   estrategia                      media      p5    peor  >nada  <nada
+   nada                            10000   10000   10000    0.0    0.0
+   siempre                         10644    6174    4028   54.9   45.1
+   max_media                       10308    7734    4270   58.2   41.5
+   cotas_espera_b60                11072   10000    9830   24.8    0.4
+   inicio190_rango130_220          11305    7515    5595   50.1   21.2
+   inicio170_rango130_220          11298    8160    6100   42.5   17.8
+   inicio150_rango120_200          11288    8959    6936   38.0   11.5
+   inicio130_rango120_200          11284    9341    7708   35.2    8.7
+   inicio150_rango130_220          11281    8662    6936   38.2   15.3
+   rango120_220                    11274    9486    8236   34.1    8.3
+
+== seleccion por anos (ajuste 2022-2023, validacion 2024), primer trozo, largo 2000: ajuste 398, validacion 180
+   cinco mejores en el ajuste: cotas_espera_b60 10593, cotas_espera_a5_b5_banda60 10567, cotas_espera_a5_b5_banda0 10567, rango140_180 10528, rango110_180 10523
+   en la validacion:
+   estrategia                      media      p5    peor  >nada  <nada
+   cotas_espera_b60                10885   10000    9892   30.0    1.1
+   nada                            10000   10000   10000    0.0    0.0
+   siempre                         10558    7558    5808   54.4   45.6
+   max_media                       10308    8872    6921   55.0   40.6
+   cotas_espera_b60                10885   10000    9892   30.0    1.1
+
+== seleccion por anos (ajuste 2022-2023, validacion 2024), primer trozo, largo 5000: ajuste 398, validacion 180
+   cinco mejores en el ajuste: cotas_espera_b60 11547, cotas_espera_a5_b5_banda60 11478, cotas_espera_a5_b5_banda0 11478, rango110_200 11381, rango110_180 11375
+   en la validacion:
+   estrategia                      media      p5    peor  >nada  <nada
+   cotas_espera_b60                12227   10000   10000   44.4    0.0
+   nada                            10000   10000   10000    0.0    0.0
+   siempre                         11439    6800    5237   67.2   32.8
+   max_media                       10732    8248    6918   66.1   32.8
+   cotas_espera_b60                12227   10000   10000   44.4    0.0
+
+== seleccion por empresa (ajuste META AAPL NFLX, validacion AMD TSLA), primer trozo, largo 2000: ajuste 360, validacion 240
+   cinco mejores en el ajuste: cotas_espera_b60 10777, cotas_espera_a5_b5_banda60 10734, cotas_espera_a5_b5_banda0 10734, rango140_180 10714, rango110_180 10711
+   en la validacion:
+   estrategia                      media      p5    peor  >nada  <nada
+   cotas_espera_b60                10483   10000   10000   18.3    0.0
+   nada                            10000   10000   10000    0.0    0.0
+   siempre                          9886    7538    5808   42.1   57.9
+   max_media                        9853    8401    6921   39.6   56.2
+   cotas_espera_b60                10483   10000   10000   18.3    0.0
+
+== seleccion por empresa (ajuste META AAPL NFLX, validacion AMD TSLA), primer trozo, largo 5000: ajuste 360, validacion 240
+   cinco mejores en el ajuste: cotas_espera_b60 11869, rango110_180 11844, rango110_190 11829, cotas_espera_a5_b5_banda60 11788, cotas_espera_a5_b5_banda0 11788
+   en la validacion:
+   estrategia                      media      p5    peor  >nada  <nada
+   cotas_espera_b60                11432   10000    9830   31.2    0.4
+   nada                            10000   10000   10000    0.0    0.0
+   siempre                         10136    6346    4028   44.2   55.8
+   max_media                        9794    7329    5730   45.8   52.9
+   cotas_espera_b60                11432   10000    9830   31.2    0.4

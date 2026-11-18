@@ -127,3 +127,32 @@ Con rivales que también usan los extremos, "espera con banda" queda primera en 
 - **Lo que no se sabe**: si las rondas de la competencia se normalizan por separado (pregunta al ayudante) y cómo es la forma por minuto de las otras cuatro empresas (el modelo usa la de Meta; con los minutos reales de Alpaca se puede repetir todo con `python3 ref/cotas/experimento.py`).
 
 Se reproduce con `python3 ref/cotas/validar.py` (el evaluador en C contra las referencias en Python), `python3 ref/cotas/validar_modelo.py` y `python3 ref/cotas/experimento.py` (20 segundos).
+
+## 6. Plan B: si las rondas son trozos de una serie normalizada más larga
+
+Pedido de Nicolás del 18/11: la mejor regla si la respuesta es que cada ronda es un trozo de una serie normalizada más larga y no toca los extremos. Es justo lo que hace el testbench oficial con la serie de práctica: corre los primeros 2000 ticks de una serie de 20 000 normalizada entera. `ref/cotas/planb_experimento.py`, salidas en `docs/mediciones/cotas/planb.txt` (madre de 20 000) y `planb_madre50000.txt` (madre de 50 000).
+
+**Familias probadas** (145 variantes, validadas contra sus referencias en Python con `ref/cotas/validar.py`):
+
+- **Posición en el rango sin tocar los extremos** ("rango"): compra bajo L, vende sobre H, de L = 110 a 180 y H hasta 250; con y sin compra al inicio si el primer precio es bajo.
+- **Saltos de apertura** ("salto"): a favor o en contra de saltos de 3, 5 u 8 unidades, saliendo 30, 60, 120 o 390 precios después.
+- **Tendencia**: cruce de medias de 8 a 1024 precios.
+- **Reversión**: `max_media` y otros umbrales, `zscore`.
+- **Cotas con márgenes**: comprar desde 100 + a y vender desde 255 - a, sin esperar el extremo exacto.
+
+**Resultado (primer trozo de cada ventana, validación):**
+
+| Separación | Largo | Elegida en el ajuste | Media en la validación | Termina bajo 10 000 | Peor |
+|------------|-------|----------------------|------------------------|---------------------|------|
+| Por años, madre 20 000 | 2000 | espera con banda 60 | 10 885 | 1,1 % | 9 892 |
+| Por años, madre 20 000 | 5000 | espera con banda 60 | 12 227 | 0 % | 10 000 |
+| Por empresa, madre 20 000 | 2000 | espera con banda 60 | 10 483 | 0 % | 10 000 |
+| Por empresa, madre 20 000 | 5000 | espera con banda 60 | 11 432 | 0,4 % | 9 830 |
+
+Con una madre de 50 000 el ajuste elige la misma regla en los cuatro cortes (media de 10 330 a 10 900 en la población).
+
+**Por qué la misma regla sigue ganando.** Aunque la ronda sea un trozo, el primer trozo de una serie normalizada toca algún extremo mucho más que su proporción del largo: el 44 % de las veces con 2000 ticks de 20 000 (el 10 % del largo). Es la ley del arcoseno: el máximo y el mínimo de un camino al azar tienden a caer cerca de sus bordes. Cuando la ronda toca un extremo, la regla lo aprovecha; cuando no, no opera y no pierde.
+
+**Si la ronda fuera un trozo cualquiera** (no el primero), los extremos aparecen en el 8 a 21 % de las rondas y "espera con banda 60" queda apenas sobre no operar (10 070 a 10 280). Ahí las de mayor media son "comprar al inicio si el primer precio es 190 o menos, y operar un rango" (de 10 200 a 11 300), pero con pérdidas de hasta 50 % en el peor caso y bajo 10 000 en una de cada cuatro rondas.
+
+**Conclusión del plan B.** Ninguna de las familias nuevas le gana a la regla elegida cuando la ronda es el primer trozo, que es lo que hace el testbench oficial. **La opción de bajo riesgo para el plan B es la misma regla ya elegida**: no hay que cambiar nada. Si se confirmara que las rondas son trozos tomados al azar en medio de la serie, la regla queda como "casi no operar" (no pierde), y la alternativa de más media (comprar al inicio con precio bajo, más un rango) cambia esa seguridad por un riesgo grande.

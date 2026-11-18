@@ -15,6 +15,12 @@
  *   zscore km kd num den w sx2     ref/zscore.py
  *   nada                           mantener siempre
  *   siempre                        comprar 63 siempre (comprar y mantener desde el tick 1)
+ *   rango  L H inicio u            compra si p <= L, vende si p >= H, si no mantiene; inicio 0 en caja,
+ *                                  1 compra con el primer precio si es <= u (ref/cotas/planb.py)
+ *   salto  G N dir                 al ver |p - p_anterior| >= G (una apertura): dir 0 compra si el salto
+ *                                  es hacia abajo, dir 1 si es hacia arriba; vende N precios despues
+ *   tendencia k1 k2 d              medias exponenciales de 2^k1 y 2^k2 precios: compra si la rapida
+ *                                  supera a la lenta por mas de d, vende si queda d por debajo
  *
  * Ventanas: archivo binario con "int32 n" y después n veces "int32 largo, largo bytes".
  * Salida (stdout): una línea por ventana con el patrimonio de cada estrategia, separados
@@ -27,7 +33,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-enum { COTAS, MEDIA, ZSCORE, NADA, SIEMPRE };
+enum { COTAS, MEDIA, ZSCORE, NADA, SIEMPRE, RANGO, SALTO, TENDENCIA };
 #define MANTENER 0x00
 #define COMPRAR 0x7F
 #define VENDER 0xBF
@@ -42,6 +48,8 @@ typedef struct {   /* estado de una estrategia en una ventana */
   int primero, q, vio_lo, vio_hi;      /* cotas */
   long S; int pos;                     /* media */
   long M, D; int n, quiere;            /* zscore */
+  int prev, resta;                     /* salto */
+  long F, L2;                          /* tendencia (por 2^16) */
 } Estado;
 
 static int decidir(const Estrategia *e, Estado *s, int p) {
@@ -84,6 +92,36 @@ static int decidir(const Estrategia *e, Estado *s, int p) {
     s->pos = (s->pos | compra) & no_vende;
     s->S = s->S + p - (((s->S + (1L << k) - 1) << (8 - k)) >> 8);
     return s->pos ? COMPRAR : VENDER;
+  }
+  case RANGO: {
+    int L = a[0], H = a[1], inicio = a[2], u = a[3];
+    if (s->primero) {
+      s->primero = 0;
+      s->q = (inicio == 1 && p <= u) ? COMPRAR : MANTENER;
+    }
+    if (p <= L) s->q = COMPRAR;
+    else if (p >= H) s->q = VENDER;
+    return s->q;
+  }
+  case SALTO: {
+    int G = a[0], N = a[1], dir = a[2];
+    if (s->primero) { s->primero = 0; s->prev = p; s->q = MANTENER; return s->q; }
+    int d = p - s->prev;
+    s->prev = p;
+    if ((dir == 0 && d <= -G) || (dir == 1 && d >= G)) { s->q = COMPRAR; s->resta = N; }
+    else if (s->resta > 0) { if (--s->resta == 0) s->q = VENDER; }
+    return s->q;
+  }
+  case TENDENCIA: {
+    int k1 = a[0], k2 = a[1], d = a[2];
+    long x = (long)p << 16;
+    if (s->primero) { s->primero = 0; s->F = x; s->L2 = x; s->q = MANTENER; return s->q; }
+    s->F += (x - s->F) >> k1;
+    s->L2 += (x - s->L2) >> k2;
+    long dif = s->F - s->L2, um = (long)d << 16;
+    if (dif > um) s->q = COMPRAR;
+    else if (dif < -um) s->q = VENDER;
+    return s->q;
   }
   case ZSCORE: {
     int km = a[0], kd = a[1], num = a[2], den = a[3], w = a[4], sx2 = a[5];
@@ -143,6 +181,9 @@ static int leer_estrategias(const char *ruta, Estrategia **out) {
     else if (!strcmp(tipo, "zscore")) e->tipo = ZSCORE;
     else if (!strcmp(tipo, "nada")) e->tipo = NADA;
     else if (!strcmp(tipo, "siempre")) e->tipo = SIEMPRE;
+    else if (!strcmp(tipo, "rango")) e->tipo = RANGO;
+    else if (!strcmp(tipo, "salto")) e->tipo = SALTO;
+    else if (!strcmp(tipo, "tendencia")) e->tipo = TENDENCIA;
     else { fprintf(stderr, "tipo desconocido: %s\n", tipo); exit(1); }
     n++;
   }
