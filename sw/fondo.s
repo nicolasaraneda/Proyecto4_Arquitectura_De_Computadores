@@ -96,6 +96,7 @@ s_espera:
 #@SUPERVISOR
 
 # 2. Comparar contra los umbrales de la tabla
+s_decidir:
     lw   x13, T_LO_MAS_1(x1)
     sltu x6, x5, x13           # bajo = p <= 100
     lw   x13, T_HI(x1)
@@ -126,6 +127,7 @@ s_espera:
     sw   x4, OFF_DECISION(x2)
 
 # 4. Telemetría: un store por tick, después de decidir
+s_telemetria:
     addi x3, x3, 1             # número de este tick
     xori x15, x4, COMPRAR_63
     sltiu x15, x15, 1          # 1 si está adentro (comprar 63)

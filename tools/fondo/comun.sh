@@ -53,10 +53,39 @@ compilar_sim() {
 # simbolos FUENTE.s: plusargs con las direcciones de las etiquetas
 simbolos() { $PYTHON $TF/simbolos.py "${1:-sw/fondo.s}" --plusargs; }
 
-# serie FAMILIA SEMILLA N: genera la serie si no existe e imprime su ruta
+# serie FAMILIA SEMILLA N: genera la serie si no existe e imprime su ruta (sin normalizar)
 serie() {
   local f=$BF/series/$1_$2_$3.csv
   [ -s "$f" ] || $PYTHON ref/series.py "$1" --n "$3" --semilla "$2" -o "$f" > /dev/null
+  echo "$f"
+}
+
+# serie_norm FAMILIA SEMILLA N: la serie de esa familia normalizada como las de la
+# competencia (mínimo 100, máximo 255; ref/cotas/comun.py). Imprime su ruta
+serie_norm() {
+  local f=$BF/series/$1-norm_$2_$3.csv
+  [ -s "$f" ] || $PYTHON - "$1" "$2" "$3" "$f" <<'PY'
+import sys
+sys.path.insert(0, "ref"); sys.path.insert(0, "ref/cotas")
+import comun, series
+fam, sem, n, ruta = sys.argv[1], int(sys.argv[2]), int(sys.argv[3]), sys.argv[4]
+series.escribir_csv(ruta, comun.normalizar(series.lote(fam, 1, n, sem)[0]))
+PY
+  echo "$f"
+}
+
+# meta_ventana INICIO N: N ticks de la serie Meta desde INICIO, normalizados de nuevo
+# (así la ventana toca 100 y 255). Imprime su ruta
+meta_ventana() {
+  local f=$BF/series/meta_$1_$2.csv
+  [ -s "$f" ] || $PYTHON - "$1" "$2" "$f" <<'PY'
+import sys
+sys.path.insert(0, "ref"); sys.path.insert(0, "ref/cotas")
+import comun, market, series
+ini, n, ruta = int(sys.argv[1]), int(sys.argv[2]), sys.argv[3]
+p = market.leer_serie("data/practica_meta.csv")
+series.escribir_csv(ruta, comun.normalizar(p[ini:ini + n]))
+PY
   echo "$f"
 }
 

@@ -1,27 +1,25 @@
 // tb_fondo.sv: testbench de medición y de protocolo de sw/fondo.s sobre el
-// Espino barrel (docs/fondo.md).
+// Espino barrel (R1 y R2).
 //
 // Grupo: Nicolás Araneda, Vicente Calderón y Santiago Muñoz.
 // Arquitectura de Computadores, Universidad de los Andes, 2026-2.
 //
-// No reemplaza al testbench oficial (tb/tb_proyecto_4.sv), que se corre sin
-// modificar con tools/fondo/oficial.sh. Usa la misma maestra SPI configurable
-// de tb/tb_estres.sv (misma transacción y misma medición de byte_done a la
-// primera escritura en DECISION) y agrega lo que el oficial no mira:
+// Desde el 17/11 (decisión T133) sw/fondo.s corre la regla de cotas en el hilo 0
+// y deja los hilos 1 a 3 en un lazo de espera. No reemplaza al testbench oficial
+// (tb/tb_proyecto_4.sv), que se corre sin modificar con tools/fondo/oficial.sh.
+// Usa la misma maestra SPI configurable de tb/tb_estres.sv (misma transacción y
+// misma medición de byte_done a la primera escritura en DECISION) y agrega lo
+// que el oficial no mira:
 //
 //   - Conteo por tick y por hilo: instrucciones ejecutadas y cuántas de ellas
-//     fueron vueltas de un lazo de sondeo.
-//   - Hitos del protocolo en ciclos desde byte_done: cuándo se escribe PUB,
-//     cuándo publica su voto cada gestor y cuándo el supervisor vuelve a
-//     sondear.
-//   - Estado compartido en el momento de decidir: PUB, los tres votos, los
-//     tres puntajes y los tres pesos, para compararlos con ref/fondo.py.
-//   - Vigilancia del protocolo: cada palabra compartida la escribe solo su
-//     dueño, nadie escribe en el programa ni en la tabla de parámetros, y solo
-//     el hilo 0 toca el SPI y el periférico.
+//     fueron vueltas de un lazo de espera (el sondeo del hilo 0 y el lazo de los
+//     hilos 1 a 3).
+//   - Cuándo el hilo 0 vuelve a sondear después de decidir.
+//   - Vigilancia del protocolo: solo el hilo 0 toca el SPI y el periférico,
+//     nadie escribe en la tabla de parámetros, y los stores a la RAM se cuentan
+//     (el programa sano no hace ninguno).
 //   - Telemetría: escrituras al periférico por tick y valor de los LED y de los
 //     7 segmentos al cerrar el tick.
-//
 //   - Vigilante (solo si el SoC se compiló con -DESPINO_VIGILANTE): si pidió
 //     la reconfiguración y cuántos precios seguidos llegó a contar sin
 //     respuesta.
@@ -37,9 +35,8 @@
 //   +SCLK_MEDIO_NS=500  +CS_SETUP_NS=1500  +CS_HOLD_NS=500
 //   +SALIDA=archivo.csv      "tick,precio,decision" (lo que lee la maestra)
 //   +ESTADO=archivo.csv      una fila por precio recibido (ver ENCABEZADO)
-//   +A_S_ESPERA, +A_S_PRIMERO, +A_S_VOTOS, +A_PLAZO, +A_FRONTERA, +A_G_ESPERA,
-//   +A_G_PRIMERO             direcciones de las etiquetas (tools/fondo/simbolos.py)
-//   +PUB, +W1, +REF1, +G1    direcciones de los datos (las demás son contiguas)
+//   +A_S_ESPERA, +A_HILO1, +A_HILO2, +A_HILO3   direcciones de las etiquetas
+//                            (tools/fondo/simbolos.py)
 //
 // Al final imprime una línea RESUMEN con los conteos que usa tools/fondo/revisar.py.
 
@@ -69,9 +66,7 @@ module tb_fondo;
   int ntick = 2000, ronda_ticks = 0;
   longint pausa_ns = 0, periodo_ns = 100000, periodo2_ns = -1, periodo3_ns = -1;
   longint inicio_ns = 4000, sclk_medio_ns = 500, cs_setup_ns = 1500, cs_hold_ns = 500;
-  int a_s_espera = -1, a_s_primero = -1, a_s_votos = -1, a_plazo = -1, a_frontera = -1;
-  int a_g_espera = -1, a_g_primero = -1;
-  int d_pub = 'h7C0, d_w1 = 'h7C4, d_ref1 = 'h7D0, d_g1 = 'h7DC;
+  int a_s_espera = -1, a_hilo [4] = '{-1, -1, -1, -1};
 
   int precio [];
 
@@ -119,9 +114,6 @@ module tb_fondo;
   wire        wr_per = dreq && dwe && dad[31] && !dad[16] && !es_tab;
   wire [11:0] wa     = {dad[11:2], 2'b00};
 
-  // Copia de las palabras compartidas, hecha con los stores que se ven en el bus
-  logic [31:0] m_pub = 0, m_w [3] = '{0, 0, 0}, m_des [3] = '{0, 0, 0}, m_est [3] = '{0, 0, 0};
-
   // --- Medición igual a la del oficial -------------------------------------------
   int ciclos = 0, peor_caso = 0, respuestas = 0, precios_perdidos = 0, recibidos = 0, sin_respuesta = 0;
   longint suma_ciclos = 0;
@@ -132,13 +124,11 @@ module tb_fondo;
   bit     abierta = 0;
   int     v_tick, v_precio;
   int     ic [4], son [4];
-  int     n_dec, n_tel, n_pub, vueltas, plazo, front;
-  int     c_pub, c_est [3], c_fin, r_ciclos;
+  int     n_dec, n_tel, c_fin, r_ciclos;
   logic [7:0]  s_byte;
-  logic [31:0] s_pub, s_w [3], s_des [3], s_est [3];
   int     fd_estado = 0;
 
-  int violaciones = 0, dec_multiples = 0, tel_multiples = 0, ticks_plazo = 0, ticks_frontera = 0, max_vueltas = 0;
+  int violaciones = 0, dec_multiples = 0, tel_multiples = 0, stores_ram = 0;
 
   task automatic violacion(input string que);
     violaciones++;
@@ -149,19 +139,12 @@ module tb_fondo;
   task automatic cerrar_tick;
     if (n_dec != 1) dec_multiples++;
     if (n_tel > 1)  tel_multiples++;
-    if (plazo != 0) ticks_plazo++;
-    if (front != 0) ticks_frontera++;
-    if (vueltas > max_vueltas) max_vueltas = vueltas;
     if (fd_estado != 0)
-      $fdisplay(fd_estado, "%0d,%0d,%0d,%0d,%02x,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d",
-        v_tick, v_precio, t0, r_ciclos, s_byte, n_dec, n_tel, n_pub, vueltas, plazo, front,
-        c_pub, c_est[0], c_est[1], c_est[2], c_fin,
-        ic[0], ic[1], ic[2], ic[3], son[0], son[1], son[2], son[3],
-        s_pub, s_est[0], s_est[1], s_est[2], $signed(s_des[0]), $signed(s_des[1]), $signed(s_des[2]),
-        s_w[0], s_w[1], s_w[2], leds, seg1, seg2);
+      $fdisplay(fd_estado, "%0d,%0d,%0d,%0d,%02x,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d",
+        v_tick, v_precio, t0, r_ciclos, s_byte, n_dec, n_tel, c_fin,
+        ic[0], ic[1], ic[2], ic[3], son[0], son[1], son[2], son[3], leds, seg1, seg2);
   endtask
 
-  int k;
 
   function automatic bit en_lazo(input int pc, input int base, input int largo);
     return base >= 0 && pc >= base && pc < base + largo;
@@ -189,56 +172,32 @@ module tb_fondo;
       abierta = 1; t0 = ciclo;
       v_tick = tick_tx; v_precio = {dut.u_spi.rx_shift[6:0], dut.u_spi.mosi};
       for (int h = 0; h < 4; h++) begin ic[h] = 0; son[h] = 0; end
-      n_dec = 0; n_tel = 0; n_pub = 0; vueltas = 0; plazo = 0; front = 0;
-      c_pub = -1; c_est[0] = -1; c_est[1] = -1; c_est[2] = -1; c_fin = -1; r_ciclos = -1;
+      n_dec = 0; n_tel = 0; c_fin = -1; r_ciclos = -1;
       s_byte = 0;
     end else if (abierta) begin
       if (xv) begin
         ic[xt]++;
         if (xt == 0) begin
-          if (en_lazo(xpc, a_s_espera, 12) || en_lazo(xpc, a_s_primero, 12)) son[0]++;
-          if (xpc == a_s_votos)  vueltas++;
-          if (xpc == a_plazo)    plazo = 1;
-          if (xpc == a_frontera) front = 1;
+          if (en_lazo(xpc, a_s_espera, 12)) son[0]++;
           if (n_dec > 0 && c_fin < 0 && xpc == a_s_espera) c_fin = ciclo - t0;
         end else begin
-          if (en_lazo(xpc, a_g_espera, 8) || en_lazo(xpc, a_g_primero, 8)) son[xt]++;
+          if (xpc == a_hilo[xt]) son[xt]++;
         end
       end
       if (wr_dec) begin
         n_dec++;
         if (n_dec == 1) begin
           r_ciclos = ciclo - t0;
-          s_byte = dwd[7:0]; s_pub = m_pub;
-          for (int k = 0; k < 3; k++) begin s_w[k] = m_w[k]; s_des[k] = m_des[k]; s_est[k] = m_est[k]; end
+          s_byte = dwd[7:0];
         end
       end
       if (wr_per) n_tel++;
     end
 
-    // Copia de las palabras compartidas y vigilancia del protocolo
-    if (xv && dreq && dad[31] && !es_tab && xt != 0) violacion("un gestor toca el SPI o el periferico");
+    // Vigilancia del protocolo
+    if (xv && dreq && dad[31] && !es_tab && xt != 0) violacion("un hilo distinto del 0 toca el SPI o el periferico");
     if (xv && dreq && dwe && es_tab) violacion("store a la tabla de parametros");
-    if (xv && wr_ram) begin
-      if (wa == d_pub) begin
-        if (xt != 0) violacion("PUB escrita por un gestor");
-        m_pub = dwd;
-        if (abierta) begin n_pub++; if (c_pub < 0) c_pub = ciclo - t0; end
-      end else if (wa >= d_w1 && wa < d_w1 + 12) begin
-        if (xt != 0) violacion("peso escrito por un gestor");
-        m_w[(wa - d_w1) >> 2] = dwd;
-      end else if (wa >= d_ref1 && wa < d_ref1 + 12) begin
-        if (xt != 0) violacion("REF escrita por un gestor");
-      end else if (wa >= d_g1 && wa < d_g1 + 24) begin
-        k = (wa - d_g1) >> 3;
-        if (xt != k + 1) violacion("bloque de un gestor escrito por otro hilo");
-        if (((wa - d_g1) & 4) == 0) m_des[k] = dwd;
-        else begin
-          m_est[k] = dwd;
-          if (abierta && c_est[k] < 0 && dwd[31:8] == m_pub[31:8]) c_est[k] = ciclo - t0;
-        end
-      end else violacion("store fuera de las palabras compartidas");
-    end
+    if (xv && wr_ram) stores_ram++;
     ciclo++;
   end
 
@@ -273,16 +232,9 @@ module tb_fondo;
     void'($value$plusargs("CS_SETUP_NS=%d", cs_setup_ns));
     void'($value$plusargs("CS_HOLD_NS=%d", cs_hold_ns));
     void'($value$plusargs("A_S_ESPERA=%d", a_s_espera));
-    void'($value$plusargs("A_S_PRIMERO=%d", a_s_primero));
-    void'($value$plusargs("A_S_VOTOS=%d", a_s_votos));
-    void'($value$plusargs("A_PLAZO=%d", a_plazo));
-    void'($value$plusargs("A_FRONTERA=%d", a_frontera));
-    void'($value$plusargs("A_G_ESPERA=%d", a_g_espera));
-    void'($value$plusargs("A_G_PRIMERO=%d", a_g_primero));
-    void'($value$plusargs("PUB=%d", d_pub));
-    void'($value$plusargs("W1=%d", d_w1));
-    void'($value$plusargs("REF1=%d", d_ref1));
-    void'($value$plusargs("G1=%d", d_g1));
+    void'($value$plusargs("A_HILO1=%d", a_hilo[1]));
+    void'($value$plusargs("A_HILO2=%d", a_hilo[2]));
+    void'($value$plusargs("A_HILO3=%d", a_hilo[3]));
     if (periodo2_ns < 0) periodo2_ns = periodo_ns;
     if (periodo3_ns < 0) periodo3_ns = periodo2_ns;
     if (cs_setup_ns < sclk_medio_ns) begin
@@ -297,7 +249,7 @@ module tb_fondo;
     $fdisplay(fd, "tick,precio,decision");
     if (estado != "") begin
       fd_estado = $fopen(estado, "w");
-      $fdisplay(fd_estado, "tick,precio,ciclo,respuesta,byte,n_dec,n_tel,n_pub,vueltas,plazo,frontera,c_pub,c_est1,c_est2,c_est3,c_fin,ic0,ic1,ic2,ic3,son0,son1,son2,son3,pub,est1,est2,est3,des1,des2,des3,w1,w2,w3,leds,seg1,seg2");
+      $fdisplay(fd_estado, "tick,precio,ciclo,respuesta,byte,n_dec,n_tel,c_fin,ic0,ic1,ic2,ic3,son0,son1,son2,son3,leds,seg1,seg2");
     end
     #(inicio_ns);
 
@@ -319,9 +271,10 @@ module tb_fondo;
     if (abierta) cerrar_tick();
     if (fd_estado != 0) $fclose(fd_estado);
 
-    $display("RESUMEN ticks=%0d recibidos=%0d respuestas=%0d sin_respuesta=%0d precios_perdidos=%0d bits_x=%0d peor_caso=%0d suma_ciclos=%0d presupuesto=%0d violaciones=%0d dec_distinto_de_1=%0d tel_mas_de_1=%0d ticks_plazo=%0d ticks_frontera=%0d max_vueltas=%0d vig_boot=%0d vig_max=%0d vig_tick=%0d",
+    // ticks_plazo se mantiene en 0 para las herramientas que lo leen (el programa no tiene plazo)
+    $display("RESUMEN ticks=%0d recibidos=%0d respuestas=%0d sin_respuesta=%0d precios_perdidos=%0d bits_x=%0d peor_caso=%0d suma_ciclos=%0d presupuesto=%0d violaciones=%0d dec_distinto_de_1=%0d tel_mas_de_1=%0d ticks_plazo=0 stores_ram=%0d vig_boot=%0d vig_max=%0d vig_tick=%0d",
              ntick, recibidos, respuestas, sin_respuesta, precios_perdidos, bits_x, peor_caso, suma_ciclos, presupuesto_min,
-             violaciones, dec_multiples, tel_multiples, ticks_plazo, ticks_frontera, max_vueltas,
+             violaciones, dec_multiples, tel_multiples, stores_ram,
              vig_boot, vig_max, vig_tick);
     $finish;
   end
