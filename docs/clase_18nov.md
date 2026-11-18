@@ -2,7 +2,17 @@
 
 Grupo: Nicolás Araneda, Vicente Calderón y Santiago Muñoz.
 
-El profesor lleva la FPGA maestra a clases. Objetivo principal: grabar la serie que manda la maestra con el registrador (`docs/registrador.md`) para tener precios reales del formato de la competencia. Objetivo secundario, si hay tiempo: medir el SPI real y pasar R0, R1 y R2 por la maestra (`docs/checklist_26nov.md`, secciones 3 y 4).
+**Estado de los bitstreams para hoy (se actualiza en la madrugada del 18/11):**
+
+| Archivo | Qué es | Estado |
+|---------|--------|--------|
+| `registrador.bin` | Registra la serie de la maestra por la UART | Listo |
+| `r0_cotas.bin` | R0 con la regla nueva ("espera", banda 60) | Listo: pasó su puerta de simulación |
+| R1 y R2 con la regla nueva | Barrel con la regla en el hilo 0 | **En verificación.** Si al salir no están en `bitstreams/` con su línea en `SHA256SUMS`, usar los anteriores (abajo) |
+| `r1_fondo.bin`, `r2_multi.bin` | R1 y R2 anteriores (el fondo con `max_media`) | Alternativa: **mismo hardware** que los nuevos, así que probarlos con la maestra valida el hardware igual |
+| `r0_base_max_media.bin` | R0 anterior | Alternativa de `r0_cotas.bin`, mismo hardware |
+
+El profesor lleva la FPGA maestra a clases. Objetivo principal: grabar la serie que manda la maestra con el registrador (`docs/registrador.md`). Después, pasar por la maestra los peldaños con la regla nueva (sección 4).
 
 Todo se corre en WSL desde la carpeta del proyecto, `~/proyectos/Proyecto4_Arquitectura_De_Computadores` (`main` tiene el registrador y su herramienta desde el 17/11 en la noche). Antes de salir, en WSL:
 
@@ -105,12 +115,17 @@ Sin la UART la serie no se puede reconstruir: el registrador no guarda nada en l
    - ¿La serie de clases es `practica_meta.csv` u otra?
    - ¿Se puede repetir la prueba con la maestra antes del 1/12?
 
-## 4. Si sobra tiempo: el hardware de la competencia con la maestra
+## 4. Orden para grabar con la maestra y qué se ve en cada uno
 
-La regla del proyecto es que el bitstream de la competencia solo puede tener hardware que pasó por la maestra real. El algoritmo va a cambiar con la serie nueva, pero el hardware no: probar hoy R0, R1 y R2 con la maestra valida el hardware aunque el programa que corran sea `max_media`. En orden, cada uno con las rondas que permita la maestra:
+En este orden, cada uno con las rondas que permita la maestra. Antes de cada uno: `sha256sum bitstreams/ARCHIVO` y anotarlo. Después de grabar, desconectar y conectar el USB con la maestra conectada (sección 2, paso 3).
 
-1. `iceprog bitstreams/r0_base_max_media.bin`
-2. `iceprog bitstreams/r1_fondo.bin`
-3. `iceprog -b bitstreams/r2_multi.bin`
+1. **`registrador.bin`** (sección 2). 7 segmentos: la cuenta de precios (con SW4, el byte alto). LED1 cambia con cada precio, LED2 encendido mientras la UART transmite, LED3 si hubo una transacción con error, LED4 si se perdió un registro. La maestra ve a nuestro grupo manteniendo.
+2. **`r0_cotas.bin`** (`iceprog bitstreams/r0_cotas.bin`). R0 no escribe telemetría: **los 7 segmentos quedan en `00` y los LED apagados todo el tiempo**. Lo que importa está en la pantalla de la maestra:
+   - Si la ronda toca el 100, el grupo compra en ese momento; si después toca el 255, vende. Con la banda, después de ver los dos, compra bajo 160 y vende sobre 195.
+   - **Si la ronda termina con exactamente 10 000 y ninguna orden, la ronda no tocó el 100.** Eso responde en parte la pregunta de la normalización: si pasa en todas las rondas, lo más probable es que las rondas sean trozos de una serie normalizada más larga (`docs/cotas.md`, sección 5.3). Anotarlo con el número de ticks de la ronda.
+   - Anotar el patrimonio final de cada ronda.
+3. **R1 con la regla nueva** si está listo (si no, `r1_fondo.bin`). Telemetría: en los ticks pares los 7 segmentos muestran `63` si el byte es "comprar 63" y `00` si no; en los impares, **LED1** es el latido (cambia cada 1024 precios: unas 10 veces por segundo a 0,1 ms, cada segundo a 1 ms, cada 10 segundos a 10 ms), **LED2** se enciende al ver el 100, **LED3** al ver el 255 y **LED4** mientras está adentro. Con `r1_fondo.bin` (el anterior) los LED son los votos de los gestores y el latido.
+4. **R2 con la regla nueva** si está lista (si no, `r2_multi.bin`), con `iceprog -b`. Lo mismo que R1. **Si la telemetría desaparece a mitad de una ronda** (LED1 deja de cambiar y queda todo en `00` y apagado), el vigilante cambió a la imagen de R0: anotar en qué ronda y en qué momento.
 
-Para cada uno: sha256 del archivo, patrimonio que muestra la maestra en cada ronda, y si nuestro grupo dejó de operar en algún momento. Detalle en `docs/checklist_26nov.md`, sección 4.
+Para comparar con lo que muestra la maestra, si la serie quedó registrada: `python3 ref/trader.py build/maestra/clase_rondaN_serie.csv --periodo-ns PERIODO` da el patrimonio que debe obtener R0 (y R1 y R2, que deciden igual).
+
