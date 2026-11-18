@@ -330,24 +330,24 @@ R1 usaría el 9,8 % del presupuesto de la ronda 3 en vez del 19,6 %; R0, el 0,97
 
 ## 10. Edición ASIC: Ops/W y energía por decisión
 
-La edición ASIC (pieza G de la factibilidad, LibreLane con GF180MCU) existe para el Espino base y el segmentado. Sus mediciones están en `docs/mediciones/asic/` con su procedencia (`LEEME.md`). P7 no corre el flujo; calcula Ops/s, Ops/W y energía con la definición de la sección 3 (`docs/mediciones/p7/asic.txt`). Esquina típica, 25 MHz:
+La edición ASIC (LibreLane con GF180MCU) existe para el Espino base y el segmentado (pieza G de la factibilidad) y, desde el 17/11, para el barrel con la extensión y `sw/fondo.s`, el hardware de R1 (`asic/README.md`, mediciones en `asic/mediciones/`). Sus mediciones están en `docs/mediciones/asic/` con su procedencia (`LEEME.md`). P7 no corre el flujo; calcula Ops/s, Ops/W y energía con la definición de la sección 3 (`docs/mediciones/p7/asic.txt`). Esquina típica, 25 MHz:
 
-| | Espino base | Segmentado |
-|---|---|---|
-| Dado | 0,359 mm² | 0,304 mm² |
-| Celdas estándar | 176 975 µm² | 149 757 µm² |
-| Frecuencia máxima con cierre (esquina lenta) | 42,6 MHz | 42,6 MHz |
-| Potencia esperando / calculando | 27,97 / 28,79 mW | 26,18 / 27,38 mW |
-| Kernel a 25 MHz / a 42,6 MHz | 3,92 / 6,68 MOPS | 7,41 / 12,61 MOPS |
-| Ops/W del kernel | 136 MOPS/W | 271 MOPS/W |
-| Ppeak por watt | 434 MOPS/W | 913 MOPS/W |
-| Energía por decisión, ronda 3 (calculada) | 2,80 µJ | 2,63 µJ |
-| Energía por decisión, rondas 2 y 1 (estimadas) | 28,0 y 280 µJ | 26,2 y 262 µJ |
-| Costo marginal de decidir | 2,62 nJ, 0,33 nJ por operación | 3,84 nJ, 0,48 nJ por operación |
+| | Espino base | Segmentado | Barrel con extensión (R1) |
+|---|---|---|---|
+| Dado | 0,359 mm² | 0,304 mm² | 1,072 mm² |
+| Celdas estándar | 176 975 µm² | 149 757 µm² | 565 604 µm² |
+| Frecuencia máxima con cierre (esquina lenta) | 42,6 MHz | 42,6 MHz | 45,5 MHz o más (cierra a 22 ns) |
+| Potencia esperando / calculando | 27,97 / 28,79 mW | 26,18 / 27,38 mW | 94,68 / 96,03 mW |
+| Kernel a 25 MHz / a la frecuencia con cierre | 3,92 / 6,68 MOPS | 7,41 / 12,61 MOPS | 5,34 / 9,71 MOPS (56 operaciones por tick) |
+| Ops/W del kernel | 136 MOPS/W | 271 MOPS/W | 55,6 MOPS/W |
+| Ppeak por watt | 434 MOPS/W | 913 MOPS/W | 521 MOPS/W |
+| Energía por decisión, ronda 3 (calculada) | 2,80 µJ | 2,63 µJ | 9,54 µJ |
+| Energía por decisión, rondas 2 y 1 (estimadas) | 28,0 y 280 µJ | 26,2 y 262 µJ | 94,8 y 947 µJ |
+| Costo marginal de decidir | 2,62 nJ, 0,33 nJ por operación | 3,84 nJ, 0,48 nJ por operación | 24,4 nJ, 0,44 nJ por operación |
 
 - La clase supuso 10 mW para Pochoco, que dan 1 250 MOPS/W de Ppeak. El macro a 5 V consume casi 3 veces eso.
 - **La energía por decisión la pone la espera, no el cálculo.** Decidir cuesta unos nJ por sobre los 2,6 a 2,8 µJ que se gastan esperando 0,1 ms con el reloj corriendo. Ningún peldaño de la escalera cambia eso; detener el reloj entre precios sí.
-- El barrel, la extensión y el fondo no pasaron por el flujo: su Ops/W no se informa (sección 12).
+- **El barrel en silicio.** Es tres veces más grande que el base: el banco de registros de cuatro contextos son 2048 flip-flops, que en la FPGA caben en dos BRAM. Gasta 3,3 veces la potencia, casi toda en el reloj y los flip-flops, y como sus cuatro hilos ejecutan una instrucción por ciclo también mientras esperan, calcular cuesta casi lo mismo que esperar. Cierra a una frecuencia algo mayor que el base. Es edición de exhibición: no compite (`asic/README.md`).
 
 ## 11. La variante elegida y por qué
 
@@ -364,7 +364,7 @@ La edición ASIC (pieza G de la factibilidad, LibreLane con GF180MCU) existe par
 - **Espino base y segmentado con la extensión**: no existen en el RTL y construirlos toca el RTL de R0 (T101). Están predichos con Amdahl, que acierta al ciclo en las variantes medidas del mismo tipo.
 - **Pasos 3 y 4 de la escalera**: no construidos, no caben en la FPGA. Estimados con CPI ideal, como en la clase.
 - **Consumo de la Go Board**: no hay medidor. La potencia es la del flujo ASIC, y solo del base y del segmentado.
-- **Edición ASIC del barrel, la extensión y el fondo**: no se pasaron por LibreLane. Es un punto posterior (la factibilidad estima más del doble de área por los cuatro bancos de registros).
+- **Edición ASIC del barrel**: hecha el 17/11 con `sw/fondo.s` (el programa de R1 hasta esa fecha) y la extensión de R1. La regla de cotas (T133) no pasó por el flujo, pero no cambia el hardware.
 - **R2 con el gemelo**: el gemelo no modela el vigilante. Sus ciclos son los de R1, confirmados contra la medición del RTL de P5 con el mismo programa y la misma tabla.
 - **La caída de frecuencia del segmentado** desde P1 (sección 5): medida e investigada hasta la síntesis (la lógica es la misma, con equivalencia formal); no se buscó una forma de evitarla, porque todas las variantes cierran a 25 MHz.
 
