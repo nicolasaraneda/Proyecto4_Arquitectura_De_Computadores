@@ -10,11 +10,12 @@ Usa los mismos casos que tools/estres.py corre con R0 (SCLK de 100 kHz a
 de una transacción, rondas seguidas sin reset y series pegadas en 1 y en 255),
 con tb/fondo/tb_fondo.sv y el hardware de R1 o de R2. Dos diferencias:
 
-  - Hasta el 17/11 el fondo respondía en 220 a 480 ciclos; con la regla de cotas
-    el hilo 0 responde en unos 130 y R0 en unos 60. Desde el 17/11 los casos que
-    dejan menos de 600 ciclos entre transacciones (SCLK de 100 kHz con período
-    de 0,1 ms, y los períodos de 11,5 y 13,5 us) no caben: se corren igual y
-    se informan como exploración, sin contar para la puerta.
+  - Hasta el 17/11 el fondo respondía en 220 a 480 ciclos y los casos con menos
+    de 600 ciclos entre transacciones (entre ellos SCLK de 100 kHz con período
+    de 0,1 ms) no cabían. Con la regla de cotas el hilo 0 responde en menos de
+    130 ciclos: solo quedan como exploración, sin contar para la puerta, los
+    casos con menos de 200 ciclos entre transacciones (los períodos de 11,5 y
+    13,5 us).
   - Se agregan SCLK de 100 kHz y de 200 kHz con período de 1 ms, que es donde
     una maestra así de lenta puede operar.
 
