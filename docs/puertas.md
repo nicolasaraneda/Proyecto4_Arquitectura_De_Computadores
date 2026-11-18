@@ -25,7 +25,21 @@ Un bitstream sube a la escalera solo si pasa tres puertas, en orden: simulación
 
 `tb/tb_estres.sv` es una maestra con la misma transacción y la misma medición que el testbench oficial, pero con los tiempos elegidos en tiempo de ejecución (decisión T53). `tools/estres.py` compara cada byte que lee la maestra con `ref/trader.py`, exige MISO sin X y ningún precio sin leer ni sin respuesta, y modela como perdidos los precios que llegan antes de que termine el reset de encendido. Los casos con SCLK sobre 1 MHz son exploración y no cuentan para la puerta.
 
-## R0: core base con `max_media`
+## R0 con la regla de cotas (T133, 17/11)
+
+Rama `regla-cotas`. El hardware no cambia; el programa entra por `icebram` en el molde de R0 (`build/r0_cotas/r0_cotas.bin`, sha256 `616f799a...`). Registro completo en `docs/mediciones/r0_cotas_puerta.txt`.
+
+| N.º | Resultado |
+|-----|-----------|
+| 1 | 4/4. Peor caso 60 ciclos de 2262 (24 instrucciones fijas después de leer el precio) |
+| 2 | Cero diferencias. `make equiv` (20 de 20); serie Meta completa por el RTL a 0,1 ms (Icarus), 1 ms y 10 ms (Verilator), patrimonio 19 214; 3810 series en el gemelo a los tres períodos; exhaustiva: los 5 estados alcanzables por los 255 precios (`docs/mediciones/exhaustivo_r0_cotas.txt`) |
+| 3 | Hardware sin cambios: vale la medición de abajo |
+| 4 | Peor caso 60 ciclos en las 8 fases |
+| 5 | Core base sin cambios |
+| 7 | La matriz pasa. El período mínimo sube: a 11,5 µs (exploración) hay 50 ciclos y la regla usa 60 |
+| 8 | El `.asc` del molde con el programa nuevo, simulado por los pines: 2000 ticks idénticos a la referencia en la serie anterior y en una ventana de la serie Meta que toca los dos extremos (25 258) |
+
+## R0: core base con `max_media` (hasta el 17/11)
 
 Medido el 15/11 (paquete P0). Los registros completos están en `docs/mediciones/` y en `docs/bitacora/p0.md`.
 
