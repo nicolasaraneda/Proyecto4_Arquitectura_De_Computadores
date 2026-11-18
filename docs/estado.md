@@ -2,6 +2,39 @@
 
 Se actualiza al cerrar cada tramo de trabajo. La versión anterior queda en el historial de git.
 
+## Tramo 17: minutos reales y clase del 18/11 (18/11 en la noche)
+
+Rama `minutos-reales`, desde `main` (`4da78ca`). Bitácora: `docs/bitacora/minutos_reales.md`. Decisiones T134 y T135. **La regla de los peldaños no se cambió.**
+
+### Resultados
+
+| Pedido | Resultado | Dónde |
+|--------|-----------|-------|
+| 1. Minutos de Alpaca | Bajados META, AAPL, NFLX, AMD y TSLA de 2022 a 2024 (753 días, unos 293 600 minutos de sesión por empresa). El descargador lee la clave de `~/.alpaca.env` y no la muestra ni la escribe; los datos quedan en `$P4_DATOS/minuto`, fuera del repositorio | `tools/datos/alpaca.py` |
+| 2. Población real | Todas las ventanas de 20 000 minutos, normalizadas con sus extremos: 1 368 253. **`practica_meta.csv` se reproduce byte a byte**: META del 23/2/2022 a las **15:20** (no 15:10; el índice del 17/11 ya era 15:20, la etiqueta estaba mal) al 9/5/2022 a las 10:39. Evaluador en C contra Python: 0 diferencias | `docs/cotas.md`, sección 7.1; `docs/mediciones/cotas_reales/comprobacion.txt` |
+| 3. Paso 5 con minutos reales | **La banda 60 sigue dentro de la meseta, pero el mejor valor pasa a 40.** Media en todas las ventanas: banda 40 21 289, banda 60 21 084 (+205, un 1 %); las dos validaciones eligen 40 en el ajuste y en la validación le ganan a 60 por +258 (años) y +314 (empresas), con el mismo percentil 5 (10 578 en la población) y el mismo peor caso (8 948). 40 le gana a 60 en 4 de 5 empresas (pierde en NFLX) y en los 3 años de inicio; en el torneo con el rival de Tesla, 0,864 contra 0,849 puntos. La curva es plana: todas las bandas de 10 a 76 quedan a menos del 2 % de la mejor, y en el 75,9 % de las ventanas 40 y 60 terminan igual (donde difieren, 40 gana 15,0 % contra 9,1 %) | `docs/cotas.md`, sección 7.2; `docs/mediciones/cotas_reales/` |
+| Clase: Tesla | La captura es TSLA del 10/1/2022 10:20 al 24/3/2022 12:09 (20 000 de 20 000). Nuestra referencia da **18 779**, lo que mostró la maestra. La ronda toca 100 y 255: la normalización es por ronda | `docs/mediciones/clase_18nov.md` |
+| Clase: AMD | AMD con el mismo inicio da **21 895**, lo que mostró la maestra | Ídem |
+| Clase: rival de Tesla | "Comprar 63 repetido desde el primer 100, vender 63 al ver 220 o más y no volver" da **21 467**, la cifra exacta. Entra al campo del torneo (`unavez 100 220`). En la población real promedia 18 896 contra 21 084 de nuestra regla: le ganamos en el 62,1 % de las ventanas, empatamos en el 28,6 % y perdemos en el 9,3 %, donde cayó la ronda de Tesla | T135; `ref/cotas/planb.py` |
+| `iceprog -b` | Checklists del 26/11 y del 1/12, `autoprueba.md`, `tabla_vigilante.md`, `clase_18nov.md`, los dos README y tres `RESUMEN.txt` del banco de contingencia que tenían `r2_multi.bin` sin `-b`. **R2 del 16/11 no quedó mal grabado**: `iceprog` verifica cada byte y se detiene si hay una diferencia; ese día se grabaron `autoprueba_r2_multi.bin` y `relevo_r2_multi.bin` con `-b`, y las dos imágenes que se ejercitaron arrancaron (la FPGA no arranca con una imagen dañada) | `docs/mediciones/clase_18nov.md`, sección 3 |
+| Registrador | Funciona en Mac y Windows con pyserial, y en Linux también sin él; `--convertir` arma los CSV desde una captura en bruto y `--listar` muestra los puertos. Con la captura de Tesla da un CSV idéntico al tuyo. **El formato que dedujiste es correcto**: precio = 2 × byte 1 + bit 6 del byte 3 (RTL, `rtl/registrador/registrador.v:136-141`). Pero el período de `an/deco.py` está mal: es `128 × (b3 & 0x0F) + b4`; la fórmula del kit mezcla MISO y el bit de error y acierta solo porque el registrador manda siempre 0 | `docs/registrador.md`, secciones 2 y 4b |
+
+### Datos de la clase (copiados de lo que informó Nicolás)
+
+R2 (`r2_cotas_multi.bin`) corrió las tres velocidades sin atrasos. La ronda dura 20 000 ticks y el mismo programa corre en las tres. 0,1 ms: primeros, con cerca de 25 000. 1 ms: primeros, 18 870 contra 18 735. AMD de enero de 2022: primeros, 21 895 contra 10 385. Tesla de enero de 2022 (10 ms): segundos, 18 779 contra 21 467. `r2_cotas_multi.bin` solo graba bien con `iceprog -b`.
+
+### Lo que decides tú
+
+- **Banda 40 o 60.** Lo que se gana con 40: unos 200 a 300 de media fuera de muestra, 1,5 puntos porcentuales más de rondas ganadas en el torneo. Lo que cuesta: una constante en `sw/trade.s` (R0) y en la tabla de R1 y R2, cargadas con `icebram` sobre los mismos moldes (el hardware no cambia), y repetir la puerta de simulación de los tres peldaños, que tomó cerca de un día con R1 y R2. Lo que dice en contra: la diferencia es del 1 % y la curva es plana, así que buena parte puede ser ruido de una población que, sin solapar, tiene 70 ventanas; el 17/11 la población modelada ponía el centro en 60. Como ilustración, y no como base para elegir (son series de la clase, decisión 2 de los pendientes): banda 40 habría dado 20 795 en Tesla (todavía bajo los 21 467 del rival), 26 470 en AMD y 21 392 en la práctica, contra 18 779, 21 895 y 19 214 con banda 60.
+
+### Qué falta y qué conviene atacar después
+
+1. **Tu decisión sobre la banda**, y si cambia, la puerta de los tres peldaños con la constante nueva (sin tocar el hardware probado).
+2. **`docs/checklist_26nov.md`, sección 3, nombra todavía los bitstreams anteriores a T133** (`r0_base_max_media.bin`, `r1_fondo.bin`, `r2_multi.bin`). Conviene pasarlo a `r0_cotas.bin`, `r1_cotas.bin` y `r2_cotas_multi.bin` antes del 26/11. No lo cambié porque no era parte del pedido.
+3. **Probar el registrador en tu Mac con pyserial**: `python3 tools/registrador.py --prueba` y `--listar`. Aquí no hay pyserial; el camino de pyserial se probó con una imitación.
+4. **Las rondas de 0,1 ms y 1 ms no están identificadas.** Ninguna de las cinco empresas con inicio el 10/1/2022 a las 10:20 da 18 870 ni cerca de 25 000. Si las capturaste, `python3 ref/cotas/reales.py comprobar --captura ARCHIVO.csv` las ubica.
+5. **Integrar la rama en `main`** después de la corrida local de la integración continua.
+
 ## Para la clase del 18/11 (actualizado en la madrugada)
 
 **Qué quedó listo.** Todo en `docs/clase_18nov.md`, con los comandos para la carpeta principal y lo que se ve en cada bitstream.
@@ -28,7 +61,7 @@ El profesor reemplazó la serie de práctica por `data/practica_meta.csv` (Meta,
 | 1. Registrador para la clase del 18/11 | Listo. Recibe la ronda 3 entera de la serie Meta (20 000 precios a 0,1 ms) sin perder ninguno, y la herramienta arma con esos bytes un CSV idéntico al archivo. La herramienta guarda ahora la hora de llegada al computador y los bytes crudos a medida que llegan. Variante de 926 kbaud construida por si el conversor no acepta 1 Mbaud. `make registrador` PASS; el bitstream principal no cambió (sha256 `231a0c6d...`) | `docs/clase_18nov.md` (comandos uno por uno, con usbipd, y qué anotar sin UART), `docs/registrador.md` |
 | 2. Comando oficial con la serie nueva | R0, R1 y R2: 4/4, `decisiones.csv` idéntico a la referencia, peor caso 44 y 391 ciclos de 2262. En la serie completa, R0 y R1 dan 9 722 a los tres períodos. Lo que queda obsoleto en el informe, el README y la defensa está listado, sin reescribir | `docs/mediciones/meta/oficial.txt`, `docs/obsoleto_serie_meta.md` |
 | 3. Reglas "cotas" | `ref/cotas.py` reproduce las cifras de Nicolás: espera 15 894 con 2 órdenes, compra 23 906 con 5, compra con banda 40 32 149. La estructura diaria se confirma: 52 aperturas con salto medio de 6,4 contra 0,44 dentro del día | `docs/cotas.md`, `ref/test_cotas.py` |
-| 4. Datos reales | Minutos de 2022 a 2024 gratis solo con cuenta (Alpaca o HF Data Library): pasos en los pendientes y descargador listo (`tools/datos/alpaca.py`). Mientras tanto, diarios reales de Yahoo y días de la serie Meta. La serie del profesor quedó ubicada: Meta del 23/2/2022 15:10 al 9/5/2022, normalizada con los extremos de la ventana | `docs/pendientes_nicolas.md` (acción 3b), `docs/cotas.md`, sección 5.1 |
+| 4. Datos reales | Minutos de 2022 a 2024 gratis solo con cuenta (Alpaca o HF Data Library): pasos en los pendientes y descargador listo (`tools/datos/alpaca.py`). Mientras tanto, diarios reales de Yahoo y días de la serie Meta. La serie del profesor quedó ubicada: Meta del 23/2/2022 15:20 (decía 15:10, corregido el 18/11) al 9/5/2022, normalizada con los extremos de la ventana | `docs/pendientes_nicolas.md` (acción 3b), `docs/cotas.md`, sección 5.1 |
 | 5. Protocolo sobre la población real | Modelo validado contra la serie del profesor. "Espera con banda 60" da de 19 900 a 20 500 de media contra 11 700 de `max_media`, supera a `max_media` en más del 90 % de las ventanas, gana en las validaciones por años y por empresa, no pierde más que una comisión si la hipótesis es falsa y es la mejor del torneo cuando otros también usan los extremos | `docs/cotas.md`, sección 5; `docs/mediciones/cotas/` |
 | 6. Opciones para cada peldaño | Anotadas con lo que se pierde, el tiempo y la recomendación: regla "espera con banda 60" en los tres peldaños; en R1 y R2, la regla en el hilo 0 del barrel. El hardware no cambia: lo que pase por la maestra mañana sigue valiendo. Unos 3 días de programas y puertas y 2 de documentos, antes del 25/11 | `docs/pendientes_nicolas.md`, decisión 0 |
 | ASIC del barrel | Terminado: cierra hasta 22 ns (45,5 MHz o más), 1,072 mm², 95 mW, 9,54 µJ por decisión | `asic/README.md` |
