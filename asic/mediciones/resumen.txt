@@ -1,0 +1,14 @@
+t_min_cierra_ns = 22.0
+fmax_cierre_mhz = 45.5
+xd3_dado_um2 = 1071890
+xd3_std_um2 = 565604
+xd3_celdas = 25453
+xd3_ff = 2929
+xd3_wns_lenta_ns = 8.007
+xd3_fmax_holgura_lenta_mhz = 31.3
+xd7_dado_um2 = 1076920
+xd7_std_um2 = 575241
+xd7_celdas = 25697
+xd7_ff = 2930
+xd7_wns_lenta_ns = 8.207
+xd7_fmax_holgura_lenta_mhz = 31.5
