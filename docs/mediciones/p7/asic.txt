@@ -27,7 +27,16 @@ combinacional, con el mismo modelo de costo). Esquina tipica (tt, 25 C, 5,0 V), 
    energia por decision: ronda 3 2.628 uJ (flujo), ronda 2 26.19 uJ y ronda 1 261.8 uJ (estimadas: mas sondeo)
    costo marginal de decidir sobre el de esperar: 3.84 nJ, 0.480 nJ por operacion util
 
-== Espino barrel con la extension (R1): sin mediciones en asic/mediciones/
+== Espino barrel con emad y devk, sw/fondo.s: el hardware de R1 (corrida barrel_xd3_t40)
+   dado 1071890 um2 (1.072 mm2), celdas estandar 565604 um2, 25453 celdas, 2929 flip-flops (el banco de registros de cuatro contextos son 2048)
+   frecuencia: cierra en la esquina lenta hasta T = 22 ns (45.5 MHz) (asic/mediciones/corridas.md)
+   potencia, esquina tipica: sondeo 94.681 mW, calculo 96.034 mW, ronda 3 95.385 mW
+   kernel: 262.37 ciclos, 56 ops: 5.336 MOPS a 25 MHz, 9.711 MOPS a 45.5 MHz; Ppeak 50.0 MOPS
+   Ops/W: kernel 55.6 MOPS/W, Ppeak 520.6 MOPS/W
+   energia por decision: ronda 3 9.539 uJ (flujo), ronda 2 94.75 uJ y ronda 1 946.9 uJ (estimadas: mas sondeo)
+   costo marginal de decidir sobre el de esperar: 24.36 nJ, 0.435 nJ por operacion util
+   (los cuatro hilos ejecutan una instruccion por ciclo tambien mientras sondean: esperar ya cuesta casi
+   lo mismo que calcular)
 
 Lectura: la energia por decision la pone la espera, no el calculo. Decidir cuesta unos nJ sobre los
 2,6 a 2,8 uJ que se gastan esperando 0,1 ms con el reloj corriendo. Detener el reloj entre precios es

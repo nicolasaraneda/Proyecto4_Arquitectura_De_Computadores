@@ -1,17 +1,17 @@
 % Generado por tools/report.py (make report). No editar a mano.
-\begin{tabular}{lrr}
+\begin{tabular}{lrrr}
 \toprule
- & Espino base & Segmentado \\
+ & Espino base & Segmentado & Barrel (R1) \\
 \midrule
-Área del dado (mm$^2$) & 0{,}359 & 0{,}304 \\
-$f_{\max}$ con cierre (MHz) & 42{,}6 & 42{,}6 \\
-Potencia calculando (mW) & 28{,}8 & 27{,}4 \\
-Potencia en la ronda 3 (mW) & 28{,}0 & 26{,}3 \\
-Kernel a 25 MHz (MOPS) & 3{,}92 & 7{,}41 \\
-Ops/W del kernel (MOPS/W) & 136 & 270 \\
-$P_{peak}$/W (MOPS/W) & 434 & 913 \\
-Energía por decisión, ronda 3 ($\mu$J) & 2{,}80 & 2{,}63 \\
-Costo marginal de decidir (nJ) & 2{,}6 & 3{,}8 \\
+Área del dado (mm$^2$) & 0{,}359 & 0{,}304 & 1{,}072 \\
+$f_{\max}$ con cierre (MHz) & 42{,}6 & 42{,}6 & 45{,}5 \\
+Potencia calculando (mW) & 28{,}8 & 27{,}4 & 96{,}0 \\
+Potencia en la ronda 3 (mW) & 28{,}0 & 26{,}3 & 95{,}4 \\
+Kernel a 25 MHz (MOPS) & 3{,}92 & 7{,}41 & 5{,}34 \\
+Ops/W del kernel (MOPS/W) & 136 & 270 & 56 \\
+$P_{peak}$/W (MOPS/W) & 434 & 913 & 521 \\
+Energía por decisión, ronda 3 ($\mu$J) & 2{,}80 & 2{,}63 & 9{,}54 \\
+Costo marginal de decidir (nJ) & 2{,}6 & 3{,}8 & 24{,}4 \\
 \bottomrule
 \end{tabular}
 \par\smallskip{\footnotesize Flujo LibreLane en GF180MCU, esquina típica, 25 MHz. El base y el segmentado ejecutan \texttt{sw/trade.s}; el barrel, \texttt{sw/fondo.s} con los cuatro hilos. Fuente: \texttt{docs/mediciones/p7/asic.txt}, \texttt{docs/mediciones/asic/} y \texttt{asic/mediciones/}.}

@@ -1,3 +1,4 @@
 core,dado_um2,celdas_std_um2,celdas,flip_flops,fmax_cierre_mhz,p_sondeo_mw,p_calculo_mw,p_ronda3_mw,ciclos_kernel,mops_25,mops_fmax,ppeak_25,mops_por_w,ppeak_por_w,e_decision_r3_uj,e_decision_r2_uj,e_decision_r1_uj,marginal_nj,marginal_por_op_nj
 base,359332,176975,8791,872,42.6,27.973,28.791,28.029,51.00,3.922,6.675,12.5,136.2,434.2,2.803,27.98,279.7,2.615,0.327
 seg,304298,149757,7524,774,42.6,26.183,27.384,26.276,27.00,7.408,12.609,25.0,270.5,912.9,2.628,26.19,261.8,3.844,0.480
+barrel_r1,1071890,565604,25453,2929,45.5,94.681,96.034,95.385,262.37,5.336,9.711,50.0,55.6,520.6,9.539,94.75,946.9,24.359,0.435
