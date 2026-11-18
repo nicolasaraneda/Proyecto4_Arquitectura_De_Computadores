@@ -85,7 +85,7 @@ Con 5 000 ticks y con los días de Meta sorteados el orden es el mismo.
 
 **a. Espera contra compra.** "Espera" gana en media (de 1 000 a 1 300 más) y "compra" en el percentil 5 (unos 800 más) y en la probabilidad de terminar sobre no operar (99 % contra 96 %). Comprar una parte al inicio (20 acciones) queda entre las dos. Decidir según el primer precio no mejora a ninguna.
 
-**b. Después de ver los dos extremos.** Una banda (comprar con p ≤ 100 + w, vender con p ≥ 255 - w) mejora a "espera" en 600 a 1 000 de media. La meseta va de w = 40 a w = 76 (todas a menos del 2 % de la mejor en cada corte); el centro es 60. La banda de 40 que da 32 149 en la serie del profesor es la mejor allí con "compra", pero en la población "compra con banda" queda bajo "espera con banda".
+**b. Después de ver los dos extremos.** Una banda (comprar con p ≤ 100 + w, vender con p ≥ 255 - w) mejora a "espera" en 400 a 1 000 de media. La meseta va de w = 40 a w = 76 (todas a menos del 2 % de la mejor en cada corte); el centro es 60. La banda de 40 que da 32 149 en la serie del profesor es la mejor allí con "compra", pero en la población "compra con banda" queda bajo "espera con banda".
 
 **c. Márgenes.** Comprar desde 100 + a o vender desde 255 - b no ayuda: con a = 2 la media baja y el peor caso empeora (la orden se ejecuta al precio siguiente y el extremo exacto ya es el mejor punto).
 
@@ -117,7 +117,7 @@ En cada ronda, 9 rivales sorteados; puntos lineales entre el peor y el mejor de 
 | comprar 20, banda 70 | 0,958 | 0,856 | 0,813 |
 | compra | 0,932 | 0,809 | 0,752 |
 
-Con rivales que también usan los extremos, "espera con banda" queda primera en el 50 a 56 % de las rondas; "comprar 20 con banda", en el 18 a 32 %.
+Con rivales que también usan los extremos, "espera con banda" queda primera en el 48 a 57 % de las rondas; "comprar 20 con banda", en el 14 a 32 %.
 
 ### 5.5 Conclusión
 
