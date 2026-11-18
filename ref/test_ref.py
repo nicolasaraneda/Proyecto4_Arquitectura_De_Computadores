@@ -136,13 +136,22 @@ class ReglaBaseTests(unittest.TestCase):
         p = market.leer_serie(SERIE)
         m = trader.correr(p, trader.ReglaBase())
         self.assertEqual((m.w, m.ordenes, m.comisiones, m.max_dd), (27062, 388, 1940, 2929))
-        m = trader.correr(p)      # la oficial: max_media
+        m = trader.correr(p, trader.MaxMedia())     # la oficial hasta el 17/11
         self.assertEqual((m.w, m.ordenes, m.comisiones, m.max_dd), (25973, 624, 3120, 6295))
 
-    def test_oficial_es_max_media(self):
-        """La oficial es la regla base con entrada a 3 unidades, igual al candidato max_media."""
-        r = trader.Oficial()
+    def test_serie_meta(self):
+        """Desde el 17/11 la oficial es cotas, espera con banda 60 (T133): 19 214 con 4 órdenes en la serie Meta."""
+        p = market.leer_serie(os.path.join(os.path.dirname(SERIE), "..", "data", "practica_meta.csv"))
+        m = trader.correr(p)
+        self.assertEqual((m.w, m.ordenes), (19214, 4))
+        self.assertEqual(trader.correr(p, trader.MaxMedia()).w, 9722)
+
+    def test_max_media_y_oficial(self):
+        """max_media es la regla base con entrada a 3 unidades; la oficial es la de cotas."""
+        r = trader.MaxMedia()
         self.assertEqual((r.k, r.umbral_compra, r.umbral_venta), (5, -96, 1))
+        o = trader.Oficial()
+        self.assertEqual((o.inicio, o.a, o.b, o.banda, o.lo, o.hi), ("espera", 0, 0, 60, 100, 255))
         b = trader.ReglaBase()
         self.assertEqual((b.k, b.umbral_compra, b.umbral_venta), (5, -128, 1))
 

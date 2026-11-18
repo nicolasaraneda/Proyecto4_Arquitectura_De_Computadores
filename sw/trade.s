@@ -3,56 +3,49 @@
 # Grupo: Nicolás Araneda, Vicente Calderón y Santiago Muñoz.
 # Arquitectura de Computadores, Universidad de los Andes, 2026-2.
 #
-# Variante: solo software. Referencia bit a bit: ref/trader.py (MaxMedia).
+# Variante: solo software. Referencia bit a bit: ref/trader.py (Oficial, que es
+# la regla de cotas de ref/regla_cotas.py con inicio "espera" y banda 60).
 #
-# Algoritmo: max_media (decision T50), la regla base de reversion a la media
-# con el umbral de entrada en 3 unidades en vez de 4:
-#   S   = 32 * media exponencial del precio, con alfa = 1/32
-#   dev = 32 p - S                desviacion del precio respecto a la media
-#   si dev < -96   -> entrar      (precio mas de 3 unidades bajo la media)
-#   si dev > 0     -> salir       (precio recupero la media)
-#   si no          -> mantener la posicion anterior
-#   DECISION = "comprar 63" si se quiere estar adentro, "vender 63" si no.
-#   S = S + ((32 p - S) >> 5)     actualizacion de la media
+# Algoritmo: cotas, "espera" con banda 60 (decision T133, docs/cotas.md). Las
+# series de la competencia se normalizan de modo que su minimo es 100 y su
+# maximo 255:
+#   si p <= 100      -> comprar 63 (y recordar que se vio el minimo)
+#   si p >= 255      -> vender 63 (y recordar que se vio el maximo)
+#   si ya se vieron los dos extremos:
+#       p <= 160     -> comprar 63
+#       p >= 195     -> vender 63
+#   si no            -> repetir la decision anterior
+# Parte en caja: hasta el primer extremo escribe 0x00 (mantener). Si la serie
+# no toca ningun extremo, no opera.
 #
 # La maestra recorta cada orden a lo que alcanza con la caja o con las
 # acciones, asi que repetir "comprar 63" o "vender 63" no paga comisiones de
-# mas. Por eso el programa no lleva contabilidad: solo decide si quiere estar
-# adentro o afuera.
+# mas. Por eso el programa no lleva contabilidad.
 #
 # Ciclo principal:
 #   1. esperar   sondea STATUS[0] hasta que haya un precio nuevo
 #   2. leer      lee PRICE (la lectura baja la bandera)
-#   3. predecir  dev = 32 p - S
-#   4. decidir   actualiza la posicion y arma el byte, sin saltos
+#   3. comparar  cuatro comparaciones con sltiu, independientes entre si
+#   4. decidir   actualiza las banderas y arma el byte con mascaras, sin saltos
 #   5. escribir  un solo store a DECISION, con la decision definitiva
-#   6. estado    actualiza la media S (despues del store, para que la
-#                decision salga lo antes posible)
-#
-# Operaciones que Espino no tiene:
-#   - 32 p: cinco sumas (duplicar cinco veces).
-#   - (32 p - S) >> 5: como desplazar un negativo no se puede hacer con el
-#     truco de abajo, se usa la identidad
-#         (32 p - S) >> 5  =  p - ceil(S / 32)  =  p - ((S + 31) >> 5)
-#     donde S + 31 nunca es negativo.
-#   - x >> 5 con x >= 0: se multiplica por 8 (tres sumas), se guarda la
-#     palabra en memoria y se lee su segundo byte con lbu. Eso es x * 8 / 256.
-#     Funciona porque (S + 31) * 8 < 65536: S nunca pasa de 255 * 32 = 8160.
-#   - Las comparaciones dan 0 o 1 con slti y la posicion se actualiza con
-#     or y and: no hay saltos que dependan del precio. El unico salto que
-#     depende de algo externo es el del sondeo.
+# No hay saltos que dependan del precio: el tiempo de respuesta es el mismo en
+# cada tick. El unico salto que depende de algo externo es el del sondeo.
 #
 # Registros:
 #   x2  base del esclavo SPI (0x8001_0000)
-#   x3  S, la media por 32 (13 bits: entre 32 y 8160)
-#   x4  pos: 0 afuera, 1 adentro
+#   x4  q, el ultimo byte escrito (0x00, 0x7F o 0xBF)
 #   x5  p, el ultimo precio (1 a 255)
-#   x6  32 p, y despues dev (con signo, entre -8128 y 8128)
-#   x7  temporal
-#   x8  byte de decision
-#   x9  temporal
+#   x6  bajo: p <= 100
+#   x7  alto: p >= 255
+#   x8  los dos extremos ya vistos
+#   x9  comprar
+#   x10 se vio el minimo (queda en 1)
+#   x11 se vio el maximo (queda en 1)
+#   x12 vender
+#   x13 mascara "cambia"
+#   x14 byte nuevo
+#   x15 temporal
 #
-# Memoria: una sola palabra de trabajo, TMP, en la ultima palabra de la RAM.
 # El .org del final rellena el .hex hasta las 512 palabras, para que la
 # simulacion y la placa partan con la misma memoria.
 
@@ -61,71 +54,46 @@
 .equ OFF_PRICE,     4          # precio recibido (1 a 255)
 .equ OFF_DECISION,  8          # byte que la maestra lee en la proxima transaccion
 
-.equ UMBRAL_COMPRA, -96        # entra si dev < -(3 * 32). La regla base usaba -128
-.equ UMBRAL_VENTA,  1          # sale si dev >= 1, o sea dev > 0 * 32
-.equ VENDER_63,     0xBF       # accion 10, cantidad 63
-.equ COMPRAR_MENOS_VENDER, -64 # 0x7F - 0xBF: lo que se suma para pasar a "comprar 63"
-
-.equ TMP,           0x7FC      # palabra de trabajo (ultima de la RAM)
-.equ TMP_BYTE1,     0x7FD      # su segundo byte: bits 15:8
+.equ LO_MAS_1,      101        # bajo si p < 101: el minimo de la serie es 100
+.equ HI,            255        # alto si p >= 255: el maximo es 255
+.equ BANDA_COMPRA,  161        # con los dos extremos vistos, compra si p < 161 (100 + 60)
+.equ BANDA_VENTA,   195        # y vende si p >= 195 (255 - 60)
+.equ COMPRAR_63,    0x7F       # accion 01, cantidad 63
+.equ VENDER_MENOS_COMPRAR, 0x40  # 0xBF - 0x7F
 
 _start:
     li   x2, SPI_BASE
-    li   x4, 0                 # pos = 0: afuera
+    li   x4, 0                 # q = mantener: parte en caja
+    li   x10, 0                # todavia no se ve el minimo
+    li   x11, 0                # ni el maximo
 
-# --- Primer precio: la media parte en ese precio (S = 32 p) ------------------
-primero:
-    lw   x7, OFF_STATUS(x2)
-    andi x7, x7, 1
-    beqz x7, primero
-    lw   x5, OFF_PRICE(x2)
-    add  x6, x5, x5            # 2 p
-    add  x6, x6, x6            # 4 p
-    add  x6, x6, x6            # 8 p
-    add  x6, x6, x6            # 16 p
-    add  x6, x6, x6            # 32 p
-    mv   x3, x6                # S = 32 p, asi dev = 0 y no se opera
-    j    decidir
-
-# --- 1. Esperar el precio -----------------------------------------------------
 esperar:
     lw   x7, OFF_STATUS(x2)
     andi x7, x7, 1
     beqz x7, esperar
-
-# --- 2. Leer ------------------------------------------------------------------
     lw   x5, OFF_PRICE(x2)
-
-# --- 3. Predecir: dev = 32 p - S ---------------------------------------------
-    add  x6, x5, x5            # 2 p
-    add  x6, x6, x6            # 4 p
-    add  x6, x6, x6            # 8 p
-    add  x6, x6, x6            # 16 p
-    add  x6, x6, x6            # 32 p
-decidir:
-    sub  x6, x6, x3            # dev = 32 p - S
-
-# --- 4. Decidir, sin saltos ---------------------------------------------------
-    slti x7, x6, UMBRAL_COMPRA # 1 si hay que entrar
-    slti x9, x6, UMBRAL_VENTA  # 0 si hay que salir
-    or   x4, x4, x7            # pos = (pos | entrar) & no_salir
-    and  x4, x4, x9
-    sub  x7, x0, x4            # 0 si pos = 0, 0xFFFFFFFF si pos = 1
-    andi x7, x7, COMPRAR_MENOS_VENDER   # 0 o -64
-    addi x8, x7, VENDER_63     # 0xBF (vender 63) o 0x7F (comprar 63)
-
-# --- 5. Escribir la decision (una sola vez por tick) -------------------------
-    sw   x8, OFF_DECISION(x2)
-
-# --- 6. Actualizar la media: S = S + p - ((S + 31) >> 5) ---------------------
-    addi x7, x3, 31            # S + 31
-    add  x7, x7, x7            # por 2
-    add  x7, x7, x7            # por 4
-    add  x7, x7, x7            # por 8
-    sw   x7, TMP(x0)
-    lbu  x7, TMP_BYTE1(x0)     # ((S + 31) * 8) >> 8 = (S + 31) >> 5
-    add  x3, x3, x5
-    sub  x3, x3, x7
+    sltiu x6, x5, LO_MAS_1     # bajo = p <= 100
+    sltiu x7, x5, HI           # p < 255
+    xori x7, x7, 1             # alto = p >= 255
+    sltiu x9, x5, BANDA_COMPRA # p <= 160
+    sltiu x12, x5, BANDA_VENTA # p < 195
+    xori x12, x12, 1           # p >= 195
+    or   x10, x10, x6          # se vio el minimo
+    or   x11, x11, x7          # se vio el maximo
+    and  x8, x10, x11          # los dos
+    and  x9, x9, x8            # comprar = bajo | (los dos & p <= 160)
+    or   x9, x9, x6
+    and  x12, x12, x8          # vender = alto | (los dos & p >= 195)
+    or   x12, x12, x7
+    or   x13, x9, x12          # cambia (comprar y vender nunca son 1 a la vez)
+    sub  x13, x0, x13          # 0 o 0xFFFFFFFF
+    sub  x14, x0, x12          # 0xFFFFFFFF si vende
+    andi x14, x14, VENDER_MENOS_COMPRAR
+    addi x14, x14, COMPRAR_63  # 0x7F (comprar 63) o 0xBF (vender 63)
+    xor  x15, x14, x4          # q = cambia ? byte nuevo : q
+    and  x15, x15, x13
+    xor  x4, x4, x15
+    sw   x4, OFF_DECISION(x2)
     j    esperar
 
 # Relleno con ceros hasta las 512 palabras de la RAM

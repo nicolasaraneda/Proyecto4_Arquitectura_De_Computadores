@@ -46,6 +46,7 @@ import argparse
 import sys
 
 import market
+import regla_cotas  # noqa: E402
 
 K = 5                    # alfa = 1 / 2^K
 ENTRA_BASE = 4           # regla base: entra si el precio está más de 4 unidades bajo la media
@@ -94,8 +95,13 @@ class MaxMedia(ReglaBase):
         super().__init__(k, entra, sale)
 
 
-# La estrategia que corre en sw/trade.s y contra la que se compara el RTL
-Oficial = MaxMedia
+class Oficial(regla_cotas.Cotas):
+    """La estrategia que corre en sw/trade.s y contra la que se compara el RTL. Desde el
+    17/11 (decisión T133) es la regla de cotas "espera" con banda 60 (ref/cotas.py,
+    docs/cotas.md); hasta entonces fue MaxMedia."""
+
+    def __init__(self):
+        super().__init__("espera", banda=60)
 
 
 def ticks_perdidos(periodo_ns, por_bits=12, inicio_ns=4000):
@@ -145,13 +151,15 @@ def tabla_3_1(precios, perdidos=0):
     """Tabla del punto 3.1: el algoritmo contra no operar y comprar y mantener."""
     base = correr(precios, ReglaBase(), perdidos=perdidos)
     m = correr(precios, perdidos=perdidos)
+    mm = correr(precios, MaxMedia(), perdidos=perdidos)
     byh = market.simular(precios, [market.MANTENER] + [market.COMPRAR_63] * (len(precios) - 1))
     filas = [
         ("no operar", market.CAJA0, 0, 0, 0),
         ("comprar y mantener (testbench)", market.comprar_y_mantener(precios), 1, market.COMISION, None),
         ("comprar 63 siempre (trade.s del tramo 1)", byh.w, byh.ordenes, byh.comisiones, byh.max_dd),
         ("regla base (trade.s hasta el 15/11)", base.w, base.ordenes, base.comisiones, base.max_dd),
-        ("max_media (trade.s)", m.w, m.ordenes, m.comisiones, m.max_dd),
+        ("max_media (trade.s hasta el 17/11)", mm.w, mm.ordenes, mm.comisiones, mm.max_dd),
+        ("cotas, espera con banda 60 (trade.s)", m.w, m.ordenes, m.comisiones, m.max_dd),
     ]
     print(f"{'estrategia':42s} {'patrimonio':>10s} {'ordenes':>8s} {'comisiones':>10s} {'perdida max':>11s}")
     for nombre, w, ordenes, comisiones, dd in filas:

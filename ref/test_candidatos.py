@@ -85,10 +85,10 @@ class TraderTests(unittest.TestCase):
             a, b = candidatos.Trader(), trader.ReglaBase()
             self.assertEqual([a.decidir(p) for p in precios], [b.decidir(p) for p in precios])
 
-    def test_max_media_es_la_oficial(self):
-        """El candidato max_media y la estrategia de sw/trade.s deciden igual."""
+    def test_max_media_es_la_de_trader(self):
+        """El candidato max_media y trader.MaxMedia (la oficial hasta el 17/11) deciden igual."""
         for precios in muestra():
-            a, b = candidatos.crear("max_media")(), trader.Oficial()
+            a, b = candidatos.crear("max_media")(), trader.MaxMedia()
             self.assertEqual([a.decidir(p) for p in precios], [b.decidir(p) for p in precios])
 
     def test_base_con_otros_parametros(self):
