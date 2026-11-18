@@ -2,6 +2,22 @@
 
 Se actualiza al cerrar cada tramo de trabajo. La versión anterior queda en el historial de git.
 
+## Tramo 16: la serie de práctica cambió a precios reales de Meta (17/11 en la noche)
+
+El profesor reemplazó la serie de práctica por `data/practica_meta.csv` (Meta, un precio por minuto, febrero a mayo de 2022, normalizada entre 100 y 255). Las series de la competencia serán períodos ocultos de Meta, Apple, Netflix, AMD o Tesla de 2022 a 2024, normalizados igual. La decisión sobre `zscore` quedó sin efecto. El banco de contingencia, el ensayo general y la tarea B quedan suspendidos hasta que haya regla nueva. Todo en `integra-noche`.
+
+| Paso | Resultado | Dónde |
+|------|-----------|-------|
+| 1. Registrador para la clase del 18/11 | Listo. Recibe la ronda 3 entera de la serie Meta (20 000 precios a 0,1 ms) sin perder ninguno, y la herramienta arma con esos bytes un CSV idéntico al archivo. La herramienta guarda ahora la hora de llegada al computador y los bytes crudos a medida que llegan. Variante de 926 kbaud construida por si el conversor no acepta 1 Mbaud. `make registrador` PASS; el bitstream principal no cambió (sha256 `231a0c6d...`) | `docs/clase_18nov.md` (comandos uno por uno, con usbipd, y qué anotar sin UART), `docs/registrador.md` |
+| 2. Comando oficial con la serie nueva | R0, R1 y R2: 4/4, `decisiones.csv` idéntico a la referencia, peor caso 44 y 391 ciclos de 2262. En la serie completa, R0 y R1 dan 9 722 a los tres períodos. Lo que queda obsoleto en el informe, el README y la defensa está listado, sin reescribir | `docs/mediciones/meta/oficial.txt`, `docs/obsoleto_serie_meta.md` |
+| 3. Reglas "cotas" | `ref/cotas.py` reproduce las cifras de Nicolás: espera 15 894 con 2 órdenes, compra 23 906 con 5, compra con banda 40 32 149. La estructura diaria se confirma: 52 aperturas con salto medio de 6,4 contra 0,44 dentro del día | `docs/cotas.md`, `ref/test_cotas.py` |
+| 4. Datos reales | Minutos de 2022 a 2024 gratis solo con cuenta (Alpaca o HF Data Library): pasos en los pendientes y descargador listo (`tools/datos/alpaca.py`). Mientras tanto, diarios reales de Yahoo y días de la serie Meta. La serie del profesor quedó ubicada: Meta del 23/2/2022 15:10 al 9/5/2022, normalizada con los extremos de la ventana | `docs/pendientes_nicolas.md` (acción 3b), `docs/cotas.md`, sección 5.1 |
+| 5. Protocolo sobre la población real | Modelo validado contra la serie del profesor. "Espera con banda 60" da de 19 900 a 20 500 de media contra 11 700 de `max_media`, supera a `max_media` en más del 90 % de las ventanas, gana en las validaciones por años y por empresa, no pierde más que una comisión si la hipótesis es falsa y es la mejor del torneo cuando otros también usan los extremos | `docs/cotas.md`, sección 5; `docs/mediciones/cotas/` |
+| 6. Opciones para cada peldaño | Anotadas con lo que se pierde, el tiempo y la recomendación: regla "espera con banda 60" en los tres peldaños; en R1 y R2, la regla en el hilo 0 del barrel. El hardware no cambia: lo que pase por la maestra mañana sigue valiendo. Unos 3 días de programas y puertas y 2 de documentos, antes del 25/11 | `docs/pendientes_nicolas.md`, decisión 0 |
+| ASIC del barrel | Corridas de 40 ns de `xd` 3 y 7 cerradas y verificadas (sección 2 del tramo 15); el barrido de período termina esta noche | `asic/README.md` |
+
+**Lo que más importa saber del ayudante mañana:** si cada ronda se normaliza por separado (de eso depende toda la familia "cotas"), cuántos ticks tiene cada ronda, y si la caja y la comisión son 10 000 y 5.
+
 ## Tramo 15: trabajo del 16 y 17/11 (cerrado el 17/11 en la noche)
 
 ### 1. Resultado de la tarea prioritaria: la regla `zscore` de Vicente
