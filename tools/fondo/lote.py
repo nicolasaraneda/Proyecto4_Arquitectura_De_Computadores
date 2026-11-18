@@ -19,6 +19,8 @@ import sys
 RAIZ = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.insert(0, os.path.join(RAIZ, "ref"))
 
+sys.path.insert(0, os.path.join(RAIZ, "ref", "cotas"))
+import comun   # noqa: E402
 import series  # noqa: E402
 
 

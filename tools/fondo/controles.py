@@ -13,9 +13,11 @@ una sola vez el script termina con error, para que un cambio en fondo.s no
 deje un control sin efecto sin que nadie lo note.
 
 Desde el 17/11 (decisión T133) el programa es la regla de cotas en el hilo 0.
-Los controles se corren con series normalizadas que tocan 100 y 255 ("norm":
-una serie de reversión normalizada; "meta": 7000 ticks de la serie Meta desde
-el 10 500, normalizados), para que la regla opere y el error se note.
+Los controles se corren con series normalizadas que tocan 100 y 255 ("norm" y
+"norm2": series de reversión normalizadas, semillas 1 y 2; "meta": la serie Meta
+desde el tick 10 500, normalizada), para que la regla opere y el error se note.
+La semilla 2 es la que tiene un precio de exactamente 195 estando adentro con los
+dos extremos vistos: la única forma de ver el umbral de venta corrido en uno.
 
 Uso: tools/fondo/controles.py --lista
      tools/fondo/controles.py NOMBRE [-i sw/fondo.s] -o salida.s
@@ -30,8 +32,11 @@ CONTROLES = {
         "la tabla trae otra banda de compra (171 en vez de 161)",
         "TABLA:BANDA_COMPRA=171", "", "", "norm"),
     "venta_tabla": (
-        "la tabla vende desde 196 en vez de 195",
-        "TABLA:BANDA_VENTA=196", "", "", "meta"),
+        "la tabla vende desde 200 en vez de 195",
+        "TABLA:BANDA_VENTA=200", "", "", "norm"),
+    "venta_196": (
+        "la tabla vende desde 196 en vez de 195 (un solo byte cambia: la serie de reversion de semilla 2)",
+        "TABLA:BANDA_VENTA=196", "", "", "norm2"),
     "bajo_desde_101": (
         "compra al ver 101 y no solo 100",
         "    lw   x13, T_LO_MAS_1(x1)\n",

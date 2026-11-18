@@ -23,6 +23,7 @@ rm -rf "$O"; mkdir -p "$O"
 ensamblar_fondo || { echo "FAIL: no ensambla"; exit 1; }
 compilar_sim || exit 1
 NORM=$(serie_norm reversion 1 $NT)
+NORM2=$(serie_norm reversion 2 $NT)
 META=$(meta_ventana 10500 $NT)
 $PYTHON $TF/controles.py --lista > "$O/lista.txt"
 while IFS='|' read -r n falla ser param desc; do
@@ -35,7 +36,7 @@ while IFS='|' read -r n falla ser param desc; do
   if [ -n "$falla" ]; then
     $PYTHON $TF/variante.py "$falla" -i "$O/$n.s" -o "$O/${n}_f.s" && mv "$O/${n}_f.s" "$O/$n.s"
   fi
-  s=$META; [ "$ser" = norm ] && s=$NORM
+  s=$META; [ "$ser" = norm ] && s=$NORM; [ "$ser" = norm2 ] && s=$NORM2
   echo "${tab}caso $O/$n $O/$n.s $s $NT 100000 4000 --limite 1131"
 done < "$O/lista.txt" | en_paralelo
 
