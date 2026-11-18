@@ -43,7 +43,7 @@ Archivos (sha256):
 
 Para grabar el peldano elegido (lo hace Nicolas):
   iceprog build/retune/c20_k10000_n2000/r1.bin          # R1
-  iceprog build/retune/c20_k10000_n2000/r2_multi.bin    # R2 con R0 de respaldo
+  iceprog -b build/retune/c20_k10000_n2000/r2_multi.bin # R2 con R0 de respaldo (imagen multiple: -b borra la flash entera)
   iceprog build/retune/c20_k10000_n2000/r0.bin          # R0
 
 Tiempo total: 691 s

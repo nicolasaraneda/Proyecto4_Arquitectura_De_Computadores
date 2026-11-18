@@ -22,7 +22,7 @@ Puerta de maestra (`docs/puertas.md` y decisión T50): cada peldaño tiene que c
    | `relevo_r2_multi.bin` y `relevo_r2_multi_sin_dormir.bin` | Tiempo del relevo en la placa, sin maestra (`docs/autoprueba.md`, sección 10) |
    | `registrador.bin` | Registrar la serie de la maestra en cada ronda (sección 4b) |
 
-   Las imágenes múltiples (`*_multi.bin`) se graban con `iceprog -b`.
+   Las imágenes múltiples (`*_multi.bin`) se graban **siempre** con `iceprog -b`: sin `-b` la verificación de `iceprog` falla ("Found difference between flash and file!"), visto el 18/11 con `r2_cotas_multi.bin`. Grabar sin `-b` no deja la placa mal grabada en silencio: `iceprog` verifica cada byte y se detiene, pero hay que repetir con `-b` antes de seguir.
 
 3. Notebook con WSL, `usbipd` y OSS CAD Suite (`iceprog --help` responde). Cable USB de la Go Board, 4 cables hembra-hembra para el PMOD más uno de tierra, y el teléfono con cámara lenta (para el relevo).
 4. Las preguntas para el ayudante impresas (sección 6).
@@ -73,7 +73,7 @@ Para cada peldaño, las tres rondas. Antes de cada peldaño se anota el sha256 q
 
 1. **R0.** `iceprog bitstreams/r0_base_max_media.bin`. Rondas 1, 2 y 3. Anotar el patrimonio final que muestra la maestra en cada ronda y si en algún tick nuestro grupo quedó sin operar cuando los demás operaban.
 2. **R1.** `iceprog bitstreams/r1_fondo.bin`. Lo mismo. Mirar además la telemetría: el LED de latido cambia con cada precio, los otros tres LED son los votos de los gestores y los 7 segmentos muestran la posición objetivo.
-3. **R2.** `iceprog -b bitstreams/r2_multi.bin` (con `-b`: la imagen múltiple ocupa más de 32 kB y hay que borrar la flash entera, T91 y `docs/tabla_vigilante.md`). Lo mismo. En funcionamiento normal **no debe cambiar a R0**: si la telemetría de R1 desaparece a mitad de una ronda, el vigilante se disparó; anotar en qué ronda y en qué momento.
+3. **R2.** `iceprog -b bitstreams/r2_multi.bin` (con `-b`: la imagen múltiple ocupa más de 32 kB y hay que borrar la flash entera, T91 y `docs/tabla_vigilante.md`; sin `-b` la verificación de `iceprog` falla ("Found difference between flash and file!"), visto el 18/11 con `r2_cotas_multi.bin`). Lo mismo. En funcionamiento normal **no debe cambiar a R0**: si la telemetría de R1 desaparece a mitad de una ronda, el vigilante se disparó; anotar en qué ronda y en qué momento.
 
 Si la serie de la maestra es conocida (por ejemplo, la de práctica), el patrimonio de cada ronda se compara con el del gemelo:
 
@@ -150,4 +150,5 @@ Respuestas del ayudante: 1 ___ 2 ___ 3 ___ 4 ___ 5 ___ 6 ___ 7 ___ 8 ___ 9 ___
 | R1 y R0 operan distinto en la misma ronda | Puede ser normal en una serie que no es la de práctica | Anotar la serie si se puede y comparar con el gemelo esa noche |
 | R2 cambia a R0 sin falla inyectada | El vigilante se disparó en funcionamiento normal | R2 no compite. Anotar la ronda y el momento |
 | `iceprog` falla | La placa no está conectada a WSL | `usbipd attach --wsl --busid X-Y` en PowerShell, y repetir |
+| `iceprog` termina con "Found difference between flash and file!" | Se grabó una imagen múltiple sin `-b`: el borrado por bloques no alcanza a la segunda imagen (18/11) | Repetir con `iceprog -b`. No usar la placa hasta ver "VERIFY OK" |
 | LED4 del medidor encendido | Alguna transacción con un número de flancos distinto de 8, flancos de SCLK con `CS_n` en alto, o SCLK en alto al bajar `CS_n` | Anotar en qué ronda. Repetir con SW3 para ver si se repite. Si hay flancos con `CS_n` en alto, preguntar al ayudante si el bus es compartido y no competir con R2 sin el arreglo de la rama `p10-arreglo-1` |
