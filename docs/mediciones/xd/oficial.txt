@@ -5,27 +5,27 @@ Herramientas:
   Yosys 0.68+195 (git sha1 435977e97-dirty, Release, Clang /usr/bin/clang++ 21.1.8)
   "nextpnr-ice40" -- Next Generation Place and Route (Version nextpnr-0.11.1-19-g8dbcee5c)
   Icarus Verilog version 14.0 (devel) (s20260301-403-g5ab23063f-dirty)
-Commit de partida: 0fb8ae8 (rama p2-extension)
+Commit de partida: 34e23a5 (rama integra-noche)
   Verilator 5.053 devel rev v5.052-22-g7cf8c5cca (mod)
 tb/tb_proyecto_4.sv: sin cambios respecto del repositorio (sha256 f83486755fe2b3de...)
 
 1. Testbench oficial sin modificar (Icarus, 2000 ticks a 0,1 ms)
 --- sw/trade.s sin modificar en el hilo 0 ---
-  Patrimonio final:          9661
-  Peor caso precio->decision: 83 ciclos (disponibles: 2262)
+  Patrimonio final:          9995
+  Peor caso precio->decision: 111 ciclos (disponibles: 2262)
   Testbenchs aprobados: 4/4
 PASS trade: 4/4
-PASS trade: decisiones.csv identico byte a byte al del Espino base con sw/trade.hex
+PASS trade: decisiones.csv identico byte a byte al del Espino base con el mismo programa
 --- sw/xd/trade_xd.s (devk y emad) en el hilo 0 ---
   Patrimonio final:          9661
   Peor caso precio->decision: 63 ciclos (disponibles: 2262)
   Testbenchs aprobados: 4/4
 PASS trade_xd: 4/4
-PASS trade_xd: decisiones.csv identico byte a byte al del Espino base con sw/trade.hex
+PASS trade_xd: decisiones.csv identico byte a byte al del Espino base con el mismo programa
 
 2. Serie de practica completa contra ref/trader.py (Verilator)
-PASS trade, periodo 100000 ns, 20000 ticks, Peor caso precio->decision: 83 ciclos (disponibles: 2262), 4/4, 20000 filas identicas a ref/trader.py, patrimonio 26070
-PASS trade, periodo 1000000 ns, 20000 ticks, Peor caso precio->decision: 87 ciclos (disponibles: 24762), 4/4, 20000 filas identicas a ref/trader.py, patrimonio 26070
+PASS trade, periodo 100000 ns, 20000 ticks, Peor caso precio->decision: 111 ciclos (disponibles: 2262), 4/4, 20000 filas identicas a ref/trader.py, patrimonio 9729
+PASS trade, periodo 1000000 ns, 20000 ticks, Peor caso precio->decision: 111 ciclos (disponibles: 24762), 4/4, 20000 filas identicas a ref/trader.py, patrimonio 9729
 PASS trade_xd, periodo 100000 ns, 20000 ticks, Peor caso precio->decision: 63 ciclos (disponibles: 2262), 4/4, 20000 filas identicas a ref/trader.py, patrimonio 26070
 PASS trade_xd, periodo 1000000 ns, 20000 ticks, Peor caso precio->decision: 67 ciclos (disponibles: 24762), 4/4, 20000 filas identicas a ref/trader.py, patrimonio 26070
 
