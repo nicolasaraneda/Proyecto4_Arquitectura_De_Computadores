@@ -40,6 +40,9 @@ TB_OFICIAL := tb/tb_proyecto_4.sv
 PERIODO_NS ?= 100000
 NTICKS     ?= 2000
 SERIE      ?= tb/practica.csv
+# Serie de práctica del curso desde el 17/11 (la que leen make report y tabla-3-1). El testbench
+# oficial sigue leyendo tb/practica.csv.
+SERIE_PRACTICA ?= data/practica_meta.csv
 
 # Productos de síntesis
 JSON := $(BUILD)/$(TOP).json
@@ -183,8 +186,8 @@ medir-ticks: $(HEX)
 # contra la regla base, no operar y comprar y mantener, en la serie completa y
 # en los primeros 2000 ticks con el período de la ronda 3.
 tabla-3-1:
-	{ $(PYTHON) ref/trader.py tb/practica.csv; echo; \
-	  $(PYTHON) ref/trader.py tb/practica.csv --nticks 2000 --periodo-ns 100000; } | tee docs/mediciones/tabla_3_1.txt
+	{ $(PYTHON) ref/trader.py $(SERIE_PRACTICA); echo; \
+	  $(PYTHON) ref/trader.py $(SERIE_PRACTICA) --nticks 2000 --periodo-ns 100000; } | tee docs/mediciones/tabla_3_1.txt
 
 # Puerta de simulación, criterios 4 y 7 (docs/puertas.md): barrido de las 8
 # fases del sondeo y matriz de estrés de la maestra SPI, con tb/tb_estres.sv y

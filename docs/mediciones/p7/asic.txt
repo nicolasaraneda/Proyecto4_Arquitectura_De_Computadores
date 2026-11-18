@@ -2,8 +2,9 @@ Edicion ASIC (GF180MCU, LibreLane): area, frecuencia, potencia, Ops/s, Ops/W y e
 Generado por tools/p7/tablas.py (make p7-rapido) desde docs/mediciones/asic/. No editar a mano.
 
 Procedencia: docs/mediciones/asic/LEEME.md. Son calculos del flujo (OpenSTA con actividad de la simulacion
-del netlist final ejecutando sw/trade.s), no mediciones de silicio. Solo existen el Espino base y el
-segmentado (ROM combinacional): el barrel, la extension y el fondo no pasaron por el flujo.
+del netlist final ejecutando el programa), no mediciones de silicio. El base y el segmentado vienen de la
+factibilidad (sw/trade.s); el barrel con la extension y el fondo (sw/fondo.s, el hardware de R1) es la
+edicion ASIC del 17/11 (asic/README.md), con sus mediciones en asic/mediciones/.
 Ops/s con la definicion de P7: 8 operaciones utiles por tick y los ciclos del kernel medidos en la FPGA
 (el core del macro son los mismos archivos de rtl/espino_core; el segmentado del macro usa la ROM
 combinacional, con el mismo modelo de costo). Esquina tipica (tt, 25 C, 5,0 V), reloj de 25 MHz.
@@ -25,6 +26,8 @@ combinacional, con el mismo modelo de costo). Esquina tipica (tt, 25 C, 5,0 V), 
    Ops/W: kernel 270.5 MOPS/W, Ppeak 912.9 MOPS/W (la clase supuso 10 mW: 2500 MOPS/W de Ppeak)
    energia por decision: ronda 3 2.628 uJ (flujo), ronda 2 26.19 uJ y ronda 1 261.8 uJ (estimadas: mas sondeo)
    costo marginal de decidir sobre el de esperar: 3.84 nJ, 0.480 nJ por operacion util
+
+== Espino barrel con la extension (R1): sin mediciones en asic/mediciones/
 
 Lectura: la energia por decision la pone la espera, no el calculo. Decidir cuesta unos nJ sobre los
 2,6 a 2,8 uJ que se gastan esperando 0,1 ms con el reloj corriendo. Detener el reloj entre precios es

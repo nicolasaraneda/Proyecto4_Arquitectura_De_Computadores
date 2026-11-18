@@ -752,3 +752,12 @@ Las decisiones T87 a T99 son del paquete P6 de R1 y R2 y las T100 a T119 del paq
 - **Hallazgo 1 (bajo, medio si la maestra mueve SCLK con `CS_n` en alto).** El esclavo SPI del curso puede contar precios fuera de una transacción. Arreglo en `p10-arreglo-1`, sin integrar: cambia hardware que ya pasó su puerta. Decisión de Nicolás (`docs/pendientes_nicolas.md`, decisión 4).
 - **Hallazgo 2.** El medidor del 26/11 no veía esa condición. El arreglo (`p10-arreglo-2`) se integró: el medidor no es parte de ningún peldaño, y pasó `make medidor` (70 comprobaciones, 6 de 6 controles negativos, 10 de 10 semillas, bitstream ruteado).
 - **Observaciones.** Vuelta del número de tick a los 16,7 millones de ticks (no afecta la competencia), costo de no reiniciar la placa entre rondas (decisión 5), entradas del SPI sin pull-up y supuesto de maestra de modo 0.
+
+### T133. Regla nueva: "espera" con banda 60 en R0, R1 y R2; en R1 y R2, la regla en el hilo 0 del barrel (17/11)
+
+- **Decisión de Nicolás, con su razón textual:** "Opción R-a con F-a, en los tres peldaños. Razón: es la que no pierde si la hipótesis de la normalización resulta falsa."
+- **La regla** (`ref/cotas.py`, `docs/cotas.md`): parte en caja; al ver 100 compra 63 (repetido), al ver 255 vende 63 (repetido); después de haber visto los dos extremos, compra con p ≤ 160 y vende con p ≥ 195; entre medio mantiene la posición.
+- **R0**: `sw/trade.s` corre la regla en el Espino base. **R1 y R2**: el hilo 0 del barrel corre la misma regla y los hilos 1 a 3 quedan en espera; los umbrales salen de la tabla en BRAM. El hardware de los tres peldaños no cambia: el programa y la tabla entran por `icebram`.
+- **Alternativas y lo que se pierde** (`docs/pendientes_nicolas.md`, decisión 0): comprar 20 al inicio con banda 70 (mejor percentil 5, pierde hasta 2 100 si la hipótesis es falsa); compra con banda 40 (32 149 en la serie Meta, peor en la población); mantener el fondo que vota (sin ganancia medida, más puntos de falla); no cambiar (9 722 en la serie Meta).
+- **Pendiente**: preguntar el 18/11 si cada ronda se normaliza por separado; con los minutos reales de Alpaca, repetir el paso 5 antes del 22/11 y ver si cambia la banda.
+- `make report` y `make tabla-3-1` leen la serie nueva (`data/practica_meta.csv`). El informe, el README y la defensa no se reescriben hasta que la regla esté fija en los peldaños y se sepa cómo se normaliza (`docs/obsoleto_serie_meta.md`).

@@ -35,6 +35,9 @@ import subprocess
 import sys
 
 RAIZ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+# Serie de práctica del curso desde el 17/11 (antes tb/practica.csv, que sigue siendo la que lee el
+# testbench oficial; docs/obsoleto_serie_meta.md).
+SERIE_PRACTICA = "data/practica_meta.csv"
 sys.path.insert(0, os.path.join(RAIZ, "ref"))
 
 import fondo     # noqa: E402
@@ -121,7 +124,7 @@ def estrategia(peldano):
 
 # --- Punto 3.1 -----------------------------------------------------------------------
 def punto_31(c, peldano):
-    practica = market.leer_serie(os.path.join(RAIZ, "tb/practica.csv"))
+    practica = market.leer_serie(os.path.join(RAIZ, SERIE_PRACTICA))
     nuevo = estrategia(peldano)
     nombre = "\\texttt{max\\_media}" if peldano == "r0" else "fondo en un chip"
     filas = []
@@ -267,7 +270,7 @@ def equivalencia(c, peldano):
     subprocess.run(["make", "-s", "build/gemelo", "fondo-hex"], cwd=RAIZ, check=True, stdout=subprocess.DEVNULL)
     opts = [] if peldano == "r0" else ["--barrel", "--xd", "3", "--tabla", "sw/fondo_tabla.hex"]
     hexf = "sw/trade.hex" if peldano == "r0" else "build/fondo/fondo.hex"
-    practica = market.leer_serie(os.path.join(RAIZ, "tb/practica.csv"))
+    practica = market.leer_serie(os.path.join(RAIZ, SERIE_PRACTICA))
     lote = []
     for nombre in series.FAMILIAS:
         lote += series.lote(nombre, 50, n=2000, semilla=21)
@@ -333,7 +336,7 @@ def main(argv=None):
     punto_32(c, peldano)
     equivalencia(c, peldano)
     # Hechos de la serie de práctica que justifican la reversión a la media
-    practica = market.leer_serie("tb/practica.csv")
+    practica = market.leer_serie(os.path.join(RAIZ, SERIE_PRACTICA))
     for k, nombre in ((10, "Diez"), (50, "Cincuenta"), (100, "Cien")):
         c[f"VR{nombre}"] = num(series.razon_de_varianza(practica, k), 2)
     d = [b - a for a, b in zip(practica, practica[1:])]
