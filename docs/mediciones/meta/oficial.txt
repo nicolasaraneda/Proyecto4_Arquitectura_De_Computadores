@@ -1,0 +1,26 @@
+Comando oficial y equivalencia con la serie Meta (data/practica_meta.csv) en R0, R1 y R2
+Corrido el 17/11 sobre integra-noche 34b2a13, en una copia de trabajo aparte donde tb/practica.csv es la serie Meta.
+tb/tb_proyecto_4.sv sin cambios (sha256 f83486755fe2b3de...). Programas y bitstreams de R0, R1 y R2 sin cambios.
+
+Testbench oficial (2000 ticks a 0,1 ms):
+  R0 (make tb): 4/4, peor caso 44 ciclos de 2262, patrimonio 10768, 18 ordenes; decisiones.csv identico a ref/trader.py (2001 lineas)
+  R1 Patrimonio final:          10768
+  R1 Peor caso precio->decision: 391 ciclos (disponibles: 2262)
+  R1 PASS: 4/4
+  R1 PASS: decisiones.csv identico byte a byte al de ref/fondo.py (2001 lineas, sha256 d8669d1ef4d6a046...)
+  R2 Patrimonio final:          10768
+  R2 Peor caso precio->decision: 391 ciclos (disponibles: 2262)
+  R2 PASS: 4/4
+  R2 PASS: decisiones.csv identico byte a byte al de ref/fondo.py (2001 lineas, sha256 d8669d1ef4d6a046...)
+
+Serie completa, 20 000 ticks:
+  R0 PASS v_r3: periodo 100000 ns, 20000 ticks, tb/practica.csv, Peor caso precio->decision: 44 ciclos (disponibles: 2262), 4/4, 20000 filas identicas a ref/trader.py, patrimonio 9722
+  R0 PASS gemelo: periodo 100000 ns, 20000 ticks, tb/practica.csv, Peor caso precio->decision: 44 ciclos (disponibles: 2262), 4/4, 20000 filas identicas a ref/trader.py, patrimonio 9722
+  R0 PASS gemelo: periodo 1000000 ns, 20000 ticks, tb/practica.csv, Peor caso precio->decision: 44 ciclos (disponibles: 24762), 4/4, 20000 filas identicas a ref/trader.py, patrimonio 9722
+  R0 PASS gemelo: periodo 10000000 ns, 20000 ticks, tb/practica.csv, Peor caso precio->decision: 44 ciclos (disponibles: 249762), 4/4, 20000 filas identicas a ref/trader.py, patrimonio 9722
+  R0 PASS v_r2: periodo 1000000 ns, 20000 ticks, tb/practica.csv, Peor caso precio->decision: 44 ciclos (disponibles: 24762), 4/4, 20000 filas identicas a ref/trader.py, patrimonio 9722
+  R1 gemelo periodo 100000 ns: Patrimonio final: 9722 Peor caso precio->decision: 443 ciclos (disponibles: 2262) Testbenchs aprobados: 4/4 decisiones identicas a ref/fondo.py
+  R1 gemelo periodo 1000000 ns: Patrimonio final: 9722 Peor caso precio->decision: 443 ciclos (disponibles: 24762) Testbenchs aprobados: 4/4 decisiones identicas a ref/fondo.py
+  R1 gemelo periodo 10000000 ns: Patrimonio final: 9722 Peor caso precio->decision: 443 ciclos (disponibles: 249762) Testbenchs aprobados: 4/4 decisiones identicas a ref/fondo.py
+
+R2 es R1 mas el vigilante: con el programa sano decide igual que R1 (puerta de simulacion, criterio 2).
