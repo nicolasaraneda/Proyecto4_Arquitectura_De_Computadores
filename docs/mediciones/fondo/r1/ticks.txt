@@ -1,71 +1,63 @@
-Mediciones por tick del fondo en un chip
+Mediciones por tick de R1 y R2 (regla de cotas en el hilo 0)
 Generado por tools/fondo/ticks.sh (make fondo-ticks). No editar a mano.
 
 Herramientas:
   Yosys 0.68+195 (git sha1 435977e97-dirty, Release, Clang /usr/bin/clang++ 21.1.8)
   "nextpnr-ice40" -- Next Generation Place and Route (Version nextpnr-0.11.1-19-g8dbcee5c)
   Icarus Verilog version 14.0 (devel) (s20260301-403-g5ab23063f-dirty)
-Commit de partida: 7d7c934 (rama p10-revision)
+Commit de partida: 6ad97b9 (rama regla-cotas-r1)
   Verilator 5.053 devel rev v5.052-22-g7cf8c5cca (mod)
 Hardware (r1): pochoco_soc con -DESPINO_BARREL -DESPINO_XD_EMAD -DESPINO_XD_DEVK -DESPINO_TABLA
-Programa: sw/fondo.s (sha256 19773517830a2e16...), tabla sw/fondo_tabla.hex (sha256 f792588c9cc823cb...), referencia ref/fondo.py
+Programa: sw/fondo.s (sha256 6f55ec520f3686ef...), tabla sw/fondo_tabla.hex (sha256 93ad35e5be0d6f7e...), referencia ref/fondo.py
 
-=== Ronda 3: periodo de 0,1 ms, 20 000 ticks de la serie de practica ===
-PASS ronda3: 20000 bytes, 19998 ticks de estado, patrimonio 26070, 630 ordenes, pesos 7/6/3 (20 cambios), 0 ticks por plazo, peor caso 443 de 2262 ciclos, hasta 3 vueltas de lectura
+=== Ronda 3: periodo de 0,1 ms, 20 000 ticks de la serie Meta (data/practica_meta.csv) ===
+PASS ronda3: 20000 bytes, 19998 ticks de estado, patrimonio 19214, 4 ordenes, vio el minimo 1 y el maximo 1, stores a la RAM 0, peor caso 127 de 2262 ciclos
 
-  Ticks medidos: 19996 (39 con frontera de ventana). Ciclo de 40 ns.
+  Ticks medidos: 19996. Ciclo de 40 ns.
 
-  Instrucciones de trabajo por tick y por hilo (fuera de los lazos de sondeo, mas la vuelta que encuentra el dato)
-    hilo                      minimo  promedio  maximo  ciclos prom.  ciclos max.    CPI
-    0, supervisor                 62     68.59     116        274.37          464  4.000
-    1, gestor max_media           25     25.00      25        100.00          100  4.000
-    2, gestor base                25     25.00      25        100.00          100  4.000
-    3, gestor activo              25     25.00      25        100.00          100  4.000
-    los cuatro (agregado)        137    143.59     191        143.59          191  1.000
+  Instrucciones por tick y por hilo
+    hilo                                minimo  promedio  maximo  ciclos prom.  ciclos max.    CPI
+    0, trabajo (fuera del sondeo)           40     45.00      50        180.00          200  4.000
+    1, lazo de espera                      624    624.00     624       2496.00         2496  4.000
+    2, lazo de espera                      625    625.00     625       2500.00         2500  4.000
+    3, lazo de espera                      625    625.00     625       2500.00         2500  4.000
     Cada hilo ejecuta una instruccion cada 4 ciclos: CPI 4 por hilo y 1 agregado, por construccion.
+    Los hilos 1 a 3 solo dan vueltas a un salto: no hacen trabajo util.
 
   Ciclos desde que llega el precio (byte_done)
     hito                                          minimo  promedio  maximo  tiempo prom.  tiempo max.
-    el supervisor publica PUB                         27     30.64      35       1.23 us      1.40 us
-    llega el ultimo voto                             122    124.36     130       4.97 us      5.20 us
-    DECISION (respuesta), todos los ticks            219    223.01     443       8.92 us     17.72 us
-    DECISION, ticks comunes                          219    222.64     227       8.91 us      9.08 us
-    DECISION, ticks con frontera                     379    413.36     443      16.53 us     17.72 us
-    el supervisor vuelve a sondear (tick completo)     251    281.01     475      11.24 us     19.00 us
+    DECISION (respuesta)                             119    123.00     127       4.92 us      5.08 us
+    el hilo 0 vuelve a sondear (tick completo)       163    187.00     211       7.48 us      8.44 us
 
   Peor caso de la respuesta contra el presupuesto de cada ronda
-    ronda 1 (10 ms)   presupuesto  249762 ciclos, uso   0.177 %, holgura  99.82 %
-    ronda 2 (1 ms)    presupuesto   24762 ciclos, uso   1.789 %, holgura  98.21 %
-    ronda 3 (0,1 ms)  presupuesto    2262 ciclos, uso  19.584 %, holgura  80.42 %
+    ronda 1 (10 ms)   presupuesto  249762 ciclos, uso   0.051 %, holgura  99.95 %
+    ronda 2 (1 ms)    presupuesto   24762 ciclos, uso   0.513 %, holgura  99.49 %
+    ronda 3 (0,1 ms)  presupuesto    2262 ciclos, uso   5.615 %, holgura  94.39 %
 
-  Ocupacion a este periodo: 143.59 instrucciones de trabajo de 2500 turnos por tick (5.74 %)
+  Ocupacion del hilo 0 a este periodo: 45.00 instrucciones de trabajo de 625 turnos del hilo por tick (7.20 %)
 
-=== Ronda 2: periodo de 1 ms, 3000 ticks de la serie de practica ===
-PASS ronda2: 3000 bytes, 2999 ticks de estado, patrimonio 9904, 92 ordenes, pesos 6/6/4 (3 cambios), 0 ticks por plazo, peor caso 435 de 24762 ciclos, hasta 3 vueltas de lectura
+=== Ronda 2: periodo de 1 ms, 3000 ticks de la serie Meta ===
+PASS ronda2: 3000 bytes, 2999 ticks de estado, patrimonio 10000, 0 ordenes, vio el minimo 0 y el maximo 0, stores a la RAM 0, peor caso 127 de 24762 ciclos
 
-  Ticks medidos: 2997 (5 con frontera de ventana). Ciclo de 40 ns.
+  Ticks medidos: 2997. Ciclo de 40 ns.
 
-  Instrucciones de trabajo por tick y por hilo (fuera de los lazos de sondeo, mas la vuelta que encuentra el dato)
-    hilo                      minimo  promedio  maximo  ciclos prom.  ciclos max.    CPI
-    0, supervisor                 62     68.58     116        274.32          464  4.000
-    1, gestor max_media           25     25.00      25        100.00          100  4.000
-    2, gestor base                25     25.00      25        100.00          100  4.000
-    3, gestor activo              25     25.00      25        100.00          100  4.000
-    los cuatro (agregado)        137    143.58     191        143.58          191  1.000
+  Instrucciones por tick y por hilo
+    hilo                                minimo  promedio  maximo  ciclos prom.  ciclos max.    CPI
+    0, trabajo (fuera del sondeo)           40     45.00      50        179.99          200  4.000
+    1, lazo de espera                     6249   6249.00    6249      24996.00        24996  4.000
+    2, lazo de espera                     6250   6250.00    6250      25000.00        25000  4.000
+    3, lazo de espera                     6250   6250.00    6250      25000.00        25000  4.000
     Cada hilo ejecuta una instruccion cada 4 ciclos: CPI 4 por hilo y 1 agregado, por construccion.
+    Los hilos 1 a 3 solo dan vueltas a un salto: no hacen trabajo util.
 
   Ciclos desde que llega el precio (byte_done)
     hito                                          minimo  promedio  maximo  tiempo prom.  tiempo max.
-    el supervisor publica PUB                         27     29.58      35       1.18 us      1.40 us
-    llega el ultimo voto                             118    121.17     130       4.85 us      5.20 us
-    DECISION (respuesta), todos los ticks            219    221.91     435       8.88 us     17.40 us
-    DECISION, ticks comunes                          219    221.59     227       8.86 us      9.08 us
-    DECISION, ticks con frontera                     379    414.20     435      16.57 us     17.40 us
-    el supervisor vuelve a sondear (tick completo)     251    279.90     467      11.20 us     18.68 us
+    DECISION (respuesta)                             119    123.00     127       4.92 us      5.08 us
+    el hilo 0 vuelve a sondear (tick completo)       163    186.99     211       7.48 us      8.44 us
 
   Peor caso de la respuesta contra el presupuesto de cada ronda
-    ronda 1 (10 ms)   presupuesto  249762 ciclos, uso   0.174 %, holgura  99.83 %
-    ronda 2 (1 ms)    presupuesto   24762 ciclos, uso   1.757 %, holgura  98.24 %
-    ronda 3 (0,1 ms)  presupuesto    2262 ciclos, uso  19.231 %, holgura  80.77 %
+    ronda 1 (10 ms)   presupuesto  249762 ciclos, uso   0.051 %, holgura  99.95 %
+    ronda 2 (1 ms)    presupuesto   24762 ciclos, uso   0.513 %, holgura  99.49 %
+    ronda 3 (0,1 ms)  presupuesto    2262 ciclos, uso   5.615 %, holgura  94.39 %
 
-  Ocupacion a este periodo: 143.58 instrucciones de trabajo de 25000 turnos por tick (0.57 %)
+  Ocupacion del hilo 0 a este periodo: 45.00 instrucciones de trabajo de 6250 turnos del hilo por tick (0.72 %)
