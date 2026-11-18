@@ -9,7 +9,7 @@ Herramienta para la prueba con la maestra real del 26/11. Es un bitstream aparte
 | `rtl/registrador/registrador.v` | El núcleo (`registrador`) y el bitstream (`registrador_top`) |
 | `tb/registrador/tb_registrador.sv` | Testbench: maestra SPI, receptor UART y comparación |
 | `tools/registrador.sh` | Testbench, controles negativos, timing en 10 semillas, bitstream y simulación del bitstream ruteado (`make registrador`) |
-| `tools/registrador.py` | Lee el puerto y escribe los CSV (con el período medido por la FPGA y la hora de llegada al computador) y los bytes crudos a medida que llegan; `--prueba` sin placa |
+| `tools/registrador.py` | Lee el puerto y escribe los CSV (con el período medido por la FPGA y la hora de llegada al computador) y los bytes crudos a medida que llegan; `--convertir` arma los CSV desde una captura en bruto; `--prueba` sin placa. Funciona en Linux, Mac y Windows con pyserial, y en Linux también sin él (sección 4b) |
 | `bitstreams/registrador.bin` | El bitstream (sha256 `231a0c6d...`, también en `bitstreams/SHA256SUMS`) |
 | `docs/mediciones/registrador.txt` | Resultado de `make registrador` |
 
@@ -36,6 +36,8 @@ maestra --SCLK, MOSI, CS_n--> sincronizadores --> registro de desplazamiento -->
   | b2 | `0`, MISO[7:1] |
   | b3 | `0`, precio[0], MISO[0], error (no fueron 8 bits), período[10:7] |
   | b4 | `0`, período[6:0] |
+
+  En una captura en bruto: **precio = 2 × b1 + bit 6 de b3**; MISO = 2 × b2 + bit 5 de b3; error = bit 4 de b3; **período = 128 × (b3 & 0x0F) + b4**. El período no incluye a b2 ni a los bits 4 a 6 de b3: una fórmula como `(b2 << 14) | ((b3 & 0x3F) << 7) | b4` da el valor correcto con el registrador solo porque su MISO es siempre 0 y no hubo errores, y se equivoca en cuanto MISO tenga un 1 o una transacción venga incompleta.
 
   El período es el tiempo desde la bajada de `CS_n` de la transacción anterior, en unidades de 128 ciclos (5,12 µs), redondeado hacia abajo y saturado en 2047 (10,48 ms). A 10 ms da 1953.
 - **UART a 1 Mbaud** (25 ciclos por bit, sin error de reloj). Un registro tarda 50 µs. A 0,1 ms la UART está ocupada la mitad del tiempo; la cola de 4 registros absorbe cualquier irregularidad.
@@ -74,6 +76,13 @@ Paso a paso, con usbipd, en `docs/clase_18nov.md` (la clase con la maestra) y en
 5. Apretar SW3 antes de la ronda siguiente y repetir con otro prefijo.
 
 La maestra ve a nuestro grupo manteniendo durante toda la ronda (`0x00`). Si la maestra solo admite un bitstream por ronda, esta prueba va después de las de los peldaños.
+
+## 4b. En Mac o Windows, y captura en bruto
+
+- **Puerto serie.** Con pyserial (`python3 -m pip install pyserial`) la herramienta abre el puerto en Linux, Mac y Windows; sin pyserial usa `termios` de la biblioteca estándar, que solo sirve en Linux y WSL. La versión del 17/11 no partía en Mac: el `termios` de Mac no trae las constantes de 921 600 ni de 1 000 000 baudios y el programa las pedía al cargarse. `--puerto-con pyserial` o `termios` fuerza una de las dos; si se pide `termios` en un sistema sin esas constantes, dice que instale pyserial.
+- **Nombre del puerto.** `python3 tools/registrador.py --listar` (con pyserial). La Go Board tiene dos interfaces y la UART es la segunda: `/dev/ttyUSB1` en Linux, la terminada en 1 en Mac (por ejemplo `/dev/cu.usbserial-1201`), un `COM` en Windows.
+- **Captura en bruto.** Si los bytes se guardaron con otro programa (por ejemplo `captura.py` del kit del 18/11), `python3 tools/registrador.py --convertir captura.bin` escribe `captura_serie.csv` y `captura_detalle.csv` junto a la captura (o con `-o PREFIJO`) e imprime el mismo resumen: registros, perdidos, errores y período. No necesita pyserial ni la placa. Con la captura de la ronda de Tesla del 18/11 da 20 000 registros sin pérdidas y un CSV idéntico al decodificado a mano (`docs/mediciones/clase_18nov.md`).
+- **Prueba sin placa.** `--prueba` agrega la conversión de una captura en bruto y prueba el puerto con pyserial si está instalado (si no, con `termios`). En WSL no hay pyserial: el camino de pyserial se probó con un módulo `serial` de imitación sobre un pseudoterminal y con un `termios` sin las constantes de Mac (`docs/bitacora/minutos_reales.md`), no con pyserial real. En el Mac, correr `--prueba` una vez antes de usarlo.
 
 ## 5. Límites
 

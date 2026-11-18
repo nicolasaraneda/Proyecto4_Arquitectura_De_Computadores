@@ -26,30 +26,87 @@ y un resumen en la salida: registros, perdidos, transacciones con error, bytes f
 un registro, y período mínimo, medio y máximo entre precios.
 
 Uso:
-    python3 tools/registrador.py /dev/ttyUSB1 -o build/maestra/ronda3            # hasta Ctrl+C
+    python3 tools/registrador.py /dev/ttyUSB1 -o build/maestra/ronda3            # Linux y WSL, hasta Ctrl+C
+    python3 tools/registrador.py /dev/cu.usbserial-1201 -o build/maestra/ronda3  # Mac (con pyserial)
+    python3 tools/registrador.py COM4 -o build/maestra/ronda3                    # Windows (con pyserial)
     python3 tools/registrador.py /dev/ttyUSB1 -o build/maestra/ronda3 --segundos 30
-    python3 tools/registrador.py --archivo bytes.bin -o salida      # bytes ya guardados
+    python3 tools/registrador.py --listar                           # puertos serie (con pyserial)
+    python3 tools/registrador.py --convertir captura.bin            # captura en bruto -> captura_serie.csv
+    python3 tools/registrador.py --archivo bytes.bin -o salida      # lo mismo, con otro prefijo
     python3 tools/registrador.py --prueba                           # sin placa
 
-Solo usa la biblioteca estándar (termios, select). Si dice "Permission denied", el usuario
-no tiene permiso sobre el puerto (grupo dialout). Si el puerto no acepta 1 Mbaud, el
-bitstream se puede construir para 921 600 baudios (docs/registrador.md) y aquí se usa
---baudios 921600.
+Puerto serie: con pyserial (python3 -m pip install pyserial) funciona en Linux, Mac y
+Windows. Sin pyserial usa termios de la biblioteca estándar, que solo sirve en Linux y WSL:
+el termios de Mac no trae las constantes de 921 600 ni de 1 000 000 baudios, y por eso la
+versión anterior no partía en Mac. Se puede forzar con --puerto-con pyserial o termios.
+Si dice "Permission denied", el usuario no tiene permiso sobre el puerto (grupo dialout en
+Linux). Si el puerto no acepta 1 Mbaud, el bitstream se puede construir para 921 600
+baudios (docs/registrador.md) y aquí se usa --baudios 921600. La conversión de una captura
+en bruto (--convertir o --archivo) no necesita puerto ni pyserial.
 """
 import argparse
 import os
-import pty
-import select
 import sys
-import termios
 import threading
 import time
 
-VELOCIDADES = {115200: termios.B115200, 921600: termios.B921600, 1000000: termios.B1000000}
+BAUDIOS = (115200, 921600, 1000000)
 UNIDAD_US = 128 * 0.04        # dt en unidades de 128 ciclos de 40 ns
 
 
-def abrir(puerto, baudios):
+def hay_pyserial():
+    try:
+        import serial  # noqa: F401
+        return True
+    except ImportError:
+        return False
+
+
+class PuertoSerial:
+    """Puerto con pyserial: Linux, Mac y Windows."""
+
+    def __init__(self, puerto, baudios):
+        import serial
+        self.s = serial.Serial(puerto, baudios, bytesize=8, parity="N", stopbits=1, timeout=0.2,
+                               xonxoff=False, rtscts=False, dsrdtr=False)
+        self.s.reset_input_buffer()
+
+    def leer(self):
+        """Lo que haya llegado, esperando a lo más 0,2 s."""
+        return self.s.read(self.s.in_waiting or 1)
+
+    def cerrar(self):
+        self.s.close()
+
+
+class PuertoTermios:
+    """Puerto con termios y select de la biblioteca estándar: solo Linux y WSL."""
+
+    def __init__(self, puerto, baudios):
+        self.fd = abrir_termios(puerto, baudios)
+
+    def leer(self):
+        import select
+        r, _, _ = select.select([self.fd], [], [], 0.2)
+        return os.read(self.fd, 65536) if r else b""
+
+    def cerrar(self):
+        os.close(self.fd)
+
+
+def abrir(puerto, baudios, con="auto"):
+    """Abre el puerto con pyserial si está instalado (o si se pide), y si no con termios."""
+    if con == "pyserial" or (con == "auto" and hay_pyserial()):
+        return PuertoSerial(puerto, baudios)
+    return PuertoTermios(puerto, baudios)
+
+
+def abrir_termios(puerto, baudios):
+    import termios
+    nombre = {115200: "B115200", 921600: "B921600", 1000000: "B1000000"}[baudios]
+    if not hasattr(termios, nombre):
+        raise SystemExit(f"el termios de este sistema no tiene {baudios} baudios ({sys.platform}): "
+                         "instalar pyserial (python3 -m pip install pyserial) y volver a correr")
     fd = os.open(puerto, os.O_RDWR | os.O_NOCTTY)
     a = termios.tcgetattr(fd)
     a[0] &= ~(termios.IGNBRK | termios.BRKINT | termios.PARMRK | termios.ISTRIP | termios.INLCR |
@@ -58,7 +115,7 @@ def abrir(puerto, baudios):
     a[2] &= ~(termios.CSIZE | termios.PARENB | termios.CSTOPB | getattr(termios, "CRTSCTS", 0))
     a[2] |= termios.CS8 | termios.CREAD | termios.CLOCAL
     a[3] &= ~(termios.ECHO | termios.ECHONL | termios.ICANON | termios.ISIG | termios.IEXTEN)
-    a[4] = a[5] = VELOCIDADES[baudios]
+    a[4] = a[5] = getattr(termios, nombre)
     a[6][termios.VMIN] = 0
     a[6][termios.VTIME] = 0
     termios.tcsetattr(fd, termios.TCSANOW, a)
@@ -66,8 +123,9 @@ def abrir(puerto, baudios):
     return fd
 
 
-def leer_puerto(fd, segundos=None, avisar=True, crudo=None, marcas=None):
+def leer_puerto(puerto, segundos=None, avisar=True, crudo=None, marcas=None):
     """Lee hasta Ctrl+C o hasta `segundos` sin pausa. Devuelve los bytes.
+    `puerto` es un PuertoSerial o un PuertoTermios.
     Con `crudo` (un archivo abierto) escribe cada trozo apenas llega, para no perder la
     ronda si el programa o el computador se caen a la mitad. Con `marcas` (una lista)
     anota (posición del trozo, segundos desde el comienzo) de cada trozo recibido."""
@@ -76,10 +134,9 @@ def leer_puerto(fd, segundos=None, avisar=True, crudo=None, marcas=None):
     ultimo_aviso = t0
     try:
         while segundos is None or time.time() - t0 < segundos:
-            r, _, _ = select.select([fd], [], [], 0.2)
-            if r:
-                trozo = os.read(fd, 65536)
-                if marcas is not None and trozo:
+            trozo = puerto.leer()
+            if trozo:
+                if marcas is not None:
                     marcas.append((len(datos), time.time() - t0))
                 datos += trozo
                 if crudo is not None and trozo:
@@ -179,7 +236,7 @@ def registro(sec, pre, mis=0, err=0, dt=19):
                   dt & 0x7F])
 
 
-def prueba():
+def prueba(con="auto"):
     fallas = 0
 
     def comprobar(ok, texto):
@@ -224,10 +281,35 @@ def prueba():
     regs, _ = armar(dos)
     perdidos, rondas, _ = analizar(regs)
     comprobar(perdidos == 0 and rondas == 2, "un borrado con SW3 a mitad: dos rondas, ningun perdido")
-    # 3. De punta a punta por un pseudoterminal a 1 Mbaud, con los archivos de salida
+    # 3. Conversión de una captura en bruto guardada en un archivo (--convertir)
+    pref_c = os.path.join(raiz, "build", "registrador", "prueba_convertir")
+    os.makedirs(os.path.dirname(pref_c), exist_ok=True)
+    open(pref_c + ".bin", "wb").write(b"\x13" + flujo)
+    for viejo in (pref_c + "_serie.csv", pref_c + "_detalle.csv"):
+        if os.path.exists(viejo):
+            os.remove(viejo)
+    codigo = main(["--convertir", pref_c + ".bin"])
+    leida = [int(l.split(",")[1]) for l in open(pref_c + "_serie.csv").read().splitlines()[1:]]
+    comprobar(codigo == 0 and leida == serie, "--convertir: la captura en bruto (con un byte suelto al comienzo) da "
+                                              "PREFIJO_serie.csv igual a la serie enviada")
+    # 4. De punta a punta por un pseudoterminal a 1 Mbaud, con los archivos de salida
+    try:
+        import pty
+    except ImportError:
+        print("NO CORRIDA: este sistema no tiene pseudoterminales (Windows); la prueba de punta a punta se salta")
+        print("RESULTADO prueba", "PASS" if fallas == 0 else "FAIL")
+        return 0 if fallas == 0 else 1
     maestro, esclavo = pty.openpty()
     nombre = os.ttyname(esclavo)
-    fd = abrir(nombre, 1000000)
+    clase = "pyserial" if con == "pyserial" or (con == "auto" and hay_pyserial()) else "termios"
+    try:
+        fd = abrir(nombre, 1000000, con)
+        baud = 1000000
+    except Exception as e:            # pyserial en Mac puede no aceptar 1 Mbaud en un pseudoterminal
+        print(f"  (el pseudoterminal no acepta 1 Mbaud con {clase}: {e}; se prueba a 115 200, que en un "
+              "pseudoterminal da lo mismo)")
+        fd = abrir(nombre, 115200, con)
+        baud = 115200
 
     def escribir_lento():
         time.sleep(0.2)
@@ -242,17 +324,17 @@ def prueba():
     with open(pref + "_crudo.bin", "wb") as crudo:
         datos = leer_puerto(fd, segundos=1.5, avisar=False, crudo=crudo, marcas=marcas)
     hilo.join()
-    os.close(fd)
+    fd.cerrar()
     regs, basura = armar(datos, inicios)
     t_pc = tiempos_pc(inicios, marcas)
     escribir(regs, pref, t_pc)
     leida = [int(l.split(",")[1]) for l in open(pref + "_serie.csv").read().splitlines()[1:]]
-    comprobar(leida == serie, f"pseudoterminal a 1 Mbaud: {len(regs)} registros, la serie escrita en {os.path.relpath(pref, raiz)}_serie.csv "
+    comprobar(leida == serie, f"pseudoterminal con {clase} a {baud} baudios: {len(regs)} registros, la serie escrita en {os.path.relpath(pref, raiz)}_serie.csv "
                               f"es igual a la enviada")
     comprobar(open(pref + "_crudo.bin", "rb").read() == datos, "los bytes crudos quedan en disco a medida que llegan")
     tp = [l.split(",")[6] for l in open(pref + "_detalle.csv").read().splitlines()[1:]]
-    comprobar(all(tp) and all(float(a) <= float(b) for a, b in zip(tp, tp[1:])) and 0.1 < float(tp[0]) < 1.0,
-              f"hora de llegada al computador en cada registro (primero a {tp[0]} s, ultimo a {tp[-1]} s)")
+    comprobar(bool(tp) and all(tp) and all(float(a) <= float(b) for a, b in zip(tp, tp[1:])) and 0.1 < float(tp[0]) < 1.0,
+              "hora de llegada al computador en cada registro" + (f" (primero a {tp[0]} s, ultimo a {tp[-1]} s)" if tp else ""))
     print("RESULTADO prueba", "PASS" if fallas == 0 else "FAIL")
     return 0 if fallas == 0 else 1
 
@@ -261,21 +343,39 @@ def main(argv=None):
     ap = argparse.ArgumentParser(description="Guarda como CSV los precios del registrador (docs/registrador.md)")
     ap.add_argument("puerto", nargs="?", help="puerto serie de la Go Board, por ejemplo /dev/ttyUSB1")
     ap.add_argument("-o", "--salida", help="prefijo de los archivos de salida")
-    ap.add_argument("--baudios", type=int, default=1000000, choices=sorted(VELOCIDADES))
+    ap.add_argument("--baudios", type=int, default=1000000, choices=BAUDIOS)
     ap.add_argument("--segundos", type=float, help="leer este tiempo (sin esto, hasta Ctrl+C)")
     ap.add_argument("--archivo", help="leer los bytes de un archivo en vez del puerto")
+    ap.add_argument("--convertir", metavar="CAPTURA", help="convertir una captura en bruto a CSV "
+                    "(como --archivo; sin -o, el prefijo es la ruta de la captura sin la extensión)")
     ap.add_argument("--crudo", help="archivo para los bytes recibidos (por defecto PREFIJO_crudo.bin)")
+    ap.add_argument("--puerto-con", choices=("auto", "pyserial", "termios"), default="auto",
+                    help="cómo abrir el puerto (auto: pyserial si está instalado, si no termios)")
+    ap.add_argument("--listar", action="store_true", help="listar los puertos serie (necesita pyserial)")
     ap.add_argument("--prueba", action="store_true", help="probar el programa sin placa")
     a = ap.parse_args(argv)
     if a.prueba:
-        return prueba()
+        return prueba(a.puerto_con)
+    if a.listar:
+        if not hay_pyserial():
+            raise SystemExit("--listar necesita pyserial (python3 -m pip install pyserial); en Linux: ls /dev/ttyUSB*")
+        from serial.tools import list_ports
+        for p in list_ports.comports():
+            print(f"{p.device}  {p.description}")
+        print("La Go Board tiene dos interfaces: la UART es la segunda (en Linux /dev/ttyUSB1; en Mac la de "
+              "nombre terminado en 1, por ejemplo /dev/cu.usbserial-1201).")
+        return 0
+    if a.convertir:
+        a.archivo = a.convertir
+    if a.archivo and not a.salida:
+        a.salida = os.path.splitext(a.archivo)[0]
     if not a.salida or not (a.puerto or a.archivo):
-        ap.error("hace falta el puerto (o --archivo) y -o PREFIJO")
+        ap.error("hace falta el puerto (o --archivo, o --convertir) y -o PREFIJO")
     marcas, inicios = [], []
     if a.archivo:
         datos = open(a.archivo, "rb").read()
     else:
-        fd = abrir(a.puerto, a.baudios)
+        fd = abrir(a.puerto, a.baudios, a.puerto_con)
         os.makedirs(os.path.dirname(os.path.abspath(a.salida)), exist_ok=True)
         ruta_crudo = a.crudo or a.salida + "_crudo.bin"
         print(f"Leyendo {a.puerto} a {a.baudios} baudios" + (f" durante {a.segundos} s" if a.segundos else " hasta Ctrl+C") +
@@ -283,7 +383,7 @@ def main(argv=None):
               f"--archivo {ruta_crudo}).", file=sys.stderr)
         with open(ruta_crudo, "wb") as crudo:
             datos = leer_puerto(fd, a.segundos, crudo=crudo, marcas=marcas)
-        os.close(fd)
+        fd.cerrar()
     regs, basura = armar(datos, inicios)
     escribir(regs, a.salida, tiempos_pc(inicios, marcas) if marcas else None)
     perdidos, _ = resumen(regs, basura)
