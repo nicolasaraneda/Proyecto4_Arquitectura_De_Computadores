@@ -1,0 +1,8 @@
+Verificacion exhaustiva de la regla de cotas de R0 (sw/trade.s) en el gemelo
+Generado por tools/exhaustivo/r0_cotas.py. Cada combinacion (estado, precio) en una serie corta: precios
+que se pierden en el reset, el prefijo que lleva al estado, el precio y un precio mas para leer el byte.
+periodo 100000 ns (precios perdidos en el reset: 2): 1275 combinaciones, 0 distintas a ref/trader.py
+periodo 1000000 ns (precios perdidos en el reset: 1): 1275 combinaciones, 0 distintas a ref/trader.py
+periodo 10000000 ns (precios perdidos en el reset: 1): 1275 combinaciones, 0 distintas a ref/trader.py
+Estados alcanzados por cada prefijo en la referencia (q, minimo, maximo): (mantener, 0, 0) -> (0x00, 0, 0), (comprar, 1, 0) -> (0x7f, 1, 0), (vender, 0, 1) -> (0xbf, 0, 1), (comprar, 1, 1) -> (0x7f, 1, 1), (vender, 1, 1) -> (0xbf, 1, 1)
+PASS
