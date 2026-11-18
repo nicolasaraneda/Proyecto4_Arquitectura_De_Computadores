@@ -48,10 +48,23 @@ D=build/vigilante/relevo
 MV=docs/mediciones/vigilante
 INF=$MV/relevo.txt
 TV=tools/vigilante
-SERIE=tb/practica.csv
 VIG_N=$(sed -n 's/.*parameter  *VigN  *= *\([0-9]*\).*/\1/p' rtl/pochoco_soc.v)
 rm -rf "$D"
 mkdir -p "$D" "$MV"
+# Serie: desde el 17/11 R1, R2 y R0 corren la regla de cotas, que solo opera cuando
+# la serie toca 100 y 255. Diez ventanas de 2000 ticks de la serie Meta, cada una
+# normalizada (la primera toca el máximo en su tick 1 y el mínimo en el 388).
+SERIE=$D/serie_relevo.csv
+$PYTHON - "$SERIE" <<'PY'
+import sys
+sys.path.insert(0, "ref"); sys.path.insert(0, "ref/cotas")
+import comun, market, series
+meta = market.leer_serie("data/practica_meta.csv")
+out = []
+for ini in (2775, 10000, 16900, 14000, 6000, 12000, 18000, 0, 4000, 8000):
+    out += comun.normalizar(meta[ini:ini + 2000])
+series.escribir_csv(sys.argv[1], out)
+PY
 t_ini=$(date +%s)
 
 # --- Copia del SoC para la imagen 0 ----------------------------------------------

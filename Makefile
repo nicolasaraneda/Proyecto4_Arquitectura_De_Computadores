@@ -638,6 +638,12 @@ fondo-ticks:
 fondo-bitstreams:
 	tools/fondo/bitstreams.sh
 
+# Desde el 17/11 (T133): R0, R1 y R2 con la regla de cotas puestos con icebram sobre
+# los moldes guardados (sin sintetizar), con el control de que los moldes con los
+# programas anteriores dan los .bin guardados, y criterio 8 por los pines.
+.PHONY: fondo-molde-cotas
+fondo-molde-cotas:
+	tools/fondo/molde_cotas.sh
 # Criterio 5 en la configuración exacta: campaña del core y mutaciones con la
 # máscara de emad y devk sobre el SoC del peldaño. Unos 40 minutos.
 fondo-criterio5:
