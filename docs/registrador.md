@@ -9,7 +9,7 @@ Herramienta para la prueba con la maestra real del 26/11. Es un bitstream aparte
 | `rtl/registrador/registrador.v` | El núcleo (`registrador`) y el bitstream (`registrador_top`) |
 | `tb/registrador/tb_registrador.sv` | Testbench: maestra SPI, receptor UART y comparación |
 | `tools/registrador.sh` | Testbench, controles negativos, timing en 10 semillas, bitstream y simulación del bitstream ruteado (`make registrador`) |
-| `tools/registrador.py` | Lee el puerto y escribe los CSV; `--prueba` sin placa |
+| `tools/registrador.py` | Lee el puerto y escribe los CSV (con el período medido por la FPGA y la hora de llegada al computador) y los bytes crudos a medida que llegan; `--prueba` sin placa |
 | `bitstreams/registrador.bin` | El bitstream (sha256 `231a0c6d...`, también en `bitstreams/SHA256SUMS`) |
 | `docs/mediciones/registrador.txt` | Resultado de `make registrador` |
 
@@ -56,14 +56,16 @@ maestra --SCLK, MOSI, CS_n--> sincronizadores --> registro de desplazamiento -->
 | Control: 30 µs entre precios | Se pierden registros, la secuencia lo muestra, los que llegan están intactos y LED4 se enciende |
 | Controles negativos (errores puestos a propósito) | 7 de 7 detectados |
 | Timing | 10 de 10 semillas a 25 MHz: 478 celdas, ninguna BRAM, mínima 118,40 MHz |
+| Ronda 3 entera con la serie Meta (`data/practica_meta.csv`): 20 000 precios a 0,1 ms | 20 000 registros, ninguno perdido; la herramienta arma con esos bytes un CSV idéntico byte a byte al archivo |
 | Bitstream ruteado, simulado por los pines | Los mismos casos en versión corta: 28 comprobaciones sin fallas |
+| Variante de 926 kbaud, bitstream ruteado por los pines | 28 comprobaciones sin fallas |
 | `tools/registrador.py --prueba` | Los bytes del testbench dan la serie de práctica exacta; pérdida, basura, byte dañado y borrado con SW3 se detectan; de punta a punta por un pseudoterminal a 1 Mbaud |
 
 **Un error encontrado por los controles negativos.** La primera versión comparaba `esc - lec` (punteros de 3 bits) con un entero: Verilog hace esa resta en 32 bits y, cuando los punteros dan la vuelta, la cola llena no se veía y un registro nuevo sobrescribía al que se estaba transmitiendo. A 0,1 ms no ocurre (la cola nunca pasa de un registro), pero a 30 µs aparecían registros con la secuencia de uno y el precio de otro. El control negativo que debía demostrar que la secuencia delata las pérdidas no falló, y eso llevó al error. Se corrigió guardando la resta en 3 bits, se agregó al testbench la comprobación de que cada registro que llega tiene el precio de su transacción, y la versión antigua quedó como control negativo (`cola_llena_en_32_bits`).
 
 ## 4. Uso el 26/11
 
-Está en `docs/checklist_26nov.md`, sección 4b. En resumen:
+Paso a paso, con usbipd, en `docs/clase_18nov.md` (la clase con la maestra) y en `docs/checklist_26nov.md`, sección 4b. En resumen:
 
 1. `iceprog bitstreams/registrador.bin`. Los 7 segmentos muestran `00` y los LED quedan apagados.
 2. Conectar la maestra (PMOD, como en la sección 2 del checklist) y el USB. Desconectar y conectar el USB para que parta de cero.
@@ -77,7 +79,7 @@ La maestra ve a nuestro grupo manteniendo durante toda la ronda (`0x00`). Si la 
 
 - **128 registros perdidos seguidos no se ven en la secuencia** (es módulo 128). Para eso está la cuenta de los 7 segmentos, que tiene que coincidir con las filas del CSV.
 - **El período se redondea hacia abajo** a múltiplos de 5,12 µs: a 0,1 ms se informa 97,3 µs. Para el período exacto está el medidor del SPI.
-- **1 Mbaud tiene que funcionar en el computador.** El conversor de la Go Board lo admite, y `tools/registrador.py --prueba` lo prueba con un pseudoterminal, no con el conversor. Si `/dev/ttyUSB1` no acepta 1 Mbaud, se construye el bitstream con `CICLOS_BIT = 27` (926 kbaud) y se lee con `--baudios 921600`: el error de 0,5 % está dentro de lo que tolera una UART. No está construido: es un cambio de parámetro y `make registrador`.
+- **1 Mbaud tiene que funcionar en el computador.** El conversor de la Go Board lo admite, y `tools/registrador.py --prueba` lo prueba con un pseudoterminal, no con el conversor. Si `/dev/ttyUSB1` no acepta 1 Mbaud, se graba `bitstreams/registrador_921k.bin` (926 kbaud, `CICLOS_BIT = 27`) y se lee con `--baudios 921600`: el error de 0,5 % está dentro de lo que tolera una UART. Está construido y su bitstream ruteado pasa las mismas pruebas (`make registrador`, paso 5b).
 - **No se usa la serie para elegir nada mientras el ayudante no diga que no es la de la competencia** (`docs/pendientes_nicolas.md`, decisión 2).
 
 ## 6. Preguntas que nos pueden hacer

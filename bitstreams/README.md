@@ -72,3 +72,5 @@ make autoprueba-r2    # build/autoprueba/r2/: autoprueba_r2_multi.bin, relevo_r2
 Se copiaron a esta carpeta con su nombre y `SHA256SUMS` se rehízo con `sha256sum *.bin moldes/*`. Los tres archivos de R2 tienen dos imágenes y ocupan 64 600 bytes: se graban con `iceprog -b`, igual que `r2_multi.bin`.
 
 `registrador.bin` (17/11) no es un peldaño: escucha el SPI de la maestra, responde siempre mantener y manda cada precio por la UART, para registrar la serie del 26/11 (`docs/registrador.md`). 478 celdas, ninguna BRAM, 10 de 10 semillas (`make registrador`).
+
+`registrador_921k.bin` (17/11) es el mismo registrador a 926 kbaud (`CICLOS_BIT = 27`), por si el conversor USB del computador no acepta 1 Mbaud. Se lee con `python3 tools/registrador.py /dev/ttyUSB1 --baudios 921600 -o ...` (0,47 % de diferencia, dentro de lo que tolera una UART). Su bitstream ruteado pasa las mismas pruebas por los pines (`make registrador`, paso 5b).

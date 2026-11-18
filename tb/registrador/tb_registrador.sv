@@ -31,6 +31,10 @@ module tb_registrador;
   wire       a1, b1, c1, d1, e1, f1, g1, a2, b2, c2, d2, e2, f2, g2;
   wire       miso, tx;
   always #20 clk = ~clk;                 // 25 MHz
+// -DCICLOS_BIT=27 para la variante de 926 kbaud (el receptor de abajo usa el mismo valor)
+`ifndef CICLOS_BIT
+  `define CICLOS_BIT 25
+`endif
 `ifdef CHIP
   chip dut (
     .i_Clk(clk), .\i_Switch (sw), .\o_LED (led),
@@ -41,7 +45,7 @@ module tb_registrador;
     .o_Segment2_E(e2), .o_Segment2_F(f2), .o_Segment2_G(g2),
     .i_SPI_SCLK(sclk), .i_SPI_MOSI(mosi), .i_SPI_CS_n(cs_n), .o_SPI_MISO(miso));
 `else
-  registrador_top #(.REBOTE(8)) dut (
+  registrador_top #(.CICLOS_BIT(`CICLOS_BIT), .REBOTE(8)) dut (
     .i_Clk(clk), .i_Switch(sw), .o_LED(led),
     .o_Segment1_A(a1), .o_Segment1_B(b1), .o_Segment1_C(c1), .o_Segment1_D(d1),
     .o_Segment1_E(e1), .o_Segment1_F(f1), .o_Segment1_G(g1),
@@ -61,9 +65,14 @@ module tb_registrador;
   // --- La serie ---------------------------------------------------------------------
   int precio[0:19999];
   string linea_cabecera;
+  // +SERIE=archivo cambia la serie (por defecto tb/practica.csv); con +COMPLETA se corre
+  // solo la ronda 3 entera, 20 000 precios a 0,1 ms.
   initial begin
     int fd, r, t;
-    fd = $fopen("tb/practica.csv", "r");
+    string serie;
+    if (!$value$plusargs("SERIE=%s", serie)) serie = "tb/practica.csv";
+    fd = $fopen(serie, "r");
+    if (fd == 0) begin $display("FAIL no se encontro %s", serie); $finish; end
     r = $fgets(linea_cabecera, fd);
     for (int n = 0; n < 20000; n++) r = $fscanf(fd, "%d,%d\n", t, precio[n]);
     $fclose(fd);
@@ -81,8 +90,8 @@ module tb_registrador;
     byte unsigned b;
     forever begin
       @(negedge tx);
-      #1500;
-      for (int i = 0; i < 8; i++) begin b[i] = tx; #1000; end
+      #(`CICLOS_BIT * 60);                // un bit y medio (40 ns por ciclo)
+      for (int i = 0; i < 8; i++) begin b[i] = tx; #(`CICLOS_BIT * 40); end
       if (tx !== 1'b1) $display("FAIL UART: falta el bit de parada");
       rx_q.push_back(b);
       if (fbytes && guardar) $fwrite(fbytes, "%c", b);
@@ -187,7 +196,9 @@ module tb_registrador;
 
   initial begin
     #2000;
-    if ($test$plusargs("RAPIDO")) begin  // para el bitstream ruteado (paso 5 de tools/registrador.sh)
+    if ($test$plusargs("COMPLETA")) begin
+      caso("ronda 3 completa (20 000 precios a 0,1 ms, SCLK 1 MHz)", 0, 20000, 100000, 500, -1, 0);
+    end else if ($test$plusargs("RAPIDO")) begin  // para el bitstream ruteado (paso 5 de tools/registrador.sh)
       caso("ronda 3 (0,1 ms, SCLK 1 MHz)", 0, 300, 100000, 500, -1, 0);
       caso("ronda 2 (1 ms, SCLK 100 kHz)", 5000, 20, 1000000, 5000, -1, 0);
       caso("0,1 ms con una transaccion de 7 bits", 12000, 50, 100000, 500, 17, 0);

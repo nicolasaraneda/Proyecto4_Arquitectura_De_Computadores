@@ -8,11 +8,14 @@
 #
 # 1. tb/registrador/tb_registrador.sv con el módulo tal cual: ningún precio perdido a
 #    0,1 ms, 1 ms, 10 ms y 60 us; el control a 30 us tiene que perder y delatarlo.
+# 1b. La ronda 3 entera con la serie Meta (20 000 precios a 0,1 ms), y la herramienta
+#    arma con esos bytes un CSV idéntico a data/practica_meta.csv.
 # 2. Controles negativos: errores puestos a propósito en una copia del módulo.
 # 3. Síntesis y nextpnr en 10 semillas a 25 MHz. Celdas, BRAM y frecuencia.
 # 4. Bitstream con la semilla 1 en build/registrador/registrador.bin.
 # 5. El bitstream ruteado (construido con REBOTE = 8) simulado por los pines con el
 #    mismo testbench, en su versión corta.
+# 5b. La variante de 926 kbaud (CICLOS_BIT = 27), con su bitstream ruteado simulado.
 # 6. tools/registrador.py --prueba: los bytes del paso 1 y un pseudoterminal a 1 Mbaud.
 #
 # Uso: tools/registrador.sh   (o make registrador). Las herramientas de OSS CAD Suite
@@ -45,6 +48,25 @@ if simular "$FUENTE" sano "+BYTES=$B/bytes_r3.bin"; then
   echo "PASS: $(grep -c '^PASS ' "$B/tb_sano.log") comprobaciones, cero fallas"
 else
   grep -E '^(FAIL|RESUMEN)' "$B/tb_sano.log"; echo "FAIL: el testbench no pasa con el modulo sano"; fallas=$((fallas + 1))
+fi
+echo
+
+echo "== 1b. Ronda 3 completa con la serie Meta (data/practica_meta.csv): 20 000 precios a 0,1 ms"
+if [ -f data/practica_meta.csv ]; then
+  if simular "$FUENTE" meta "+SERIE=data/practica_meta.csv +COMPLETA +BYTES=$B/bytes_meta.bin"; then
+    grep -E '^(PASS|FAIL)' "$B/tb_meta.log" | grep -v '^PASS: registrador'
+    python3 tools/registrador.py --archivo "$B/bytes_meta.bin" -o "$B/meta" > "$B/meta_herramienta.log"
+    if cmp -s "$B/meta_serie.csv" data/practica_meta.csv; then
+      echo "PASS: la herramienta arma con esos bytes un CSV identico byte a byte a data/practica_meta.csv"
+      grep '^Registros' "$B/meta_herramienta.log"
+    else
+      echo "FAIL: el CSV de la herramienta difiere de data/practica_meta.csv"; fallas=$((fallas + 1))
+    fi
+  else
+    grep -E '^(FAIL|RESUMEN)' "$B/tb_meta.log"; echo "FAIL: la ronda completa pierde o corrompe precios"; fallas=$((fallas + 1))
+  fi
+else
+  echo "NO CORRIDA: falta data/practica_meta.csv"
 fi
 echo
 
@@ -109,6 +131,25 @@ if iverilog -g2012 -DCHIP -o "$B/sim_chip" "$CELLS_SIM" "$B/chip.v" tb/registrad
   echo "PASS: $(grep -c '^PASS ' "$B/tb_chip.log") comprobaciones por los pines del bitstream, cero fallas"
 else
   grep -E '^(FAIL|RESUMEN)' "$B/tb_chip.log"; echo "FAIL: el bitstream no registra lo esperado"; fallas=$((fallas + 1))
+fi
+echo
+
+echo "== 5b. Variante de 926 kbaud (CICLOS_BIT = 27), por si el conversor no acepta 1 Mbaud"
+yosys -q -p "read_verilog $FUENTE; chparam -set CICLOS_BIT 27 registrador_top; synth_ice40 -top registrador_top -json $B/registrador_921k.json"
+nextpnr-ice40 --hx1k --package vq100 --freq 25 --seed 1 --json "$B/registrador_921k.json" --pcf goboard.pcf \
+  --asc "$B/registrador_921k.asc" -l "$B/pnr_921k.log" -q 2>/dev/null
+icepack "$B/registrador_921k.asc" "$B/registrador_921k.bin"
+f921=$(grep -o "Max frequency for clock '[^']*': [0-9.]* MHz" "$B/pnr_921k.log" | tail -n 1 | grep -o '[0-9.]* MHz')
+echo "build/registrador/registrador_921k.bin: $(stat -c %s "$B/registrador_921k.bin") bytes, sha256 $(sha256sum "$B/registrador_921k.bin" | cut -d' ' -f1), frecuencia maxima $f921 (semilla 1)"
+yosys -q -p "read_verilog $FUENTE; chparam -set REBOTE 8 -set CICLOS_BIT 27 registrador_top; synth_ice40 -top registrador_top -json $B/registrador_921k_r8.json"
+nextpnr-ice40 --hx1k --package vq100 --freq 25 --seed 1 --json "$B/registrador_921k_r8.json" --pcf goboard.pcf \
+  --asc "$B/registrador_921k_r8.asc" -l "$B/pnr_921k_r8.log" -q 2>/dev/null
+python3 tools/chip_vlog.py "$B/registrador_921k_r8.asc" goboard.pcf -o "$B/chip_921k.v"
+if iverilog -g2012 -DCHIP -DCICLOS_BIT=27 -o "$B/sim_chip_921k" "$CELLS_SIM" "$B/chip_921k.v" tb/registrador/tb_registrador.sv && \
+   vvp -n "$B/sim_chip_921k" +RAPIDO > "$B/tb_chip_921k.log" && grep -q '^PASS: registrador' "$B/tb_chip_921k.log"; then
+  echo "PASS: $(grep -c '^PASS ' "$B/tb_chip_921k.log") comprobaciones por los pines del bitstream de 926 kbaud, cero fallas"
+else
+  grep -E '^(FAIL|RESUMEN)' "$B/tb_chip_921k.log"; echo "FAIL: la variante de 926 kbaud no registra lo esperado"; fallas=$((fallas + 1))
 fi
 echo
 

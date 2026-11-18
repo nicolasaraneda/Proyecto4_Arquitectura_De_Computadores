@@ -40,3 +40,7 @@ informe/*.out
 informe/*.fls
 informe/*.fdb_latexmk
 informe/*.pdf
+
+# Serie de práctica del profesor (desde el 17/11). Los datos externos de evaluación no se versionan.
+!data/practica_meta.csv
+data/externos/

@@ -5,7 +5,7 @@ Herramientas:
   Yosys 0.68+195 (git sha1 435977e97-dirty, Release, Clang /usr/bin/clang++ 21.1.8)
   "nextpnr-ice40" -- Next Generation Place and Route (Version nextpnr-0.11.1-19-g8dbcee5c)
   Icarus Verilog version 14.0 (devel) (s20260301-403-g5ab23063f-dirty)
-Commit de partida: dc83903
+Commit de partida: 0f0eb34
 
 == 1. Testbench
 PASS ronda 3 (0,1 ms, SCLK 1 MHz): 2000 registros de 2000 precios
@@ -45,6 +45,16 @@ PASS control: 30 us: LED4 (registro perdido) encendido
 RESUMEN: 34 comprobaciones, 0 fallas
 PASS: 34 comprobaciones, cero fallas
 
+== 1b. Ronda 3 completa con la serie Meta (data/practica_meta.csv): 20 000 precios a 0,1 ms
+PASS ronda 3 completa (20 000 precios a 0,1 ms, SCLK 1 MHz): 20000 registros de 20000 precios
+PASS ronda 3 completa (20 000 precios a 0,1 ms, SCLK 1 MHz): 0 bytes fuera de un registro
+PASS ronda 3 completa (20 000 precios a 0,1 ms, SCLK 1 MHz): secuencia, precio, MISO y marca de error iguales a lo enviado (0 distintos)
+PASS ronda 3 completa (20 000 precios a 0,1 ms, SCLK 1 MHz): periodo de 19 unidades de 5,12 us en todos (0 distintos)
+PASS ronda 3 completa (20 000 precios a 0,1 ms, SCLK 1 MHz): LED4 (registro perdido) apagado
+PASS ronda 3 completa (20 000 precios a 0,1 ms, SCLK 1 MHz): LED3 (transaccion con error) apagado
+PASS: la herramienta arma con esos bytes un CSV identico byte a byte a data/practica_meta.csv
+Registros: 20000. Perdidos (saltos de la secuencia): 0. Rondas (borrados con SW3): 1. Transacciones con error: 0. Bytes fuera de un registro: 0.
+
 == 2. Controles negativos
 PASS flanco_de_bajada: detectado (6 comprobaciones fallan)
 PASS primero_el_bit_menor: detectado (6 comprobaciones fallan)
@@ -66,6 +76,10 @@ build/registrador/registrador.bin: 32220 bytes, sha256 231a0c6d2a69a78d6bde91a2c
 == 5. Bitstream ruteado simulado por los pines (testbench corto, construido con REBOTE = 8)
 PASS: 28 comprobaciones por los pines del bitstream, cero fallas
 
+== 5b. Variante de 926 kbaud (CICLOS_BIT = 27), por si el conversor no acepta 1 Mbaud
+build/registrador/registrador_921k.bin: 32220 bytes, sha256 67d9beba36c251e440912e2c06425575e42ecd9aa7635d5c27f22c902f8d674a, frecuencia maxima 128.87 MHz (semilla 1)
+PASS: 28 comprobaciones por los pines del bitstream de 926 kbaud, cero fallas
+
 == 6. Herramienta (tools/registrador.py --prueba)
 PASS bytes del testbench (ronda 3): 2000 registros, precios iguales a tb/practica.csv, 0 perdidos, 0 bytes sueltos
 PASS bytes del testbench: periodo de 19 unidades (97,3 us)
@@ -75,6 +89,8 @@ PASS limite conocido: 128 perdidos seguidos no se ven en la secuencia (modulo 12
 PASS un byte dañado: se pierde ese registro y la secuencia lo cuenta
 PASS un borrado con SW3 a mitad: dos rondas, ningun perdido
 PASS pseudoterminal a 1 Mbaud: 300 registros, la serie escrita en build/registrador/prueba_pty_serie.csv es igual a la enviada
+PASS los bytes crudos quedan en disco a medida que llegan
+PASS hora de llegada al computador en cada registro (primero a 0.200 s, ultimo a 0.220 s)
 RESULTADO prueba PASS
 
 PASS: registrador listo
