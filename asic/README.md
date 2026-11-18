@@ -38,7 +38,7 @@ Se construyen dos variantes: `xd=3` (`emad` y `devk`, el hardware de R1) y `xd=7
 | Celdas estándar | 176 975 um² | 149 757 um² | 565 604 um² | 575 241 um² |
 | Flip-flops | | | 2929 | 2930 |
 | Holgura de setup a 40 ns, esquina lenta | | | 8,01 ns | 8,21 ns |
-| Frecuencia con cierre demostrado (esquina lenta) | 42,6 MHz | 42,6 MHz | FMAX_XD3 | (no se barrió) |
+| Frecuencia con cierre demostrado (esquina lenta) | 42,6 MHz (no cierra a 22 ns) | 42,6 MHz | 45,5 MHz (cierra a 22 ns, con 0,18 ns de holgura) | (no se barrió) |
 | Potencia esperando / calculando | 27,97 / 28,79 mW | 26,18 / 27,38 mW | 94,68 / 96,03 mW | 95,77 / 97,26 mW |
 | Kernel a 25 MHz | 3,92 MOPS (8 op. por tick) | 7,41 MOPS | 5,34 MOPS (56 op. por tick) | |
 | Ops/W del kernel | 136 MOPS/W | 271 MOPS/W | 55,6 MOPS/W | |
@@ -56,6 +56,7 @@ Las columnas del base y el segmentado son las de `docs/codiseno.md`, sección 10
 - **Esperar cuesta lo mismo que calcular.** En el base, decidir cuesta 2,6 nJ sobre 2,8 uJ de espera. En el barrel la diferencia entre sondear y calcular es de 1,4 mW: los cuatro hilos ejecutan una instrucción por ciclo también mientras sondean. La energía por decisión es 3,4 veces la del base por el área, no por el cálculo.
 - **Ops/W.** El fondo hace 56 operaciones útiles por tick contra 8 de `max_media`, pero gasta 3,3 veces la potencia: 55,6 MOPS/W contra 136. Por Ppeak por watt el barrel (521) queda entre el base (434) y el segmentado (913).
 - **`mulstep` cuesta 9 637 um² de celdas estándar** (1,7 %) y no cambia la frecuencia de forma apreciable.
+- **Frecuencia.** El barrido de xd=3 cierra en los siete períodos probados, de 40 a 22 ns (`asic/mediciones/corridas.md`). A 22 ns quedan 0,18 ns de holgura en la esquina lenta, así que el límite está cerca de 21,8 ns; no se corrió un período más corto. El base y el segmentado de la factibilidad cierran hasta 23,5 ns y fallan a 22. El barrel es más rápido porque cada BRAM (aquí, cada banco de flip-flops) queda entre dos etapas: no hay un camino que lea el banco y calcule en el mismo ciclo. La holgura de la corrida de 40 ns (8,0 ns, que sugeriría 31 MHz) subestima la frecuencia: con un período más corto el resizer optimiza más.
 
 ## 4. Imagen del layout
 
@@ -83,7 +84,7 @@ Necesita Docker con la imagen `ghcr.io/librelane/librelane:3.0.16`, LibreLane en
 | `make asic-barrel-flujo` | Las dos corridas de 40 ns | 30 min |
 | `make asic-barrel-post` | Cierre, DRC de KLayout, netlist final (500 ticks), arranque y potencia, de cada corrida | 2 h |
 | `make asic-barrel-imagen` | La imagen del layout | 1 min |
-| `asic/scripts/correr.sh barrel_xd3_tT 3 T` | Una corrida a otro período (el barrido de la sección 3) | 15 a 20 min |
+| `asic/scripts/correr.sh barrel_xd3_tT 3 T` | Una corrida a otro período (el barrido de la sección 3: 40, 31, 30, 27, 25, 23,5 y 22 ns) | 15 a 30 min |
 | `python3 asic/scripts/resumen_barrel.py` | `asic/mediciones/corridas.md` y `resumen.txt` (los lee `make p7-rapido`) | segundos |
 
 Las corridas quedan en `asic/runs/` (unos 2 GB cada una, no se versionan).
