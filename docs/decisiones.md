@@ -761,3 +761,11 @@ Las decisiones T87 a T99 son del paquete P6 de R1 y R2 y las T100 a T119 del paq
 - **Alternativas y lo que se pierde** (`docs/pendientes_nicolas.md`, decisión 0): comprar 20 al inicio con banda 70 (mejor percentil 5, pierde hasta 2 100 si la hipótesis es falsa); compra con banda 40 (32 149 en la serie Meta, peor en la población); mantener el fondo que vota (sin ganancia medida, más puntos de falla); no cambiar (9 722 en la serie Meta).
 - **Pendiente**: preguntar el 18/11 si cada ronda se normaliza por separado; con los minutos reales de Alpaca, repetir el paso 5 antes del 22/11 y ver si cambia la banda.
 - `make report` y `make tabla-3-1` leen la serie nueva (`data/practica_meta.csv`). El informe, el README y la defensa no se reescriben hasta que la regla esté fija en los peldaños y se sepa cómo se normaliza (`docs/obsoleto_serie_meta.md`).
+
+### T134. Cómo quedó aplicada T133 en el repositorio (18/11, madrugada)
+
+- **Programas.** R0 (`sw/trade.s`) y R1 y R2 (`sw/fondo.s`, el hilo 0; los hilos 1 a 3 en espera) corren "espera" con banda 60. Los bitstreams (`r0_cotas.bin`, `r1_cotas.bin`, `r2_cotas.bin`, `r2_cotas_multi.bin`) salen de los moldes con `icebram`: el hardware es el que pasó las puertas. Los cuatro pasaron sus puertas de simulación.
+- **Programas históricos.** `max_media` y el fondo que vota quedaron en `sw/historico/`. Los usan el estudio de co-diseño de P7 (que midió ese kernel), la prueba de la extensión (`emad` y `devk` solo tienen sentido con `max_media`) y la reproducción de los bitstreams anteriores.
+- **Fuera de las pruebas automáticas.** `tools/retune.py` recalcula los umbrales de `max_media`; con la regla de cotas no aplica y el banco de contingencia quedó suspendido por Nicolás. `tools/autoprueba.py` y `tools/exhaustivo/r1.py` también siguen con el programa anterior: las autopruebas de placa hay que rehacerlas (pendientes, acción 3c).
+- **Variante de contingencia** "comprar 20 al inicio, banda 70" (pedido de Nicolás del 18/11): programas en `sw/variantes/`, puertas con `tools/variante_cotas.sh` (R0) y `tools/variante_cotas_r1.sh` (R1 y R2), bitstreams en `bitstreams/variantes/`. No reemplaza a la oficial.
+- **`main`** avanzó a `a08f7b2` (R0) y a `4da78ca` (R1 y R2) después de corridas locales sin fallas: la integración continua de GitHub sigue sin correr.

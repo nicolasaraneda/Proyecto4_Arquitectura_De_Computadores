@@ -9,8 +9,8 @@ Se actualiza al cerrar cada tramo de trabajo. La versión anterior queda en el h
 | Bitstream | Estado | Dónde |
 |-----------|--------|-------|
 | `registrador.bin` (y `registrador_921k.bin` de respaldo) | Listo | `bitstreams/` |
-| `r0_cotas.bin`, R0 con "espera" y banda 60 | Listo: puerta de simulación completa; en `main` desde las 03:45 | `bitstreams/` |
-| `r1_cotas.bin` y `r2_cotas_multi.bin`, R1 y R2 con la regla en el hilo 0 | Listos: puertas completas de R1 y R2 (rama `regla-cotas-r1`, integrada); llegan a `main` cuando la corrida local de `4da78ca` quede en verde | `bitstreams/` |
+| `r0_cotas.bin`, R0 con "espera" y banda 60 | Listo: puerta de simulación completa; en `main` | `bitstreams/` |
+| `r1_cotas.bin` y `r2_cotas_multi.bin`, R1 y R2 con la regla en el hilo 0 | Listos: puertas completas de R1 y R2; en `main` desde las 04:40 (`4da78ca`, corrida local 0 fallas) | `bitstreams/` |
 | Anteriores (`r0_base_max_media.bin`, `r1_fondo.bin`, `r2_multi.bin`) | Alternativa: mismo hardware, programa anterior | `bitstreams/` |
 | Variante "comprar 20 al inicio, banda 70" | R0 listo con su puerta (`bitstreams/variantes/r0_p20b70.bin`); R1 y R2 en la cola (unas 2 horas) | `bitstreams/variantes/LEEME.md` |
 
