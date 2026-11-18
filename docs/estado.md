@@ -2,6 +2,23 @@
 
 Se actualiza al cerrar cada tramo de trabajo. La versión anterior queda en el historial de git.
 
+## Para la clase del 18/11 (actualizado en la madrugada)
+
+**Qué quedó listo.** Todo en `docs/clase_18nov.md`, con los comandos para la carpeta principal y lo que se ve en cada bitstream.
+
+| Bitstream | Estado | Dónde |
+|-----------|--------|-------|
+| `registrador.bin` (y `registrador_921k.bin` de respaldo) | Listo, en `main` | `bitstreams/` |
+| `r0_cotas.bin`, R0 con "espera" y banda 60 | Puerta de simulación completa; pasa a `main` cuando la corrida local quede en verde | `bitstreams/` |
+| R1 y R2 con la regla nueva | En verificación (rama `regla-cotas-r1`); si no alcanzan, se usan `r1_fondo.bin` y `r2_multi.bin`, que tienen el mismo hardware | `docs/clase_18nov.md`, arriba |
+| Variante "comprar 20 al inicio, banda 70" | R0 listo con su puerta (`bitstreams/variantes/r0_p20b70.bin`); R1 y R2 después de sus programas nuevos | `bitstreams/variantes/LEEME.md` |
+
+**Plan B, si las rondas son trozos de una serie normalizada más larga** (`docs/cotas.md`, sección 6). Se probaron 145 variantes de cinco familias: posición en el rango sin tocar los extremos, saltos de apertura, tendencia, reversión y cotas con márgenes. Se ajustaron en 2022 y 2023 o con tres empresas y se validaron en 2024 o con las otras dos.
+
+- **Si la ronda es el primer trozo de la serie** (lo que hace el testbench oficial), la mejor en los cuatro cortes es **la misma regla ya elegida**, "espera" con banda 60. Media en la validación de 10 483 a 12 227 contra 10 000 de no operar, bajo 10 000 en a lo más el 1,1 % de las rondas, peor caso 9 830. El primer trozo toca un extremo mucho más seguido que lo que pesa en el largo (44 % con 2000 de 20 000): los extremos de un camino al azar caen cerca de sus bordes.
+- **Si la ronda es un trozo cualquiera**, la regla elegida queda en 10 070 a 10 280: casi no opera y no pierde. Lo de más media es comprar al inicio si el primer precio es 190 o menos y operar un rango (10 200 a 11 300), pero con pérdidas de hasta 50 % y bajo 10 000 en una de cada cuatro rondas.
+- **Opción de bajo riesgo para el plan B: no cambiar nada.** Ninguna familia nueva le gana a la regla elegida donde importa, y donde no gana, no pierde.
+
 ## Tramo 16: la serie de práctica cambió a precios reales de Meta (17/11 en la noche)
 
 El profesor reemplazó la serie de práctica por `data/practica_meta.csv` (Meta, un precio por minuto, febrero a mayo de 2022, normalizada entre 100 y 255). Las series de la competencia serán períodos ocultos de Meta, Apple, Netflix, AMD o Tesla de 2022 a 2024, normalizados igual. La decisión sobre `zscore` quedó sin efecto. El banco de contingencia, el ensayo general y la tarea B quedan suspendidos hasta que haya regla nueva. Todo en `integra-noche`.
