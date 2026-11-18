@@ -742,7 +742,9 @@ retune-control: $(GEMELO) fondo-hex
 	$(PYTHON) tools/retune.py --comision 5 --caja 10000 --control
 contingencia: $(GEMELO) fondo-hex
 	tools/p8/contingencia.sh
-check-p8: medidor p8-matriz-rapida retune-control
+# retune-control queda fuera desde el 18/11: tools/retune.py recalcula los umbrales de max_media y la
+# regla de cotas (T133) no los usa; el banco de contingencia quedo suspendido por Nicolas.
+check-p8: medidor p8-matriz-rapida
 
 # --- Diseño por defecto (docs/peldano.md) ---------------------------------------
 # peldano-oficial: el comando del encabezado de tb/tb_proyecto_4.sv tal cual, sin

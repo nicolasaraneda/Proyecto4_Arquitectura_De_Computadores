@@ -89,7 +89,7 @@ def main(argv=None):
     if difs:
         errores.append(f"{len(difs)} bytes distintos a la referencia, el primero en el tick {difs[0]}")
     if a.solo_max_media:
-        solo = trader.decisiones(precios, trader.Oficial(), perdidos)
+        solo = trader.decisiones(precios, trader.MaxMedia(), perdidos)   # el supervisor del fondo que vota
         if [int(x[2], 16) for x in tb] != solo:
             errores.append("los bytes no son los de max_media sola")
 
@@ -161,7 +161,7 @@ def main(argv=None):
     if fallas:
         ref_bytes = [y[2] for y in filas]
         sano = trader.decisiones(precios, ref_fondo.Fondo(parametros), perdidos)
-        solo = trader.decisiones(precios, trader.Oficial(), perdidos)
+        solo = trader.decisiones(precios, trader.MaxMedia(), perdidos)   # el supervisor del fondo que vota
         extra = (f", bytes esperados distintos a los del fondo sano {sum(x != y for x, y in zip(ref_bytes, sano))}"
                  f" y a los de max_media sola {sum(x != y for x, y in zip(ref_bytes, solo))}")
 
