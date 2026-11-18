@@ -6,7 +6,7 @@ en la serie de practica completa a 0,1 ms. tools/p7/fuentes.py asigna cada direc
 programa. Ciclos por tick = ciclos de la fase / ticks. La deteccion (cuanto demora el sondeo en ver el
 precio) es la respuesta medida menos las fases que van antes de la escritura: no se estima.
 
-== Espino base, sw/trade.s (R0, solo software)
+== Espino base, max_media (R0 hasta el 17/11, solo software)
    fase                                           ciclos/tick instr./tick  % resp. % kernel
    esperar el precio: deteccion por el sondeo           10.00           -     24.4        -
    leer PRICE                                            3.00        1.00      7.3      5.9
@@ -21,7 +21,7 @@ precio) es la respuesta medida menos las fases que van antes de la escritura: no
    Fase mas larga de la respuesta: decidir y armar el byte (14.00 ciclos); del kernel: media: S = S + (dev >>> 5) (17.00).
    Actualizar la media (dev y S) suma 29.00 ciclos: 56.9 % del kernel.
 
-== Pipeline de 3 etapas, sw/trade.s
+== Pipeline de 3 etapas, max_media
    fase                                           ciclos/tick instr./tick  % resp. % kernel
    esperar el precio: deteccion por el sondeo            6.00           -     27.3        -
    leer PRICE                                            2.00        1.00      9.1      7.4
@@ -36,7 +36,7 @@ precio) es la respuesta medida menos las fases que van antes de la escritura: no
    Fase mas larga de la respuesta: decidir y armar el byte (7.00 ciclos); del kernel: media: S = S + (dev >>> 5) (9.00).
    Actualizar la media (dev y S) suma 15.00 ciclos: 55.6 % del kernel.
 
-== Barrel, sw/trade.s en un hilo
+== Barrel, max_media en un hilo
    fase                                           ciclos/tick instr./tick  % resp. % kernel
    esperar el precio: deteccion por el sondeo           15.00           -     20.0        -
    leer PRICE                                            4.00        1.00      5.3      4.2

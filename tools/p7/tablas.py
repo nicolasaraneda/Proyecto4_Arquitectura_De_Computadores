@@ -75,11 +75,11 @@ OPS_FONDO = 4 * 8 + 3 * 6 + 6
 
 # Variantes de la tabla. fuente: programa en assembly para mapear el perfil.
 VAR = {
-    "r0": dict(nombre="Espino base, sw/trade.s (R0, solo software)", corto="R0 base", fuente="sw/trade.s",
+    "r0": dict(nombre="Espino base, max_media (R0 hasta el 17/11, solo software)", corto="R0 base", fuente="sw/historico/trade_max_media.s",
                ops=OPS_TRADE, ppeak=12.5, ppeak_hw=12.5, hilos=1, macro="Rcero"),
-    "seg": dict(nombre="Pipeline de 3 etapas, sw/trade.s", corto="Segmentado", fuente="sw/trade.s",
+    "seg": dict(nombre="Pipeline de 3 etapas, max_media", corto="Segmentado", fuente="sw/historico/trade_max_media.s",
                 ops=OPS_TRADE, ppeak=25.0, ppeak_hw=25.0, hilos=1, macro="Seg"),
-    "barrel": dict(nombre="Barrel, sw/trade.s en un hilo", corto="Barrel 1 hilo", fuente="build/p7/sw/trade_h0.s",
+    "barrel": dict(nombre="Barrel, max_media en un hilo", corto="Barrel 1 hilo", fuente="build/p7/sw/trade_h0.s",
                    ops=OPS_TRADE, ppeak=6.25, ppeak_hw=25.0, hilos=1, macro="Barrel"),
     "barrel_xd": dict(nombre="Barrel con emad y devk, sw/xd/trade_xd.s en un hilo", corto="Barrel 1 hilo + ext.",
                       fuente="build/p7/sw/trade_xd_h0.s", ops=OPS_TRADE, ppeak=12.5, ppeak_hw=50.0, hilos=1,

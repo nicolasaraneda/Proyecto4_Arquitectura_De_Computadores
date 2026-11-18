@@ -51,7 +51,8 @@ echo "  sha256 del recien construido     $obtenido"
 mal=0
 [ "$esperado" = "$guardado" ] || { echo "FAIL: el archivo guardado no corresponde a SHA256SUMS"; mal=1; }
 [ "$esperado" = "$obtenido" ] || { echo "FAIL: el bitstream reconstruido no es el guardado"; mal=1; }
-cmp -s "$D/sw/trade.hex" sw/trade.hex || { echo "FAIL: sw/trade.hex ya no es el programa de R0"; mal=1; }
+python3 tools/pochoasm.py sw/historico/trade_max_media.s -o "$D/historico.hex" > /dev/null
+cmp -s "$D/sw/trade.hex" "$D/historico.hex" || { echo "FAIL: sw/historico/trade_max_media.s ya no es el programa de R0"; mal=1; }
 
 # 4. Informativo: qué cambió desde entonces en las fuentes que usa el base,
 #    pasadas por el preprocesador sin definir ninguna variante y sin comentarios

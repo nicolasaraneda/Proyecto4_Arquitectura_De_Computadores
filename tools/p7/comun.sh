@@ -21,8 +21,8 @@ mkdir -p "$B/sw" "$M"
 
 R1_DEFS="-DESPINO_BARREL -DESPINO_XD_EMAD -DESPINO_XD_DEVK -DESPINO_TABLA"
 VARIANTES=(
-  "r0||sw/trade.hex"
-  "seg|-DESPINO_SEGMENTADO|sw/trade.hex"
+  "r0||$B/sw/trade_max_media.hex"
+  "seg|-DESPINO_SEGMENTADO|$B/sw/trade_max_media.hex"
   "barrel|-DESPINO_BARREL|$B/sw/trade_h0.hex"
   "barrel_xd|-DESPINO_BARREL -DESPINO_XD_EMAD -DESPINO_XD_DEVK|$B/sw/trade_xd_h0.hex"
   "r1|$R1_DEFS|$B/sw/fondo.hex"
@@ -33,7 +33,8 @@ VARIANTES=(
 programas() {
   $PYTHON tools/pochoasm.py sw/trade.s -o "$B/sw/trade.hex" > /dev/null
   cmp -s "$B/sw/trade.hex" sw/trade.hex || { echo "FAIL: sw/trade.hex no corresponde a sw/trade.s"; exit 1; }
-  $PYTHON tools/barrel/tabla.py 0 sw/trade.s > "$B/sw/trade_h0.s"
+  $PYTHON tools/barrel/tabla.py 0 sw/historico/trade_max_media.s > "$B/sw/trade_h0.s"
+  $PYTHON tools/pochoasm.py sw/historico/trade_max_media.s -o "$B/sw/trade_max_media.hex" > /dev/null
   $PYTHON tools/pochoasm.py "$B/sw/trade_h0.s" -o "$B/sw/trade_h0.hex" > /dev/null
   $PYTHON tools/barrel/tabla.py 0 sw/xd/trade_xd.s > "$B/sw/trade_xd_h0.s"
   $PYTHON tools/pochoasm.py "$B/sw/trade_xd_h0.s" -o "$B/sw/trade_xd_h0.hex" > /dev/null

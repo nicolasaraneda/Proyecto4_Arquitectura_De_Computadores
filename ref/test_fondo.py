@@ -117,10 +117,11 @@ class TestFondo(unittest.TestCase):
             self.assertEqual([g.s for g in a.gestores], b.s)
 
     def test_sin_votos_es_max_media(self):
+        """El supervisor del fondo es max_media (la oficial hasta el 17/11)."""
         fallas = [fondo.Falla(k) for k in (1, 2, 3)]
         for precios in [self.practica] + [series.lote(fam, 1, 6000, 5)[0] for fam in FAMILIAS]:
             f = fondo.Fondo(fallas=fallas)
-            self.assertEqual(trader.decisiones(precios, f, 2), trader.decisiones(precios, trader.Oficial(), 2))
+            self.assertEqual(trader.decisiones(precios, f, 2), trader.decisiones(precios, trader.MaxMedia(), 2))
             self.assertEqual(f.cambios, 0)
 
     def test_sin_un_voto_no_se_ajustan_los_pesos(self):

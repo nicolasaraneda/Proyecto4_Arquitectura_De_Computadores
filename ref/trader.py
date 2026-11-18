@@ -173,6 +173,8 @@ def main(argv=None):
     ap.add_argument("--periodo-ns", type=int, default=None,
                     help="período del testbench: modela los precios que se pierden durante el reset")
     ap.add_argument("--perdidos", type=int, default=None, help="fijar a mano cuántos precios iniciales no se ven")
+    ap.add_argument("--regla", default="oficial", choices=["oficial", "max_media", "regla_base"],
+                    help="estrategia (por defecto la oficial; max_media es la de R0 hasta el 17/11)")
     ap.add_argument("--por-bits", type=int, default=12, help="ancho del contador de reset de pochoco_soc")
     ap.add_argument("-o", "--salida", help="escribir el decisiones.csv de referencia")
     a = ap.parse_args(argv)
@@ -188,7 +190,8 @@ def main(argv=None):
     print(f"Serie {a.serie}: {len(precios)} ticks, precios iniciales que el programa no ve: {perdidos}")
     if a.salida:
         filas = []
-        m = correr(precios, perdidos=perdidos, filas=filas)
+        regla = {"oficial": Oficial, "max_media": MaxMedia, "regla_base": ReglaBase}[a.regla]
+        m = correr(precios, regla(), perdidos=perdidos, filas=filas)
         market.escribir_csv(a.salida, filas)
         print(f"{a.salida}: patrimonio final {m.w}, {m.ordenes} ordenes, perdida maxima {m.max_dd}")
     else:

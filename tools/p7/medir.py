@@ -36,8 +36,8 @@ GEMELO = "build/gemelo"
 
 # etiqueta, opciones del gemelo, programa
 VARIANTES = [
-    ("r0", [], "sw/trade.hex"),
-    ("seg", ["--pipeline"], "sw/trade.hex"),
+    ("r0", [], f"{B}/sw/trade_max_media.hex"),
+    ("seg", ["--pipeline"], f"{B}/sw/trade_max_media.hex"),
     ("barrel", ["--barrel"], f"{B}/sw/trade_h0.hex"),
     ("barrel_xd", ["--barrel", "--xd", "3"], f"{B}/sw/trade_xd_h0.hex"),
     ("r1", ["--barrel", "--xd", "3", "--tabla", "sw/fondo_tabla.hex"], f"{B}/sw/fondo.hex"),

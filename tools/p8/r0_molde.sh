@@ -12,8 +12,9 @@
 #   1. Extrae las fuentes del commit de R0 a build/r0_molde/.
 #   2. Construye ahí el bitstream con la memoria llena de un patrón al azar
 #      (icebram -g) en lugar de sw/trade.hex.
-#   3. Pone sw/trade.hex con icebram sobre el molde y exige que el resultado
-#      sea, byte por byte, bitstreams/r0_base_max_media.bin. Si lo es, el
+#   3. Pone el programa de R0 de ese commit con icebram sobre el molde y exige que el
+#      resultado sea, byte por byte, bitstreams/r0_base_max_media.bin. Desde el 17/11
+#      (T133) exige además que sw/trade.hex sobre el molde dé bitstreams/r0_cotas.bin. Si lo es, el
 #      molde sirve: cualquier otro programa puesto así queda en el mismo
 #      hardware, con la misma ubicación.
 #   4. Guarda el molde comprimido y su patrón en bitstreams/moldes/.
@@ -35,9 +36,12 @@ icebram -g -s 7 32 512 > "$D/molde_prog.hex"
 ( cd "$D" && make bin HEX=molde_prog.hex > construir.log 2>&1 ) || { echo "FAIL: no se pudo construir el molde"; exit 1; }
 
 a=$(date +%s.%N)
-icebram "$D/molde_prog.hex" sw/trade.hex < "$D/build/pochoco_soc.asc" > "$D/r0_icebram.asc"
+icebram "$D/molde_prog.hex" "$D/sw/trade.hex" < "$D/build/pochoco_soc.asc" > "$D/r0_icebram.asc"
 icepack "$D/r0_icebram.asc" "$D/r0_icebram.bin"
 b=$(date +%s.%N)
+# El programa de R0 desde el 17/11 (T133) sobre el mismo molde: tiene que dar bitstreams/r0_cotas.bin
+icebram "$D/molde_prog.hex" sw/trade.hex < "$D/build/pochoco_soc.asc" > "$D/r0_cotas.asc"
+icepack "$D/r0_cotas.asc" "$D/r0_cotas.bin"
 
 {
 echo "Molde de R0 para icebram"
@@ -46,11 +50,11 @@ echo
 echo "Herramientas: $(yosys -V); $(nextpnr-ice40 --version 2>&1 | head -n 1)"
 echo "Fuentes: commit ${COMMIT_R0:0:7} (el de R0). Patron: icebram -g -s 7 32 512"
 echo "Molde: $(grep -E 'ICESTORM_LC' "$D/build/nextpnr.log" | tail -n 1 | sed 's/^Info: *//')"
-echo "icebram con sw/trade.hex sobre el molde e icepack: $(echo "$a $b" | awk '{printf "%.2f", $2 - $1}') s"
+echo "icebram con el programa de R0 sobre el molde e icepack: $(echo "$a $b" | awk '{printf "%.2f", $2 - $1}') s"
 esperado=$(sha256sum bitstreams/r0_base_max_media.bin | cut -d' ' -f1)
 obtenido=$(sha256sum "$D/r0_icebram.bin" | cut -d' ' -f1)
 echo "  sha256 de bitstreams/r0_base_max_media.bin  $esperado"
-echo "  sha256 del molde con sw/trade.hex           $obtenido"
+echo "  sha256 del molde con el programa de R0       $obtenido"
 if [ "$esperado" = "$obtenido" ]; then
   mkdir -p bitstreams/moldes
   gzip -9 -n -c "$D/build/pochoco_soc.asc" > bitstreams/moldes/r0_molde.asc.gz
@@ -59,5 +63,11 @@ if [ "$esperado" = "$obtenido" ]; then
 else
   echo "FAIL: el molde con el programa de R0 no da R0"
 fi
+esperado_c=$(sha256sum bitstreams/r0_cotas.bin | cut -d' ' -f1)
+obtenido_c=$(sha256sum "$D/r0_cotas.bin" | cut -d' ' -f1)
+echo "  sha256 de bitstreams/r0_cotas.bin            $esperado_c"
+echo "  sha256 del molde con sw/trade.hex (cotas)    $obtenido_c"
+if [ "$esperado_c" = "$obtenido_c" ]; then echo "PASS: el molde con sw/trade.hex (la regla de cotas, T133) da bitstreams/r0_cotas.bin byte por byte"
+else echo "FAIL: el molde con sw/trade.hex no da bitstreams/r0_cotas.bin"; fi
 } | tee "$SALIDA"
-grep -q '^PASS' "$SALIDA"
+! grep -q '^FAIL' "$SALIDA" && grep -q '^PASS' "$SALIDA"

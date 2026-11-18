@@ -8,8 +8,10 @@
 # Dos programas en el hilo 0, los dos con la tabla de arranque delante:
 #   trade     sw/trade.s sin modificar. No usa la extensión: comprueba que el
 #             hardware agregado no cambia nada (criterio 1 de la puerta).
-#   trade_xd  sw/xd/trade_xd.s, la misma regla escrita con devk y emad.
-#             Comprueba de punta a punta el ensamblador y las dos instrucciones.
+#   trade_xd  sw/xd/trade_xd.s, max_media escrita con devk y emad (la regla de R0
+#             hasta el 17/11, sw/historico/trade_max_media.s). Comprueba de punta a
+#             punta el ensamblador y las dos instrucciones; se compara con el Espino
+#             base corriendo ese programa y con ref/trader.py --regla max_media.
 # Con cada uno:
 #   1. tb/tb_proyecto_4.sv sin modificar, con Icarus y el comando de su
 #      encabezado (más las definiciones del barrel con la extensión): 4/4 y
@@ -42,6 +44,8 @@ oficial() {   # oficial ETIQUETA PROGRAMA.hex FUENTES
   ( cd "$d" && vvp -n tb_p4 > salida.txt )
 }
 oficial base     sw/trade.hex               "$BASE_SRC" &
+$PYTHON tools/pochoasm.py sw/historico/trade_max_media.s -o "$O/trade_max_media.hex" > /dev/null
+oficial base_mm  "$O/trade_max_media.hex"   "$BASE_SRC" &
 oficial trade    "$B/sw/trade_h0.hex"       "$XD_SRC" &
 oficial trade_xd "$BX/sw/trade_xd_h0.hex"   "$XD_SRC" &
 wait
@@ -63,7 +67,8 @@ caso() {   # caso PROGRAMA PERIODO_NS
     -DNO_ICE40_DEFAULT_ASSIGNMENTS -O3 --Mdir "$d/obj" -o sim \
     "$CELLS_SIM" $XD_SRC "$d/tb_p4.sv" > "$d/verilator.log" 2>&1 || { echo "FAIL $e: Verilator no compila" > "$d/resultado.txt"; return; }
   "$d/obj/sim" > "$d/tb.log"
-  $PYTHON ref/trader.py tb/practica.csv --nticks "$NTICKS" --periodo-ns "$per" -o "$d/ref.csv" > "$d/ref.log"
+  local regla=oficial; [ "$1" = trade_xd ] && regla=max_media
+  $PYTHON ref/trader.py tb/practica.csv --nticks "$NTICKS" --periodo-ns "$per" --regla $regla -o "$d/ref.csv" > "$d/ref.log"
   local resumen="$1, periodo $per ns, $NTICKS ticks, $(grep 'Peor caso' "$d/tb.log" | sed 's/  */ /g')"
   if ! grep -q "Testbenchs aprobados: 4/4" "$d/tb.log"; then echo "FAIL $resumen: el testbench no entrega 4/4" > "$d/resultado.txt"; return; fi
   if ! cmp -s "$d/tb.csv" "$d/ref.csv"; then echo "FAIL $resumen: decisiones distintas a la referencia" > "$d/resultado.txt"; return; fi
@@ -89,7 +94,8 @@ for p in trade trade_xd; do
   echo "--- $que ---"
   grep -E 'Peor caso|Patrimonio|aprobados' "$O/$p/salida.txt" | sed 's/^/  /'
   if grep -q "Testbenchs aprobados: 4/4" "$O/$p/salida.txt"; then echo "PASS $p: 4/4"; else echo "FAIL $p: no obtiene 4/4"; fi
-  if cmp -s "$O/$p/decisiones.csv" "$O/base/decisiones.csv"; then echo "PASS $p: decisiones.csv identico byte a byte al del Espino base con sw/trade.hex"
+  [ $p = trade ] && b=base || b=base_mm
+  if cmp -s "$O/$p/decisiones.csv" "$O/$b/decisiones.csv"; then echo "PASS $p: decisiones.csv identico byte a byte al del Espino base con el mismo programa"
   else echo "FAIL $p: decisiones.csv difiere del Espino base"; fi
 done
 echo
