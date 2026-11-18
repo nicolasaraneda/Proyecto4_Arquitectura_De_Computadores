@@ -84,7 +84,37 @@ Medido el 15/11 (paquete P2). Tampoco es un peldaño: es el core de R1 y R2 con 
 
 Para el criterio 5, la referencia de las instrucciones nuevas es la fórmula de la especificación escrita en el testbench (decisión T60).
 
-## R1 y R2: el fondo en un chip
+## R1 y R2 con la regla de cotas (desde el 17/11, decisión T133)
+
+Medido el 18/11 en la rama `regla-cotas-r1`. El hardware no cambia: el mismo barrel con `emad`, `devk` y la tabla, y en R2 el vigilante. Cambian el programa y la tabla: `sw/fondo.s` corre en el hilo 0 la regla de R0 ("espera" con banda 60, `docs/cotas.md`) con sus cuatro umbrales leídos de la tabla en cada tick, y deja los hilos 1 a 3 en un lazo de espera. Referencia: `ref/fondo.py`, que con la tabla por defecto decide igual que `ref/trader.py`. Bitácora: `docs/bitacora/regla_cotas_r1.md`.
+
+| N.º | Criterio | R1 | R2 |
+|-----|----------|----|----|
+| 1 | Testbench oficial sin modificar | 4/4, peor caso 127 ciclos de 2262, `decisiones.csv` idéntico al de `ref/fondo.py` | Igual |
+| 2 | Equivalencia con la referencia | Cero diferencias: copia del oficial con la serie Meta y con la anterior a 0,1, 1 y 10 ms (4/4 en las seis; 19 214 en la serie Meta); `tb_fondo.sv` con la serie Meta a los tres períodos, la anterior y una serie de cada una de las 15 familias, cruda y normalizada (680 000 ticks); 1 050 series (2,1 millones de ticks, la mitad normalizadas entre 100 y 255); el gemelo con 1 051 series a los tres períodos | Igual |
+| 3 | Timing en 10 semillas | Hardware sin cambios: el bitstream sale del molde de `r1_fondo.bin` (control: el molde con el programa anterior da ese `.bin` byte por byte) e `icetime` da los mismos 52,61 MHz. Síntesis nueva con el programa cargado: 10 de 10, 1001 celdas, mínima 49,40 MHz | Molde de `r2_fondo_vigilante.bin`, `icetime` 51,66 MHz igual que antes. Síntesis nueva: 10 de 10, 1015 celdas, mínima 49,64 MHz |
+| 4 | Peor caso barriendo la fase | 128 ciclos (48 fases, 24 corridas 13 ns, período de 2501 ciclos, y 24 fases con los hilos 1 a 3 haciendo cuentas), contra 1131 | Igual |
+| 5 | Core en la configuración exacta | Sin cambios: es hardware (la campaña y las mutaciones no dependen del programa) | Igual |
+| 6 | Degradación | 17 de 17 corridas: los hilos 1 a 3 haciendo cuentas, escribiendo y leyendo la RAM o leyendo el programa, de a uno y todos a la vez, no cambian ningún byte ni el peor caso (127 ciclos). 14 de 14 controles negativos detectados | Igual |
+| 7 | Estrés | 57 de 57 casos (se suma SCLK de 100 kHz a 0,1 ms, que ahora cabe: 126 ciclos de 237) | 57 de 57, sin disparo del vigilante |
+| 8 | Bitstream simulado desde el `.asc` | Molde con icebram: 2000 ticks idénticos con la serie Meta y con una ventana normalizada | Igual, sin disparo; con el hilo 0 colgado en el tick 100, BOOT sube en la quinta transacción sin respuesta |
+
+Mediciones por tick (`docs/mediciones/fondo/r1/ticks.txt`, serie Meta a 0,1 ms): el hilo 0 ejecuta entre 40 y 50 instrucciones de trabajo por tick (CPI 4 por hilo), responde en 119 a 127 ciclos (5,6 % del presupuesto de la ronda 3) y vuelve a sondear a los 163 a 211 ciclos. El programa ocupa 67 de 512 palabras (`tamano.txt`) y no usa la RAM de datos.
+
+Bitstreams nuevos (`make fondo-molde-cotas`, `docs/mediciones/fondo/molde_cotas.txt`; quedan en `build/fondo/molde_cotas/` y no reemplazan todavía a los de `bitstreams/`):
+
+| Archivo | sha256 |
+|---------|--------|
+| `r0_cotas.bin` | `616f799a816d5bdd4ba29f0713f769e35beb980d7f5a1f8734ddd5a763ec64a1` |
+| `r1_cotas.bin` | `309a443512f28e3e44d24219116e099c496e56e42a7f99ab27147d9e4e0d0854` |
+| `r2_cotas.bin` | `aa7d1fb5027986a059f8a1b06aa94ab8f7df0f5359f996a3d21e0837267d94be` |
+| `r2_cotas_multi.bin` (imagen 0 R2, imagen 1 R0) | `12b93bb0009c9eb24ff44bda023bb63c7696ad3aa655c3a5f5e0a4ddfe73f9ff` |
+
+Relevo del vigilante de punta a punta con los programas nuevos (`make vig-relevo`, `docs/mediciones/vigilante/relevo.txt`): todas las comprobaciones pasan, incluidas las de los 35,50 ms medidos en la placa (355 ticks leyendo 0xFF a 0,1 ms).
+
+Lo que no cambió y sigue valiendo de la sección siguiente: el criterio 5, el timing del hardware y la puerta de placa del hardware. La puerta de placa con los programas nuevos (firmas de las autopruebas) está por rehacer: `tools/autoprueba.py` todavía usa los parámetros del fondo anterior.
+
+## R1 y R2: el fondo en un chip (hasta el 17/11)
 
 Medido el 15/11 (paquete P5). R1 es el barrel con `emad`, `devk` y la tabla de parámetros en su BRAM (`-DESPINO_BARREL -DESPINO_XD_EMAD -DESPINO_XD_DEVK -DESPINO_TABLA`). R2 agrega el vigilante y `SB_WARMBOOT` (`-DESPINO_VIGILANTE`) y se graba como imagen múltiple con R0 de respaldo. El programa de los dos es `sw/fondo.s`. Detalle en `docs/fondo.md` y `docs/tabla_vigilante.md`; salidas en `docs/mediciones/fondo/r1/`, `r2/` y `bitstreams.txt`, y en `docs/mediciones/vigilante/`.
 

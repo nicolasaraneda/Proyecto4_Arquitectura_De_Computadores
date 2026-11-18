@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
-# ticks.sh: mediciones por tick del fondo en un chip (punto 3.2 del enunciado):
+# ticks.sh: mediciones por tick de R1 y R2 (punto 3.2 del enunciado):
 # IC, ciclos, CPI y tiempo, promedio y peor caso, por hilo y agregado.
 #
 # Grupo: Nicolás Araneda, Vicente Calderón y Santiago Muñoz.
 # Arquitectura de Computadores, Universidad de los Andes, 2026-2.
 #
-# Serie de práctica completa con el timing del testbench oficial, a los
+# Serie Meta (data/practica_meta.csv, desde el 17/11) con el timing del testbench oficial, a los
 # períodos de la ronda 3 (20 000 ticks) y de la ronda 2 (3000 ticks), medida
 # con tb/fondo/tb_fondo.sv y Verilator. También deja el tamaño del programa
 # por bloque.
@@ -26,16 +26,16 @@ $PYTHON $TF/simbolos.py sw/fondo.s --tamano
 } | tee "$MF/tamano.txt"
 echo
 
-caso "$O/ronda3" sw/fondo.s tb/practica.csv 20000 100000 4000 --medir &
-caso "$O/ronda2" sw/fondo.s tb/practica.csv 3000 1000000 4000 --medir &
+caso "$O/ronda3" sw/fondo.s data/practica_meta.csv 20000 100000 4000 --medir &
+caso "$O/ronda2" sw/fondo.s data/practica_meta.csv 3000 1000000 4000 --medir &
 wait
 
 {
-cabecera "Mediciones por tick del fondo en un chip" tools/fondo/ticks.sh "make fondo-ticks"
-echo "=== Ronda 3: periodo de 0,1 ms, 20 000 ticks de la serie de practica ==="
+cabecera "Mediciones por tick de R1 y R2 (regla de cotas en el hilo 0)" tools/fondo/ticks.sh "make fondo-ticks"
+echo "=== Ronda 3: periodo de 0,1 ms, 20 000 ticks de la serie Meta (data/practica_meta.csv) ==="
 cat "$O/ronda3/resultado.txt"
 echo
-echo "=== Ronda 2: periodo de 1 ms, 3000 ticks de la serie de practica ==="
+echo "=== Ronda 2: periodo de 1 ms, 3000 ticks de la serie Meta ==="
 cat "$O/ronda2/resultado.txt"
 } | tee "$MF/ticks.txt"
 cierre "$MF/ticks.txt"

@@ -1,0 +1,55 @@
+Bitstreams R0, R1 y R2 con la regla de cotas, puestos con icebram sobre los moldes
+Generado por tools/fondo/molde_cotas.sh. No editar a mano.
+
+Herramientas:
+  Yosys 0.68+195 (git sha1 435977e97-dirty, Release, Clang /usr/bin/clang++ 21.1.8)
+  "nextpnr-ice40" -- Next Generation Place and Route (Version nextpnr-0.11.1-19-g8dbcee5c)
+  Icarus Verilog version 14.0 (devel) (s20260301-403-g5ab23063f-dirty)
+Commit de partida: 41826e0 (rama regla-cotas-r1)
+Commit: 41826e0. Programas: sw/trade.s y sw/fondo.s (sha256 6f55ec520f3686ef...), tabla sw/fondo_tabla.hex.
+
+0. Control: los moldes con los programas del commit c794834 dan los bitstreams guardados
+PASS R0 (sw/trade.hex anterior) contra bitstreams/r0_base_max_media.bin: identico byte a byte (67f6f1c498696632...)
+PASS R1 (fondo anterior) contra bitstreams/r1_fondo.bin: identico byte a byte (b61c8dc04ebf992e...)
+PASS R2 (fondo anterior) contra bitstreams/r2_fondo_vigilante.bin: identico byte a byte (a9c107a10e932dcf...)
+PASS imagen multiple anterior contra bitstreams/r2_multi.bin: identico byte a byte (293653575bba2fca...)
+
+1. Bitstreams nuevos (icebram e icepack de los tres: 0.26 s)
+  r0_cotas.bin: 32220 bytes, sha256 616f799a816d5bdd4ba29f0713f769e35beb980d7f5a1f8734ddd5a763ec64a1
+  r1_cotas.bin: 32220 bytes, sha256 309a443512f28e3e44d24219116e099c496e56e42a7f99ab27147d9e4e0d0854
+  r2_cotas.bin: 32220 bytes, sha256 aa7d1fb5027986a059f8a1b06aa94ab8f7df0f5359f996a3d21e0837267d94be
+  r2_cotas_multi.bin: 64600 bytes, sha256 12b93bb0009c9eb24ff44bda023bb63c7696ad3aa655c3a5f5e0a4ddfe73f9ff
+  lineas del .asc que cambian respecto del anterior en r0: 16
+  lineas del .asc que cambian respecto del anterior en r1: 58
+  lineas del .asc que cambian respecto del anterior en r2: 58
+PASS icetime r0: Total path delay: 23.11 ns (43.27 MHz), igual que el bitstream anterior
+PASS icetime r1: Total path delay: 19.01 ns (52.61 MHz), igual que el bitstream anterior
+PASS icetime r2: Total path delay: 19.36 ns (51.66 MHz), igual que el bitstream anterior
+  archivo: build/fondo/molde_cotas/r2_cotas_multi.bin
+  tamaño: 64600 bytes de 131072 (49.3 %), sobran 66472
+  sha256: 12b93bb0009c9eb24ff44bda023bb63c7696ad3aa655c3a5f5e0a4ddfe73f9ff
+  vector 0 (encendido ) -> 0x0000A0   modo 0x00, oscilador de configuración en frecuencia baja, warm boot habilitado
+  vector 1 (S1 S0 = 00) -> 0x0000A0   modo 0x00, oscilador de configuración en frecuencia baja, warm boot habilitado
+  vector 2 (S1 S0 = 01) -> 0x007E7C   modo 0x00, oscilador de configuración en frecuencia baja, warm boot habilitado
+  vector 3 (S1 S0 = 10) -> 0x0000A0   modo 0x00, oscilador de configuración en frecuencia baja, warm boot habilitado
+  vector 4 (S1 S0 = 11) -> 0x0000A0   modo 0x00, oscilador de configuración en frecuencia baja, warm boot habilitado
+  imágenes distintas: 2, en 0x0000A0, 0x007E7C
+  imagen 0: build/fondo/molde_cotas/r2_cotas.bin, 32220 bytes, sha256 aa7d1fb5027986a059f8a1b06aa94ab8f7df0f5359f996a3d21e0837267d94be, copia idéntica
+  imagen 1: build/fondo/molde_cotas/r0_cotas.bin, 32220 bytes, sha256 616f799a816d5bdd4ba29f0713f769e35beb980d7f5a1f8734ddd5a763ec64a1, copia idéntica
+  RESULTADO: correcto
+PASS imagen multiple correcta (imagen 0 R2, imagen 1 R0) y cabe en la flash de 131072 bytes
+
+2. Criterio 8: bitstream simulado desde el .asc por los pines (Icarus, tb/tb_bitstream.sv), periodo de 0,1 ms
+PASS R0, primeros 2000 ticks de la serie Meta, contra ref/trader.py: 2000 ticks identicos a la referencia, patrimonio 10000
+PASS R0, ventana normalizada de la serie Meta (toca 100 y 255), contra ref/trader.py: 2000 ticks identicos a la referencia, patrimonio 14697
+PASS R1, primeros 2000 ticks de la serie Meta: 2000 ticks identicos a la referencia, patrimonio 10000
+PASS R1, ventana normalizada: 2000 ticks identicos a la referencia, patrimonio 14697
+PASS R2, primeros 2000 ticks de la serie Meta: 2000 ticks identicos a la referencia, patrimonio 10000
+PASS R2, ventana normalizada: 2000 ticks identicos a la referencia, patrimonio 14697
+PASS R2, serie Meta: SB_WARMBOOT no se dispara
+PASS R2, ventana normalizada: SB_WARMBOOT no se dispara
+PASS R0 y R1 deciden los mismos bytes en la ventana normalizada
+
+3. Vigilante dentro del bitstream de R2: hilo 0 colgado en el tick 100
+  WARMBOOT t_ns=10513580 s1s0=01 cs_n=1
+PASS el vigilante pide la imagen 01 con CS_n en alto al terminar la transaccion 105: la quinta sin respuesta (101 a 105)

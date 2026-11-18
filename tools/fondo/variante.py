@@ -1,38 +1,36 @@
 #!/usr/bin/env python3
 """
 variante.py: arma programas con fallas puestas a propósito a partir de
-sw/fondo.s, para las pruebas de degradación (criterio 6 de la puerta).
+sw/fondo.s, para las pruebas de degradación (criterio 6 de la puerta) y del
+vigilante.
 
 Grupo: Nicolás Araneda, Vicente Calderón y Santiago Muñoz.
 Arquitectura de Computadores, Universidad de los Andes, 2026-2.
 
 No cambia ninguna línea del programa: solo inserta instrucciones en las marcas
-"#@" de la rutina de los gestores. El supervisor queda intacto, que es lo que
-se quiere probar.
+"#@" (los lazos de los hilos 1 a 3 y el punto del hilo 0 después de leer el
+precio).
 
-Fallas (K es el gestor: 1, 2 o 3; los ticks se cuentan como el programa, desde
-1 en el primer precio que ve). Se pueden juntar varias con "+":
-
-  cuelgue:K:N        el gestor K entra en un lazo infinito al procesar el tick
-                     N y no vuelve (N = 1: nunca llega a votar)
-  sin_voto:K:N:M     el gestor K calcula pero no publica su voto en los ticks
-                     N a M
-  atraso:K:C         el gestor K demora C ciclos más antes de publicar, en
-                     todos los ticks
-  atraso:K:C:N:M     lo mismo, solo en los ticks N a M
-  cuelgue_sup:N      el supervisor entra en un lazo infinito al recibir el
-                     precio del tick N, antes de publicarlo: deja de escribir
-                     DECISION. Es la falla dura que debe ver el vigilante
+Desde el 17/11 (decisión T133) los hilos 1 a 3 no participan en la decisión:
+están en un lazo de espera. Las fallas de esos hilos muestran que lo que hagan
+no cambia los bytes ni el tiempo de respuesta del hilo 0. K es el hilo (1, 2 o
+3); se pueden juntar varias con "+":
+  ocupado:K          el hilo K hace cuentas sin parar (sumas, xor, comparaciones)
+  escribe:K          el hilo K escribe y lee una palabra de la RAM sin parar
+                     (el programa sano no usa la RAM; se corre con --permitir-ram)
+  programa:K         el hilo K lee sin parar palabras de la memoria del programa
+  cuelgue_sup:N      el hilo 0 entra en un lazo infinito al recibir el precio
+                     del tick N, antes de decidir: deja de escribir DECISION. Es la
+                     falla dura que debe ver el vigilante de R2
 
 Uso: tools/fondo/variante.py FALLAS [-i sw/fondo.s] -o salida.s
-     tools/fondo/variante.py FALLAS --ref      # las --falla para ref/fondo.py
+     tools/fondo/variante.py FALLAS --ref      # argumentos para revisar.py
 """
 
 import argparse
 import sys
 
-CICLOS_POR_VUELTA = 8        # addi y bnez, 4 ciclos cada una en el barrel
-BLOQUE = {1: "G1", 2: "G2", 3: "G3"}
+RAM_HILO = {1: 0x7C4, 2: 0x7C8, 3: 0x7CC}     # palabra de la RAM que escribe cada hilo
 
 
 def leer(texto):
@@ -40,63 +38,32 @@ def leer(texto):
     for parte in texto.split("+"):
         campos = parte.split(":")
         tipo, nums = campos[0], [int(c) for c in campos[1:]]
-        if tipo == "cuelgue_sup" and len(nums) == 1:
+        if tipo == "cuelgue_sup" and len(nums) == 1 and nums[0] >= 1:
             fallas.append((tipo, nums))
-            continue
-        if tipo == "cuelgue" and len(nums) == 2:
-            pass
-        elif tipo == "sin_voto" and len(nums) == 3:
-            pass
-        elif tipo == "atraso" and len(nums) in (2, 4):
-            pass
+        elif tipo in ("ocupado", "escribe", "programa") and len(nums) == 1 and nums[0] in RAM_HILO:
+            fallas.append((tipo, nums))
         else:
             raise SystemExit(f"falla mal escrita: {parte}")
-        if nums[0] not in BLOQUE:
-            raise SystemExit(f"el gestor de una falla es 1, 2 o 3: {parte}")
-        fallas.append((tipo, nums))
     return fallas
 
 
-def en_rango(i, n, m, sale):
-    """Salta a `sale` si el tick en curso (x5 - x8 = tick * 256) no está entre n y m."""
-    return [f"    sub  x7, x5, x8",
-            f"    li   x1, {n * 256}",
-            f"    bltu x7, x1, {sale}",
-            f"    li   x1, {m * 256}",
-            f"    bltu x1, x7, {sale}"]
-
-
 def armar(fuente, fallas):
-    antes, voto, despues, sup = [], [], [], []
+    marcas = {"#@HILO1": [], "#@HILO2": [], "#@HILO3": [], "#@SUPERVISOR": []}
     for i, (tipo, n) in enumerate(fallas):
         if tipo == "cuelgue_sup":
-            # x3 todavía trae el tick anterior por 256; x9 está libre
-            sup += [f"    li   x9, {(n[0] - 1) * 256}", f"    bne  x3, x9, v{i}_sigue",
-                    f"v{i}_cuelgue:", f"    j    v{i}_cuelgue", f"v{i}_sigue:"]
+            # x3 trae el número del tick anterior; x15 está libre en ese punto
+            marcas["#@SUPERVISOR"] += [f"    li   x15, {n[0] - 1}", f"    bne  x3, x15, v{i}_sigue",
+                                       f"v{i}_cuelgue:", f"    j    v{i}_cuelgue", f"v{i}_sigue:"]
             continue
         k = n[0]
-        sigue = f"v{i}_sigue"
-        if tipo == "cuelgue":
-            antes += [f"    li   x1, {BLOQUE[k]}", f"    bne  x2, x1, {sigue}",
-                      "    sub  x7, x5, x8", f"    li   x1, {n[1] * 256}", f"    bltu x7, x1, {sigue}",
-                      f"v{i}_cuelgue:", f"    j    v{i}_cuelgue", f"{sigue}:"]
-        elif tipo == "atraso":
-            vueltas = max(1, n[1] // CICLOS_POR_VUELTA)
-            antes += [f"    li   x1, {BLOQUE[k]}", f"    bne  x2, x1, {sigue}"]
-            if len(n) == 4:
-                antes += en_rango(i, n[2], n[3], sigue)
-            antes += [f"    li   x1, {vueltas}", f"v{i}_lazo:", "    addi x1, x1, -1",
-                      f"    bnez x1, v{i}_lazo", f"{sigue}:"]
-        elif tipo == "sin_voto":
-            # x7 trae el voto ya armado: se usa x9 y x15 para no pisarlo
-            voto += [f"    li   x1, {BLOQUE[k]}", f"    bne  x2, x1, {sigue}",
-                     "    sub  x9, x5, x8",
-                     f"    li   x1, {n[1] * 256}", f"    bltu x9, x1, {sigue}",
-                     f"    li   x1, {n[2] * 256}", f"    bltu x1, x9, {sigue}",
-                     "    j    v_sin_voto", f"{sigue}:"]
-    if any(t == "sin_voto" for t, _ in fallas):
-        despues = ["v_sin_voto:"]
-    marcas = {"#@ANTES_DE_PUBLICAR": antes, "#@VOTO": voto, "#@DESPUES_DEL_VOTO": despues, "#@SUPERVISOR": sup}
+        if tipo == "ocupado":
+            marcas[f"#@HILO{k}"] += ["    addi x5, x5, 1", "    xor  x6, x6, x5", "    add  x7, x7, x6",
+                                     "    sltu x8, x7, x5", "    or   x9, x9, x8"]
+        elif tipo == "escribe":
+            marcas[f"#@HILO{k}"] += [f"    li   x5, {RAM_HILO[k]}", "    addi x6, x6, 1", "    sw   x6, 0(x5)",
+                                     "    lw   x7, 0(x5)"]
+        elif tipo == "programa":
+            marcas[f"#@HILO{k}"] += ["    addi x5, x5, 4", "    andi x5, x5, 0xFC", "    lw   x6, 0(x5)"]
     salida, vistas = [], set()
     for linea in fuente.splitlines():
         salida.append(linea)
@@ -110,19 +77,10 @@ def armar(fuente, fallas):
     return "\n".join(salida) + "\n"
 
 
-def para_ref(fallas, plazo_ciclos):
-    """Las fallas como las entiende ref/fondo.py: desde y hasta qué tick no llega el voto."""
-    args = []
-    for tipo, n in fallas:
-        if tipo == "cuelgue_sup":
-            continue
-        if tipo == "cuelgue":
-            args.append(f"{n[0]}:{n[1]}:")
-        elif tipo == "sin_voto":
-            args.append(f"{n[0]}:{n[1]}:{n[2]}")
-        elif tipo == "atraso" and n[1] > plazo_ciclos:
-            args.append(f"{n[0]}:{n[2]}:{n[3]}" if len(n) == 4 else f"{n[0]}:1:")
-    return args
+def para_revisar(fallas):
+    """Argumentos para revisar.py: las fallas de los hilos 1 a 3 no cambian los bytes;
+    si algún hilo escribe la RAM, esos stores se permiten."""
+    return ["--permitir-ram"] if any(t == "escribe" for t, _ in fallas) else []
 
 
 def main(argv=None):
@@ -130,13 +88,11 @@ def main(argv=None):
     ap.add_argument("fallas")
     ap.add_argument("-i", "--entrada", default="sw/fondo.s")
     ap.add_argument("-o", "--salida")
-    ap.add_argument("--ref", action="store_true", help="imprime las --falla equivalentes para ref/fondo.py")
-    ap.add_argument("--plazo-ciclos", type=int, default=600,
-                    help="un atraso mayor que esto se cuenta como voto que no llega (por defecto 600)")
+    ap.add_argument("--ref", action="store_true", help="imprime los argumentos para tools/fondo/revisar.py")
     a = ap.parse_args(argv)
     fallas = leer(a.fallas)
     if a.ref:
-        print(" ".join(f"--falla {x}" for x in para_ref(fallas, a.plazo_ciclos)))
+        print(" ".join(para_revisar(fallas)))
         return 0
     with open(a.entrada, encoding="utf-8") as f:
         texto = armar(f.read(), fallas)

@@ -1,1 +1,1 @@
-fondo_r1               celdas 1029 de 1280, BRAM 13 de 16, LUT4  854, fmax min  51.59 mediana  52.57 max  53.69 MHz, cierran a 25 MHz 10 de 10
+fondo_r1               celdas 1001 de 1280, BRAM 13 de 16, LUT4  825, fmax min  49.40 mediana  51.84 max  53.89 MHz, cierran a 25 MHz 10 de 10

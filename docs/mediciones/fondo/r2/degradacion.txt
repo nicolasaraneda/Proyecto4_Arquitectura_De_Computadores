@@ -1,61 +1,43 @@
-Pruebas de degradacion del fondo en un chip
+Pruebas de degradacion de R1 y R2
 Generado por tools/fondo/degradacion.sh (make fondo-degradacion). No editar a mano.
 
 Herramientas:
   Yosys 0.68+195 (git sha1 435977e97-dirty, Release, Clang /usr/bin/clang++ 21.1.8)
   "nextpnr-ice40" -- Next Generation Place and Route (Version nextpnr-0.11.1-19-g8dbcee5c)
   Icarus Verilog version 14.0 (devel) (s20260301-403-g5ab23063f-dirty)
-Commit de partida: b772d1c (rama p10-revision)
+Commit de partida: 41826e0 (rama regla-cotas-r1)
   Verilator 5.053 devel rev v5.052-22-g7cf8c5cca (mod)
 Hardware (r2): pochoco_soc con -DESPINO_BARREL -DESPINO_XD_EMAD -DESPINO_XD_DEVK -DESPINO_TABLA -DESPINO_VIGILANTE
-Programa: sw/fondo.s (sha256 19773517830a2e16...), tabla sw/fondo_tabla.hex (sha256 f792588c9cc823cb...), referencia ref/fondo.py
+Programa: sw/fondo.s (sha256 6f55ec520f3686ef...), tabla sw/fondo_tabla.hex (sha256 93ad35e5be0d6f7e...), referencia ref/fondo.py
 
 20000 ticks por corrida, periodo de 0,1 ms. Limite del peor caso: 1131 ciclos.
+Las fallas estan en los hilos 1 a 3; el hilo 0, que decide, no se toca. La referencia es la del programa sano.
 
---- gestor 1 en lazo infinito desde el arranque (cuelgue:1:1) ---
-PASS lazo_g1_inicio__practica: 20000 bytes, 19998 ticks de estado, patrimonio 26070, 630 ordenes, pesos 6/5/5 (0 cambios), 19998 ticks por plazo, peor caso 559 de 1131 ciclos, hasta 8 vueltas de lectura, bytes esperados distintos a los del fondo sano 0 y a los de max_media sola 0
-PASS lazo_g1_inicio__reversion: 20000 bytes, 19998 ticks de estado, patrimonio 256562, 2400 ordenes, pesos 6/5/5 (0 cambios), 19998 ticks por plazo, peor caso 559 de 1131 ciclos, hasta 8 vueltas de lectura, bytes esperados distintos a los del fondo sano 1816 y a los de max_media sola 0
---- gestor 2 en lazo infinito desde el arranque (cuelgue:2:1) ---
-PASS lazo_g2_inicio__practica: 20000 bytes, 19998 ticks de estado, patrimonio 26070, 630 ordenes, pesos 6/5/5 (0 cambios), 19998 ticks por plazo, peor caso 559 de 1131 ciclos, hasta 8 vueltas de lectura, bytes esperados distintos a los del fondo sano 0 y a los de max_media sola 0
-PASS lazo_g2_inicio__reversion: 20000 bytes, 19998 ticks de estado, patrimonio 256562, 2400 ordenes, pesos 6/5/5 (0 cambios), 19998 ticks por plazo, peor caso 559 de 1131 ciclos, hasta 8 vueltas de lectura, bytes esperados distintos a los del fondo sano 1816 y a los de max_media sola 0
---- gestor 3 en lazo infinito desde el arranque (cuelgue:3:1) ---
-PASS lazo_g3_inicio__practica: 20000 bytes, 19998 ticks de estado, patrimonio 26070, 630 ordenes, pesos 6/5/5 (0 cambios), 19998 ticks por plazo, peor caso 559 de 1131 ciclos, hasta 8 vueltas de lectura, bytes esperados distintos a los del fondo sano 0 y a los de max_media sola 0
-PASS lazo_g3_inicio__reversion: 20000 bytes, 19998 ticks de estado, patrimonio 256562, 2400 ordenes, pesos 6/5/5 (0 cambios), 19998 ticks por plazo, peor caso 559 de 1131 ciclos, hasta 8 vueltas de lectura, bytes esperados distintos a los del fondo sano 1816 y a los de max_media sola 0
---- gestor 1 en lazo infinito desde el tick 1500 (cuelgue:1:1500) ---
-PASS lazo_g1_t1500__practica: 20000 bytes, 19998 ticks de estado, patrimonio 26070, 630 ordenes, pesos 6/5/5 (2 cambios), 18499 ticks por plazo, peor caso 559 de 1131 ciclos, hasta 8 vueltas de lectura, bytes esperados distintos a los del fondo sano 0 y a los de max_media sola 0
-PASS lazo_g1_t1500__reversion: 20000 bytes, 19998 ticks de estado, patrimonio 256562, 2400 ordenes, pesos 6/3/7 (2 cambios), 18499 ticks por plazo, peor caso 559 de 1131 ciclos, hasta 8 vueltas de lectura, bytes esperados distintos a los del fondo sano 1816 y a los de max_media sola 0
---- gestor 2 en lazo infinito desde el tick 1500 (cuelgue:2:1500) ---
-PASS lazo_g2_t1500__practica: 20000 bytes, 19998 ticks de estado, patrimonio 26070, 630 ordenes, pesos 6/5/5 (2 cambios), 18499 ticks por plazo, peor caso 559 de 1131 ciclos, hasta 8 vueltas de lectura, bytes esperados distintos a los del fondo sano 0 y a los de max_media sola 0
-PASS lazo_g2_t1500__reversion: 20000 bytes, 19998 ticks de estado, patrimonio 256562, 2400 ordenes, pesos 6/3/7 (2 cambios), 18499 ticks por plazo, peor caso 559 de 1131 ciclos, hasta 8 vueltas de lectura, bytes esperados distintos a los del fondo sano 1816 y a los de max_media sola 0
---- gestor 3 en lazo infinito desde el tick 1500 (cuelgue:3:1500) ---
-PASS lazo_g3_t1500__practica: 20000 bytes, 19998 ticks de estado, patrimonio 26070, 630 ordenes, pesos 6/5/5 (2 cambios), 18499 ticks por plazo, peor caso 559 de 1131 ciclos, hasta 8 vueltas de lectura, bytes esperados distintos a los del fondo sano 0 y a los de max_media sola 0
-PASS lazo_g3_t1500__reversion: 20000 bytes, 19998 ticks de estado, patrimonio 256562, 2400 ordenes, pesos 6/3/7 (2 cambios), 18499 ticks por plazo, peor caso 559 de 1131 ciclos, hasta 8 vueltas de lectura, bytes esperados distintos a los del fondo sano 1816 y a los de max_media sola 0
---- gestor 1 colgado desde el tick 900 y gestor 3 desde el 1700 (cuelgue:1:900+cuelgue:3:1700) ---
-PASS lazo_dos__practica: 20000 bytes, 19998 ticks de estado, patrimonio 26070, 630 ordenes, pesos 6/4/6 (1 cambios), 19099 ticks por plazo, peor caso 563 de 1131 ciclos, hasta 8 vueltas de lectura, bytes esperados distintos a los del fondo sano 0 y a los de max_media sola 0
-PASS lazo_dos__reversion: 20000 bytes, 19998 ticks de estado, patrimonio 256562, 2400 ordenes, pesos 6/4/6 (1 cambios), 19099 ticks por plazo, peor caso 563 de 1131 ciclos, hasta 8 vueltas de lectura, bytes esperados distintos a los del fondo sano 1816 y a los de max_media sola 0
---- los tres gestores colgados: el supervisor decide solo (cuelgue:1:1+cuelgue:2:1+cuelgue:3:1) ---
-PASS lazo_tres__practica: 20000 bytes, 19998 ticks de estado, patrimonio 26070, 630 ordenes, pesos 6/5/5 (0 cambios), 19998 ticks por plazo, peor caso 563 de 1131 ciclos, hasta 8 vueltas de lectura, bytes esperados distintos a los del fondo sano 0 y a los de max_media sola 0
-PASS lazo_tres__reversion: 20000 bytes, 19998 ticks de estado, patrimonio 256562, 2400 ordenes, pesos 6/5/5 (0 cambios), 19998 ticks por plazo, peor caso 563 de 1131 ciclos, hasta 8 vueltas de lectura, bytes esperados distintos a los del fondo sano 1816 y a los de max_media sola 0
---- el voto del gestor 1 no llega en el tick 1200 (sin_voto:1:1200:1200) ---
-PASS sin_voto_g1__practica: 20000 bytes, 19998 ticks de estado, patrimonio 26070, 630 ordenes, pesos 7/6/3 (20 cambios), 1 ticks por plazo, peor caso 551 de 1131 ciclos, hasta 8 vueltas de lectura, bytes esperados distintos a los del fondo sano 0 y a los de max_media sola 0
-PASS sin_voto_g1__reversion: 20000 bytes, 19998 ticks de estado, patrimonio 419913, 5232 ordenes, pesos 6/1/9 (16 cambios), 1 ticks por plazo, peor caso 551 de 1131 ciclos, hasta 8 vueltas de lectura, bytes esperados distintos a los del fondo sano 0 y a los de max_media sola 1816
---- el voto del gestor 2 no llega en un tick de frontera de ventana (1024) (sin_voto:2:1024:1024) ---
-PASS sin_voto_g2_frontera__practica: 20000 bytes, 19998 ticks de estado, patrimonio 26070, 630 ordenes, pesos 7/6/3 (20 cambios), 1 ticks por plazo, peor caso 559 de 1131 ciclos, hasta 8 vueltas de lectura, bytes esperados distintos a los del fondo sano 0 y a los de max_media sola 0
-PASS sin_voto_g2_frontera__reversion: 20000 bytes, 19998 ticks de estado, patrimonio 416945, 5193 ordenes, pesos 6/1/9 (17 cambios), 1 ticks por plazo, peor caso 559 de 1131 ciclos, hasta 8 vueltas de lectura, bytes esperados distintos a los del fondo sano 57 y a los de max_media sola 1759
---- el voto del gestor 3 no llega entre los ticks 1000 y 2600 y despues vuelve (sin_voto:3:1000:2600) ---
-PASS sin_voto_g3_tramo__practica: 20000 bytes, 19998 ticks de estado, patrimonio 26070, 630 ordenes, pesos 7/6/3 (20 cambios), 1601 ticks por plazo, peor caso 559 de 1131 ciclos, hasta 8 vueltas de lectura, bytes esperados distintos a los del fondo sano 0 y a los de max_media sola 0
-PASS sin_voto_g3_tramo__reversion: 20000 bytes, 19998 ticks de estado, patrimonio 401257, 4982 ordenes, pesos 6/1/9 (16 cambios), 1601 ticks por plazo, peor caso 559 de 1131 ciclos, hasta 8 vueltas de lectura, bytes esperados distintos a los del fondo sano 276 y a los de max_media sola 1540
---- gestor 1 atrasado 160 ciclos en todos los ticks (cabe en el plazo) (atraso:1:160) ---
-PASS atraso_g1_corto__practica: 20000 bytes, 19998 ticks de estado, patrimonio 26070, 630 ordenes, pesos 7/6/3 (20 cambios), 0 ticks por plazo, peor caso 635 de 1131 ciclos, hasta 7 vueltas de lectura
-PASS atraso_g1_corto__reversion: 20000 bytes, 19998 ticks de estado, patrimonio 419913, 5232 ordenes, pesos 6/1/9 (16 cambios), 0 ticks por plazo, peor caso 635 de 1131 ciclos, hasta 7 vueltas de lectura
---- gestor 3 atrasado 200 ciclos en todos los ticks (cabe en el plazo) (atraso:3:200) ---
-PASS atraso_g3_corto__practica: 20000 bytes, 19998 ticks de estado, patrimonio 26070, 630 ordenes, pesos 7/6/3 (20 cambios), 0 ticks por plazo, peor caso 679 de 1131 ciclos, hasta 8 vueltas de lectura
-PASS atraso_g3_corto__reversion: 20000 bytes, 19998 ticks de estado, patrimonio 419913, 5232 ordenes, pesos 6/1/9 (16 cambios), 0 ticks por plazo, peor caso 679 de 1131 ciclos, hasta 8 vueltas de lectura
---- gestor 2 atrasado 1000 ciclos en todos los ticks (llega despues del plazo) (atraso:2:1000) ---
-PASS atraso_g2_largo__practica: 20000 bytes, 19998 ticks de estado, patrimonio 26070, 630 ordenes, pesos 6/5/5 (0 cambios), 19998 ticks por plazo, peor caso 559 de 1131 ciclos, hasta 8 vueltas de lectura, bytes esperados distintos a los del fondo sano 0 y a los de max_media sola 0
-PASS atraso_g2_largo__reversion: 20000 bytes, 19998 ticks de estado, patrimonio 256562, 2400 ordenes, pesos 6/5/5 (0 cambios), 19998 ticks por plazo, peor caso 559 de 1131 ciclos, hasta 8 vueltas de lectura, bytes esperados distintos a los del fondo sano 1816 y a los de max_media sola 0
---- gestor 3 atrasado 1200 ciclos entre los ticks 1100 y 2500 (atraso:3:1200:1100:2500) ---
-PASS atraso_g3_tramo__practica: 20000 bytes, 19998 ticks de estado, patrimonio 26070, 630 ordenes, pesos 7/6/3 (20 cambios), 1401 ticks por plazo, peor caso 559 de 1131 ciclos, hasta 8 vueltas de lectura, bytes esperados distintos a los del fondo sano 0 y a los de max_media sola 0
-PASS atraso_g3_tramo__reversion: 20000 bytes, 19998 ticks de estado, patrimonio 418222, 5195 ordenes, pesos 6/1/9 (16 cambios), 1401 ticks por plazo, peor caso 559 de 1131 ciclos, hasta 8 vueltas de lectura, bytes esperados distintos a los del fondo sano 91 y a los de max_media sola 1725
+--- programa sano ---
+PASS sano__meta: 20000 bytes, 19998 ticks de estado, patrimonio 19214, 4 ordenes, vio el minimo 1 y el maximo 1, stores a la RAM 0, peor caso 127 de 1131 ciclos
+--- el hilo 1 hace cuentas sin parar (ocupado:1) ---
+PASS ocupado_1__meta: 20000 bytes, 19998 ticks de estado, patrimonio 19214, 4 ordenes, vio el minimo 1 y el maximo 1, stores a la RAM 0, peor caso 127 de 1131 ciclos
+PASS ocupado_1__norm: 20000 bytes, 19998 ticks de estado, patrimonio 205483, 210 ordenes, vio el minimo 1 y el maximo 1, stores a la RAM 0, peor caso 127 de 1131 ciclos
+--- el hilo 2 hace cuentas sin parar (ocupado:2) ---
+PASS ocupado_2__meta: 20000 bytes, 19998 ticks de estado, patrimonio 19214, 4 ordenes, vio el minimo 1 y el maximo 1, stores a la RAM 0, peor caso 127 de 1131 ciclos
+PASS ocupado_2__norm: 20000 bytes, 19998 ticks de estado, patrimonio 205483, 210 ordenes, vio el minimo 1 y el maximo 1, stores a la RAM 0, peor caso 127 de 1131 ciclos
+--- el hilo 3 hace cuentas sin parar (ocupado:3) ---
+PASS ocupado_3__meta: 20000 bytes, 19998 ticks de estado, patrimonio 19214, 4 ordenes, vio el minimo 1 y el maximo 1, stores a la RAM 0, peor caso 127 de 1131 ciclos
+PASS ocupado_3__norm: 20000 bytes, 19998 ticks de estado, patrimonio 205483, 210 ordenes, vio el minimo 1 y el maximo 1, stores a la RAM 0, peor caso 127 de 1131 ciclos
+--- los tres hilos hacen cuentas sin parar (ocupado:1+ocupado:2+ocupado:3) ---
+PASS ocupados__meta: 20000 bytes, 19998 ticks de estado, patrimonio 19214, 4 ordenes, vio el minimo 1 y el maximo 1, stores a la RAM 0, peor caso 127 de 1131 ciclos
+PASS ocupados__norm: 20000 bytes, 19998 ticks de estado, patrimonio 205483, 210 ordenes, vio el minimo 1 y el maximo 1, stores a la RAM 0, peor caso 127 de 1131 ciclos
+--- el hilo 1 escribe y lee la RAM sin parar (escribe:1) ---
+PASS escribe_1__meta: 20000 bytes, 19998 ticks de estado, patrimonio 19214, 4 ordenes, vio el minimo 1 y el maximo 1, stores a la RAM 2499800, peor caso 127 de 1131 ciclos
+PASS escribe_1__norm: 20000 bytes, 19998 ticks de estado, patrimonio 205483, 210 ordenes, vio el minimo 1 y el maximo 1, stores a la RAM 2499800, peor caso 127 de 1131 ciclos
+--- los tres hilos escriben y leen la RAM sin parar (escribe:1+escribe:2+escribe:3) ---
+PASS escribe_todos__meta: 20000 bytes, 19998 ticks de estado, patrimonio 19214, 4 ordenes, vio el minimo 1 y el maximo 1, stores a la RAM 7499400, peor caso 127 de 1131 ciclos
+PASS escribe_todos__norm: 20000 bytes, 19998 ticks de estado, patrimonio 205483, 210 ordenes, vio el minimo 1 y el maximo 1, stores a la RAM 7499400, peor caso 127 de 1131 ciclos
+--- el hilo 3 lee la memoria del programa sin parar (programa:3) ---
+PASS programa_3__meta: 20000 bytes, 19998 ticks de estado, patrimonio 19214, 4 ordenes, vio el minimo 1 y el maximo 1, stores a la RAM 0, peor caso 127 de 1131 ciclos
+PASS programa_3__norm: 20000 bytes, 19998 ticks de estado, patrimonio 205483, 210 ordenes, vio el minimo 1 y el maximo 1, stores a la RAM 0, peor caso 127 de 1131 ciclos
+--- un hilo calcula, otro escribe la RAM y otro lee el programa (ocupado:1+escribe:2+programa:3) ---
+PASS mezcla__meta: 20000 bytes, 19998 ticks de estado, patrimonio 19214, 4 ordenes, vio el minimo 1 y el maximo 1, stores a la RAM 2499800, peor caso 127 de 1131 ciclos
+PASS mezcla__norm: 20000 bytes, 19998 ticks de estado, patrimonio 205483, 210 ordenes, vio el minimo 1 y el maximo 1, stores a la RAM 2499800, peor caso 127 de 1131 ciclos
 
-PASS: 30 de 30 corridas con la decision esperada y a tiempo. Peor caso 679 ciclos de 1131
+PASS: 17 de 17 corridas con la decision esperada y a tiempo. Peor caso 127 ciclos de 1131 (programa sano: 127)

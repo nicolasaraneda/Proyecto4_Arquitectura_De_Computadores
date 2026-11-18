@@ -1,26 +1,26 @@
 #!/usr/bin/env python3
-"""Pruebas de la referencia del fondo en un chip (ref/fondo.py).
+"""Pruebas de la referencia de R1 y R2 (ref/fondo.py).
 
 Grupo: Nicolás Araneda, Vicente Calderón y Santiago Muñoz.
 Arquitectura de Computadores, Universidad de los Andes, 2026-2.
 
     python3 ref/test_fondo.py        (o make test-fondo)
 
-Qué comprueba:
-  - Con los tres gestores sanos, ref/fondo.py da los números que la
-    factibilidad midió con su módulo en C para `fondo_min` (patrimonio,
-    órdenes, pesos finales y cambios de pesos en cinco corridas).
-  - Una segunda escritura del mismo fondo, hecha aparte y con la aritmética de
-    la factibilidad (puntaje en dieciseisavos, media con (S + 31) >> 5 y
-    margen 2 * ventaja > p), da los mismos bytes y los mismos pesos. Es lo que
-    respalda llevar el puntaje en treintaidosavos y la media con emad.
-  - Degradación: sin ningún voto los bytes son los de max_media sola
-    (ref/trader.py); con un voto ausente no se ajustan los pesos; una falla
-    acotada deja de tener efecto en los votos cuando termina.
-  - sw/fondo_tabla.hex, el contenido de la BRAM de la tabla, es el que genera
-    ref/fondo.py; los desplazamientos que usa sw/fondo.s son los del orden de
-    PARAMETROS, y el programa no toma ningún valor inicial de su imagen.
+Desde el 17/11 (decisión T133, opción F-a) sw/fondo.s corre en el hilo 0 la regla
+de cotas de R0 y deja los hilos 1 a 3 en espera. Qué comprueba:
+  - Con la tabla por defecto, ref/fondo.py decide byte por byte igual que
+    ref/trader.py (Oficial, la regla de sw/trade.s en R0), en la serie Meta, en
+    la de práctica anterior y en series de cada familia, crudas y normalizadas
+    entre 100 y 255. En la serie Meta da 19 214 con 4 órdenes.
+  - La telemetría: 7 segmentos en los ticks pares, LED en los impares, con el
+    latido en el bit 10 del número de tick.
+  - Los parámetros de la tabla cambian la decisión como se espera, y una falla
+    en un hilo 1 a 3 no cambia nada.
+  - sw/fondo_tabla.hex es el que genera ref/fondo.py, los desplazamientos que usa
+    sw/fondo.s son los del orden de PARAMETROS y el programa no deja nada en la
+    zona de datos de la RAM.
 """
+
 import os
 import sys
 import unittest
@@ -28,8 +28,10 @@ import unittest
 AQUI = os.path.dirname(os.path.abspath(__file__))
 RAIZ = os.path.dirname(AQUI)
 sys.path.insert(0, AQUI)
+sys.path.insert(0, os.path.join(AQUI, "cotas"))
 sys.path.insert(0, os.path.join(RAIZ, "tools", "fondo"))
 
+import comun            # noqa: E402
 import fondo            # noqa: E402
 import market           # noqa: E402
 import series           # noqa: E402
@@ -37,120 +39,75 @@ import simbolos         # noqa: E402
 import trader           # noqa: E402
 
 FAMILIAS = ["modelo", "tendencia", "volatil", "reversion", "paseo", "saltos", "plana", "borde_bajo", "borde_alto"]
-
-
-class FondoFactibilidad:
-    """`fondo_min` como lo escribe el programa de la factibilidad, sin compartir código con fondo.py."""
-
-    GESTORES = [(-96, 1), (-128, 1), (-64, 17)]
-
-    def __init__(self):
-        self.s = [None] * 3
-        self.pos = [0] * 3
-        self.ejec = [0] * 3
-        self.des = [0] * 3
-        self.p16 = 0
-        self.w = [6, 5, 5]
-        self.wmax = [10, 9, 9]
-        self.wmin = [2, 1, 1]
-        self.ref = [0] * 3
-        self.faltan = 512
-
-    def decidir(self, p):
-        primero = self.s[0] is None
-        for k, (entra, sale) in enumerate(self.GESTORES):
-            if primero:
-                self.s[k] = 32 * p
-            else:
-                if self.ejec[k]:
-                    self.des[k] += 16 * p - self.p16
-                self.des[k] -= self.ejec[k] ^ self.pos[k]
-                self.ejec[k] = self.pos[k]
-            dev = 32 * p - self.s[k]
-            self.pos[k] = (self.pos[k] | (dev < entra)) & (dev < sale)
-            self.s[k] = self.s[k] + p - ((self.s[k] + 31) >> 5)
-        self.p16 = 16 * p
-        self.faltan -= 1
-        if self.faltan == 0:
-            self.faltan = 512
-            g = [self.des[k] - self.ref[k] for k in range(3)]
-            self.ref = list(self.des)
-            mejor = max(range(3), key=lambda k: (g[k], -k))      # el primero entre los empatados
-            peor = min(range(3), key=lambda k: (g[k], k))
-            if 2 * (g[mejor] - g[peor]) > p and self.w[mejor] < self.wmax[mejor] and self.w[peor] > self.wmin[peor]:
-                self.w[mejor] += 1
-                self.w[peor] -= 1
-        f = sum(w for w, x in zip(self.w, self.pos) if x)
-        return market.COMPRAR_63 if f >= 8 else market.VENDER_63
+META = os.path.join(RAIZ, "data", "practica_meta.csv")
 
 
 class TestFondo(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.practica = series.practica()
+        cls.meta = market.leer_serie(META)
+        cls.lotes = [cls.meta, series.practica()]
+        for fam in FAMILIAS:
+            for s in series.lote(fam, 2, 4000, 3):
+                cls.lotes += [s, comun.normalizar(s)]
 
-    def correr(self, precios, perdidos=2, **k):
-        return fondo.correr(precios, perdidos, **k)
+    def test_igual_a_la_regla_de_r0(self):
+        operan = 0
+        for precios in self.lotes:
+            for perdidos in (0, 2):
+                f = fondo.Fondo()
+                self.assertEqual(trader.decisiones(precios, f, perdidos),
+                                 trader.decisiones(precios, trader.Oficial(), perdidos))
+            # con perdidos = 2 el programa ve desde el tercer precio hasta el último
+            vistos = precios[2:]
+            self.assertEqual((f.vio_lo, f.vio_hi), (int(min(vistos) <= 100), int(max(vistos) >= 255)))
+            operan += f.vio_lo and f.vio_hi
+        self.assertGreaterEqual(operan, len(FAMILIAS))       # las normalizadas ven los dos extremos
 
-    def test_numeros_de_la_factibilidad(self):
-        casos = [
-            (self.practica, 2, 26070, 630, [7, 6, 3], 20),
-            (self.practica[:3000], 1, 9904, 92, [6, 6, 4], 3),
-            (series.lote("modelo", 1, 20000, 1)[0], 2, 11208, 325, [3, 4, 9], 15),
-            (series.lote("tendencia", 1, 20000, 1)[0], 2, 13079, 185, [6, 2, 8], 6),
-            (series.lote("volatil", 1, 20000, 1)[0], 2, 374864, 6521, [8, 5, 3], 31),
-        ]
-        for precios, perdidos, w, ordenes, pesos, cambios in casos:
-            m, f = self.correr(precios, perdidos)
-            self.assertEqual((m.w, m.ordenes, f.w, f.cambios), (w, ordenes, pesos, cambios))
-            self.assertEqual(f.degradados, 0)
+    def test_serie_meta(self):
+        m, f = fondo.correr(self.meta)
+        self.assertEqual((m.w, m.ordenes, f.vio_lo, f.vio_hi), (19214, 4, 1, 1))
 
-    def test_igual_a_la_aritmetica_de_la_factibilidad(self):
-        lotes = [self.practica] + [s for fam in FAMILIAS for s in series.lote(fam, 2, 6000, 3)]
-        for precios in lotes:
-            a = fondo.Fondo()
-            b = FondoFactibilidad()
-            self.assertEqual(trader.decisiones(precios, a, 2), trader.decisiones(precios, b, 2))
-            self.assertEqual(a.w, b.w)
-            self.assertEqual([g.puntaje for g in a.gestores], [2 * d for d in b.des])
-            self.assertEqual([g.s for g in a.gestores], b.s)
-
-    def test_sin_votos_es_max_media(self):
-        """El supervisor del fondo es max_media (la oficial hasta el 17/11)."""
-        fallas = [fondo.Falla(k) for k in (1, 2, 3)]
-        for precios in [self.practica] + [series.lote(fam, 1, 6000, 5)[0] for fam in FAMILIAS]:
-            f = fondo.Fondo(fallas=fallas)
-            self.assertEqual(trader.decisiones(precios, f, 2), trader.decisiones(precios, trader.MaxMedia(), 2))
-            self.assertEqual(f.cambios, 0)
-
-    def test_sin_un_voto_no_se_ajustan_los_pesos(self):
-        precios = series.lote("reversion", 1, 6000, 1)[0]
-        _, sano = self.correr(precios)
-        self.assertGreater(sano.cambios, 0)
-        for k in (1, 2, 3):
-            _, f = self.correr(precios, fallas=[fondo.Falla(k)])
-            self.assertEqual((f.cambios, f.w, f.degradados), (0, [6, 5, 5], len(precios) - 2))
-
-    def test_falla_acotada(self):
-        precios = series.lote("reversion", 1, 6000, 1)[0]
+    def test_telemetria(self):
         traza = []
-        _, f = self.correr(precios, fallas=[fondo.Falla(2, 1024, 1024)], traza=traza)
-        self.assertEqual(f.degradados, 1)
-        campos = fondo.Fondo.CAMPOS
-        fila = dict(zip(campos, traza[1023]))
-        self.assertEqual((fila["tick"], fila["llego2"], fila["v2"]), (1024, 0, fila["pos0"]))
-        # el tick 1024 es de frontera: sin los tres votos no hay ajuste ahí
-        self.assertEqual(traza[1022][campos.index("w1"):campos.index("w3") + 1],
-                         traza[1023][campos.index("w1"):campos.index("w3") + 1])
-        self.assertTrue(all(dict(zip(campos, t))["llego2"] for t in traza[1024:]))
+        precios = comun.normalizar(series.lote("reversion", 1, 3000, 1)[0])
+        fondo.correr(precios, traza=traza)
+        c = fondo.Fondo.CAMPOS
+        for t in traza:
+            fila = dict(zip(c, t))
+            adentro = fila["byte"] == market.COMPRAR_63
+            if fila["tick"] % 2 == 0:
+                self.assertEqual(fila["seg"], 0x63 if adentro else 0)
+            else:
+                esperado = ((fila["tick"] >> 10) & 1) | (fila["vio_lo"] << 1) | (fila["vio_hi"] << 2) | (adentro << 3)
+                self.assertEqual(fila["leds"], esperado)
+        latidos = {dict(zip(c, t))["leds"] & 1 for t in traza}
+        self.assertEqual(latidos, {0, 1})
+
+    def test_parametros(self):
+        precios = comun.normalizar(series.lote("reversion", 1, 4000, 1)[0])
+        base = trader.decisiones(precios, fondo.Fondo(), 0)
+        otra = trader.decisiones(precios, fondo.Fondo({"BANDA_COMPRA": 171}), 0)
+        self.assertNotEqual(base, otra)
+        ref = trader.decisiones(precios, trader.Oficial(), 0)
+        self.assertEqual(base, ref)
+        with self.assertRaises(KeyError):
+            fondo.Fondo({"G1_ENTRA": -64})
+
+    def test_fallas_no_cambian_nada(self):
+        precios = comun.normalizar(series.lote("tendencia", 1, 4000, 2)[0])
+        sano = trader.decisiones(precios, fondo.Fondo(), 2)
+        for k in (1, 2, 3):
+            f = fondo.Fondo(fallas=[fondo.Falla(k)])
+            self.assertEqual(trader.decisiones(precios, f, 2), sano)
+            self.assertEqual(f.degradados, 0)
 
     def test_falla_leer(self):
         a = fondo.Falla.leer("3:100:")
         self.assertEqual((a.gestor, a.desde, a.hasta), (3, 100, None))
         b = fondo.Falla.leer("2:50:60")
         self.assertTrue(b.afecta(2, 50) and b.afecta(2, 60) and not b.afecta(2, 61) and not b.afecta(1, 55))
-        self.assertTrue(fondo.Falla.leer("1").afecta(1, 1))
         with self.assertRaises(ValueError):
             fondo.Falla.leer("4")
 
@@ -159,19 +116,18 @@ class TestFondo(unittest.TestCase):
         with open(os.path.join(RAIZ, "sw", "fondo_tabla.hex")) as f:
             self.assertEqual(f.read(), fondo.tabla_hex())
         nombres = [n for n, _ in fondo.PARAMETROS]
-        for nombre, valor in e.simbolos.items():
-            if nombre.startswith("T_"):
-                self.assertEqual(valor, 4 * nombres.index(nombre[2:]), nombre)
+        usados = [n for n in e.simbolos if n.startswith("T_")]
+        self.assertEqual(sorted(n[2:] for n in usados), sorted(nombres))
+        for nombre in usados:
+            self.assertEqual(e.simbolos[nombre], 4 * nombres.index(nombre[2:]), nombre)
         self.assertEqual(e.simbolos["TAB_BASE"] & 0xFFFFFFFF, 0x80020000)
         fin = max(i for i, w in enumerate(palabras) if w) + 1
-        self.assertLess(4 * fin, e.simbolos["PUB"])          # nada inicializado en los datos
+        self.assertLess(4 * fin, 0x7C0)                     # nada en la zona de datos
 
     def test_tabla_fuera_de_rango(self):
         with self.assertRaises(ValueError):
-            fondo.tabla_hex({"VENTANA": 40000})
-        with self.assertRaises(ValueError):
-            fondo.tabla_hex({"PLAZO": 0})
-        self.assertEqual(fondo.tabla_hex({"G3_ENTRA": -65}).splitlines()[6], "ffbf")
+            fondo.tabla_hex({"HI": 40000})
+        self.assertEqual(fondo.tabla_hex({"BANDA_COMPRA": 171}).splitlines()[2], "00ab")
 
 
 if __name__ == "__main__":

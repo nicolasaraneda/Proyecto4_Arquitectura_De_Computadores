@@ -5,28 +5,43 @@ Herramientas:
   Yosys 0.68+195 (git sha1 435977e97-dirty, Release, Clang /usr/bin/clang++ 21.1.8)
   "nextpnr-ice40" -- Next Generation Place and Route (Version nextpnr-0.11.1-19-g8dbcee5c)
   Icarus Verilog version 14.0 (devel) (s20260301-403-g5ab23063f-dirty)
-Commit de partida: b772d1c (rama p10-revision)
+Commit de partida: 41826e0 (rama regla-cotas-r1)
   Verilator 5.053 devel rev v5.052-22-g7cf8c5cca (mod)
 Hardware (r2): pochoco_soc con -DESPINO_BARREL -DESPINO_XD_EMAD -DESPINO_XD_DEVK -DESPINO_TABLA -DESPINO_VIGILANTE
-Programa: sw/fondo.s (sha256 19773517830a2e16...), tabla sw/fondo_tabla.hex (sha256 f792588c9cc823cb...), referencia ref/fondo.py
+Programa: sw/fondo.s (sha256 6f55ec520f3686ef...), tabla sw/fondo_tabla.hex (sha256 93ad35e5be0d6f7e...), referencia ref/fondo.py
 
-70 series por familia, 2000 ticks cada una, semilla 1, periodo de 0,1 ms.
+35 series por familia, cada una cruda y normalizada (-norm), 2000 ticks, semilla 1, periodo de 0,1 ms.
 
-familia               series   pasan        ticks    peor caso  por plazo
-borde_alto                70      70       140000          443          0
-borde_bajo                70      70       140000          443          0
-cambio_de_caracter        70      70       140000          443          0
-cambio_volatilidad        70      70       140000          443          0
-dos_componentes           70      70       140000          443          0
-modelo                    70      70       140000          443          0
-modelo_vecino             70      70       140000          443          0
-nivel_bajo                70      70       140000          443          0
-paseo                     70      70       140000          443          0
-plana                     70      70       140000          379          0
-remuestreo                70      70       140000          443          0
-reversion                 70      70       140000          443          0
-saltos                    70      70       140000          443          0
-tendencia                 70      70       140000          443          0
-volatil                   70      70       140000          443          0
+familia                   series   pasan        ticks    peor caso  ven los dos
+borde_alto                    35      35        70000          127            0
+borde_alto-norm               35      35        70000          127           35
+borde_bajo                    35      35        70000          127            0
+borde_bajo-norm               35      35        70000          127           35
+cambio_de_caracter            35      35        70000          127            0
+cambio_de_caracter-norm       35      35        70000          127           35
+cambio_volatilidad            35      35        70000          127            0
+cambio_volatilidad-norm       35      35        70000          127           32
+dos_componentes               35      35        70000          127            0
+dos_componentes-norm          35      35        70000          127           35
+modelo                        35      35        70000          127            0
+modelo-norm                   35      35        70000          127           35
+modelo_vecino                 35      35        70000          127            0
+modelo_vecino-norm            35      35        70000          127           35
+nivel_bajo                    35      35        70000          127            0
+nivel_bajo-norm               35      35        70000          127           35
+paseo                         35      35        70000          127            0
+paseo-norm                    35      35        70000          127           35
+plana                         35      35        70000          127            0
+plana-norm                    35      35        70000          127            0
+remuestreo                    35      35        70000          127            0
+remuestreo-norm               35      35        70000          127           35
+reversion                     35      35        70000          127            0
+reversion-norm                35      35        70000          127           35
+saltos                        35      35        70000          127            0
+saltos-norm                   35      35        70000          127           35
+tendencia                     35      35        70000          127            0
+tendencia-norm                35      35        70000          127           33
+volatil                       35      35        70000          127            0
+volatil-norm                  35      35        70000          127           34
 
 PASS: 1050 de 1050 series identicas a la referencia (bytes, estado, telemetria y protocolo), 2100000 ticks

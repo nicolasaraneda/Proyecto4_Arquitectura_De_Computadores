@@ -23,7 +23,7 @@ desde 0 y la transacción n empieza en t(n) = inicio + n * periodo.
      reloj en total. Desde ahí y durante T_RECONF el pin MISO está suelto y la
      maestra lee unos.
   4. Respaldo. La imagen 1 parte de cero: su reset dura 4095 ciclos y después
-     corre max_media sin historia. No ve los precios que llegan durante el
+     corre la regla de R0 (sw/trade.s) sin historia. No ve los precios que llegan durante el
      reset y la maestra lee 0x00 hasta su primera decisión.
 
 Detalle de los tiempos (reloj de 40 ns con flancos de subida en 20 + 40 k, como
@@ -253,12 +253,12 @@ def main(argv=None):
             f"  pin suelto, byte 0xFF: {cuenta['suelto']} ticks; transacciones cortadas por el fin de la reconfiguración: "
             + (", ".join(f"{k} (byte {b:02x})" for k, b in cortados) or "ninguna"),
             f"  imagen 1 en reset o sin decisión todavía, byte 0x00 en {cuenta['reset']} transacciones; "
-            f"bytes de max_media desde la transacción {n1 + 1 if n1 >= 0 else '-'}: {cuenta['respaldo']}",
+            f"bytes de R0 (sw/trade.s) desde la transacción {n1 + 1 if n1 >= 0 else '-'}: {cuenta['respaldo']}",
             f"  ticks sin decisión nueva, desde el precio colgado hasta el primero que responde la imagen 1: "
             f"{sin_decision if sin_decision is not None else 'no vuelve en esta corrida'} "
             f"(precios {e.nf} a {n1 - 1}; {a.vig_n + 1} los gasta el vigilante en contar)",
             f"  patrimonio final: {w_sim} con el relevo; {market.simular(precios, e.sano).w} el fondo sano en los mismos "
-            f"{nticks} ticks; {trader.correr(precios, perdidos=e.perd).w} max_media sola",
+            f"{nticks} ticks; {trader.correr(precios, perdidos=e.perd).w} R0 solo",
         ]
 
     if a.breve:

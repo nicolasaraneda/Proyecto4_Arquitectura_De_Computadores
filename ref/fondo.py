@@ -1,55 +1,42 @@
 #!/usr/bin/env python3
 """
-fondo.py: referencia exacta de sw/fondo.s, el fondo de cuatro hilos que corre
-en el Espino barrel (docs/fondo.md).
+fondo.py: referencia exacta de sw/fondo.s, el programa de R1 y R2 (Espino barrel).
 
 Grupo: Nicolás Araneda, Vicente Calderón y Santiago Muñoz.
 Arquitectura de Computadores, Universidad de los Andes, 2026-2.
 
-Es la configuración `fondo_min` de la factibilidad (tres gestores de la regla
-de reversión, pesos 6/5/5 que se ajustan cada 512 ticks y voto con mayoría de
-8/16), más la degradación que pide el diseño de competencia: el supervisor
-calcula `max_media` por su cuenta y la usa en el lugar de cada voto que no
-llegó. Con los tres gestores sanos el flujo de bytes es el de `fondo_min`.
+Desde el 17/11 (decisión T133, opción F-a) el hilo 0 corre la regla de cotas
+"espera" con banda 60 (ref/regla_cotas.py, docs/cotas.md) y los hilos 1 a 3
+quedan en un lazo de espera. El nombre del archivo se mantiene porque todas las
+herramientas de R1 y R2 lo usan; hasta el 17/11 modelaba el fondo de cuatro
+hilos que votaba (historial de git).
 
-Por cada precio p que el programa ve (tick t = 1, 2, 3...):
+Por cada precio p que el programa ve (tick t = 1, 2, 3...), con los umbrales
+de la tabla de parámetros:
+    bajo   = p < LO_MAS_1          (101: p <= 100)
+    alto   = no (p < HI)           (255: p >= 255)
+    vio_lo |= bajo ; vio_hi |= alto ; los_dos = vio_lo & vio_hi
+    comprar = bajo | (los_dos & p < BANDA_COMPRA)       (161: p <= 160)
+    vender  = alto | (los_dos & no (p < BANDA_VENTA))   (195: p >= 195)
+    si comprar o vender: q = vender 63 si vender, si no comprar 63
+    DECISION = q (parte en 0x00, mantener)
+Con los umbrales de la tabla por defecto decide byte por byte igual que
+ref/trader.py (Oficial), la regla de sw/trade.s en R0 (lo comprueba
+ref/test_fondo.py).
 
-  Gestor k (hilos 1, 2 y 3), con sus umbrales entra_k y sale_k:
-    1. Puntaje en papel, en treintaidosavos de unidad de precio:
-         puntaje += 32 (p - p anterior)   si tenía la acción
-         puntaje -= 2                     si la orden del tick anterior cambió su posición
-    2. dev = 32 p - S, con S la media exponencial por 32 (alfa 1/32).
-       pos = (pos | dev < entra_k) & (dev < sale_k)
-    3. Publica el puntaje y después su voto: el tick t y pos.
-    4. S = S + (dev >>> 5).
-    En su primer precio S parte en 32 p y no hay puntaje que sumar.
+Telemetría (un store por tick, después de decidir): en los ticks pares los 7
+segmentos muestran 63 si q es comprar 63 y 00 si no; en los impares los LED
+son latido (bit 10 del número de tick), vio_lo, vio_hi y adentro.
 
-  Supervisor (hilo 0):
-    1. Calcula `max_media` propia con el mismo paso 2 y 4 (pos0).
-    2. Voto de cada gestor: su pos si llegó con el tick t; si no, pos0.
-    3. Cada VENTANA ticks, y solo si llegaron los tres votos: g_k es lo que
-       ganó el gestor k en la ventana. Si la ventaja del mejor sobre el peor
-       supera 1/32 del precio y los topes lo permiten, pasa 1/16 de peso del
-       peor al mejor.
-    4. F = suma de los pesos de los votos adentro. Byte: comprar 63 si
-       F >= UMBRAL, vender 63 si no.
-
-El puntaje se lleva en treintaidosavos y no en dieciseisavos como en la
-factibilidad porque así sale de `devk` sin más instrucciones. Es el doble
-exacto, y la comparación con el margen se escala igual, así que ninguna
-decisión cambia (lo comprueba `ref/test_fondo.py` contra los números medidos
-en la factibilidad).
-
-Las fallas se describen con `Falla`: desde qué tick y hasta cuál el voto de un
-gestor no llega. Un gestor que no publica sigue llevando su estado en este
-modelo: sirve para un gestor colgado (no vuelve) y para uno atrasado menos de
-un tick (sus votos llegan siempre tarde, pero no se salta precios).
+Fallas: los hilos 1 a 3 no participan en la decisión, así que una falla en
+ellos (`Falla`, se mantiene para las herramientas) no cambia ningún byte. Las
+pruebas de degradación (tools/fondo/degradacion.sh) lo comprueban por el RTL.
 
 Uso:
-  python3 ref/fondo.py                         # tabla contra max_media
   python3 ref/fondo.py SERIE --periodo-ns 100000 -o ref.csv
-  python3 ref/fondo.py --falla 3:100: -o ref.csv    # gestor 3 sin voto desde el tick 100
-  python3 ref/fondo.py --traza traza.csv       # estado interno por tick
+  python3 ref/fondo.py SERIE --param BANDA_COMPRA=171 -o ref.csv
+  python3 ref/fondo.py SERIE --traza traza.csv       # estado por tick
+  python3 ref/fondo.py --tabla | --tabla-hex ARCHIVO
 """
 
 import argparse
@@ -61,87 +48,32 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import market
 import trader
 
-K = 5                    # alfa = 1/32. El hardware solo tiene k = 5
-
 # Tabla de parámetros, en el orden en que está en la BRAM de la tabla
 # (rtl/pochoco_tabla.v, 0x8002_0000; la palabra i está en el desplazamiento
-# 4 i). Cada valor tiene que caber en 16 bits con signo. Los umbrales van en
-# unidades de dev (precio por 32).
+# 4 i). Cada valor tiene que caber en 16 bits con signo: el programa la lee con
+# lw y llega con extensión de signo.
 PALABRAS_TABLA = 256
 PARAMETROS = [
-    ("S_ENTRA", -96),    # supervisor, max_media: entra si dev < -3 * 32
-    ("S_SALE", 1),       #                         sale si dev > 0
-    ("G1_ENTRA", -96),   # gestor 1, max_media
-    ("G1_SALE", 1),
-    ("G2_ENTRA", -128),  # gestor 2, base: entra 4 bajo la media
-    ("G2_SALE", 1),
-    ("G3_ENTRA", -64),   # gestor 3, activo: entra 2 bajo la media
-    ("G3_SALE", 17),     #                    sale medio punto sobre la media
-    ("W1_INI", 6),       # pesos iniciales (el prior), en dieciseisavos
-    ("W2_INI", 5),
-    ("W3_INI", 5),
-    ("W1_MAX", 10),      # prior + 4
-    ("W2_MAX", 9),
-    ("W3_MAX", 9),
-    ("W1_MIN", 2),       # prior - 4
-    ("W2_MIN", 1),
-    ("W3_MIN", 1),
-    ("VENTANA", 512),    # ticks entre ajustes de los pesos
-    ("UMBRAL", 8),       # compra si los pesos adentro suman 8/16 o más
-    ("PLAZO", 8),        # vueltas del lazo de espera antes de decidir sin los que falten
+    ("LO_MAS_1", 101),       # bajo si p < 101: el mínimo de la serie es 100
+    ("HI", 255),             # alto si p >= 255: el máximo es 255
+    ("BANDA_COMPRA", 161),   # con los dos extremos vistos, compra si p < 161 (100 + 60)
+    ("BANDA_VENTA", 195),    # y vende si p >= 195 (255 - 60)
 ]
 POR_DEFECTO = dict(PARAMETROS)
 
 M32 = 0xFFFFFFFF
+DIGITOS_ADENTRO = 0x63
+BIT_LATIDO = 1 << 10
 
 
-def s32(x):
-    """Interpreta x como entero de 32 bits con signo."""
-    x &= M32
-    return x - (1 << 32) if x & 0x80000000 else x
-
-
-class Regla:
-    """La regla de reversión de sw/trade.s con umbrales libres (un gestor o el supervisor)."""
-
-    def __init__(self, entra, sale):
-        self.entra = entra
-        self.sale = sale
-        self.s = None
-        self.pos = 0
-
-    def paso(self, p):
-        if self.s is None:
-            self.s = 32 * p
-        dev = s32(32 * p - self.s)
-        entrar = 1 if dev < self.entra else 0
-        no_salir = 1 if dev < self.sale else 0
-        self.pos = (self.pos | entrar) & no_salir
-        self.s = s32(self.s + (dev >> K))
-        return self.pos
-
-
-class Gestor(Regla):
-    """Un gestor en papel: la regla más su puntaje por acción."""
-
-    def __init__(self, entra, sale):
-        super().__init__(entra, sale)
-        self.ejecutada = 0       # posición ya ejecutada en papel
-        self.puntaje = 0         # en treintaidosavos de unidad de precio
-        self.p32 = None          # 32 p del tick anterior
-
-    def paso(self, p):
-        if self.p32 is not None:
-            if self.ejecutada:
-                self.puntaje = s32(self.puntaje + 32 * p - self.p32)
-            self.puntaje = s32(self.puntaje - 2 * (self.ejecutada ^ self.pos))
-            self.ejecutada = self.pos
-        self.p32 = 32 * p
-        return super().paso(p)
+def u32(x):
+    """El registro que deja lw: 16 bits con extensión de signo, comparado sin signo (sltu)."""
+    return x & M32
 
 
 class Falla:
-    """El voto del gestor `gestor` (1, 2 o 3) no llega entre los ticks `desde` y `hasta`."""
+    """El hilo `gestor` (1, 2 o 3) falla entre los ticks `desde` y `hasta`. Desde el
+    17/11 los hilos 1 a 3 no participan en la decisión: la falla no cambia nada."""
 
     def __init__(self, gestor, desde=1, hasta=None):
         self.gestor = gestor
@@ -153,87 +85,70 @@ class Falla:
 
     @classmethod
     def leer(cls, texto):
-        """ "3:100:" gestor 3 desde el tick 100; "2:50:60" gestor 2 entre el 50 y el 60; "1" siempre."""
+        """ "3:100:" hilo 3 desde el tick 100; "2:50:60" hilo 2 entre el 50 y el 60; "1" siempre."""
         partes = texto.split(":")
         gestor = int(partes[0])
         desde = int(partes[1]) if len(partes) > 1 and partes[1] else 1
         hasta = int(partes[2]) if len(partes) > 2 and partes[2] else None
         if gestor not in (1, 2, 3):
-            raise ValueError("el gestor de una falla es 1, 2 o 3")
+            raise ValueError("el hilo de una falla es 1, 2 o 3")
         return cls(gestor, desde, hasta)
 
 
-class Fondo:
-    """El fondo completo. `decidir(p)` devuelve el byte que queda en DECISION."""
+def _validar(parametros):
+    q = dict(POR_DEFECTO)
+    if parametros:
+        for nombre in parametros:
+            if nombre not in POR_DEFECTO:
+                raise KeyError(f"parametro desconocido: {nombre}")
+        q.update(parametros)
+    return q
 
-    CAMPOS = ("tick", "precio", "byte", "pos0", "v1", "v2", "v3", "llego1", "llego2", "llego3",
-              "w1", "w2", "w3", "des1", "des2", "des3", "s0", "s1", "s2", "s3")
+
+class Fondo:
+    """El programa de R1 y R2. `decidir(p)` devuelve el byte que queda en DECISION."""
+
+    CAMPOS = ("tick", "precio", "byte", "bajo", "alto", "vio_lo", "vio_hi", "leds", "seg")
 
     def __init__(self, parametros=None, fallas=()):
-        q = dict(POR_DEFECTO)
-        if parametros:
-            q.update(parametros)
-        self.q = q
-        self.sup = Regla(q["S_ENTRA"], q["S_SALE"])
-        self.gestores = [Gestor(q[f"G{k}_ENTRA"], q[f"G{k}_SALE"]) for k in (1, 2, 3)]
-        self.w = [q["W1_INI"], q["W2_INI"], q["W3_INI"]]
-        self.wmax = [q["W1_MAX"], q["W2_MAX"], q["W3_MAX"]]
-        self.wmin = [q["W1_MIN"], q["W2_MIN"], q["W3_MIN"]]
-        self.ref = [0, 0, 0]             # puntaje de cada gestor al empezar la ventana
-        self.faltan = q["VENTANA"]       # ticks que faltan para la frontera
-        self.fallas = list(fallas)
+        self.q = _validar(parametros)
+        self.fallas = list(fallas)       # no afectan la decisión (ver Falla)
+        self.byte = market.MANTENER
+        self.vio_lo = 0
+        self.vio_hi = 0
         self.tick = 0
-        self.cambios = 0                 # ajustes de pesos hechos
-        self.degradados = 0              # ticks decididos sin algún voto
+        self.leds = 0                    # LED al cerrar el tick
+        self.seg = 0                     # 0 o 0x63: lo último escrito en los dígitos
+        self.degradados = 0              # se mantiene por compatibilidad: siempre 0
         self.traza = None                # lista de tuplas si se pide
 
     def decidir(self, p):
+        q = self.q
         self.tick += 1
         t = self.tick
-        pos0 = self.sup.paso(p)
-        self.faltan -= 1
-        posiciones = [g.paso(p) for g in self.gestores]
-        llego = [not any(f.afecta(k + 1, t) for f in self.fallas) for k in range(3)]
-        votos = [posiciones[k] if llego[k] else pos0 for k in range(3)]
-        if all(llego):
-            if self.faltan == 0:
-                self._frontera(p)
+        bajo = 1 if p < u32(q["LO_MAS_1"]) else 0
+        alto = 0 if p < u32(q["HI"]) else 1
+        banda_c = 1 if p < u32(q["BANDA_COMPRA"]) else 0
+        banda_v = 0 if p < u32(q["BANDA_VENTA"]) else 1
+        self.vio_lo |= bajo
+        self.vio_hi |= alto
+        dos = self.vio_lo & self.vio_hi
+        comprar = bajo | (dos & banda_c)
+        vender = alto | (dos & banda_v)
+        if comprar or vender:
+            self.byte = market.VENDER_63 if vender else market.COMPRAR_63
+        adentro = 1 if self.byte == market.COMPRAR_63 else 0
+        if t % 2 == 0:
+            self.seg = DIGITOS_ADENTRO if adentro else 0
         else:
-            self.degradados += 1
-            if self.faltan == 0:         # sin los tres votos no se tocan los pesos
-                self.faltan = self.q["VENTANA"]
-        f = sum(w for w, v in zip(self.w, votos) if v)
-        byte = market.COMPRAR_63 if f >= self.q["UMBRAL"] else market.VENDER_63
+            self.leds = (1 if t & BIT_LATIDO else 0) | (self.vio_lo << 1) | (self.vio_hi << 2) | (adentro << 3)
         if self.traza is not None:
-            self.traza.append((t, p, byte, pos0, *votos, *(int(x) for x in llego), *self.w,
-                               *(g.puntaje for g in self.gestores), self.sup.s, *(g.s for g in self.gestores)))
-        return byte
-
-    def _frontera(self, p):
-        """Ajuste de pesos. Mismo orden de comparaciones que sw/fondo.s."""
-        g = []
-        for k in range(3):
-            des = self.gestores[k].puntaje
-            g.append(s32(des - self.ref[k]))
-            self.ref[k] = des
-        mejor = peor = 0
-        for k in (1, 2):
-            if g[k] > g[mejor]:
-                mejor = k
-            if g[k] < g[peor]:
-                peor = k
-        self.faltan = self.q["VENTANA"]
-        if p >= g[mejor] - g[peor]:              # la ventaja no supera 1/32 del precio
-            return
-        if self.w[mejor] >= self.wmax[mejor] or self.wmin[peor] >= self.w[peor]:
-            return
-        self.w[mejor] += 1
-        self.w[peor] -= 1
-        self.cambios += 1
+            self.traza.append((t, p, self.byte, bajo, alto, self.vio_lo, self.vio_hi, self.leds, self.seg))
+        return self.byte
 
 
 def correr(precios, perdidos=0, parametros=None, fallas=(), filas=None, traza=None):
-    """Corre el fondo sobre la serie. Devuelve (Mercado final, Fondo)."""
+    """Corre el programa sobre la serie. Devuelve (Mercado final, Fondo)."""
     fondo = Fondo(parametros, fallas)
     fondo.traza = traza
     m = market.simular(precios, trader.decisiones(precios, fondo, perdidos), filas=filas)
@@ -242,15 +157,11 @@ def correr(precios, perdidos=0, parametros=None, fallas=(), filas=None, traza=No
 
 def palabras_tabla(parametros=None):
     """Los valores de la tabla de parámetros, en el orden de la memoria."""
-    q = dict(POR_DEFECTO)
-    if parametros:
-        q.update(parametros)
+    q = _validar(parametros)
     valores = [q[nombre] for nombre, _ in PARAMETROS]
     for (nombre, _), v in zip(PARAMETROS, valores):
         if not -32768 <= v <= 32767:
             raise ValueError(f"{nombre} = {v} no cabe en 16 bits con signo")
-    if q["PLAZO"] < 1:
-        raise ValueError("PLAZO tiene que ser 1 o más")
     return valores
 
 
@@ -263,17 +174,17 @@ def tabla_hex(parametros=None):
 
 def main(argv=None):
     ap = argparse.ArgumentParser(description="Referencia de sw/fondo.s")
-    ap.add_argument("serie", nargs="?", default="tb/practica.csv")
+    ap.add_argument("serie", nargs="?", default="data/practica_meta.csv")
     ap.add_argument("--nticks", type=int, default=None, help="usar solo los primeros N ticks")
     ap.add_argument("--periodo-ns", type=int, default=None,
                     help="período del testbench: modela los precios que se pierden durante el reset")
     ap.add_argument("--perdidos", type=int, default=None, help="fijar a mano cuántos precios iniciales no se ven")
-    ap.add_argument("--falla", action="append", default=[], metavar="G[:DESDE[:HASTA]]",
-                    help="el voto del gestor G no llega entre esos ticks (se puede repetir)")
+    ap.add_argument("--falla", action="append", default=[], metavar="H[:DESDE[:HASTA]]",
+                    help="falla en el hilo H (1 a 3) entre esos ticks: no cambia la decisión")
     ap.add_argument("--param", action="append", default=[], metavar="NOMBRE=VALOR",
                     help="cambia un parámetro de la tabla (se puede repetir)")
     ap.add_argument("-o", "--salida", help="escribir el decisiones.csv de referencia")
-    ap.add_argument("--traza", help="escribir el estado interno por tick")
+    ap.add_argument("--traza", help="escribir el estado por tick")
     ap.add_argument("--tabla", action="store_true", help="mostrar la tabla de parámetros y salir")
     ap.add_argument("--tabla-hex", metavar="ARCHIVO",
                     help="escribir el contenido de la BRAM de la tabla (256 valores de 16 bits) y salir")
@@ -287,7 +198,7 @@ def main(argv=None):
         parametros[nombre] = int(valor, 0)
     if a.tabla:
         for i, ((nombre, _), v) in enumerate(zip(PARAMETROS, palabras_tabla(parametros))):
-            print(f"{i:3d}  0x{4 * i:03x}  {nombre:10s} {v:6d}  0x{v & 0xFFFF:04x}")
+            print(f"{i:3d}  0x{4 * i:03x}  {nombre:12s} {v:6d}  0x{v & 0xFFFF:04x}")
         return 0
     if a.tabla_hex:
         with open(a.tabla_hex, "w", newline="\n") as f:
@@ -307,9 +218,8 @@ def main(argv=None):
     traza = [] if a.traza else None
     m, fondo = correr(precios, perdidos, parametros, fallas, filas, traza)
     print(f"Serie {a.serie}: {len(precios)} ticks, precios iniciales que el programa no ve: {perdidos}")
-    print(f"fondo: patrimonio final {m.w}, {m.ordenes} ordenes, perdida maxima {m.max_dd}, "
-          f"pesos finales {fondo.w[0]}/{fondo.w[1]}/{fondo.w[2]} con {fondo.cambios} cambios, "
-          f"{fondo.degradados} ticks sin algun voto")
+    print(f"R1 y R2 (sw/fondo.s): patrimonio final {m.w}, {m.ordenes} ordenes, perdida maxima {m.max_dd}, "
+          f"vio el minimo {fondo.vio_lo}, vio el maximo {fondo.vio_hi}")
     if a.salida:
         market.escribir_csv(a.salida, filas)
     if a.traza:
@@ -317,9 +227,6 @@ def main(argv=None):
             f.write(",".join(Fondo.CAMPOS) + "\n")
             for fila in traza:
                 f.write(",".join(str(x) for x in fila) + "\n")
-    if not a.salida and not a.traza:
-        mm = trader.correr(precios, perdidos=perdidos)
-        print(f"max_media sola: patrimonio final {mm.w}, {mm.ordenes} ordenes, perdida maxima {mm.max_dd}")
     return 0
 
 

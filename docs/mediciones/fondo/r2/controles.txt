@@ -5,42 +5,40 @@ Herramientas:
   Yosys 0.68+195 (git sha1 435977e97-dirty, Release, Clang /usr/bin/clang++ 21.1.8)
   "nextpnr-ice40" -- Next Generation Place and Route (Version nextpnr-0.11.1-19-g8dbcee5c)
   Icarus Verilog version 14.0 (devel) (s20260301-403-g5ab23063f-dirty)
-Commit de partida: b772d1c (rama p10-revision)
+Commit de partida: 41826e0 (rama regla-cotas-r1)
   Verilator 5.053 devel rev v5.052-22-g7cf8c5cca (mod)
 Hardware (r2): pochoco_soc con -DESPINO_BARREL -DESPINO_XD_EMAD -DESPINO_XD_DEVK -DESPINO_TABLA -DESPINO_VIGILANTE
-Programa: sw/fondo.s (sha256 19773517830a2e16...), tabla sw/fondo_tabla.hex (sha256 f792588c9cc823cb...), referencia ref/fondo.py
+Programa: sw/fondo.s (sha256 6f55ec520f3686ef...), tabla sw/fondo_tabla.hex (sha256 93ad35e5be0d6f7e...), referencia ref/fondo.py
 
 6000 ticks por control. Un control esta bien cuando la comparacion FALLA.
 
-DETECTADO umbral_gestor3: la tabla trae otro umbral de entrada para el gestor 3
-    407 bytes distintos a la referencia, el primero en el tick 1638; voto 3 en el tick 71: 18176 y se esperaba 18177; LED en el tick 71: 0 y se esperaba 8; puntaje 3 en el tick 72: -548 y se esperaba -550
-DETECTADO comision_papel: el puntaje en papel descuenta la mitad de la comision
-    puntaje 1 en el tick 3: -1 y se esperaba -2; puntaje 3 en el tick 3: -1 y se esperaba -2; puntaje 2 en el tick 9: -1 y se esperaba -2
-DETECTADO margen_frontera: la frontera ajusta los pesos sin exigir el margen
-    pesos en el tick 1536: (7, 5, 4) y se esperaba (6, 5, 5)
-DETECTADO tope_pesos: la frontera no respeta el tope del peso del mejor
-    pesos en el tick 3072: (5, 1, 10) y se esperaba (6, 1, 9)
-DETECTADO umbral_voto: el voto exige un dieciseisavo mas para comprar
-    76 bytes distintos a la referencia, el primero en el tick 1638; byte en el tick 1636: 191 y se esperaba 127; 7 segmentos en el tick 1636: (64, 64) y se esperaba (2, 48)
-DETECTADO plazo_corto: el plazo de la tabla es de una sola vuelta: vence con los gestores sanos
-    plazo vencido en el tick 1: 1 y se esperaba 0; LED en el tick 11: 0 y se esperaba 8; pesos en el tick 512: (6, 5, 5) y se esperaba (6, 4, 6); ticks_plazo = 5998 y se esperaba 0
-DETECTADO sin_reemplazo: vencido el plazo, el voto viejo del gestor 3 no se reemplaza (con cuelgue:3:1)
-    285 bytes distintos a la referencia, el primero en el tick 4; byte en el tick 2: 191 y se esperaba 127; 7 segmentos en el tick 2: (64, 64) y se esperaba (2, 48); LED en el tick 3: 2 y se esperaba 10
-DETECTADO reemplazo_fijo: vencido el plazo, el voto viejo del gestor 2 se cuenta como afuera en vez de usar max_media (con cuelgue:2:1)
-    LED en el tick 3: 10 y se esperaba 14
-DETECTADO sin_media_propia: el supervisor no actualiza la media de su max_media (con cuelgue:1:1+cuelgue:2:1+cuelgue:3:1)
-    4526 bytes distintos a la referencia, el primero en el tick 11; byte en el tick 9: 127 y se esperaba 191; LED en el tick 9: 14 y se esperaba 0; 7 segmentos en el tick 10: (2, 48) y se esperaba (64, 64
-DETECTADO frontera_degradada: con un voto ausente en la frontera igual se ajustan los pesos (con sin_voto:2:1024:1024)
-    722 bytes distintos a la referencia, el primero en el tick 1386; byte en el tick 1024: 0 y se esperaba 191; escrituras en DECISION en el tick 1024: 0 y se esperaba 1; PUB en el tick 1024: 261951 y se 
-DETECTADO voto_sin_tick: el supervisor acepta un voto sin mirar de que tick es (con atraso:3:1000)
-    421 bytes distintos a la referencia, el primero en el tick 4; plazo vencido en el tick 1: 0 y se esperaba 1; byte en el tick 2: 191 y se esperaba 127; 7 segmentos en el tick 2: (64, 64) y se esperaba 
-DETECTADO dos_stores_telemetria: la telemetria hace dos stores en los ticks impares
-    stores de telemetria en el tick 1: 2 y se esperaba 1; 7 segmentos en el tick 7: (64, 64) y se esperaba (2, 48); tel_mas_de_1 = 2999 y se esperaba 0
-DETECTADO latido: el LED de latido usa otro bit del numero de tick
-    LED en el tick 513: 1 y se esperaba 0
-DETECTADO gestor_escribe_pub: un gestor escribe en la palabra PUB, que es del supervisor
-    escrituras en PUB en el tick 1: 4 y se esperaba 1; violaciones = 17994 y se esperaba 0
-DETECTADO dos_decisiones: el supervisor escribe DECISION dos veces en el tick
+DETECTADO banda_tabla: la tabla trae otra banda de compra (171 en vez de 161)
+    1198 bytes distintos a la referencia, el primero en el tick 388; los bytes no son los de ref/trader.py (la regla de R0); byte en el tick 386: 127 y se esperaba 191; 7 segmentos en el tick 386: (2, 48)
+DETECTADO venta_tabla: la tabla vende desde 200 en vez de 195
+    487 bytes distintos a la referencia, el primero en el tick 436; los bytes no son los de ref/trader.py (la regla de R0); byte en el tick 434: 127 y se esperaba 191; 7 segmentos en el tick 434: (2, 48) 
+DETECTADO venta_196: la tabla vende desde 196 en vez de 195 (un solo byte cambia: la serie de reversion de semilla 2)
+    1 bytes distintos a la referencia, el primero en el tick 4674; los bytes no son los de ref/trader.py (la regla de R0); byte en el tick 4672: 127 y se esperaba 191; 7 segmentos en el tick 4672: (2, 48)
+DETECTADO bajo_desde_101: compra al ver 101 y no solo 100
+    25 bytes distintos a la referencia, el primero en el tick 5964; los bytes no son los de ref/trader.py (la regla de R0); byte en el tick 5962: 127 y se esperaba 191; 7 segmentos en el tick 5962: (2, 48
+DETECTADO minimo_olvidado: la marca de haber visto el minimo no queda puesta
+    2717 bytes distintos a la referencia, el primero en el tick 349; los bytes no son los de ref/trader.py (la regla de R0); LED en el tick 57: 8 y se esperaba 10; byte en el tick 347: 191 y se esperaba 1
+DETECTADO sin_banda: con los dos extremos vistos no compra en la banda
+    3019 bytes distintos a la referencia, el primero en el tick 349; los bytes no son los de ref/trader.py (la regla de R0); byte en el tick 347: 191 y se esperaba 127; LED en el tick 347: 6 y se esperaba
+DETECTADO q_no_se_mantiene: sin cambio el byte no se repite: pasa a comprar 63
+    2094 bytes distintos a la referencia, el primero en el tick 3; los bytes no son los de ref/trader.py (la regla de R0); byte en el tick 1: 127 y se esperaba 0; LED en el tick 1: 8 y se esperaba 0; 7 se
+DETECTADO parte_comprando: parte con comprar 63 en vez de mantener
+    463 bytes distintos a la referencia, el primero en el tick 3; los bytes no son los de ref/trader.py (la regla de R0); byte en el tick 1: 127 y se esperaba 0; LED en el tick 1: 8 y se esperaba 0; 7 seg
+DETECTADO dos_decisiones: el hilo 0 escribe DECISION dos veces en el tick
     escrituras en DECISION en el tick 1: 2 y se esperaba 1; dec_distinto_de_1 = 5998 y se esperaba 0
+DETECTADO dos_stores_telemetria: la telemetria hace dos stores en los ticks impares
+    stores de telemetria en el tick 1: 2 y se esperaba 1; 7 segmentos en el tick 5989: (64, 64) y se esperaba (2, 48); tel_mas_de_1 = 2999 y se esperaba 0
+DETECTADO latido: el LED de latido usa otro bit del numero de tick
+    LED en el tick 513: 5 y se esperaba 4
+DETECTADO digitos: los 7 segmentos muestran otro numero al estar adentro
+    7 segmentos en el tick 5988: (48, 2) y se esperaba (2, 48)
+DETECTADO hilo_toca_spi: el hilo 1 lee el registro de estado del SPI
+    violaciones = 1249667 y se esperaba 0
+DETECTADO hilo_escribe_ram: el hilo 2 escribe la RAM (el programa sano no la usa) (con escribe:2)
+    stores_ram = 749800 y se esperaba 0
 
-PASS: 15 de 15 controles detectados
+PASS: 14 de 14 controles detectados

@@ -23,25 +23,16 @@ sys.path.insert(0, os.path.join(RAIZ, "tools", "asm"))
 import core  # noqa: E402
 
 # etiqueta del programa -> plusarg del testbench
-PLUSARGS = [
-    ("s_espera", "A_S_ESPERA"), ("s_primero", "A_S_PRIMERO"), ("s_votos", "A_S_VOTOS"),
-    ("s_plazo", "A_PLAZO"), ("frontera", "A_FRONTERA"), ("g_espera", "A_G_ESPERA"),
-    ("g_primero", "A_G_PRIMERO"), ("PUB", "PUB"), ("W1", "W1"), ("REF1", "REF1"), ("G1", "G1"),
-]
+PLUSARGS = [("s_espera", "A_S_ESPERA"), ("hilo1", "A_HILO1"), ("hilo2", "A_HILO2"), ("hilo3", "A_HILO3")]
 
 # bloques del programa, en orden: (nombre, etiqueta donde empieza)
 BLOQUES = [
     ("Tabla de arranque", None),
-    ("Supervisor: inicio y primer precio", "supervisor"),
-    ("Supervisor: sondeo del SPI y publicación", "s_espera"),
-    ("Supervisor: max_media propia", None),
-    ("Supervisor: lectura de votos con plazo", "s_votos"),
-    ("Supervisor: degradación (plazo vencido)", "s_plazo"),
-    ("Supervisor: voto y DECISION", "s_todos"),
-    ("Supervisor: telemetría", None),
-    ("Supervisor: frontera de ventana (pesos)", "frontera"),
-    ("Entradas de los tres gestores", "hilo1"),
-    ("Rutina común de los gestores", "gestor"),
+    ("Hilos 1 a 3: lazo de espera", "hilo1"),
+    ("Hilo 0: inicio", "supervisor"),
+    ("Hilo 0: sondeo del SPI y lectura del precio", "s_espera"),
+    ("Hilo 0: umbrales de la tabla, decision y DECISION", "s_decidir"),
+    ("Hilo 0: telemetria", "s_telemetria"),
 ]
 
 
@@ -75,22 +66,12 @@ def main(argv):
     if argv[2] == "--plusargs":
         print(" ".join(f"+{arg}={e.simbolos[nombre]}" for nombre, arg in PLUSARGS))
     elif argv[2] == "--tamano":
-        tabla = e.simbolos["PUB"] // 4
-        fin = max(i for i, w in enumerate(palabras[:tabla]) if w) + 1
-        marcas = {"Supervisor: max_media propia": e.etiquetas["s_publica"] + 12,
-                  "Supervisor: telemetría": e.etiquetas["s_voto"] + 14 * 4}
-        inicio = [0 if et is None and n == "Tabla de arranque" else marcas[n] if et is None else e.etiquetas[et]
-                  for n, et in BLOQUES]
-        inicio.append(fin * 4)
+        fin = max(i for i, w in enumerate(palabras) if w) + 1
+        inicio = [0 if et is None else e.etiquetas[et] for _, et in BLOQUES] + [fin * 4]
         for (nombre, _), a, b in zip(BLOQUES, inicio, inicio[1:]):
-            print(f"  {nombre:45s} {(b - a) // 4:4d}")
-        n_estado = (e.simbolos["G3"] + 8 - e.simbolos["PUB"]) // 4
-        print(f"  {'Programa':45s} {fin:4d}")
-        print(f"  {'Estado compartido (parte en cero)':45s} {n_estado:4d}")
-        print(f"  {'Total':45s} {fin + n_estado:4d} de {len(palabras)} palabras "
-              f"({100.0 * (fin + n_estado) / len(palabras):.1f} %)")
-        print(f"  {'Libres entre el programa y el estado':45s} {tabla - fin:4d}")
-        print("  La tabla de parametros (20 valores de 16 bits) no ocupa esta memoria: esta en su BRAM.")
+            print(f"  {nombre:52s} {(b - a) // 4:4d}")
+        print(f"  {'Programa':52s} {fin:4d} de 512 palabras ({100.0 * fin / 512:.1f} %)")
+        print("  El programa no usa la RAM de datos. La tabla de parametros (4 valores de 16 bits) esta en su BRAM.")
     else:
         for nombre in argv[2:]:
             print(f"{nombre} {e.simbolos[nombre]}")

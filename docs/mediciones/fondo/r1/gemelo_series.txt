@@ -4,60 +4,60 @@ Generado por tools/fondo/gemelo_series.py (make fondo-gemelo-series). No editar 
 
 Periodo 100000 ns (presupuesto 2262 ciclos, 2 precios perdidos en el reset):
   familia              series  pasan     ticks    prom   peor
-  remuestreo               70     70    140000   222.9    443
-  borde_alto               70     70    140000   223.0    443
-  borde_bajo               70     70    140000   223.0    443
-  cambio_de_caracter       70     70    140000   222.8    443
-  cambio_volatilidad       70     70    140000   222.9    443
-  dos_componentes          70     70    140000   222.8    443
-  modelo                   70     70    140000   222.9    443
-  modelo_vecino            70     70    140000   222.9    443
-  nivel_bajo               70     70    140000   222.9    443
-  paseo                    70     70    140000   222.9    443
-  plana                    70     70    140000   223.2    379
-  reversion                70     70    140000   222.9    443
-  saltos                   70     70    140000   222.9    443
-  tendencia                70     70    140000   223.1    443
-  volatil                  70     70    140000   222.8    443
-  practica                  1      1     20000   223.0    443
+  remuestreo               70     70    140000   123.0    127
+  borde_alto               70     70    140000   123.0    127
+  borde_bajo               70     70    140000   123.0    127
+  cambio_de_caracter       70     70    140000   123.0    127
+  cambio_volatilidad       70     70    140000   123.0    127
+  dos_componentes          70     70    140000   123.0    127
+  modelo                   70     70    140000   123.0    127
+  modelo_vecino            70     70    140000   123.0    127
+  nivel_bajo               70     70    140000   123.0    127
+  paseo                    70     70    140000   123.0    127
+  plana                    70     70    140000   123.0    127
+  reversion                70     70    140000   123.0    127
+  saltos                   70     70    140000   123.0    127
+  tendencia                70     70    140000   123.0    127
+  volatil                  70     70    140000   123.0    127
+  practica                  1      1     20000   123.0    127
 
 Periodo 1000000 ns (presupuesto 24762 ciclos, 1 precios perdidos en el reset):
   familia              series  pasan     ticks    prom   peor
-  remuestreo               70     70    140000   222.6    443
-  borde_alto               70     70    140000   222.2    443
-  borde_bajo               70     70    140000   222.1    443
-  cambio_de_caracter       70     70    140000   222.9    443
-  cambio_volatilidad       70     70    140000   222.5    443
-  dos_componentes          70     70    140000   222.6    443
-  modelo                   70     70    140000   222.5    443
-  modelo_vecino            70     70    140000   222.8    443
-  nivel_bajo               70     70    140000   222.7    443
-  paseo                    70     70    140000   222.4    443
-  plana                    70     70    140000   222.8    379
-  reversion                70     70    140000   222.8    443
-  saltos                   70     70    140000   222.7    443
-  tendencia                70     70    140000   222.5    443
-  volatil                  70     70    140000   222.4    443
-  practica                  1      1     20000   222.6    443
+  remuestreo               70     70    140000   123.0    127
+  borde_alto               70     70    140000   123.0    127
+  borde_bajo               70     70    140000   123.0    127
+  cambio_de_caracter       70     70    140000   123.0    127
+  cambio_volatilidad       70     70    140000   123.0    127
+  dos_componentes          70     70    140000   123.0    127
+  modelo                   70     70    140000   123.0    127
+  modelo_vecino            70     70    140000   123.0    127
+  nivel_bajo               70     70    140000   123.0    127
+  paseo                    70     70    140000   123.0    127
+  plana                    70     70    140000   123.0    127
+  reversion                70     70    140000   123.0    127
+  saltos                   70     70    140000   123.0    127
+  tendencia                70     70    140000   123.0    127
+  volatil                  70     70    140000   123.0    127
+  practica                  1      1     20000   123.0    127
 
 Periodo 10000000 ns (presupuesto 249762 ciclos, 1 precios perdidos en el reset):
   familia              series  pasan     ticks    prom   peor
-  remuestreo               70     70    140000   222.6    443
-  borde_alto               70     70    140000   222.2    443
-  borde_bajo               70     70    140000   222.1    443
-  cambio_de_caracter       70     70    140000   222.9    443
-  cambio_volatilidad       70     70    140000   222.5    443
-  dos_componentes          70     70    140000   222.6    443
-  modelo                   70     70    140000   222.5    443
-  modelo_vecino            70     70    140000   222.8    443
-  nivel_bajo               70     70    140000   222.7    443
-  paseo                    70     70    140000   222.4    443
-  plana                    70     70    140000   222.8    379
-  reversion                70     70    140000   222.8    443
-  saltos                   70     70    140000   222.7    443
-  tendencia                70     70    140000   222.5    443
-  volatil                  70     70    140000   222.4    443
-  practica                  1      1     20000   222.6    443
+  remuestreo               70     70    140000   123.0    127
+  borde_alto               70     70    140000   123.0    127
+  borde_bajo               70     70    140000   123.0    127
+  cambio_de_caracter       70     70    140000   123.0    127
+  cambio_volatilidad       70     70    140000   123.0    127
+  dos_componentes          70     70    140000   123.0    127
+  modelo                   70     70    140000   123.0    127
+  modelo_vecino            70     70    140000   123.0    127
+  nivel_bajo               70     70    140000   123.0    127
+  paseo                    70     70    140000   123.0    127
+  plana                    70     70    140000   123.0    127
+  reversion                70     70    140000   123.0    127
+  saltos                   70     70    140000   123.0    127
+  tendencia                70     70    140000   123.0    127
+  volatil                  70     70    140000   123.0    127
+  practica                  1      1     20000   123.0    127
 
-Ticks comparados: 6360000 (1051 series por 3 periodos). Tiempo del gemelo: 19.0 s en total.
+Ticks comparados: 6360000 (1051 series por 3 periodos). Tiempo del gemelo: 12.5 s en total.
 PASS: 0 corridas con diferencias
