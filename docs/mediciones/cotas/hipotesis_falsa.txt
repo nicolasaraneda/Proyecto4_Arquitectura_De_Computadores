@@ -1,0 +1,66 @@
+Caso d: la ronda es un trozo de una ventana de 20 000 normalizada (no se vuelve a normalizar)
+Generado por ref/cotas/experimento.py. Cinco empresas, 30 ventanas de 20 000 cada una, cortadas en rondas.
+
+== trozos de 2000 (tocan algun extremo: 20 %) (1500 ventanas)
+estrategia                       media      p5    peor  >nada >c y m >max_m
+nada                             10000   10000   10000    0.0   46.5   45.1
+siempre                          10240    7152    5400   53.5    0.0   51.3
+max_media                        10078    8444    5094   52.9   48.7    0.0
+zscore                            9988    8607    5157   48.9   44.5   41.1
+espera                           10297   10000    9990   10.2   51.8   49.5
+compra                           10360    7241    5400   57.7    9.6   54.6
+parte20                          10293    9055    7915   61.0   52.8   55.5
+parte40                          10293    7915    5835   59.6   54.3   55.6
+umbral170                        10462    8596    6414   32.6   30.5   57.0
+umbral190                        10459    8081    6053   40.0   23.3   56.6
+espera_banda20                   10297   10000    9990   10.2   51.8   49.5
+espera_banda40                   10297   10000    9990   10.2   51.8   49.5
+espera_banda60                   10297   10000    9990   10.2   51.8   49.5
+espera_banda70                   10297   10000    9990   10.2   51.8   49.5
+espera_banda76                   10297   10000    9990   10.2   51.8   49.5
+compra_banda20                   10360    7241    5400   57.7    9.6   54.6
+compra_banda40                   10360    7241    5400   57.7    9.6   54.6
+compra_banda60                   10360    7241    5400   57.7    9.6   54.6
+compra_banda70                   10360    7241    5400   57.7    9.6   54.6
+parte20_banda60                  10293    9055    7915   61.0   52.8   55.5
+parte20_banda70                  10293    9055    7915   61.0   52.8   55.5
+espera_a2                        10313   10000    9796   11.2   51.9   50.0
+espera_b2                        10297   10000    9990   10.2   51.8   49.5
+espera_a5                        10324   10000    9110   13.1   52.1   50.7
+compra_a2                        10360    7241    5400   57.7    9.6   54.6
+compra_b2                        10373    7245    5400   58.0   10.7   55.1
+compra_a5                        10360    7241    5400   57.7    9.6   54.6
+espera_a2_b2_banda60             10313   10000    9796   11.2   51.9   50.0
+compra_a2_b2_banda40             10373    7245    5400   58.0   10.7   55.1
+
+== trozos de 5000 (tocan algun extremo: 50 %) (600 ventanas)
+estrategia                       media      p5    peor  >nada >c y m >max_m
+nada                             10000   10000   10000    0.0   47.8   45.7
+siempre                          10617    6164    4320   52.2    0.0   53.8
+max_media                        10206    7615    4276   53.8   46.0    0.0
+zscore                            9996    7497    5348   48.5   41.8   38.7
+espera                           11205   10000    9990   25.3   60.5   58.7
+compra                           11144    6540    4320   64.0   23.8   64.2
+parte20                          11150    8695    7155   73.8   62.5   67.0
+parte40                          11092    7326    4457   69.5   66.3   65.3
+umbral170                        11478    8521    6540   42.8   40.5   66.0
+umbral190                        11369    7511    5884   47.3   33.2   65.2
+espera_banda20                   11205   10000    9990   25.3   60.5   58.7
+espera_banda40                   11205   10000    9990   25.3   60.5   58.7
+espera_banda60                   11205   10000    9990   25.3   60.5   58.7
+espera_banda70                   11205   10000    9990   25.3   60.5   58.7
+espera_banda76                   11205   10000    9990   25.3   60.5   58.7
+compra_banda20                   11144    6540    4320   64.0   23.8   64.2
+compra_banda40                   11144    6540    4320   64.0   23.8   64.2
+compra_banda60                   11144    6540    4320   64.0   23.8   64.2
+compra_banda70                   11144    6540    4320   64.0   23.8   64.2
+parte20_banda60                  11150    8695    7155   73.8   62.5   67.0
+parte20_banda70                  11150    8695    7155   73.8   62.5   67.0
+espera_a2                        11207   10000    9765   26.3   60.3   58.8
+espera_b2                        11207   10000    9990   25.3   60.5   58.7
+espera_a5                        11181   10000    9515   28.0   59.0   59.2
+compra_a2                        11144    6540    4320   64.0   23.8   64.2
+compra_b2                        11156    6540    4320   63.7   25.2   64.5
+compra_a5                        11152    6540    4320   64.0   23.8   64.2
+espera_a2_b2_banda60             11209   10000    9765   26.3   60.3   58.8
+compra_a2_b2_banda40             11156    6540    4320   63.7   25.2   64.5

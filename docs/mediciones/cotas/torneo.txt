@@ -1,0 +1,100 @@
+Caso e: torneo. En cada ronda, 9 rivales sorteados del campo; puntos lineales entre el peor y el mejor
+de la ronda (0 a 1) y porcentaje de rondas en primer lugar. Poblacion puente, cinco empresas.
+Campos: 'sin extremos' (nada, siempre, max_media, regla_base, media_e2, media_e6, zscore, zscore_z2), 'un tercio con extremos' y 'dos tercios con extremos'
+(los de extremos sorteados de: espera, compra, compra_banda40, espera_banda40, umbral170, compra_a2_b2_banda40).
+
+== largo 2000 (1200 rondas)
+estrategia                                    sin extremos        un tercio con extremos      dos tercios con extremos
+nada                                  0.407 pts  23.9 % 1o          0.210 pts   1.2 % 1o          0.162 pts   0.4 % 1o
+siempre                               0.492 pts  37.1 % 1o          0.279 pts   2.1 % 1o          0.226 pts   0.9 % 1o
+max_media                             0.448 pts  10.1 % 1o          0.270 pts   4.7 % 1o          0.212 pts   5.0 % 1o
+zscore                                0.439 pts  15.8 % 1o          0.244 pts   3.8 % 1o          0.186 pts   3.1 % 1o
+espera                                0.923 pts  79.2 % 1o          0.819 pts  50.7 % 1o          0.778 pts  47.0 % 1o
+compra                                0.915 pts  77.8 % 1o          0.794 pts  47.4 % 1o          0.736 pts  39.4 % 1o
+parte20                               0.935 pts  82.2 % 1o          0.817 pts  22.8 % 1o          0.772 pts  10.9 % 1o
+parte40                               0.933 pts  81.3 % 1o          0.809 pts  27.5 % 1o          0.762 pts  15.6 % 1o
+umbral170                             0.929 pts  78.2 % 1o          0.801 pts  36.5 % 1o          0.733 pts  28.1 % 1o
+umbral190                             0.922 pts  76.9 % 1o          0.785 pts  34.5 % 1o          0.715 pts  25.4 % 1o
+espera_banda20                        0.925 pts  79.8 % 1o          0.827 pts  51.7 % 1o          0.788 pts  47.8 % 1o
+espera_banda40                        0.928 pts  80.5 % 1o          0.841 pts  53.2 % 1o          0.803 pts  49.4 % 1o
+espera_banda60                        0.932 pts  80.9 % 1o          0.840 pts  51.8 % 1o          0.803 pts  48.3 % 1o
+espera_banda70                        0.935 pts  81.4 % 1o          0.844 pts  53.1 % 1o          0.806 pts  49.7 % 1o
+espera_banda76                        0.935 pts  81.2 % 1o          0.844 pts  52.8 % 1o          0.807 pts  50.0 % 1o
+compra_banda20                        0.918 pts  78.4 % 1o          0.803 pts  48.1 % 1o          0.747 pts  40.0 % 1o
+compra_banda40                        0.919 pts  78.8 % 1o          0.816 pts  50.5 % 1o          0.762 pts  42.2 % 1o
+compra_banda60                        0.925 pts  79.4 % 1o          0.813 pts  48.6 % 1o          0.761 pts  41.0 % 1o
+compra_banda70                        0.927 pts  80.1 % 1o          0.817 pts  49.4 % 1o          0.764 pts  41.5 % 1o
+parte20_banda60                       0.943 pts  84.2 % 1o          0.840 pts  28.1 % 1o          0.800 pts  17.6 % 1o
+parte20_banda70                       0.946 pts  84.4 % 1o          0.845 pts  30.2 % 1o          0.804 pts  19.9 % 1o
+espera_a2                             0.926 pts  79.1 % 1o          0.821 pts  37.4 % 1o          0.775 pts  30.8 % 1o
+espera_b2                             0.923 pts  79.5 % 1o          0.819 pts  39.2 % 1o          0.777 pts  33.3 % 1o
+espera_a5                             0.922 pts  78.0 % 1o          0.805 pts  29.8 % 1o          0.758 pts  23.2 % 1o
+compra_a2                             0.915 pts  77.4 % 1o          0.791 pts  38.3 % 1o          0.730 pts  28.9 % 1o
+compra_b2                             0.917 pts  77.2 % 1o          0.796 pts  36.5 % 1o          0.738 pts  27.7 % 1o
+compra_a5                             0.913 pts  76.8 % 1o          0.779 pts  31.1 % 1o          0.714 pts  21.3 % 1o
+espera_a2_b2_banda60                  0.935 pts  81.2 % 1o          0.840 pts  36.7 % 1o          0.799 pts  29.9 % 1o
+compra_a2_b2_banda40                  0.920 pts  77.9 % 1o          0.815 pts  36.1 % 1o          0.757 pts  27.1 % 1o
+
+== largo 5000 (1200 rondas)
+estrategia                                    sin extremos        un tercio con extremos      dos tercios con extremos
+nada                                  0.435 pts  23.7 % 1o          0.220 pts   1.5 % 1o          0.168 pts   0.8 % 1o
+siempre                               0.509 pts  38.4 % 1o          0.286 pts   1.9 % 1o          0.233 pts   0.8 % 1o
+max_media                             0.455 pts  10.0 % 1o          0.262 pts   4.1 % 1o          0.206 pts   3.5 % 1o
+zscore                                0.438 pts  13.3 % 1o          0.230 pts   3.5 % 1o          0.175 pts   2.7 % 1o
+espera                                0.946 pts  83.9 % 1o          0.852 pts  55.8 % 1o          0.809 pts  49.8 % 1o
+compra                                0.932 pts  80.7 % 1o          0.809 pts  48.0 % 1o          0.752 pts  38.9 % 1o
+parte20                               0.955 pts  86.4 % 1o          0.845 pts  25.3 % 1o          0.798 pts   9.8 % 1o
+parte40                               0.947 pts  85.1 % 1o          0.833 pts  29.7 % 1o          0.784 pts  15.5 % 1o
+umbral170                             0.940 pts  80.9 % 1o          0.813 pts  36.5 % 1o          0.741 pts  25.0 % 1o
+umbral190                             0.940 pts  80.6 % 1o          0.811 pts  36.8 % 1o          0.740 pts  25.6 % 1o
+espera_banda20                        0.947 pts  84.2 % 1o          0.860 pts  57.2 % 1o          0.821 pts  51.6 % 1o
+espera_banda40                        0.947 pts  84.0 % 1o          0.863 pts  56.2 % 1o          0.825 pts  51.7 % 1o
+espera_banda60                        0.950 pts  84.4 % 1o          0.859 pts  55.5 % 1o          0.820 pts  50.4 % 1o
+espera_banda70                        0.949 pts  84.5 % 1o          0.857 pts  55.8 % 1o          0.818 pts  50.4 % 1o
+espera_banda76                        0.951 pts  84.8 % 1o          0.861 pts  56.5 % 1o          0.823 pts  50.9 % 1o
+compra_banda20                        0.935 pts  80.8 % 1o          0.820 pts  50.0 % 1o          0.765 pts  41.2 % 1o
+compra_banda40                        0.934 pts  81.1 % 1o          0.822 pts  50.6 % 1o          0.770 pts  42.1 % 1o
+compra_banda60                        0.936 pts  82.4 % 1o          0.821 pts  49.0 % 1o          0.767 pts  40.4 % 1o
+compra_banda70                        0.936 pts  82.5 % 1o          0.821 pts  50.3 % 1o          0.768 pts  41.7 % 1o
+parte20_banda60                       0.958 pts  87.2 % 1o          0.856 pts  30.5 % 1o          0.813 pts  16.4 % 1o
+parte20_banda70                       0.958 pts  87.0 % 1o          0.856 pts  31.9 % 1o          0.813 pts  18.4 % 1o
+espera_a2                             0.946 pts  82.4 % 1o          0.845 pts  37.6 % 1o          0.802 pts  29.8 % 1o
+espera_b2                             0.946 pts  83.8 % 1o          0.850 pts  42.0 % 1o          0.805 pts  32.8 % 1o
+espera_a5                             0.938 pts  80.1 % 1o          0.822 pts  29.0 % 1o          0.775 pts  20.0 % 1o
+compra_a2                             0.932 pts  80.2 % 1o          0.806 pts  36.2 % 1o          0.747 pts  24.8 % 1o
+compra_b2                             0.932 pts  80.3 % 1o          0.811 pts  35.6 % 1o          0.749 pts  25.7 % 1o
+compra_a5                             0.929 pts  78.6 % 1o          0.793 pts  28.8 % 1o          0.725 pts  16.5 % 1o
+espera_a2_b2_banda60                  0.949 pts  82.9 % 1o          0.850 pts  36.1 % 1o          0.809 pts  28.7 % 1o
+compra_a2_b2_banda40                  0.934 pts  80.1 % 1o          0.820 pts  33.2 % 1o          0.762 pts  23.7 % 1o
+
+== largo 20000 (1200 rondas)
+estrategia                                    sin extremos        un tercio con extremos      dos tercios con extremos
+nada                                  0.420 pts  17.2 % 1o          0.186 pts   0.9 % 1o          0.133 pts   0.2 % 1o
+siempre                               0.565 pts  43.3 % 1o          0.304 pts   1.4 % 1o          0.254 pts   0.0 % 1o
+max_media                             0.519 pts  13.9 % 1o          0.267 pts   4.8 % 1o          0.205 pts   4.6 % 1o
+zscore                                0.380 pts   8.0 % 1o          0.177 pts   0.6 % 1o          0.126 pts   0.8 % 1o
+espera                                0.954 pts  87.1 % 1o          0.842 pts  56.8 % 1o          0.799 pts  51.2 % 1o
+compra                                0.945 pts  86.6 % 1o          0.806 pts  49.8 % 1o          0.754 pts  39.8 % 1o
+parte20                               0.963 pts  90.1 % 1o          0.837 pts  23.3 % 1o          0.793 pts   8.0 % 1o
+parte40                               0.956 pts  89.7 % 1o          0.828 pts  28.4 % 1o          0.785 pts  13.6 % 1o
+umbral170                             0.953 pts  86.9 % 1o          0.802 pts  35.8 % 1o          0.729 pts  23.0 % 1o
+umbral190                             0.951 pts  86.5 % 1o          0.804 pts  37.0 % 1o          0.732 pts  24.0 % 1o
+espera_banda20                        0.955 pts  87.2 % 1o          0.847 pts  57.4 % 1o          0.805 pts  52.1 % 1o
+espera_banda40                        0.957 pts  87.6 % 1o          0.858 pts  57.9 % 1o          0.816 pts  52.7 % 1o
+espera_banda60                        0.957 pts  87.4 % 1o          0.847 pts  56.5 % 1o          0.805 pts  51.0 % 1o
+espera_banda70                        0.958 pts  87.7 % 1o          0.848 pts  56.3 % 1o          0.806 pts  51.3 % 1o
+espera_banda76                        0.958 pts  87.3 % 1o          0.846 pts  55.8 % 1o          0.804 pts  51.2 % 1o
+compra_banda20                        0.945 pts  86.7 % 1o          0.812 pts  50.8 % 1o          0.761 pts  40.8 % 1o
+compra_banda40                        0.947 pts  86.7 % 1o          0.824 pts  52.3 % 1o          0.776 pts  43.0 % 1o
+compra_banda60                        0.946 pts  86.4 % 1o          0.809 pts  47.3 % 1o          0.761 pts  38.4 % 1o
+compra_banda70                        0.946 pts  86.2 % 1o          0.807 pts  47.6 % 1o          0.759 pts  39.5 % 1o
+parte20_banda60                       0.966 pts  90.2 % 1o          0.845 pts  26.5 % 1o          0.802 pts  12.8 % 1o
+parte20_banda70                       0.966 pts  90.2 % 1o          0.844 pts  27.1 % 1o          0.802 pts  14.0 % 1o
+espera_a2                             0.953 pts  86.6 % 1o          0.827 pts  30.5 % 1o          0.779 pts  21.3 % 1o
+espera_b2                             0.954 pts  86.9 % 1o          0.838 pts  32.2 % 1o          0.794 pts  21.4 % 1o
+espera_a5                             0.946 pts  84.3 % 1o          0.803 pts  23.2 % 1o          0.750 pts  13.5 % 1o
+compra_a2                             0.944 pts  86.2 % 1o          0.798 pts  30.2 % 1o          0.741 pts  17.0 % 1o
+compra_b2                             0.944 pts  84.9 % 1o          0.804 pts  25.5 % 1o          0.750 pts  15.1 % 1o
+compra_a5                             0.942 pts  85.1 % 1o          0.784 pts  24.0 % 1o          0.720 pts  12.1 % 1o
+espera_a2_b2_banda60                  0.956 pts  86.8 % 1o          0.832 pts  26.2 % 1o          0.783 pts  17.2 % 1o
+compra_a2_b2_banda40                  0.945 pts  84.9 % 1o          0.815 pts  23.3 % 1o          0.760 pts  12.8 % 1o

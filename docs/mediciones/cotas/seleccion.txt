@@ -1,0 +1,101 @@
+Seleccion con separacion de ajuste y validacion (ref/cotas/experimento.py)
+Se elige la variante de cotas con mayor patrimonio medio en el ajuste y se informa en la validacion,
+junto con sus vecinas (meseta) y las de referencia.
+
+== por anos (ajuste 2022-2023, validacion 2024), largo 2000: ajuste 749 ventanas, validacion 386
+   cinco mejores en el ajuste: espera_banda70 19599, espera_banda76 19573, espera_banda73 19560, espera_banda65 19535, espera_a2_b2_banda60 19527
+   en la validacion:
+   estrategia                       media      p5    peor  >nada >c y m >max_m
+   espera_banda70                   20875   10480    9150   97.7   98.2   90.4
+   espera_banda40                   20360   10480    9150   97.7   98.2   88.6
+   espera_banda60                   20827   10480    9150   97.7   98.2   90.2
+   espera_banda76                   21041   10480    9150   97.7   98.2   90.9
+   parte20_banda70                  20399   10928   10040  100.0   98.4   91.7
+   compra                           18149   11256    8355   99.5   95.1   85.8
+   espera                           19747   10287    9150   97.4   97.9   88.1
+   compra_banda40                   18814   11256    7792   99.5   95.1   86.5
+   max_media                        12296    5699    3156   59.1   46.4    0.0
+   siempre                          12689    4829    4067   60.4    0.0   53.6
+   nada                             10000   10000   10000    0.0   39.6   40.9
+
+== por anos (ajuste 2022-2023, validacion 2024), largo 5000: ajuste 763 ventanas, validacion 383
+   cinco mejores en el ajuste: espera_banda73 19725, espera_banda76 19692, espera_banda70 19649, espera_banda65 19616, espera_banda60 19577
+   en la validacion:
+   estrategia                       media      p5    peor  >nada >c y m >max_m
+   espera_banda73                   21504   10323    9162   97.9   99.0   90.6
+   espera_banda40                   20493   10323    9162   97.9   99.0   90.6
+   espera_banda60                   21074   10323    9162   97.9   99.0   89.8
+   espera_banda70                   21312   10323    9162   97.9   99.0   89.8
+   espera_banda76                   21721   10323    9162   97.9   99.0   91.4
+   parte20_banda70                  20812   10825   10000   99.7   99.2   89.6
+   compra                           18504   10863   10000   99.7   95.0   86.7
+   espera                           20013   10323    9162   97.9   99.0   90.1
+   compra_banda40                   18890   10863   10000   99.7   95.0   87.5
+   max_media                        12657    6326    3930   60.1   48.3    0.0
+   siempre                          12614    4652    3950   61.6    0.0   51.7
+   nada                             10000   10000   10000    0.0   38.4   39.9
+
+== por anos (ajuste 2022-2023, validacion 2024), largo 20000: ajuste 820 ventanas, validacion 314
+   cinco mejores en el ajuste: espera_banda50 20254, espera_banda76 20220, espera_banda70 20220, espera_banda40 20219, espera_banda73 20189
+   en la validacion:
+   estrategia                       media      p5    peor  >nada >c y m >max_m
+   espera_banda50                   22110   10647    9990   99.4   99.7   89.5
+   espera_banda40                   22366   10647    9990   99.4   99.7   89.5
+   espera_banda60                   21965   10647    9990   99.4   99.7   90.8
+   espera_banda70                   22195   10647    9990   99.4  100.0   89.8
+   espera_banda76                   22098   10647    9990   99.4  100.0   89.8
+   parte20_banda70                  21526   12257   10610  100.0  100.0   89.5
+   compra                           19297   11633   10155  100.0   97.5   82.5
+   espera                           21365   10647    9990   99.4   99.7   88.9
+   compra_banda40                   20458   11633   10155  100.0   97.5   82.8
+   max_media                        13357    6117    4223   61.5   43.0    0.0
+   siempre                          12956    5526    4223   63.7    0.0   57.0
+   nada                             10000   10000   10000    0.0   36.3   38.5
+
+== por empresa (ajuste META AAPL NFLX, validacion AMD TSLA), largo 2000: ajuste 720 ventanas, validacion 480
+   cinco mejores en el ajuste: espera_banda76 20557, espera_banda70 20526, espera_banda73 20509, espera_a2_b2_banda60 20449, espera_banda65 20364
+   en la validacion:
+   estrategia                       media      p5    peor  >nada >c y m >max_m
+   espera_banda76                   19230   10083    9153   95.6   99.2   95.0
+   espera_banda40                   19035   10060    8595   95.4   99.6   94.4
+   espera_banda60                   19159   10083    8796   95.6   99.2   94.6
+   espera_banda70                   19188   10083    9153   95.6   99.2   94.8
+   parte20_banda70                  18878   10556    8845   99.4  100.0   96.5
+   compra                           17762   10782    9297   99.4   94.6   93.3
+   espera                           18635   10060    8595   95.4   99.4   94.6
+   compra_banda40                   18146   10772    9297   99.2   94.6   93.3
+   max_media                        10162    5177    3525   43.8   44.8    0.0
+   siempre                          11364    4562    4067   51.9    0.0   55.2
+   nada                             10000   10000   10000    0.0   48.1   56.2
+
+== por empresa (ajuste META AAPL NFLX, validacion AMD TSLA), largo 5000: ajuste 720 ventanas, validacion 480
+   cinco mejores en el ajuste: espera_banda76 20935, espera_banda73 20842, espera_banda70 20643, espera_banda65 20511, espera_banda60 20377
+   en la validacion:
+   estrategia                       media      p5    peor  >nada >c y m >max_m
+   espera_banda76                   19392   10087    7400   96.0   99.2   96.7
+   espera_banda40                   19151   10087    7400   96.0   99.4   97.1
+   espera_banda60                   19552   10087    7400   96.0   99.4   96.9
+   espera_banda70                   19441   10087    7400   96.0   99.2   96.7
+   parte20_banda70                  19108   10540    8771   99.6   99.6   97.1
+   compra                           17752   10699    9990   99.6   96.9   95.8
+   espera                           18741   10087    7400   96.0   99.4   96.7
+   compra_banda40                   18108   10699    9990   99.6   96.9   96.0
+   max_media                         9901    5324    3176   37.1   43.3    0.0
+   siempre                          11500    4386    4001   51.5    0.0   56.7
+   nada                             10000   10000   10000    0.0   48.5   62.9
+
+== por empresa (ajuste META AAPL NFLX, validacion AMD TSLA), largo 20000: ajuste 720 ventanas, validacion 480
+   cinco mejores en el ajuste: espera_banda70 21567, espera_banda76 21551, espera_banda73 21542, espera_banda50 21455, espera_banda40 21414
+   en la validacion:
+   estrategia                       media      p5    peor  >nada >c y m >max_m
+   espera_banda70                   19225   10186    9798   97.9  100.0   96.0
+   espera_banda40                   19460   10182    9798   97.7   99.8   96.0
+   espera_banda60                   19282   10182    9798   97.7   99.8   96.0
+   espera_banda76                   19204   10186    9798   97.9  100.0   96.0
+   parte20_banda70                  18977   11213   10003  100.0  100.0   98.3
+   compra                           18225   11300   10169  100.0   98.8   97.3
+   espera                           19135   10182    9798   97.7   99.8   96.0
+   compra_banda40                   18557   11300   10169  100.0   98.8   97.3
+   max_media                         9594    6024    1965   41.9   44.0    0.0
+   siempre                          10859    4773    4100   46.5    0.0   56.0
+   nada                             10000   10000   10000    0.0   53.5   58.1
