@@ -23,21 +23,32 @@ La carpeta de salida es la variable de entorno P4_DATOS (más /minuto) o, si no 
 data/externos/minuto, que está fuera del repositorio (.gitignore). Los datos solo se
 usan para evaluar reglas: no entran al diseño ni al repositorio.
 
+Con --gzip las barras crudas quedan en crudo/TICKER.csv.gz. Con --procesos N baja N empresas a
+la vez, con un tope común de llamadas por minuto (--tope, 190 por omisión, bajo el límite de
+200 de la cuenta). Una empresa con TICKER.csv ya escrito se salta (para retomar una descarga
+cortada), salvo con --rehacer. Al terminar cada empresa avisa los saltos entre días mayores
+que --salto (25 % por omisión), que pueden ser una escisión o un error del dato.
+
 Uso:
     python3 tools/datos/alpaca.py                       # META AAPL NFLX AMD TSLA, 2022 a 2024
+    python3 tools/datos/alpaca.py --lista tools/datos/otras_acciones.txt --desde 2020-01-01 \
+        --hasta 2024-12-31 --salida $P4_DATOS/otras --procesos 4 --gzip
     python3 tools/datos/alpaca.py --tickers AAPL --desde 2023-01-01 --hasta 2023-03-31
     python3 tools/datos/alpaca.py --solo-sesion         # rehace TICKER.csv desde crudo/, sin red
 Solo usa la biblioteca estándar.
 """
 import argparse
 import datetime as dt
+import gzip
 import json
 import os
 import sys
+import threading
 import time
 import urllib.error
 import urllib.parse
 import urllib.request
+from concurrent.futures import ThreadPoolExecutor
 from zoneinfo import ZoneInfo
 
 NY = ZoneInfo("America/New_York")
@@ -71,7 +82,29 @@ def leer_claves(ruta):
     return vals[NOMBRES[0]], vals[NOMBRES[1]]
 
 
+class Tope:
+    """Tope común de llamadas por minuto entre hilos (ventana deslizante de 60 s)."""
+
+    def __init__(self, por_minuto):
+        self.n, self.t, self.lock = por_minuto, [], threading.Lock()
+
+    def esperar(self):
+        while True:
+            with self.lock:
+                ahora = time.monotonic()
+                self.t = [x for x in self.t if ahora - x < 60.0]
+                if len(self.t) < self.n:
+                    self.t.append(ahora)
+                    return
+                espera = 60.0 - (ahora - self.t[0]) + 0.05
+            time.sleep(espera)
+
+
+TOPE = Tope(190)
+
+
 def pedir(params, clave, secreto):
+    TOPE.esperar()
     url = URL + "?" + urllib.parse.urlencode(params)
     req = urllib.request.Request(url, headers={"APCA-API-KEY-ID": clave, "APCA-API-SECRET-KEY": secreto,
                                                "Accept": "application/json"})
@@ -108,7 +141,9 @@ def barras(ticker, desde, hasta, clave, secreto):
 
 def leer_crudo(ruta):
     out = []
-    with open(ruta) as f:
+    if not os.path.exists(ruta) and os.path.exists(ruta + ".gz"):
+        ruta += ".gz"
+    with (gzip.open(ruta, "rt") if ruta.endswith(".gz") else open(ruta)) as f:
         next(f)
         for linea in f:
             t, o, h, l, c, v = linea.rstrip("\n").split(",")
@@ -137,9 +172,77 @@ def a_sesion(bs):
     return filas
 
 
+def saltos(filas, umbral):
+    """Cambios entre el último minuto de un día y el primero del siguiente mayores que umbral."""
+    out = []
+    for k in range(1, len(filas)):
+        if filas[k][0] != filas[k - 1][0]:
+            a, b = filas[k - 1][2], filas[k][2]
+            if a > 0 and abs(b / a - 1) > umbral:
+                out.append(f"{filas[k][0]} {a:.2f}->{b:.2f} ({100 * (b / a - 1):+.0f} %)")
+    return out
+
+
+def leer_lista(ruta):
+    """Tickers de un archivo de texto: se ignora lo que sigue a '#' y los rótulos 'grupo:'."""
+    out = []
+    with open(ruta) as f:
+        for linea in f:
+            linea = linea.split("#")[0]
+            if ":" in linea:
+                linea = linea.split(":", 1)[1]
+            out.extend(linea.split())
+    return out
+
+
+def una(t, a, carpeta, clave, secreto):
+    try:
+        _una(t, a, carpeta, clave, secreto)
+    except BaseException as e:            # una empresa que falla no detiene a las demás
+        print(f"{t}: FALLA {type(e).__name__}: {e}", flush=True)
+
+
+def _una(t, a, carpeta, clave, secreto):
+    ruta = os.path.join(carpeta, f"{t}.csv")
+    if not a.solo_sesion and not a.rehacer and os.path.exists(ruta):
+        print(f"{t}: ya estaba, se salta", flush=True)
+        return
+    ruta_crudo = os.path.join(carpeta, "crudo", f"{t}.csv")
+    if a.solo_sesion:
+        bs = leer_crudo(ruta_crudo)
+    else:
+        bs = barras(t, a.desde, a.hasta, clave, secreto)
+        if a.gzip:
+            ruta_crudo += ".gz"
+        tmp = ruta_crudo + ".tmp"
+        with (gzip.open(tmp, "wt", newline="\n") if a.gzip else open(tmp, "w", newline="\n")) as f:
+            f.write("t,o,h,l,c,v\n")
+            for b in bs:
+                f.write(f"{b[0].isoformat()},{b[1]:.4f},{b[2]:.4f},{b[3]:.4f},{b[4]:.4f},{b[5]:.0f}\n")
+        os.replace(tmp, ruta_crudo)
+    filas = a_sesion(bs)
+    del bs
+    tmp = ruta + ".tmp"
+    with open(tmp, "w", newline="\n") as f:
+        f.write("fecha,minuto,precio\n")
+        for d, m, c in filas:
+            f.write(f"{d},{m},{c:.4f}\n")
+    os.replace(tmp, ruta)
+    dias = len({d for d, _, _ in filas})
+    print(f"{t}: {len(filas)} minutos de sesión en {dias} días -> {ruta}", flush=True)
+    for x in saltos(filas, a.salto):
+        print(f"{t}: SALTO entre días {x}", flush=True)
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--tickers", nargs="+", default=["META", "AAPL", "NFLX", "AMD", "TSLA"])
+    ap.add_argument("--lista", default=None, help="archivo con los tickers (reemplaza a --tickers)")
+    ap.add_argument("--procesos", type=int, default=1, help="empresas que se bajan a la vez")
+    ap.add_argument("--tope", type=int, default=190, help="llamadas por minuto entre todos los hilos")
+    ap.add_argument("--gzip", action="store_true", help="barras crudas comprimidas (crudo/TICKER.csv.gz)")
+    ap.add_argument("--rehacer", action="store_true", help="baja aunque TICKER.csv ya exista")
+    ap.add_argument("--salto", type=float, default=0.25, help="avisa saltos entre días mayores que esto")
     ap.add_argument("--desde", default="2022-01-01")
     ap.add_argument("--hasta", default="2024-12-31")
     ap.add_argument("--claves", default="~/.alpaca.env", help="archivo con la clave si no está en el entorno")
@@ -156,24 +259,15 @@ def main(argv=None):
     clave = secreto = None
     if not a.solo_sesion:
         clave, secreto = leer_claves(a.claves)
-    for t in a.tickers:
-        ruta_crudo = os.path.join(carpeta, "crudo", f"{t}.csv")
-        if a.solo_sesion:
-            bs = leer_crudo(ruta_crudo)
-        else:
-            bs = barras(t, a.desde, a.hasta, clave, secreto)
-            with open(ruta_crudo, "w", newline="\n") as f:
-                f.write("t,o,h,l,c,v\n")
-                for b in bs:
-                    f.write(f"{b[0].isoformat()},{b[1]:.4f},{b[2]:.4f},{b[3]:.4f},{b[4]:.4f},{b[5]:.0f}\n")
-        filas = a_sesion(bs)
-        ruta = os.path.join(carpeta, f"{t}.csv")
-        with open(ruta, "w", newline="\n") as f:
-            f.write("fecha,minuto,precio\n")
-            for d, m, c in filas:
-                f.write(f"{d},{m},{c:.4f}\n")
-        dias = len({d for d, _, _ in filas})
-        print(f"{t}: {len(bs)} barras, {len(filas)} minutos de sesión en {dias} días -> {ruta}")
+    tickers = leer_lista(a.lista) if a.lista else a.tickers
+    TOPE.n = a.tope
+    if a.procesos <= 1:
+        for t in tickers:
+            una(t, a, carpeta, clave, secreto)
+    else:
+        with ThreadPoolExecutor(a.procesos) as ex:
+            for f in [ex.submit(una, t, a, carpeta, clave, secreto) for t in tickers]:
+                f.result()
 
 
 if __name__ == "__main__":

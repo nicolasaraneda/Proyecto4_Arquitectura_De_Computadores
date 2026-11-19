@@ -1,0 +1,12 @@
+# Otras acciones para ajustar la política por régimen (docs/exploracion_ideas.md, sección 12).
+# Las 20 de mayor monto transado mediano en enero de 2020 de cada grupo, entre 198 candidatas que
+# cotizaron todo 2020 a 2024 sin cambio de símbolo, fusión ni escisión conocida
+# (tools/datos/candidatas.py). Grupos de sectores: asignación propia, cercana a GICS.
+# Sin META, AAPL, NFLX, AMD ni TSLA. Visto bueno de Nicolás el 19/11.
+tec: MSFT GOOGL NVDA DIS ROKU INTC MU CMCSA CSCO CRM QCOM VZ ADBE AVGO SHOP TXN CHTR ORCL NOW LRCX
+fin: V BAC JPM MA C WFC PYPL GS MS SCHW AXP USB PNC BLK TFC SPGI PGR MET CME BX
+sal: UNH JNJ BMY ABBV GILD LLY MDT AMGN ABT CVS ISRG BIIB TMO HUM CI SYK BSX ZTS VRTX REGN
+con: AMZN HD PG KO BKNG MCD WMT SBUX TGT PEP COST NKE PM DAL LOW F MO UAL MDLZ GM
+ind: BA XOM CVX UBER UNP OXY NEE LMT HON SLB CAT COP FDX MPC AMT EOG SHW NOC APD LIN
+# Suplentes (dos por grupo, en el mismo orden de grupos); se usan solo si una elegida falla.
+suplentes: SNAP AMAT ICE CB HCA MCK EL EBAY UPS DUK
