@@ -508,9 +508,369 @@ def accion_f3(nombre, procesos):
     print(txt)
 
 
+# --- equivalencia con la banda 40 ----------------------------------------------------------------
+
+NEUTRO_D = {"S": (140, 0, 215, 0), "B": (140, 0, 215, 0), "c2": 0, "k": -1}
+_EQ = {}
+
+
+def _eq(ids):
+    """Decisiones tick a tick de la banda 40, de la política con los módulos apagados y de la política
+    con el módulo D en su punto neutro (140/215 en toda la tabla). Ninguna usa caja ni acciones."""
+    conj = _EQ["conj"]
+    dif, ticks = [], 0
+    for i in ids:
+        w = conj.ventana(i)
+        da = ideas.Regla(ideas.BandaD(140, 215)).decidir
+        db = RG.Politica().decidir
+        dc = RG.Politica(D=NEUTRO_D).decidir
+        for p in w:
+            x = da(p, 0, 0)
+            if db(p, 0, 0) != x or dc(p, 0, 0) != x:
+                dif.append(i)
+                break
+        ticks += len(w)
+    return dif, ticks
+
+
+def accion_equivalencia(procesos, cual):
+    L = ["# Equivalencia: política con los módulos apagados contra la banda 40", "",
+         f"ref/cotas/explorar_regimen.py equivalencia, commit {commit()}. Se comparan las decisiones tick a tick de "
+         "ideas.Regla(BandaD(140, 215)), de regimen.Politica() y de regimen.Politica(D con 140/215 en toda la tabla)."]
+    pares = []
+    if cual == "cinco":
+        conj5 = E.completa(reales.carpeta_datos())
+        conj5.cargar_series()
+        pares.append(("población completa de las cinco empresas", conj5))
+    else:
+        pares.append(("muestra de las otras acciones", cargar("otras").conj()))
+    for nombre, conj in pares:
+        _EQ["conj"] = conj
+        n = len(conj.filas)
+        tr = 200
+        dif, ticks = [], 0
+        t0 = time.time()
+        with Pool(procesos or os.cpu_count()) as pool:
+            for d, t in pool.imap_unordered(_eq, [list(range(a, min(n, a + tr))) for a in range(0, n, tr)]):
+                dif += d
+                ticks += t
+        L.append(f"- {nombre}: {n} ventanas, {ticks} decisiones por estrategia, ventanas con alguna diferencia: {len(dif)} "
+                 f"({time.time() - t0:.0f} s)" + (f"; primeras: {sorted(dif)[:10]}" if dif else ""))
+        print(L[-1], file=sys.stderr)
+    txt = "\n".join(L) + "\n"
+    open(os.path.join(SALIDA, f"regimen_equivalencia_{cual}.txt"), "w").write(txt)
+    print(txt)
+
+
+# --- ajuste en las otras acciones --------------------------------------------------------------
+
+def rivales_otras(D, carpeta):
+    import array
+    import reales_experimento as rx
+    ruta = os.path.join(CACHE, f"rivales_{D.clave()}.pkl")
+    if os.path.exists(ruta):
+        return pickle.load(open(ruta, "rb"))
+    out = {nm: array.array("i") for nm in E.COLUMNAS_C}
+    orden, emps = {}, []
+    for i, f in enumerate(D.filas):
+        if f[0] not in orden:
+            orden[f[0]] = []
+            emps.append(f[0])
+        orden[f[0]].append(i)
+    vistos = []
+    for emp in emps:
+        r = reales.correr(rx.ESTR, carpeta, emp, paso=PASO)
+        ne = r["ne"]
+        for i in orden[emp]:
+            s = D.filas[i][1]
+            k = s // PASO
+            assert r["ini"][k] == s
+            for nm in E.COLUMNAS_C:
+                out[nm].append(r["w"][k * ne + rx.J[nm]])
+            vistos.append(i)
+    assert vistos == list(range(len(D.filas)))
+    pickle.dump(out, open(ruta, "wb"))
+    return out
+
+
+SEP_OTRAS = {
+    "anios": (lambda f, g: f[2] <= 2022, lambda f, g: f[2] >= 2023),
+    "grupos": (lambda f, g: g in ("fin", "sal", "ind"), lambda f, g: g in ("tec", "con")),
+}
+
+
+class CtxO:
+    """Muestra de las otras acciones con rivales (C, paso PASO), subconjuntos y torneos."""
+
+    def __init__(self, procesos=None):
+        self.carpeta = os.path.join(os.path.expanduser(os.environ.get("P4_DATOS", "~/proyectos/datos_p4")), "otras")
+        self.D = cargar("otras")
+        self.conj = self.D.conj(self.carpeta)
+        self.procesos = procesos
+        self.R = rivales_otras(self.D, self.carpeta)
+        self.G = grupos_de(self.D)
+        todos = list(range(len(self.D.filas)))
+        self.idx = {"todas": todos}
+        for sep, (aj, va) in SEP_OTRAS.items():
+            self.idx[f"{sep}-ajuste"] = [i for i in todos if aj(self.D.filas[i], self.D.grupo[i])]
+            self.idx[f"{sep}-validacion"] = [i for i in todos if va(self.D.filas[i], self.D.grupo[i])]
+        self.T = {k: E.Torneo(ix, self.R, f"otras-{k}", SEMILLA) for k, ix in self.idx.items()}
+        self.Tx = {k: E.Torneo(ix, self.R, f"otras-{k}-sin-copia", SEMILLA, excluir=("espera_banda40",))
+                   for k, ix in self.idx.items()}
+
+    def ev(self, specs, info=True):
+        return E.evaluar(self.conj, specs, self.procesos, verbose=False, info=info)
+
+
+def delta(G, rA, rB, idx, dos=True):
+    x = [0.0] * len(rA["W"])
+    for i in idx:
+        x[i] = rA["W"][i] - rB["W"][i]
+    m = sum(x[i] for i in idx) / len(idx)
+    c = [0.0] * len(x)
+    for i in idx:
+        c[i] = (x[i] - m) / len(idx)
+    return m, ee_contrib(c, G, dos)[0]
+
+
+def mano(G, W, Wr, idx, nombre, dos=True, sorteos=20000):
+    n = len(idx)
+    g = sum(1 for i in idx if W[i] > Wr[i])
+    e = sum(1 for i in idx if W[i] == Wr[i])
+    d, ee = delta(G, {"W": W}, {"W": Wr}, idx, dos)
+    rng = random.Random(f"mano3-{SEMILLA}-{nombre}")
+    g3 = e3 = 0
+    for _ in range(sorteos):
+        a, b, c = idx[rng.randrange(n)], idx[rng.randrange(n)], idx[rng.randrange(n)]
+        x = W[a] + W[b] + W[c] - Wr[a] - Wr[b] - Wr[c]
+        g3 += x > 0
+        e3 += x == 0
+    return dict(g=100 * g / n, e=100 * e / n, p=100 * (n - g - e) / n, d=d, ee=ee,
+                g3=100 * g3 / sorteos, e3=100 * e3 / sorteos, p3=100 * (sorteos - g3 - e3) / sorteos)
+
+
+def fila_metricas(cx, r, k, rb, nombre, idx=None, T=None, Tx=None):
+    idx = cx.idx[k] if idx is None else idx
+    T = cx.T[k] if T is None else T
+    Tx = cx.Tx[k] if Tx is None else Tx
+    m = E.metricas(r, idx, cx.R, T)
+    p, q = Tx.puntos(r["W"])
+    d, ee = delta(cx.G, r, rb, idx)
+    mm = mano(cx.G, r["W"], cx.R[E.RIVAL_TESLA], idx, f"{k}-{nombre}")
+    inf = [x for x in (r["info"][i] for i in idx) if x]
+    disp = 100 * sum(1 for x in inf if len(x) > 2 and x[2]) / len(idx) if inf else 0.0
+    tope = 100 * sum(1 for x in inf if len(x) > 3 and x[3]) / len(idx) if inf else 0.0
+    return (f"| {nombre} | {m['n']} | {fmt(p)} | {100 * q:.1f} | {m['media']:.0f} | {m['p5']} | {m['peor']} | {m['ordenes']:.1f} | "
+            f"{d:+.0f} ({ee:.0f}) | {disp:.1f} / {tope:.1f} | {mm['g']:.1f} / {mm['e']:.1f} / {mm['p']:.1f} | "
+            f"{mm['d']:+.0f} ({mm['ee']:.0f}) | {mm['g3']:.1f} / {mm['p3']:.1f} |"), dict(pts=p, pri=q, media=m["media"], d=d, ee=ee, p3=mm["p3"])
+
+
+CAB_M = ("| estrategia | ventanas | pts sin copia | 1.ª sola % | media | p5 | peor | órdenes | Δ con banda 40 (ee) | "
+         "módulo A: dispara / tope % | contra el rival: gana / empata / pierde % | Δ con el rival (ee) | 3 rondas: gana / pierde % |")
+SEP_M = "|---|---|---|---|---|---|---|---|---|---|---|---|---|"
+
+GRILLA_A = [{"kA": kA, "theta": th, "d": d, "N": N} for kA in (0, 1) for th in RG.THETAS for d in RG.DS for N in (33, 63)]
+GRILLA_D = {"c0": (110, 120, 130, 140, 150, 160, 170), "c1": (-10, -5, 0, 5, 10),
+            "v0": (185, 195, 205, 215, 225, 235, 245, 256), "v1": (-10, -5, 0, 5, 10),
+            "c2": (-5, 0, 5, 10), "k": (-1, 0, 1, 2)}
+
+
+def nombre_a(A):
+    return "ninguno" if A is None else f"A(kA {A['kA']}, theta {A['theta']}, d {A['d']}, N {A['N']})"
+
+
+def nombre_d(D):
+    if D is None:
+        return "ninguno"
+    return (f"D(S {D['S'][0]}+{D['S'][1]}c/{D['S'][2]}-{D['S'][3]}c, B {D['B'][0]}+{D['B'][1]}c/{D['B'][2]}-{D['B'][3]}c, "
+            f"c2 {D['c2']}, k {D['k']})")
+
+
+def puntos(cx, r, k):
+    return cx.T[k].puntos(r["W"])[0]
+
+
+def ajuste_a(cx, L):
+    specs = [RG.spec_politica(None, A) for A in GRILLA_A]
+    res = cx.ev(specs)
+    elegido = {}
+    for k in ("anios-ajuste", "grupos-ajuste", "todas"):
+        orden = sorted(range(len(specs)), key=lambda j: (-puntos(cx, res[j], k), -E.metricas(res[j], cx.idx[k], cx.R, cx.T[k])["media"]))
+        elegido[k] = GRILLA_A[orden[0]]
+        L.append(f"\nMódulo A, ajuste en {k} ({len(cx.idx[k])} ventanas): las 5 mejores de {len(specs)} por puntos de torneo")
+        for j in orden[:5]:
+            L.append(f"- {nombre_a(GRILLA_A[j])}: pts {fmt(puntos(cx, res[j], k))}, media "
+                     f"{E.metricas(res[j], cx.idx[k], cx.R, cx.T[k])['media']:.0f}")
+    return elegido
+
+
+def descenso_d(cx, k, L, A=None, pasadas=3):
+    par = {"S": [140, 0, 215, 0], "B": [140, 0, 215, 0], "c2": 0, "k": -1}
+
+    def congelar(q):
+        return {"S": tuple(q["S"]), "B": tuple(q["B"]), "c2": q["c2"], "k": q["k"]}
+
+    coords = [(c, j, nm) for c in ("S", "B") for j, nm in enumerate(("c0", "c1", "v0", "v1"))] + [("c2", None, "c2"), ("k", None, "k")]
+    actual = congelar(par)
+    mejor = puntos(cx, cx.ev([RG.spec_politica(actual, A)])[0], k)
+    L.append(f"\nMódulo D, ajuste en {k}: desde la banda 40 (pts {fmt(mejor)}), una coordenada a la vez")
+    for pasada in range(pasadas):
+        cambio = False
+        for c, j, nm in coords:
+            cands = []
+            for v in GRILLA_D[nm]:
+                q = {"S": list(actual["S"]), "B": list(actual["B"]), "c2": actual["c2"], "k": actual["k"]}
+                if j is None:
+                    if q[c] == v:
+                        continue
+                    q[c] = v
+                else:
+                    if q[c][j] == v:
+                        continue
+                    q[c][j] = v
+                cands.append(congelar(q))
+            res = cx.ev([RG.spec_politica(q, A) for q in cands])
+            for q, r in zip(cands, res):
+                pt = puntos(cx, r, k)
+                if pt > mejor + 1e-9:
+                    mejor, actual, cambio = pt, q, True
+            L.append(f"  pasada {pasada + 1}, {c if j is None else c + ' ' + nm}: {nombre_d(actual)} pts {fmt(mejor)}")
+        if not cambio:
+            break
+    return actual
+
+
+def accion_ajuste(procesos, con_d):
+    cx = CtxO(procesos)
+    b40 = cx.ev([E.B40], info=False)[0]
+    neutro = cx.ev([RG.spec_politica(None, None)])[0]
+    igual = sum(1 for i in range(len(b40["W"])) if b40["W"][i] != neutro["W"][i])
+    c40 = sum(1 for i in range(len(b40["W"])) if b40["W"][i] != cx.R["espera_banda40"][i])
+    L = ["# Ajuste de los módulos en las otras acciones", "",
+         f"ref/cotas/explorar_regimen.py ajuste, commit {commit()}. Muestra {cx.D.nombre}: {len(cx.D.filas)} ventanas. "
+         "Se elige por puntos de torneo de 3 rondas en la parte de ajuste (rival de Tesla fijo más 8 del campo, 20 000 "
+         "sorteos). Validación por años: ajuste con inicio en 2020 a 2022, validación con inicio en 2023 o 2024. Por "
+         "grupos: ajuste con fin, sal e ind; validación con tec y con.",
+         f"Comprobaciones: política sin módulos contra banda 40 (Python), ventanas distintas: {igual}; banda 40 en Python "
+         f"contra espera_banda40 en C: {c40}."]
+    elegidoA = ajuste_a(cx, L)
+    elegidoD = {}
+    if con_d:
+        for k in ("anios-ajuste", "grupos-ajuste", "todas"):
+            elegidoD[k] = descenso_d(cx, k, L)
+    L.append("\n## Validación interna\n")
+    for sep in ("anios", "grupos"):
+        ka, kv = f"{sep}-ajuste", f"{sep}-validacion"
+        filas = [("banda 40", b40)]
+        filas.append((f"módulo A: {nombre_a(elegidoA[ka])}", cx.ev([RG.spec_politica(None, elegidoA[ka])])[0]))
+        if con_d:
+            filas.append((f"módulo D: {nombre_d(elegidoD[ka])}", cx.ev([RG.spec_politica(elegidoD[ka], None)])[0]))
+            filas.append(("A y D", cx.ev([RG.spec_politica(elegidoD[ka], elegidoA[ka])])[0]))
+        for parte in (ka, kv):
+            L.append(f"\n### {parte} ({len(cx.idx[parte])} ventanas)\n")
+            L.append(CAB_M)
+            L.append(SEP_M)
+            for nm, r in filas:
+                L.append(fila_metricas(cx, r, parte, b40, nm)[0])
+    L.append("\n## Parámetros finales (ajuste con todas las otras acciones)\n")
+    L.append(f"- módulo A: {nombre_a(elegidoA['todas'])}")
+    if con_d:
+        L.append(f"- módulo D: {nombre_d(elegidoD['todas'])}")
+    finales = {"A": elegidoA["todas"], "D": elegidoD.get("todas")}
+    pickle.dump(finales, open(os.path.join(CACHE, "finales.pkl"), "wb"))
+    L.append(f"\nGuardados en build/cotas/regimen/finales.pkl: {finales!r}")
+    txt = "\n".join(L) + "\n"
+    open(os.path.join(SALIDA, "regimen_ajuste.txt"), "w").write(txt)
+    print(txt)
+
+
+# --- examen final en las cinco empresas --------------------------------------------------------------
+
+def accion_examen(procesos):
+    finales = pickle.load(open(os.path.join(CACHE, "finales.pkl"), "rb"))
+    carpeta = reales.carpeta_datos()
+    conj = E.completa(carpeta)
+    R = E.rivales(conj)
+    specs = [("módulo A", RG.spec_politica(None, finales["A"]))]
+    if finales.get("D"):
+        specs += [("módulo D", RG.spec_politica(finales["D"], None)), ("A y D", RG.spec_politica(finales["D"], finales["A"]))]
+    b40 = E.evaluar(conj, [E.B40], procesos, trozo=200, info=False)[0]
+    res = E.evaluar(conj, [sp for _, sp in specs], procesos, trozo=200, info=True)
+    caso = [x[1] for x in res[0]["info"]]
+    filas = [("banda 40", b40)] + [(nm, r) for (nm, _), r in zip(specs, res)]
+    L = ["# Examen final en las cinco empresas (una sola vez, parámetros fijos)", "",
+         f"ref/cotas/explorar_regimen.py examen, commit {commit()}. Población completa ({len(conj.filas)} ventanas). "
+         f"Parámetros del ajuste con todas las otras acciones: A = {nombre_a(finales['A'])}"
+         + (f", D = {nombre_d(finales['D'])}" if finales.get("D") else "") + ". Error estándar por grupos de ventanas "
+         "vecinas (empresa y bloque de 20 días de inicio), como en las secciones 10 y 11."]
+    subs = {"todas": list(range(len(conj.filas)))}
+    for sep, (aj, va) in E.SEPARACIONES.items():
+        subs[f"{sep}-validacion"] = E.sub(conj, va)
+    resumen = {}
+    for k, ix in subs.items():
+        for cn, cs in (("todas", None), ("S", 1), ("B", 2)):
+            sel = ix if cs is None else [i for i in ix if caso[i] == cs]
+            T = E.Torneo(sel, R, f"examen-{k}-{cn}", SEMILLA)
+            Tx = E.Torneo(sel, R, f"examen-{k}-{cn}-sin-copia", SEMILLA, excluir=("espera_banda40",))
+            L.append(f"\n### {k}, caso {cn} ({len(sel)} ventanas)\n")
+            L.append(CAB_M)
+            L.append(SEP_M)
+            for nm, r in filas:
+                txt, m = fila_examen(conj, R, r, b40, sel, T, Tx, f"{k}-{cn}-{nm}")
+                L.append(f"| {nm} " + txt)
+                resumen[(k, cn, nm)] = m
+    L.append("\n## Criterio de la sección 9\n")
+    for nm, _ in specs:
+        c1 = all(resumen[(k, "todas", nm)]["pts"] > resumen[(k, "todas", "banda 40")]["pts"] for k in ("anios-validacion", "empresas-validacion"))
+        c2 = all(resumen[(k, "todas", nm)]["d"] > resumen[(k, "todas", nm)]["ee"] for k in ("anios-validacion", "empresas-validacion"))
+        c3 = resumen[("todas", "todas", nm)]["p3"] <= resumen[("todas", "todas", "banda 40")]["p3"]
+        L.append(f"- {nm}: 1. más puntos sin la copia en las dos validaciones: {'sí' if c1 else 'no'}; 2. Δ con la banda 40 "
+                 f"mayor que 1 ee en las dos validaciones: {'sí' if c2 else 'no'}; 3. no pierde más torneos de 3 rondas "
+                 f"contra el rival que la banda 40 en la población: {'sí' if c3 else 'no'} "
+                 f"({resumen[('todas', 'todas', nm)]['p3']:.1f} % contra {resumen[('todas', 'todas', 'banda 40')]['p3']:.1f} %)")
+    txt = "\n".join(L) + "\n"
+    open(os.path.join(SALIDA, "regimen_examen.txt"), "w").write(txt)
+    print(txt)
+
+
+def types_ns(**kw):
+    import types
+    return types.SimpleNamespace(**kw)
+
+
+def fila_examen(conj, R, r, rb, sel, T, Tx, nombre):
+    m = E.metricas(r, sel, R, T)
+    p, q = Tx.puntos(r["W"])
+    P = types_ns(conj=conj)
+    d, ee = E.delta_ee(P, r, rb, sel)
+    Wr = R[E.RIVAL_TESLA]
+    W = r["W"]
+    n = len(sel)
+    g = sum(1 for i in sel if W[i] > Wr[i])
+    e = sum(1 for i in sel if W[i] == Wr[i])
+    dr, eer = E.delta_ee(P, r, {"W": Wr}, sel)
+    rng = random.Random(f"mano3-{SEMILLA}-{nombre}")
+    g3 = p3 = 0
+    for _ in range(20000):
+        a, b, c = sel[rng.randrange(n)], sel[rng.randrange(n)], sel[rng.randrange(n)]
+        x = W[a] + W[b] + W[c] - Wr[a] - Wr[b] - Wr[c]
+        g3 += x > 0
+        p3 += x < 0
+    inf = r.get("info")
+    disp = tope = 0.0
+    if inf and inf[0]:
+        disp = 100 * sum(1 for i in sel if inf[i][2]) / n
+        tope = 100 * sum(1 for i in sel if inf[i][3]) / n
+    txt = (f"| {n} | {fmt(p)} | {100 * q:.1f} | {m['media']:.0f} | {m['p5']} | {m['peor']} | {m['ordenes']:.1f} | "
+           f"{d:+.0f} ({ee:.0f}) | {disp:.1f} / {tope:.1f} | {100 * g / n:.1f} / {100 * e / n:.1f} / {100 * (n - g - e) / n:.1f} | "
+           f"{dr:+.0f} ({eer:.0f}) | {100 * g3 / 20000:.1f} / {100 * p3 / 20000:.1f} |")
+    return txt, dict(pts=p, d=d, ee=ee, p3=100 * p3 / 20000)
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
-    ap.add_argument("accion", choices=["filtros", "f3"])
+    ap.add_argument("accion", choices=["filtros", "f3", "equivalencia", "ajuste", "examen"])
+    ap.add_argument("--sin-d", action="store_true", help="ajuste solo del módulo A (el D descartado por F1)")
     ap.add_argument("--conjunto", default="cinco")
     ap.add_argument("--procesos", type=int, default=None)
     a = ap.parse_args()
@@ -518,6 +878,12 @@ def main():
         accion_filtros(a.conjunto, a.procesos)
     elif a.accion == "f3":
         accion_f3(a.conjunto, a.procesos)
+    elif a.accion == "equivalencia":
+        accion_equivalencia(a.procesos, a.conjunto)
+    elif a.accion == "ajuste":
+        accion_ajuste(a.procesos, not a.sin_d)
+    elif a.accion == "examen":
+        accion_examen(a.procesos)
 
 
 if __name__ == "__main__":
