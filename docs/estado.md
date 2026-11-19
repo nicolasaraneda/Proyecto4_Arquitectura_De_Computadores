@@ -2,6 +2,20 @@
 
 Se actualiza al cerrar cada tramo de trabajo. La versión anterior queda en el historial de git.
 
+## Tramo 20: mano a mano contra el rival de Tesla, ronda de AMD y variante del caso S (19/11)
+
+Rama `minutos-reales`. Secciones 10 y 11 de `docs/exploracion_ideas.md`; bitácora `docs/bitacora/exploracion.md`. Decisión T138. Solo Python. **La regla de los peldaños no se cambió.**
+
+| Pedido | Resultado | Dónde |
+|--------|-----------|-------|
+| Mano a mano contra el rival | Caso S: le ganamos en 94 % a 98,5 % de las ventanas. Caso B: la banda 40 empata en el 80 %, gana 9 %, pierde 11 % (+322, ee 148); la banda 60, +134; las tres bandas, -82. En toda la población la banda 40 es la que menos pierde (5,4 % de ventanas, 2,7 % de torneos) | Sección 10; `mano.txt` |
+| AMD del 18/11 | Caso B. La caída desde el máximo (24 541 en el tick 12 955, a 21 895) es la de las 126 acciones recompradas en 161; sin esa recompra habría cerrado con 20 456 | Sección 11.1; `amd.txt` |
+| Variante del caso S | (a) no recomprar y (b) recomprar un tercio bajan la media del caso S en todos los subconjuntos (banda 40: -707 y -474 en la población) y los puntos; (a) nunca pierde contra el rival en S y sube algo el percentil 5 | Sección 11.2; `caso_s.txt` |
+
+### Lo que decides tú
+
+Si la variante del caso S entra: (a), (b) o (c), lo actual. Mi recomendación, etiquetada en el documento: mantener (c). Sigue pendiente la decisión de banda 40 o 60 (sección 6).
+
 ## Tramo 19: ideas 13 y 14 sobre la banda 40 (19/11)
 
 Rama `minutos-reales`. Sección 9 de `docs/exploracion_ideas.md`; bitácora `docs/bitacora/exploracion.md` (segundo pedido). Decisión T137. Solo Python. **La regla de los peldaños no se cambió.** Las ideas 11 y 12 del pedido son la 13 y la 14 en el documento, para no confundirlas con la 11 y la 12 de la primera tanda.

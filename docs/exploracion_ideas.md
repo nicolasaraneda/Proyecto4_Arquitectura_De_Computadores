@@ -339,3 +339,119 @@ Nada de esta tanda agrega una opción a la sección 6. La idea 13 en su mejor ve
 | Filtro de la idea 14 y detectores | `python3 ref/cotas/explorar_ideas2.py filtro14 --semilla 18` | `filtro14.txt` |
 | Regla de la idea 14 y salto según la posición de la banda | `python3 ref/cotas/explorar_ideas2.py idea14 --semilla 18` | `idea14.txt`, `idea14.json` |
 | Primera sola sin la copia | `python3 ref/cotas/explorar_ideas2.py primera --semilla 18` | `primera.txt` |
+
+## 10. Mano a mano contra el rival de Tesla (19/11)
+
+Comando: `python3 ref/cotas/explorar_rival.py mano --semilla 18` (`mano.txt`). El rival de Tesla compra 63 repetido desde el primer 100, vende al ver 220 o más y no vuelve; su patrimonio sale de la caché en C de la población. Los subconjuntos son de la población completa: todas las ventanas y las de validación por años y por empresas. Aquí no se ajusta nada, así que "validación" solo nombra el subconjunto. El caso de cada ventana (S: 100 antes que 255; B: 255 antes que 100) lo informa la corrida de la sección 11. Δ es la diferencia media de patrimonio por ronda (nosotros menos el rival), con su error estándar por grupos de ventanas vecinas. Los torneos de 3 rondas son 20 000 sorteos de tres ventanas del mismo subconjunto y caso, los mismos para las tres estrategias, y comparan la suma de las tres rondas. La diferencia media de esa suma es 3 veces la de la tabla, con 3 veces su error estándar.
+
+| Subconjunto | Caso | Ventanas | Estrategia | Gana % | Empata % | Pierde % | Δ media (ee) | 3 rondas: gana % | empata % | pierde % |
+|---|---|---|---|---|---|---|---|---|---|---|
+| Población completa | todas | 1 368 253 | banda 40 | 60,6 | 34,0 | 5,4 | +2393 (174) | 93,3 | 4,0 | 2,7 |
+| Población completa | todas | 1 368 253 | banda 60 | 62,1 | 28,6 | 9,3 | +2188 (164) | 91,4 | 2,3 | 6,3 |
+| Población completa | todas | 1 368 253 | tres bandas por hilo | 66,9 | 19,3 | 13,8 | +2161 (168) | 91,4 | 0,7 | 7,9 |
+| Población completa | S | 790 173 | banda 40 | 98,5 | 0,0 | 1,5 | +3908 (198) | 100,0 | 0,0 | 0,0 |
+| Población completa | S | 790 173 | banda 60 | 96,8 | 0,0 | 3,1 | +3692 (170) | 99,6 | 0,0 | 0,4 |
+| Población completa | S | 790 173 | tres bandas por hilo | 98,2 | 0,0 | 1,8 | +3802 (169) | 100,0 | 0,0 | 0,1 |
+| Población completa | B | 578 080 | banda 40 | 8,8 | 80,5 | 10,7 | +322 (148) | 22,8 | 51,4 | 25,8 |
+| Población completa | B | 578 080 | banda 60 | 14,6 | 67,6 | 17,8 | +134 (143) | 32,5 | 30,3 | 37,3 |
+| Población completa | B | 578 080 | tres bandas por hilo | 24,1 | 45,6 | 30,3 | -82 (137) | 38,9 | 9,2 | 51,9 |
+| Validación años | todas | 391 320 | banda 40 | 68,0 | 25,7 | 6,2 | +2790 (357) | 96,7 | 1,7 | 1,6 |
+| Validación años | todas | 391 320 | banda 60 | 68,0 | 22,9 | 9,1 | +2533 (322) | 95,0 | 1,3 | 3,8 |
+| Validación años | todas | 391 320 | tres bandas por hilo | 75,3 | 11,9 | 12,7 | +2462 (261) | 95,8 | 0,2 | 4,0 |
+| Validación años | S | 262 490 | banda 40 | 98,4 | 0,1 | 1,4 | +3902 (369) | 100,0 | 0,0 | 0,0 |
+| Validación años | S | 262 490 | banda 60 | 96,4 | 0,1 | 3,5 | +3705 (352) | 99,6 | 0,0 | 0,4 |
+| Validación años | S | 262 490 | tres bandas por hilo | 98,1 | 0,1 | 1,8 | +3654 (227) | 99,9 | 0,0 | 0,1 |
+| Validación años | B | 128 830 | banda 40 | 6,0 | 78,0 | 16,0 | +524 (519) | 16,0 | 47,2 | 36,8 |
+| Validación años | B | 128 830 | banda 60 | 10,2 | 69,4 | 20,5 | +145 (286) | 25,5 | 33,5 | 41,1 |
+| Validación años | B | 128 830 | tres bandas por hilo | 29,0 | 36,0 | 35,0 | +33 (301) | 42,8 | 4,6 | 52,5 |
+| Validación empresas | todas | 547 338 | banda 40 | 53,7 | 41,2 | 5,1 | +2144 (293) | 89,5 | 7,1 | 3,5 |
+| Validación empresas | todas | 547 338 | banda 60 | 53,5 | 36,5 | 9,9 | +1830 (232) | 86,8 | 4,9 | 8,3 |
+| Validación empresas | todas | 547 338 | tres bandas por hilo | 61,0 | 24,9 | 14,1 | +1848 (242) | 88,2 | 1,5 | 10,2 |
+| Validación empresas | S | 284 347 | banda 40 | 97,0 | 0,0 | 3,0 | +3994 (384) | 99,9 | 0,0 | 0,1 |
+| Validación empresas | S | 284 347 | banda 60 | 94,1 | 0,0 | 5,9 | +3457 (252) | 99,0 | 0,0 | 1,0 |
+| Validación empresas | S | 284 347 | tres bandas por hilo | 96,1 | 0,0 | 3,9 | +3716 (250) | 99,8 | 0,0 | 0,2 |
+| Validación empresas | B | 262 991 | banda 40 | 6,9 | 85,7 | 7,4 | +145 (102) | 17,8 | 63,3 | 18,9 |
+| Validación empresas | B | 262 991 | banda 60 | 9,7 | 76,0 | 14,3 | +71 (126) | 24,0 | 44,2 | 31,9 |
+| Validación empresas | B | 262 991 | tres bandas por hilo | 22,9 | 51,9 | 25,2 | -171 (141) | 37,6 | 14,0 | 48,4 |
+
+Lectura:
+
+- **Caso S (58 % de la población): le ganamos casi siempre** (94 % a 98,5 % de las ventanas según estrategia y subconjunto, 99 % o más de los torneos de 3 rondas). El rival vende en 220 y no vuelve, y la regla de los peldaños vende en el 255. Las pocas ventanas S que perdemos son de recompras que terminan mal: con la variante (a) de la sección 11 no se pierde ninguna.
+- **Caso B (42 %): el rival es casi la misma regla.** Los dos compran en el 100 y venden cerca de 215 a 220, así que la banda 40 empata en el 80 % de las ventanas, gana en el 9 % y pierde en el 11 %, con +322 (ee 148) de media. La banda 60 empata menos (68 %) y queda en +134 (143). Las tres bandas pierden más ventanas de las que ganan (30 % contra 24 %), con -82 (137). En torneos de 3 rondas solo con ventanas B, la banda 40 gana el 23 %, empata el 51 % y pierde el 26 %. La ronda de Tesla del 18/11 fue de este caso.
+- **En toda la población** la banda 40 es la que menos pierde contra el rival: 5,4 % de las ventanas y 2,7 % de los torneos de 3 rondas, contra 9,3 % y 6,3 % de la banda 60 y 13,8 % y 7,9 % de las tres bandas. Las tres bandas ganan más ventanas (66,9 %) porque empatan menos.
+
+## 11. Ronda de AMD y variante del caso S (19/11)
+
+### 11.1 Traza de la ronda de AMD
+
+Comando: `python3 ref/cotas/explorar_rival.py amd` (`amd.txt`). Es AMD desde el 10/1/2022 a las 10:20, la ronda que la maestra mostró con 21 895. **Es del caso B**: el primer 255 llega en el tick 1124 y el primer 100 en el 5051, y ahí empieza la fase D. El precio final es 173.
+
+Banda 60 (la regla que corrió el 18/11). Cada fila es una orden ejecutada:
+
+| Tick | Precio | Orden | Caja | Acciones | Patrimonio |
+|------|--------|-------|------|----------|------------|
+| 5052 | 100 | compra 63 | 3695 | 63 | 9995 |
+| 5053 | 101 | compra 36 | 54 | 99 | 10 053 |
+| 6191 | 208 | vende 63 | 13 153 | 36 | 20 641 |
+| 6192 | 203 | vende 36 | 20 456 | 0 | 20 456 |
+| 9170 | 161 | compra 63 | 10 308 | 63 | 20 451 |
+| 9171 | 162 | compra 63 | 97 | 126 | 20 509 |
+
+Patrimonio máximo: **24 541 en el tick 12 955**, con precio 194. Termina en 21 895.
+
+**¿La caída desde el máximo vino de una recompra? Sí.** La caída de 2646 es la de las 126 acciones recompradas en 161 y 162 (ticks 9170 y 9171), que la regla mantuvo mientras el precio bajaba de 194 a 173. Después del máximo no hubo ninguna orden: la banda 60 vende con 195 o más y el precio llegó a 194, a un nivel de la venta. Aun así la recompra sumó: sin ella la ronda habría cerrado con 20 456 en caja, y con ella cerró con 21 895. Esta recompra es del caso B, así que la variante de la sección 11.2 no la toca.
+
+Como referencia, la banda 40 vende en 216 (ticks 8230 y 8231), recompra 152 acciones en 140 (ticks 10 964 a 10 966) y llega a un máximo de 29 683 en el mismo tick 12 955. Termina con 26 470. El rival de Tesla vende en 220 (ticks 8371 y 8372), no vuelve a comprar y termina con 21 824.
+
+### 11.2 Variante del caso S
+
+Comando: `python3 ref/cotas/explorar_rival.py casos --semilla 18` (`caso_s.txt`). Código: `ref/cotas/ideas_caso_s.py`. La variante actúa solo en el caso S, después de vender en el 255:
+
+- **(a)** no vuelve a comprar;
+- **(b)** vuelve a comprar con un tercio del patrimonio, fijado al momento de la recompra y sin reajustes tick a tick (en las tres bandas, la posición total queda en ese tercio);
+- **(c)** recompra todo, que es lo actual.
+
+En el caso B nada cambia. Se probó sobre la banda 40 y las tres bandas, sin ajustar parámetros, en la población completa: 4 corridas nuevas, 49 minutos con 24 núcleos. Comprobación: en la muestra, el modo (c) da lo mismo que la base, con 0 diferencias en 3600 ventanas.
+
+Media, p5 y peor son de las ventanas del caso S; el resto, de todas las ventanas del subconjunto. "Recompra en S" es el porcentaje de ventanas S en que la base vuelve a comprar después del 255. Los puntos y la primera sola son del torneo de 3 rondas de la tabla 2 sin `espera_banda40` (mismo sorteo que `primera.txt`). "Contra el rival" es el mano a mano de la sección 10.
+
+| Subconjunto | Estrategia | Caso S: media | p5 | Peor | Δ contra (c) (ee) | Recompra en S % | Pts sin copia | 1.ª sola % sin copia | Contra el rival: gana / empata / pierde % | Δ contra el rival (ee) | 3 rondas: gana % | Caso S contra el rival: gana / pierde % |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| Población completa | banda 40, (c) recompra todo | 25668 | 24198 | 14746 | +0 (0) | 12,7 | 1,852 | 35,9 | 60,6 / 34,0 / 5,4 | +2393 (174) | 93,3 | 98,5 / 1,5 |
+| Población completa | banda 40, (a) no recompra | 24961 | 24314 | 14746 | -707 (196) | 12,7 | 1,836 | 27,3 | 61,4 / 34,0 / 4,5 | +1985 (118) | 93,8 | 100,0 / 0,0 |
+| Población completa | banda 40, (b) recompra 1/3 | 25194 | 24198 | 14746 | -474 (132) | 12,7 | 1,845 | 33,3 | 61,4 / 34,0 / 4,5 | +2119 (129) | 93,9 | 99,9 / 0,0 |
+| Población completa | tres bandas por hilo, (c) recompra todo | 25562 | 23709 | 14746 | +0 (0) | 26,6 | 1,823 | 42,9 | 66,9 / 19,3 / 13,8 | +2161 (168) | 91,4 | 98,2 / 1,8 |
+| Población completa | tres bandas, (a) no recompra | 24961 | 24314 | 14746 | -601 (167) | 26,6 | 1,811 | 31,8 | 67,9 / 19,3 / 12,8 | +1814 (121) | 91,8 | 100,0 / 0,0 |
+| Población completa | tres bandas, (b) recompra 1/3 | 25067 | 23401 | 14746 | -495 (141) | 26,6 | 1,810 | 38,8 | 67,7 / 19,3 / 13,0 | +1875 (129) | 91,7 | 99,5 / 0,4 |
+| Validación años | banda 40, (c) recompra todo | 25556 | 23684 | 14746 | +0 (0) | 15,3 | 1,874 | 40,1 | 68,0 / 25,7 / 6,2 | +2790 (357) | 96,7 | 98,4 / 1,4 |
+| Validación años | banda 40, (a) no recompra | 24812 | 24218 | 14746 | -743 (359) | 15,3 | 1,854 | 27,8 | 69,0 / 25,7 / 5,3 | +2292 (237) | 97,1 | 99,9 / 0,0 |
+| Validación años | banda 40, (b) recompra 1/3 | 25081 | 23772 | 14746 | -474 (230) | 15,3 | 1,865 | 37,2 | 68,9 / 25,7 / 5,3 | +2472 (260) | 97,0 | 99,8 / 0,1 |
+| Validación años | tres bandas por hilo, (c) recompra todo | 25308 | 23167 | 14746 | +0 (0) | 29,6 | 1,846 | 47,6 | 75,3 / 11,9 / 12,7 | +2462 (261) | 95,8 | 98,1 / 1,8 |
+| Validación años | tres bandas, (a) no recompra | 24812 | 24218 | 14746 | -495 (219) | 29,6 | 1,835 | 33,1 | 76,5 / 11,9 / 11,5 | +2130 (198) | 96,2 | 99,9 / 0,0 |
+| Validación años | tres bandas, (b) recompra 1/3 | 25048 | 23628 | 14746 | -260 (138) | 29,6 | 1,837 | 44,8 | 76,4 / 11,9 / 11,6 | +2288 (221) | 96,2 | 99,7 / 0,2 |
+| Validación empresas | banda 40, (c) recompra todo | 25745 | 23714 | 17301 | +0 (0) | 17,1 | 1,843 | 35,3 | 53,7 / 41,2 / 5,1 | +2144 (293) | 89,5 | 97,0 / 3,0 |
+| Validación empresas | banda 40, (a) no recompra | 24946 | 24198 | 18644 | -799 (382) | 17,1 | 1,828 | 26,5 | 55,3 / 41,2 / 3,6 | +1729 (170) | 90,7 | 100,0 / 0,0 |
+| Validación empresas | banda 40, (b) recompra 1/3 | 25205 | 23952 | 18893 | -541 (259) | 17,1 | 1,838 | 32,7 | 55,2 / 41,2 / 3,6 | +1863 (197) | 90,7 | 100,0 / 0,0 |
+| Validación empresas | tres bandas por hilo, (c) recompra todo | 25468 | 22808 | 16853 | +0 (0) | 42,1 | 1,811 | 43,1 | 61,0 / 24,9 / 14,1 | +1848 (242) | 88,2 | 96,1 / 3,9 |
+| Validación empresas | tres bandas, (a) no recompra | 24946 | 24198 | 18644 | -522 (246) | 42,1 | 1,804 | 30,7 | 63,0 / 24,9 / 12,1 | +1577 (181) | 89,4 | 100,0 / 0,0 |
+| Validación empresas | tres bandas, (b) recompra 1/3 | 25057 | 23004 | 19082 | -411 (194) | 42,1 | 1,799 | 39,3 | 62,6 / 24,9 / 12,5 | +1635 (198) | 89,1 | 99,2 / 0,8 |
+
+Lectura:
+
+- **(a) y (b) bajan la media del caso S en todos los subconjuntos.** Con la banda 40, (a) pierde -707 (ee 196) en la población, y -743 (359) y -799 (382) en las dos validaciones; (b) pierde -474 (132), -474 (230) y -541 (259). Con las tres bandas, (a) pierde de -495 a -601 y (b) de -260 a -495.
+- **La recompra pasa poco y vale mucho.** La banda 40 recompra en el 12,7 % a 17,1 % de las ventanas S. Dividiendo la diferencia entre (c) y (a) por esa fracción, cada recompra vale en promedio entre +4700 y +5600 por ronda.
+- **Lo que ganan (a) y (b).** Con (a) el percentil 5 del caso S sube un poco (24 314 contra 24 198 en la población; 24 218 contra 23 684 en la validación por años), y en la validación por empresas el peor caso pasa de 17 301 a 18 644. Además nunca perdemos contra el rival en el caso S (100 % contra 98,5 %), las ventanas perdidas contra el rival bajan de 5,4 % a 4,5 %, y los torneos de 3 rondas ganados contra el rival suben de 93,3 % a 93,8 %. El peor caso de la población (14 746) es el mismo en las tres versiones.
+- **Lo que pierden.** Puntos de torneo: banda 40 (c) 1,852, (b) 1,845, (a) 1,836 en la población, con el mismo orden en las dos validaciones. Primera sola: 35,9 %, 33,3 % y 27,3 %. Parte de la caída de (a) en primeros lugares es otro empate: la regla `espera` del campo (sin banda en la fase D) hace en el caso S exactamente lo mismo que (a).
+- En la ronda de AMD, que es del caso B, las tres versiones dan lo mismo.
+
+Placa: (a) es un bit que recuerda que el 100 llegó primero y bloquea la compra en D, unas 3 instrucciones. (b) calcula una sola vez, al recomprar, el patrimonio dividido por 3p (una división por restas, de 60 a 80 instrucciones) y después va hacia ese número de acciones con órdenes de hasta 63. Ninguna necesita RTL.
+
+**Opciones, sin decidir:** (c) es lo actual y tiene la mejor media, los mejores puntos y la mayor primera sola. (a) sacrifica de 700 a 800 de media en el caso S (de 400 a 500 por ronda sobre todas las ventanas) a cambio de no perder nunca contra el rival en el caso S y de un percentil 5 algo más alto. (b) queda entre las dos. **Recomendación (mía, etiquetada como tal): mantener (c).** Las ventajas de (a) son chicas y la pérdida en media y en puntos aparece en los tres subconjuntos. La decisión es de Nicolás.
+
+### 11.3 Comandos
+
+| Resultado | Comando | Salida |
+|-----------|---------|--------|
+| Mano a mano contra el rival de Tesla | `python3 ref/cotas/explorar_rival.py mano --semilla 18` (corre la población si falta, unos 50 minutos) | `mano.txt` |
+| Traza de la ronda de AMD | `python3 ref/cotas/explorar_rival.py amd` | `amd.txt` |
+| Variante del caso S | `python3 ref/cotas/explorar_rival.py casos --semilla 18` | `caso_s.txt` |

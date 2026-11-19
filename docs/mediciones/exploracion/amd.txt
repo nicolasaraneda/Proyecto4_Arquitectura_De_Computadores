@@ -1,0 +1,33 @@
+Ronda de AMD del 18/11 (AMD desde el 10/1/2022 a las 10:20, 20 000 minutos). ref/cotas/explorar_rival.py amd, commit 44f0c4c
+Primer 100 en el tick 5051, primer 255 en el tick 1124: caso B. Precio final 173.
+
+== banda 60 (la que corrio el 18/11): patrimonio final 21895; maximo 24541 en el tick 12955 (precio 194); fase D desde el tick 5051
+     tick precio  orden ejecutada    caja acciones patrimonio
+     5052    100        compra 63    3695       63       9995
+     5053    101        compra 36      54       99      10053
+     6191    208         vende 63   13153       36      20641
+     6192    203         vende 36   20456        0      20456
+     9170    161        compra 63   10308       63      20451
+     9171    162        compra 63      97      126      20509
+   despues del maximo: 0 ordenes, 0 compras
+
+== banda 40: patrimonio final 26470; maximo 29683 en el tick 12955 (precio 194); fase D desde el tick 5051
+     tick precio  orden ejecutada    caja acciones patrimonio
+     5052    100        compra 63    3695       63       9995
+     5053    101        compra 36      54       99      10053
+     8230    216         vende 63   13657       36      21433
+     8231    216         vende 36   21428        0      21428
+    10964    140        compra 63   12603       63      21423
+    10965    140        compra 63    3778      126      21418
+    10966    140        compra 26     133      152      21413
+    12040    127         compra 1       1      153      19432
+   despues del maximo: 0 ordenes, 0 compras
+
+== rival de Tesla: patrimonio final 21824; maximo 21834 en el tick 8370 (precio 220)
+     tick precio  orden ejecutada    caja acciones patrimonio
+     5052    100        compra 63    3695       63       9995
+     5053    101        compra 36      54       99      10053
+     8371    220         vende 63   13909       36      21829
+     8372    220         vende 36   21824        0      21824
+   despues del maximo: 2 ordenes, 0 compras
+

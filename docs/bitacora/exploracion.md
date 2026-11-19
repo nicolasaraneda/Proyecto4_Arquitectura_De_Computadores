@@ -55,3 +55,17 @@ Plan:
 8. **Idea 13.** Ajuste por años: S 140/215 y B 140/205, validación -16 (ee 41). Ajuste por empresas: 140/215 en los dos casos (la banda 40, primera de 900). Composición contra simulación directa: 0 diferencias.
 9. **Primera sola sin la copia.** Banda 40 y banda 60 quedan primeras solas con la misma frecuencia (35 % a 40 %); la banda 40 con más puntos (+0,025 a +0,038); tres bandas por hilo, más primeros lugares (43 % a 48 %) y menos puntos.
 10. **Cierre.** Sección 9 de `docs/exploracion_ideas.md`, estado (tramo 19) y T137.
+
+## Tercer y cuarto pedido (19/11): mano a mano contra el rival de Tesla, AMD y variante del caso S
+
+Plan: `ref/cotas/explorar_rival.py` (mano a mano, traza de AMD, variante) e `ref/cotas/ideas_caso_s.py` (la variante: en el caso S, después de vender en el 255, (a) no recompra, (b) recompra con un tercio, (c) todo; en B no cambia). Subconjuntos de la población completa: todas y las validaciones por años y por empresas. El caso de cada ventana de la población sale de la corrida de la variante (a), que lo informa; no hace falta otra corrida. Para las tres bandas, (b) deja la posición total en un tercio del patrimonio fijado al recomprar.
+
+### Avance
+
+1. **AMD** (`amd.txt`). Es del caso B (255 en el tick 1124, 100 en el 5051): la variante del caso S no la toca. Banda 60: compra en 100, vende en 208 y 203 (ticks 6191 y 6192), recompra 126 en 161 y 162 (ticks 9170 y 9171); máximo 24 541 en el tick 12 955 con precio 194, a un nivel de su venta en 195; ninguna orden después; cierra en 173 con 21 895. Sin la recompra habría cerrado con 20 456. Banda 40: recompra en 140, máximo 29 683 en el mismo tick, cierra con 26 470.
+2. **Prueba corta de la variante** en 60 ventanas: el modo 'todo' da lo mismo que la base.
+3. **Población completa en la cola** (`exploracion-rival`): 4 variantes nuevas, después mano a mano y tabla de la variante.
+4. **Población (15:22 a 16:11).** Las 4 variantes en las 1 368 253 ventanas (la corrida más larga, 1437 s por par de especificaciones), mano a mano y tabla de la variante. Modo (c) contra la base en la muestra: 0 diferencias.
+5. **Mano a mano.** Caso S: ganamos en 94 % a 98,5 % de las ventanas. Caso B: la banda 40 empata en el 80,5 %, gana 8,8 % y pierde 10,7 % (+322, ee 148); tres bandas -82. En toda la población la banda 40 es la que menos pierde contra el rival (5,4 % de ventanas, 2,7 % de torneos de 3 rondas).
+6. **Variante del caso S.** (a) y (b) bajan la media del caso S en los tres subconjuntos (banda 40: (a) -707 a -799, (b) -474 a -541). La recompra pasa en 12,7 % a 17,1 % de las ventanas S y vale de 4700 a 5600 cuando pasa. (a) gana en percentil 5 y en no perder nunca contra el rival en S; pierde puntos (1,836 contra 1,852) y primeros lugares, en parte por empatar con `espera`, que en el caso S es la misma regla.
+7. **Cierre.** Secciones 10 y 11 de `docs/exploracion_ideas.md`, estado (tramo 20) y T138.

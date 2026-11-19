@@ -793,3 +793,10 @@ Las decisiones T87 a T99 son del paquete P6 de R1 y R2 y las T100 a T119 del paq
 - **La regla de la idea 14 se probó** aunque el salto no pasó por sí solo, porque el criterio del pedido ("algún efecto") se cumplió por los minutos del día. Perdió en las 9 variantes.
 - **Resultado:** ninguna de las dos le gana a la banda 40 fuera de muestra. La regla de los peldaños no se cambió.
 
+### T138. Mano a mano contra el rival de Tesla y variante del caso S: se presentan, no se deciden (19/11)
+
+- **Subconjuntos de la población completa** para las dos validaciones, en vez de la muestra: aquí no se ajusta ningún parámetro, y la población ya estaba evaluada para las bases. Lo que se pierde: nada del protocolo, porque no hay elección en el ajuste.
+- **El caso de cada ventana** sale de la corrida de la variante (a), que lo informa, en vez de una pasada aparte por las 1 368 253 ventanas.
+- **Variante (b) en las tres bandas:** la posición total queda en un tercio del patrimonio, fijado al recomprar, sin reajustes tick a tick (reajustar cada tick haría órdenes de una acción). Alternativa descartada: escalar cada banda a un tercio (un noveno por banda), que no es lo que dice el pedido.
+- **Resultado:** (a) y (b) bajan la media del caso S y los puntos en los tres subconjuntos. La regla de los peldaños no se cambió.
+
