@@ -87,6 +87,47 @@ def leer_grupos(ruta=LISTA):
     return g, sup
 
 
+MIN_DIAS = 0.98     # una acción falla si la receta de sesión le deja menos del 98 % de los días hábiles
+
+
+def dias_sesion(carpeta, emp):
+    n, ult = 0, None
+    with open(os.path.join(carpeta, f"{emp}.csv")) as f:
+        next(f)
+        for linea in f:
+            d = linea[:10]
+            if d != ult:
+                n += 1
+                ult = d
+    return n
+
+
+def empresas_otras(carpeta):
+    """Las 100 elegidas, con cada una que falla reemplazada por la primera suplente de su grupo que no
+    falla (dos suplentes por grupo, en el orden de los grupos del archivo). Devuelve ({ticker: grupo},
+    lista de (falla, días, reemplazo))."""
+    grupos, sup = leer_grupos()
+    orden_g = []
+    for g in grupos.values():
+        if g not in orden_g:
+            orden_g.append(g)
+    sup_g = {g: sup[2 * j:2 * j + 2] for j, g in enumerate(orden_g)}
+    dias = {t: dias_sesion(carpeta, t) for t in list(grupos) + sup}
+    tope = max(dias.values())
+    out, cambios = {}, []
+    usados = set()
+    for t, g in grupos.items():
+        if dias[t] >= MIN_DIAS * tope:
+            out[t] = g
+            continue
+        r = next((x for x in sup_g[g] if x not in usados and dias[x] >= MIN_DIAS * tope), None)
+        cambios.append((t, dias[t], r, dias.get(r)))
+        if r:
+            usados.add(r)
+            out[r] = g
+    return out, cambios, tope
+
+
 class Datos:
     """Ventanas normalizadas (bytes), filas (empresa, inicio, año inicio, año fin), día hábil de
     inicio (para los grupos) y grupo de sector de cada ventana."""
@@ -128,7 +169,7 @@ def datos_cinco(carpeta):
 
 
 def datos_otras(carpeta):
-    grupos, _ = leer_grupos()
+    grupos, cambios, tope = empresas_otras(carpeta)
     empresas = list(grupos)
     h = hashlib.sha256(repr((empresas, PASO, POR_ESTRATO_OTRAS, SEMILLA, LARGO)).encode())
     for emp in empresas:
@@ -158,6 +199,7 @@ def datos_otras(carpeta):
     cal = _calendario(todas_fechas)
     d = Datos(f"otras-{SEMILLA}-{POR_ESTRATO_OTRAS}-{PASO}", filas, ventanas, [cal[f] for f in fechas_ini],
               [grupos[f[0]] for f in filas])
+    d.cambios, d.tope = cambios, tope
     os.makedirs(CACHE, exist_ok=True)
     pickle.dump(d, open(ruta, "wb"))
     return d
@@ -466,6 +508,9 @@ def accion_filtros(nombre, procesos):
          f"{len(med)} ventanas. Clase por v^2 de los ticks 1 a K (umbrales 1/4, 1/2 y 1). Persistencia con t cada "
          f"{RG.PASO_T} ticks y t - h >= K. Error estándar por grupos (bloques de 20 y 60 días hábiles de la fecha de "
          "inicio" + (", y en dos sentidos fecha y empresa" if nombre == "otras" else "") + "); se informa el mayor."]
+    if getattr(D, "cambios", None):
+        L.append(f"Acciones reemplazadas (la receta de sesión les deja menos del {100 * MIN_DIAS:.0f} % de los {D.tope} días): "
+                 + "; ".join(f"{t} ({d} días) por {r} ({dr} días)" for t, d, r, dr in D.cambios) + ".")
     r = f1(D, med, L, titulo="todas las ventanas")
     v = veredicto_f1(r)
     caso = {c: [i for i, m in enumerate(med) if m["caso"] == c] for c in (1, 2)}
