@@ -1,0 +1,4 @@
+# Equivalencia: política con los módulos apagados contra la banda 40
+
+ref/cotas/explorar_regimen.py equivalencia, commit 7f45641. Se comparan las decisiones tick a tick de ideas.Regla(BandaD(140, 215)), de regimen.Politica() y de regimen.Politica(D con 140/215 en toda la tabla).
+- muestra de las otras acciones: 12000 ventanas, 240000000 decisiones por estrategia, ventanas con alguna diferencia: 0 (15 s)

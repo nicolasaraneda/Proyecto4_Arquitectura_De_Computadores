@@ -1,0 +1,4 @@
+# Equivalencia: política con los módulos apagados contra la banda 40
+
+ref/cotas/explorar_regimen.py equivalencia, commit fa35fc5. Se comparan las decisiones tick a tick de ideas.Regla(BandaD(140, 215)), de regimen.Politica() y de regimen.Politica(D con 140/215 en toda la tabla).
+- población completa de las cinco empresas: 1368253 ventanas, 27365060000 decisiones por estrategia, ventanas con alguna diferencia: 0 (1914 s)

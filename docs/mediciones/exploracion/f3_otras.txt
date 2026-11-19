@@ -1,0 +1,16 @@
+# F3: techo del módulo E, otras
+
+ref/cotas/explorar_regimen.py f3 --conjunto otras, commit 7f45641. Banda 40 normal; decidiendo con p(n) completo (techo); con la orden condicionada a los bits del precio que llega (efectivo), armada cuando el precio anterior quedó a 1 o 2 niveles del umbral, con y sin comisión por una orden de cantidad 0.
+
+### F3 otras-18-24-97 (12000 ventanas)
+
+| variante | patrimonio medio | diferencia con la banda 40 (ee) |
+|---|---|---|
+| banda 40 | 21303 | +0.0 (0.0) |
+| techo: decide con p(n) | 21594 | +290.8 (14.6) |
+| bits, armado 1, sin comisión en 0 | 21290 | -13.6 (17.8) |
+| bits, armado 1, con comisión en 0 | 21290 | -13.6 (17.8) |
+| bits, armado 2, sin comisión en 0 | 21164 | -139.5 (31.2) |
+| bits, armado 2, con comisión en 0 | 21164 | -139.5 (31.2) |
+
+Veredicto F3 (una distancia de armado gana más de 1 ee con y sin comisión en 0): no pasa
