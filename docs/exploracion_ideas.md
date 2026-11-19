@@ -209,7 +209,7 @@ Todos con los minutos fuera del repositorio: `export P4_DATOS=~/proyectos/datos_
 | Idea 8 en la ronda de Tesla | `python3 ref/cotas/explorar_ideas.py tesla` | `tesla.txt` |
 | Finalistas en la población completa | `python3 ref/cotas/explorar_ideas.py completa 5 --semilla 18` | `completa.txt` |
 
-Las salidas quedan en `docs/mediciones/exploracion/`.
+Las salidas quedan en `docs/mediciones/exploracion/`. Los `.json` no se suben al repositorio (el `.gitignore` ignora `*.json`): se regeneran con los mismos comandos, y `tabla` y `completa` los necesitan, así que van después de `idea`.
 
 ## 9. Segunda tanda (19/11): ideas 13 y 14, y primera sola sin la copia
 
