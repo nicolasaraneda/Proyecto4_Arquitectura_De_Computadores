@@ -1,0 +1,24 @@
+Idea 13: niveles segun el orden de los extremos (clase B). ref/cotas/explorar_ideas2.py idea13 --semilla 18, commit 984cae6
+Muestra muestra-18-240: 3600 ventanas; 30 x 30 combinaciones (par S, par B). Se elige la de mas puntos de torneo en el ajuste y se informa en la validacion.
+
+== separacion por anios: ajuste 2400 ventanas, validacion 1200
+   cinco mejores en el ajuste: S 140/215 B 140/205 1.849; S 140/215 B 140/215 1.848; S 130/215 B 140/205 1.846; S 140/205 B 140/205 1.846; S 130/205 B 140/205 1.846
+   140/215 en los dos casos (banda 40) queda en el lugar 2 de 900 en el ajuste
+   estrategia                           pts  1a %   media mediana     p5   peor  /cym   ord   com  dd %
+   elegida S 140/215, B 140/205       1.849  21.1   20999   24690  10386   9090  1.69   3.9    20  21.0   (ajuste)
+   elegida S 140/215, B 140/205       1.860  20.2   22300   24645  10917   9864  1.67   4.0    20  22.5   (validacion)
+   banda 40                           1.848  15.8   20893   24661  10386   9090  1.68   3.8    19  21.2   (ajuste)
+   banda 40                           1.866  18.3   22316   24645  10917   9864  1.67   3.9    20  22.6   (validacion)
+   diferencia de patrimonio medio en la validacion contra banda 40: -16 (ee 41; con grupos de 60 dias, ee 46)
+
+== separacion por empresas: ajuste 2160 ventanas, validacion 1440
+   cinco mejores en el ajuste: S 140/215 B 140/215 1.861; S 140/225 B 140/215 1.861; S 140/215 B 130/225 1.861; S 140/225 B 130/225 1.861; S 140/225 B 140/205 1.861
+   140/215 en los dos casos (banda 40) queda en el lugar 1 de 900 en el ajuste
+   estrategia                           pts  1a %   media mediana     p5   peor  /cym   ord   com  dd %
+   elegida S 140/215, B 140/215       1.861  17.1   22000   24876  10584   9090  1.60   3.9    19  22.2   (ajuste)
+   elegida S 140/215, B 140/215       1.849  17.3   20418   23703  10347   9673  1.82   3.8    19  21.0   (validacion)
+   banda 40                           1.861  17.1   22000   24876  10584   9090  1.60   3.9    19  22.2   (ajuste)
+   banda 40                           1.849  17.3   20418   23703  10347   9673  1.82   3.8    19  21.0   (validacion)
+   diferencia de patrimonio medio en la validacion contra banda 40: +0 (ee 0; con grupos de 60 dias, ee 0)
+
+Comprobacion: la regla simulada directamente (OrdenD, ideas_reloj.py) contra la composicion por caso, 2 reglas x 3600 ventanas: 0 diferencias  PASS

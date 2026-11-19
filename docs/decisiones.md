@@ -784,3 +784,12 @@ Las decisiones T87 a T99 son del paquete P6 de R1 y R2 y las T100 a T119 del paq
 - **Filtros.** Se aplicaron los del pedido. Las ideas 7, 8 y 10 no traen filtro: se informa un diagnóstico y pasan al barrido. Las ideas que no pasan (1, 5 y 6) no se barren; para la tabla se informa un representante elegido antes de ver resultados. El filtro de la idea 4 se corrigió durante el trabajo: la primera versión elegía el indicador mirando la validación.
 - **Idea 12 agregada:** banda asimétrica (compra y venta por separado), porque en la ronda de Tesla decidió el nivel de venta. Su óptimo es 140/215 en los dos ajustes, la banda 40.
 - **Resultado:** ninguna idea ni combinación le gana a la banda 40 fuera de muestra, ni en la muestra ni en la población completa (las cinco finalistas quedan entre -4 y -67 de patrimonio medio en su propia validación). La regla de los peldaños no se cambió; la decisión (banda 40 sola, banda 60 sin cambios, o banda 40 con un agregado) queda en `docs/exploracion_ideas.md`, sección 6.
+
+### T137. Ideas 13 y 14 sobre la banda 40: resultados negativos, la decisión sigue en la sección 6 (19/11)
+
+- **Pedido de Nicolás:** niveles de la banda según el orden de los extremos y reloj de día de mercado, cada una con su filtro, con el protocolo de T136; la primera sola sin `espera_banda40`. En el documento son las ideas 13 y 14 (en el pedido, 11 y 12), para no chocar con la numeración de la primera tanda.
+- **Idea 13 por composición:** como el caso queda fijado al entrar a D y las fases A a C son iguales para todos los pares, la regla con un par por caso se arma ventana por ventana con las bandas de cada par (30 bandas en vez de 900 simulaciones). Se comprobó contra la simulación directa: 0 diferencias.
+- **Error estándar de la idea 14 por la fecha del tick:** con los grupos por inicio de ventana de la tabla 2, la mitad de los minutos del día salía significativa. Alternativa descartada: dejar la agrupación del protocolo, que habría dado por bueno el salto. Lo que se pierde: la comparación directa con los ee de la tabla 2.
+- **La regla de la idea 14 se probó** aunque el salto no pasó por sí solo, porque el criterio del pedido ("algún efecto") se cumplió por los minutos del día. Perdió en las 9 variantes.
+- **Resultado:** ninguna de las dos le gana a la banda 40 fuera de muestra. La regla de los peldaños no se cambió.
+

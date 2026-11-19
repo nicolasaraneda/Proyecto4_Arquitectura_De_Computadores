@@ -2,6 +2,22 @@
 
 Se actualiza al cerrar cada tramo de trabajo. La versión anterior queda en el historial de git.
 
+## Tramo 19: ideas 13 y 14 sobre la banda 40 (19/11)
+
+Rama `minutos-reales`. Sección 9 de `docs/exploracion_ideas.md`; bitácora `docs/bitacora/exploracion.md` (segundo pedido). Decisión T137. Solo Python. **La regla de los peldaños no se cambió.** Las ideas 11 y 12 del pedido son la 13 y la 14 en el documento, para no confundirlas con la 11 y la 12 de la primera tanda.
+
+| Pedido | Resultado | Dónde |
+|--------|-----------|-------|
+| Idea 13: niveles según el orden de los extremos | Pasa el filtro por el caso B (mejor par 140/205, +157 con ee 116). En el protocolo no se sostiene: el ajuste por empresas elige la banda 40 y el de años queda -16 (ee 41) en su validación | Sección 9.3; `filtro13.txt`, `idea13.txt` |
+| Idea 14: reloj de día de mercado | El salto de cierre a apertura vale +0,37 niveles en promedio, pero no pasa 2 ee en los ajustes; 19 minutos del día sí se mantienen, de 0,03 a 0,12 niveles, bajo lo que cuesta una vuelta (0,16). La regla pierde en las 9 variantes (-421 a -1156): con la banda en caja en D el salto vale -1,40 | Sección 9.4; `filtro14.txt`, `idea14.txt` |
+| Detección de la fase del día | Histograma de 390 casilleros: fija la fase en el tick 689 en la mediana (1386 en el percentil 90), predice el 96 % de los saltos; unas 20 instrucciones por tick y 195 palabras | Sección 9.4 |
+| Primera sola sin la copia | Banda 40 y 60, 35 % a 40 % cada una; la banda 40 con más puntos | Sección 9.5; `primera.txt` |
+| Error estándar | Para efectos por tick, los grupos por inicio de ventana subestiman el error (146 a 198 minutos de 390 pasaban 2 ee); se agrupó por la fecha del tick | Sección 9.4 |
+
+### Lo que decides tú
+
+Lo mismo que en el tramo 18: ninguna de las dos ideas agrega una opción a la sección 6.
+
 ## Tramo 18: exploración de ideas sobre la población real (18/11 en la noche y madrugada del 19/11)
 
 Rama `minutos-reales`, sobre `9ba804a`. Documento: `docs/exploracion_ideas.md`. Bitácora: `docs/bitacora/exploracion.md`. Decisión T136. Solo Python: no se tocó `rtl/`, `sw/`, `main` ni los bitstreams. **La regla de los peldaños no se cambió.**

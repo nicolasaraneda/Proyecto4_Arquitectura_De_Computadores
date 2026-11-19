@@ -1,0 +1,45 @@
+Idea 14 (la 12 del pedido del 19/11): reloj de dia de mercado. Filtro (ref/cotas/explorar_ideas2.py filtro14 --semilla 18), commit 984cae6
+Muestra muestra-18-240: 3600 ventanas normalizadas de 20 000 minutos. Unidades: niveles de precio normalizado (100 a 255) por tick. Error estandar por grupos de ticks: empresa y bloque de 20 dias de la fecha del tick (el mismo tick aparece en muchas ventanas; agrupar por el inicio de la ventana subestima el error).
+Minuto 0 = el tick del salto de cierre a apertura (primer minuto del dia: p(apertura) - p(cierre anterior)).
+
+== 1. Salto de cierre a apertura (minuto 0): media (ee) y t, por empresa y por anio de inicio de la ventana
+   empresa                    2022                   2023                   2024                  todas
+   META      -0.747 (0.441) t -1.7  +1.380 (0.452) t +3.1  +0.652 (0.527) t +1.2  +0.429 (0.314) t +1.4
+   AAPL      -0.408 (0.377) t -1.1  +0.115 (0.425) t +0.3  +0.419 (0.823) t +0.5  +0.043 (0.342) t +0.1
+   NFLX      -0.317 (0.579) t -0.5  +1.170 (0.432) t +2.7  +1.034 (0.514) t +2.0  +0.629 (0.320) t +2.0
+   AMD       +0.006 (0.552) t +0.0  +0.447 (0.398) t +1.1  +0.840 (0.439) t +1.9  +0.431 (0.278) t +1.6
+   TSLA      +0.459 (0.343) t +1.3  -0.108 (0.506) t -0.2  +0.594 (0.524) t +1.1  +0.315 (0.284) t +1.1
+   todas     -0.201 (0.215) t -0.9  +0.601 (0.209) t +2.9  +0.708 (0.261) t +2.7  +0.369 (0.139) t +2.7
+   tamano del salto: |J| medio 5.73 niveles (ee 0.15), en 184319 saltos de la muestra
+
+== 2. Efectos en el ajuste y en la validacion de cada separacion: media (ee) y t
+   salto (minuto 0)
+      anios-ajuste: +0.200 (0.156) t+1.3; anios-validacion: +0.708 (0.261) t+2.7; empresas-ajuste: +0.367 (0.190) t+1.9; empresas-validacion: +0.373 (0.199) t+1.9
+   salto + primer minuto (lo que gana quien pasa el salto)
+      anios-ajuste: +0.111 (0.155) t+0.7; anios-validacion: +0.684 (0.264) t+2.6; empresas-ajuste: +0.357 (0.192) t+1.9; empresas-validacion: +0.220 (0.195) t+1.1
+   signo del salto x 30 minutos siguientes (+ sigue, - revierte)
+      anios-ajuste: +0.080 (0.116) t+0.7; anios-validacion: -0.045 (0.165) t-0.3; empresas-ajuste: +0.162 (0.136) t+1.2; empresas-validacion: -0.146 (0.124) t-1.2
+   30 minutos despues de un salto positivo: -0.131 (ee 0.127), 89179 saltos
+   30 minutos despues de un salto negativo: -0.224 (ee 0.153), 81324 saltos
+
+== 3. Los 390 minutos del dia: cuantos superan 2 ee (se esperan unos 20 por azar en cada subconjunto)
+   anios-ajuste: 121 de 390
+   anios-validacion: 88 de 390
+   empresas-ajuste: 65 de 390
+   empresas-validacion: 71 de 390
+   minutos que superan 2 ee en el ajuste y se mantienen en la validacion (mismo signo y mas de 2 ee):
+      anios: 13 (09:43): ajuste -0.058, validacion -0.123, 45 (10:15): ajuste +0.046, validacion +0.063, 80 (10:50): ajuste -0.077, validacion -0.049, 87 (10:57): ajuste -0.033, validacion -0.047, 104 (11:14): ajuste +0.041, validacion +0.057, 105 (11:15): ajuste -0.026, validacion -0.034, 142 (11:52): ajuste +0.031, validacion +0.044, 155 (12:05): ajuste -0.037, validacion -0.028, 202 (12:52): ajuste +0.027, validacion +0.033, 210 (13:00): ajuste -0.022, validacion -0.029, 222 (13:12): ajuste +0.031, validacion +0.040, 251 (13:41): ajuste -0.033, validacion -0.044, 269 (13:59): ajuste +0.051, validacion +0.031, 308 (14:38): ajuste +0.031, validacion +0.032, 333 (15:03): ajuste -0.027, validacion -0.032, 347 (15:17): ajuste -0.028, validacion -0.028, 354 (15:24): ajuste +0.031, validacion +0.039, 365 (15:35): ajuste -0.028, validacion -0.047, 381 (15:51): ajuste -0.038, validacion -0.088, 389 (15:59): ajuste +0.044, validacion +0.045
+      empresas: 13 (09:43): ajuste -0.071, validacion -0.093, 45 (10:15): ajuste +0.048, validacion +0.056, 47 (10:17): ajuste +0.045, validacion +0.037, 80 (10:50): ajuste -0.063, validacion -0.075, 81 (10:51): ajuste -0.035, validacion -0.048, 87 (10:57): ajuste -0.032, validacion -0.047, 104 (11:14): ajuste +0.054, validacion +0.035, 105 (11:15): ajuste -0.024, validacion -0.036, 133 (11:43): ajuste -0.027, validacion -0.025, 142 (11:52): ajuste +0.043, validacion +0.025, 150 (12:00): ajuste -0.029, validacion -0.049, 155 (12:05): ajuste -0.029, validacion -0.041, 202 (12:52): ajuste +0.031, validacion +0.026, 209 (12:59): ajuste +0.030, validacion +0.032, 210 (13:00): ajuste -0.026, validacion -0.022, 240 (13:30): ajuste +0.039, validacion +0.050, 251 (13:41): ajuste -0.034, validacion -0.041, 254 (13:44): ajuste +0.020, validacion +0.021, 269 (13:59): ajuste +0.046, validacion +0.043, 281 (14:11): ajuste -0.030, validacion -0.023, 307 (14:37): ajuste +0.036, validacion +0.029, 308 (14:38): ajuste +0.027, validacion +0.038, 320 (14:50): ajuste -0.035, validacion -0.044, 333 (15:03): ajuste -0.028, validacion -0.030, 347 (15:17): ajuste -0.027, validacion -0.030, 348 (15:18): ajuste +0.025, validacion +0.020, 354 (15:24): ajuste +0.030, validacion +0.040, 361 (15:31): ajuste +0.026, validacion +0.031, 365 (15:35): ajuste -0.035, validacion -0.033, 370 (15:40): ajuste +0.027, validacion +0.044, 381 (15:51): ajuste -0.060, validacion -0.048, 389 (15:59): ajuste +0.057, validacion +0.026
+      en las dos separaciones: 13 (09:43), 45 (10:15), 80 (10:50), 87 (10:57), 104 (11:14), 105 (11:15), 142 (11:52), 155 (12:05), 202 (12:52), 210 (13:00), 251 (13:41), 269 (13:59), 308 (14:38), 333 (15:03), 347 (15:17), 354 (15:24), 365 (15:35), 381 (15:51), 389 (15:59)
+   salto, salto + primer minuto y continuacion que se mantienen en las dos separaciones: ninguno
+
+== 4. Tamano necesario: comprar q acciones para pasar el salto y venderlas paga 2 comisiones (10). Con q = 63,
+   el salto + primer minuto tendria que valer mas de 10 / 63 = 0,16 niveles por salto en promedio.
+
+== 5. Deteccion de la fase del dia con la serie recibida (ideas_reloj.py; contador que da la vuelta en 390)
+   histograma: primer salto predicho en el tick (mediana / p90 / max) 689 / 1386 / 5793; nunca en 0 de 3600 ventanas
+      despues del primer acierto predice 96.0 % de los saltos; de todas sus predicciones, 95.8 % son saltos
+   bloque: primer salto predicho en el tick (mediana / p90 / max) 1354 / 3008 / 7775; nunca en 0 de 3600 ventanas
+      despues del primer acierto predice 44.5 % de los saltos; de todas sus predicciones, 98.6 % son saltos
+
+Criterio del pedido: algun efecto supera 2 ee y se mantiene en la validacion por anios y por empresas. Resultado: PASA. (14 s)

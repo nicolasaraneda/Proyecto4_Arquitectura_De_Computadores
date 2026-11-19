@@ -82,6 +82,11 @@ def codigo():
     return h.hexdigest()[:16]
 
 
+# Tipos de especificación definidos fuera de ideas.py (ideas_reloj.py, segunda tanda): su clave de caché
+# agrega el código de su módulo. Para los tipos de ideas.py la clave queda igual que antes.
+CODIGO_EXTRA = {}
+
+
 def commit():
     try:
         return subprocess.run(["git", "rev-parse", "--short", "HEAD"], cwd=comun.AQUI, capture_output=True,
@@ -190,8 +195,11 @@ def _trabajo(args):
     specs, ids = args
     conj = _G["conj"]
     out = [([], [], [], []) for _ in specs]
+    antes = _G.get("antes")      # gancho opcional por ventana (explorar_ideas2.py: minutos del día para la idea 14)
     for i in ids:
         w = conj.ventana(i)
+        if antes is not None:
+            antes(i)
         for k, sp in enumerate(specs):
             s = ideas.crear(sp)
             W, n, dd = ideas.correr(w, s)
@@ -207,7 +215,8 @@ def evaluar(conj, specs, procesos=None, trozo=None, verbose=True, info=True):
     """Devuelve una lista (una por spec) de dict W, n, dd, info, alineadas con conj.filas."""
     cod = codigo()
     os.makedirs(CACHE, exist_ok=True)
-    rutas = [os.path.join(CACHE, f"{conj.clave()}_{hashlib.sha256((cod + repr(sp)).encode()).hexdigest()[:20]}.pkl")
+    rutas = [os.path.join(CACHE, f"{conj.clave()}_"
+                          f"{hashlib.sha256((cod + CODIGO_EXTRA.get(sp[0], '') + repr(sp)).encode()).hexdigest()[:20]}.pkl")
              for sp in specs]
     faltan = [k for k, r in enumerate(rutas) if not os.path.exists(r)]
     if faltan:

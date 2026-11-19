@@ -210,3 +210,132 @@ Todos con los minutos fuera del repositorio: `export P4_DATOS=~/proyectos/datos_
 | Finalistas en la población completa | `python3 ref/cotas/explorar_ideas.py completa 5 --semilla 18` | `completa.txt` |
 
 Las salidas quedan en `docs/mediciones/exploracion/`.
+
+## 9. Segunda tanda (19/11): ideas 13 y 14, y primera sola sin la copia
+
+Pedido de Nicolás del 19/11: dos ideas nuevas sobre la banda 40, cada una con su filtro primero, con el mismo protocolo, validaciones y reglas de sesión. En el pedido son la 11 y la 12; aquí son la **13** (niveles según el orden de los extremos) y la **14** (reloj de día de mercado), para no confundirlas con la 11 (combinaciones) y la 12 (banda asimétrica) de la primera tanda. Código: `ref/cotas/ideas_reloj.py` (comportamientos y detectores) y `ref/cotas/explorar_ideas2.py` (filtros, barridos y tablas). `ideas.py` no cambió, así que las cachés de la primera tanda siguen valiendo. Este documento presenta resultados; la decisión no se toma aquí.
+
+### 9.1 Filtros
+
+| Idea | Filtro del pedido | Número medido | Pasa |
+|------|-------------------|---------------|------|
+| 13. Niveles según el orden de los extremos | Por caso, el mejor par (compra, venta) contra 140/215; se descarta si en los dos casos queda a menos de un error estándar | Caso S: 130/185, +208 (ee 237). Caso B: 140/205, +157 (ee 116) | Sí, por el caso B |
+| 14. Reloj de día de mercado | Algún efecto del día pasa 2 ee en el ajuste y se mantiene (mismo signo, más de 2 ee) en la validación por años y por empresas | El salto de cierre a apertura no (t del ajuste: +1,3 por años, +1,9 por empresas). 19 minutos del día sí, de 0,03 a 0,12 niveles | Sí, por los minutos; el salto no |
+
+### 9.2 Resultados en la validación (formato de la tabla 2)
+
+| # | Idea | Clase | Elegida (años / empresas) | Pts validación años / empresas | Pts ajuste años / empresas | 1.ª sola % | Media | Mediana | p5 | Peor | / c. y m. | Órdenes | Comisiones | Pérdida máx. % | Δ media vs banda 40 (ee), años / empresas |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| - | banda 40 | base | banda 40 | 1,866 / 1,849 | 1,848 / 1,861 | 18,3 / 17,3 | 22316 | 24645 | 10917 | 9864 | 1,67 | 3,9 | 20 | 22,6 | 0 / 0 |
+| 13 | Niveles según el orden de los extremos | B | S 140/215 y B 140/205 / 140/215 en los dos (la banda 40) | 1,860 / 1,849 | 1,849 / 1,861 | 20,2 / 17,3 | 22300 | 24645 | 10917 | 9864 | 1,67 | 4,0 | 20 | 22,5 | -16 (41) / 0 (0) |
+| - | banda 60 | base | banda 60 | 1,811 / 1,794 | 1,810 / 1,826 | 26,7 / 26,3 | 22059 | 24575 | 10917 | 9864 | 1,65 | 4,5 | 23 | 23,2 | -256 (272) / -319 (226) |
+| 14 | Reloj de día de mercado | B | detector por bloques, vende 1 tick después del salto (las dos) | 1,808 / 1,791 | 1,807 / 1,821 | 31,9 / 26,5 | 21864 | 24411 | 10917 | 9864 | 1,63 | 9,5 | 48 | 22,7 | -452 (189) / -421 (110) |
+
+Media, mediana, p5, peor, razón contra comprar y mantener, órdenes, comisiones y pérdida máxima son de la validación por años. En el orden de la tabla 2, la idea 13 queda entre la 8 y la 9, y la 14 entre la grilla y el torneo en sombra. **Ninguna de las dos le gana a la banda 40 fuera de muestra.** Con grupos de 60 días de inicio (más que el largo de una ventana) los errores estándar de la idea 13 suben de 41 a 46 y los de las 9 variantes de la 14 cambian entre -12 % y +20 %; ninguna conclusión cambia.
+
+### 9.3 Idea 13: niveles según el orden de los extremos
+
+Comandos: `python3 ref/cotas/explorar_ideas2.py filtro13 --semilla 18` (`filtro13.txt`) y `python3 ref/cotas/explorar_ideas2.py idea13 --semilla 18` (`idea13.txt`, `idea13.json`).
+
+El caso queda fijado al entrar a D: en el caso S la fase D empieza al ver el 255 y la banda vende; en el B empieza al ver el 100 y la banda compra. Como las fases A a C son iguales para todos los pares, la regla con un par por caso es, ventana por ventana, la banda del par de su caso. Así se armaron las 900 combinaciones a partir de 30 bandas (20 ya estaban en la caché de la idea 12). La regla simulada directamente (`OrdenD`) da lo mismo que la composición en las 2 combinaciones elegidas y las 3600 ventanas: 0 diferencias.
+
+| Caso | Ventanas | Tick mediano de entrada a D | Banda 40: patrimonio medio | Tocan 215 después de entrar a D | Toques de 215 por ventana | Tocan 140 después de entrar a D | Mejor par | Δ contra 140/215 (ee; ee con grupos de 60 días) |
+|------|----------|-----------------------------|----------------------------|-------------------------------|---------------------------|--------------------------------|-----------|-----------------------------------------------|
+| S (100 antes que 255) | 2101 (58,4 %) | 17 695 | 25 678 | 1015 (48,3 %) | 9,45 | 295 (14,0 %) | 130/185 | +208 (237; 255) |
+| B (255 antes que 100) | 1499 (41,6 %) | 16 175 | 15 325 | 294 (19,6 %) | 3,37 | 896 (59,8 %) | 140/205 | +157 (116; 124) |
+
+Lectura del filtro. En el caso S la banda vende en el 255 al entrar a D y queda en caja, y el nivel de venta solo importa en el 14 % de las ventanas que vuelven a 140. En el caso B la banda compra en el 100, y el nivel de venta decide en el 20 % que llega a 215. El mejor par del caso B (vender en 205) es el mejor de 30 en la misma muestra, así que lleva el sesgo de elegir el máximo.
+
+En el protocolo, el ajuste por empresas elige 140/215 en los dos casos (la banda 40 queda primera de 900 en el ajuste). El ajuste por años elige S 140/215 y B 140/205, con 1,849 puntos contra 1,848 de la banda 40. En su validación queda en 1,860 contra 1,866, con -16 (ee 41) de patrimonio medio. **La ventaja del caso B no se sostiene fuera de muestra.**
+
+Placa: igual que la banda, con cuatro constantes en la tabla en vez de dos y un bit que guarda cuál extremo llegó primero (unas 3 instrucciones más). No necesita RTL, multiplicación ni división.
+
+### 9.4 Idea 14: reloj de día de mercado
+
+Comandos: `python3 ref/cotas/explorar_ideas2.py filtro14 --semilla 18` (`filtro14.txt`) y `python3 ref/cotas/explorar_ideas2.py idea14 --semilla 18` (`idea14.txt`, `idea14.json`).
+
+**Error estándar.** En esta idea la unidad es el tick, y un mismo tick aparece en cientos de ventanas de la muestra que empiezan en bloques vecinos. Con los grupos de la tabla 2 (empresa y bloque de 20 días de inicio de la ventana), entre 146 y 198 de los 390 minutos pasaban 2 ee en cada subconjunto, cuando por azar se esperan unos 20, y el salto pasaba en los cuatro subconjuntos del protocolo (t de 2,1 a 4,3). Por eso se agrupó por empresa y bloque de 20 días de la fecha del tick mismo. Todos los números de esta sección usan esa agrupación. Para las diferencias de patrimonio por ventana de las ideas 13 y 14, la versión conservadora (grupos de 60 días de inicio, más que el largo de una ventana) cambia el error estándar entre -12 % y +20 %. No se recalculó para la primera tanda.
+
+**Salto de cierre a apertura** (minuto 0, p(apertura) - p(cierre anterior), en niveles normalizados), por empresa y año de inicio de la ventana: media (ee).
+
+| Empresa | 2022 | 2023 | 2024 | Todos |
+|---------|------|------|------|-------|
+| META | -0,75 (0,44) | +1,38 (0,45) | +0,65 (0,53) | +0,43 (0,31) |
+| AAPL | -0,41 (0,38) | +0,12 (0,43) | +0,42 (0,82) | +0,04 (0,34) |
+| NFLX | -0,32 (0,58) | +1,17 (0,43) | +1,03 (0,51) | +0,63 (0,32) |
+| AMD | +0,01 (0,55) | +0,45 (0,40) | +0,84 (0,44) | +0,43 (0,28) |
+| TSLA | +0,46 (0,34) | -0,11 (0,51) | +0,59 (0,52) | +0,32 (0,28) |
+| Todas | -0,20 (0,22) | +0,60 (0,21) | +0,71 (0,26) | +0,37 (0,14) |
+
+El salto mide 5,73 niveles en valor absoluto en promedio y su media es +0,37, con t de 2,7 en toda la muestra. El signo cambia con el año: es negativo en 2022, el año de caída. En el protocolo:
+
+| Efecto | Ajuste años | Validación años | Ajuste empresas | Validación empresas | Se mantiene |
+|--------|-------------|-----------------|-----------------|---------------------|-------------|
+| Salto (minuto 0) | +0,20 (0,16) | +0,71 (0,26) | +0,37 (0,19) | +0,37 (0,20) | No: no pasa 2 ee en ningún ajuste |
+| Salto + primer minuto (lo que gana por acción quien pasa el salto) | +0,11 (0,16) | +0,68 (0,26) | +0,36 (0,19) | +0,22 (0,20) | No |
+| Signo del salto × 30 minutos siguientes (+ sigue, - revierte) | +0,08 (0,12) | -0,05 (0,17) | +0,16 (0,14) | -0,15 (0,12) | No |
+
+En toda la muestra, los 30 minutos que siguen a un salto positivo se mueven -0,13 (ee 0,13), y los que siguen a uno negativo -0,22 (ee 0,15). El signo del salto no predice los 30 minutos siguientes.
+
+**Los 390 minutos del día.** Pasan 2 ee entre 65 y 121 minutos por subconjunto, y 19 se mantienen en el ajuste y la validación de las dos separaciones: 09:43, 10:15, 10:50, 10:57, 11:14, 11:15, 11:52, 12:05, 12:52, 13:00, 13:41, 13:59, 14:38, 15:03, 15:17, 15:24, 15:35, 15:51 y 15:59. Varios están junto a horas o cuartos de hora redondos (10:15, 11:14 y 11:15, 13:00, 13:59, 15:59). Que pasen 65 a 121 minutos por subconjunto, y no 20, indica que hay estructura dentro del día o que el error estándar todavía queda corto. En cualquier caso son chicos: de 0,03 a 0,12 niveles. Una ida y vuelta de 63 acciones paga 10 de comisión, así que necesita más de 10 / 63 = 0,16 niveles por vuelta. Ninguno alcanza.
+
+**La regla del pedido.** En la fase D, con la banda 40 en caja, compra 63 para pasar el salto (decidida tras ver p(j - 2), se ejecuta al cierre p(j - 1)) y vende h ticks después del salto. Se barrieron 9 variantes: detector oráculo (el minuto verdadero, una cota superior que la placa no tiene), por histograma y por bloques, con h de 1, 5 y 30. Diferencia de patrimonio medio contra banda 40 en la validación, con su ee:
+
+| Variante | Años | Empresas | Vueltas por ventana (años / empresas) |
+|----------|------|----------|---------------------------------------|
+| Bloques, h = 1 (la elegida en los dos ajustes) | -452 (189) | -421 (110) | 2,85 / 3,23 |
+| Bloques, h = 5 | -568 (209) | -496 (132) | 2,85 / 3,23 |
+| Bloques, h = 30 | -818 (247) | -631 (169) | 2,85 / 3,23 |
+| Histograma, h = 1 | -616 (213) | -682 (125) | 6,03 / 6,37 |
+| Oráculo, h = 1 | -590 (216) | -739 (147) | 6,03 / 6,37 |
+| Histograma, h = 5 | -748 (236) | -842 (151) | 6,03 / 6,37 |
+| Oráculo, h = 5 | -764 (238) | -884 (165) | 6,03 / 6,37 |
+| Histograma, h = 30 | -1057 (263) | -1110 (185) | 6,03 / 6,37 |
+| Oráculo, h = 30 | -1061 (266) | -1156 (197) | 6,03 / 6,37 |
+
+Pierden todas, y el oráculo pierde igual que el histograma: no es un problema de detección. El detector por bloques pierde menos solo porque opera menos. La causa está en el diagnóstico de `idea14.txt`. En la fase D de la banda 40, el salto más el primer minuto vale **-1,40 niveles (ee 0,24) cuando la banda está en caja** y +1,42 (ee 0,35) cuando está invertida. Lo mismo pasa en las dos validaciones: -1,10 y -1,56 en caja, +2,33 y +1,49 invertida. La banda queda en caja cuando el precio está alto en el rango de la ventana. Desde ahí el precio tiende a bajar también a través del salto, y esa estructura de la ventana normalizada pesa más que el +0,37 promedio del salto. Los saltos favorables ya los pasa la banda cuando está invertida.
+
+**Detección en la placa.** Un hilo lleva un contador c que da la vuelta en 390 (sumar 1 y comparar con 390, sin dividir) y no necesita multiplicar, dividir ni desplazar.
+
+- **Detector por histograma** (`DetectorHistograma`). En cada tick suma |p(n) - p(n - 1)| al casillero c y, con una comparación, lleva el casillero con más suma. Ese casillero es la fase del salto. El primer salto que predice llega en el tick 689 en la mediana de las 3600 ventanas (menos de 2 días de mercado), 1386 en el percentil 90 (3,6 días) y 5793 en el peor caso (15 días). Desde el primer acierto predice el 96,0 % de los saltos, y el 95,8 % de sus predicciones son saltos. Cuesta unas 20 instrucciones por tick: leer el precio anterior, valor absoluto sin saltos, cargar, sumar y guardar el casillero, comparar con el máximo y avanzar el contador. Usa 390 contadores de 16 bits, unas 195 palabras de la memoria de 512 (el programa de la regla de los peldaños usa 67).
+- **Detector por bloques** (`DetectorBloque`). Guarda la posición del mayor cambio de cada bloque de 390 ticks y fija la fase cuando dos bloques seguidos coinciden. Usa 4 palabras y unas 12 instrucciones por tick. El primer acierto llega en el tick 1354 en la mediana (3008 en el percentil 90 y 7775 en el peor caso), pero después predice solo el 44,5 % de los saltos, porque suelta la fase cada vez que el mayor cambio de un día no es el salto.
+
+Los días con menos de 390 minutos (13 en las cinco empresas, todos de 359 a 389) corren la fase. El detector por bloques la vuelve a fijar en dos días por construcción, y el histograma tarda más porque el casillero viejo tiene la suma acumulada; los porcentajes de arriba ya incluyen esos días.
+
+### 9.5 Primera sola sin la copia `espera_banda40`
+
+Comando: `python3 ref/cotas/explorar_ideas2.py primera --semilla 18` (`primera.txt`). Es el mismo sorteo de 20 000 torneos que la tabla 2, con `espera_banda40` fuera del campo. Los porcentajes difieren en 0,1 de los de `detalle.txt`, que usó otro sorteo.
+
+| Subconjunto | Estrategia | Pts, campo de siempre | 1.ª sola %, campo de siempre | Pts sin la copia | 1.ª sola % sin la copia |
+|-------------|------------|-----------------------|------------------------------|------------------|-------------------------|
+| Validación años (muestra) | banda 40 | 1,866 | 18,3 | 1,862 | 39,9 |
+| | banda 60 | 1,811 | 26,7 | 1,824 | 39,2 |
+| | tres bandas por hilo | 1,820 | 34,6 | 1,834 | 47,2 |
+| Validación empresas (muestra) | banda 40 | 1,849 | 17,3 | 1,845 | 37,0 |
+| | banda 60 | 1,794 | 26,3 | 1,816 | 38,0 |
+| | tres bandas por hilo | 1,803 | 36,2 | 1,820 | 46,0 |
+| Población completa, todas | banda 40 | 1,859 | 16,7 | 1,852 | 35,9 |
+| | banda 60 | 1,817 | 25,7 | 1,825 | 37,9 |
+| | tres bandas por hilo | 1,815 | 32,0 | 1,823 | 42,9 |
+| Población, validación años | banda 40 | 1,876 | 18,6 | 1,874 | 40,1 |
+| | banda 60 | 1,824 | 27,3 | 1,838 | 40,0 |
+| | tres bandas por hilo | 1,830 | 34,0 | 1,846 | 47,6 |
+| Población, validación empresas | banda 40 | 1,848 | 17,0 | 1,843 | 35,3 |
+| | banda 60 | 1,790 | 25,3 | 1,806 | 35,6 |
+| | tres bandas por hilo | 1,798 | 34,3 | 1,811 | 43,1 |
+
+Sin la copia, la banda 40 y la banda 60 quedan primeras solas con la misma frecuencia (35 % a 40 %, con diferencias de -2,0 a +0,7 puntos porcentuales entre ellas), y la banda 40 sigue con más puntos (+0,025 a +0,038). Las tres bandas por hilo quedan primeras solas más veces (43 % a 48 %) y con menos puntos que la banda 40. La pregunta de cuál conviene depende de qué cuente más en la nota, ganar la ronda o el puntaje lineal. La pauta del enunciado reparte la nota de competencia en forma lineal entre el peor grupo y el mejor, y eso es lo que miden los puntos.
+
+### 9.6 Qué cambia para la decisión
+
+Nada de esta tanda agrega una opción a la sección 6. La idea 13 en su mejor versión es la banda 40 (ajuste por empresas) o queda 16 bajo ella (ajuste por años). La idea 14 pierde de 420 a 1160 por ronda en todas sus variantes. La recomendación de la sección 6 (mía, etiquetada como tal) no cambia, y la decisión sigue siendo de Nicolás.
+
+### 9.7 Comandos
+
+| Resultado | Comando | Salida |
+|-----------|---------|--------|
+| Filtro de la idea 13 | `python3 ref/cotas/explorar_ideas2.py filtro13 --semilla 18` | `filtro13.txt` |
+| Idea 13 | `python3 ref/cotas/explorar_ideas2.py idea13 --semilla 18` | `idea13.txt`, `idea13.json` |
+| Filtro de la idea 14 y detectores | `python3 ref/cotas/explorar_ideas2.py filtro14 --semilla 18` | `filtro14.txt` |
+| Regla de la idea 14 y salto según la posición de la banda | `python3 ref/cotas/explorar_ideas2.py idea14 --semilla 18` | `idea14.txt`, `idea14.json` |
+| Primera sola sin la copia | `python3 ref/cotas/explorar_ideas2.py primera --semilla 18` | `primera.txt` |

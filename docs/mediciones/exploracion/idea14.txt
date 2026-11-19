@@ -1,0 +1,40 @@
+Idea 14: reloj de dia de mercado, la regla (clase B). ref/cotas/explorar_ideas2.py idea14 --semilla 18, commit 984cae6
+Muestra muestra-18-240: 3600 ventanas; 9 variantes. En la fase D, con la banda 40 en caja, compra 63 para pasar el salto de cierre a apertura y vende h ticks despues del salto. Detector: 'oraculo' usa el minuto verdadero del dia (cota superior, la placa no lo tiene); 'histograma' y 'bloque' son los de ideas_reloj.py.
+Se elige la de mas puntos de torneo en el ajuste y se informa en la validacion.
+
+== Diagnostico: salto + primer minuto, p(j+1) - p(j-1), en la fase D de la banda 40, segun su posicion al cierre
+   (lo que gana por accion quien pasa el salto; grupos por empresa y bloque de 20 dias del tick)
+   muestra: en caja: -1.399 (ee 0.240), 19289 saltos; invertida: +1.417 (ee 0.346), 18568 saltos
+   anios-validacion: en caja: -1.102 (ee 0.484), 7243 saltos; invertida: +2.329 (ee 0.883), 5175 saltos
+   empresas-validacion: en caja: -1.562 (ee 0.299), 9168 saltos; invertida: +1.490 (ee 0.272), 8827 saltos
+
+== separacion por anios: ajuste 2400 ventanas, validacion 1200
+   variante                 pts ajuste  pts val.  vueltas/v     d40 val. (ee; ee 60 d)  d40 por vuelta
+   reloj bloque h=1              1.807     1.808       2.85     -452 ( 189;  179)         -158.6
+   reloj bloque h=5              1.800     1.796       2.85     -568 ( 209;  196)         -199.5
+   reloj bloque h=30             1.795     1.767       2.85     -818 ( 247;  230)         -287.3
+   reloj histograma h=1          1.779     1.792       6.03     -616 ( 213;  198)         -102.3
+   reloj oraculo h=1             1.767     1.792       6.03     -590 ( 216;  203)          -97.8
+   reloj histograma h=5          1.763     1.774       6.03     -748 ( 236;  213)         -124.1
+   reloj oraculo h=5             1.750     1.771       6.03     -764 ( 238;  214)         -126.7
+   reloj histograma h=30         1.738     1.735       6.03    -1057 ( 263;  235)         -175.4
+   reloj oraculo h=30            1.725     1.734       6.03    -1061 ( 266;  234)         -175.8
+   estrategia                           pts  1a %   media mediana     p5   peor  /cym   ord   com  dd %
+   elegida reloj bloque h=1           1.808  31.9   21864   24411  10917   9864  1.63   9.5    48  22.7   (validacion)
+   banda 40                           1.866  18.3   22316   24645  10917   9864  1.67   3.9    20  22.6   (validacion)
+
+== separacion por empresas: ajuste 2160 ventanas, validacion 1440
+   variante                 pts ajuste  pts val.  vueltas/v     d40 val. (ee; ee 60 d)  d40 por vuelta
+   reloj bloque h=1              1.821     1.791       3.23     -421 ( 110;  125)         -130.3
+   reloj bloque h=5              1.812     1.783       3.23     -496 ( 132;  148)         -153.5
+   reloj histograma h=1          1.804     1.756       6.37     -682 ( 125;  139)         -107.0
+   reloj bloque h=30             1.800     1.768       3.23     -631 ( 169;  173)         -195.2
+   reloj oraculo h=1             1.796     1.747       6.37     -739 ( 147;  177)         -116.0
+   reloj histograma h=5          1.790     1.735       6.37     -842 ( 151;  158)         -132.2
+   reloj oraculo h=5             1.779     1.729       6.37     -884 ( 165;  183)         -138.8
+   reloj histograma h=30         1.765     1.700       6.37    -1110 ( 185;  182)         -174.3
+   reloj oraculo h=30            1.754     1.693       6.37    -1156 ( 197;  202)         -181.6
+   estrategia                           pts  1a %   media mediana     p5   peor  /cym   ord   com  dd %
+   elegida reloj bloque h=1           1.791  26.5   19997   21921  10347   9673  1.78  10.1    51  21.0   (validacion)
+   banda 40                           1.849  17.3   20418   23703  10347   9673  1.82   3.8    19  21.0   (validacion)
+

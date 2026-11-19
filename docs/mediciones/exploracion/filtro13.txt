@@ -1,0 +1,31 @@
+Idea 13 (la 11 del pedido del 19/11): niveles segun el orden de los extremos. Filtro (ref/cotas/explorar_ideas2.py filtro13 --semilla 18), commit 984cae6
+Muestra muestra-18-240: 3600 ventanas. Caso S: el 100 llega antes que el 255; caso B: al reves.
+Toques: veces que el precio cruza hacia 215 o mas (o hacia 140 o menos) despues del tick que abre la fase D.
+
+== caso S: 2101 ventanas (58.4 %), tick mediano de entrada a D 17695
+   banda 40 (140/215): patrimonio medio 25678
+   215 despues de entrar a D: lo tocan 1015 ventanas (48.3 %), 9.45 toques por ventana
+   140 despues de entrar a D: lo tocan 295 ventanas (14.0 %)
+   mejor par por patrimonio medio: 130/185, 25886; diferencia contra 140/215 +208 (ee 237); menos de un error estandar; con grupos de 60 dias, ee 255
+   los cinco mejores pares: 130/185 25886; 130/175 25873; 140/185 25866; 140/175 25864; 120/185 25755
+   patrimonio medio por par (filas: compra; columnas: venta 175 185 195 205 215 225)
+      120:  25685  25755  25582  25593  25598  25527
+      130:  25873  25886  25691  25563  25579  25521
+      140:  25864  25866  25744  25658  25678  25551
+      150:  25671  25720  25577  25451  25475  25408
+      160:  25656  25593  25444  25343  25384  25303
+
+== caso B: 1499 ventanas (41.6 %), tick mediano de entrada a D 16175
+   banda 40 (140/215): patrimonio medio 15325
+   215 despues de entrar a D: lo tocan 294 ventanas (19.6 %), 3.37 toques por ventana
+   140 despues de entrar a D: lo tocan 896 ventanas (59.8 %)
+   mejor par por patrimonio medio: 140/205, 15481; diferencia contra 140/215 +157 (ee 116); mas de un error estandar; con grupos de 60 dias, ee 124
+   los cinco mejores pares: 140/205 15481; 140/195 15404; 130/205 15383; 150/205 15377; 120/205 15373
+   patrimonio medio por par (filas: compra; columnas: venta 175 185 195 205 215 225)
+      120:  14966  15145  15329  15373  15330  15333
+      130:  14992  15240  15341  15383  15326  15325
+      140:  15052  15260  15404  15481  15325  15278
+      150:  14951  15169  15281  15377  15242  15215
+      160:  15069  15104  15148  15151  15032  14994
+
+Criterio del pedido: si en los dos casos el mejor par queda a menos de un error estandar de 140/215, se descarta. Resultado: PASA (S: menos de un ee; B: mas de un ee).
