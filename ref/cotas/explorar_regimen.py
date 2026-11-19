@@ -903,7 +903,7 @@ def fila_examen(conj, R, r, rb, sel, T, Tx, nombre):
         p3 += x < 0
     inf = r.get("info")
     disp = tope = 0.0
-    if inf and inf[0]:
+    if inf and inf[0] and len(inf[0]) > 3:
         disp = 100 * sum(1 for i in sel if inf[i][2]) / n
         tope = 100 * sum(1 for i in sel if inf[i][3]) / n
     txt = (f"| {n} | {fmt(p)} | {100 * q:.1f} | {m['media']:.0f} | {m['p5']} | {m['peor']} | {m['ordenes']:.1f} | "

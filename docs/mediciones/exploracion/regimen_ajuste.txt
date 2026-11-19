@@ -1,0 +1,62 @@
+# Ajuste de los módulos en las otras acciones
+
+ref/cotas/explorar_regimen.py ajuste, commit 9351954. Muestra otras-18-24-97: 12000 ventanas. Se elige por puntos de torneo de 3 rondas en la parte de ajuste (rival de Tesla fijo más 8 del campo, 20 000 sorteos). Validación por años: ajuste con inicio en 2020 a 2022, validación con inicio en 2023 o 2024. Por grupos: ajuste con fin, sal e ind; validación con tec y con.
+Comprobaciones: política sin módulos contra banda 40 (Python), ventanas distintas: 0; banda 40 en Python contra espera_banda40 en C: 0.
+
+Módulo A, ajuste en anios-ajuste (7200 ventanas): las 5 mejores de 64 por puntos de torneo
+- A(kA 1, theta 200, d 24, N 63): pts 1,857, media 21536
+- A(kA 1, theta 220, d 24, N 63): pts 1,857, media 21520
+- A(kA 1, theta 200, d 16, N 63): pts 1,856, media 21527
+- A(kA 1, theta 200, d 24, N 33): pts 1,856, media 21507
+- A(kA 1, theta 220, d 16, N 63): pts 1,856, media 21507
+
+Módulo A, ajuste en grupos-ajuste (7200 ventanas): las 5 mejores de 64 por puntos de torneo
+- A(kA 1, theta 220, d 24, N 63): pts 1,849, media 21399
+- A(kA 1, theta 200, d 16, N 63): pts 1,849, media 21412
+- A(kA 1, theta 220, d 24, N 33): pts 1,848, media 21382
+- A(kA 1, theta 200, d 16, N 33): pts 1,848, media 21388
+- A(kA 1, theta 220, d 16, N 63): pts 1,848, media 21390
+
+Módulo A, ajuste en todas (12000 ventanas): las 5 mejores de 64 por puntos de torneo
+- A(kA 1, theta 220, d 24, N 63): pts 1,848, media 21389
+- A(kA 1, theta 220, d 24, N 33): pts 1,846, media 21368
+- A(kA 1, theta 200, d 24, N 63): pts 1,846, media 21402
+- A(kA 1, theta 200, d 16, N 63): pts 1,846, media 21395
+- A(kA 1, theta 220, d 16, N 63): pts 1,846, media 21374
+
+## Validación interna
+
+
+### anios-ajuste (7200 ventanas)
+
+| estrategia | ventanas | pts sin copia | 1.ª sola % | media | p5 | peor | órdenes | Δ con banda 40 (ee) | módulo A: dispara / tope % | contra el rival: gana / empata / pierde % | Δ con el rival (ee) | 3 rondas: gana / pierde % |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| banda 40 | 7200 | 1,851 | 38.9 | 21433 | 10813 | 9405 | 3.8 | +0 (0) | 0.0 / 0.0 | 57.5 / 35.2 / 7.3 | +2413 (153) | 91.7 / 4.0 |
+| módulo A: A(kA 1, theta 200, d 24, N 63) | 7200 | 1,859 | 47.5 | 21536 | 10970 | 8317 | 4.2 | +103 (37) | 16.9 / 4.5 | 68.5 / 21.5 / 10.0 | +2516 (127) | 95.1 / 3.9 |
+
+### anios-validacion (4800 ventanas)
+
+| estrategia | ventanas | pts sin copia | 1.ª sola % | media | p5 | peor | órdenes | Δ con banda 40 (ee) | módulo A: dispara / tope % | contra el rival: gana / empata / pierde % | Δ con el rival (ee) | 3 rondas: gana / pierde % |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| banda 40 | 4800 | 1,829 | 35.8 | 21109 | 10680 | 8490 | 3.7 | +0 (0) | 0.0 / 0.0 | 57.7 / 36.0 / 6.2 | +2288 (114) | 92.1 / 3.4 |
+| módulo A: A(kA 1, theta 200, d 24, N 63) | 4800 | 1,837 | 44.5 | 21201 | 10791 | 7714 | 4.1 | +92 (27) | 17.7 / 5.2 | 69.0 / 21.7 / 9.3 | +2380 (114) | 95.3 / 3.7 |
+
+### grupos-ajuste (7200 ventanas)
+
+| estrategia | ventanas | pts sin copia | 1.ª sola % | media | p5 | peor | órdenes | Δ con banda 40 (ee) | módulo A: dispara / tope % | contra el rival: gana / empata / pierde % | Δ con el rival (ee) | 3 rondas: gana / pierde % |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| banda 40 | 7200 | 1,840 | 38.0 | 21328 | 10795 | 8490 | 3.8 | +0 (0) | 0.0 / 0.0 | 57.7 / 35.3 / 7.1 | +2365 (113) | 92.2 / 3.7 |
+| módulo A: A(kA 1, theta 220, d 24, N 63) | 7200 | 1,846 | 45.8 | 21399 | 10935 | 8490 | 4.1 | +72 (18) | 14.4 / 3.3 | 67.8 / 23.0 / 9.2 | +2436 (103) | 95.3 / 3.5 |
+
+### grupos-validacion (4800 ventanas)
+
+| estrategia | ventanas | pts sin copia | 1.ª sola % | media | p5 | peor | órdenes | Δ con banda 40 (ee) | módulo A: dispara / tope % | contra el rival: gana / empata / pierde % | Δ con el rival (ee) | 3 rondas: gana / pierde % |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| banda 40 | 4800 | 1,840 | 37.6 | 21267 | 10677 | 9465 | 3.8 | +0 (0) | 0.0 / 0.0 | 57.5 / 35.9 / 6.7 | +2361 (141) | 91.7 / 3.4 |
+| módulo A: A(kA 1, theta 220, d 24, N 63) | 4800 | 1,849 | 47.0 | 21374 | 10888 | 7714 | 4.1 | +107 (26) | 16.8 / 3.1 | 70.1 / 21.5 / 8.4 | +2468 (131) | 96.0 / 3.0 |
+
+## Parámetros finales (ajuste con todas las otras acciones)
+
+- módulo A: A(kA 1, theta 220, d 24, N 63)
+
+Guardados en build/cotas/regimen/finales.pkl: {'A': {'kA': 1, 'theta': 220, 'd': 24, 'N': 63}, 'D': None}
