@@ -1,0 +1,202 @@
+Tabla 1: filtros de las ideas (ref/cotas/explorar_ideas.py filtros --semilla 18), commit 9ba804a
+
+| Idea | Filtro | Numero medido | Pasa |
+|---|---|---|---|
+| 1 | puntos de la tabla de placa (log exacto) contra banda 40 | 1.813 contra 1.860 (mejor variante: dp objetivo=log version=placa modo=cambios, 1.846) | no |
+| 2 | idas y vueltas por ventana en D con N = 4 (minimo 1) | (100,255) 0.74, (110,245) 0.94, (120,215) 1.41, (130,200) 1.89 | si |
+| 3 | Spearman del orden a mitad de ventana contra la segunda mitad (pasa si >= 0,2) | +0.322 (dentro de D: +0.055) | si |
+| 4 | acierto en la validacion por anios del indicador elegido en el ajuste (pasa si >= 55 %) | 56.5 % con vr16 (clase mayoritaria 61.0 %) | si |
+| 5 | variantes de cuantiles que superan a la banda fija del mismo ancho medio, en puntos (pasa si > 50 %) | 0 de 81 | no |
+| 6 | 63 x E[p(n+1) - p(n)] con el contador en 3 (pasa si >= 10) | +0.10 (mejor: contadores h=2 xor=False) | no |
+| 7 | sin filtro en el pedido; diagnostico: ventanas en que la copia se activa alguna vez (m = 2 %, Tc = 20 000) | 58.2 % | sin filtro |
+| 8 | sin filtro en el pedido; diagnostico: ventanas que terminan invertidas en D bajo el precio de entrada (banda 40) | 3.4 % | sin filtro |
+| 9 | rangos de p0 donde P(255 antes) real supera al paseo por mas de 0,03 (con 50 ventanas o mas; pasa si hay alguno) | 170-179 (+0.03) | si |
+| 10 | sin filtro en el pedido; diagnostico: ventanas con una subida de 20 que se devuelve bajo la entrada | 6.6 % | sin filtro |
+
+Detalle de los filtros (ref/cotas/explorar_ideas.py filtros), muestra estratificada muestra-18-240 (3600 ventanas), commit 9ba804a
+
+== Bases en la muestra
+estrategia                           pts  1a %   media mediana     p5   peor  /cym   ord   com  dd %
+banda 40                           1.860  17.2   21367   24656  10480   9090  1.68   3.8    19  21.7
+banda 60                           1.819  26.4   21157   24564  10480   9090  1.66   4.4    22  21.8
+tres bandas por hilo               1.819  32.9   21120   24645  10480   9090  1.66   4.8    24  20.1
+no vuelve                          1.808  15.6   20777   24572  10480   9090  1.63   3.3    17  21.2
+
+== Idea 1: umbrales de la programacion dinamica contra la banda 40 (puntos del torneo en la muestra)
+estrategia                           pts  1a %   media mediana     p5   peor  /cym   ord   com  dd %
+dp objetivo=log version=placa modo=cambios 1.846  23.1   21272   24582  10480   9090  1.67   3.7    19  21.7
+dp objetivo=log version=placa modo=varianza 1.829  22.2   21162   24575  10480   9090  1.66   3.6    18  21.8
+dp objetivo=log version=fino modo=cambios 1.844  22.7   21262   24602  10480   9090  1.67   3.7    18  21.7
+dp objetivo=log version=fino modo=varianza 1.829  22.0   21166   24575  10480   9090  1.66   3.6    18  21.8
+dp objetivo=log_exacto version=placa modo=cambios 1.813  33.0   21260   24645  10485   9090  1.67   6.2    31  20.5
+dp objetivo=log_exacto version=placa modo=varianza 1.822  33.4   21331   24645  10480   9090  1.67   6.3    31  21.0
+dp objetivo=log_exacto version=fino modo=cambios 1.814  34.2   21288   24656  10485   9090  1.67   6.1    31  20.5
+dp objetivo=log_exacto version=fino modo=varianza 1.822  35.3   21351   24645  10480   9090  1.67   6.3    32  20.9
+dp objetivo=lineal version=placa modo=cambios 1.824  29.7   21246   24575  10480   9090  1.67   5.1    25  21.5
+dp objetivo=lineal version=placa modo=varianza 1.827  30.0   21273   24575  10480   9090  1.67   5.4    27  21.4
+dp objetivo=lineal version=fino modo=cambios 1.824  28.5   21222   24572  10480   9090  1.66   5.0    25  21.5
+dp objetivo=lineal version=fino modo=varianza 1.827  30.2   21277   24575  10480   9090  1.67   5.4    27  21.4
+
+== Idea 2: idas y vueltas completas por ventana en la fase D con N = 4 (tramo comprado y despues vendido)
+   (100, 255):  0.74 por ventana; ventanas con 0, 1, 2, 3, 4+: [2284, 535, 412, 237, 132]
+   (110, 245):  0.94 por ventana; ventanas con 0, 1, 2, 3, 4+: [2168, 546, 354, 272, 260]
+   (120, 215):  1.41 por ventana; ventanas con 0, 1, 2, 3, 4+: [2187, 378, 233, 165, 637]
+   (130, 200):  1.89 por ventana; ventanas con 0, 1, 2, 3, 4+: [2196, 290, 174, 136, 804]
+
+== Idea 3: correlacion de rangos (Spearman) entre el orden de las cuentas a mitad de ventana y su
+   rendimiento en la segunda mitad: media +0.322 en 3561 ventanas
+   dentro de la fase D (rendimiento en la primera mitad de D contra la segunda): media +0.055 en 3429 ventanas
+   cuentas: 19
+
+== Idea 4: el indicador hasta la entrada a D predice quien gana despues, banda 40 o 'vende con 220 o mas y no vuelve'
+   ventanas con D: 3600; empates 3037; sin empate gana 'no vuelve' en 37.7 %
+   vr16   : umbral elegido en el ajuste (anios)    0.736, 'no vuelve' si el indicador esta bajo el umbral; acierto ajuste  67.8 %, validacion  56.5 % (clase mayoritaria en la validacion:  61.0 %)
+   vr64   : umbral elegido en el ajuste (anios)    0.684, 'no vuelve' si el indicador esta bajo el umbral; acierto ajuste  66.1 %, validacion  69.5 % (clase mayoritaria en la validacion:  61.0 %)
+   vr390  : umbral elegido en el ajuste (anios)    1.150, 'no vuelve' si el indicador esta sobre el umbral; acierto ajuste  62.0 %, validacion  61.0 % (clase mayoritaria en la validacion:  61.0 %)
+   cruces : umbral elegido en el ajuste (anios)    0.244, 'no vuelve' si el indicador esta bajo el umbral; acierto ajuste  62.3 %, validacion  59.5 % (clase mayoritaria en la validacion:  61.0 %)
+   desde  : umbral elegido en el ajuste (anios)  341.000, 'no vuelve' si el indicador esta sobre el umbral; acierto ajuste  63.1 %, validacion  72.5 % (clase mayoritaria en la validacion:  61.0 %)
+   indicador con mas acierto en el ajuste: vr16; su acierto en la validacion es el numero del filtro
+
+== Idea 5: bandas por cuantiles contra la banda fija del mismo ancho medio (w = (155 - ancho) / 2)
+variante                                                    ancho w fija    pts pts fija   media media fija
+cuantil qc=0.125 qv=0.625 origen=inicio calor=390            59.1     48  1.834    1.842   21420      21276
+cuantil qc=0.125 qv=0.625 origen=inicio calor=1950           59.1     48  1.834    1.842   21420      21276
+cuantil qc=0.125 qv=0.625 origen=inicio calor=3900           59.1     48  1.834    1.842   21420      21276
+cuantil qc=0.125 qv=0.75 origen=inicio calor=390             73.8     41  1.844    1.857   21409      21371
+cuantil qc=0.125 qv=0.75 origen=inicio calor=1950            73.8     41  1.844    1.857   21409      21371
+cuantil qc=0.125 qv=0.75 origen=inicio calor=3900            73.8     41  1.844    1.857   21409      21371
+cuantil qc=0.125 qv=0.875 origen=inicio calor=390            91.1     32  1.840    1.847   21267      21274
+cuantil qc=0.125 qv=0.875 origen=inicio calor=1950           91.1     32  1.840    1.847   21267      21274
+cuantil qc=0.125 qv=0.875 origen=inicio calor=3900           91.1     32  1.840    1.847   21267      21274
+cuantil qc=0.25 qv=0.625 origen=inicio calor=390             42.3     56  1.825    1.826   21299      21161
+cuantil qc=0.25 qv=0.625 origen=inicio calor=1950            42.3     56  1.825    1.826   21299      21161
+cuantil qc=0.25 qv=0.625 origen=inicio calor=3900            42.3     56  1.825    1.826   21299      21161
+cuantil qc=0.25 qv=0.75 origen=inicio calor=390              57.0     49  1.827    1.840   21243      21253
+cuantil qc=0.25 qv=0.75 origen=inicio calor=1950             57.0     49  1.827    1.840   21243      21253
+cuantil qc=0.25 qv=0.75 origen=inicio calor=3900             57.0     49  1.827    1.840   21242      21253
+cuantil qc=0.25 qv=0.875 origen=inicio calor=390             74.3     40  1.821    1.860   21147      21367
+cuantil qc=0.25 qv=0.875 origen=inicio calor=1950            74.3     40  1.821    1.860   21147      21367
+cuantil qc=0.25 qv=0.875 origen=inicio calor=3900            74.2     40  1.821    1.860   21146      21367
+cuantil qc=0.375 qv=0.625 origen=inicio calor=390            27.8     64  1.811    1.820   21176      21213
+cuantil qc=0.375 qv=0.625 origen=inicio calor=1950           27.8     64  1.811    1.820   21176      21213
+cuantil qc=0.375 qv=0.625 origen=inicio calor=3900           27.8     64  1.810    1.820   21172      21213
+cuantil qc=0.375 qv=0.75 origen=inicio calor=390             42.3     56  1.808    1.826   21104      21161
+cuantil qc=0.375 qv=0.75 origen=inicio calor=1950            42.3     56  1.808    1.826   21104      21161
+cuantil qc=0.375 qv=0.75 origen=inicio calor=3900            42.3     56  1.808    1.826   21101      21161
+cuantil qc=0.375 qv=0.875 origen=inicio calor=390            59.6     48  1.799    1.842   20995      21276
+cuantil qc=0.375 qv=0.875 origen=inicio calor=1950           59.6     48  1.799    1.842   20996      21276
+cuantil qc=0.375 qv=0.875 origen=inicio calor=3900           59.6     48  1.799    1.842   20992      21276
+cuantil qc=0.125 qv=0.625 origen=D calor=390                 26.6     64  1.605    1.820   19775      21213
+cuantil qc=0.125 qv=0.625 origen=D calor=1950                30.5     62  1.699    1.820   20414      21196
+cuantil qc=0.125 qv=0.625 origen=D calor=3900                34.5     60  1.787    1.819   21163      21157
+cuantil qc=0.125 qv=0.75 origen=D calor=390                  32.6     61  1.590    1.819   19675      21168
+cuantil qc=0.125 qv=0.75 origen=D calor=1950                 37.7     59  1.695    1.821   20429      21153
+cuantil qc=0.125 qv=0.75 origen=D calor=3900                 42.7     56  1.788    1.826   21162      21161
+cuantil qc=0.125 qv=0.875 origen=D calor=390                 39.8     58  1.561    1.822   19392      21143
+cuantil qc=0.125 qv=0.875 origen=D calor=1950                46.1     54  1.687    1.830   20331      21192
+cuantil qc=0.125 qv=0.875 origen=D calor=3900                52.0     51  1.783    1.836   21084      21228
+cuantil qc=0.25 qv=0.625 origen=D calor=390                  19.5     68  1.593    1.816   19642      21193
+cuantil qc=0.25 qv=0.625 origen=D calor=1950                 21.9     67  1.691    1.813   20355      21117
+cuantil qc=0.25 qv=0.625 origen=D calor=3900                 24.5     65  1.780    1.817   21081      21166
+cuantil qc=0.25 qv=0.75 origen=D calor=390                   25.2     65  1.585    1.817   19552      21166
+cuantil qc=0.25 qv=0.75 origen=D calor=1950                  28.8     63  1.686    1.823   20314      21235
+cuantil qc=0.25 qv=0.75 origen=D calor=3900                  32.6     61  1.779    1.819   21040      21168
+cuantil qc=0.25 qv=0.875 origen=D calor=390                  32.2     61  1.567    1.819   19355      21168
+cuantil qc=0.25 qv=0.875 origen=D calor=1950                 37.2     59  1.684    1.821   20258      21153
+cuantil qc=0.25 qv=0.875 origen=D calor=3900                 41.9     57  1.777    1.823   20967      21142
+cuantil qc=0.375 qv=0.625 origen=D calor=390                 14.2     70  1.591    1.814   19566      21177
+cuantil qc=0.375 qv=0.625 origen=D calor=1950                15.3     70  1.684    1.814   20249      21177
+cuantil qc=0.375 qv=0.625 origen=D calor=3900                16.4     69  1.774    1.815   20959      21192
+cuantil qc=0.375 qv=0.75 origen=D calor=390                  19.1     68  1.581    1.816   19471      21193
+cuantil qc=0.375 qv=0.75 origen=D calor=1950                 21.5     67  1.678    1.813   20195      21117
+cuantil qc=0.375 qv=0.75 origen=D calor=3900                 23.9     66  1.770    1.816   20924      21154
+cuantil qc=0.375 qv=0.875 origen=D calor=390                 25.9     65  1.571    1.817   19331      21166
+cuantil qc=0.375 qv=0.875 origen=D calor=1950                29.6     63  1.671    1.823   20120      21235
+cuantil qc=0.375 qv=0.875 origen=D calor=3900                33.2     61  1.769    1.819   20868      21168
+cuantil qc=0.125 qv=0.625 origen=olvido calor=390            49.9     53  1.783    1.836   21100      21258
+cuantil qc=0.125 qv=0.625 origen=olvido calor=1950           49.9     53  1.783    1.836   21100      21258
+cuantil qc=0.125 qv=0.625 origen=olvido calor=3900           49.9     53  1.783    1.836   21100      21258
+cuantil qc=0.125 qv=0.75 origen=olvido calor=390             61.3     47  1.811    1.842   21309      21253
+cuantil qc=0.125 qv=0.75 origen=olvido calor=1950            61.3     47  1.811    1.842   21309      21253
+cuantil qc=0.125 qv=0.75 origen=olvido calor=3900            61.3     47  1.811    1.842   21309      21253
+cuantil qc=0.125 qv=0.875 origen=olvido calor=390            75.7     40  1.824    1.860   21302      21367
+cuantil qc=0.125 qv=0.875 origen=olvido calor=1950           75.7     40  1.824    1.860   21302      21367
+cuantil qc=0.125 qv=0.875 origen=olvido calor=3900           75.7     40  1.824    1.860   21302      21367
+cuantil qc=0.25 qv=0.625 origen=olvido calor=390             34.0     60  1.758    1.819   20796      21157
+cuantil qc=0.25 qv=0.625 origen=olvido calor=1950            34.0     60  1.758    1.819   20796      21157
+cuantil qc=0.25 qv=0.625 origen=olvido calor=3900            34.0     60  1.758    1.819   20795      21157
+cuantil qc=0.25 qv=0.75 origen=olvido calor=390              45.4     55  1.778    1.828   20923      21180
+cuantil qc=0.25 qv=0.75 origen=olvido calor=1950             45.4     55  1.778    1.828   20923      21180
+cuantil qc=0.25 qv=0.75 origen=olvido calor=3900             45.4     55  1.778    1.828   20923      21180
+cuantil qc=0.25 qv=0.875 origen=olvido calor=390             59.8     48  1.782    1.842   20888      21276
+cuantil qc=0.25 qv=0.875 origen=olvido calor=1950            59.8     48  1.782    1.842   20888      21276
+cuantil qc=0.25 qv=0.875 origen=olvido calor=3900            59.8     48  1.782    1.842   20887      21276
+cuantil qc=0.375 qv=0.625 origen=olvido calor=390            22.5     66  1.735    1.816   20646      21154
+cuantil qc=0.375 qv=0.625 origen=olvido calor=1950           22.5     66  1.735    1.816   20646      21154
+cuantil qc=0.375 qv=0.625 origen=olvido calor=3900           22.5     66  1.735    1.816   20643      21154
+cuantil qc=0.375 qv=0.75 origen=olvido calor=390             33.6     61  1.751    1.819   20750      21168
+cuantil qc=0.375 qv=0.75 origen=olvido calor=1950            33.6     61  1.751    1.819   20750      21168
+cuantil qc=0.375 qv=0.75 origen=olvido calor=3900            33.6     61  1.750    1.819   20747      21168
+cuantil qc=0.375 qv=0.875 origen=olvido calor=390            48.0     54  1.750    1.830   20672      21192
+cuantil qc=0.375 qv=0.875 origen=olvido calor=1950           48.0     54  1.750    1.830   20672      21192
+cuantil qc=0.375 qv=0.875 origen=olvido calor=3900           48.0     54  1.750    1.830   20669      21192
+
+== Idea 6: cambio medio de precio que sigue a una decision con el contador saturado (fase D)
+   contadores h=2 xor=False     contador en 3:   3651420 veces, E[cambio] +0.0016, 63 x E =  +0.10; contador en 0:   3521177 veces, E[cambio] -0.0023
+   contadores h=2 xor=True      contador en 3:   3597615 veces, E[cambio] -0.0023, 63 x E =  -0.15; contador en 0:   3548200 veces, E[cambio] +0.0010
+   contadores h=3 xor=False     contador en 3:   3686040 veces, E[cambio] -0.0014, 63 x E =  -0.09; contador en 0:   3567732 veces, E[cambio] +0.0007
+   contadores h=3 xor=True      contador en 3:   3656778 veces, E[cambio] -0.0029, 63 x E =  -0.18; contador en 0:   3589357 veces, E[cambio] +0.0013
+   contadores h=4 xor=False     contador en 3:   3728396 veces, E[cambio] -0.0016, 63 x E =  -0.10; contador en 0:   3598233 veces, E[cambio] +0.0006
+   contadores h=4 xor=True      contador en 3:   3640895 veces, E[cambio] -0.0032, 63 x E =  -0.20; contador en 0:   3684141 veces, E[cambio] -0.0007
+   contadores h=6 xor=False     contador en 3:   3494714 veces, E[cambio] +0.0000, 63 x E =  +0.00; contador en 0:   3823993 veces, E[cambio] -0.0008
+   contadores h=6 xor=True      contador en 3:   2629835 veces, E[cambio] -0.0004, 63 x E =  -0.03; contador en 0:   4110582 veces, E[cambio] -0.0007
+
+== Idea 7 (diagnostico, el pedido no trae filtro): ventanas en que la condicion de copia se activa alguna vez
+   m =  2 %: se activa en  58.2 % de las ventanas; copias por ventana 1.28
+   m =  5 %: se activa en  56.6 % de las ventanas; copias por ventana 1.36
+   m = 10 %: se activa en  52.7 % de las ventanas; copias por ventana 1.35
+
+== Idea 8 (diagnostico): ventanas que terminan con la banda 40 invertida bajo su ultima compra
+   3.4 % de las ventanas
+
+== Idea 9: probabilidad de que el 255 llegue antes que el 100 segun p0, contra el paseo sin memoria (p0-100)/155
+   p0 en 100-109:   502 ventanas, P(255 antes) = 0.006; paseo 0.032; diferencia -0.026
+   p0 en 110-119:   399 ventanas, P(255 antes) = 0.030; paseo 0.097; diferencia -0.067
+   p0 en 120-129:   244 ventanas, P(255 antes) = 0.086; paseo 0.161; diferencia -0.075
+   p0 en 130-139:   207 ventanas, P(255 antes) = 0.198; paseo 0.226; diferencia -0.028
+   p0 en 140-149:   211 ventanas, P(255 antes) = 0.270; paseo 0.290; diferencia -0.020
+   p0 en 150-159:   178 ventanas, P(255 antes) = 0.326; paseo 0.355; diferencia -0.029
+   p0 en 160-169:   204 ventanas, P(255 antes) = 0.373; paseo 0.419; diferencia -0.047
+   p0 en 170-179:   176 ventanas, P(255 antes) = 0.517; paseo 0.484; diferencia +0.033
+   p0 en 180-189:   190 ventanas, P(255 antes) = 0.542; paseo 0.548; diferencia -0.006
+   p0 en 190-199:   177 ventanas, P(255 antes) = 0.605; paseo 0.613; diferencia -0.008
+   p0 en 200-209:   173 ventanas, P(255 antes) = 0.618; paseo 0.677; diferencia -0.059
+   p0 en 210-219:   183 ventanas, P(255 antes) = 0.727; paseo 0.742; diferencia -0.015
+   p0 en 220-229:   167 ventanas, P(255 antes) = 0.802; paseo 0.806; diferencia -0.004
+   p0 en 230-239:   214 ventanas, P(255 antes) = 0.888; paseo 0.871; diferencia +0.017
+   p0 en 240-249:   208 ventanas, P(255 antes) = 0.957; paseo 0.935; diferencia +0.021
+   p0 en 250-255:   167 ventanas, P(255 antes) = 1.000; paseo 1.000; diferencia +0.000
+   pendiente de los primeros 390 ticks (ventanas que siguen en la fase A en el tick 390):
+     p(T)-p0 en [ -40, -31]:    46 ventanas, P(255 antes) 0.500, paseo desde p(T) 0.460
+     p(T)-p0 en [ -30, -21]:   113 ventanas, P(255 antes) 0.363, paseo desde p(T) 0.390
+     p(T)-p0 en [ -20, -11]:   342 ventanas, P(255 antes) 0.404, paseo desde p(T) 0.430
+     p(T)-p0 en [ -10,  -1]:   858 ventanas, P(255 antes) 0.348, paseo desde p(T) 0.390
+     p(T)-p0 en [   0,   9]:   901 ventanas, P(255 antes) 0.422, paseo desde p(T) 0.442
+     p(T)-p0 en [  10,  19]:   369 ventanas, P(255 antes) 0.553, paseo desde p(T) 0.541
+     p(T)-p0 en [  20,  29]:   138 ventanas, P(255 antes) 0.594, paseo desde p(T) 0.596
+     p(T)-p0 en [  30,  39]:    48 ventanas, P(255 antes) 0.625, paseo desde p(T) 0.640
+     p(T)-p0 en [  40,  49]:    16 ventanas, P(255 antes) 0.438, paseo desde p(T) 0.606
+   pendiente de los primeros 1950 ticks (ventanas que siguen en la fase A en el tick 1950):
+     p(T)-p0 en [ -40, -31]:   223 ventanas, P(255 antes) 0.278, paseo desde p(T) 0.354
+     p(T)-p0 en [ -30, -21]:   205 ventanas, P(255 antes) 0.346, paseo desde p(T) 0.360
+     p(T)-p0 en [ -20, -11]:   235 ventanas, P(255 antes) 0.311, paseo desde p(T) 0.369
+     p(T)-p0 en [ -10,  -1]:   375 ventanas, P(255 antes) 0.336, paseo desde p(T) 0.394
+     p(T)-p0 en [   0,   9]:   325 ventanas, P(255 antes) 0.415, paseo desde p(T) 0.435
+     p(T)-p0 en [  10,  19]:   233 ventanas, P(255 antes) 0.506, paseo desde p(T) 0.508
+     p(T)-p0 en [  20,  29]:   176 ventanas, P(255 antes) 0.580, paseo desde p(T) 0.586
+     p(T)-p0 en [  30,  39]:   135 ventanas, P(255 antes) 0.741, paseo desde p(T) 0.634
+     p(T)-p0 en [  40,  49]:   160 ventanas, P(255 antes) 0.706, paseo desde p(T) 0.688
+
+== Idea 10 (diagnostico): ventanas en que, en D, tras comprar, el precio sube 20 o mas y vuelve bajo la entrada
+   antes de que la banda 40 venda
+   6.6 % de las ventanas

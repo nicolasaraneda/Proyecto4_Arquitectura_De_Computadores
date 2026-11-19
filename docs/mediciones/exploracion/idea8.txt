@@ -1,0 +1,61 @@
+Idea 8: Final de ronda (clase B). ref/cotas/explorar_ideas.py idea 8 --semilla 18, commit 9ba804a
+Muestra muestra-18-240: 3600 ventanas; 26 variantes. Se elige la de mas puntos de torneo en el ajuste y se informa en la validacion.
+
+== separacion por anios: ajuste 2400 ventanas, validacion 1200
+   diez mejores en el ajuste:
+   estrategia                           pts  1a %   media mediana     p5   peor  /cym   ord   com  dd %
+   final base=banda w=40 var=c Tf=3   1.847  26.2   20888   24680  10376   9090  1.68   4.7    23  21.2
+   final base=banda w=40 var=a Tf=100 1.846  16.6   20885   24661  10284   9825  1.68   3.7    19  21.2
+   final base=banda w=40 var=b Tf=100 1.844  28.1   20882   24661  10367   9090  1.68   5.3    26  21.2
+   final base=banda w=40 var=a Tf=390 1.841  16.6   20857   24680  10000   9825  1.68   3.6    18  20.9
+   final base=banda w=40 var=c Tf=100 1.839  31.9   20873   24690  10274   9980  1.68   4.6    23  21.0
+   final base=banda w=40 var=b Tf=390 1.839  29.2   20874   24690  10363   9090  1.68   6.2    31  21.2
+   final base=banda w=40 var=b Tf=100 1.836  31.6   20892   24690  10366   8913  1.68   7.3    36  21.1
+   final base=banda w=40 var=b Tf=200 1.828  32.6   20900   24758  10342   9223  1.68   8.6    43  20.9
+   final base=banda w=40 var=a Tf=100 1.824  16.4   20753   24661  10000   9825  1.67   3.5    17  20.5
+   final base=banda w=40 var=c Tf=390 1.822  30.7   20837   24690  10000  10000  1.68   4.4    22  20.5
+   bases en el ajuste:
+   banda 40                           1.848  15.8   20893   24661  10386   9090  1.68   3.8    19  21.2
+   banda 60                           1.810  25.4   20706   24539  10386   9090  1.67   4.4    22  21.1
+   tres bandas por hilo               1.807  31.1   20673   24539  10386   9090  1.66   4.8    24  19.5
+   en la validacion (elegida: final base=banda w=40 var=c Tf=3):
+   estrategia                           pts  1a %   media mediana     p5   peor  /cym   ord   com  dd %
+   ELEGIDA                            1.864  27.3   22311   24645  10907   9920  1.67   4.7    23  22.6
+   final base=banda w=40 var=a Tf=100 1.864  18.6   22307   24645  10809   9920  1.67   3.9    19  22.6
+   final base=banda w=40 var=b Tf=100 1.862  30.7   22301   24645  10905   9864  1.67   5.0    25  22.6
+   final base=banda w=40 var=a Tf=390 1.858  18.7   22267   24645  10000   9920  1.66   3.8    19  22.4
+   final base=banda w=40 var=c Tf=100 1.857  32.7   22288   24645  10925  10000  1.67   4.6    23  22.4
+   banda 40                           1.866  18.3   22316   24645  10917   9864  1.67   3.9    20  22.6
+   banda 60                           1.811  26.7   22059   24575  10917   9864  1.65   4.5    23  23.2
+   tres bandas por hilo               1.820  34.6   22014   24656  10935   9864  1.65   4.8    24  21.3
+   diferencia media de patrimonio en la validacion: contra banda 40 -5 (ee 1), contra banda 60 +251 (ee 273)
+
+== separacion por empresas: ajuste 2160 ventanas, validacion 1440
+   diez mejores en el ajuste:
+   estrategia                           pts  1a %   media mediana     p5   peor  /cym   ord   com  dd %
+   final base=banda w=40 var=a Tf=100 1.860  17.6   21995   24876  10548   9892  1.60   3.8    19  22.1
+   final base=banda w=40 var=c Tf=3   1.860  26.7   21996   24876  10610   9090  1.60   4.6    23  22.2
+   final base=banda w=40 var=b Tf=100 1.858  29.0   21992   24876  10528   9090  1.60   5.1    25  22.2
+   final base=banda w=40 var=a Tf=390 1.855  17.4   21965   24869  10000   9892  1.60   3.8    19  22.0
+   final base=banda w=40 var=b Tf=390 1.854  29.9   21988   24876  10551   9090  1.60   5.7    29  22.2
+   final base=banda w=40 var=c Tf=100 1.852  31.6   21981   24876  10610   9980  1.60   4.6    23  22.0
+   final base=banda w=40 var=b Tf=100 1.849  31.9   22002   24876  10595   8913  1.60   6.5    33  22.1
+   final base=banda w=40 var=b Tf=200 1.842  33.4   22010   24911  10531   9223  1.60   7.7    38  21.8
+   final base=banda w=40 var=a Tf=100 1.840  16.8   21861   24869  10000   9990  1.59   3.7    18  21.6
+   final base=banda w=40 var=c Tf=390 1.836  29.8   21924   24876  10000  10000  1.59   4.4    22  21.6
+   bases en el ajuste:
+   banda 40                           1.861  17.1   22000   24876  10584   9090  1.60   3.9    19  22.2
+   banda 60                           1.826  26.7   21862   24869  10584   9090  1.59   4.5    22  22.2
+   tres bandas por hilo               1.822  29.2   21779   24845  10676   9090  1.58   4.8    24  20.8
+   en la validacion (elegida: final base=banda w=40 var=a Tf=100):
+   estrategia                           pts  1a %   media mediana     p5   peor  /cym   ord   com  dd %
+   ELEGIDA                            1.847  18.2   20405   23703  10089   9825  1.82   3.7    18  20.9
+   final base=banda w=40 var=c Tf=3   1.848  28.2   20412   23625  10313   9673  1.82   4.7    24  21.0
+   final base=banda w=40 var=b Tf=100 1.844  29.9   20400   23714  10318   9673  1.82   5.4    27  20.9
+   final base=banda w=40 var=a Tf=390 1.840  18.4   20370   23714  10000   9825  1.81   3.5    18  20.6
+   final base=banda w=40 var=b Tf=390 1.838  30.8   20385   23714  10308   9673  1.81   6.5    32  20.9
+   banda 40                           1.849  17.3   20418   23703  10347   9673  1.82   3.8    19  21.0
+   banda 60                           1.794  26.3   20099   22254  10347   9673  1.79   4.4    22  21.1
+   tres bandas por hilo               1.803  36.2   20131   21920  10347   9673  1.79   4.8    24  19.1
+   diferencia media de patrimonio en la validacion: contra banda 40 -13 (ee 4), contra banda 60 +306 (ee 226)
+

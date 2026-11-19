@@ -1,0 +1,61 @@
+Idea 3: Torneo en sombra (clase A). ref/cotas/explorar_ideas.py idea 3 --semilla 18, commit 9ba804a
+Muestra muestra-18-240: 3600 ventanas; 18 variantes. Se elige la de mas puntos de torneo en el ajuste y se informa en la validacion.
+
+== separacion por anios: ajuste 2400 ventanas, validacion 1200
+   diez mejores en el ajuste:
+   estrategia                           pts  1a %   media mediana     p5   peor  /cym   ord   com  dd %
+   sombra 19c R=1000 M=1/16 lider     1.798  26.7   20607   24314  10386   9090  1.66   6.4    32  20.9
+   sombra 19c R=1000 M=1/32 lider     1.772  28.5   20420   24314  10347   9015  1.64  11.4    57  21.2
+   sombra 19c R=390 M=1/16 lider      1.772  26.2   20422   24198  10382   8253  1.64   9.3    47  21.1
+   sombra 19c R=100 M=1/16 lider      1.765  28.2   20428   24314  10344   7949  1.64  11.6    58  21.1
+   sombra 19c R=1000 M=1/16 tercios   1.755  22.9   20205   23916  10386   9090  1.62  71.6   358  20.7
+   sombra 19c R=1000 M=1/32 tercios   1.747  23.8   20153   23852  10386   9090  1.62  74.7   373  20.7
+   sombra 19c R=1000 M=1/64 lider     1.747  26.9   20234   23713  10347   9015  1.63  19.4    97  21.2
+   sombra 19c R=390 M=1/32 lider      1.746  25.3   20223   23733  10347   8130  1.63  16.4    82  21.3
+   sombra 19c R=100 M=1/32 lider      1.743  27.5   20266   24251  10302   8697  1.63  19.3    96  21.2
+   sombra 19c R=100 M=1/16 tercios    1.741  23.2   20112   24150  10386   9090  1.62  77.3   387  20.8
+   bases en el ajuste:
+   banda 40                           1.848  15.8   20893   24661  10386   9090  1.68   3.8    19  21.2
+   banda 60                           1.810  25.4   20706   24539  10386   9090  1.67   4.4    22  21.1
+   tres bandas por hilo               1.807  31.1   20673   24539  10386   9090  1.66   4.8    24  19.5
+   en la validacion (elegida: sombra 19c R=1000 M=1/16 lider):
+   estrategia                           pts  1a %   media mediana     p5   peor  /cym   ord   com  dd %
+   ELEGIDA                            1.807  36.5   22045   24582  10935   9864  1.65   6.4    32  22.8
+   sombra 19c R=1000 M=1/32 lider     1.774  34.4   21850   24505  10935   9864  1.63  18.6    93  22.8
+   sombra 19c R=390 M=1/16 lider      1.784  31.6   21804   24536  10881   9864  1.63   8.6    43  23.0
+   sombra 19c R=100 M=1/16 lider      1.770  33.6   21726   24536  10935   9864  1.62   8.9    45  23.0
+   sombra 19c R=1000 M=1/16 tercios   1.791  33.8   21870   24645  10935   9864  1.63  57.0   285  22.7
+   banda 40                           1.866  18.3   22316   24645  10917   9864  1.67   3.9    20  22.6
+   banda 60                           1.811  26.7   22059   24575  10917   9864  1.65   4.5    23  23.2
+   tres bandas por hilo               1.820  34.6   22014   24656  10935   9864  1.65   4.8    24  21.3
+   diferencia media de patrimonio en la validacion: contra banda 40 -270 (ee 343), contra banda 60 -14 (ee 162)
+
+== separacion por empresas: ajuste 2160 ventanas, validacion 1440
+   diez mejores en el ajuste:
+   estrategia                           pts  1a %   media mediana     p5   peor  /cym   ord   com  dd %
+   sombra 19c R=1000 M=1/16 lider     1.825  28.9   21827   24806  10613   9090  1.59   5.6    28  22.1
+   sombra 19c R=390 M=1/16 lider      1.791  26.5   21569   24806  10525   8253  1.57   9.0    45  22.3
+   sombra 19c R=1000 M=1/16 tercios   1.786  24.0   21444   24806  10620   9090  1.56  59.1   296  21.7
+   sombra 19c R=1000 M=1/32 lider     1.781  27.8   21507   24743  10480   9015  1.56  15.6    78  22.3
+   sombra 19c R=100 M=1/16 lider      1.773  27.3   21426   24806  10480   7949  1.56  10.4    52  22.2
+   sombra 19c R=1000 M=1/32 tercios   1.773  23.3   21349   24753  10584   9090  1.55  63.2   316  21.8
+   sombra 19c R=390 M=1/16 tercios    1.769  22.8   21286   24785  10620   9090  1.55  61.9   310  21.9
+   sombra 19c R=100 M=1/16 tercios    1.764  23.2   21287   24785  10613   9090  1.55  61.7   308  21.9
+   sombra 19c R=390 M=1/32 lider      1.761  25.5   21338   24743  10485   8130  1.55  15.9    79  22.4
+   sombra 19c R=1000 M=1/64 tercios   1.758  22.6   21226   24656  10584   9090  1.54  67.1   335  21.9
+   bases en el ajuste:
+   banda 40                           1.861  17.1   22000   24876  10584   9090  1.60   3.9    19  22.2
+   banda 60                           1.826  26.7   21862   24869  10584   9090  1.59   4.5    22  22.2
+   tres bandas por hilo               1.822  29.2   21779   24845  10676   9090  1.58   4.8    24  20.8
+   en la validacion (elegida: sombra 19c R=1000 M=1/16 lider):
+   estrategia                           pts  1a %   media mediana     p5   peor  /cym   ord   com  dd %
+   ELEGIDA                            1.771  31.7   19976   21700  10350   9673  1.78   7.7    38  20.8
+   sombra 19c R=390 M=1/16 lider      1.758  30.3   19854   21503  10344   9673  1.77   9.3    46  20.9
+   sombra 19c R=1000 M=1/16 tercios   1.745  30.1   19734   19970  10350   9673  1.76  78.1   390  20.8
+   sombra 19c R=1000 M=1/32 lider     1.766  33.8   19980   21221  10350   9673  1.78  11.0    55  20.9
+   sombra 19c R=100 M=1/16 lider      1.764  33.8   20014   21370  10323   9673  1.78  11.2    56  21.0
+   banda 40                           1.849  17.3   20418   23703  10347   9673  1.82   3.8    19  21.0
+   banda 60                           1.794  26.3   20099   22254  10347   9673  1.79   4.4    22  21.1
+   tres bandas por hilo               1.803  36.2   20131   21920  10347   9673  1.79   4.8    24  19.1
+   diferencia media de patrimonio en la validacion: contra banda 40 -442 (ee 262), contra banda 60 -123 (ee 134)
+

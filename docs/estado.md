@@ -2,6 +2,31 @@
 
 Se actualiza al cerrar cada tramo de trabajo. La versión anterior queda en el historial de git.
 
+## Tramo 18: exploración de ideas sobre la población real (18/11 en la noche y madrugada del 19/11)
+
+Rama `minutos-reales`, sobre `9ba804a`. Documento: `docs/exploracion_ideas.md`. Bitácora: `docs/bitacora/exploracion.md`. Decisión T136. Solo Python: no se tocó `rtl/`, `sw/`, `main` ni los bitstreams. **La regla de los peldaños no se cambió.**
+
+### Resultados
+
+| Pedido | Resultado | Dónde |
+|--------|-----------|-------|
+| Motor | Fases A a D, contabilidad oficial, cuenta propia, órdenes de 63 como máximo. Da 18 779 en Tesla, y 0 diferencias contra la caché en C en 3600 ventanas y contra `trader.correr` en 40 | `ref/cotas/ideas.py`; `docs/mediciones/exploracion/validar.txt` |
+| Tabla 1: filtros | No pasan: 1 (1,813 contra 1,860 de banda 40), 5 (0 de 81) y 6 (63 × E = +0,10 contra 10). Pasan: 2 solo en rangos angostos, 3 a mitad de ventana pero no dentro de D (+0,055), 4 con 56,5 % (bajo la clase mayoritaria de 61 %) y 9 en un tramo de p0. 7, 8 y 10 sin filtro | `docs/exploracion_ideas.md`, sección 2 |
+| Tabla 2: ideas y combinaciones | **Ninguna le gana a la banda 40 fuera de muestra.** Las más cercanas son la banda 40 con un agregado: idea 8 (-5 / -13), 9 (-40 / -10), 4 (-65 / -78), 10 (-23 / -55) y 7 (-63 / -37). Grilla, sombra y programación dinámica pierden de 220 a 440; contadores, más de 7 000. Ninguna combinación mejora a su mejor componente | Sección 3 |
+| Idea 12 (agregada) | Banda asimétrica: el óptimo de 56 combinaciones es 140/215 en los dos ajustes, la banda 40 | Sección 4 |
+| Población completa | Las finalistas (12, 8, 9, 4 y 10) en 1 368 253 ventanas confirman la muestra: mismo orden, mismos signos, diferencias de 1 a 12. Banda 40 contra banda 60: +257 (ee 244) y +314 (ee 194) en las dos validaciones, +205 (ee 101) en todas | Sección 5; `completa.txt` |
+| Primera sola | El campo incluye `espera_banda40`, idéntica a la banda 40. Sin ella, la banda 40 queda primera sola en 40 % y 37 % de los torneos, no en 18 % y 17 % | Sección 3.1 |
+| Tesla | Ninguna idea gana la ronda: la decidió el nivel de venta. La más cercana fue la idea 10 (21 177 contra 21 467 del rival) | `tesla.txt` |
+
+### Lo que decides tú
+
+Opciones en `docs/exploracion_ideas.md`, sección 6: banda 40 sola, banda 60 sin cambios, o banda 40 con final de ronda, con precio inicial o con detector de régimen. Mi recomendación, etiquetada como tal en el documento: **banda 40 sola**, que cuesta dos constantes y repetir la puerta de los tres peldaños. Si no alcanza el tiempo, la banda 60 sin cambios. Ninguno de los agregados justifica el trabajo extra.
+
+### Qué falta y qué conviene atacar después
+
+1. **Tu decisión** antes del corte del 22/11, y si es banda 40, la puerta de los tres peldaños con las constantes nuevas.
+2. Siguen pendientes los puntos 2 a 5 del tramo 17 (checklist del 26/11 con los nombres nuevos, registrador en tu Mac, rondas de 0,1 ms y 1 ms sin identificar, integrar la rama en `main`).
+
 ## Tramo 17: minutos reales y clase del 18/11 (18/11 en la noche)
 
 Rama `minutos-reales`, desde `main` (`4da78ca`). Bitácora: `docs/bitacora/minutos_reales.md`. Decisiones T134 y T135. **La regla de los peldaños no se cambió.**

@@ -1,0 +1,36 @@
+Idea 1: Politica por programacion dinamica (clase A). ref/cotas/explorar_ideas.py idea 1 --semilla 18, commit 9ba804a
+NO PASO SU FILTRO: sin barrido; se informa un representante fijo, elegido antes de ver resultados.
+Muestra muestra-18-240: 3600 ventanas; 1 variantes. Se elige la de mas puntos de torneo en el ajuste y se informa en la validacion.
+
+== separacion por anios: ajuste 2400 ventanas, validacion 1200
+   diez mejores en el ajuste:
+   estrategia                           pts  1a %   media mediana     p5   peor  /cym   ord   com  dd %
+   dp objetivo=log_exacto version=pla 1.805  32.7   20885   24656  10386   9090  1.68   6.5    32  19.8
+   bases en el ajuste:
+   banda 40                           1.848  15.8   20893   24661  10386   9090  1.68   3.8    19  21.2
+   banda 60                           1.810  25.4   20706   24539  10386   9090  1.67   4.4    22  21.1
+   tres bandas por hilo               1.807  31.1   20673   24539  10386   9090  1.66   4.8    24  19.5
+   en la validacion (elegida: dp objetivo=log_exacto version=placa modo=cambios):
+   estrategia                           pts  1a %   media mediana     p5   peor  /cym   ord   com  dd %
+   ELEGIDA                            1.807  30.1   22010   24582  10935   9864  1.65   5.7    28  21.8
+   banda 40                           1.866  18.3   22316   24645  10917   9864  1.67   3.9    20  22.6
+   banda 60                           1.811  26.7   22059   24575  10917   9864  1.65   4.5    23  23.2
+   tres bandas por hilo               1.820  34.6   22014   24656  10935   9864  1.65   4.8    24  21.3
+   diferencia media de patrimonio en la validacion: contra banda 40 -306 (ee 171), contra banda 60 -50 (ee 210)
+
+== separacion por empresas: ajuste 2160 ventanas, validacion 1440
+   diez mejores en el ajuste:
+   estrategia                           pts  1a %   media mediana     p5   peor  /cym   ord   com  dd %
+   dp objetivo=log_exacto version=pla 1.815  31.7   21969   24876  10683   9090  1.60   6.1    31  20.9
+   bases en el ajuste:
+   banda 40                           1.861  17.1   22000   24876  10584   9090  1.60   3.9    19  22.2
+   banda 60                           1.826  26.7   21862   24869  10584   9090  1.59   4.5    22  22.2
+   tres bandas por hilo               1.822  29.2   21779   24845  10676   9090  1.58   4.8    24  20.8
+   en la validacion (elegida: dp objetivo=log_exacto version=placa modo=cambios):
+   estrategia                           pts  1a %   media mediana     p5   peor  /cym   ord   com  dd %
+   ELEGIDA                            1.800  33.8   20197   23714  10347   9673  1.80   6.3    32  19.9
+   banda 40                           1.849  17.3   20418   23703  10347   9673  1.82   3.8    19  21.0
+   banda 60                           1.794  26.3   20099   22254  10347   9673  1.79   4.4    22  21.1
+   tres bandas por hilo               1.803  36.2   20131   21920  10347   9673  1.79   4.8    24  19.1
+   diferencia media de patrimonio en la validacion: contra banda 40 -220 (ee 148), contra banda 60 +98 (ee 170)
+

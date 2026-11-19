@@ -1,0 +1,61 @@
+Idea 10: Salida por caida desde el maximo (clase B). ref/cotas/explorar_ideas.py idea 10 --semilla 18, commit 9ba804a
+Muestra muestra-18-240: 3600 ventanas; 60 variantes. Se elige la de mas puntos de torneo en el ajuste y se informa en la validacion.
+
+== separacion por anios: ajuste 2400 ventanas, validacion 1200
+   diez mejores en el ajuste:
+   estrategia                           pts  1a %   media mediana     p5   peor  /cym   ord   com  dd %
+   caida w=40 dd=5 g=60 reentrada=reb 1.847  24.0   20909   24690  10386   9090  1.68   4.9    25  21.2
+   caida w=40 dd=15 g=60 reentrada=re 1.845  24.7   20955   24690  10386   9090  1.69   4.9    24  20.8
+   caida w=40 dd=10 g=60 reentrada=re 1.842  22.7   20921   24690  10382   9090  1.68   4.9    25  21.2
+   caida w=40 dd=20 g=60 reentrada=re 1.838  23.8   20935   24690  10382   9090  1.68   4.8    24  20.9
+   caida w=40 dd=10 g=60 reentrada=ba 1.816  25.6   20819   24656  10386   9090  1.67   4.4    22  20.0
+   caida w=40 dd=20 g=60 reentrada=ba 1.816  24.6   20804   24690  10386   9090  1.67   4.4    22  20.4
+   caida w=40 dd=5 g=60 reentrada=ban 1.815  25.8   20835   24661  10386   9090  1.68   4.4    22  19.9
+   caida w=40 dd=30 g=60 reentrada=re 1.813  21.7   20750   24690  10347   7936  1.67  17.7    88  21.2
+   caida w=40 dd=5 g=40 reentrada=reb 1.813  22.9   20711   24656  10284   6969  1.67  32.6   163  21.7
+   caida w=40 dd=15 g=60 reentrada=ba 1.812  24.8   20792   24656  10386   9090  1.67   4.4    22  20.2
+   bases en el ajuste:
+   banda 40                           1.848  15.8   20893   24661  10386   9090  1.68   3.8    19  21.2
+   banda 60                           1.810  25.4   20706   24539  10386   9090  1.67   4.4    22  21.1
+   tres bandas por hilo               1.807  31.1   20673   24539  10386   9090  1.66   4.8    24  19.5
+   en la validacion (elegida: caida w=40 dd=5 g=60 reentrada=rebote):
+   estrategia                           pts  1a %   media mediana     p5   peor  /cym   ord   com  dd %
+   ELEGIDA                            1.859  23.3   22292   24645  10881   9864  1.67   4.9    25  22.6
+   caida w=40 dd=15 g=60 reentrada=re 1.850  21.5   22226   24645  10867   9864  1.66   4.7    24  22.6
+   caida w=40 dd=10 g=60 reentrada=re 1.848  23.5   22216   24645  10917   9864  1.66   4.8    24  22.5
+   caida w=40 dd=20 g=60 reentrada=re 1.858  27.5   22329   24645  10935   9864  1.67   4.6    23  22.3
+   caida w=40 dd=10 g=60 reentrada=ba 1.841  29.8   22247   24645  10935   9864  1.66   4.4    22  21.7
+   banda 40                           1.866  18.3   22316   24645  10917   9864  1.67   3.9    20  22.6
+   banda 60                           1.811  26.7   22059   24575  10917   9864  1.65   4.5    23  23.2
+   tres bandas por hilo               1.820  34.6   22014   24656  10935   9864  1.65   4.8    24  21.3
+   diferencia media de patrimonio en la validacion: contra banda 40 -23 (ee 24), contra banda 60 +233 (ee 277)
+
+== separacion por empresas: ajuste 2160 ventanas, validacion 1440
+   diez mejores en el ajuste:
+   estrategia                           pts  1a %   media mediana     p5   peor  /cym   ord   com  dd %
+   caida w=40 dd=15 g=60 reentrada=re 1.856  24.6   22057   24876  10584   9090  1.60   4.8    24  21.8
+   caida w=40 dd=5 g=60 reentrada=reb 1.856  22.4   21993   24876  10584   9090  1.60   4.9    25  22.2
+   caida w=40 dd=10 g=60 reentrada=re 1.852  24.0   22016   24876  10548   9090  1.60   4.9    24  22.1
+   caida w=40 dd=20 g=60 reentrada=re 1.850  23.5   22056   24876  10584   9090  1.60   4.7    24  21.9
+   caida w=40 dd=30 g=60 reentrada=re 1.837  22.3   21907   24876  10548   7943  1.59  11.4    57  22.1
+   caida w=40 dd=20 g=60 reentrada=ba 1.829  23.6   21887   24876  10620   9090  1.59   4.3    22  21.6
+   caida w=40 dd=30 g=60 reentrada=ba 1.826  22.4   21821   24876  10584   7943  1.59  11.2    56  22.0
+   caida w=40 dd=10 g=60 reentrada=ba 1.822  24.3   21868   24876  10676   9090  1.59   4.3    22  21.2
+   caida w=40 dd=15 g=60 reentrada=ba 1.821  23.3   21823   24876  10676   9090  1.59   4.3    22  21.4
+   caida w=40 dd=5 g=60 reentrada=ban 1.814  24.1   21816   24876  10676   9090  1.59   4.3    22  21.2
+   bases en el ajuste:
+   banda 40                           1.861  17.1   22000   24876  10584   9090  1.60   3.9    19  22.2
+   banda 60                           1.826  26.7   21862   24869  10584   9090  1.59   4.5    22  22.2
+   tres bandas por hilo               1.822  29.2   21779   24845  10676   9090  1.58   4.8    24  20.8
+   en la validacion (elegida: caida w=40 dd=15 g=60 reentrada=rebote):
+   estrategia                           pts  1a %   media mediana     p5   peor  /cym   ord   com  dd %
+   ELEGIDA                            1.839  24.2   20362   23578  10323   9673  1.81   4.8    24  20.9
+   caida w=40 dd=5 g=60 reentrada=reb 1.849  27.4   20437   23355  10347   9673  1.82   5.0    25  20.8
+   caida w=40 dd=10 g=60 reentrada=re 1.839  23.1   20358   23714  10347   9673  1.81   4.9    24  20.9
+   caida w=40 dd=20 g=60 reentrada=re 1.844  28.2   20415   23355  10323   9673  1.82   4.8    24  20.6
+   caida w=40 dd=30 g=60 reentrada=re 1.819  24.6   20281   23258  10287   7647  1.80  17.5    88  20.8
+   banda 40                           1.849  17.3   20418   23703  10347   9673  1.82   3.8    19  21.0
+   banda 60                           1.794  26.3   20099   22254  10347   9673  1.79   4.4    22  21.1
+   tres bandas por hilo               1.803  36.2   20131   21920  10347   9673  1.79   4.8    24  19.1
+   diferencia media de patrimonio en la validacion: contra banda 40 -55 (ee 46), contra banda 60 +263 (ee 220)
+

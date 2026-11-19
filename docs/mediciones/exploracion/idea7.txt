@@ -1,0 +1,61 @@
+Idea 7: Cobertura contra rivales emulados (clase A). ref/cotas/explorar_ideas.py idea 7 --semilla 18, commit 9ba804a
+Muestra muestra-18-240: 3600 ventanas; 24 variantes. Se elige la de mas puntos de torneo en el ajuste y se informa en la validacion.
+
+== separacion por anios: ajuste 2400 ventanas, validacion 1200
+   diez mejores en el ajuste:
+   estrategia                           pts  1a %   media mediana     p5   peor  /cym   ord   com  dd %
+   cobertura base=banda w=40 m=10 Tc= 1.841  20.3   20877   24507  10386   9090  1.68   4.7    23  21.2
+   cobertura base=banda w=40 m=5 Tc=5 1.840  21.9   20868   24419  10386   9090  1.68   4.9    24  21.2
+   cobertura base=banda w=40 m=2 Tc=5 1.838  21.6   20858   24396  10386   9090  1.68   4.9    24  21.2
+   cobertura base=banda w=40 m=10 Tc= 1.825  19.1   20733   24246  10386   9090  1.67   5.8    29  21.2
+   cobertura base=banda w=40 m=5 Tc=2 1.816  19.4   20668   23982  10386   9090  1.66   6.4    32  21.2
+   cobertura base=banda w=40 m=2 Tc=2 1.812  18.7   20640   23891  10386   9090  1.66   6.5    33  21.1
+   cobertura base=banda w=40 m=10 Tc= 1.809  17.2   20593   24025  10386   9090  1.66   6.3    31  21.1
+   cobertura base=banda w=60 m=10 Tc= 1.808  26.7   20700   24316  10386   9090  1.66   5.2    26  21.1
+   cobertura base=banda w=60 m=5 Tc=5 1.807  27.9   20703   24314  10386   9090  1.66   5.4    27  21.1
+   cobertura base=banda w=60 m=2 Tc=5 1.806  27.7   20693   24307  10386   9090  1.66   5.4    27  21.1
+   bases en el ajuste:
+   banda 40                           1.848  15.8   20893   24661  10386   9090  1.68   3.8    19  21.2
+   banda 60                           1.810  25.4   20706   24539  10386   9090  1.67   4.4    22  21.1
+   tres bandas por hilo               1.807  31.1   20673   24539  10386   9090  1.66   4.8    24  19.5
+   en la validacion (elegida: cobertura base=banda w=40 m=10 Tc=500):
+   estrategia                           pts  1a %   media mediana     p5   peor  /cym   ord   com  dd %
+   ELEGIDA                            1.854  24.0   22253   24575  10917   9864  1.66   5.5    27  22.6
+   cobertura base=banda w=40 m=5 Tc=5 1.852  23.6   22233   24572  10917   9864  1.66   5.6    28  22.6
+   cobertura base=banda w=40 m=2 Tc=5 1.851  23.5   22228   24544  10917   9864  1.66   5.6    28  22.5
+   cobertura base=banda w=40 m=10 Tc= 1.836  20.5   22083   24443  10917   9864  1.65   6.6    33  22.5
+   cobertura base=banda w=40 m=5 Tc=2 1.824  19.2   21993   24443  10917   9864  1.64   7.6    38  22.5
+   banda 40                           1.866  18.3   22316   24645  10917   9864  1.67   3.9    20  22.6
+   banda 60                           1.811  26.7   22059   24575  10917   9864  1.65   4.5    23  23.2
+   tres bandas por hilo               1.820  34.6   22014   24656  10935   9864  1.65   4.8    24  21.3
+   diferencia media de patrimonio en la validacion: contra banda 40 -63 (ee 30), contra banda 60 +194 (ee 277)
+
+== separacion por empresas: ajuste 2160 ventanas, validacion 1440
+   diez mejores en el ajuste:
+   estrategia                           pts  1a %   media mediana     p5   peor  /cym   ord   com  dd %
+   cobertura base=banda w=40 m=10 Tc= 1.853  22.8   21972   24800  10584   9090  1.60   5.0    25  22.2
+   cobertura base=banda w=40 m=5 Tc=5 1.850  24.4   21955   24724  10584   9090  1.60   5.3    26  22.2
+   cobertura base=banda w=40 m=2 Tc=5 1.848  24.1   21940   24690  10584   9090  1.59   5.2    26  22.2
+   cobertura base=banda w=40 m=10 Tc= 1.834  19.1   21788   24586  10584   9090  1.58   6.0    30  22.1
+   cobertura base=banda w=60 m=10 Tc= 1.821  28.8   21825   24753  10584   9090  1.59   5.5    28  22.2
+   cobertura base=banda w=40 m=5 Tc=2 1.821  19.0   21694   24519  10584   9090  1.58   6.9    34  22.1
+   cobertura base=banda w=60 m=5 Tc=5 1.820  30.0   21819   24674  10584   9090  1.59   5.8    29  22.2
+   cobertura base=banda w=60 m=2 Tc=5 1.819  30.1   21811   24656  10584   9090  1.59   5.8    29  22.2
+   cobertura base=banda w=40 m=2 Tc=2 1.815  18.2   21656   24497  10584   9090  1.57   7.0    35  22.1
+   cobertura base=banda w=40 m=10 Tc= 1.814  17.1   21600   24503  10584   9090  1.57   6.3    31  22.0
+   bases en el ajuste:
+   banda 40                           1.861  17.1   22000   24876  10584   9090  1.60   3.9    19  22.2
+   banda 60                           1.826  26.7   21862   24869  10584   9090  1.59   4.5    22  22.2
+   tres bandas por hilo               1.822  29.2   21779   24845  10676   9090  1.58   4.8    24  20.8
+   en la validacion (elegida: cobertura base=banda w=40 m=10 Tc=500):
+   estrategia                           pts  1a %   media mediana     p5   peor  /cym   ord   com  dd %
+   ELEGIDA                            1.841  21.8   20380   23714  10347   9673  1.81   4.8    24  20.9
+   cobertura base=banda w=40 m=5 Tc=5 1.841  21.8   20375   23647  10347   9673  1.81   4.9    25  20.9
+   cobertura base=banda w=40 m=2 Tc=5 1.841  21.9   20376   23607  10347   9673  1.81   5.0    25  20.9
+   cobertura base=banda w=40 m=10 Tc= 1.828  21.1   20276   23751  10347   9673  1.80   6.1    31  20.8
+   cobertura base=banda w=60 m=10 Tc= 1.795  27.2   20092   22573  10347   9673  1.79   5.2    26  21.1
+   banda 40                           1.849  17.3   20418   23703  10347   9673  1.82   3.8    19  21.0
+   banda 60                           1.794  26.3   20099   22254  10347   9673  1.79   4.4    22  21.1
+   tres bandas por hilo               1.803  36.2   20131   21920  10347   9673  1.79   4.8    24  19.1
+   diferencia media de patrimonio en la validacion: contra banda 40 -37 (ee 28), contra banda 60 +281 (ee 231)
+

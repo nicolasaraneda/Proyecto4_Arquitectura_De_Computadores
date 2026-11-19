@@ -1,0 +1,61 @@
+Idea 4: Detector de regimen (clase B). ref/cotas/explorar_ideas.py idea 4 --semilla 18, commit 9ba804a
+Muestra muestra-18-240: 3600 ventanas; 184 variantes. Se elige la de mas puntos de torneo en el ajuste y se informa en la validacion.
+
+== separacion por anios: ajuste 2400 ventanas, validacion 1200
+   diez mejores en el ajuste:
+   estrategia                           pts  1a %   media mediana     p5   peor  /cym   ord   com  dd %
+   regimen ind=vr64 u1=0.7 u2=1.15 se 1.845  16.5   20868   24661  10386   9090  1.68   3.7    19  21.2
+   regimen ind=vr64 u1=0.7 u2=1.15 se 1.845  16.5   20868   24661  10386   9090  1.68   3.7    19  21.2
+   regimen ind=vr16 u1=0.7 u2=1.15 se 1.844  15.9   20857   24656  10386   9090  1.68   3.7    19  21.3
+   regimen ind=vr16 u1=0.7 u2=1.15 se 1.844  15.9   20857   24656  10386   9090  1.68   3.7    19  21.3
+   regimen ind=vr16 u1=0.7 u2=1.0 sen 1.843  16.3   20844   24656  10386   9090  1.68   3.8    19  21.2
+   regimen ind=vr16 u1=0.7 u2=1.15 se 1.842  16.3   20849   24661  10386   9090  1.68   3.8    19  21.2
+   regimen ind=vr64 u1=0.7 u2=1.0 sen 1.841  16.5   20835   24656  10386   9090  1.68   3.8    19  21.2
+   regimen ind=vr64 u1=0.7 u2=1.0 sen 1.841  17.0   20832   24656  10386   9090  1.68   3.9    20  21.1
+   regimen ind=vr64 u1=0.7 u2=1.15 se 1.841  17.7   20854   24656  10386   9090  1.68   3.9    19  21.2
+   regimen ind=vr16 u1=0.7 u2=1.0 sen 1.840  15.7   20822   24656  10386   9090  1.67   3.8    19  21.3
+   bases en el ajuste:
+   banda 40                           1.848  15.8   20893   24661  10386   9090  1.68   3.8    19  21.2
+   banda 60                           1.810  25.4   20706   24539  10386   9090  1.67   4.4    22  21.1
+   tres bandas por hilo               1.807  31.1   20673   24539  10386   9090  1.66   4.8    24  19.5
+   en la validacion (elegida: regimen ind=vr64 u1=0.7 u2=1.15 sentido=-1 osc=banda w=60):
+   estrategia                           pts  1a %   media mediana     p5   peor  /cym   ord   com  dd %
+   ELEGIDA                            1.860  19.3   22251   24582  10917   9864  1.66   3.8    19  22.5
+   regimen ind=vr64 u1=0.7 u2=1.15 se 1.860  19.3   22251   24582  10917   9864  1.66   3.8    19  22.5
+   regimen ind=vr16 u1=0.7 u2=1.15 se 1.854  18.7   22197   24645  10917   9864  1.66   3.8    19  22.6
+   regimen ind=vr16 u1=0.7 u2=1.15 se 1.854  18.7   22197   24645  10917   9864  1.66   3.8    19  22.6
+   regimen ind=vr16 u1=0.7 u2=1.0 sen 1.847  18.4   22124   24645  10917   9864  1.65   3.9    20  22.6
+   banda 40                           1.866  18.3   22316   24645  10917   9864  1.67   3.9    20  22.6
+   banda 60                           1.811  26.7   22059   24575  10917   9864  1.65   4.5    23  23.2
+   tres bandas por hilo               1.820  34.6   22014   24656  10935   9864  1.65   4.8    24  21.3
+   diferencia media de patrimonio en la validacion: contra banda 40 -65 (ee 37), contra banda 60 +191 (ee 265)
+
+== separacion por empresas: ajuste 2160 ventanas, validacion 1440
+   diez mejores en el ajuste:
+   estrategia                           pts  1a %   media mediana     p5   peor  /cym   ord   com  dd %
+   regimen ind=vr64 u1=0.7 u2=1.15 se 1.860  18.1   21988   24869  10584   9090  1.60   3.9    19  22.2
+   regimen ind=vr64 u1=0.7 u2=1.15 se 1.860  18.1   21988   24869  10584   9090  1.60   3.9    19  22.2
+   regimen ind=vr16 u1=0.7 u2=1.15 se 1.859  17.7   21977   24869  10584   9090  1.60   3.9    19  22.2
+   regimen ind=vr16 u1=0.7 u2=1.15 se 1.859  17.7   21977   24869  10584   9090  1.60   3.9    19  22.2
+   regimen ind=vr16 u1=0.7 u2=1.15 se 1.857  18.6   21991   24876  10584   9090  1.60   4.0    20  22.2
+   regimen ind=vr64 u1=0.7 u2=1.0 sen 1.856  18.2   21955   24869  10584   9090  1.60   3.9    20  22.1
+   regimen ind=vr64 u1=0.7 u2=1.15 se 1.856  19.3   21995   24869  10584   9090  1.60   4.0    20  22.2
+   regimen ind=vr64 u1=0.7 u2=1.0 sen 1.855  18.5   21947   24869  10584   9090  1.60   4.0    20  22.1
+   regimen ind=vr16 u1=0.7 u2=1.0 sen 1.855  18.6   21963   24869  10584   9090  1.60   3.9    20  22.2
+   regimen ind=vr16 u1=0.7 u2=1.0 sen 1.854  17.9   21921   24869  10584   9090  1.59   4.0    20  22.2
+   bases en el ajuste:
+   banda 40                           1.861  17.1   22000   24876  10584   9090  1.60   3.9    19  22.2
+   banda 60                           1.826  26.7   21862   24869  10584   9090  1.59   4.5    22  22.2
+   tres bandas por hilo               1.822  29.2   21779   24845  10676   9090  1.58   4.8    24  20.8
+   en la validacion (elegida: regimen ind=vr64 u1=0.7 u2=1.15 sentido=-1 osc=banda w=60):
+   estrategia                           pts  1a %   media mediana     p5   peor  /cym   ord   com  dd %
+   ELEGIDA                            1.840  16.9   20340   24001  10347   9673  1.81   3.6    18  20.9
+   regimen ind=vr64 u1=0.7 u2=1.15 se 1.840  16.9   20340   24001  10347   9673  1.81   3.6    18  20.9
+   regimen ind=vr16 u1=0.7 u2=1.15 se 1.833  16.3   20295   23714  10347   9673  1.81   3.6    18  21.0
+   regimen ind=vr16 u1=0.7 u2=1.15 se 1.833  16.3   20295   23714  10347   9673  1.81   3.6    18  21.0
+   regimen ind=vr16 u1=0.7 u2=1.15 se 1.832  17.3   20289   23045  10347   9673  1.81   3.8    19  21.1
+   banda 40                           1.849  17.3   20418   23703  10347   9673  1.82   3.8    19  21.0
+   banda 60                           1.794  26.3   20099   22254  10347   9673  1.79   4.4    22  21.1
+   tres bandas por hilo               1.803  36.2   20131   21920  10347   9673  1.79   4.8    24  19.1
+   diferencia media de patrimonio en la validacion: contra banda 40 -78 (ee 46), contra banda 60 +241 (ee 223)
+

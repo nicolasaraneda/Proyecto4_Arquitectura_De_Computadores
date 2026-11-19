@@ -1,0 +1,61 @@
+Idea 12: Banda asimetrica (agregada: en Tesla decidio el nivel de venta) (clase B). ref/cotas/explorar_ideas.py idea 12 --semilla 18, commit 9ba804a
+Muestra muestra-18-240: 3600 ventanas; 56 variantes. Se elige la de mas puntos de torneo en el ajuste y se informa en la validacion.
+
+== separacion por anios: ajuste 2400 ventanas, validacion 1200
+   diez mejores en el ajuste:
+   estrategia                           pts  1a %   media mediana     p5   peor  /cym   ord   com  dd %
+   banda compra<=140 vende>=215       1.848  15.8   20893   24661  10386   9090  1.68   3.8    19  21.2
+   banda compra<=140 vende>=205       1.846  21.5   20985   24690  10386   9090  1.69   3.9    20  21.0
+   banda compra<=140 vende>=210       1.846  17.9   20916   24690  10386   9090  1.68   3.8    19  21.2
+   banda compra<=135 vende>=215       1.845  23.1   20922   24656  10386   9090  1.68   3.7    19  21.2
+   banda compra<=130 vende>=215       1.843  23.5   20899   24690  10386   9090  1.68   3.7    18  21.0
+   banda compra<=120 vende>=215       1.842  22.9   20983   24690  10386   9090  1.69   3.6    18  20.8
+   banda compra<=135 vende>=210       1.842  24.0   20903   24656  10386   9090  1.68   3.7    19  21.2
+   banda compra<=135 vende>=205       1.842  25.4   20971   24656  10386   9090  1.69   3.8    19  21.0
+   banda compra<=130 vende>=205       1.841  26.8   20929   24661  10386   9090  1.68   3.8    19  20.8
+   banda compra<=120 vende>=205       1.841  26.6   21025   24690  10386   9090  1.69   3.7    19  20.6
+   bases en el ajuste:
+   banda 40                           1.848  15.8   20893   24661  10386   9090  1.68   3.8    19  21.2
+   banda 60                           1.810  25.4   20706   24539  10386   9090  1.67   4.4    22  21.1
+   tres bandas por hilo               1.807  31.1   20673   24539  10386   9090  1.66   4.8    24  19.5
+   en la validacion (elegida: banda compra<=140 vende>=215):
+   estrategia                           pts  1a %   media mediana     p5   peor  /cym   ord   com  dd %
+   ELEGIDA                            1.866  18.3   22316   24645  10917   9864  1.67   3.9    20  22.6
+   banda compra<=140 vende>=205       1.859  20.8   22292   24645  10917   9864  1.67   4.0    20  22.5
+   banda compra<=140 vende>=210       1.864  20.4   22333   24645  10917   9864  1.67   4.0    20  22.6
+   banda compra<=135 vende>=215       1.848  19.7   22135   24575  10917   9864  1.65   3.8    19  22.6
+   banda compra<=130 vende>=215       1.846  20.6   22131   24575  10917   9864  1.65   3.8    19  22.6
+   banda 40                           1.866  18.3   22316   24645  10917   9864  1.67   3.9    20  22.6
+   banda 60                           1.811  26.7   22059   24575  10917   9864  1.65   4.5    23  23.2
+   tres bandas por hilo               1.820  34.6   22014   24656  10935   9864  1.65   4.8    24  21.3
+   diferencia media de patrimonio en la validacion: contra banda 40 +0 (ee 0), contra banda 60 +256 (ee 272)
+
+== separacion por empresas: ajuste 2160 ventanas, validacion 1440
+   diez mejores en el ajuste:
+   estrategia                           pts  1a %   media mediana     p5   peor  /cym   ord   com  dd %
+   banda compra<=140 vende>=215       1.861  17.1   22000   24876  10584   9090  1.60   3.9    19  22.2
+   banda compra<=140 vende>=225       1.860  22.6   22022   24869  10584   9090  1.60   3.8    19  22.2
+   banda compra<=140 vende>=210       1.859  19.0   22012   24876  10584   9090  1.60   3.9    20  22.2
+   banda compra<=140 vende>=205       1.859  22.5   22078   24876  10584   9090  1.60   4.0    20  22.0
+   banda compra<=140 vende>=220       1.858  21.8   21986   24869  10584   9090  1.60   3.8    19  22.2
+   banda compra<=145 vende>=225       1.855  21.9   22018   24869  10584   9090  1.60   3.8    19  22.2
+   banda compra<=145 vende>=215       1.855  18.1   21990   24869  10584   9090  1.60   3.9    20  22.2
+   banda compra<=145 vende>=205       1.854  23.0   22057   24869  10584   9090  1.60   4.1    20  22.0
+   banda compra<=145 vende>=210       1.854  19.8   21995   24869  10584   9090  1.60   4.0    20  22.2
+   banda compra<=145 vende>=220       1.853  20.3   21979   24869  10584   9090  1.60   3.9    19  22.2
+   bases en el ajuste:
+   banda 40                           1.861  17.1   22000   24876  10584   9090  1.60   3.9    19  22.2
+   banda 60                           1.826  26.7   21862   24869  10584   9090  1.59   4.5    22  22.2
+   tres bandas por hilo               1.822  29.2   21779   24845  10676   9090  1.58   4.8    24  20.8
+   en la validacion (elegida: banda compra<=140 vende>=215):
+   estrategia                           pts  1a %   media mediana     p5   peor  /cym   ord   com  dd %
+   ELEGIDA                            1.849  17.3   20418   23703  10347   9673  1.82   3.8    19  21.0
+   banda compra<=140 vende>=225       1.829  20.4   20149   23084  10347   9673  1.79   3.5    18  21.2
+   banda compra<=140 vende>=210       1.848  20.1   20452   23355  10347   9673  1.82   3.8    19  20.9
+   banda compra<=140 vende>=205       1.844  21.1   20435   23355  10347   9673  1.82   3.8    19  20.8
+   banda compra<=140 vende>=220       1.836  20.3   20244   23355  10347   9673  1.80   3.6    18  21.2
+   banda 40                           1.849  17.3   20418   23703  10347   9673  1.82   3.8    19  21.0
+   banda 60                           1.794  26.3   20099   22254  10347   9673  1.79   4.4    22  21.1
+   tres bandas por hilo               1.803  36.2   20131   21920  10347   9673  1.79   4.8    24  19.1
+   diferencia media de patrimonio en la validacion: contra banda 40 +0 (ee 0), contra banda 60 +319 (ee 226)
+

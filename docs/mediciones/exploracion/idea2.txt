@@ -1,0 +1,61 @@
+Idea 2: Grilla con compensacion (clase B). ref/cotas/explorar_ideas.py idea 2 --semilla 18, commit 9ba804a
+Muestra muestra-18-240: 3600 ventanas; 48 variantes. Se elige la de mas puntos de torneo en el ajuste y se informa en la validacion.
+
+== separacion por anios: ajuste 2400 ventanas, validacion 1200
+   diez mejores en el ajuste:
+   estrategia                           pts  1a %   media mediana     p5   peor  /cym   ord   com  dd %
+   grilla N=2 Linf=130 Lsup=200 modo= 1.813  28.5   20741   24564  10386   9090  1.67   4.6    23  19.6
+   grilla N=2 Linf=120 Lsup=215 modo= 1.812  26.6   20655   24443  10386   9090  1.66   4.2    21  19.5
+   grilla N=3 Linf=130 Lsup=200 modo= 1.805  31.9   20639   24564  10386   9090  1.66   5.4    27  19.4
+   grilla N=4 Linf=130 Lsup=200 modo= 1.804  33.9   20640   24564  10386   9090  1.66   6.8    34  19.3
+   grilla N=3 Linf=120 Lsup=215 modo= 1.800  31.4   20575   24539  10386   9090  1.65   4.8    24  19.2
+   grilla N=4 Linf=120 Lsup=215 modo= 1.795  32.1   20502   24410  10386   9090  1.65   5.8    29  19.1
+   grilla N=6 Linf=130 Lsup=200 modo= 1.791  32.4   20493   24539  10374   9090  1.65  10.7    53  19.2
+   grilla N=8 Linf=130 Lsup=200 modo= 1.785  32.7   20431   24539  10374   9090  1.64  15.7    79  19.1
+   grilla N=2 Linf=110 Lsup=245 modo= 1.784  25.1   20382   24198  10386   9090  1.64   3.8    19  20.1
+   grilla N=6 Linf=120 Lsup=215 modo= 1.783  33.0   20411   24443  10407   9090  1.64   8.7    44  19.0
+   bases en el ajuste:
+   banda 40                           1.848  15.8   20893   24661  10386   9090  1.68   3.8    19  21.2
+   banda 60                           1.810  25.4   20706   24539  10386   9090  1.67   4.4    22  21.1
+   tres bandas por hilo               1.807  31.1   20673   24539  10386   9090  1.66   4.8    24  19.5
+   en la validacion (elegida: grilla N=2 Linf=130 Lsup=200 modo=fraccion):
+   estrategia                           pts  1a %   media mediana     p5   peor  /cym   ord   com  dd %
+   ELEGIDA                            1.806  28.6   21877   24582  10935   9864  1.64   4.5    22  21.7
+   grilla N=2 Linf=120 Lsup=215 modo= 1.802  26.2   21806   24575  10935   9864  1.63   4.2    21  21.7
+   grilla N=3 Linf=130 Lsup=200 modo= 1.817  36.2   21985   24662  10935   9864  1.64   5.3    26  21.3
+   grilla N=4 Linf=130 Lsup=200 modo= 1.801  34.9   21847   24645  10935   9864  1.63   6.4    32  21.5
+   grilla N=3 Linf=120 Lsup=215 modo= 1.800  33.3   21827   24645  10935   9864  1.63   4.8    24  21.3
+   banda 40                           1.866  18.3   22316   24645  10917   9864  1.67   3.9    20  22.6
+   banda 60                           1.811  26.7   22059   24575  10917   9864  1.65   4.5    23  23.2
+   tres bandas por hilo               1.820  34.6   22014   24656  10935   9864  1.65   4.8    24  21.3
+   diferencia media de patrimonio en la validacion: contra banda 40 -438 (ee 236), contra banda 60 -182 (ee 194)
+
+== separacion por empresas: ajuste 2160 ventanas, validacion 1440
+   diez mejores en el ajuste:
+   estrategia                           pts  1a %   media mediana     p5   peor  /cym   ord   com  dd %
+   grilla N=2 Linf=120 Lsup=215 modo= 1.822  26.8   21726   24826  10620   9090  1.58   4.3    21  20.9
+   grilla N=2 Linf=130 Lsup=200 modo= 1.817  27.5   21767   24869  10620   9090  1.58   4.6    23  21.0
+   grilla N=3 Linf=130 Lsup=200 modo= 1.816  30.9   21727   24869  10676   9090  1.58   5.3    27  20.7
+   grilla N=3 Linf=120 Lsup=215 modo= 1.809  29.6   21624   24806  10676   9090  1.57   4.8    24  20.6
+   grilla N=4 Linf=130 Lsup=200 modo= 1.808  32.4   21666   24806  10620   9090  1.57   6.5    33  20.7
+   grilla N=4 Linf=120 Lsup=215 modo= 1.803  31.7   21573   24806  10676   9090  1.57   5.7    28  20.6
+   grilla N=6 Linf=130 Lsup=200 modo= 1.801  31.5   21587   24869  10662   9090  1.57   9.8    49  20.6
+   grilla N=8 Linf=130 Lsup=200 modo= 1.797  32.9   21541   24876  10599   9090  1.57  14.3    72  20.5
+   grilla N=3 Linf=110 Lsup=245 modo= 1.792  29.9   21464   24758  10676   9090  1.56   4.3    21  20.8
+   grilla N=2 Linf=110 Lsup=245 modo= 1.791  24.5   21427   24743  10613   9090  1.56   3.9    19  21.5
+   bases en el ajuste:
+   banda 40                           1.861  17.1   22000   24876  10584   9090  1.60   3.9    19  22.2
+   banda 60                           1.826  26.7   21862   24869  10584   9090  1.59   4.5    22  22.2
+   tres bandas por hilo               1.822  29.2   21779   24845  10676   9090  1.58   4.8    24  20.8
+   en la validacion (elegida: grilla N=2 Linf=120 Lsup=215 modo=fraccion):
+   estrategia                           pts  1a %   media mediana     p5   peor  /cym   ord   com  dd %
+   ELEGIDA                            1.794  27.6   20008   22146  10347   9673  1.78   4.1    21  19.3
+   grilla N=2 Linf=130 Lsup=200 modo= 1.810  31.2   20150   23114  10347   9673  1.79   4.5    23  19.3
+   grilla N=3 Linf=130 Lsup=200 modo= 1.807  37.3   20128   22865  10347   9673  1.79   5.4    27  19.0
+   grilla N=3 Linf=120 Lsup=215 modo= 1.795  35.8   20045   22259  10347   9673  1.78   4.8    24  18.9
+   grilla N=4 Linf=130 Lsup=200 modo= 1.805  37.7   20108   22319  10382   9673  1.79   7.0    35  19.0
+   banda 40                           1.849  17.3   20418   23703  10347   9673  1.82   3.8    19  21.0
+   banda 60                           1.794  26.3   20099   22254  10347   9673  1.79   4.4    22  21.1
+   tres bandas por hilo               1.803  36.2   20131   21920  10347   9673  1.79   4.8    24  19.1
+   diferencia media de patrimonio en la validacion: contra banda 40 -410 (ee 214), contra banda 60 -91 (ee 111)
+

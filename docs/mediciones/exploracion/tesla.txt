@@ -1,0 +1,53 @@
+Idea 8 en la ronda de Tesla del 18/11 (ref/cotas/explorar_ideas.py tesla), commit 9ba804a
+La maestra mostro 18 779 para nosotros (banda 60) y 21 467 para el rival. AMD (21 895 con banda 60) y la serie de
+practica se muestran como ilustracion: no sirven para elegir (son tres series).
+
+variante                                        Tesla 18/11      AMD 18/11  practica Meta   cierra Tesla
+banda 40                                              20795          26470          21392
+banda 60                                              18779          21895          19214
+final base=banda w=40 var=a Tf=100                    20795          26470          21392
+final base=banda w=40 var=a Tf=390                    20795          26470          21392
+final base=banda w=40 var=a Tf=1000                   20795          26470          21392
+final base=banda w=40 var=a Tf=2000                   20795          26470          21392
+final base=banda w=40 var=b Tf=100                    20795          26761          21392
+final base=banda w=40 var=b Tf=390                    20795          24313          21392
+final base=banda w=40 var=b Tf=1000                   18044          24988          20708
+final base=banda w=40 var=b Tf=2000                   17213          24070          19250
+final base=banda w=40 var=c Tf=100                    20795          23539          21392
+final base=banda w=40 var=c Tf=390                    20795          24835          21392
+final base=banda w=40 var=c Tf=1000                   17243          23764          19745
+final base=banda w=40 var=c Tf=2000                   14618          22171          18359
+final base=banda w=60 var=a Tf=100                    18779          21895          19214
+final base=banda w=60 var=a Tf=390                    18779          21895          19214
+final base=banda w=60 var=a Tf=1000                   18779          21895          19214
+final base=banda w=60 var=a Tf=2000                   18779          21895          19214
+final base=banda w=60 var=b Tf=100                    18779          22074          19214
+final base=banda w=60 var=b Tf=390                    18779          21066          19214
+final base=banda w=60 var=b Tf=1000                   17789          20562          19214
+final base=banda w=60 var=b Tf=2000                   16571          21366          19214
+final base=banda w=60 var=c Tf=100                    18779          20499          19214
+final base=banda w=60 var=c Tf=390                    18779          20562          19214
+final base=banda w=60 var=c Tf=1000                   17243          20310          19214
+final base=banda w=60 var=c Tf=2000                   14618          20814          19214
+final base=banda w=40 var=c Tf=3                      20795          26455          21392
+final base=banda w=60 var=c Tf=3                      18779          21885          19214
+no vuelve en D (220)                                  21467          21824          21752   si
+idea 1: dp objetivo=log_exacto version=placa          15707          24648          19521
+idea 2: grilla N=2 Linf=130 Lsup=200 modo=fr          19633          23525          18664
+idea 2: grilla N=2 Linf=120 Lsup=215 modo=fr          18679          24684          19446
+idea 3: sombra 19c R=1000 M=1/16 lider                15984          24429          21392
+idea 4: regimen ind=vr64 u1=0.7 u2=1.15 sent          20795          26470          21392
+idea 5: cuantil qc=0.25 qv=0.75 origen=inici          17786          23447          20562
+idea 6: contadores h=4 xor=False                       4092            104          10430
+idea 7: cobertura base=banda w=40 m=10 Tc=50          20795          24070          21392
+idea 9: inicio: si p(1950)-p0>=30 compra 1/3          20795          26470          21392
+idea 9: inicio: si p0>=240 compra 1/3; banda          20795          26470          21392
+idea 10: caida w=40 dd=5 g=60 reentrada=rebo          21177          26375          20572
+idea 10: caida w=40 dd=15 g=60 reentrada=reb          19214          26391          21048
+idea 11: final base=caida w=40 dd=5 g=60 ree          21177          24232          20572
+idea 11: sombra 3c R=1000 M=1/16 lider                20795          14948          21392
+idea 12: banda compra<=140 vende>=215                 20795          26470          21392
+
+En Tesla el primer 100 llega en el tick 12040 y el primer 255 en el 1058; la fase D empieza en el tick 12040.
+banda 60: tick 12041 a 103: compra 63; tick 12042 a 104: compra 33; tick 19325 a 195: vende 63; tick 19326 a 195: vende 33; termina con 0 acciones a 212 (patrimonio 18779)
+banda 40: tick 12041 a 103: compra 63; tick 12042 a 104: compra 33; tick 19487 a 216: vende 63; tick 19488 a 216: vende 33; termina con 0 acciones a 212 (patrimonio 20795)

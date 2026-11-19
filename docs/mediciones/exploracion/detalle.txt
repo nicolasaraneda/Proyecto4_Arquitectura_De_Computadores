@@ -1,0 +1,22 @@
+Detalle de las ideas 3 y 7 (ref/cotas/explorar_ideas.py detalle --semilla 18), commit 9ba804a
+
+Idea 3, sombra 19c R=1000 M=1/16 lider, validacion por anios: 0.58 cambios de lider por ventana; 0.87 ordenes por cambio (4.3 de comision por cambio); +2.51 ordenes por ventana contra banda 40; patrimonio medio -270 contra banda 40, es decir -464 por cada cambio de lider
+Idea 3, sombra 19c R=1000 M=1/16 lider, validacion por empresas: 0.71 cambios de lider por ventana; 1.07 ordenes por cambio (5.4 de comision por cambio); +3.92 ordenes por ventana contra banda 40; patrimonio medio -442 contra banda 40, es decir -623 por cada cambio de lider
+Idea 3 con tres cuentas, sombra 3c R=1000 M=1/16 lider, validacion por anios: 0.06 cambios de lider por ventana; 1.11 ordenes por cambio (5.5 de comision por cambio); +10.33 ordenes por ventana contra banda 40; patrimonio medio -106 contra banda 40, es decir -1677 por cada cambio de lider
+Idea 3 con tres cuentas, sombra 3c R=1000 M=1/16 lider, validacion por empresas: 0.10 cambios de lider por ventana; 1.32 ordenes por cambio (6.6 de comision por cambio); +14.43 ordenes por ventana contra banda 40; patrimonio medio -178 contra banda 40, es decir -1706 por cada cambio de lider
+
+Idea 7: efecto de la cobertura en el torneo, con el campo de siempre (rival de Tesla fijo) y con un campo sin los
+rivales emulados (sin el rival de Tesla ni comprar y mantener; la banda simple 140/215 no esta en el campo).
+   anios, campo de siempre: cobertura base=banda w=40 m=10 Tc=500 1.854 pts y 24.0 % primera sola; banda 40 1.866 pts y 18.3 % (diferencia -0.011 pts, +5.7 puntos porcentuales)
+   anios, sin rivales emulados: cobertura base=banda w=40 m=10 Tc=500 1.848 pts y 18.6 % primera sola; banda 40 1.860 pts y 12.0 % (diferencia -0.012 pts, +6.6 puntos porcentuales)
+   empresas, campo de siempre: cobertura base=banda w=40 m=10 Tc=500 1.841 pts y 21.8 % primera sola; banda 40 1.849 pts y 17.3 % (diferencia -0.008 pts, +4.4 puntos porcentuales)
+   empresas, sin rivales emulados: cobertura base=banda w=40 m=10 Tc=500 1.835 pts y 16.8 % primera sola; banda 40 1.844 pts y 11.4 % (diferencia -0.008 pts, +5.4 puntos porcentuales)
+
+Primera sola y la regla identica del campo: el campo con extremos incluye espera_banda40, que es la banda 40
+misma; cuando sale sorteada (en cerca de la mitad de los torneos), la banda 40 empata y no puede quedar primera sola.
+   anios, banda 40              : campo de siempre 1.866 pts,  18.3 % primera sola; campo sin espera_banda40 1.863 pts,  40.0 % primera sola
+   anios, banda 60              : campo de siempre 1.811 pts,  26.7 % primera sola; campo sin espera_banda40 1.826 pts,  39.4 % primera sola
+   anios, tres bandas por hilo  : campo de siempre 1.820 pts,  34.6 % primera sola; campo sin espera_banda40 1.836 pts,  48.0 % primera sola
+   empresas, banda 40              : campo de siempre 1.849 pts,  17.3 % primera sola; campo sin espera_banda40 1.846 pts,  37.0 % primera sola
+   empresas, banda 60              : campo de siempre 1.794 pts,  26.3 % primera sola; campo sin espera_banda40 1.815 pts,  37.6 % primera sola
+   empresas, tres bandas por hilo  : campo de siempre 1.803 pts,  36.2 % primera sola; campo sin espera_banda40 1.821 pts,  45.7 % primera sola

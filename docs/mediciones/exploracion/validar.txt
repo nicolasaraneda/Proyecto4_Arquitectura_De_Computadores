@@ -1,0 +1,7 @@
+Validacion del motor de ideas.py (commit 9ba804a)
+
+Tesla 18/11, banda 60: motor 18779, Cotas 18779, maestra 18779  PASS
+Tesla 18/11, banda 40: motor 20795, Cotas 20795  PASS
+Tesla 18/11, fases A-C y 'vende con 220 o mas y no vuelve' en D: 21467 (el rival dio 21 467)
+Muestra (3600 ventanas): bandas 40 y 60 del motor contra la cache en C: 0 diferencias  PASS
+40 ventanas de la muestra contra trader.correr + Cotas: 0 diferencias  PASS

@@ -1,0 +1,36 @@
+Idea 5: Bandas por cuantiles (clase A). ref/cotas/explorar_ideas.py idea 5 --semilla 18, commit 9ba804a
+NO PASO SU FILTRO: sin barrido; se informa un representante fijo, elegido antes de ver resultados.
+Muestra muestra-18-240: 3600 ventanas; 1 variantes. Se elige la de mas puntos de torneo en el ajuste y se informa en la validacion.
+
+== separacion por anios: ajuste 2400 ventanas, validacion 1200
+   diez mejores en el ajuste:
+   estrategia                           pts  1a %   media mediana     p5   peor  /cym   ord   com  dd %
+   cuantil qc=0.25 qv=0.75 origen=ini 1.808  26.2   20739   24539  10386   9090  1.67   4.4    22  21.3
+   bases en el ajuste:
+   banda 40                           1.848  15.8   20893   24661  10386   9090  1.68   3.8    19  21.2
+   banda 60                           1.810  25.4   20706   24539  10386   9090  1.67   4.4    22  21.1
+   tres bandas por hilo               1.807  31.1   20673   24539  10386   9090  1.66   4.8    24  19.5
+   en la validacion (elegida: cuantil qc=0.25 qv=0.75 origen=inicio calor=1950):
+   estrategia                           pts  1a %   media mediana     p5   peor  /cym   ord   com  dd %
+   ELEGIDA                            1.843  30.6   22250   24645  10917   9864  1.66   4.4    22  22.6
+   banda 40                           1.866  18.3   22316   24645  10917   9864  1.67   3.9    20  22.6
+   banda 60                           1.811  26.7   22059   24575  10917   9864  1.65   4.5    23  23.2
+   tres bandas por hilo               1.820  34.6   22014   24656  10935   9864  1.65   4.8    24  21.3
+   diferencia media de patrimonio en la validacion: contra banda 40 -65 (ee 170), contra banda 60 +191 (ee 191)
+
+== separacion por empresas: ajuste 2160 ventanas, validacion 1440
+   diez mejores en el ajuste:
+   estrategia                           pts  1a %   media mediana     p5   peor  /cym   ord   com  dd %
+   cuantil qc=0.25 qv=0.75 origen=ini 1.831  26.0   21868   24806  10584   9090  1.59   4.3    22  22.2
+   bases en el ajuste:
+   banda 40                           1.861  17.1   22000   24876  10584   9090  1.60   3.9    19  22.2
+   banda 60                           1.826  26.7   21862   24869  10584   9090  1.59   4.5    22  22.2
+   tres bandas por hilo               1.822  29.2   21779   24845  10676   9090  1.58   4.8    24  20.8
+   en la validacion (elegida: cuantil qc=0.25 qv=0.75 origen=inicio calor=1950):
+   estrategia                           pts  1a %   media mediana     p5   peor  /cym   ord   com  dd %
+   ELEGIDA                            1.814  31.0   20305   22420  10347   9673  1.81   4.4    22  21.0
+   banda 40                           1.849  17.3   20418   23703  10347   9673  1.82   3.8    19  21.0
+   banda 60                           1.794  26.3   20099   22254  10347   9673  1.79   4.4    22  21.1
+   tres bandas por hilo               1.803  36.2   20131   21920  10347   9673  1.79   4.8    24  19.1
+   diferencia media de patrimonio en la validacion: contra banda 40 -113 (ee 229), contra banda 60 +206 (ee 136)
+
