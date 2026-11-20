@@ -32,7 +32,9 @@ module tb_autoprueba;
   parameter string       PROGRAMA = "sw/trade.hex";
   parameter string       TABLA    = "sw/fondo_tabla.hex";
   parameter int          CONT     = 0;
-  parameter logic [15:0] SEM      = 16'hACE1;
+  parameter logic [15:0] SEM      = 16'hE3AA;
+  parameter int          PASO     = 4;     // caminata de la maestra (T141)
+  parameter int          PISO     = 100;
   parameter logic [15:0] FIRMA_P  = 16'h0000;
 
   logic clk = 0;
@@ -55,7 +57,7 @@ module tb_autoprueba;
     .i_SPI_SCLK(1'b0), .i_SPI_MOSI(1'b0), .i_SPI_CS_n(1'b1), .o_SPI_MISO(miso_pmod));
 `else
   autoprueba_top #(.MemFile(PROGRAMA), .TablaFile(TABLA), .CONTINUO(CONT), .SEMILLA(SEM),
-                   .FIRMA_ESPERADA(FIRMA_P)) dut (
+                   .PASO(PASO), .PISO(PISO), .FIRMA_ESPERADA(FIRMA_P)) dut (
     .i_Clk(clk), .i_Switch(sw), .o_LED(led), .i_UART_RX(rx), .o_UART_TX(tx), .o_SPI_MISO(miso_pmod),
     .o_Segment1_A(s1[0]), .o_Segment1_B(s1[1]), .o_Segment1_C(s1[2]), .o_Segment1_D(s1[3]),
     .o_Segment1_E(s1[4]), .o_Segment1_F(s1[5]), .o_Segment1_G(s1[6]),

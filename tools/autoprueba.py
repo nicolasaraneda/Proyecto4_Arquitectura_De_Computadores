@@ -37,7 +37,7 @@ CRC-16. Este script:
               vigilante no pasa de 1 y no puede disparar (necesita 5).
 
 Peldaños (docs/peldano.md y docs/puertas.md): r0 es el core base con sw/trade.s
-(max_media); r1 el barrel con emad, devk y la tabla, con sw/fondo.s; r2 es r1
+(la regla de cotas); r1 el barrel con emad, devk y la tabla, con sw/fondo.s; r2 es r1
 con el vigilante y SB_WARMBOOT.
 
 Uso, desde la raíz:
@@ -64,6 +64,7 @@ if os.environ.get("OSS_CAD_SUITE"):   # si no, las herramientas tienen que estar
 
 import fondo     # noqa: E402
 import market    # noqa: E402
+import regla_cotas  # noqa: E402
 import trader    # noqa: E402
 
 NTICKS = 2000
@@ -81,28 +82,41 @@ R1_DEFS = "-DESPINO_BARREL -DESPINO_XD_EMAD -DESPINO_XD_DEVK -DESPINO_TABLA"
 R2_DEFS = R1_DEFS + " -DESPINO_VIGILANTE"
 GEMELO_FONDO = ["--barrel", "--xd", "3"]
 
+# Caminata de la maestra interna (decisión T141): cada tick sube o baja PASO, sin
+# pasar de 255 ni bajar de PISO, desde 128, según el LFSR que parte en SEMILLA.
+# Son parámetros del RTL de la maestra (rtl/autoprueba/autoprueba_top.v) y de la
+# simulación: para ejercitar otra volatilidad basta cambiar PASO aquí o correr con
+# --paso N (y --semilla S). Con valores distintos de estos, los productos quedan en
+# build/autoprueba/PELDANO_pasoN_sSEMILLA/ y el registro en
+# docs/mediciones/autoprueba_PELDANO_pasoN_sSEMILLA.txt, sin pisar los de competencia.
+# Con PASO = 4 y la semilla 0xE3AA la caminata toca 100 en el tick 11 y 255 en el 174;
+# con pasos más chicos puede no llegar a los extremos en 2000 ticks (con 1, ninguna
+# semilla llega a 255) y entonces la regla de cotas no entra a la banda: la firma lo
+# informa.
+PASO = 4
+PISO = 100
+SEMILLA = 0xE3AA
+PASO_COMPETENCIA, SEMILLA_COMPETENCIA = PASO, SEMILLA
+
 PELDANOS = {
     # defs: definiciones del RTL; fuente y asm: programa y opciones del
     # ensamblador; gemelo: opciones del gemelo (sin la tabla); ref: referencia;
     # tabla: contenido de la tabla de parámetros (None si el peldaño no la
-    # tiene); semilla: del LFSR (T87); continuo: modo continuo de la maestra.
-    "r0": dict(defs="", fuente="sw/trade.s", asm=[], gemelo=[], ref="trader", tabla=None,
-               semilla=0xACE1, continuo=0),
-    "r1": dict(defs=R1_DEFS, fuente="sw/fondo.s", asm=[], gemelo=GEMELO_FONDO, ref="fondo", tabla=TABLA,
-               semilla=0x3CA1, continuo=0),
-    "r2": dict(defs=R2_DEFS, fuente="sw/fondo.s", asm=[], gemelo=GEMELO_FONDO, ref="fondo", tabla=TABLA,
-               semilla=0x3CA1, continuo=1),
+    # tiene); continuo: modo continuo de la maestra. La semilla es SEMILLA, la
+    # misma en los tres (hasta el 19/11 R0 usaba 0xACE1 y R1 y R2 0x3CA1, T87).
+    "r0": dict(defs="", fuente="sw/trade.s", asm=[], gemelo=[], ref="trader", tabla=None, continuo=0),
+    "r1": dict(defs=R1_DEFS, fuente="sw/fondo.s", asm=[], gemelo=GEMELO_FONDO, ref="fondo", tabla=TABLA, continuo=0),
+    "r2": dict(defs=R2_DEFS, fuente="sw/fondo.s", asm=[], gemelo=GEMELO_FONDO, ref="fondo", tabla=TABLA, continuo=1),
 }
-# Control negativo: algo que la autoprueba tiene que rechazar (LED4). Para R0,
-# el umbral de la regla base en el programa. Para R1 y R2, la misma tabla con
-# el umbral de entrada del gestor 1 cambiado (el programa no cambia): muestra
-# que el SoC usa la tabla de la BRAM. Se eligió ese umbral porque da una firma
-# distinta de la de max_media sola (7d4f), que es la que se vería con un gestor
-# colgado (T88).
+# Control negativo: algo que la autoprueba tiene que rechazar (LED4). Desde la
+# banda 40 (T140) es la banda 60 (161 y 195): en R0 en el programa, en R1 y R2 en
+# la tabla (el programa no cambia, así que muestra además que el SoC usa la tabla
+# de la BRAM). Es el error que importa ver en la placa: el programa anterior.
+BANDA60 = {"BANDA_COMPRA": 161, "BANDA_VENTA": 195}
 CONTROL = {
-    "r0": dict(asm=["-D", "UMBRAL_COMPRA=-128"], texto="UMBRAL_COMPRA=-128 en sw/trade.s"),
-    "r1": dict(param={"G1_ENTRA": -64}, texto="G1_ENTRA=-64 en la tabla (era -96)"),
-    "r2": dict(param={"G1_ENTRA": -64}, texto="G1_ENTRA=-64 en la tabla (era -96)"),
+    "r0": dict(asm=["-D", "BANDA_COMPRA=161", "-D", "BANDA_VENTA=195"], texto="banda 60 en sw/trade.s (161 y 195)"),
+    "r1": dict(param=BANDA60, texto="la tabla de la banda 60 (161 y 195)"),
+    "r2": dict(param=BANDA60, texto="la tabla de la banda 60 (161 y 195)"),
 }
 FALLA_TICK = 100             # cuelgue_sup:100 en la prueba del relevo
 VIG_N = 4                    # rtl/pochoco_soc.v, parámetro VigN
@@ -120,13 +134,17 @@ def sh(cmd, log=None, **kw):
 
 
 # --- La secuencia y la firma, igual que autoprueba_maestra --------------------------------
-def precios(n=NTICKS, semilla=0xACE1):
-    """Caminata aleatoria: 128 y después pasos de +1 o -1 según el bit nuevo del LFSR."""
+def precios(n=NTICKS, semilla=None, paso=None, piso=None):
+    """Caminata aleatoria: 128 y después pasos de +PASO o -PASO según el bit nuevo del
+    LFSR, sin pasar de 255 ni bajar de PISO."""
+    semilla = SEMILLA if semilla is None else semilla
+    paso = PASO if paso is None else paso
+    piso = PISO if piso is None else piso
     lfsr, p, salida = semilla, 128, [128]
     for _ in range(n - 1):
         nuevo = ((lfsr >> 15) ^ (lfsr >> 13) ^ (lfsr >> 12) ^ (lfsr >> 10)) & 1
         lfsr = ((lfsr << 1) & 0xFFFF) | nuevo
-        p = min(255, p + 1) if nuevo else max(1, p - 1)
+        p = min(255, p + paso) if nuevo else max(piso, p - paso)
         salida.append(p)
     return salida
 
@@ -141,8 +159,15 @@ def crc16(datos, crc=0xFFFF):
     return crc
 
 
+def sufijo():
+    """Vacío con la caminata de competencia; si no, _pasoN_sSEMILLA."""
+    if (PASO, SEMILLA) == (PASO_COMPETENCIA, SEMILLA_COMPETENCIA) and PISO == 100:
+        return ""
+    return f"_paso{PASO}_s{SEMILLA:04x}" + ("" if PISO == 100 else f"_piso{PISO}")
+
+
 def carpeta(peldano):
-    d = f"build/autoprueba/{peldano}"
+    d = f"build/autoprueba/{peldano}{sufijo()}"
     os.makedirs(os.path.join(RAIZ, d), exist_ok=True)
     return d
 
@@ -166,7 +191,7 @@ def preparar(peldano):
     hexfile = f"{d}/programa.hex"
     ensamblar(pd["fuente"], hexfile, pd["asm"])
     serie = f"{d}/serie.csv"
-    escribir_serie(serie, precios(semilla=pd["semilla"]))
+    escribir_serie(serie, precios())
     return hexfile, serie
 
 
@@ -202,24 +227,22 @@ def firma(peldano, informe):
         leidos = [int(x.split(",")[2], 16) for x in open(os.path.join(RAIZ, csv)).read().splitlines()[1:]]
         peor = re.search(r"Peor caso precio->decision: (\d+) ciclos \(disponibles: (\d+)\)", r.stdout)
         firmas[boton] = (crc16(leidos), leidos, peor.group(1), peor.group(2))
-    p = precios(semilla=pd["semilla"])
+    p = precios()
     estrategia = fondo.Fondo() if pd["ref"] == "fondo" else trader.Oficial()
     esperados = trader.decisiones(p, estrategia, 0)
     f_ref = crc16(esperados)
     m = market.simular(p, esperados)
-    informe.append(f"Serie: caminata aleatoria del LFSR con semilla 0x{pd['semilla']:04X}, {NTICKS} precios, "
-                   f"entre {min(p)} y {max(p)}, sha256 {hashlib.sha256(bytes(p)).hexdigest()[:16]}...")
+    informe.append(f"Serie: caminata aleatoria del LFSR con semilla 0x{SEMILLA:04X}, pasos de {PASO} entre {PISO} y 255, "
+                   f"{NTICKS} precios, entre {min(p)} y {max(p)}, sha256 {hashlib.sha256(bytes(p)).hexdigest()[:16]}...")
+    if 100 in p and 255 in p:
+        informe.append(f"     toca 100 en el tick {p.index(100)} y 255 en el tick {p.index(255)}: la regla entra a la banda")
+    else:
+        informe.append("     AVISO: la caminata no toca 100 y 255: la regla de cotas no entra a la banda y la firma no la ve")
     informe.append(f"Referencia ref/{pd['ref']}.py: firma {f_ref:04x}, {sum(a != b for a, b in zip(esperados, esperados[1:]))} "
                    f"cambios de byte, patrimonio {m.w} con {m.ordenes} ordenes")
-    if pd["ref"] == "fondo":
-        # Qué tan distinta es la firma de la que daría el supervisor solo (max_media)
-        mm = trader.decisiones(p, trader.Oficial(), 0)
-        informe.append(f"     max_media sola (el supervisor sin votos) daria {crc16(mm):04x}: "
-                       f"{sum(a != b for a, b in zip(mm, esperados))} bytes distintos")
-        for k in (1, 2, 3):
-            colgado = trader.decisiones(p, fondo.Fondo(fallas=[fondo.Falla(k)]), 0)
-            informe.append(f"     con el gestor {k} colgado desde el tick 1 daria {crc16(colgado):04x}: "
-                           f"{sum(a != b for a, b in zip(colgado, esperados))} bytes distintos")
+    # Qué tan distinta es la firma de la que daría el programa anterior (banda 60)
+    b60 = trader.decisiones(p, fondo.Fondo(BANDA60) if pd["ref"] == "fondo" else regla_cotas.Cotas("espera", banda=60), 0)
+    informe.append(f"     con la banda 60 daria {crc16(b60):04x}: {sum(a != b for a, b in zip(b60, esperados))} bytes distintos")
     ok = True
     for boton, (f, leidos, peor, disp) in firmas.items():
         igual = leidos == esperados
@@ -256,7 +279,7 @@ def compilar_rtl(peldano, hexfile, obj, tabla=None):
     vig = ["-DVIGILANTE"] if es_r2(peldano) else []
     r = sh(["verilator", "--binary", "--timing", "-Wno-fatal", "-Wno-lint", "-Wno-style", "--top-module", "tb_autoprueba",
             "-DNO_ICE40_DEFAULT_ASSIGNMENTS", *pd["defs"].split(), *vig, f'-GPROGRAMA="{hexfile}"',
-            f'-GTABLA="{tabla or pd["tabla"] or TABLA}"', f"-GCONT={pd['continuo']}", f"-GSEM=16'h{pd['semilla']:04x}",
+            f'-GTABLA="{tabla or pd["tabla"] or TABLA}"', f"-GCONT={pd['continuo']}", f"-GSEM=16'h{SEMILLA:04x}", f"-GPASO={PASO}", f"-GPISO={PISO}",
             f"-GFIRMA_P=16'h{esperada:04x}", "-O3", "--Mdir", f"{d}/{obj}", "-o", "sim",
             celdas_sim(), *fuentes_soc(), "tb/autoprueba/tb_autoprueba.sv"], log=f"{d}/verilator_{obj}.log")
     if r.returncode != 0:
@@ -332,7 +355,7 @@ def control(peldano, informe):
     f_control = crc16(leidos)
     nota = ""
     if tabla:
-        p = precios(semilla=pd["semilla"])
+        p = precios()
         ref = trader.decisiones(p, fondo.Fondo(c["param"]), 0)
         nota = (f"; ref/fondo.py con ese parametro da {crc16(ref):04x}"
                 f"{'' if ref == leidos else ' (DISTINTO del gemelo)'}")
@@ -422,7 +445,8 @@ def pnr(nombre, d, lectura, chparam, top):
 def chparam_autoprueba(peldano, hexfile, esperada):
     pd = PELDANOS[peldano]
     return (f'chparam -set MemFile "{hexfile}" -set TablaFile "{pd["tabla"] or TABLA}" '
-            f"-set CONTINUO {pd['continuo']} -set SEMILLA {pd['semilla']} -set FIRMA_ESPERADA {esperada} autoprueba_top")
+            f"-set CONTINUO {pd['continuo']} -set SEMILLA {SEMILLA} -set PASO {PASO} -set PISO {PISO} "
+            f"-set FIRMA_ESPERADA {esperada} autoprueba_top")
 
 
 def bitstream(peldano, informe):
@@ -570,7 +594,7 @@ def escribir_caminata(ruta, n, semilla):
         for i in range(1, n):
             nuevo = ((lfsr >> 15) ^ (lfsr >> 13) ^ (lfsr >> 12) ^ (lfsr >> 10)) & 1
             lfsr = ((lfsr << 1) & 0xFFFF) | nuevo
-            p = min(255, p + 1) if nuevo else max(1, p - 1)
+            p = min(255, p + PASO) if nuevo else max(PISO, p - PASO)
             lo, hi = min(lo, p), max(hi, p)
             f.write(f"{i},{p}\n")
     return lo, hi
@@ -586,7 +610,7 @@ def continuo(peldano, informe):
     tareas, rangos = [], {}
     for boton, ciclos in PERIODOS.items():
         n = MEDIA_HORA_MS * 25_000 // ciclos
-        rangos[boton] = (n, *escribir_caminata(f"{d}/media_hora_{boton}.csv", n, pd["semilla"]))
+        rangos[boton] = (n, *escribir_caminata(f"{d}/media_hora_{boton}.csv", n, SEMILLA))
         tareas.append((boton, sh, (["build/gemelo", *opciones_gemelo(peldano), "--hex", f"{d}/programa.hex",
                                     "--serie", f"{d}/media_hora_{boton}.csv", "--periodo-ns", str(40 * ciclos),
                                     "--inicio-ns", str(INICIO_NS), *GEMELO_SPI], f"{d}/media_hora_{boton}.log")))
@@ -608,12 +632,19 @@ def continuo(peldano, informe):
 
 
 def main(argv=None):
+    global PASO, PISO, SEMILLA
     ap = argparse.ArgumentParser()
     ap.add_argument("accion", choices=("firma", "simular", "control", "falla", "bitstream", "chip", "continuo", "todo"))
     ap.add_argument("peldano", choices=sorted(PELDANOS))
     ap.add_argument("--botones", default="3,2,1", help="botones a simular (3 es el período más corto)")
     ap.add_argument("--botones-chip", default="3", help="botones a simular con el bitstream ruteado")
+    ap.add_argument("--paso", type=int, default=PASO, help=f"paso de la caminata (por defecto {PASO})")
+    ap.add_argument("--piso", type=int, default=PISO, help=f"precio mínimo de la caminata (por defecto {PISO})")
+    ap.add_argument("--semilla", type=lambda x: int(x, 0), default=SEMILLA, help=f"semilla del LFSR (por defecto 0x{SEMILLA:04X})")
     a = ap.parse_args(argv)
+    PASO, PISO, SEMILLA = a.paso, a.piso, a.semilla
+    if not (1 <= PASO <= 127 and 1 <= PISO <= 255 - PASO and 1 <= SEMILLA <= 0xFFFF):
+        raise SystemExit("paso, piso o semilla fuera de rango")
     os.chdir(RAIZ)
     botones = [int(x) for x in a.botones.split(",")]
     informe = []
@@ -640,7 +671,7 @@ def main(argv=None):
                       ["", "PASS" if ok else "FAIL"]) + "\n"
     print(texto, end="")
     if todo:
-        with open(os.path.join(RAIZ, f"docs/mediciones/autoprueba_{a.peldano}.txt"), "w") as f:
+        with open(os.path.join(RAIZ, f"docs/mediciones/autoprueba_{a.peldano}{sufijo()}.txt"), "w") as f:
             f.write(texto)
     return 0 if ok else 1
 

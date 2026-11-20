@@ -54,10 +54,17 @@
 //              misma caminata, sin fin, y la firma queda fija. Sirve para la
 //              prueba de media hora de R2: el vigilante tiene precios que
 //              contar todo el tiempo. LED1 sigue parpadeando.
-//   SEMILLA    valor inicial del LFSR. R0 usa 0xACE1; R1 y R2 usan 0x3CA1,
-//              porque con la caminata de 0xACE1 el fondo decide igual que
-//              max_media en los 2000 ticks y la firma no vería un gestor
-//              colgado (decisión T87).
+//   SEMILLA    valor inicial del LFSR. Desde el 19/11 (decisión T141) los
+//              tres peldaños usan 0xE3AA: con pasos de 4 entre 100 y 255 la
+//              caminata toca 100 en el tick 11 y 255 en el 174, y la regla de
+//              cotas decide 380 bytes distintos con banda 40 que con banda 60.
+//              Hasta el 19/11 R0 usaba 0xACE1 y R1 y R2 0x3CA1 (T87), con pasos
+//              de 1 entre 1 y 255.
+//   PASO, PISO la caminata sube o baja PASO por tick, sin pasar de 255 ni bajar
+//              de PISO. Por defecto 4 y 100 (T141), como una serie normalizada:
+//              con pasos de 1 desde 128 ninguna semilla llega a 255 en 2000
+//              ticks y la regla de cotas no entra a la banda. PASO = 1 y PISO = 1
+//              dan la caminata anterior.
 // Además, en todos los peldaños, el pin de transmisión de la UART repite el de
 // recepción (eco, sin lógica) y el pin de MISO del PMOD queda en 0. Los dos
 // sirven para medir en la placa cuánto dura el relevo por warm boot: durante
@@ -67,7 +74,9 @@ module autoprueba_top #(
   parameter        MemFile        = "sw/trade.hex",
   parameter        TablaFile      = "sw/fondo_tabla.hex",
   parameter integer CONTINUO      = 0,
-  parameter [15:0] SEMILLA        = 16'hACE1,
+  parameter [15:0] SEMILLA        = 16'hE3AA,
+  parameter integer PASO          = 4,
+  parameter integer PISO          = 100,
   parameter integer NTICKS        = 2000,
   parameter [15:0] FIRMA_ESPERADA = 16'h0000,
   parameter integer P1            = 250000,     // 10 ms en ciclos de 40 ns
@@ -108,7 +117,8 @@ module autoprueba_top #(
   wire [15:0] firma;
   wire [10:0] ticks;
 
-  autoprueba_maestra #(.NTICKS(NTICKS), .CONTINUO(CONTINUO), .SEMILLA(SEMILLA), .P1(P1), .P2(P2), .P3(P3)) u_maestra (
+  autoprueba_maestra #(.NTICKS(NTICKS), .CONTINUO(CONTINUO), .SEMILLA(SEMILLA), .PASO(PASO), .PISO(PISO),
+                     .P1(P1), .P2(P2), .P3(P3)) u_maestra (
     .clk_i   (clk),
     .elige_i (i_Switch[2:0]),
     .sclk_o  (sclk),
@@ -169,17 +179,19 @@ endmodule
 //
 // Precio del tick 0: 128. Al cerrar cada tick el LFSR de 16 bits
 // (x^16 + x^14 + x^13 + x^11 + 1, semilla SEMILLA) avanza un paso y su bit
-// nuevo da el cambio de precio del tick siguiente: 1 sube 1 y 0 baja 1, sin
-// pasar de 255 ni bajar de 1. Firma: CRC-16/CCITT (polinomio 0x1021, valor
-// inicial 0xFFFF) de los NTICKS bytes leídos por MISO, en orden y con el bit
-// más significativo primero. Se calcula bit a bit, al leer cada bit, que da lo
+// nuevo da el cambio de precio del tick siguiente: 1 sube PASO y 0 baja PASO,
+// sin pasar de 255 ni bajar de PISO (por defecto 4 y 100, T141; antes 1 y 1).
+// Firma: CRC-16/CCITT (polinomio 0x1021, valor inicial 0xFFFF) de los NTICKS
+// bytes leídos por MISO, en orden y con el bit más significativo primero. Se calcula bit a bit, al leer cada bit, que da lo
 // mismo que byte a byte. tools/autoprueba.py implementa lo mismo en Python.
 // Con CONTINUO = 1 la maestra no se detiene al terminar: sigue con la misma
 // caminata y el mismo período, y la firma ya no cambia.
 module autoprueba_maestra #(
   parameter integer NTICKS = 2000,
   parameter integer CONTINUO = 0,
-  parameter [15:0]  SEMILLA  = 16'hACE1,
+  parameter [15:0]  SEMILLA  = 16'hE3AA,
+  parameter integer PASO   = 4,
+  parameter integer PISO   = 100,
   parameter integer P1     = 250000,
   parameter integer P2     = 25000,
   parameter integer P3     = 2500
@@ -207,6 +219,10 @@ module autoprueba_maestra #(
   wire [3:0]  bit_t  = t[8:5];     // 1 .. 8 durante los bits, 9 en la última bajada
   wire        en_bit = (bit_t >= 4'd1) && (bit_t <= 4'd8);
   wire        lfsr_n = lfsr[15] ^ lfsr[13] ^ lfsr[12] ^ lfsr[10];
+  localparam [7:0] PASO8       = PASO;
+  localparam [7:0] PISO8       = PISO;
+  localparam [7:0] TECHO_MENOS = 255 - PASO;     // sobre este valor, subir deja 255
+  localparam [7:0] PISO_MAS    = PISO + PASO;    // bajo este valor, bajar deja PISO
   wire        fb     = firma_o[15] ^ miso_i;
 
   always @(posedge clk_i) begin
@@ -238,8 +254,8 @@ module autoprueba_maestra #(
         ticks_o <= ticks_o + 11'd1;
         // precio del tick siguiente
         lfsr <= {lfsr[14:0], lfsr_n};
-        if (lfsr_n) tx <= (tx == 8'd255) ? tx : tx + 8'd1;
-        else        tx <= (tx == 8'd1)   ? tx : tx - 8'd1;
+        if (lfsr_n) tx <= (tx > TECHO_MENOS) ? 8'd255 : tx + PASO8;
+        else        tx <= (tx < PISO_MAS)    ? PISO8  : tx - PASO8;
         if (ticks_o == NTICKS - 1) begin
           if (CONTINUO == 0) corre_o <= 1'b0;
           listo_o <= 1'b1;
