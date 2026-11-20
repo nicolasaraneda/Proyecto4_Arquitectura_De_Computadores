@@ -29,11 +29,11 @@ P=${1:?uso: tools/reales.sh r0|r1|r2}
 PYTHON=${PYTHON:-python3}
 DATOS=${P4_DATOS:?falta P4_DATOS (carpeta con capturas/ y minuto/)}
 DATOS=${DATOS/#\~/$HOME}
-B=build/reales
+SR=build/reales   # no B: tools/barrel/comun.sh define B=build/barrel
 SALIDA=docs/mediciones/reales/$P.txt
-mkdir -p "$B" docs/mediciones/reales
+mkdir -p "$SR" docs/mediciones/reales
 
-$PYTHON - "$DATOS" "$B" <<'PY' || { echo "FAIL: no se pudieron armar las series"; exit 1; }
+$PYTHON - "$DATOS" "$SR" <<'PY' || { echo "FAIL: no se pudieron armar las series"; exit 1; }
 import os, sys
 sys.path.insert(0, "ref"); sys.path.insert(0, "ref/cotas")
 import comun
@@ -53,11 +53,11 @@ PY
 
 if [ "$P" = r0 ]; then
   HEX=sw/trade.hex
-  $PYTHON tools/pochoasm.py sw/trade.s -o "$B/r0.hex" > /dev/null && cmp -s "$B/r0.hex" "$HEX" || { echo "FAIL: sw/trade.hex no corresponde a sw/trade.s"; exit 1; }
+  $PYTHON tools/pochoasm.py sw/trade.s -o "$SR/r0.hex" > /dev/null && cmp -s "$SR/r0.hex" "$HEX" || { echo "FAIL: sw/trade.hex no corresponde a sw/trade.s"; exit 1; }
   make -s build/gemelo > /dev/null
   for s in tesla amd; do
     for per in 100000 1000000; do
-      echo "SIM=verilator tools/equiv.sh reales_${s}_$per $per 20000 $B/$s.csv > $B/r0_${s}_$per.txt 2>&1"
+      echo "SIM=verilator tools/equiv.sh reales_${s}_$per $per 20000 $SR/$s.csv > $SR/r0_${s}_$per.txt 2>&1"
     done
   done | xargs -P 4 -I{} bash -c "{}"
   {
@@ -66,8 +66,8 @@ if [ "$P" = r0 ]; then
     echo "Tesla: la captura del registrador (identica a TSLA desde el 10/1/2022 10:20, normalizada). AMD: el mismo inicio."
     echo
     for s in tesla amd; do
-      for per in 100000 1000000; do tail -1 "$B/r0_${s}_$per.txt"; done
-      SERIE=$B/$s.csv ETQ=$s tools/equiv_gemelo.sh 20000 2>&1 | tail -3
+      for per in 100000 1000000; do tail -1 "$SR/r0_${s}_$per.txt"; done
+      SERIE=$SR/$s.csv ETQ=$s tools/equiv_gemelo.sh 20000 2>&1 | tail -3
     done
   } | tee "$SALIDA"
 else
@@ -78,7 +78,7 @@ else
   compilar_sim || exit 1
   O=$BF/reales; mkdir -p "$O"
   for s in tesla amd; do
-    for per in 100000 1000000; do echo "caso $O/${s}_$per sw/fondo.s $RAIZ/$B/$s.csv 20000 $per 4000"; done
+    for per in 100000 1000000; do echo "caso $O/${s}_$per sw/fondo.s $RAIZ/$SR/$s.csv 20000 $per 4000"; done
   done | en_paralelo
   make -s build/gemelo > /dev/null
   {
@@ -91,9 +91,9 @@ else
     echo "2. Gemelo del barrel (el de R1: el vigilante no existe en el gemelo) a los tres periodos"
     for s in tesla amd; do
       for per in 100000 1000000 10000000; do
-        build/gemelo --barrel --xd 3 --tabla "$TABLA_HEX" --hex "$FONDO_HEX" --serie "$B/$s.csv" --periodo-ns $per --nticks 20000 \
+        build/gemelo --barrel --xd 3 --tabla "$TABLA_HEX" --hex "$FONDO_HEX" --serie "$SR/$s.csv" --periodo-ns $per --nticks 20000 \
           --csv "$O/gem_${s}_$per.csv" > "$O/gem_${s}_$per.log"
-        $PYTHON ref/fondo.py "$B/$s.csv" --nticks 20000 --periodo-ns $per -o "$O/ref_${s}_$per.csv" > /dev/null
+        $PYTHON ref/fondo.py "$SR/$s.csv" --nticks 20000 --periodo-ns $per -o "$O/ref_${s}_$per.csv" > /dev/null
         r="gemelo, $s, periodo $per ns, 20000 ticks, $(grep 'Peor caso' "$O/gem_${s}_$per.log" | sed 's/  */ /g')"
         if ! grep -q "Testbenchs aprobados: 4/4" "$O/gem_${s}_$per.log"; then echo "FAIL $r: no entrega 4/4"
         elif cmp -s "$O/gem_${s}_$per.csv" "$O/ref_${s}_$per.csv"; then

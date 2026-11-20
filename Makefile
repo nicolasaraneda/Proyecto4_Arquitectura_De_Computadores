@@ -846,9 +846,12 @@ relevo-placa:
 	  cat docs/mediciones/relevo_placa.txt; exit $$r
 # r2-falla: R2 con el supervisor colgado y R0 de respaldo, para ver el relevo con
 #   la maestra real (bitstreams/r2_falla_multi.bin).
-.PHONY: r2-falla
+.PHONY: r2-falla r2-falla-banda40
 r2-falla:
 	tools/p8/r2_falla.sh
+r2-falla-banda40:
+	O=build/p8/r2_falla_banda40 R0=bitstreams/r0_banda40.bin SALIDA=bitstreams/r2_banda40_falla_multi.bin \
+	  SIMULADO=build/fondo/molde_banda40/r2_colgado.asc tools/p8/r2_falla.sh
 
 # Edición de exhibición con las tres instrucciones (docs/mediciones/p9/exhibicion.txt)
 .PHONY: exhibicion

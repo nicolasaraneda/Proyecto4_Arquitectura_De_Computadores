@@ -17,9 +17,15 @@
 #   4. icemulti con R0 de respaldo, como r2_multi.bin.
 #
 # Uso: tools/p8/r2_falla.sh   (o make r2-falla). Segundos.
+# Con banda 40 (T140): make r2-falla-banda40, que usa R0=bitstreams/r0_banda40.bin,
+# SALIDA=bitstreams/r2_banda40_falla_multi.bin y compara con el .asc que
+# tools/fondo/molde_cotas.sh (SUF=banda40) simuló por los pines en su paso 3.
 set -euo pipefail
 cd "$(dirname "$0")/../.."
-O=build/p8/r2_falla
+O=${O:-build/p8/r2_falla}
+R0=${R0:-bitstreams/r0_base_max_media.bin}
+SALIDA=${SALIDA:-bitstreams/r2_falla_multi.bin}
+P5=${SIMULADO:-build/fondo/bitstreams/r2_colgado.asc}
 rm -rf "$O"; mkdir -p "$O"
 python3 tools/fondo/variante.py cuelgue_sup:100 -o "$O/colgado.s"
 python3 tools/pochoasm.py "$O/colgado.s" -o "$O/colgado_asm.hex" > /dev/null
@@ -31,14 +37,13 @@ PY
 gunzip -c bitstreams/moldes/r2_molde.asc.gz > "$O/r2_molde.asc"
 icebram bitstreams/moldes/molde_prog.hex "$O/colgado.hex" < "$O/r2_molde.asc" \
   | icebram bitstreams/moldes/molde_tabla.hex sw/fondo_tabla.hex > "$O/r2_colgado.asc"
-P5=build/fondo/bitstreams/r2_colgado.asc
 if [ -f "$P5" ]; then
-  cmp -s "$P5" "$O/r2_colgado.asc" && echo "PASS: el .asc es el que make fondo-bitstreams simulo por los pines" \
-    || { echo "FAIL: el .asc no es el simulado en make fondo-bitstreams"; exit 1; }
+  cmp -s "$P5" "$O/r2_colgado.asc" && echo "PASS: el .asc es el simulado por los pines ($P5)" \
+    || { echo "FAIL: el .asc no es el simulado por los pines ($P5)"; exit 1; }
 else
-  echo "Aviso: no esta $P5 (make fondo-bitstreams); no se comparo con el .asc simulado"
+  echo "Aviso: no esta $P5; no se comparo con el .asc simulado"
 fi
 icepack "$O/r2_colgado.asc" "$O/r2_colgado.bin"
-icemulti -p0 -o bitstreams/r2_falla_multi.bin "$O/r2_colgado.bin" bitstreams/r0_base_max_media.bin
-python3 tools/ver_multi.py bitstreams/r2_falla_multi.bin "$O/r2_colgado.bin" bitstreams/r0_base_max_media.bin
-sha256sum bitstreams/r2_falla_multi.bin
+icemulti -p0 -o "$SALIDA" "$O/r2_colgado.bin" "$R0"
+python3 tools/ver_multi.py "$SALIDA" "$O/r2_colgado.bin" "$R0"
+sha256sum "$SALIDA"
