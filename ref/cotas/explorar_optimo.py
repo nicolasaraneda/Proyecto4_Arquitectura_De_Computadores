@@ -356,14 +356,45 @@ def accion_g2(procesos):
         L.append(fila(cx, res[repr(final)], k, b40, nombre_spec(final))[0])
     import pickle as _pk
     _pk.dump({"final": final}, open(os.path.join(CACHE, "elegida.pkl"), "wb"))
+    if v == "V3":
+        L.append("\n## G3\n\nLa variante elegida tiene tres posiciones; su compresión se evalúa con `explorar_optimo.py g3` "
+                 "(optimo_g3.txt).")
     txt = "\n".join(L) + "\n"
     open(os.path.join(SALIDA, "optimo_g2.txt"), "w").write(txt)
     print(txt)
 
 
+def accion_g3(procesos):
+    import pickle as _pk
+    final = _pk.load(open(os.path.join(CACHE, "elegida.pkl"), "rb"))["final"]
+    v, o, est = final[1]["variante"], final[1]["objetivo"], final[1]["estimador"]
+    OE.tablas(v, o)
+    OE.comprimida(v, o)
+    cx = XR.CtxO(procesos)
+    b40 = cx.ev([E.B40], info=False)[0]
+    comp = OE.spec(v, o, est, comprimida=True)
+    rf, rc = cx.ev([final, comp])
+    L = ["# G3: compresión de la variante elegida", "",
+         f"ref/cotas/explorar_optimo.py g3, commit {XR.commit()}. Variante elegida en optimo_g2.txt: {nombre_spec(final)}. "
+         + ("Compresión de tres posiciones: por celda (clase de v^2, tramo de 1250 ticks) y por cada s, los umbrales a1, a2 "
+            "(arriba: media posición desde a1, completa desde a2) y b1, b2 (abajo), del r del medio del tramo; 12 bytes por "
+            "celda, 1536 en la fase A." if v == "V3" else "Cuatro bytes por celda, 512 en la fase A."), "", CAB, SEPC]
+    tb, _ = fila(cx, b40, "todas", b40, "banda 40")
+    tf, mf = fila(cx, rf, "todas", b40, nombre_spec(final))
+    tc, mc = fila(cx, rc, "todas", b40, nombre_spec(comp))
+    L += [tb, tf, tc]
+    frac = mc["d"] / mf["d"] if mf["d"] > 0 else float("nan")
+    g3 = mf["d"] > 0 and frac >= 0.8
+    L.append(f"\nLa comprimida conserva {fmt(100 * frac, 1)} % de la ganancia de la completa ({mc['d']:+.0f} contra "
+             f"{mf['d']:+.0f}). G3 pide al menos 80 %: **{'PASA' if g3 else 'no pasa'}**.")
+    txt = "\n".join(L) + "\n"
+    open(os.path.join(SALIDA, "optimo_g3.txt"), "w").write(txt)
+    print(txt)
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
-    ap.add_argument("accion", choices=["g1", "g2", "equivalencia"])
+    ap.add_argument("accion", choices=["g1", "g2", "g3", "equivalencia"])
     ap.add_argument("--conjunto", default="otras")
     ap.add_argument("--procesos", type=int, default=None)
     a = ap.parse_args()
@@ -371,6 +402,8 @@ def main():
         accion_g1(a.procesos)
     elif a.accion == "g2":
         accion_g2(a.procesos)
+    elif a.accion == "g3":
+        accion_g3(a.procesos)
     elif a.accion == "equivalencia":
         accion_equivalencia(a.procesos, a.conjunto)
 

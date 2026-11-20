@@ -186,7 +186,8 @@ class Comprimida:
       bajo   compra con s = 0 si x <= bajo (el bloque que parte en 101)
       salida con s = 1 mantiene si x >= salida
       bajo1  con s = 1 mantiene si x <= bajo1
-    256 en alto o salida y 99 en bajo o bajo1 marcan un intervalo vacío. Solo variantes de dos posiciones."""
+    256 en alto o salida y 99 en bajo o bajo1 marcan un intervalo vacío. Con tres posiciones (V3), cuatro
+    umbrales por cada s (ver _niveles): 12 bytes por celda, 1536 en la fase A."""
 
     def __init__(self, variante, objetivo):
         pol = tablas(variante, objetivo)
@@ -201,7 +202,11 @@ class Comprimida:
                     for s in range(self.nS):
                         dec = [t[(r * P.L + i) * self.nS + s] for i in range(i0, i1)]
                         u.append(self._intervalos(dec, i0))
-                    self.cel[(F, j, tr)] = (u[0][0], u[0][1], u[1][0], u[1][1])
+                    if self.nS == 2:
+                        self.cel[(F, j, tr)] = (u[0][0], u[0][1], u[1][0], u[1][1])
+                    else:
+                        self.cel[(F, j, tr)] = tuple(self._niveles(
+                            [t[(r * P.L + i) * 3 + s] for i in range(i0, i1)], i0) for s in range(3))
 
     @staticmethod
     def _intervalos(dec, i0):
@@ -221,8 +226,46 @@ class Comprimida:
                 k -= 1
         return alto, bajo
 
+    @staticmethod
+    def _niveles(dec, i0):
+        """V3 (tres posiciones): umbrales (a1, a2, b1, b2): s' >= 1/2 si x >= a1 o x <= b1; s' = 1 si
+        x >= a2 o x <= b2. Arriba se ignoran los ceros y la media posición del corte superior."""
+        n = len(dec)
+        b1 = b2 = 99
+        k = 0
+        while k < n and dec[k] == 2:
+            b2 = b1 = LO + i0 + k
+            k += 1
+        while k < n and dec[k] >= 1:
+            b1 = LO + i0 + k
+            k += 1
+        a1 = a2 = 256
+        k = n - 1
+        while k >= 0 and dec[k] == 0:
+            k -= 1
+        while k >= 0 and dec[k] == 1 and LO + i0 + k > b1:
+            k -= 1
+        if k >= 0 and dec[k] == 2:
+            while k >= 0 and dec[k] == 2 and LO + i0 + k > b1:
+                a2 = a1 = LO + i0 + k
+                k -= 1
+            while k >= 0 and dec[k] >= 1 and LO + i0 + k > b1:
+                a1 = LO + i0 + k
+                k -= 1
+        else:       # sin bloque de posición completa arriba: el bloque de media posición
+            k = n - 1
+            while k >= 0 and dec[k] == 0:
+                k -= 1
+            while k >= 0 and dec[k] >= 1 and LO + i0 + k > b1:
+                a1 = LO + i0 + k
+                k -= 1
+        return a1, a2, b1, b2
+
     def decide(self, F, j, r, p, s):
         tr = min(TRAMOS - 1, r // LARGO_TRAMO)
+        if self.nS == 3:
+            a1, a2, b1, b2 = self.cel[(F, j, tr)][s]
+            return 2 if (p >= a2 or p <= b2) else 1 if (p >= a1 or p <= b1) else 0
         alto, bajo, salida, bajo1 = self.cel[(F, j, tr)]
         if s == 0:
             return 1 if (p >= alto or p <= bajo) else 0
