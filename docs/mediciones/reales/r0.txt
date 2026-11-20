@@ -1,0 +1,14 @@
+Series reales de la clase del 18/11 en R0 (sw/trade.s) contra ref/trader.py
+Generado por tools/reales.sh r0, commit 2f3567e.
+Tesla: la captura del registrador (identica a TSLA desde el 10/1/2022 10:20, normalizada). AMD: el mismo inicio.
+
+PASS reales_tesla_100000: periodo 100000 ns, 20000 ticks, build/reales/tesla.csv, Peor caso precio->decision: 60 ciclos (disponibles: 2262), 4/4, 20000 filas identicas a ref/trader.py, patrimonio 20795
+PASS reales_tesla_1000000: periodo 1000000 ns, 20000 ticks, build/reales/tesla.csv, Peor caso precio->decision: 60 ciclos (disponibles: 24762), 4/4, 20000 filas identicas a ref/trader.py, patrimonio 20795
+PASS gemelo (tesla): periodo 100000 ns, 20000 ticks, build/reales/tesla.csv, Peor caso precio->decision: 60 ciclos (disponibles: 2262), 4/4, 20000 filas identicas a ref/trader.py, patrimonio 20795
+PASS gemelo (tesla): periodo 1000000 ns, 20000 ticks, build/reales/tesla.csv, Peor caso precio->decision: 60 ciclos (disponibles: 24762), 4/4, 20000 filas identicas a ref/trader.py, patrimonio 20795
+PASS gemelo (tesla): periodo 10000000 ns, 20000 ticks, build/reales/tesla.csv, Peor caso precio->decision: 60 ciclos (disponibles: 249762), 4/4, 20000 filas identicas a ref/trader.py, patrimonio 20795
+PASS reales_amd_100000: periodo 100000 ns, 20000 ticks, build/reales/amd.csv, Peor caso precio->decision: 60 ciclos (disponibles: 2262), 4/4, 20000 filas identicas a ref/trader.py, patrimonio 26470
+PASS reales_amd_1000000: periodo 1000000 ns, 20000 ticks, build/reales/amd.csv, Peor caso precio->decision: 60 ciclos (disponibles: 24762), 4/4, 20000 filas identicas a ref/trader.py, patrimonio 26470
+PASS gemelo (amd): periodo 100000 ns, 20000 ticks, build/reales/amd.csv, Peor caso precio->decision: 60 ciclos (disponibles: 2262), 4/4, 20000 filas identicas a ref/trader.py, patrimonio 26470
+PASS gemelo (amd): periodo 1000000 ns, 20000 ticks, build/reales/amd.csv, Peor caso precio->decision: 60 ciclos (disponibles: 24762), 4/4, 20000 filas identicas a ref/trader.py, patrimonio 26470
+PASS gemelo (amd): periodo 10000000 ns, 20000 ticks, build/reales/amd.csv, Peor caso precio->decision: 60 ciclos (disponibles: 249762), 4/4, 20000 filas identicas a ref/trader.py, patrimonio 26470
