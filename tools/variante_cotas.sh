@@ -27,7 +27,7 @@ rm -rf "$W"
 git worktree prune
 git worktree add -q --detach "$W" HEAD
 cp "$PROG" "$W/sw/trade.s"
-sed -i "s|super().__init__(\"espera\", banda=60)|super().__init__($ARGS)|" "$W/ref/trader.py"
+sed -i "s|super().__init__(\"espera\", banda=40)|super().__init__($ARGS)|" "$W/ref/trader.py"
 grep -q "super().__init__($ARGS)" "$W/ref/trader.py" || { echo "FAIL: no se pudo poner la variante en ref/trader.py"; exit 1; }
 cd "$W"
 python3 tools/pochoasm.py sw/trade.s -o sw/trade.hex > /dev/null

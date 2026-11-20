@@ -4,16 +4,17 @@
 # Arquitectura de Computadores, Universidad de los Andes, 2026-2.
 #
 # Variante: solo software. Referencia bit a bit: ref/trader.py (Oficial, que es
-# la regla de cotas de ref/regla_cotas.py con inicio "espera" y banda 60).
+# la regla de cotas de ref/regla_cotas.py con inicio "espera" y banda 40).
 #
-# Algoritmo: cotas, "espera" con banda 60 (decision T133, docs/cotas.md). Las
+# Algoritmo: cotas, "espera" con banda 40 (decision T140, docs/cotas.md; del
+# 17/11 al 19/11 fue banda 60, decision T133). Las
 # series de la competencia se normalizan de modo que su minimo es 100 y su
 # maximo 255:
 #   si p <= 100      -> comprar 63 (y recordar que se vio el minimo)
 #   si p >= 255      -> vender 63 (y recordar que se vio el maximo)
 #   si ya se vieron los dos extremos:
-#       p <= 160     -> comprar 63
-#       p >= 195     -> vender 63
+#       p <= 140     -> comprar 63
+#       p >= 215     -> vender 63
 #   si no            -> repetir la decision anterior
 # Parte en caja: hasta el primer extremo escribe 0x00 (mantener). Si la serie
 # no toca ningun extremo, no opera.
@@ -56,8 +57,8 @@
 
 .equ LO_MAS_1,      101        # bajo si p < 101: el minimo de la serie es 100
 .equ HI,            255        # alto si p >= 255: el maximo es 255
-.equ BANDA_COMPRA,  161        # con los dos extremos vistos, compra si p < 161 (100 + 60)
-.equ BANDA_VENTA,   195        # y vende si p >= 195 (255 - 60)
+.equ BANDA_COMPRA,  141        # con los dos extremos vistos, compra si p < 141 (100 + 40)
+.equ BANDA_VENTA,   215        # y vende si p >= 215 (255 - 40)
 .equ COMPRAR_63,    0x7F       # accion 01, cantidad 63
 .equ VENDER_MENOS_COMPRAR, 0x40  # 0xBF - 0x7F
 
@@ -75,15 +76,15 @@ esperar:
     sltiu x6, x5, LO_MAS_1     # bajo = p <= 100
     sltiu x7, x5, HI           # p < 255
     xori x7, x7, 1             # alto = p >= 255
-    sltiu x9, x5, BANDA_COMPRA # p <= 160
-    sltiu x12, x5, BANDA_VENTA # p < 195
-    xori x12, x12, 1           # p >= 195
+    sltiu x9, x5, BANDA_COMPRA # p <= 140
+    sltiu x12, x5, BANDA_VENTA # p < 215
+    xori x12, x12, 1           # p >= 215
     or   x10, x10, x6          # se vio el minimo
     or   x11, x11, x7          # se vio el maximo
     and  x8, x10, x11          # los dos
-    and  x9, x9, x8            # comprar = bajo | (los dos & p <= 160)
+    and  x9, x9, x8            # comprar = bajo | (los dos & p <= 140)
     or   x9, x9, x6
-    and  x12, x12, x8          # vender = alto | (los dos & p >= 195)
+    and  x12, x12, x8          # vender = alto | (los dos & p >= 215)
     or   x12, x12, x7
     or   x13, x9, x12          # cambia (comprar y vender nunca son 1 a la vez)
     sub  x13, x0, x13          # 0 o 0xFFFFFFFF

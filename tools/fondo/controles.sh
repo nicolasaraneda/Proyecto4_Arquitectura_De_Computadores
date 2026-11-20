@@ -23,7 +23,7 @@ rm -rf "$O"; mkdir -p "$O"
 ensamblar_fondo || { echo "FAIL: no ensambla"; exit 1; }
 compilar_sim || exit 1
 NORM=$(serie_norm reversion 1 $NT)
-NORM2=$(serie_norm reversion 2 $NT)
+NORM2=$(serie_norm reversion 39 $NT)
 META=$(meta_ventana 10500 $NT)
 $PYTHON $TF/controles.py --lista > "$O/lista.txt"
 while IFS='|' read -r n falla ser param desc; do

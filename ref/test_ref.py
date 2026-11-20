@@ -29,6 +29,7 @@ import market           # noqa: E402
 import p4_baseline      # noqa: E402
 import protocolo        # noqa: E402
 import series           # noqa: E402
+import regla_cotas      # noqa: E402
 import trader           # noqa: E402
 
 RAIZ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -140,10 +141,12 @@ class ReglaBaseTests(unittest.TestCase):
         self.assertEqual((m.w, m.ordenes, m.comisiones, m.max_dd), (25973, 624, 3120, 6295))
 
     def test_serie_meta(self):
-        """Desde el 17/11 la oficial es cotas, espera con banda 60 (T133): 19 214 con 4 órdenes en la serie Meta."""
+        """Desde el 19/11 la oficial es cotas, espera con banda 40 (T140): 21 392 con 4 órdenes en la serie Meta.
+        Con banda 60 (T133, 17/11 a 19/11) daba 19 214."""
         p = market.leer_serie(os.path.join(os.path.dirname(SERIE), "..", "data", "practica_meta.csv"))
         m = trader.correr(p)
-        self.assertEqual((m.w, m.ordenes), (19214, 4))
+        self.assertEqual((m.w, m.ordenes), (21392, 4))
+        self.assertEqual(trader.correr(p, regla_cotas.Cotas("espera", banda=60)).w, 19214)
         self.assertEqual(trader.correr(p, trader.MaxMedia()).w, 9722)
 
     def test_max_media_y_oficial(self):
@@ -151,7 +154,7 @@ class ReglaBaseTests(unittest.TestCase):
         r = trader.MaxMedia()
         self.assertEqual((r.k, r.umbral_compra, r.umbral_venta), (5, -96, 1))
         o = trader.Oficial()
-        self.assertEqual((o.inicio, o.a, o.b, o.banda, o.lo, o.hi), ("espera", 0, 0, 60, 100, 255))
+        self.assertEqual((o.inicio, o.a, o.b, o.banda, o.lo, o.hi), ("espera", 0, 0, 40, 100, 255))
         b = trader.ReglaBase()
         self.assertEqual((b.k, b.umbral_compra, b.umbral_venta), (5, -128, 1))
 

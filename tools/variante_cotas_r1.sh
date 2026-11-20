@@ -38,11 +38,11 @@ def rep(p, pares):
         assert o in s, (p, o[:60])
         s = s.replace(o, n)
     open(p, "w", encoding="utf-8").write(s)
-rep("ref/trader.py", [('super().__init__("espera", banda=60)', 'super().__init__("parte", k=20, banda=70)')])
-rep("ref/test_fondo.py", [("(19214, 4, 1, 1)", "(24671, 19, 1, 1)")])     # la variante en la serie Meta
+rep("ref/trader.py", [('super().__init__("espera", banda=40)', 'super().__init__("parte", k=20, banda=70)')])
+rep("ref/test_fondo.py", [("(21392, 4, 1, 1)", "(24671, 19, 1, 1)")])     # la variante en la serie Meta
 rep("ref/fondo.py", [
-    ('("BANDA_COMPRA", 161),', '("BANDA_COMPRA", 171),'),
-    ('("BANDA_VENTA", 195),', '("BANDA_VENTA", 185),'),
+    ('("BANDA_COMPRA", 141),', '("BANDA_COMPRA", 171),'),
+    ('("BANDA_VENTA", 215),', '("BANDA_VENTA", 185),'),
     ('''        if comprar or vender:
             self.byte = market.VENDER_63 if vender else market.COMPRAR_63''',
      '''        if comprar or vender:

@@ -3,8 +3,9 @@
 Grupo: Nicolás Araneda, Vicente Calderón y Santiago Muñoz.
 Arquitectura de Computadores, Universidad de los Andes, 2026-2.
 
-Descripción y variantes en ref/cotas.py y docs/cotas.md. Desde el 17/11 (decisión T133)
-la estrategia de los tres peldaños es Cotas("espera", banda=60) (trader.Oficial).
+Descripción y variantes en ref/cotas.py y docs/cotas.md. Desde el 19/11 (decisión T140)
+la estrategia de los tres peldaños es Cotas("espera", banda=40) (trader.Oficial); del 17/11
+al 19/11 (decisión T133) fue Cotas("espera", banda=60).
 """
 import market
 

@@ -11,7 +11,8 @@ de cotas de R0 y deja los hilos 1 a 3 en espera. Qué comprueba:
   - Con la tabla por defecto, ref/fondo.py decide byte por byte igual que
     ref/trader.py (Oficial, la regla de sw/trade.s en R0), en la serie Meta, en
     la de práctica anterior y en series de cada familia, crudas y normalizadas
-    entre 100 y 255. En la serie Meta da 19 214 con 4 órdenes.
+    entre 100 y 255. En la serie Meta da 21 392 con 4 órdenes (banda 40, desde el
+    19/11, T140; con banda 60 daba 19 214).
   - La telemetría: 7 segmentos en los ticks pares, LED en los impares, con el
     latido en el bit 10 del número de tick.
   - Los parámetros de la tabla cambian la decisión como se espera, y una falla
@@ -67,7 +68,7 @@ class TestFondo(unittest.TestCase):
 
     def test_serie_meta(self):
         m, f = fondo.correr(self.meta)
-        self.assertEqual((m.w, m.ordenes, f.vio_lo, f.vio_hi), (19214, 4, 1, 1))
+        self.assertEqual((m.w, m.ordenes, f.vio_lo, f.vio_hi), (21392, 4, 1, 1))
 
     def test_telemetria(self):
         traza = []

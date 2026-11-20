@@ -6,7 +6,8 @@ Grupo: Nicolás Araneda, Vicente Calderón y Santiago Muñoz.
 Arquitectura de Computadores, Universidad de los Andes, 2026-2.
 
 Desde el 17/11 (decisión T133, opción F-a) el hilo 0 corre la regla de cotas
-"espera" con banda 60 (ref/regla_cotas.py, docs/cotas.md) y los hilos 1 a 3
+"espera" (ref/regla_cotas.py, docs/cotas.md), desde el 19/11 con banda 40
+(decisión T140; del 17/11 al 19/11 con banda 60), y los hilos 1 a 3
 quedan en un lazo de espera. El nombre del archivo se mantiene porque todas las
 herramientas de R1 y R2 lo usan; hasta el 17/11 modelaba el fondo de cuatro
 hilos que votaba (historial de git).
@@ -16,8 +17,8 @@ de la tabla de parámetros:
     bajo   = p < LO_MAS_1          (101: p <= 100)
     alto   = no (p < HI)           (255: p >= 255)
     vio_lo |= bajo ; vio_hi |= alto ; los_dos = vio_lo & vio_hi
-    comprar = bajo | (los_dos & p < BANDA_COMPRA)       (161: p <= 160)
-    vender  = alto | (los_dos & no (p < BANDA_VENTA))   (195: p >= 195)
+    comprar = bajo | (los_dos & p < BANDA_COMPRA)       (141: p <= 140)
+    vender  = alto | (los_dos & no (p < BANDA_VENTA))   (215: p >= 215)
     si comprar o vender: q = vender 63 si vender, si no comprar 63
     DECISION = q (parte en 0x00, mantener)
 Con los umbrales de la tabla por defecto decide byte por byte igual que
@@ -56,8 +57,8 @@ PALABRAS_TABLA = 256
 PARAMETROS = [
     ("LO_MAS_1", 101),       # bajo si p < 101: el mínimo de la serie es 100
     ("HI", 255),             # alto si p >= 255: el máximo es 255
-    ("BANDA_COMPRA", 161),   # con los dos extremos vistos, compra si p < 161 (100 + 60)
-    ("BANDA_VENTA", 195),    # y vende si p >= 195 (255 - 60)
+    ("BANDA_COMPRA", 141),   # con los dos extremos vistos, compra si p < 141 (100 + 40)
+    ("BANDA_VENTA", 215),    # y vende si p >= 215 (255 - 40)
 ]
 POR_DEFECTO = dict(PARAMETROS)
 

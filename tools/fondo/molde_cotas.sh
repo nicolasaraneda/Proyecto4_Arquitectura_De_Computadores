@@ -29,13 +29,15 @@
 #      tick 100 (variante cuelgue_sup:100) puesto con icebram; BOOT tiene que
 #      subir con S1 S0 = 01 y CS_n en alto en la quinta transacción sin respuesta.
 #
-# Los productos quedan en build/fondo/molde_cotas/. No toca bitstreams/.
+# Los productos quedan en build/fondo/molde_SUF/ (SUF=cotas por defecto; para la banda
+# 40 de la decisión T140, SUF=banda40). No toca bitstreams/.
 #
 # Uso: tools/fondo/molde_cotas.sh   Resultado en docs/mediciones/fondo/molde_cotas.txt.
 set -uo pipefail
 source "$(dirname "$0")/comun.sh"
-O=build/fondo/molde_cotas
-SALIDA=docs/mediciones/fondo/molde_cotas.txt
+SUF=${SUF:-cotas}                       # banda 40 (T140): SUF=banda40
+O=build/fondo/molde_${SUF}
+SALIDA=${SALIDA:-docs/mediciones/fondo/molde_${SUF}.txt}
 M=bitstreams/moldes
 BASE=${BASE:-c794834}
 NTICKS=${NTICKS:-2000}
@@ -70,14 +72,14 @@ $PYTHON tools/pochoasm.py sw/fondo.s -o "$O/fondo_asm.hex" > /dev/null || { echo
 completar "$O/fondo_asm.hex" "$O/fondo.hex"
 cp "$TABLA_HEX" "$O/tabla.hex"
 a=$(date +%s.%N)
-icebram "$M/molde_prog_r0.hex" sw/trade.hex < "$O/r0_molde.asc" > "$O/r0_cotas.asc" && icepack "$O/r0_cotas.asc" "$O/r0_cotas.bin"
+icebram "$M/molde_prog_r0.hex" sw/trade.hex < "$O/r0_molde.asc" > "$O/r0_${SUF}.asc" && icepack "$O/r0_${SUF}.asc" "$O/r0_${SUF}.bin"
 for r in r1 r2; do
-  icebram "$M/molde_prog.hex" "$O/fondo.hex" < "$O/${r}_molde.asc" | icebram "$M/molde_tabla.hex" "$O/tabla.hex" > "$O/${r}_cotas.asc" \
-    && icepack "$O/${r}_cotas.asc" "$O/${r}_cotas.bin"
+  icebram "$M/molde_prog.hex" "$O/fondo.hex" < "$O/${r}_molde.asc" | icebram "$M/molde_tabla.hex" "$O/tabla.hex" > "$O/${r}_${SUF}.asc" \
+    && icepack "$O/${r}_${SUF}.asc" "$O/${r}_${SUF}.bin"
 done
 b=$(date +%s.%N)
-icemulti -v -p0 -o "$O/r2_cotas_multi.bin" "$O/r2_cotas.bin" "$O/r0_cotas.bin" > "$O/icemulti.log" 2>&1
-$PYTHON tools/ver_multi.py --flash $FLASH "$O/r2_cotas_multi.bin" "$O/r2_cotas.bin" "$O/r0_cotas.bin" > "$O/ver_multi.txt" 2>&1; multi_ok=$?
+icemulti -v -p0 -o "$O/r2_${SUF}_multi.bin" "$O/r2_${SUF}.bin" "$O/r0_${SUF}.bin" > "$O/icemulti.log" 2>&1
+$PYTHON tools/ver_multi.py --flash $FLASH "$O/r2_${SUF}_multi.bin" "$O/r2_${SUF}.bin" "$O/r0_${SUF}.bin" > "$O/ver_multi.txt" 2>&1; multi_ok=$?
 $PYTHON tools/fondo/variante.py cuelgue_sup:100 -o "$O/colgado.s"
 $PYTHON tools/pochoasm.py "$O/colgado.s" -o "$O/colgado_asm.hex" > /dev/null && completar "$O/colgado_asm.hex" "$O/colgado.hex"
 icebram "$M/molde_prog.hex" "$O/colgado.hex" < "$O/r2_molde.asc" | icebram "$M/molde_tabla.hex" "$O/tabla.hex" > "$O/r2_colgado.asc"
@@ -85,7 +87,7 @@ icebram "$M/molde_prog.hex" "$O/colgado.hex" < "$O/r2_molde.asc" | icebram "$M/m
 # --- 1b. icetime: la misma ubicación y el mismo ruteo dan la misma frecuencia ------
 for r in r0 r1 r2; do
   icetime -d hx1k -P vq100 -p goboard.pcf -t "$O/viejo/$r.asc" 2>/dev/null | grep 'Total path delay' > "$O/viejo/$r.icetime" &
-  icetime -d hx1k -P vq100 -p goboard.pcf -t "$O/${r}_cotas.asc" 2>/dev/null | grep 'Total path delay' > "$O/${r}_cotas.icetime" &
+  icetime -d hx1k -P vq100 -p goboard.pcf -t "$O/${r}_${SUF}.asc" 2>/dev/null | grep 'Total path delay' > "$O/${r}_${SUF}.icetime" &
 done
 wait
 
@@ -103,13 +105,13 @@ sim() {   # sim NOMBRE ASC SERIE NTICKS [mon]
 }
 VEN=$(meta_ventana 2775 $NTICKS)
 META=data/practica_meta.csv
-sim r0_meta "$O/r0_cotas.asc" "$META" $NTICKS &
-sim r0_ven  "$O/r0_cotas.asc" "$VEN"  $NTICKS &
-sim r1_meta "$O/r1_cotas.asc" "$META" $NTICKS &
-sim r1_ven  "$O/r1_cotas.asc" "$VEN"  $NTICKS &
+sim r0_meta "$O/r0_${SUF}.asc" "$META" $NTICKS &
+sim r0_ven  "$O/r0_${SUF}.asc" "$VEN"  $NTICKS &
+sim r1_meta "$O/r1_${SUF}.asc" "$META" $NTICKS &
+sim r1_ven  "$O/r1_${SUF}.asc" "$VEN"  $NTICKS &
 wait
-sim r2_meta "$O/r2_cotas.asc" "$META" $NTICKS mon &
-sim r2_ven  "$O/r2_cotas.asc" "$VEN"  $NTICKS mon &
+sim r2_meta "$O/r2_${SUF}.asc" "$META" $NTICKS mon &
+sim r2_ven  "$O/r2_${SUF}.asc" "$VEN"  $NTICKS mon &
 sim r2_colgado "$O/r2_colgado.asc" "$VEN" 300 mon &
 wait
 $PYTHON ref/trader.py "$META" --nticks $NTICKS --periodo-ns 100000 -o "$O/ref_r0_meta.csv" > /dev/null
@@ -144,10 +146,10 @@ igual "$O/viejo/r2.bin" bitstreams/r2_fondo_vigilante.bin "R2 (fondo anterior) c
 igual "$O/viejo/r2_multi.bin" bitstreams/r2_multi.bin "imagen multiple anterior contra bitstreams/r2_multi.bin"
 echo
 echo "1. Bitstreams nuevos (icebram e icepack de los tres: $(echo "$a $b" | awk '{printf "%.2f", $2 - $1}') s)"
-for f in r0_cotas r1_cotas r2_cotas r2_cotas_multi; do echo "  $f.bin: $(stat -c %s "$O/$f.bin") bytes, sha256 $(sha256sum "$O/$f.bin" | cut -d' ' -f1)"; done
-for r in r0 r1 r2; do echo "  lineas del .asc que cambian respecto del anterior en $r: $(diff "$O/viejo/$r.asc" "$O/${r}_cotas.asc" | grep -c '^>')"; done
+for f in r0_${SUF} r1_${SUF} r2_${SUF} r2_${SUF}_multi; do echo "  $f.bin: $(stat -c %s "$O/$f.bin") bytes, sha256 $(sha256sum "$O/$f.bin" | cut -d' ' -f1)"; done
+for r in r0 r1 r2; do echo "  lineas del .asc que cambian respecto del anterior en $r: $(diff "$O/viejo/$r.asc" "$O/${r}_${SUF}.asc" | grep -c '^>')"; done
 for r in r0 r1 r2; do
-  v=$(cat "$O/viejo/$r.icetime"); c=$(cat "$O/${r}_cotas.icetime")
+  v=$(cat "$O/viejo/$r.icetime"); c=$(cat "$O/${r}_${SUF}.icetime")
   if [ -n "$v" ] && [ "$v" = "$c" ]; then echo "PASS icetime $r: $c, igual que el bitstream anterior"
   else echo "FAIL icetime $r: anterior '$v', nuevo '$c'"; fi
 done

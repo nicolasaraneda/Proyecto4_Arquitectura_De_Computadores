@@ -97,11 +97,12 @@ class MaxMedia(ReglaBase):
 
 class Oficial(regla_cotas.Cotas):
     """La estrategia que corre en sw/trade.s y contra la que se compara el RTL. Desde el
-    17/11 (decisión T133) es la regla de cotas "espera" con banda 60 (ref/cotas.py,
-    docs/cotas.md); hasta entonces fue MaxMedia."""
+    19/11 (decisión T140) es la regla de cotas "espera" con banda 40 (ref/cotas.py,
+    docs/cotas.md); del 17/11 al 19/11 (T133) fue la misma con banda 60, y hasta el
+    17/11, MaxMedia."""
 
     def __init__(self):
-        super().__init__("espera", banda=60)
+        super().__init__("espera", banda=40)
 
 
 def ticks_perdidos(periodo_ns, por_bits=12, inicio_ns=4000):
@@ -152,6 +153,7 @@ def tabla_3_1(precios, perdidos=0):
     base = correr(precios, ReglaBase(), perdidos=perdidos)
     m = correr(precios, perdidos=perdidos)
     mm = correr(precios, MaxMedia(), perdidos=perdidos)
+    b60 = correr(precios, regla_cotas.Cotas("espera", banda=60), perdidos=perdidos)
     byh = market.simular(precios, [market.MANTENER] + [market.COMPRAR_63] * (len(precios) - 1))
     filas = [
         ("no operar", market.CAJA0, 0, 0, 0),
@@ -159,7 +161,8 @@ def tabla_3_1(precios, perdidos=0):
         ("comprar 63 siempre (trade.s del tramo 1)", byh.w, byh.ordenes, byh.comisiones, byh.max_dd),
         ("regla base (trade.s hasta el 15/11)", base.w, base.ordenes, base.comisiones, base.max_dd),
         ("max_media (trade.s hasta el 17/11)", mm.w, mm.ordenes, mm.comisiones, mm.max_dd),
-        ("cotas, espera con banda 60 (trade.s)", m.w, m.ordenes, m.comisiones, m.max_dd),
+        ("cotas, banda 60 (trade.s 17/11 a 19/11)", b60.w, b60.ordenes, b60.comisiones, b60.max_dd),
+        ("cotas, espera con banda 40 (trade.s)", m.w, m.ordenes, m.comisiones, m.max_dd),
     ]
     print(f"{'estrategia':42s} {'patrimonio':>10s} {'ordenes':>8s} {'comisiones':>10s} {'perdida max':>11s}")
     for nombre, w, ordenes, comisiones, dd in filas:

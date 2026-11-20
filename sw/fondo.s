@@ -1,6 +1,7 @@
 # =============================================================================
 # fondo.s: programa de R1 y R2 desde el 17/11 (decisión T133, opción F-a). El
-# hilo 0 del Espino barrel corre la regla de cotas; los hilos 1, 2 y 3 quedan
+# hilo 0 del Espino barrel corre la regla de cotas (desde el 19/11 con banda 40,
+# decisión T140: solo cambió la tabla); los hilos 1, 2 y 3 quedan
 # en un lazo de espera. El nombre del archivo se mantiene porque todas las
 # herramientas de R1 y R2 lo usan; hasta el 17/11 era el fondo de cuatro hilos
 # que votaba (docs/fondo.md, historial de git).
@@ -17,11 +18,12 @@
 # y su máximo 255.
 #   p <= 100   -> comprar 63 y recordar que se vio el mínimo
 #   p >= 255   -> vender 63 y recordar que se vio el máximo
-#   con los dos extremos ya vistos: p <= 160 -> comprar 63; p >= 195 -> vender 63
+#   con los dos extremos ya vistos: p <= 140 -> comprar 63; p >= 215 -> vender 63
 #   si no      -> repetir el último byte (parte en 0x00, mantener)
 # Los cuatro umbrales salen de la tabla de parámetros en cada tick (BRAM de
 # solo lectura en 0x8002_0000; se cambian con icebram sin sintetizar):
-#   T_LO_MAS_1 = 101, T_HI = 255, T_BANDA_COMPRA = 161, T_BANDA_VENTA = 195.
+#   T_LO_MAS_1 = 101, T_HI = 255, T_BANDA_COMPRA = 141, T_BANDA_VENTA = 215
+#   (banda 40; con banda 60 eran 161 y 195).
 #
 #   hilo 0   sondea el SPI, lee el precio, decide sin saltos que dependan del
 #            precio, escribe DECISION una vez por tick y después un registro
@@ -58,8 +60,8 @@
 .equ TAB_BASE,      0x80020000
 .equ T_LO_MAS_1,    0          # bajo si p < este valor (101)
 .equ T_HI,          4          # alto si p >= este valor (255)
-.equ T_BANDA_COMPRA, 8         # con los dos extremos vistos, compra si p < este valor (161)
-.equ T_BANDA_VENTA, 12         # y vende si p >= este valor (195)
+.equ T_BANDA_COMPRA, 8         # con los dos extremos vistos, compra si p < este valor (141)
+.equ T_BANDA_VENTA, 12         # y vende si p >= este valor (215)
 
 # --- Tabla de arranque: el hilo t parte en la dirección 4 t -------------------
     j    supervisor
@@ -103,18 +105,18 @@ s_decidir:
     sltu x7, x5, x13
     xori x7, x7, 1             # alto = p >= 255
     lw   x13, T_BANDA_COMPRA(x1)
-    sltu x9, x5, x13           # p <= 160
+    sltu x9, x5, x13           # p <= 140
     lw   x13, T_BANDA_VENTA(x1)
     sltu x12, x5, x13
-    xori x12, x12, 1           # p >= 195
+    xori x12, x12, 1           # p >= 215
 
 # 3. Decidir sin saltos, igual que sw/trade.s
     or   x10, x10, x6          # se vio el mínimo
     or   x11, x11, x7          # se vio el máximo
     and  x8, x10, x11          # los dos
-    and  x9, x9, x8            # comprar = bajo | (los dos & p <= 160)
+    and  x9, x9, x8            # comprar = bajo | (los dos & p <= 140)
     or   x9, x9, x6
-    and  x12, x12, x8          # vender = alto | (los dos & p >= 195)
+    and  x12, x12, x8          # vender = alto | (los dos & p >= 215)
     or   x12, x12, x7
     or   x13, x9, x12          # cambia (comprar y vender nunca son 1 a la vez)
     sub  x13, x0, x13          # 0 o 0xFFFFFFFF

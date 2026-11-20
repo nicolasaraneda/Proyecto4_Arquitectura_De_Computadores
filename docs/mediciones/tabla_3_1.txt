@@ -5,7 +5,8 @@ comprar y mantener (testbench)                   9695        1          5
 comprar 63 siempre (trade.s del tramo 1)         9695        1          5        9300
 regla base (trade.s hasta el 15/11)              8904      159        795        3110
 max_media (trade.s hasta el 17/11)               9722      249       1245        3717
-cotas, espera con banda 60 (trade.s)            19214        4         20        3168
+cotas, banda 60 (trade.s 17/11 a 19/11)         19214        4         20        3168
+cotas, espera con banda 40 (trade.s)            21392        4         20        3168
 
 Serie data/practica_meta.csv: 2000 ticks, precios iniciales que el programa no ve: 2
 estrategia                                 patrimonio  ordenes comisiones perdida max
@@ -14,4 +15,5 @@ comprar y mantener (testbench)                  11375        1          5
 comprar 63 siempre (trade.s del tramo 1)        11375        1          5        1560
 regla base (trade.s hasta el 15/11)             10846       12         60         260
 max_media (trade.s hasta el 17/11)              10768       18         90         302
-cotas, espera con banda 60 (trade.s)            10000        0          0           0
+cotas, banda 60 (trade.s 17/11 a 19/11)         10000        0          0           0
+cotas, espera con banda 40 (trade.s)            10000        0          0           0
