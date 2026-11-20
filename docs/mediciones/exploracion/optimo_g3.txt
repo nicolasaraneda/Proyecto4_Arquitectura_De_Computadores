@@ -1,0 +1,11 @@
+# G3: compresión de la variante elegida
+
+ref/cotas/explorar_optimo.py g3, commit 6627321. Variante elegida en optimo_g2.txt: V3 log, S2/t. Compresión de tres posiciones: por celda (clase de v^2, tramo de 1250 ticks) y por cada s, los umbrales a1, a2 (arriba: media posición desde a1, completa desde a2) y b1, b2 (abajo), del r del medio del tramo; 12 bytes por celda, 1536 en la fase A.
+
+| estrategia | pts sin copia | 1.ª sola % | media | p5 | peor | órdenes | Δ con banda 40 (ee) | contra el rival: gana / empata / pierde % | 3 rondas: gana / pierde % |
+|---|---|---|---|---|---|---|---|---|---|
+| banda 40 | 1,842 | 37,9 | 21303 | 10746 | 8490 | 3,8 | +0 (0) | 57,6 / 35,5 / 6,9 | 91,6 / 3,7 |
+| V3 log, S2/t | 1,855 | 52,7 | 21603 | 11636 | 6122 | 7,9 | +299 (73) | 75,8 / 9,5 / 14,7 | 91,7 / 8,2 |
+| V3 log, S2/t, comprimida | 1,855 | 52,9 | 21600 | 11646 | 6156 | 7,9 | +296 (73) | 76,7 / 8,6 / 14,7 | 91,6 / 8,3 |
+
+La comprimida conserva 98,9 % de la ganancia de la completa (+296 contra +299). G3 pide al menos 80 %: **PASA**.
