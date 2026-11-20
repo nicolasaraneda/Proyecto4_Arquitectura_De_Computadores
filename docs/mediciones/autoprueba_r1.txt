@@ -1,21 +1,19 @@
-Autoprueba del peldano r1 (todo), commit f2f4a7d
+Autoprueba del peldano r1 (todo), commit 2f3567e
 Generado por tools/autoprueba.py todo r1. No editar a mano.
 
-Serie: caminata aleatoria del LFSR con semilla 0x3CA1, 2000 precios, entre 87 y 152, sha256 8e4c1d5e3bbed54d...
-Referencia ref/fondo.py: firma 15d7, 44 cambios de byte, patrimonio 7678 con 87 ordenes
-     max_media sola (el supervisor sin votos) daria 7d4f: 51 bytes distintos
-     con el gestor 1 colgado desde el tick 1 daria 7d4f: 51 bytes distintos
-     con el gestor 2 colgado desde el tick 1 daria 7d4f: 51 bytes distintos
-     con el gestor 3 colgado desde el tick 1 daria 7d4f: 51 bytes distintos
-PASS gemelo con SW1 (10 ms): firma 15d7, bytes identicos a la referencia, peor caso 438 de 249696 ciclos
-PASS gemelo con SW2 (1 ms): firma 15d7, bytes identicos a la referencia, peor caso 438 de 24696 ciclos
-PASS gemelo con SW3 (0,1 ms): firma 15d7, bytes identicos a la referencia, peor caso 438 de 2196 ciclos
-PASS bitstream build/autoprueba/r1/autoprueba_r1.bin: 1191 de 1280 celdas, 13 de 16 BRAM, frecuencia maxima 50.81 MHz, firma esperada 15d7 adentro
-     sha256 4a8f70f7a5a75990725093c7f4ff31b00486a4b2437af4d16b8959c5c3cdcd18
-PASS RTL con SW3 (0,1 ms): RESULTADO boton=3 firma=15d7 esperada=15d7 LED=0110 duracion_ms=197 PASS
-PASS RTL con SW2 (1 ms): RESULTADO boton=2 firma=15d7 esperada=15d7 LED=0110 duracion_ms=1997 PASS
-PASS RTL con SW1 (10 ms): RESULTADO boton=1 firma=15d7 esperada=15d7 LED=0110 duracion_ms=19988 PASS
-PASS control negativo (G1_ENTRA=-64 en la tabla (era -96)): el gemelo da 6f2a; ref/fondo.py con ese parametro da 6f2a, y la autoprueba lo rechaza con LED4: RESULTADO boton=3 firma=6f2a esperada=15d7 LED=1010 duracion_ms=197 FAIL
-PASS bitstream ruteado con SW3 (0,1 ms): RESULTADO boton=3 firma=15d7 esperada=15d7 LED=0110 duracion_ms=197 PASS
+Serie: caminata aleatoria del LFSR con semilla 0xE3AA, pasos de 4 entre 100 y 255, 2000 precios, entre 100 y 255, sha256 3fd8b16e7f3a4849...
+     toca 100 en el tick 11 y 255 en el tick 174: la regla entra a la banda
+Referencia ref/fondo.py: firma a639, 3 cambios de byte, patrimonio 26395 con 7 ordenes
+     con la banda 60 daria 8610: 380 bytes distintos
+PASS gemelo con SW1 (10 ms): firma a639, bytes identicos a la referencia, peor caso 126 de 249696 ciclos
+PASS gemelo con SW2 (1 ms): firma a639, bytes identicos a la referencia, peor caso 126 de 24696 ciclos
+PASS gemelo con SW3 (0,1 ms): firma a639, bytes identicos a la referencia, peor caso 126 de 2196 ciclos
+PASS bitstream build/autoprueba/r1/autoprueba_r1.bin: 1188 de 1280 celdas, 13 de 16 BRAM, frecuencia maxima 52.00 MHz, firma esperada a639 adentro
+     sha256 7478606482a119d69f3f3317604d109716509a0e43a454b55f608e5e1a88d73d
+PASS RTL con SW3 (0,1 ms): RESULTADO boton=3 firma=a639 esperada=a639 LED=0110 duracion_ms=197 PASS
+PASS RTL con SW2 (1 ms): RESULTADO boton=2 firma=a639 esperada=a639 LED=0110 duracion_ms=1997 PASS
+PASS RTL con SW1 (10 ms): RESULTADO boton=1 firma=a639 esperada=a639 LED=0110 duracion_ms=19988 PASS
+PASS control negativo (la tabla de la banda 60 (161 y 195)): el gemelo da 8610; ref/fondo.py con ese parametro da 8610, y la autoprueba lo rechaza con LED4: RESULTADO boton=3 firma=8610 esperada=a639 LED=1010 duracion_ms=197 FAIL
+PASS bitstream ruteado con SW3 (0,1 ms): RESULTADO boton=3 firma=a639 esperada=a639 LED=0110 duracion_ms=197 PASS
 
 PASS

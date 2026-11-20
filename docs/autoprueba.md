@@ -287,3 +287,56 @@ El pin de MISO del PMOD (pin 63 de la FPGA, el mismo que usa la maestra real) es
 | 106 ms (el doble) | 15 | 111 | 1066 |
 
 La cuenta es: 5 ticks del vigilante, más el tiempo de reconfiguración y los 0,164 ms del reset de R0 divididos por el período, más el primer precio que R0 alcanza a responder. Durante la reconfiguración la maestra lee 0xFF, que es mantener. El número medido ya está en `tools/vigilante/relevo.sh` (`T_MEDIDO`, sección 2b de `docs/mediciones/vigilante/relevo.txt`: 361, 40 y 8 ticks, iguales a la traducción) y en el árbol de decisión del 1/12. Los casos con 53 ms se conservan como el escenario de la hoja de datos.
+
+## 11. Banda 40 y la caminata entre 100 y 255 (19/11, T140 y T141)
+
+### 11.1 Qué cambió
+
+Con la regla de cotas la decisión depende de haber visto 100 y 255, y después de una banda junto a cada extremo. La caminata anterior (pasos de 1 desde 128) nunca llegaba a 255 en 2000 precios, así que la firma salía igual con cualquier banda y la autoprueba no distinguía el programa. Nicolás eligió la maestra normalizada (T141): la caminata sube o baja `PASO` por tick, sin pasar de 255 ni bajar de `PISO`, desde 128. El hardware de la maestra se cambió solo en eso (`rtl/autoprueba/autoprueba_top.v`, parámetros `PASO` y `PISO`); el SoC de cada peldaño es el mismo que compite.
+
+| Constante (`tools/autoprueba.py`) | Valor | Para cambiarla |
+|-----------------------------------|-------|----------------|
+| `PASO` | 4 | Editar la constante, o `--paso N` |
+| `PISO` | 100 | Editar la constante, o `--piso N` |
+| `SEMILLA` | 0xE3AA | Editar la constante, o `--semilla S` |
+
+Con estos valores la caminata toca 100 en el tick 11 y 255 en el 174, y la regla compra y vende 7 veces (patrimonio 26 395). Con otro paso o semilla, los productos quedan en `build/autoprueba/PELDANO_pasoN_sSEMILLA/` y en `docs/mediciones/autoprueba_PELDANO_pasoN_sSEMILLA.txt`, sin pisar los de competencia. Con pasos más chicos la caminata puede no llegar a los dos extremos (con paso 2 y esta semilla llega solo a 198): el informe de la firma lo avisa con un AVISO, y en ese caso hay que buscar otra semilla.
+
+### 11.2 Firma esperada y verificación
+
+| | R0 | R1 | R2 |
+|---|----|----|----|
+| Firma esperada (gemelo a los tres períodos y referencia) | `a639` | `a639` | `a639` |
+| Con la banda 60 (control negativo) | `8610`, rechazada con LED4 | `8610` (tabla con 161 y 195), rechazada | Igual que R1 |
+| RTL por los pines, SW3, SW2 y SW1 | `a639`, LED2 y LED3 | Igual | Igual, más 2 s en modo continuo sin disparo |
+| Bitstream ruteado, SW3 | `a639` | `a639` | `a639`; la imagen con el supervisor colgado pide el relevo en la transacción 103 |
+| Peor caso de respuesta | 60 ciclos | 126 | 126; media hora en el gemelo a los tres períodos sin que el vigilante llegue a 5 |
+| Celdas | 1267 de 1280 | 1188 | 1199 (testigo: 83) |
+| Frecuencia máxima | 45,14 MHz | 52,00 MHz | 52,00 MHz |
+
+La autoprueba de R0 sigue cabiendo con la telemetría: quedan 13 celdas. Resultados completos en `docs/mediciones/autoprueba_r0.txt`, `_r1.txt` y `_r2.txt` (`make autoprueba-r0`, `-r1`, `-r2`).
+
+| Archivo | sha256 |
+|---------|--------|
+| `autoprueba_r0.bin` | `b0a4ebcc4c30ed76a46eb61d0857e22fdcaf7c7b305ea22e7665e17cdcf90070` |
+| `autoprueba_r1.bin` | `7478606482a119d69f3f3317604d109716509a0e43a454b55f608e5e1a88d73d` |
+| `autoprueba_r2_multi.bin` | `bd5b7278a3a3eb0ca7bd6d7471d95261e01fb164b81ea2bf09b9e3bde8656b98` |
+| `relevo_r2_multi.bin` | `bafb50392f8b2f83a70be80e06b917d95287a3690ecee8cf4c5a7e760a08cd36` |
+| `relevo_r2_multi_sin_dormir.bin` | `91a94e4efad287dd605bdbfcaf41821ebbbfc489e9b6a572ab5821ce5fd6677d` |
+
+### 11.3 Comandos para la placa
+
+Los mismos pasos de las secciones 5 y 9, con otros dígitos. En los tres peldaños, al terminar cada corrida: **LED2 y LED3 encendidos, "39" en los 7 segmentos y "A6" con SW4 apretado**. Al configurarse, antes de apretar nada: los cuatro LED apagados y "FF".
+
+1. `cd bitstreams && sha256sum -c SHA256SUMS && cd ..`: todas las líneas en `OK`.
+2. R0: `iceprog bitstreams/autoprueba_r0.bin`; SW3 (0,2 s), desconectar y conectar el USB, SW2 (2 s), desconectar y conectar, SW1 (20 s, LED1 parpadea cada 0,64 s). En los tres, LED2, LED3, "39" y "A6".
+3. R1: `iceprog bitstreams/autoprueba_r1.bin` y lo mismo.
+4. R2: `iceprog -b bitstreams/autoprueba_r2_multi.bin` y lo mismo; LED1 no se apaga al terminar, porque la maestra sigue mandando precios. Después, media hora con SW3 como en 9.3: a la media hora, lo mismo y sin la testigo.
+5. Relevo: `iceprog -b bitstreams/relevo_r2_multi.bin` y SW3: a los pocos milisegundos, los cuatro LED encendidos y "--" (9.4).
+6. Volver a competencia: `iceprog bitstreams/r1_banda40.bin`, o `iceprog -b bitstreams/r2_banda40_multi.bin`, o `iceprog bitstreams/r0_banda40.bin`.
+
+| Se ve | Qué significa |
+|-------|---------------|
+| LED4 con "10" ("86" con SW4) | Firma `8610`: la placa corre un programa con la banda 60 (161 y 195) en vez de la banda 40 |
+| LED4 con otros dígitos | Alguna decisión fue distinta o llegó tarde: anotar los cuatro dígitos y el período, y seguir la tabla de 9.5 |
+| LED2 y LED3 con "D7" o "3C" | Se grabó una autoprueba anterior al 19/11 (firmas `15d7` y `a23c` con la caminata vieja); comprobar el `sha256sum` |
