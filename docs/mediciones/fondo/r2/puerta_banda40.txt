@@ -1,0 +1,215 @@
+Puerta de simulacion de r2 con la regla de cotas, tabla: LO_MAS_1=101 HI=255 BANDA_COMPRA=141 BANDA_VENTA=215 
+Generado por tools/fondo/puerta_cotas.sh, commit 2f3567e. Hardware sin cambios: programa y tabla entran por icebram en el molde.
+sw/fondo.s sha256 f82f094c97577e6d..., sw/fondo_tabla.hex sha256 a90aacf30968a690...
+
+Referencia y tabla
+== make test-fondo
+PASS: make test-fondo
+== make check-tabla
+PASS: make check-tabla
+PASS sw/fondo_tabla.hex corresponde a ref/fondo.py
+
+1. Testbench oficial sin modificar
+== make fondo-oficial HW=r2
+PASS: make fondo-oficial HW=r2
+  Peor caso precio->decision: 127 ciclos (disponibles: 2262)
+
+2. Equivalencia
+== make fondo-equiv-ronda1 HW=r2
+PASS: make fondo-equiv-ronda1 HW=r2
+PASS copia del oficial, tb/practica.csv, periodo 100000 ns, 20000 ticks, Peor caso precio->decision: 127 ciclos (disponibles: 2262), 4/4, 20000 filas identicas, patrimonio 9729
+PASS copia del oficial, data/practica_meta.csv, periodo 100000 ns, 20000 ticks, Peor caso precio->decision: 127 ciclos (disponibles: 2262), 4/4, 20000 filas identicas, patrimonio 21392
+PASS copia del oficial, tb/practica.csv, periodo 1000000 ns, 20000 ticks, Peor caso precio->decision: 127 ciclos (disponibles: 24762), 4/4, 20000 filas identicas, patrimonio 9729
+PASS copia del oficial, data/practica_meta.csv, periodo 1000000 ns, 20000 ticks, Peor caso precio->decision: 127 ciclos (disponibles: 24762), 4/4, 20000 filas identicas, patrimonio 21392
+PASS copia del oficial, tb/practica.csv, periodo 10000000 ns, 20000 ticks, Peor caso precio->decision: 127 ciclos (disponibles: 249762), 4/4, 20000 filas identicas, patrimonio 9729
+PASS copia del oficial, data/practica_meta.csv, periodo 10000000 ns, 20000 ticks, Peor caso precio->decision: 127 ciclos (disponibles: 249762), 4/4, 20000 filas identicas, patrimonio 21392
+PASS meta_100000: 20000 bytes, 19998 ticks de estado, patrimonio 21392, 4 ordenes, vio el minimo 1 y el maximo 1, stores a la RAM 0, peor caso 127 de 2262 ciclos
+PASS meta_1000000: 20000 bytes, 19999 ticks de estado, patrimonio 21392, 4 ordenes, vio el minimo 1 y el maximo 1, stores a la RAM 0, peor caso 127 de 24762 ciclos
+PASS meta_10000000: 20000 bytes, 19999 ticks de estado, patrimonio 21392, 4 ordenes, vio el minimo 1 y el maximo 1, stores a la RAM 0, peor caso 127 de 249762 ciclos
+PASS practica_anterior: 20000 bytes, 19998 ticks de estado, patrimonio 9729, 2 ordenes, vio el minimo 1 y el maximo 0, stores a la RAM 0, peor caso 127 de 2262 ciclos
+PASS remuestreo: 20000 bytes, 19998 ticks de estado, patrimonio 16047, 2 ordenes, vio el minimo 1 y el maximo 0, stores a la RAM 0, peor caso 127 de 2262 ciclos
+PASS remuestreo-norm: 20000 bytes, 19998 ticks de estado, patrimonio 23892, 4 ordenes, vio el minimo 1 y el maximo 1, stores a la RAM 0, peor caso 127 de 2262 ciclos
+PASS modelo: 20000 bytes, 19998 ticks de estado, patrimonio 11274, 2 ordenes, vio el minimo 1 y el maximo 0, stores a la RAM 0, peor caso 127 de 2262 ciclos
+PASS modelo-norm: 20000 bytes, 19998 ticks de estado, patrimonio 27366, 7 ordenes, vio el minimo 1 y el maximo 1, stores a la RAM 0, peor caso 127 de 2262 ciclos
+PASS modelo_vecino: 20000 bytes, 19998 ticks de estado, patrimonio 10000, 0 ordenes, vio el minimo 0 y el maximo 0, stores a la RAM 0, peor caso 127 de 2262 ciclos
+PASS modelo_vecino-norm: 20000 bytes, 19998 ticks de estado, patrimonio 25055, 4 ordenes, vio el minimo 1 y el maximo 1, stores a la RAM 0, peor caso 127 de 2262 ciclos
+PASS paseo: 20000 bytes, 19998 ticks de estado, patrimonio 1317, 2 ordenes, vio el minimo 1 y el maximo 0, stores a la RAM 0, peor caso 127 de 2262 ciclos
+PASS paseo-norm: 20000 bytes, 19998 ticks de estado, patrimonio 10732, 2 ordenes, vio el minimo 1 y el maximo 1, stores a la RAM 0, peor caso 127 de 2262 ciclos
+PASS tendencia: 20000 bytes, 19998 ticks de estado, patrimonio 97433, 14 ordenes, vio el minimo 1 y el maximo 1, stores a la RAM 0, peor caso 127 de 2262 ciclos
+PASS tendencia-norm: 20000 bytes, 19998 ticks de estado, patrimonio 25072, 4 ordenes, vio el minimo 1 y el maximo 1, stores a la RAM 0, peor caso 127 de 2262 ciclos
+PASS reversion: 20000 bytes, 19998 ticks de estado, patrimonio 8716, 3 ordenes, vio el minimo 1 y el maximo 0, stores a la RAM 0, peor caso 127 de 2262 ciclos
+PASS reversion-norm: 20000 bytes, 19998 ticks de estado, patrimonio 57341, 26 ordenes, vio el minimo 1 y el maximo 1, stores a la RAM 0, peor caso 127 de 2262 ciclos
+PASS dos_componentes: 20000 bytes, 19998 ticks de estado, patrimonio 13934, 2 ordenes, vio el minimo 1 y el maximo 0, stores a la RAM 0, peor caso 127 de 2262 ciclos
+PASS dos_componentes-norm: 20000 bytes, 19998 ticks de estado, patrimonio 24410, 4 ordenes, vio el minimo 1 y el maximo 1, stores a la RAM 0, peor caso 127 de 2262 ciclos
+PASS saltos: 20000 bytes, 19998 ticks de estado, patrimonio 354, 4 ordenes, vio el minimo 1 y el maximo 0, stores a la RAM 0, peor caso 127 de 2262 ciclos
+PASS saltos-norm: 20000 bytes, 19998 ticks de estado, patrimonio 10089, 2 ordenes, vio el minimo 1 y el maximo 1, stores a la RAM 0, peor caso 127 de 2262 ciclos
+PASS cambio_volatilidad: 20000 bytes, 19998 ticks de estado, patrimonio 2872, 3 ordenes, vio el minimo 1 y el maximo 0, stores a la RAM 0, peor caso 127 de 2262 ciclos
+PASS cambio_volatilidad-norm: 20000 bytes, 19998 ticks de estado, patrimonio 12600, 2 ordenes, vio el minimo 1 y el maximo 1, stores a la RAM 0, peor caso 127 de 2262 ciclos
+PASS cambio_de_caracter: 20000 bytes, 19998 ticks de estado, patrimonio 25443, 4 ordenes, vio el minimo 1 y el maximo 1, stores a la RAM 0, peor caso 127 de 2262 ciclos
+PASS cambio_de_caracter-norm: 20000 bytes, 19998 ticks de estado, patrimonio 25009, 4 ordenes, vio el minimo 1 y el maximo 1, stores a la RAM 0, peor caso 127 de 2262 ciclos
+PASS volatil: 20000 bytes, 19998 ticks de estado, patrimonio 2650, 21 ordenes, vio el minimo 1 y el maximo 1, stores a la RAM 0, peor caso 127 de 2262 ciclos
+PASS volatil-norm: 20000 bytes, 19998 ticks de estado, patrimonio 10284, 2 ordenes, vio el minimo 1 y el maximo 1, stores a la RAM 0, peor caso 127 de 2262 ciclos
+PASS nivel_bajo: 20000 bytes, 19998 ticks de estado, patrimonio 69968, 11 ordenes, vio el minimo 1 y el maximo 1, stores a la RAM 0, peor caso 127 de 2262 ciclos
+PASS nivel_bajo-norm: 20000 bytes, 19998 ticks de estado, patrimonio 24939, 4 ordenes, vio el minimo 1 y el maximo 1, stores a la RAM 0, peor caso 127 de 2262 ciclos
+PASS plana: 20000 bytes, 19998 ticks de estado, patrimonio 9920, 16 ordenes, vio el minimo 1 y el maximo 0, stores a la RAM 0, peor caso 127 de 2262 ciclos
+PASS plana-norm: 20000 bytes, 19998 ticks de estado, patrimonio 10000, 0 ordenes, vio el minimo 0 y el maximo 0, stores a la RAM 0, peor caso 127 de 2262 ciclos
+PASS borde_bajo: 20000 bytes, 19998 ticks de estado, patrimonio 9926, 40 ordenes, vio el minimo 1 y el maximo 0, stores a la RAM 0, peor caso 127 de 2262 ciclos
+PASS borde_bajo-norm: 20000 bytes, 19998 ticks de estado, patrimonio 20215, 7 ordenes, vio el minimo 1 y el maximo 1, stores a la RAM 0, peor caso 127 de 2262 ciclos
+PASS borde_alto: 20000 bytes, 19998 ticks de estado, patrimonio 10000, 0 ordenes, vio el minimo 0 y el maximo 1, stores a la RAM 0, peor caso 127 de 2262 ciclos
+PASS borde_alto-norm: 20000 bytes, 19998 ticks de estado, patrimonio 300727, 138 ordenes, vio el minimo 1 y el maximo 1, stores a la RAM 0, peor caso 127 de 2262 ciclos
+Ticks comparados con tb_fondo.sv en los casos que pasan: 680000
+== make fondo-series HW=r2
+PASS: make fondo-series HW=r2
+JOBS=6 tools/fondo/series.sh
+El fondo en un chip contra su referencia en un lote de series sinteticas
+Generado por tools/fondo/series.sh (make fondo-series). No editar a mano.
+35 series por familia, cada una cruda y normalizada (-norm), 2000 ticks, semilla 1, periodo de 0,1 ms.
+familia                   series   pasan        ticks    peor caso  ven los dos
+== tools/reales.sh r2
+FAIL: tools/reales.sh r2
+FAIL gemelo, tesla, periodo 100000 ns, 20000 ticks, : no entrega 4/4
+FAIL gemelo, tesla, periodo 1000000 ns, 20000 ticks, : no entrega 4/4
+FAIL gemelo, tesla, periodo 10000000 ns, 20000 ticks, : no entrega 4/4
+FAIL gemelo, amd, periodo 100000 ns, 20000 ticks, : no entrega 4/4
+FAIL gemelo, amd, periodo 1000000 ns, 20000 ticks, : no entrega 4/4
+FAIL gemelo, amd, periodo 10000000 ns, 20000 ticks, : no entrega 4/4
+
+3. Timing: hardware sin cambios (docs/puertas.md); icetime del .asc nuevo en tools/fondo/molde_cotas.sh.
+
+4. Fases
+== make fondo-fases HW=r2
+PASS: make fondo-fases HW=r2
+Peor caso de la respuesta del fondo barriendo la fase de llegada del precio
+PASS programa sano, 48 fases de un ciclo, 1100 ticks: 48 de 48 corridas iguales a la referencia, peor caso por corrida entre 125 y 128 ciclos (limite 1131)
+PASS programa sano, 24 fases corridas 13 ns: 24 de 24 corridas iguales a la referencia, peor caso por corrida entre 125 y 128 ciclos (limite 1131)
+PASS programa sano, periodo de 2501 ciclos, 20000 ticks: 1 de 1 corridas iguales a la referencia, peor caso por corrida entre 128 y 128 ciclos (limite 1131)
+PASS hilos 1 a 3 haciendo cuentas, 24 fases: 24 de 24 corridas iguales a la referencia, peor caso por corrida entre 125 y 128 ciclos (limite 1131)
+Peor caso con el programa sano: 128 ciclos (5.65 % del presupuesto de la ronda 3, 2262 ciclos)
+Peor caso con los hilos 1 a 3 ocupados: 128 ciclos (5.65 %)
+
+5. Core: hardware sin cambios y el binario de sw/fondo.s es el mismo (la mascara de la extension no cambia).
+
+6. Degradacion y controles negativos
+== make fondo-degradacion HW=r2
+PASS: make fondo-degradacion HW=r2
+PASS sano__meta: 20000 bytes, 19998 ticks de estado, patrimonio 21392, 4 ordenes, vio el minimo 1 y el maximo 1, stores a la RAM 0, peor caso 127 de 1131 ciclos
+PASS ocupado_1__meta: 20000 bytes, 19998 ticks de estado, patrimonio 21392, 4 ordenes, vio el minimo 1 y el maximo 1, stores a la RAM 0, peor caso 127 de 1131 ciclos
+PASS ocupado_1__norm: 20000 bytes, 19998 ticks de estado, patrimonio 57341, 26 ordenes, vio el minimo 1 y el maximo 1, stores a la RAM 0, peor caso 127 de 1131 ciclos
+PASS ocupado_2__meta: 20000 bytes, 19998 ticks de estado, patrimonio 21392, 4 ordenes, vio el minimo 1 y el maximo 1, stores a la RAM 0, peor caso 127 de 1131 ciclos
+PASS ocupado_2__norm: 20000 bytes, 19998 ticks de estado, patrimonio 57341, 26 ordenes, vio el minimo 1 y el maximo 1, stores a la RAM 0, peor caso 127 de 1131 ciclos
+PASS ocupado_3__meta: 20000 bytes, 19998 ticks de estado, patrimonio 21392, 4 ordenes, vio el minimo 1 y el maximo 1, stores a la RAM 0, peor caso 127 de 1131 ciclos
+PASS ocupado_3__norm: 20000 bytes, 19998 ticks de estado, patrimonio 57341, 26 ordenes, vio el minimo 1 y el maximo 1, stores a la RAM 0, peor caso 127 de 1131 ciclos
+PASS ocupados__meta: 20000 bytes, 19998 ticks de estado, patrimonio 21392, 4 ordenes, vio el minimo 1 y el maximo 1, stores a la RAM 0, peor caso 127 de 1131 ciclos
+PASS ocupados__norm: 20000 bytes, 19998 ticks de estado, patrimonio 57341, 26 ordenes, vio el minimo 1 y el maximo 1, stores a la RAM 0, peor caso 127 de 1131 ciclos
+PASS escribe_1__meta: 20000 bytes, 19998 ticks de estado, patrimonio 21392, 4 ordenes, vio el minimo 1 y el maximo 1, stores a la RAM 2499800, peor caso 127 de 1131 ciclos
+PASS escribe_1__norm: 20000 bytes, 19998 ticks de estado, patrimonio 57341, 26 ordenes, vio el minimo 1 y el maximo 1, stores a la RAM 2499800, peor caso 127 de 1131 ciclos
+PASS escribe_todos__meta: 20000 bytes, 19998 ticks de estado, patrimonio 21392, 4 ordenes, vio el minimo 1 y el maximo 1, stores a la RAM 7499400, peor caso 127 de 1131 ciclos
+PASS escribe_todos__norm: 20000 bytes, 19998 ticks de estado, patrimonio 57341, 26 ordenes, vio el minimo 1 y el maximo 1, stores a la RAM 7499400, peor caso 127 de 1131 ciclos
+PASS programa_3__meta: 20000 bytes, 19998 ticks de estado, patrimonio 21392, 4 ordenes, vio el minimo 1 y el maximo 1, stores a la RAM 0, peor caso 127 de 1131 ciclos
+PASS programa_3__norm: 20000 bytes, 19998 ticks de estado, patrimonio 57341, 26 ordenes, vio el minimo 1 y el maximo 1, stores a la RAM 0, peor caso 127 de 1131 ciclos
+PASS mezcla__meta: 20000 bytes, 19998 ticks de estado, patrimonio 21392, 4 ordenes, vio el minimo 1 y el maximo 1, stores a la RAM 2499800, peor caso 127 de 1131 ciclos
+PASS mezcla__norm: 20000 bytes, 19998 ticks de estado, patrimonio 57341, 26 ordenes, vio el minimo 1 y el maximo 1, stores a la RAM 2499800, peor caso 127 de 1131 ciclos
+== make fondo-controles HW=r2
+PASS: make fondo-controles HW=r2
+DETECTADO banda_tabla: la tabla trae la banda de compra de banda 60 (161 en vez de 141)
+DETECTADO venta_tabla: la tabla vende desde 195 (banda 60) en vez de 215
+DETECTADO venta_216: la tabla vende desde 216 en vez de 215 (la serie de reversion de semilla 39 tiene un 215 exacto adentro)
+DETECTADO compra_139: la tabla compra hasta 139 en vez de 140 (la serie de reversion de semilla 39 tiene un 140 exacto afuera)
+DETECTADO bajo_desde_101: compra al ver 101 y no solo 100
+DETECTADO minimo_olvidado: la marca de haber visto el minimo no queda puesta
+DETECTADO sin_banda: con los dos extremos vistos no compra en la banda
+DETECTADO q_no_se_mantiene: sin cambio el byte no se repite: pasa a comprar 63
+DETECTADO parte_comprando: parte con comprar 63 en vez de mantener
+DETECTADO dos_decisiones: el hilo 0 escribe DECISION dos veces en el tick
+DETECTADO dos_stores_telemetria: la telemetria hace dos stores en los ticks impares
+DETECTADO latido: el LED de latido usa otro bit del numero de tick
+DETECTADO digitos: los 7 segmentos muestran otro numero al estar adentro
+DETECTADO hilo_toca_spi: el hilo 1 lee el registro de estado del SPI
+DETECTADO hilo_escribe_ram: el hilo 2 escribe la RAM (el programa sano no la usa) (con escribe:2)
+
+7. Estres
+== make fondo-estres HW=r2
+PASS: make fondo-estres HW=r2
+PASS sclk_100k: perdidos en reset 2, respuestas 1998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, stores a la RAM 0, violaciones 0, vigilante 0 (max 1), ciclos prom 122.0 peor 126 de 237
+PASS sclk_200k: perdidos en reset 2, respuestas 1998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, stores a la RAM 0, violaciones 0, vigilante 0 (max 1), ciclos prom 121.0 peor 125 de 1362
+PASS sclk_500k: perdidos en reset 2, respuestas 1998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, stores a la RAM 0, violaciones 0, vigilante 0 (max 1), ciclos prom 122.0 peor 126 de 2037
+PASS sclk_1M: perdidos en reset 2, respuestas 1998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, stores a la RAM 0, violaciones 0, vigilante 0 (max 1), ciclos prom 123.0 peor 127 de 2262
+PASS cs_setup500_hold40: perdidos en reset 2, respuestas 998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, stores a la RAM 0, violaciones 0, vigilante 0 (max 1), ciclos prom 124.0 peor 128 de 
+PASS cs_setup500_hold100: perdidos en reset 2, respuestas 998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, stores a la RAM 0, violaciones 0, vigilante 0 (max 1), ciclos prom 124.0 peor 128 de
+PASS cs_setup500_hold500: perdidos en reset 2, respuestas 998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, stores a la RAM 0, violaciones 0, vigilante 0 (max 1), ciclos prom 124.0 peor 128 de
+PASS cs_setup500_hold5000: perdidos en reset 2, respuestas 998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, stores a la RAM 0, violaciones 0, vigilante 0 (max 1), ciclos prom 124.0 peor 128 d
+PASS cs_setup600_hold40: perdidos en reset 2, respuestas 998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, stores a la RAM 0, violaciones 0, vigilante 0 (max 1), ciclos prom 121.0 peor 125 de 
+PASS cs_setup600_hold100: perdidos en reset 2, respuestas 998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, stores a la RAM 0, violaciones 0, vigilante 0 (max 1), ciclos prom 121.0 peor 125 de
+PASS cs_setup600_hold500: perdidos en reset 2, respuestas 998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, stores a la RAM 0, violaciones 0, vigilante 0 (max 1), ciclos prom 121.0 peor 125 de
+PASS cs_setup600_hold5000: perdidos en reset 2, respuestas 998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, stores a la RAM 0, violaciones 0, vigilante 0 (max 1), ciclos prom 121.0 peor 125 d
+PASS cs_setup1000_hold40: perdidos en reset 2, respuestas 998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, stores a la RAM 0, violaciones 0, vigilante 0 (max 1), ciclos prom 123.0 peor 127 de
+PASS cs_setup1000_hold100: perdidos en reset 2, respuestas 998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, stores a la RAM 0, violaciones 0, vigilante 0 (max 1), ciclos prom 123.0 peor 127 d
+PASS cs_setup1000_hold500: perdidos en reset 2, respuestas 998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, stores a la RAM 0, violaciones 0, vigilante 0 (max 1), ciclos prom 123.0 peor 127 d
+PASS cs_setup1000_hold5000: perdidos en reset 2, respuestas 998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, stores a la RAM 0, violaciones 0, vigilante 0 (max 1), ciclos prom 123.0 peor 127 
+PASS cs_setup5000_hold40: perdidos en reset 2, respuestas 998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, stores a la RAM 0, violaciones 0, vigilante 0 (max 1), ciclos prom 123.0 peor 127 de
+PASS cs_setup5000_hold100: perdidos en reset 2, respuestas 998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, stores a la RAM 0, violaciones 0, vigilante 0 (max 1), ciclos prom 123.0 peor 127 d
+PASS cs_setup5000_hold500: perdidos en reset 2, respuestas 998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, stores a la RAM 0, violaciones 0, vigilante 0 (max 1), ciclos prom 123.0 peor 127 d
+PASS cs_setup5000_hold5000: perdidos en reset 2, respuestas 998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, stores a la RAM 0, violaciones 0, vigilante 0 (max 1), ciclos prom 123.0 peor 127 
+PASS cs_setup20000_hold40: perdidos en reset 2, respuestas 998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, stores a la RAM 0, violaciones 0, vigilante 0 (max 1), ciclos prom 124.0 peor 128 d
+PASS cs_setup20000_hold100: perdidos en reset 2, respuestas 998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, stores a la RAM 0, violaciones 0, vigilante 0 (max 1), ciclos prom 124.0 peor 128 
+PASS cs_setup20000_hold500: perdidos en reset 2, respuestas 998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, stores a la RAM 0, violaciones 0, vigilante 0 (max 1), ciclos prom 124.0 peor 128 
+PASS cs_setup20000_hold5000: perdidos en reset 2, respuestas 998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, stores a la RAM 0, violaciones 0, vigilante 0 (max 1), ciclos prom 124.0 peor 128
+PASS reset_flanco_0: perdidos en reset 0, respuestas 500, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, stores a la RAM 0, violaciones 0, vigilante 0 (max 1), ciclos prom 122.0 peor 126 de 2262
+PASS reset_flanco_1: perdidos en reset 1, respuestas 499, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, stores a la RAM 0, violaciones 0, vigilante 0 (max 1), ciclos prom 123.0 peor 127 de 2262
+PASS reset_flanco_2: perdidos en reset 1, respuestas 499, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, stores a la RAM 0, violaciones 0, vigilante 0 (max 1), ciclos prom 124.0 peor 128 de 2262
+PASS reset_flanco_3: perdidos en reset 1, respuestas 499, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, stores a la RAM 0, violaciones 0, vigilante 0 (max 1), ciclos prom 121.0 peor 125 de 2262
+PASS reset_flanco_4: perdidos en reset 1, respuestas 499, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, stores a la RAM 0, violaciones 0, vigilante 0 (max 1), ciclos prom 122.0 peor 126 de 2262
+PASS reset_flanco_5: perdidos en reset 1, respuestas 499, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, stores a la RAM 0, violaciones 0, vigilante 0 (max 1), ciclos prom 123.0 peor 127 de 2262
+PASS reset_flanco_6: perdidos en reset 1, respuestas 499, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, stores a la RAM 0, violaciones 0, vigilante 0 (max 1), ciclos prom 124.0 peor 128 de 2262
+PASS reset_flanco_7: perdidos en reset 1, respuestas 499, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, stores a la RAM 0, violaciones 0, vigilante 0 (max 1), ciclos prom 121.0 peor 125 de 2262
+PASS reset_flanco_8: perdidos en reset 1, respuestas 499, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, stores a la RAM 0, violaciones 0, vigilante 0 (max 1), ciclos prom 122.0 peor 126 de 2262
+PASS reset_inicio_0: perdidos en reset 2, respuestas 498, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, stores a la RAM 0, violaciones 0, vigilante 0 (max 1), ciclos prom 123.0 peor 127 de 2262
+PASS reset_inicio_1: perdidos en reset 2, respuestas 498, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, stores a la RAM 0, violaciones 0, vigilante 0 (max 1), ciclos prom 122.0 peor 126 de 2262
+PASS reset_inicio_20: perdidos en reset 2, respuestas 498, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, stores a la RAM 0, violaciones 0, vigilante 0 (max 1), ciclos prom 122.0 peor 126 de 226
+PASS reset_inicio_100000: perdidos en reset 1, respuestas 499, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, stores a la RAM 0, violaciones 0, vigilante 0 (max 1), ciclos prom 123.0 peor 127 de
+PASS reset_inicio_163000: perdidos en reset 0, respuestas 500, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, stores a la RAM 0, violaciones 0, vigilante 0 (max 1), ciclos prom 124.0 peor 128 de
+PASS reset_inicio_162440: perdidos en reset 0, respuestas 500, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, stores a la RAM 0, violaciones 0, vigilante 0 (max 1), ciclos prom 122.0 peor 126 de
+PASS reset_inicio_162441: perdidos en reset 0, respuestas 500, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, stores a la RAM 0, violaciones 0, vigilante 0 (max 1), ciclos prom 121.0 peor 125 de
+PASS reset_inicio_162480: perdidos en reset 0, respuestas 500, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, stores a la RAM 0, violaciones 0, vigilante 0 (max 1), ciclos prom 121.0 peor 125 de
+PASS pegada_1: perdidos en reset 2, respuestas 998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, stores a la RAM 0, violaciones 0, vigilante 0 (max 1), ciclos prom 123.0 peor 127 de 2262
+PASS pegada_255: perdidos en reset 2, respuestas 998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, stores a la RAM 0, violaciones 0, vigilante 0 (max 1), ciclos prom 123.0 peor 127 de 2262
+PASS alterna_1_255: perdidos en reset 2, respuestas 998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, stores a la RAM 0, violaciones 0, vigilante 0 (max 1), ciclos prom 123.0 peor 127 de 2262
+PASS pegada_1_luego_255: perdidos en reset 2, respuestas 998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, stores a la RAM 0, violaciones 0, vigilante 0 (max 1), ciclos prom 123.0 peor 127 de 
+PASS al_azar_1_255: perdidos en reset 2, respuestas 1998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, stores a la RAM 0, violaciones 0, vigilante 0 (max 1), ciclos prom 123.0 peor 127 de 2262
+PASS familia_plana: perdidos en reset 2, respuestas 1998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, stores a la RAM 0, violaciones 0, vigilante 0 (max 1), ciclos prom 123.0 peor 127 de 2262
+PASS familia_borde_bajo: perdidos en reset 2, respuestas 1998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, stores a la RAM 0, violaciones 0, vigilante 0 (max 1), ciclos prom 123.0 peor 127 de
+PASS familia_borde_alto: perdidos en reset 2, respuestas 1998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, stores a la RAM 0, violaciones 0, vigilante 0 (max 1), ciclos prom 123.0 peor 127 de
+PASS familia_saltos: perdidos en reset 2, respuestas 1998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, stores a la RAM 0, violaciones 0, vigilante 0 (max 1), ciclos prom 123.0 peor 127 de 226
+PASS familia_tendencia: perdidos en reset 2, respuestas 1998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, stores a la RAM 0, violaciones 0, vigilante 0 (max 1), ciclos prom 123.0 peor 127 de 
+PASS familia_paseo: perdidos en reset 2, respuestas 1998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, stores a la RAM 0, violaciones 0, vigilante 0 (max 1), ciclos prom 123.0 peor 127 de 2262
+PASS rondas_10ms_1ms_01ms: perdidos en reset 1, respuestas 599, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, stores a la RAM 0, violaciones 0, vigilante 0 (max 1), ciclos prom 123.0 peor 127 d
+PASS rondas_01ms_1ms_10ms: perdidos en reset 2, respuestas 598, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, stores a la RAM 0, violaciones 0, vigilante 0 (max 1), ciclos prom 123.0 peor 127 d
+PASS rondas_3x2000_01ms: perdidos en reset 2, respuestas 5998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, stores a la RAM 0, violaciones 0, vigilante 0 (max 1), ciclos prom 123.0 peor 127 de
+PASS sclk_100k_periodo_1ms: perdidos en reset 1, respuestas 999, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, stores a la RAM 0, violaciones 0, vigilante 0 (max 1), ciclos prom 122.0 peor 126 
+PASS sclk_200k_periodo_1ms: perdidos en reset 1, respuestas 999, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, stores a la RAM 0, violaciones 0, vigilante 0 (max 1), ciclos prom 121.0 peor 125 
+
+Mediciones por tick (punto 3.2)
+== make fondo-ticks HW=r2
+PASS: make fondo-ticks HW=r2
+PASS ronda3: 20000 bytes, 19998 ticks de estado, patrimonio 21392, 4 ordenes, vio el minimo 1 y el maximo 1, stores a la RAM 0, peor caso 127 de 2262 ciclos
+  Peor caso de la respuesta contra el presupuesto de cada ronda
+PASS ronda2: 3000 bytes, 2999 ticks de estado, patrimonio 10000, 0 ordenes, vio el minimo 0 y el maximo 0, stores a la RAM 0, peor caso 127 de 24762 ciclos
+  Peor caso de la respuesta contra el presupuesto de cada ronda
+
+FAIL: 1 pasos fallaron
+
+Repeticion del paso de las series reales (commit 6ddd4ce, tools/reales.sh sha256 0a655b76be7b354f...).
+En la corrida de arriba tools/reales.sh fallo antes de simular: tools/barrel/comun.sh define B=build/barrel y pisaba la carpeta de las series.
+Los demas pasos no usan tools/reales.sh y no se repiten.
+PASS: tools/reales.sh r2
+PASS tesla_100000: 20000 bytes, 19998 ticks de estado, patrimonio 20795, 4 ordenes, vio el minimo 1 y el maximo 1, stores a la RAM 0, peor caso 127 de 2262 ciclos
+PASS tesla_1000000: 20000 bytes, 19999 ticks de estado, patrimonio 20795, 4 ordenes, vio el minimo 1 y el maximo 1, stores a la RAM 0, peor caso 127 de 24762 ciclos
+PASS amd_100000: 20000 bytes, 19998 ticks de estado, patrimonio 26470, 8 ordenes, vio el minimo 1 y el maximo 1, stores a la RAM 0, peor caso 127 de 2262 ciclos
+PASS amd_1000000: 20000 bytes, 19999 ticks de estado, patrimonio 26470, 8 ordenes, vio el minimo 1 y el maximo 1, stores a la RAM 0, peor caso 127 de 24762 ciclos
+PASS gemelo, tesla, periodo 100000 ns, 20000 ticks, Peor caso precio->decision: 127 ciclos (disponibles: 2262), 4/4, 20000 filas identicas a ref/fondo.py, patrimonio 20795
+PASS gemelo, tesla, periodo 1000000 ns, 20000 ticks, Peor caso precio->decision: 127 ciclos (disponibles: 24762), 4/4, 20000 filas identicas a ref/fondo.py, patrimonio 20795
+PASS gemelo, tesla, periodo 10000000 ns, 20000 ticks, Peor caso precio->decision: 127 ciclos (disponibles: 249762), 4/4, 20000 filas identicas a ref/fondo.py, patrimonio 20795
+PASS gemelo, amd, periodo 100000 ns, 20000 ticks, Peor caso precio->decision: 127 ciclos (disponibles: 2262), 4/4, 20000 filas identicas a ref/fondo.py, patrimonio 26470
+PASS gemelo, amd, periodo 1000000 ns, 20000 ticks, Peor caso precio->decision: 127 ciclos (disponibles: 24762), 4/4, 20000 filas identicas a ref/fondo.py, patrimonio 26470
+PASS gemelo, amd, periodo 10000000 ns, 20000 ticks, Peor caso precio->decision: 127 ciclos (disponibles: 249762), 4/4, 20000 filas identicas a ref/fondo.py, patrimonio 26470
+PASS: r2 paso los criterios 1, 2, 4, 6 y 7 (con el paso de las series reales repetido)

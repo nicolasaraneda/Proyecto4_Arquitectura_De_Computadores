@@ -1,0 +1,27 @@
+Series reales de la clase del 18/11 en r2 contra ref/fondo.py
+Generado por tools/reales.sh (tools/reales.sh r2). No editar a mano.
+
+Herramientas:
+  Yosys 0.68+195 (git sha1 435977e97-dirty, Release, Clang /usr/bin/clang++ 21.1.8)
+  "nextpnr-ice40" -- Next Generation Place and Route (Version nextpnr-0.11.1-19-g8dbcee5c)
+  Icarus Verilog version 14.0 (devel) (s20260301-403-g5ab23063f-dirty)
+Commit de partida: 6ddd4ce (rama banda-40)
+  Verilator 5.053 devel rev v5.052-22-g7cf8c5cca (mod)
+Hardware (r2): pochoco_soc con -DESPINO_BARREL -DESPINO_XD_EMAD -DESPINO_XD_DEVK -DESPINO_TABLA -DESPINO_VIGILANTE
+Programa: sw/fondo.s (sha256 f82f094c97577e6d...), tabla sw/fondo_tabla.hex (sha256 a90aacf30968a690...), referencia ref/fondo.py
+
+Tesla: la captura del registrador (identica a TSLA desde el 10/1/2022 10:20, normalizada). AMD: el mismo inicio.
+
+1. RTL con tb/fondo/tb_fondo.sv (Verilator)
+PASS tesla_100000: 20000 bytes, 19998 ticks de estado, patrimonio 20795, 4 ordenes, vio el minimo 1 y el maximo 1, stores a la RAM 0, peor caso 127 de 2262 ciclos
+PASS tesla_1000000: 20000 bytes, 19999 ticks de estado, patrimonio 20795, 4 ordenes, vio el minimo 1 y el maximo 1, stores a la RAM 0, peor caso 127 de 24762 ciclos
+PASS amd_100000: 20000 bytes, 19998 ticks de estado, patrimonio 26470, 8 ordenes, vio el minimo 1 y el maximo 1, stores a la RAM 0, peor caso 127 de 2262 ciclos
+PASS amd_1000000: 20000 bytes, 19999 ticks de estado, patrimonio 26470, 8 ordenes, vio el minimo 1 y el maximo 1, stores a la RAM 0, peor caso 127 de 24762 ciclos
+
+2. Gemelo del barrel (el de R1: el vigilante no existe en el gemelo) a los tres periodos
+PASS gemelo, tesla, periodo 100000 ns, 20000 ticks, Peor caso precio->decision: 127 ciclos (disponibles: 2262), 4/4, 20000 filas identicas a ref/fondo.py, patrimonio 20795
+PASS gemelo, tesla, periodo 1000000 ns, 20000 ticks, Peor caso precio->decision: 127 ciclos (disponibles: 24762), 4/4, 20000 filas identicas a ref/fondo.py, patrimonio 20795
+PASS gemelo, tesla, periodo 10000000 ns, 20000 ticks, Peor caso precio->decision: 127 ciclos (disponibles: 249762), 4/4, 20000 filas identicas a ref/fondo.py, patrimonio 20795
+PASS gemelo, amd, periodo 100000 ns, 20000 ticks, Peor caso precio->decision: 127 ciclos (disponibles: 2262), 4/4, 20000 filas identicas a ref/fondo.py, patrimonio 26470
+PASS gemelo, amd, periodo 1000000 ns, 20000 ticks, Peor caso precio->decision: 127 ciclos (disponibles: 24762), 4/4, 20000 filas identicas a ref/fondo.py, patrimonio 26470
+PASS gemelo, amd, periodo 10000000 ns, 20000 ticks, Peor caso precio->decision: 127 ciclos (disponibles: 249762), 4/4, 20000 filas identicas a ref/fondo.py, patrimonio 26470

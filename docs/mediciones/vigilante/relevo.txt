@@ -5,13 +5,13 @@ Herramientas:
   Yosys 0.68+195 (git sha1 435977e97-dirty, Release, Clang /usr/bin/clang++ 21.1.8)
   "nextpnr-ice40" -- Next Generation Place and Route (Version nextpnr-0.11.1-19-g8dbcee5c)
   Icarus Verilog version 14.0 (devel) (s20260301-403-g5ab23063f-dirty)
-Commit de partida: 41826e0 (rama regla-cotas-r1)
+Commit de partida: 2f3567e (rama banda-40)
   Verilator 5.053 devel rev v5.052-22-g7cf8c5cca (mod)
 Hardware (r2): pochoco_soc con -DESPINO_BARREL -DESPINO_XD_EMAD -DESPINO_XD_DEVK -DESPINO_TABLA -DESPINO_VIGILANTE
-Programa: sw/fondo.s (sha256 6f55ec520f3686ef...), tabla sw/fondo_tabla.hex (sha256 93ad35e5be0d6f7e...), referencia ref/fondo.py
+Programa: sw/fondo.s (sha256 f82f094c97577e6d...), tabla sw/fondo_tabla.hex (sha256 a90aacf30968a690...), referencia ref/fondo.py
 
 Imagen 0: copia de rtl/pochoco_soc.v llamada pochoco_soc_r2, con las definiciones de R2 y VigN = 4.
-Imagen 1: pochoco_soc sin definiciones (Espino base) con sw/trade.hex (sha256 2e4308da4ad636ec...).
+Imagen 1: pochoco_soc sin definiciones (Espino base) con sw/trade.hex (sha256 4ba987032b990a84...).
 Serie: build/vigilante/relevo/serie_relevo.csv. Referencia: tools/vigilante/relevo_ref.py, con ref/fondo.py y ref/trader.py.
 Modelo de la reconfiguracion: desde BOOT y durante T_RECONF el pin MISO vale 1 (pull-up) y
 ningun SoC tiene reloj. T_RECONF = 53 ms es el valor tipico de la hoja de datos; 35500000 ns es el
@@ -33,7 +33,7 @@ PASS sana: la cuenta del vigilante nunca pasa de 1
 PASS sana: una escritura en DECISION por cada uno de los 19998 precios recibidos
 PASS sana: la imagen 1 nunca recibe reloj
 PASS sana: los 20000 bytes coinciden con ref/fondo.py
-  patrimonio final: 253980
+  patrimonio final: 440655
 
 === 2. Relevos con T_RECONF = 53 ms ===
 --- falla en el tick 100, T = 0,1 ms (ronda 3), 800 ticks ---

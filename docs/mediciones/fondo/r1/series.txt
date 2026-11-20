@@ -5,10 +5,10 @@ Herramientas:
   Yosys 0.68+195 (git sha1 435977e97-dirty, Release, Clang /usr/bin/clang++ 21.1.8)
   "nextpnr-ice40" -- Next Generation Place and Route (Version nextpnr-0.11.1-19-g8dbcee5c)
   Icarus Verilog version 14.0 (devel) (s20260301-403-g5ab23063f-dirty)
-Commit de partida: 6ad97b9 (rama regla-cotas-r1)
+Commit de partida: 2f3567e (rama banda-40)
   Verilator 5.053 devel rev v5.052-22-g7cf8c5cca (mod)
 Hardware (r1): pochoco_soc con -DESPINO_BARREL -DESPINO_XD_EMAD -DESPINO_XD_DEVK -DESPINO_TABLA
-Programa: sw/fondo.s (sha256 6f55ec520f3686ef...), tabla sw/fondo_tabla.hex (sha256 93ad35e5be0d6f7e...), referencia ref/fondo.py
+Programa: sw/fondo.s (sha256 f82f094c97577e6d...), tabla sw/fondo_tabla.hex (sha256 a90aacf30968a690...), referencia ref/fondo.py
 
 35 series por familia, cada una cruda y normalizada (-norm), 2000 ticks, semilla 1, periodo de 0,1 ms.
 

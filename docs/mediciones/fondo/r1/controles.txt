@@ -5,27 +5,29 @@ Herramientas:
   Yosys 0.68+195 (git sha1 435977e97-dirty, Release, Clang /usr/bin/clang++ 21.1.8)
   "nextpnr-ice40" -- Next Generation Place and Route (Version nextpnr-0.11.1-19-g8dbcee5c)
   Icarus Verilog version 14.0 (devel) (s20260301-403-g5ab23063f-dirty)
-Commit de partida: 6ad97b9 (rama regla-cotas-r1)
+Commit de partida: 2f3567e (rama banda-40)
   Verilator 5.053 devel rev v5.052-22-g7cf8c5cca (mod)
 Hardware (r1): pochoco_soc con -DESPINO_BARREL -DESPINO_XD_EMAD -DESPINO_XD_DEVK -DESPINO_TABLA
-Programa: sw/fondo.s (sha256 6f55ec520f3686ef...), tabla sw/fondo_tabla.hex (sha256 93ad35e5be0d6f7e...), referencia ref/fondo.py
+Programa: sw/fondo.s (sha256 f82f094c97577e6d...), tabla sw/fondo_tabla.hex (sha256 a90aacf30968a690...), referencia ref/fondo.py
 
 6000 ticks por control. Un control esta bien cuando la comparacion FALLA.
 
-DETECTADO banda_tabla: la tabla trae otra banda de compra (171 en vez de 161)
-    1198 bytes distintos a la referencia, el primero en el tick 388; los bytes no son los de ref/trader.py (la regla de R0); byte en el tick 386: 127 y se esperaba 191; 7 segmentos en el tick 386: (2, 48)
-DETECTADO venta_tabla: la tabla vende desde 200 en vez de 195
-    487 bytes distintos a la referencia, el primero en el tick 436; los bytes no son los de ref/trader.py (la regla de R0); byte en el tick 434: 127 y se esperaba 191; 7 segmentos en el tick 434: (2, 48) 
-DETECTADO venta_196: la tabla vende desde 196 en vez de 195 (un solo byte cambia: la serie de reversion de semilla 2)
-    1 bytes distintos a la referencia, el primero en el tick 4674; los bytes no son los de ref/trader.py (la regla de R0); byte en el tick 4672: 127 y se esperaba 191; 7 segmentos en el tick 4672: (2, 48)
+DETECTADO banda_tabla: la tabla trae la banda de compra de banda 60 (161 en vez de 141)
+    184 bytes distintos a la referencia, el primero en el tick 349; los bytes no son los de ref/trader.py (la regla de R0); byte en el tick 347: 127 y se esperaba 191; LED en el tick 347: 14 y se esperaba
+DETECTADO venta_tabla: la tabla vende desde 195 (banda 60) en vez de 215
+    4521 bytes distintos a la referencia, el primero en el tick 843; los bytes no son los de ref/trader.py (la regla de R0); byte en el tick 841: 191 y se esperaba 127; LED en el tick 841: 6 y se esperaba
+DETECTADO venta_216: la tabla vende desde 216 en vez de 215 (la serie de reversion de semilla 39 tiene un 215 exacto adentro)
+    119 bytes distintos a la referencia, el primero en el tick 4290; los bytes no son los de ref/trader.py (la regla de R0); byte en el tick 4288: 127 y se esperaba 191; 7 segmentos en el tick 4288: (2, 4
+DETECTADO compra_139: la tabla compra hasta 139 en vez de 140 (la serie de reversion de semilla 39 tiene un 140 exacto afuera)
+    2 bytes distintos a la referencia, el primero en el tick 4251; los bytes no son los de ref/trader.py (la regla de R0); byte en el tick 4249: 191 y se esperaba 127; LED en el tick 4249: 6 y se esperaba
 DETECTADO bajo_desde_101: compra al ver 101 y no solo 100
     25 bytes distintos a la referencia, el primero en el tick 5964; los bytes no son los de ref/trader.py (la regla de R0); byte en el tick 5962: 127 y se esperaba 191; 7 segmentos en el tick 5962: (2, 48
 DETECTADO minimo_olvidado: la marca de haber visto el minimo no queda puesta
-    2717 bytes distintos a la referencia, el primero en el tick 349; los bytes no son los de ref/trader.py (la regla de R0); LED en el tick 57: 8 y se esperaba 10; byte en el tick 347: 191 y se esperaba 1
+    3549 bytes distintos a la referencia, el primero en el tick 483; los bytes no son los de ref/trader.py (la regla de R0); LED en el tick 57: 8 y se esperaba 10; byte en el tick 481: 191 y se esperaba 1
 DETECTADO sin_banda: con los dos extremos vistos no compra en la banda
-    3019 bytes distintos a la referencia, el primero en el tick 349; los bytes no son los de ref/trader.py (la regla de R0); byte en el tick 347: 191 y se esperaba 127; LED en el tick 347: 6 y se esperaba
+    3549 bytes distintos a la referencia, el primero en el tick 483; los bytes no son los de ref/trader.py (la regla de R0); byte en el tick 481: 191 y se esperaba 127; LED en el tick 481: 6 y se esperaba
 DETECTADO q_no_se_mantiene: sin cambio el byte no se repite: pasa a comprar 63
-    2094 bytes distintos a la referencia, el primero en el tick 3; los bytes no son los de ref/trader.py (la regla de R0); byte en el tick 1: 127 y se esperaba 0; LED en el tick 1: 8 y se esperaba 0; 7 se
+    329 bytes distintos a la referencia, el primero en el tick 3; los bytes no son los de ref/trader.py (la regla de R0); byte en el tick 1: 127 y se esperaba 0; LED en el tick 1: 8 y se esperaba 0; 7 seg
 DETECTADO parte_comprando: parte con comprar 63 en vez de mantener
     463 bytes distintos a la referencia, el primero en el tick 3; los bytes no son los de ref/trader.py (la regla de R0); byte en el tick 1: 127 y se esperaba 0; LED en el tick 1: 8 y se esperaba 0; 7 seg
 DETECTADO dos_decisiones: el hilo 0 escribe DECISION dos veces en el tick
@@ -41,4 +43,4 @@ DETECTADO hilo_toca_spi: el hilo 1 lee el registro de estado del SPI
 DETECTADO hilo_escribe_ram: el hilo 2 escribe la RAM (el programa sano no la usa) (con escribe:2)
     stores_ram = 749800 y se esperaba 0
 
-PASS: 14 de 14 controles detectados
+PASS: 15 de 15 controles detectados

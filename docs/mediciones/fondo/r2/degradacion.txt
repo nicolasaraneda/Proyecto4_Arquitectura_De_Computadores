@@ -5,39 +5,39 @@ Herramientas:
   Yosys 0.68+195 (git sha1 435977e97-dirty, Release, Clang /usr/bin/clang++ 21.1.8)
   "nextpnr-ice40" -- Next Generation Place and Route (Version nextpnr-0.11.1-19-g8dbcee5c)
   Icarus Verilog version 14.0 (devel) (s20260301-403-g5ab23063f-dirty)
-Commit de partida: 41826e0 (rama regla-cotas-r1)
+Commit de partida: 2f3567e (rama banda-40)
   Verilator 5.053 devel rev v5.052-22-g7cf8c5cca (mod)
 Hardware (r2): pochoco_soc con -DESPINO_BARREL -DESPINO_XD_EMAD -DESPINO_XD_DEVK -DESPINO_TABLA -DESPINO_VIGILANTE
-Programa: sw/fondo.s (sha256 6f55ec520f3686ef...), tabla sw/fondo_tabla.hex (sha256 93ad35e5be0d6f7e...), referencia ref/fondo.py
+Programa: sw/fondo.s (sha256 f82f094c97577e6d...), tabla sw/fondo_tabla.hex (sha256 a90aacf30968a690...), referencia ref/fondo.py
 
 20000 ticks por corrida, periodo de 0,1 ms. Limite del peor caso: 1131 ciclos.
 Las fallas estan en los hilos 1 a 3; el hilo 0, que decide, no se toca. La referencia es la del programa sano.
 
 --- programa sano ---
-PASS sano__meta: 20000 bytes, 19998 ticks de estado, patrimonio 19214, 4 ordenes, vio el minimo 1 y el maximo 1, stores a la RAM 0, peor caso 127 de 1131 ciclos
+PASS sano__meta: 20000 bytes, 19998 ticks de estado, patrimonio 21392, 4 ordenes, vio el minimo 1 y el maximo 1, stores a la RAM 0, peor caso 127 de 1131 ciclos
 --- el hilo 1 hace cuentas sin parar (ocupado:1) ---
-PASS ocupado_1__meta: 20000 bytes, 19998 ticks de estado, patrimonio 19214, 4 ordenes, vio el minimo 1 y el maximo 1, stores a la RAM 0, peor caso 127 de 1131 ciclos
-PASS ocupado_1__norm: 20000 bytes, 19998 ticks de estado, patrimonio 205483, 210 ordenes, vio el minimo 1 y el maximo 1, stores a la RAM 0, peor caso 127 de 1131 ciclos
+PASS ocupado_1__meta: 20000 bytes, 19998 ticks de estado, patrimonio 21392, 4 ordenes, vio el minimo 1 y el maximo 1, stores a la RAM 0, peor caso 127 de 1131 ciclos
+PASS ocupado_1__norm: 20000 bytes, 19998 ticks de estado, patrimonio 57341, 26 ordenes, vio el minimo 1 y el maximo 1, stores a la RAM 0, peor caso 127 de 1131 ciclos
 --- el hilo 2 hace cuentas sin parar (ocupado:2) ---
-PASS ocupado_2__meta: 20000 bytes, 19998 ticks de estado, patrimonio 19214, 4 ordenes, vio el minimo 1 y el maximo 1, stores a la RAM 0, peor caso 127 de 1131 ciclos
-PASS ocupado_2__norm: 20000 bytes, 19998 ticks de estado, patrimonio 205483, 210 ordenes, vio el minimo 1 y el maximo 1, stores a la RAM 0, peor caso 127 de 1131 ciclos
+PASS ocupado_2__meta: 20000 bytes, 19998 ticks de estado, patrimonio 21392, 4 ordenes, vio el minimo 1 y el maximo 1, stores a la RAM 0, peor caso 127 de 1131 ciclos
+PASS ocupado_2__norm: 20000 bytes, 19998 ticks de estado, patrimonio 57341, 26 ordenes, vio el minimo 1 y el maximo 1, stores a la RAM 0, peor caso 127 de 1131 ciclos
 --- el hilo 3 hace cuentas sin parar (ocupado:3) ---
-PASS ocupado_3__meta: 20000 bytes, 19998 ticks de estado, patrimonio 19214, 4 ordenes, vio el minimo 1 y el maximo 1, stores a la RAM 0, peor caso 127 de 1131 ciclos
-PASS ocupado_3__norm: 20000 bytes, 19998 ticks de estado, patrimonio 205483, 210 ordenes, vio el minimo 1 y el maximo 1, stores a la RAM 0, peor caso 127 de 1131 ciclos
+PASS ocupado_3__meta: 20000 bytes, 19998 ticks de estado, patrimonio 21392, 4 ordenes, vio el minimo 1 y el maximo 1, stores a la RAM 0, peor caso 127 de 1131 ciclos
+PASS ocupado_3__norm: 20000 bytes, 19998 ticks de estado, patrimonio 57341, 26 ordenes, vio el minimo 1 y el maximo 1, stores a la RAM 0, peor caso 127 de 1131 ciclos
 --- los tres hilos hacen cuentas sin parar (ocupado:1+ocupado:2+ocupado:3) ---
-PASS ocupados__meta: 20000 bytes, 19998 ticks de estado, patrimonio 19214, 4 ordenes, vio el minimo 1 y el maximo 1, stores a la RAM 0, peor caso 127 de 1131 ciclos
-PASS ocupados__norm: 20000 bytes, 19998 ticks de estado, patrimonio 205483, 210 ordenes, vio el minimo 1 y el maximo 1, stores a la RAM 0, peor caso 127 de 1131 ciclos
+PASS ocupados__meta: 20000 bytes, 19998 ticks de estado, patrimonio 21392, 4 ordenes, vio el minimo 1 y el maximo 1, stores a la RAM 0, peor caso 127 de 1131 ciclos
+PASS ocupados__norm: 20000 bytes, 19998 ticks de estado, patrimonio 57341, 26 ordenes, vio el minimo 1 y el maximo 1, stores a la RAM 0, peor caso 127 de 1131 ciclos
 --- el hilo 1 escribe y lee la RAM sin parar (escribe:1) ---
-PASS escribe_1__meta: 20000 bytes, 19998 ticks de estado, patrimonio 19214, 4 ordenes, vio el minimo 1 y el maximo 1, stores a la RAM 2499800, peor caso 127 de 1131 ciclos
-PASS escribe_1__norm: 20000 bytes, 19998 ticks de estado, patrimonio 205483, 210 ordenes, vio el minimo 1 y el maximo 1, stores a la RAM 2499800, peor caso 127 de 1131 ciclos
+PASS escribe_1__meta: 20000 bytes, 19998 ticks de estado, patrimonio 21392, 4 ordenes, vio el minimo 1 y el maximo 1, stores a la RAM 2499800, peor caso 127 de 1131 ciclos
+PASS escribe_1__norm: 20000 bytes, 19998 ticks de estado, patrimonio 57341, 26 ordenes, vio el minimo 1 y el maximo 1, stores a la RAM 2499800, peor caso 127 de 1131 ciclos
 --- los tres hilos escriben y leen la RAM sin parar (escribe:1+escribe:2+escribe:3) ---
-PASS escribe_todos__meta: 20000 bytes, 19998 ticks de estado, patrimonio 19214, 4 ordenes, vio el minimo 1 y el maximo 1, stores a la RAM 7499400, peor caso 127 de 1131 ciclos
-PASS escribe_todos__norm: 20000 bytes, 19998 ticks de estado, patrimonio 205483, 210 ordenes, vio el minimo 1 y el maximo 1, stores a la RAM 7499400, peor caso 127 de 1131 ciclos
+PASS escribe_todos__meta: 20000 bytes, 19998 ticks de estado, patrimonio 21392, 4 ordenes, vio el minimo 1 y el maximo 1, stores a la RAM 7499400, peor caso 127 de 1131 ciclos
+PASS escribe_todos__norm: 20000 bytes, 19998 ticks de estado, patrimonio 57341, 26 ordenes, vio el minimo 1 y el maximo 1, stores a la RAM 7499400, peor caso 127 de 1131 ciclos
 --- el hilo 3 lee la memoria del programa sin parar (programa:3) ---
-PASS programa_3__meta: 20000 bytes, 19998 ticks de estado, patrimonio 19214, 4 ordenes, vio el minimo 1 y el maximo 1, stores a la RAM 0, peor caso 127 de 1131 ciclos
-PASS programa_3__norm: 20000 bytes, 19998 ticks de estado, patrimonio 205483, 210 ordenes, vio el minimo 1 y el maximo 1, stores a la RAM 0, peor caso 127 de 1131 ciclos
+PASS programa_3__meta: 20000 bytes, 19998 ticks de estado, patrimonio 21392, 4 ordenes, vio el minimo 1 y el maximo 1, stores a la RAM 0, peor caso 127 de 1131 ciclos
+PASS programa_3__norm: 20000 bytes, 19998 ticks de estado, patrimonio 57341, 26 ordenes, vio el minimo 1 y el maximo 1, stores a la RAM 0, peor caso 127 de 1131 ciclos
 --- un hilo calcula, otro escribe la RAM y otro lee el programa (ocupado:1+escribe:2+programa:3) ---
-PASS mezcla__meta: 20000 bytes, 19998 ticks de estado, patrimonio 19214, 4 ordenes, vio el minimo 1 y el maximo 1, stores a la RAM 2499800, peor caso 127 de 1131 ciclos
-PASS mezcla__norm: 20000 bytes, 19998 ticks de estado, patrimonio 205483, 210 ordenes, vio el minimo 1 y el maximo 1, stores a la RAM 2499800, peor caso 127 de 1131 ciclos
+PASS mezcla__meta: 20000 bytes, 19998 ticks de estado, patrimonio 21392, 4 ordenes, vio el minimo 1 y el maximo 1, stores a la RAM 2499800, peor caso 127 de 1131 ciclos
+PASS mezcla__norm: 20000 bytes, 19998 ticks de estado, patrimonio 57341, 26 ordenes, vio el minimo 1 y el maximo 1, stores a la RAM 2499800, peor caso 127 de 1131 ciclos
 
 PASS: 17 de 17 corridas con la decision esperada y a tiempo. Peor caso 127 ciclos de 1131 (programa sano: 127)

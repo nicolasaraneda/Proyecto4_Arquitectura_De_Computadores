@@ -5,28 +5,28 @@ Herramientas:
   Yosys 0.68+195 (git sha1 435977e97-dirty, Release, Clang /usr/bin/clang++ 21.1.8)
   "nextpnr-ice40" -- Next Generation Place and Route (Version nextpnr-0.11.1-19-g8dbcee5c)
   Icarus Verilog version 14.0 (devel) (s20260301-403-g5ab23063f-dirty)
-Commit de partida: 41826e0 (rama regla-cotas-r1)
+Commit de partida: 2f3567e (rama banda-40)
   Verilator 5.053 devel rev v5.052-22-g7cf8c5cca (mod)
 Hardware (r2): pochoco_soc con -DESPINO_BARREL -DESPINO_XD_EMAD -DESPINO_XD_DEVK -DESPINO_TABLA -DESPINO_VIGILANTE
-Programa: sw/fondo.s (sha256 6f55ec520f3686ef...), tabla sw/fondo_tabla.hex (sha256 93ad35e5be0d6f7e...), referencia ref/fondo.py
+Programa: sw/fondo.s (sha256 f82f094c97577e6d...), tabla sw/fondo_tabla.hex (sha256 a90aacf30968a690...), referencia ref/fondo.py
 
 1. Copia parametrizada del testbench oficial (Verilator)
 PASS copia del oficial, tb/practica.csv, periodo 100000 ns, 20000 ticks, Peor caso precio->decision: 127 ciclos (disponibles: 2262), 4/4, 20000 filas identicas, patrimonio 9729
-PASS copia del oficial, data/practica_meta.csv, periodo 100000 ns, 20000 ticks, Peor caso precio->decision: 127 ciclos (disponibles: 2262), 4/4, 20000 filas identicas, patrimonio 19214
+PASS copia del oficial, data/practica_meta.csv, periodo 100000 ns, 20000 ticks, Peor caso precio->decision: 127 ciclos (disponibles: 2262), 4/4, 20000 filas identicas, patrimonio 21392
 PASS copia del oficial, tb/practica.csv, periodo 1000000 ns, 20000 ticks, Peor caso precio->decision: 127 ciclos (disponibles: 24762), 4/4, 20000 filas identicas, patrimonio 9729
-PASS copia del oficial, data/practica_meta.csv, periodo 1000000 ns, 20000 ticks, Peor caso precio->decision: 127 ciclos (disponibles: 24762), 4/4, 20000 filas identicas, patrimonio 19214
+PASS copia del oficial, data/practica_meta.csv, periodo 1000000 ns, 20000 ticks, Peor caso precio->decision: 127 ciclos (disponibles: 24762), 4/4, 20000 filas identicas, patrimonio 21392
 PASS copia del oficial, tb/practica.csv, periodo 10000000 ns, 20000 ticks, Peor caso precio->decision: 127 ciclos (disponibles: 249762), 4/4, 20000 filas identicas, patrimonio 9729
-PASS copia del oficial, data/practica_meta.csv, periodo 10000000 ns, 20000 ticks, Peor caso precio->decision: 127 ciclos (disponibles: 249762), 4/4, 20000 filas identicas, patrimonio 19214
+PASS copia del oficial, data/practica_meta.csv, periodo 10000000 ns, 20000 ticks, Peor caso precio->decision: 127 ciclos (disponibles: 249762), 4/4, 20000 filas identicas, patrimonio 21392
 
 2. Bytes, estado tick a tick, telemetria y protocolo (tb/fondo/tb_fondo.sv)
-PASS meta_100000: 20000 bytes, 19998 ticks de estado, patrimonio 19214, 4 ordenes, vio el minimo 1 y el maximo 1, stores a la RAM 0, peor caso 127 de 2262 ciclos
-PASS meta_1000000: 20000 bytes, 19999 ticks de estado, patrimonio 19214, 4 ordenes, vio el minimo 1 y el maximo 1, stores a la RAM 0, peor caso 127 de 24762 ciclos
-PASS meta_10000000: 20000 bytes, 19999 ticks de estado, patrimonio 19214, 4 ordenes, vio el minimo 1 y el maximo 1, stores a la RAM 0, peor caso 127 de 249762 ciclos
+PASS meta_100000: 20000 bytes, 19998 ticks de estado, patrimonio 21392, 4 ordenes, vio el minimo 1 y el maximo 1, stores a la RAM 0, peor caso 127 de 2262 ciclos
+PASS meta_1000000: 20000 bytes, 19999 ticks de estado, patrimonio 21392, 4 ordenes, vio el minimo 1 y el maximo 1, stores a la RAM 0, peor caso 127 de 24762 ciclos
+PASS meta_10000000: 20000 bytes, 19999 ticks de estado, patrimonio 21392, 4 ordenes, vio el minimo 1 y el maximo 1, stores a la RAM 0, peor caso 127 de 249762 ciclos
 PASS practica_anterior: 20000 bytes, 19998 ticks de estado, patrimonio 9729, 2 ordenes, vio el minimo 1 y el maximo 0, stores a la RAM 0, peor caso 127 de 2262 ciclos
 PASS remuestreo: 20000 bytes, 19998 ticks de estado, patrimonio 16047, 2 ordenes, vio el minimo 1 y el maximo 0, stores a la RAM 0, peor caso 127 de 2262 ciclos
-PASS remuestreo-norm: 20000 bytes, 19998 ticks de estado, patrimonio 28261, 7 ordenes, vio el minimo 1 y el maximo 1, stores a la RAM 0, peor caso 127 de 2262 ciclos
+PASS remuestreo-norm: 20000 bytes, 19998 ticks de estado, patrimonio 23892, 4 ordenes, vio el minimo 1 y el maximo 1, stores a la RAM 0, peor caso 127 de 2262 ciclos
 PASS modelo: 20000 bytes, 19998 ticks de estado, patrimonio 11274, 2 ordenes, vio el minimo 1 y el maximo 0, stores a la RAM 0, peor caso 127 de 2262 ciclos
-PASS modelo-norm: 20000 bytes, 19998 ticks de estado, patrimonio 28424, 14 ordenes, vio el minimo 1 y el maximo 1, stores a la RAM 0, peor caso 127 de 2262 ciclos
+PASS modelo-norm: 20000 bytes, 19998 ticks de estado, patrimonio 27366, 7 ordenes, vio el minimo 1 y el maximo 1, stores a la RAM 0, peor caso 127 de 2262 ciclos
 PASS modelo_vecino: 20000 bytes, 19998 ticks de estado, patrimonio 10000, 0 ordenes, vio el minimo 0 y el maximo 0, stores a la RAM 0, peor caso 127 de 2262 ciclos
 PASS modelo_vecino-norm: 20000 bytes, 19998 ticks de estado, patrimonio 25055, 4 ordenes, vio el minimo 1 y el maximo 1, stores a la RAM 0, peor caso 127 de 2262 ciclos
 PASS paseo: 20000 bytes, 19998 ticks de estado, patrimonio 1317, 2 ordenes, vio el minimo 1 y el maximo 0, stores a la RAM 0, peor caso 127 de 2262 ciclos
@@ -34,7 +34,7 @@ PASS paseo-norm: 20000 bytes, 19998 ticks de estado, patrimonio 10732, 2 ordenes
 PASS tendencia: 20000 bytes, 19998 ticks de estado, patrimonio 97433, 14 ordenes, vio el minimo 1 y el maximo 1, stores a la RAM 0, peor caso 127 de 2262 ciclos
 PASS tendencia-norm: 20000 bytes, 19998 ticks de estado, patrimonio 25072, 4 ordenes, vio el minimo 1 y el maximo 1, stores a la RAM 0, peor caso 127 de 2262 ciclos
 PASS reversion: 20000 bytes, 19998 ticks de estado, patrimonio 8716, 3 ordenes, vio el minimo 1 y el maximo 0, stores a la RAM 0, peor caso 127 de 2262 ciclos
-PASS reversion-norm: 20000 bytes, 19998 ticks de estado, patrimonio 205483, 210 ordenes, vio el minimo 1 y el maximo 1, stores a la RAM 0, peor caso 127 de 2262 ciclos
+PASS reversion-norm: 20000 bytes, 19998 ticks de estado, patrimonio 57341, 26 ordenes, vio el minimo 1 y el maximo 1, stores a la RAM 0, peor caso 127 de 2262 ciclos
 PASS dos_componentes: 20000 bytes, 19998 ticks de estado, patrimonio 13934, 2 ordenes, vio el minimo 1 y el maximo 0, stores a la RAM 0, peor caso 127 de 2262 ciclos
 PASS dos_componentes-norm: 20000 bytes, 19998 ticks de estado, patrimonio 24410, 4 ordenes, vio el minimo 1 y el maximo 1, stores a la RAM 0, peor caso 127 de 2262 ciclos
 PASS saltos: 20000 bytes, 19998 ticks de estado, patrimonio 354, 4 ordenes, vio el minimo 1 y el maximo 0, stores a la RAM 0, peor caso 127 de 2262 ciclos
@@ -43,15 +43,15 @@ PASS cambio_volatilidad: 20000 bytes, 19998 ticks de estado, patrimonio 2872, 3 
 PASS cambio_volatilidad-norm: 20000 bytes, 19998 ticks de estado, patrimonio 12600, 2 ordenes, vio el minimo 1 y el maximo 1, stores a la RAM 0, peor caso 127 de 2262 ciclos
 PASS cambio_de_caracter: 20000 bytes, 19998 ticks de estado, patrimonio 25443, 4 ordenes, vio el minimo 1 y el maximo 1, stores a la RAM 0, peor caso 127 de 2262 ciclos
 PASS cambio_de_caracter-norm: 20000 bytes, 19998 ticks de estado, patrimonio 25009, 4 ordenes, vio el minimo 1 y el maximo 1, stores a la RAM 0, peor caso 127 de 2262 ciclos
-PASS volatil: 20000 bytes, 19998 ticks de estado, patrimonio 2696, 37 ordenes, vio el minimo 1 y el maximo 1, stores a la RAM 0, peor caso 127 de 2262 ciclos
+PASS volatil: 20000 bytes, 19998 ticks de estado, patrimonio 2650, 21 ordenes, vio el minimo 1 y el maximo 1, stores a la RAM 0, peor caso 127 de 2262 ciclos
 PASS volatil-norm: 20000 bytes, 19998 ticks de estado, patrimonio 10284, 2 ordenes, vio el minimo 1 y el maximo 1, stores a la RAM 0, peor caso 127 de 2262 ciclos
 PASS nivel_bajo: 20000 bytes, 19998 ticks de estado, patrimonio 69968, 11 ordenes, vio el minimo 1 y el maximo 1, stores a la RAM 0, peor caso 127 de 2262 ciclos
 PASS nivel_bajo-norm: 20000 bytes, 19998 ticks de estado, patrimonio 24939, 4 ordenes, vio el minimo 1 y el maximo 1, stores a la RAM 0, peor caso 127 de 2262 ciclos
 PASS plana: 20000 bytes, 19998 ticks de estado, patrimonio 9920, 16 ordenes, vio el minimo 1 y el maximo 0, stores a la RAM 0, peor caso 127 de 2262 ciclos
 PASS plana-norm: 20000 bytes, 19998 ticks de estado, patrimonio 10000, 0 ordenes, vio el minimo 0 y el maximo 0, stores a la RAM 0, peor caso 127 de 2262 ciclos
 PASS borde_bajo: 20000 bytes, 19998 ticks de estado, patrimonio 9926, 40 ordenes, vio el minimo 1 y el maximo 0, stores a la RAM 0, peor caso 127 de 2262 ciclos
-PASS borde_bajo-norm: 20000 bytes, 19998 ticks de estado, patrimonio 36912, 21 ordenes, vio el minimo 1 y el maximo 1, stores a la RAM 0, peor caso 127 de 2262 ciclos
+PASS borde_bajo-norm: 20000 bytes, 19998 ticks de estado, patrimonio 20215, 7 ordenes, vio el minimo 1 y el maximo 1, stores a la RAM 0, peor caso 127 de 2262 ciclos
 PASS borde_alto: 20000 bytes, 19998 ticks de estado, patrimonio 10000, 0 ordenes, vio el minimo 0 y el maximo 1, stores a la RAM 0, peor caso 127 de 2262 ciclos
-PASS borde_alto-norm: 20000 bytes, 19998 ticks de estado, patrimonio 638741, 464 ordenes, vio el minimo 1 y el maximo 1, stores a la RAM 0, peor caso 127 de 2262 ciclos
+PASS borde_alto-norm: 20000 bytes, 19998 ticks de estado, patrimonio 300727, 138 ordenes, vio el minimo 1 y el maximo 1, stores a la RAM 0, peor caso 127 de 2262 ciclos
 
 Ticks comparados con tb_fondo.sv en los casos que pasan: 680000

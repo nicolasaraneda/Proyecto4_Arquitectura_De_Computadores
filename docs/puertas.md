@@ -25,6 +25,22 @@ Un bitstream sube a la escalera solo si pasa tres puertas, en orden: simulación
 
 `tb/tb_estres.sv` es una maestra con la misma transacción y la misma medición que el testbench oficial, pero con los tiempos elegidos en tiempo de ejecución (decisión T53). `tools/estres.py` compara cada byte que lee la maestra con `ref/trader.py`, exige MISO sin X y ningún precio sin leer ni sin respuesta, y modela como perdidos los precios que llegan antes de que termine el reset de encendido. Los casos con SCLK sobre 1 MHz son exploración y no cuentan para la puerta.
 
+## R0 con banda 40 (T140, 19/11)
+
+Rama `banda-40`. Cambian dos constantes de `sw/trade.s` (`BANDA_COMPRA` 141 y `BANDA_VENTA` 215): compra con 140 o menos y vende con 215 o más después de ver los dos extremos. El hardware no cambia y el programa entra por `icebram` en el molde de R0. La puerta la corre `tools/puerta_r0_cotas.sh` (registro en `docs/mediciones/r0_banda40_puerta.txt`, unos 50 minutos); los bitstreams salen de `make fondo-molde-banda40` (`docs/mediciones/fondo/molde_banda40.txt`).
+
+| N.º | Resultado |
+|-----|-----------|
+| 1 | 4/4. Peor caso 60 ciclos de 2262 (las mismas 24 instrucciones fijas) |
+| 2 | Cero diferencias. `make equiv` (20 de 20); práctica completa a 0,1 ms con Icarus y a 10 ms con Verilator; serie Meta completa por el RTL a 0,1 ms (Icarus), 1 ms y 10 ms (Verilator), patrimonio 21 392; 3810 series en el gemelo a los tres períodos (7,62 millones de ticks por período); exhaustiva: 1275 combinaciones de estado y precio a cada período; las series reales de la clase del 18/11 por el RTL a 0,1 y 1 ms y por el gemelo a los tres períodos (Tesla 20 795, AMD 26 470; `docs/mediciones/reales/r0.txt`) |
+| 3 | Hardware sin cambios: vale la medición de 10 semillas de más abajo. `icetime` del `.asc` nuevo: 43,27 MHz, igual que el anterior |
+| 4 | Peor caso 60 ciclos en las 8 fases, con y sin el corrimiento de 13 ns |
+| 5 | Core base sin cambios |
+| 7 | 72 casos pasan. El único FAIL es la exploración del período de 11,5 µs (50 ciclos disponibles, la regla usa 60), igual que con la banda 60; 13,5 µs pasa |
+| 8 | El `.asc` del molde, simulado por los pines: 2000 ticks idénticos a la referencia en los primeros 2000 de la serie Meta y en una ventana normalizada que toca los dos extremos (14 697) |
+
+Qué se reutilizó y por qué sigue valiendo: el timing en 10 semillas y el criterio 5 dependen solo del hardware, que no cambió; que el bitstream nuevo tiene el mismo hardware lo comprueban el control del molde (con el programa de `c794834` da `r0_base_max_media.bin` byte por byte) y el `icetime` del `.asc` nuevo.
+
 ## R0 con la regla de cotas (T133, 17/11)
 
 Rama `regla-cotas`. El hardware no cambia; el programa entra por `icebram` en el molde de R0 (`build/r0_cotas/r0_cotas.bin`, sha256 `616f799a...`). Registro completo en `docs/mediciones/r0_cotas_puerta.txt`.
@@ -83,6 +99,35 @@ Medido el 15/11 (paquete P2). Tampoco es un peldaño: es el core de R1 y R2 con 
 | Formal | Cada instrucción contra su especificación en los 7 subconjuntos, y el core con la extensión equivalente al de P1 para programas sin custom-0. 9 de 9 mutaciones con contraejemplo | `make xd-formal` |
 
 Para el criterio 5, la referencia de las instrucciones nuevas es la fórmula de la especificación escrita en el testbench (decisión T60).
+
+## R1 y R2 con banda 40 (T140, 19/11)
+
+Rama `banda-40`. El hardware y el binario de `sw/fondo.s` no cambian (solo sus comentarios; `cmp` del `.hex` contra el anterior). Cambian dos palabras de la tabla: `BANDA_COMPRA` 0x8d (141) y `BANDA_VENTA` 0xd7 (215). La puerta la corre `HW=r1|r2 tools/fondo/puerta_cotas.sh` (registros en `docs/mediciones/fondo/r1/puerta_banda40.txt` y `r2/puerta_banda40.txt`).
+
+| N.º | Criterio | R1 | R2 |
+|-----|----------|----|----|
+| 1 | Testbench oficial sin modificar | 4/4, peor caso 127 ciclos de 2262, `decisiones.csv` idéntico al de `ref/fondo.py` | Igual |
+| 2 | Equivalencia | Cero diferencias: copia del oficial con la serie anterior y con la serie Meta a 0,1, 1 y 10 ms (21 392 en la serie Meta); `tb_fondo.sv` con la serie Meta a los tres períodos y las 15 familias crudas y normalizadas; 1 050 series por el RTL (2,1 millones de ticks); el gemelo con 1 051 series a los tres períodos (6,36 millones de ticks); las series reales de la clase del 18/11 por el RTL a 0,1 y 1 ms y por el gemelo a los tres períodos (`docs/mediciones/reales/r1.txt`) | Igual (`reales/r2.txt`) |
+| 3 | Timing | Hardware sin cambios. `icetime` del `.asc` nuevo: 52,61 MHz, igual que antes | 51,66 MHz, igual que antes |
+| 4 | Peor caso barriendo la fase | 128 ciclos contra 1131 (holgura de 94,3 %) | Igual |
+| 5 | Core | Hardware y binario sin cambios: vale la campaña de P1 a P5 | Igual |
+| 6 | Degradación | 17 de 17 corridas, peor caso 127 ciclos. 15 de 15 controles negativos detectados, entre ellos la tabla con la banda 60 (161 y 195), un nivel corrido en uno de cada lado (vende desde 216, compra hasta 139) | Igual |
+| 7 | Estrés | 57 de 57, peor caso 128 ciclos | 57 de 57, el vigilante no dispara en ninguno |
+| 8 | Bitstream simulado desde el `.asc` | Molde con `icebram`: 2000 ticks idénticos en los primeros 2000 de la serie Meta y en una ventana normalizada (14 697) | Igual, sin disparo; con el supervisor colgado en el tick 100, BOOT pide la imagen 01 al terminar la transacción 105. `make vig-relevo`: todas las comprobaciones pasan |
+
+El paso de las series reales falló en la primera corrida por un error del script, no del diseño (`tools/barrel/comun.sh` define `B` y pisaba la carpeta de las series); se corrigió y se repitió solo ese paso, como consta al final de cada registro. En la repetición pasó en los dos peldaños: Tesla 20 795 y AMD 26 470 por el RTL a 0,1 y 1 ms y por el gemelo a los tres períodos, iguales a `ref/fondo.py` y a R0.
+
+Bitstreams (`make fondo-molde-banda40`, copiados a `bitstreams/`):
+
+| Archivo | sha256 |
+|---------|--------|
+| `r0_banda40.bin` | `390edbfad65b2e269c059e646259f7c3e117398a5ececb1d64816fe8fdd4fd5f` |
+| `r1_banda40.bin` | `a9e233b96fba7643c8faa5cabcd3f54b1b9cd5e291850bb8ee295570b0a7ba61` |
+| `r2_banda40.bin` | `3fb31a04674a1fcd67d7cf97cb57fcf44eea23243de262a1994284ff96c57bd3` |
+| `r2_banda40_multi.bin` (imagen 0 R2, imagen 1 R0 banda 40) | `8a773121e44a4d6f93f319afe8145620e65bcab285dec1e9b0440f8763d9d691` |
+| `r2_banda40_falla_multi.bin` (R2 colgado en el tick 100, imagen 1 R0; `make r2-falla-banda40`) | `88d63a08082f51d279e7e3a9e4c3ac7030443905ea92561a27e29fd7800b345d` |
+
+Qué se reutilizó y por qué sigue valiendo: el timing en 10 semillas, la verificación del core (criterio 5) y la equivalencia formal dependen solo del hardware, que no cambió; el control del molde (con los programas anteriores da `r1_fondo.bin`, `r2_fondo_vigilante.bin` y `r2_multi.bin` byte por byte) y el `icetime` de cada `.asc` nuevo lo comprueban. La máscara de la extensión que vigila el criterio 5 depende del binario de `sw/fondo.s`, que es el mismo.
 
 ## R1 y R2 con la regla de cotas (desde el 17/11, decisión T133)
 
