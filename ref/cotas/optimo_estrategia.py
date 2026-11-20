@@ -177,11 +177,16 @@ LARGO_TRAMO = P.N // TRAMOS
 
 
 class Comprimida:
-    """Umbrales por celda (clase de v^2, tramo de r, fase): para cada posición s, el conjunto de x con
-    s' = arriba se aproxima por x >= alto[s] o x <= bajo[s] (los dos intervalos que tocan los
-    bordes), tomados de la tabla completa en el r del medio del tramo. 0 en alto o 255 en bajo
-    marcan 'vacío'. Para V3 hay además el umbral de media posición. Solo variantes de dos
-    posiciones."""
+    """Umbrales por celda (fase, clase de v^2, tramo de 1250 ticks restantes), tomados de la tabla
+    completa en el r del medio del tramo. La forma de la tabla en la fase A (sección 13.4): con s = 0
+    compra en un intervalo alto que no llega al borde (deja fuera los últimos niveles bajo 255) y, a
+    veces, en un intervalo bajo que parte en 101; con s = 1 mantiene en intervalos parecidos pero más
+    anchos (histéresis). Cuatro bytes por celda:
+      alto   compra con s = 0 si x >= alto (el bloque alto, sin su corte superior)
+      bajo   compra con s = 0 si x <= bajo (el bloque que parte en 101)
+      salida con s = 1 mantiene si x >= salida
+      bajo1  con s = 1 mantiene si x <= bajo1
+    256 en alto o salida y 99 en bajo o bajo1 marcan un intervalo vacío. Solo variantes de dos posiciones."""
 
     def __init__(self, variante, objetivo):
         pol = tablas(variante, objetivo)
@@ -192,30 +197,36 @@ class Comprimida:
             for j, t in enumerate(por_v):
                 for tr in range(TRAMOS):
                     r = tr * LARGO_TRAMO + LARGO_TRAMO // 2
+                    u = []
                     for s in range(self.nS):
                         dec = [t[(r * P.L + i) * self.nS + s] for i in range(i0, i1)]
-                        top = self.nS - 1
-                        # intervalo alto: desde el borde superior hacia abajo mientras s' = top
-                        alto = 256
-                        for i in range(i1 - 1, i0 - 1, -1):
-                            if dec[i - i0] == top:
-                                alto = LO + i
-                            else:
-                                break
-                        bajo = 99
-                        for i in range(i0, i1):
-                            if dec[i - i0] == top:
-                                bajo = LO + i
-                            else:
-                                break
-                        if bajo >= alto:      # todo el rango
-                            bajo = 255
-                        self.cel[(F, j, tr, s)] = (alto, bajo)
+                        u.append(self._intervalos(dec, i0))
+                    self.cel[(F, j, tr)] = (u[0][0], u[0][1], u[1][0], u[1][1])
+
+    @staticmethod
+    def _intervalos(dec, i0):
+        n = len(dec)
+        bajo = 99
+        k = 0
+        while k < n and dec[k] == 1:
+            bajo = LO + i0 + k
+            k += 1
+        alto = 256
+        k = n - 1
+        while k >= 0 and dec[k] == 0:          # corte superior (se ignora)
+            k -= 1
+        if k >= 0 and LO + i0 + k > bajo:
+            while k >= 0 and dec[k] == 1 and LO + i0 + k > bajo:
+                alto = LO + i0 + k
+                k -= 1
+        return alto, bajo
 
     def decide(self, F, j, r, p, s):
         tr = min(TRAMOS - 1, r // LARGO_TRAMO)
-        alto, bajo = self.cel[(F, j, tr, s)]
-        return (self.nS - 1) if (p >= alto or p <= bajo) else 0
+        alto, bajo, salida, bajo1 = self.cel[(F, j, tr)]
+        if s == 0:
+            return 1 if (p >= alto or p <= bajo) else 0
+        return 1 if (p >= salida or p <= bajo1) else 0
 
 
 COMPRIMIDAS = {}
