@@ -165,6 +165,179 @@ def p255(T, v2, x, r):
     return a + f * (b - a)
 
 
+# --- programación dinámica (sección 4 del diseño) ---------------------------------------------
+
+LOGL = [math.log(LO + i) for i in range(L)]
+COSTO = 10 / 15000      # un cambio completo de posición: dos órdenes de 5 sobre un patrimonio de 15 000
+VARIANTES = {"V1": ("A",), "V2": ("A", "B", "C", "D"), "V3": ("A",), "B40": ()}
+POS = {"V1": (0.0, 1.0), "V2": (0.0, 1.0), "V3": (0.0, 0.5, 1.0), "B40": (0.0, 1.0)}
+FASES = "ABCD"
+RANGO = {"A": (1, L - 1), "B": (0, L - 1), "C": (1, L), "D": (0, L)}
+
+
+def fija(F, i, s, nS):
+    """Política fija fuera de las fases optimizadas: B invertido, C en caja, D banda 40, A mantener."""
+    if F == "B":
+        return nS - 1
+    if F == "C":
+        return 0
+    if F == "D":
+        x = LO + i
+        return nS - 1 if x <= 140 else 0 if x >= 215 else s
+    return s
+
+
+def ruta_pol(variante, objetivo, j):
+    return os.path.join(CACHE, f"pol_{variante}_{objetivo}_{j}.bin")
+
+
+def dp(args):
+    """Programación dinámica sobre el paseo condicionado para un v^2 de la grilla. La posición s
+    (fracción invertida) es la que viaja de x al precio siguiente y; la elegida s' se ejecuta en y.
+      log:    V_F(x, r, s) = max_s' { log(1 - s + s y/x) en esperanza + costo(s, s') + E[V_F'(y, r-1, s')] }
+      lineal: V_F(x, r, s) = max_s' { (1 - costo) E[(1 - s + s y/x) V_F'(y, r-1, s')] }
+    con la esperanza bajo P(x -> y | condición) = K(y - x) g_F'(y, r - 1) / g_F(x, r). Guarda, para
+    las fases optimizadas, s' por (r, x, s), y el valor en r = N - 1."""
+    variante, objetivo, j = args
+    ruta = ruta_pol(variante, objetivo, j)
+    if os.path.exists(ruta) and os.path.exists(ruta + ".val"):
+        return ruta
+    K = nucleo(V2S[j])
+    m = max(abs(k) for k, _ in K)
+    ps = [p for _, p in K]
+    w = len(ps)
+    pos = POS[variante]
+    nS = len(pos)
+    opt = VARIANTES[variante]
+    log = objetivo == "log"
+    V0 = 0.0 if log else 1.0
+    cst = [[(math.log(1 - abs(a - b) * COSTO) if log else 1 - abs(a - b) * COSTO) for b in pos] for a in pos]
+    pad = [0.0] * m
+    LOGP = pad + LOGL + pad
+    YP = pad + [float(LO + i) for i in range(L)] + pad
+    H = {si: [[math.log(1 - sv + sv * (LO + i + k) / (LO + i)) for k in range(-m, m + 1)] for i in range(L)]
+         for si, sv in enumerate(pos) if 0 < sv < 1}
+    gD, gB, gC, gA = [1.0] * L, [0.0] * L, [0.0] * L, [0.0] * L
+    V = {F: [[V0] * L for _ in pos] for F in FASES}
+    tab = {F: bytearray(N * L * nS) for F in opt}
+
+    def ext(F, rowF, B0, C155, D0, D155):
+        if F == "D":
+            return pad + rowF + pad
+        if F == "B":
+            return pad + rowF[:L - 1] + [D155] + pad
+        if F == "C":
+            return pad + [D0] + rowF[1:] + pad
+        return pad + [B0] + rowF[1:L - 1] + [C155] + pad
+
+    for r in range(1, N):
+        g = {"A": gA, "B": gB, "C": gC, "D": gD}
+        e = {F: ext(F, g[F], gB[0], gC[L - 1], gD[0], gD[L - 1]) for F in FASES}
+        ev = {F: [ext(F, V[F][sp], V["B"][sp][0], V["C"][sp][L - 1], V["D"][sp][0], V["D"][sp][L - 1])
+                  for sp in range(nS)] for F in FASES}
+        nuevo_g, nuevo_V = {}, {}
+        for F in FASES:
+            eF = e[F]
+            pV = [[a * b for a, b in zip(eF, ev[F][sp])] for sp in range(nS)]
+            if log:
+                pL = [a * b for a, b in zip(eF, LOGP)]
+            else:
+                pY = [[a * b for a, b in zip(pV[sp], YP)] for sp in range(nS)]
+            i0, i1 = RANGO[F]
+            gF = [0.0] * L
+            VF = [[V0] * L for _ in range(nS)]
+            optF = F in opt
+            tF = tab.get(F)
+            for i in range(i0, i1):
+                gi = sum(map(mul, ps, eF[i:i + w]))
+                gF[i] = gi
+                if gi <= 0.0:
+                    for s in range(nS):
+                        sp = fija(F, i, s, nS)
+                        VF[s][i] = V[F][s][i]
+                        if optF:
+                            tF[(r * L + i) * nS + s] = sp
+                    continue
+                E2 = [sum(map(mul, ps, pV[sp][i:i + w])) / gi for sp in range(nS)]
+                if log:
+                    r1 = sum(map(mul, ps, pL[i:i + w])) / gi - LOGL[i]
+                    E1 = []
+                    for s, sv in enumerate(pos):
+                        if sv == 0.0:
+                            E1.append(0.0)
+                        elif sv == 1.0:
+                            E1.append(r1)
+                        else:
+                            E1.append(sum(map(mul, map(mul, ps, eF[i:i + w]), H[s][i])) / gi)
+                else:
+                    Bq = [sum(map(mul, ps, pY[sp][i:i + w])) / gi / (LO + i) for sp in range(nS)]
+                for s in range(nS):
+                    if optF:
+                        mejor, msp = None, s
+                        for sp in range(nS):
+                            if log:
+                                val = E1[s] + cst[s][sp] + E2[sp]
+                            else:
+                                val = cst[s][sp] * ((1 - pos[s]) * E2[sp] + pos[s] * Bq[sp])
+                            if mejor is None or val > mejor + 1e-15:
+                                mejor, msp = val, sp
+                        tF[(r * L + i) * nS + s] = msp
+                        VF[s][i] = mejor
+                    else:
+                        sp = fija(F, i, s, nS)
+                        if log:
+                            VF[s][i] = E1[s] + cst[s][sp] + E2[sp]
+                        else:
+                            VF[s][i] = cst[s][sp] * ((1 - pos[s]) * E2[sp] + pos[s] * Bq[sp])
+            nuevo_g[F], nuevo_V[F] = gF, VF
+        gA, gB, gC, gD = nuevo_g["A"], nuevo_g["B"], nuevo_g["C"], nuevo_g["D"]
+        V = nuevo_V
+    os.makedirs(CACHE, exist_ok=True)
+    with open(ruta + ".tmp", "wb") as f:
+        for F in opt:
+            f.write(tab[F])
+    os.replace(ruta + ".tmp", ruta)
+    val = array.array("d")
+    for F in FASES:
+        for s in range(nS):
+            val.extend(V[F][s])
+    with open(ruta + ".val", "wb") as f:
+        val.tofile(f)
+    return ruta
+
+
+def politicas(variantes=("V1", "V2", "V3", "B40"), objetivos=("log", "lineal"), procesos=None):
+    trabajos = [(v, o, j) for v in variantes for o in objetivos for j in range(len(V2S))
+                if not (v == "B40" and o == "lineal")]
+    falta = [t for t in trabajos if not (os.path.exists(ruta_pol(*t)) and os.path.exists(ruta_pol(*t) + ".val"))]
+    if falta:
+        with Pool(min(procesos or os.cpu_count(), len(falta))) as pool:
+            for k, _ in enumerate(pool.imap_unordered(dp, falta), 1):
+                print(f"  programación dinámica: {k}/{len(falta)}", file=sys.stderr)
+
+
+def cargar_pol(variante, objetivo):
+    """{fase: [bytes por v^2]} con s' en el índice (r * L + i) * nS + s."""
+    opt = VARIANTES[variante]
+    nS = len(POS[variante])
+    out = {F: [] for F in opt}
+    for j in range(len(V2S)):
+        datos = open(ruta_pol(variante, objetivo, j), "rb").read()
+        tam = N * L * nS
+        for k, F in enumerate(opt):
+            out[F].append(bytes(datos[k * tam:(k + 1) * tam]))
+    return out
+
+
+def valores(variante, objetivo, j):
+    """Valor en r = N - 1: {fase: [[V(x, s) para x] para s]}."""
+    nS = len(POS[variante])
+    a = array.array("d")
+    with open(ruta_pol(variante, objetivo, j) + ".val", "rb") as f:
+        a.fromfile(f, 4 * nS * L)
+    return {F: [list(a[(k * nS + s) * L:(k * nS + s + 1) * L]) for s in range(nS)] for k, F in enumerate(FASES)}
+
+
 # --- prueba del cálculo: paseos de la red simulados -------------------------------------------------
 
 def _mc(args):
