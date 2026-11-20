@@ -1,0 +1,4 @@
+# Equivalencia: política óptima apagada contra la banda 40
+
+ref/cotas/explorar_optimo.py equivalencia --conjunto cinco, commit 92f9ccb. Decisiones tick a tick de ideas.Regla(BandaD(140, 215)) y de optimo_estrategia.Optima() (sin tabla).
+- población completa de las cinco empresas: 1368253 ventanas, 27365060000 decisiones por regla, ventanas con alguna diferencia: 0 (1712 s)

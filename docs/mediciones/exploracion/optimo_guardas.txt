@@ -1,0 +1,104 @@
+# Política óptima: diagnóstico de pérdidas, guardas de la fase A y elección
+
+ref/cotas/explorar_optimo.py guardas, commit 92f9ccb. Otras acciones (12000 ventanas). Todo con la tabla comprimida y la clase de placa (cortes en 1/64 comparados con sumas, histéresis de 64 ticks), que es lo que iría a la placa. Torneos contra el rival con los mismos 20 000 sorteos para todas las variantes.
+Guardas sobre las compras de la fase A: (a) tope de d niveles bajo la entrada, sin volver a entrar en la fase A de esa ronda; (b) nunca más de media posición en la fase A (solo V3); (c) no aumentar la posición en la fase A con v² en las dos clases más altas (3/2 y 2).
+
+## Diagnóstico de V3 sin guarda
+
+
+Comprobación: el rival en Python coincide con el de C en 12000 de 12000 ventanas.
+
+### Torneos de 3 rondas que V3 pierde contra el rival de Tesla (1611 de 20 000)
+
+Se reparte la diferencia de patrimonio V3 menos rival de las tres ventanas de cada torneo perdido según la fase y la clase de v² del tick en que ocurrió cada cambio (la clase de placa de V3 en ese momento). Porcentajes del total neto perdido (un negativo es pérdida).
+
+Diferencia con el rival en los torneos perdidos: total -4267331 (-883 por ventana).
+
+| fase | antes de 390 | v² 0,125 | v² 0,250 | v² 0,375 | v² 0,500 | v² 0,750 | v² 1,000 | v² 1,500 | v² 2,000 | total fase |
+|---|---|---|---|---|---|---|---|---|---|---|
+| A | +0 % | +1 % | -1 % | -6 % | -26 % | -16 % | -25 % | -21 % | -13 % | -107 % |
+| B | +0 % | +0 % | +3 % | +9 % | +22 % | +10 % | +6 % | -12 % | -9 % | +30 % |
+| C | +0 % | -0 % | -0 % | -0 % | -2 % | -0 % | -0 % | -0 % | +0 % | -2 % |
+| D | +0 % | -0 % | -0 % | -0 % | -2 % | -6 % | -9 % | -3 % | +1 % | -21 % |
+| total clase | +0 % | +1 % | +2 % | +2 % | -8 % | -12 % | -29 % | -35 % | -21 % | 100 % |
+
+### El 1 % de peores ventanas de V3 (120 ventanas, patrimonio de 5828 a 10243)
+
+
+Resultado propio (patrimonio final menos 10 000): total -33036 (-275 por ventana).
+
+| fase | antes de 390 | v² 0,125 | v² 0,250 | v² 0,375 | v² 0,500 | v² 0,750 | v² 1,000 | v² 1,500 | v² 2,000 | total fase |
+|---|---|---|---|---|---|---|---|---|---|---|
+| A | +0 % | +2 % | -15 % | -43 % | -102 % | -28 % | +5 % | +2 % | +0 % | -178 % |
+| B | +0 % | +0 % | +0 % | +0 % | +0 % | +29 % | +17 % | -1 % | +0 % | +46 % |
+| C | +0 % | -1 % | -0 % | -1 % | -48 % | -2 % | -1 % | +0 % | +0 % | -52 % |
+| D | +0 % | +0 % | +1 % | +4 % | +21 % | +49 % | +8 % | +2 % | +0 % | +85 % |
+| total clase | +0 % | +1 % | -14 % | -40 % | -128 % | +48 % | +29 % | +4 % | +0 % | 100 % |
+
+Diferencia con la banda 40: total -113440 (-945 por ventana).
+
+| fase | antes de 390 | v² 0,125 | v² 0,250 | v² 0,375 | v² 0,500 | v² 0,750 | v² 1,000 | v² 1,500 | v² 2,000 | total fase |
+|---|---|---|---|---|---|---|---|---|---|---|
+| A | +0 % | +1 % | -4 % | -13 % | -30 % | -8 % | +2 % | +1 % | +0 % | -52 % |
+| B | +0 % | +0 % | +0 % | +0 % | +0 % | -18 % | -9 % | +0 % | +0 % | -26 % |
+| C | +0 % | -0 % | -0 % | -0 % | -14 % | -1 % | -0 % | +0 % | +0 % | -15 % |
+| D | +0 % | +0 % | +0 % | -0 % | -4 % | -1 % | -1 % | -0 % | +0 % | -6 % |
+| total clase | +0 % | +0 % | -5 % | -13 % | -48 % | -28 % | -8 % | +1 % | +0 % | 100 % |
+
+## V3 log con guardas (12000 ventanas)
+
+| estrategia | pts sin copia | 1.ª sola % | media | p5 | peor | órdenes | Δ con banda 40 (ee) | contra el rival: gana / empata / pierde % | 3 rondas: gana / pierde % |
+|---|---|---|---|---|---|---|---|---|---|
+| banda 40 | 1,842 | 37,9 | 21303 | 10746 | 8490 | 3,8 | +0 (0) | 57,6 / 35,5 / 6,9 | 91,6 / 3,7 |
+| V3 log, sin guarda | 1,856 | 53,0 | 21615 | 11659 | 5828 | 7,4 | +312 (75) | 76,7 / 8,8 / 14,5 | 91,9 / 8,1 |
+| V3 log, a16 | 1,845 | 49,6 | 21423 | 10937 | 8000 | 6,3 | +120 (40) | 73,8 / 8,8 / 17,5 | 94,3 / 5,6 |
+| V3 log, a24 | 1,847 | 50,7 | 21462 | 11122 | 7373 | 6,8 | +158 (47) | 74,9 / 8,7 / 16,3 | 93,3 / 6,6 |
+| V3 log, a32 | 1,848 | 51,4 | 21496 | 11320 | 5828 | 7,0 | +192 (58) | 75,0 / 8,8 / 16,2 | 92,7 / 7,3 |
+| V3 log, b | 1,857 | 51,3 | 21449 | 11359 | 7642 | 6,0 | +146 (43) | 80,8 / 8,8 / 10,4 | 96,5 / 3,4 |
+| V3 log, c | 1,854 | 52,8 | 21509 | 11561 | 5828 | 6,7 | +205 (54) | 76,8 / 9,8 / 13,4 | 93,2 / 6,7 |
+| V3 log, a16+b | 1,845 | 48,6 | 21358 | 10938 | 9181 | 5,6 | +55 (22) | 75,7 / 8,8 / 15,6 | 96,2 / 3,8 |
+| V3 log, a24+b | 1,847 | 49,3 | 21375 | 11079 | 8651 | 5,8 | +71 (28) | 78,7 / 8,8 / 12,5 | 96,4 / 3,5 |
+| V3 log, a32+b | 1,849 | 49,8 | 21391 | 11170 | 7642 | 5,9 | +87 (34) | 80,3 / 8,8 / 11,0 | 96,4 / 3,6 |
+| V3 log, a16+c | 1,846 | 50,0 | 21406 | 10937 | 8000 | 6,0 | +103 (33) | 73,4 / 9,8 / 16,8 | 94,6 / 5,3 |
+| V3 log, a24+c | 1,848 | 51,0 | 21429 | 11122 | 7373 | 6,3 | +125 (42) | 75,2 / 9,8 / 15,1 | 94,0 / 5,9 |
+| V3 log, a32+c | 1,849 | 51,6 | 21458 | 11304 | 5828 | 6,5 | +154 (48) | 75,4 / 9,8 / 14,8 | 93,6 / 6,4 |
+| V3 log, b+c | 1,852 | 51,1 | 21397 | 11327 | 7642 | 5,7 | +94 (33) | 80,1 / 9,8 / 10,1 | 96,7 / 3,3 |
+| V3 log, a16+b+c | 1,845 | 48,8 | 21352 | 10935 | 8490 | 5,4 | +49 (20) | 74,9 / 9,8 / 15,3 | 96,1 / 3,8 |
+| V3 log, a24+b+c | 1,847 | 49,5 | 21357 | 11079 | 8490 | 5,5 | +53 (25) | 77,9 / 9,8 / 12,3 | 96,4 / 3,5 |
+| V3 log, a32+b+c | 1,848 | 50,1 | 21370 | 11166 | 7642 | 5,6 | +66 (29) | 79,5 / 9,8 / 10,8 | 96,5 / 3,5 |
+
+Elegida por la regla 1 (pierde a lo más 5 %): **V3 log, b**: 1,857 puntos, pierde 3,4 % de los torneos contra el rival, +146 (ee 43) contra la banda 40.
+
+Validación interna de la elegida (informativa):
+
+| estrategia | pts sin copia | 1.ª sola % | media | p5 | peor | órdenes | Δ con banda 40 (ee) | contra el rival: gana / empata / pierde % | 3 rondas: gana / pierde % |
+|---|---|---|---|---|---|---|---|---|---|
+| banda 40 (anios-validacion) | 1,829 | 35,8 | 21109 | 10680 | 8490 | 3,7 | +0 (0) | 57,7 / 36,0 / 6,2 | 92,1 / 3,1 |
+| V3 log, b (anios-validacion) | 1,851 | 50,8 | 21316 | 11267 | 8944 | 6,0 | +207 (60) | 82,5 / 8,2 / 9,3 | 97,3 / 2,6 |
+| banda 40 (grupos-validacion) | 1,840 | 37,6 | 21267 | 10677 | 9465 | 3,8 | +0 (0) | 57,5 / 35,9 / 6,7 | 91,7 / 3,7 |
+| V3 log, b (grupos-validacion) | 1,856 | 51,4 | 21411 | 11304 | 7642 | 5,9 | +144 (50) | 81,3 / 8,9 / 9,8 | 96,5 / 3,4 |
+
+## V1 log con guardas (12000 ventanas)
+
+| estrategia | pts sin copia | 1.ª sola % | media | p5 | peor | órdenes | Δ con banda 40 (ee) | contra el rival: gana / empata / pierde % | 3 rondas: gana / pierde % |
+|---|---|---|---|---|---|---|---|---|---|
+| banda 40 | 1,842 | 37,9 | 21303 | 10746 | 8490 | 3,8 | +0 (0) | 57,6 / 35,5 / 6,9 | 91,6 / 3,7 |
+| V1 log, sin guarda | 1,853 | 53,2 | 21650 | 11574 | 5648 | 6,8 | +347 (73) | 75,4 / 9,7 / 14,9 | 91,2 / 8,7 |
+| V1 log, a16 | 1,840 | 49,7 | 21436 | 10935 | 6957 | 6,2 | +132 (38) | 72,4 / 9,7 / 17,9 | 93,1 / 6,8 |
+| V1 log, a24 | 1,845 | 51,1 | 21509 | 11107 | 6957 | 6,5 | +206 (50) | 72,8 / 9,7 / 17,5 | 92,3 / 7,7 |
+| V1 log, a32 | 1,846 | 51,6 | 21533 | 11337 | 5648 | 6,6 | +230 (60) | 73,7 / 9,7 / 16,6 | 91,6 / 8,3 |
+| V1 log, c | 1,851 | 53,0 | 21530 | 11500 | 5648 | 6,1 | +227 (52) | 75,4 / 10,8 / 13,8 | 92,6 / 7,3 |
+| V1 log, a16+c | 1,843 | 50,2 | 21418 | 10937 | 7762 | 5,8 | +115 (33) | 72,0 / 10,8 / 17,1 | 93,6 / 6,3 |
+| V1 log, a24+c | 1,846 | 51,6 | 21469 | 11118 | 7363 | 6,0 | +166 (43) | 73,2 / 10,8 / 16,0 | 93,0 / 6,9 |
+| V1 log, a32+c | 1,847 | 52,1 | 21497 | 11314 | 5648 | 6,1 | +194 (47) | 74,0 / 10,8 / 15,2 | 92,7 / 7,2 |
+
+Elegida por la regla 2 (ninguna pierde a lo más 5 %): **V1 log, a16+c**: 1,843 puntos, pierde 6,3 % de los torneos contra el rival, +115 (ee 33) contra la banda 40.
+
+Validación interna de la elegida (informativa):
+
+| estrategia | pts sin copia | 1.ª sola % | media | p5 | peor | órdenes | Δ con banda 40 (ee) | contra el rival: gana / empata / pierde % | 3 rondas: gana / pierde % |
+|---|---|---|---|---|---|---|---|---|---|
+| banda 40 (anios-validacion) | 1,829 | 35,8 | 21109 | 10680 | 8490 | 3,7 | +0 (0) | 57,7 / 36,0 / 6,2 | 92,1 / 3,1 |
+| V1 log, a16+c (anios-validacion) | 1,833 | 49,0 | 21254 | 10809 | 8000 | 5,8 | +146 (47) | 72,6 / 10,3 / 17,1 | 94,2 / 5,7 |
+| banda 40 (grupos-validacion) | 1,840 | 37,6 | 21267 | 10677 | 9465 | 3,8 | +0 (0) | 57,5 / 35,9 / 6,7 | 91,7 / 3,7 |
+| V1 log, a16+c (grupos-validacion) | 1,843 | 50,2 | 21386 | 10937 | 8000 | 5,8 | +119 (49) | 72,8 / 10,6 / 16,6 | 93,5 / 6,5 |
