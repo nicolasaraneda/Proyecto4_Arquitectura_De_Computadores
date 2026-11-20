@@ -392,9 +392,265 @@ def accion_g3(procesos):
     print(txt)
 
 
+# --- guardas, diagnóstico y elección (pedido del 19/11, noche) ---------------------------------------
+
+def guardas_v3():
+    out = [None]
+    for d in (16, 24, 32):
+        out.append((d, False, False))
+    out += [(0, True, False), (0, False, True)]
+    for d in (16, 24, 32):
+        out.append((d, True, False))
+    for d in (16, 24, 32):
+        out.append((d, False, True))
+    out.append((0, True, True))
+    for d in (16, 24, 32):
+        out.append((d, True, True))
+    return out
+
+
+def guardas_v1():
+    return [g for g in guardas_v3() if g is None or not g[1]]
+
+
+def nombre_guarda(g):
+    if g is None:
+        return "sin guarda"
+    d, media, alta = g
+    partes = ([f"a{d}"] if d else []) + (["b"] if media else []) + (["c"] if alta else [])
+    return "+".join(partes)
+
+
+def spec_g(variante, g):
+    return OE.spec(variante, "log", "S2/t", comprimida=True, placa=True, guarda=g)
+
+
+FASE_N = "ABCD"
+
+
+def _diag(ids):
+    V = _G["v"]
+    out = []
+    for i in ids:
+        w = V[i]
+        S = [ideas.crear(spec_g("V3", None)), ideas.UnaVezR(100, 220), ideas.Regla(ideas.BandaD(140, 215))]
+        caja, acc, d, Wp = [10000] * 3, [0] * 3, [ideas.M] * 3, [10000] * 3
+        acum = {}
+        lab = None
+        vlo = vhi = False
+        for p in w:
+            dW = [0] * 3
+            for k in range(3):
+                b = d[k]
+                if b:
+                    a = b >> 6
+                    q = b & 63
+                    if a == 1:
+                        t = (caja[k] - 5) // p
+                        if q > t:
+                            q = t
+                        if q > 0:
+                            caja[k] -= q * p + 5
+                            acc[k] += q
+                    elif a == 2:
+                        if q > acc[k]:
+                            q = acc[k]
+                        if q > 0 and caja[k] + q * p >= 5:
+                            caja[k] += q * p - 5
+                            acc[k] -= q
+                W = caja[k] + acc[k] * p
+                dW[k] = W - Wp[k]
+                Wp[k] = W
+            if lab is not None and (dW[0] or dW[1] or dW[2]):
+                a = acum.setdefault(lab, [0, 0, 0])
+                a[0] += dW[0] - dW[1]
+                a[1] += dW[0] - dW[2]
+                a[2] += dW[0]
+            for k in range(3):
+                d[k] = S[k].decidir(p, caja[k], acc[k])
+            if p <= 100:
+                vlo = True
+            elif p >= 255:
+                vhi = True
+            fase = "D" if (vlo and vhi) else "B" if vlo else "C" if vhi else "A"
+            lab = (fase, S[0].cv)
+        out.append((i, Wp, acum))
+    return ids, out
+
+
+def diagnostico(cx, procesos, L):
+    ruta = os.path.join(CACHE, f"diag_{cx.D.clave()}_{E.CODIGO_EXTRA['optima']}.pkl")
+    if os.path.exists(ruta):
+        res = pickle.load(open(ruta, "rb"))
+    else:
+        _G["v"] = cx.D.ventanas
+        n = len(cx.D.ventanas)
+        res = [None] * n
+        with Pool(procesos or os.cpu_count()) as pool:
+            for _, o in pool.imap_unordered(_diag, [list(range(a, min(n, a + 100))) for a in range(0, n, 100)]):
+                for i, Wp, ac in o:
+                    res[i] = (Wp, ac)
+        pickle.dump(res, open(ruta, "wb"))
+    Wv = [r[0][0] for r in res]
+    Wr = [r[0][1] for r in res]
+    ok_r = sum(1 for i in range(len(res)) if Wr[i] == cx.R[E.RIVAL_TESLA][i])
+    L.append(f"\nComprobación: el rival en Python coincide con el de C en {ok_r} de {len(res)} ventanas.")
+    idx = cx.idx["todas"]
+    n = len(idx)
+    rng = random.Random(f"mano3-{XR.SEMILLA}-todas")
+    perdidas = []
+    for _ in range(20000):
+        a, b, c = idx[rng.randrange(n)], idx[rng.randrange(n)], idx[rng.randrange(n)]
+        if Wv[a] + Wv[b] + Wv[c] - Wr[a] - Wr[b] - Wr[c] < 0:
+            perdidas.append((a, b, c))
+    peores = sorted(idx, key=lambda i: Wv[i])[:len(idx) // 100]
+
+    def tabla(ventanas, medida, titulo):
+        tot = {}
+        for i in ventanas:
+            for lab, v in res[i][1].items():
+                tot[lab] = tot.get(lab, 0) + v[medida]
+        neto = sum(tot.values())
+        L.append(f"\n{titulo}: total {neto:+.0f} ({neto / len(ventanas):+.0f} por ventana).\n")
+        L.append("| fase | " + " | ".join(["antes de 390"] + [f"v² {fmt(P.V2S[j], 3)}" for j in range(8)]) + " | total fase |")
+        L.append("|---|" + "---|" * 10)
+        for F in FASE_N:
+            celdas = [tot.get((F, j), 0) for j in range(-1, 8)]
+            L.append(f"| {F} | " + " | ".join(f"{100 * c / abs(neto):+.0f} %" if neto else "0" for c in celdas)
+                     + f" | {100 * sum(celdas) / abs(neto):+.0f} % |")
+        col = [sum(tot.get((F, j), 0) for F in FASE_N) for j in range(-1, 8)]
+        L.append("| total clase | " + " | ".join(f"{100 * c / abs(neto):+.0f} %" for c in col) + " | 100 % |")
+
+    L.append(f"\n### Torneos de 3 rondas que V3 pierde contra el rival de Tesla ({len(perdidas)} de 20 000)\n")
+    L.append("Se reparte la diferencia de patrimonio V3 menos rival de las tres ventanas de cada torneo perdido según la fase y "
+             "la clase de v² del tick en que ocurrió cada cambio (la clase de placa de V3 en ese momento). Porcentajes del total "
+             "neto perdido (un negativo es pérdida).")
+    tabla([i for t in perdidas for i in t], 0, "Diferencia con el rival en los torneos perdidos")
+    L.append(f"\n### El 1 % de peores ventanas de V3 ({len(peores)} ventanas, patrimonio de {Wv[peores[0]]} a {Wv[peores[-1]]})\n")
+    tabla(peores, 2, "Resultado propio (patrimonio final menos 10 000)")
+    tabla(peores, 1, "Diferencia con la banda 40")
+
+
+def eleccion(cands, met, b40pts):
+    """Regla de Nicolás: más puntos entre las que pierden a lo más 5 % de los torneos de 3 rondas contra el
+    rival; si ninguna, la que menos pierde entre las que superan en puntos a la banda 40."""
+    elig = [c for c in cands if met[c]["p3"] <= 5.0]
+    if elig:
+        return max(elig, key=lambda c: (met[c]["pts"], met[c]["media"])), "regla 1 (pierde a lo más 5 %)"
+    sup = [c for c in cands if met[c]["pts"] > b40pts]
+    if sup:
+        return min(sup, key=lambda c: (met[c]["p3"], -met[c]["pts"])), "regla 2 (ninguna pierde a lo más 5 %)"
+    return None, "ninguna supera a la banda 40 en puntos"
+
+
+def accion_guardas(procesos):
+    for v in ("V3", "V1"):
+        OE.tablas(v, "log")
+        OE.comprimida(v, "log")
+    cx = XR.CtxO(procesos)
+    b40 = cx.ev([E.B40], info=False)[0]
+    L = ["# Política óptima: diagnóstico de pérdidas, guardas de la fase A y elección", "",
+         f"ref/cotas/explorar_optimo.py guardas, commit {XR.commit()}. Otras acciones ({len(cx.D.filas)} ventanas). Todo con la "
+         "tabla comprimida y la clase de placa (cortes en 1/64 comparados con sumas, histéresis de 64 ticks), que es lo que "
+         "iría a la placa. Torneos contra el rival con los mismos 20 000 sorteos para todas las variantes.",
+         "Guardas sobre las compras de la fase A: (a) tope de d niveles bajo la entrada, sin volver a entrar en la fase A de esa "
+         "ronda; (b) nunca más de media posición en la fase A (solo V3); (c) no aumentar la posición en la fase A con v² en las "
+         "dos clases más altas (3/2 y 2)."]
+    L.append("\n## Diagnóstico de V3 sin guarda\n")
+    diagnostico(cx, procesos, L)
+    tb, mb = fila(cx, b40, "todas", b40, "banda 40")
+    elegidas = {}
+    for v, gs in (("V3", guardas_v3()), ("V1", guardas_v1())):
+        specs = [spec_g(v, g) for g in gs]
+        res = cx.ev(specs)
+        met, filas = {}, []
+        for g, sp, r in zip(gs, specs, res):
+            t, m = fila(cx, r, "todas", b40, f"{v} log, {nombre_guarda(g)}")
+            met[repr(sp)] = m
+            filas.append(t)
+        L.append(f"\n## {v} log con guardas ({len(cx.idx['todas'])} ventanas)\n")
+        L += [CAB, SEPC, tb] + filas
+        el, como = eleccion([repr(sp) for sp in specs], met, mb["pts"])
+        if el is None:
+            L.append(f"\nElegida: ninguna ({como}).")
+            continue
+        sp_el = specs[[repr(x) for x in specs].index(el)]
+        elegidas[v] = sp_el
+        m = met[el]
+        L.append(f"\nElegida por la {como}: **{v} log, {nombre_guarda(sp_el[1].get('guarda'))}**: {fmt(m['pts'])} puntos, "
+                 f"pierde {fmt(m['p3'], 1)} % de los torneos contra el rival, {m['d']:+.0f} (ee {m['ee']:.0f}) contra la banda 40.")
+        L.append("\nValidación interna de la elegida (informativa):\n")
+        L += [CAB, SEPC]
+        r_el = cx.ev([sp_el])[0]
+        for k in ("anios-validacion", "grupos-validacion"):
+            L.append(fila(cx, b40, k, b40, f"banda 40 ({k})")[0])
+            L.append(fila(cx, r_el, k, b40, f"{v} log, {nombre_guarda(sp_el[1].get('guarda'))} ({k})")[0])
+    pickle.dump(elegidas, open(os.path.join(CACHE, "elegidas_guardas.pkl"), "wb"))
+    txt = "\n".join(L) + "\n"
+    open(os.path.join(SALIDA, "optimo_guardas.txt"), "w").write(txt)
+    print(txt)
+
+
+def accion_examen(procesos):
+    import regimen as RG
+    elegidas = pickle.load(open(os.path.join(CACHE, "elegidas_guardas.pkl"), "rb"))
+    sp = elegidas["V3"]
+    OE.tablas("V3", "log")
+    OE.comprimida("V3", "log")
+    finales_A = pickle.load(open(os.path.join(XR.CACHE, "finales.pkl"), "rb"))
+    carpeta = XR.reales.carpeta_datos()
+    conj = E.completa(carpeta)
+    R = E.rivales(conj)
+    b40 = E.evaluar(conj, [E.B40], procesos, trozo=200, info=False)[0]
+    rA = E.evaluar(conj, [RG.spec_politica(None, finales_A["A"])], procesos, trozo=200, info=True)[0]
+    rV = E.evaluar(conj, [sp], procesos, trozo=200, info=True)[0]
+    caso = [x[1] for x in rA["info"]]
+    filas = [("banda 40", b40), ("banda 40 + módulo A", rA), (f"V3 log, {nombre_guarda(sp[1].get('guarda'))}", rV)]
+    L = ["# Examen de la política óptima del paseo en las cinco empresas (una sola vez)", "",
+         f"ref/cotas/explorar_optimo.py examen, commit {XR.commit()}. Población completa ({len(conj.filas)} ventanas). Variante "
+         f"elegida en las otras acciones (optimo_guardas.txt): {nombre_spec(sp)}, {nombre_guarda(sp[1].get('guarda'))}, tabla "
+         "comprimida y clase de placa. Es la segunda mirada a las cinco empresas (la primera fue el examen del módulo A). Error "
+         "estándar por grupos de ventanas vecinas (empresa y bloque de 20 días de inicio), como en las secciones 10 a 12. "
+         "Torneos contra el rival con los mismos sorteos de la sección 10. En la columna del módulo A, para V3: ventanas en que "
+         "usó la tabla / en que cortó por la guarda (a)."]
+    subs = {"todas": list(range(len(conj.filas)))}
+    for sep, (aj, va) in E.SEPARACIONES.items():
+        subs[f"{sep}-validacion"] = E.sub(conj, va)
+    resumen = {}
+    for k, ix in subs.items():
+        for cn, cs in (("todas", None), ("S", 1), ("B", 2)):
+            sel = ix if cs is None else [i for i in ix if caso[i] == cs]
+            T = E.Torneo(sel, R, f"examen-{k}-{cn}", XR.SEMILLA)
+            Tx = E.Torneo(sel, R, f"examen-{k}-{cn}-sin-copia", XR.SEMILLA, excluir=("espera_banda40",))
+            L.append(f"\n### {k}, caso {cn} ({len(sel)} ventanas)\n")
+            L.append(XR.CAB_M)
+            L.append(XR.SEP_M)
+            for nm, r in filas:
+                txt, m = XR.fila_examen(conj, R, r, b40, sel, T, Tx, f"{k}-{cn}")
+                L.append(f"| {nm} " + txt)
+                resumen[(k, cn, nm)] = m
+    L.append("\n## Criterio (sección 7 del diseño, con el punto 3 cambiado por Nicolás antes del examen)\n")
+    for nm, _ in filas[1:]:
+        c1 = all(resumen[(k, "todas", nm)]["pts"] > resumen[(k, "todas", "banda 40")]["pts"] for k in ("anios-validacion", "empresas-validacion"))
+        c2 = all(resumen[(k, "todas", nm)]["d"] > resumen[(k, "todas", nm)]["ee"] for k in ("anios-validacion", "empresas-validacion"))
+        c3 = resumen[("todas", "todas", nm)]["p3"] <= 10.0
+        L.append(f"- {nm}: 1. más puntos sin la copia que la banda 40 en las dos validaciones: {'sí' if c1 else 'no'} "
+                 f"(años {fmt(resumen[('anios-validacion', 'todas', nm)]['pts'])} contra "
+                 f"{fmt(resumen[('anios-validacion', 'todas', 'banda 40')]['pts'])}; empresas "
+                 f"{fmt(resumen[('empresas-validacion', 'todas', nm)]['pts'])} contra "
+                 f"{fmt(resumen[('empresas-validacion', 'todas', 'banda 40')]['pts'])}); 2. Δ con la banda 40 mayor que 1 ee en "
+                 f"las dos: {'sí' if c2 else 'no'} (años {resumen[('anios-validacion', 'todas', nm)]['d']:+.0f} con ee "
+                 f"{resumen[('anios-validacion', 'todas', nm)]['ee']:.0f}; empresas {resumen[('empresas-validacion', 'todas', nm)]['d']:+.0f} "
+                 f"con ee {resumen[('empresas-validacion', 'todas', nm)]['ee']:.0f}); 3. pierde a lo más 10 % de los torneos de 3 "
+                 f"rondas contra el rival en la población: {'sí' if c3 else 'no'} ({fmt(resumen[('todas', 'todas', nm)]['p3'], 1)} %)")
+    txt = "\n".join(L) + "\n"
+    open(os.path.join(SALIDA, "optimo_examen.txt"), "w").write(txt)
+    print(txt)
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
-    ap.add_argument("accion", choices=["g1", "g2", "g3", "equivalencia"])
+    ap.add_argument("accion", choices=["g1", "g2", "g3", "equivalencia", "guardas", "examen"])
     ap.add_argument("--conjunto", default="otras")
     ap.add_argument("--procesos", type=int, default=None)
     a = ap.parse_args()
@@ -404,6 +660,10 @@ def main():
         accion_g2(a.procesos)
     elif a.accion == "g3":
         accion_g3(a.procesos)
+    elif a.accion == "guardas":
+        accion_guardas(a.procesos)
+    elif a.accion == "examen":
+        accion_examen(a.procesos)
     elif a.accion == "equivalencia":
         accion_equivalencia(a.procesos, a.conjunto)
 

@@ -29,6 +29,12 @@ from ideas import M, C, V, LO, HI, hacia
 
 T_MIN = 390
 CORTES = [math.sqrt(P.V2S[k] * P.V2S[k + 1]) for k in range(len(P.V2S) - 1)]
+# Versión de placa (pedido del 19/11, noche): cortes en sesenta y cuatroavos, comparados con sumas
+# (64 S2 >= N_j (t - 1), con 64 S2 y N_j (t - 1) llevados como sumas corridas), e histéresis de 64
+# ticks como la clase de regimen.py. Los cortes son las medias geométricas de la grilla redondeadas
+# a 1/64: 0,172, 0,313, 0,438, 0,609, 0,859, 1,219 y 1,734.
+N64 = (11, 20, 28, 39, 55, 78, 111)
+HIST = 64
 TABLAS = {}
 
 
@@ -46,9 +52,29 @@ def tablas(variante, objetivo):
     return TABLAS[k]
 
 
+def clase_placa(S2, nd):
+    a = S2 + S2
+    a = a + a
+    a = a + a
+    a = a + a
+    a = a + a
+    a = a + a          # 64 S2 con sumas
+    j = 0
+    while j < 7 and a >= N64[j] * nd:
+        j += 1
+    return j
+
+
 class Optima(RG.Politica):
-    def __init__(self, variante=None, objetivo="log", estimador="S2/t", comprimida=None):
+    def __init__(self, variante=None, objetivo="log", estimador="S2/t", comprimida=None, placa=False, guarda=None):
         super().__init__()
+        self.placa = placa
+        self.cv = -1
+        self.cv_cuenta = 0
+        self.guarda = guarda            # (d, media, alta) o None
+        self.a_off = False
+        self.entrada = 0
+        self.topes = 0
         self.var = variante
         self.est = estimador
         self.pol = tablas(variante, objetivo) if (variante and comprimida is None) else None
@@ -86,11 +112,46 @@ class Optima(RG.Politica):
         self.s = sp
         return o
 
+    def _clase(self):
+        """Clase de v^2 de placa con histéresis, actualizada en cada tick desde t = 390."""
+        if self.t < T_MIN:
+            return
+        raw = clase_placa(self.S2, self.t - 1)
+        if self.cv < 0:
+            self.cv = raw
+        elif raw != self.cv:
+            self.cv_cuenta += 1
+            if self.cv_cuenta >= HIST:
+                self.cv = raw
+                self.cv_cuenta = 0
+        else:
+            self.cv_cuenta = 0
+
+    def _guardas(self, F, j, p, sp):
+        g = self.guarda
+        if F != "A" or g is None:
+            return sp
+        d, media, alta = g
+        if self.a_off:
+            sp = 0
+        elif d and self.s > 0 and p <= self.entrada - d:
+            sp = 0
+            self.a_off = True
+            self.topes += 1
+        else:
+            if alta and j >= 6 and sp > self.s:
+                sp = self.s
+            if media and sp > 1:
+                sp = 1
+        if self.s == 0 and sp > 0:
+            self.entrada = p
+        return sp
+
     def _tabla(self, F, p, caja, acc):
         """Decisión de la tabla, o None si no se usa (antes de t = 390)."""
         if self.t < T_MIN:
             return None
-        j = clase_v(self._v2())
+        j = self.cv if self.placa else clase_v(self._v2())
         r = P.N - 1 - self.n
         if r < 0:
             r = 0
@@ -99,6 +160,8 @@ class Optima(RG.Politica):
             sp = self.comp.decide(F, j, r, p, self.s)
         else:
             sp = self.pol[F][j][(r * P.L + p - LO) * self.nS + self.s]
+        if self.guarda is not None:
+            sp = self._guardas(F, j, p, sp)
         return self._orden(sp, p, caja, acc)
 
     def _fijo(self):
@@ -110,6 +173,8 @@ class Optima(RG.Politica):
         self.n += 1
         prev = self.prev
         self._regimen(p)
+        if self.placa:
+            self._clase()
         if prev >= 0:
             d = p - prev
             if d < 0:
@@ -167,7 +232,7 @@ class Optima(RG.Politica):
         return self.q
 
     def info(self):
-        return (self.tD, self.caso, self.usos)
+        return (self.tD, self.caso, self.usos, self.topes)
 
 
 # --- compresión (G3) ---------------------------------------------------------------------------
@@ -298,8 +363,12 @@ def _crear(spec):
 ideas.crear = _crear
 
 
-def spec(variante=None, objetivo="log", estimador="S2/t", comprimida=False):
+def spec(variante=None, objetivo="log", estimador="S2/t", comprimida=False, placa=False, guarda=None):
     d = {"variante": variante, "objetivo": objetivo, "estimador": estimador}
     if comprimida:
         d["comprimida"] = True
+    if placa:
+        d["placa"] = True
+    if guarda is not None:
+        d["guarda"] = tuple(guarda)
     return ("optima", d)
