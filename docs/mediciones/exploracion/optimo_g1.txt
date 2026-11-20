@@ -1,0 +1,214 @@
+# G1: calibración del modelo del paseo normalizado
+
+ref/cotas/explorar_optimo.py g1, commit 8c393dd. P(255 antes que 100) del modelo (h_A / g_A, ref/cotas/paseo_optimo.py) en los ticks t = 500, 1000, 2000, 4000 y 8000 de cada ventana que siguen en la fase A, con r = 19 999 - t e interpolación lineal en v^2 entre las tablas de v^2 = 1/8, 1/4, 3/8, 1/2, 3/4, 1, 3/2 y 2 (fuera de ese rango, la del borde). Deciles de la probabilidad predicha. Error estándar por grupos: ventana en los paseos; bloques de 20 y 60 días de inicio (y fecha y empresa en las otras acciones) en los datos reales, el mayor.
+Pasa si ningún decil cae respecto del anterior en más de 2 ee y ningún decil se aleja más de 10 puntos de lo predicho.
+
+### Paseos normalizados: estimador verdadero (9517 observaciones en 2833 ventanas)
+
+| decil | observaciones | P predicha media | frecuencia observada (ee) | diferencia (puntos) |
+|---|---|---|---|---|
+| 1 | 951 | 0,019 | 0,017 (0,005) | -0,2 |
+| 2 | 952 | 0,114 | 0,116 (0,013) | +0,2 |
+| 3 | 952 | 0,241 | 0,261 (0,018) | +2,0 |
+| 4 | 951 | 0,358 | 0,363 (0,020) | +0,5 |
+| 5 | 952 | 0,462 | 0,471 (0,021) | +0,8 |
+| 6 | 952 | 0,559 | 0,571 (0,020) | +1,3 |
+| 7 | 951 | 0,668 | 0,655 (0,020) | -1,3 |
+| 8 | 952 | 0,787 | 0,770 (0,018) | -1,7 |
+| 9 | 952 | 0,909 | 0,897 (0,013) | -1,2 |
+| 10 | 952 | 0,986 | 0,975 (0,008) | -1,1 |
+
+Crece con la predicha: sí; mayor distancia 2,0 puntos; G1 PASA.
+Por tick: t = 500: 2833 obs., predicha 0,512, observada 0,512; t = 1000: 2531 obs., predicha 0,512, observada 0,510; t = 2000: 2091 obs., predicha 0,513, observada 0,507; t = 4000: 1440 obs., predicha 0,500, observada 0,502; t = 8000: 622 obs., predicha 0,511, observada 0,523.
+
+### Paseos normalizados: estimador S2/t (9517 observaciones en 2833 ventanas)
+
+| decil | observaciones | P predicha media | frecuencia observada (ee) | diferencia (puntos) |
+|---|---|---|---|---|
+| 1 | 951 | 0,053 | 0,026 (0,006) | -2,7 |
+| 2 | 952 | 0,175 | 0,121 (0,013) | -5,4 |
+| 3 | 952 | 0,290 | 0,252 (0,017) | -3,8 |
+| 4 | 951 | 0,386 | 0,359 (0,020) | -2,8 |
+| 5 | 952 | 0,470 | 0,468 (0,021) | -0,1 |
+| 6 | 952 | 0,548 | 0,570 (0,020) | +2,3 |
+| 7 | 951 | 0,634 | 0,659 (0,020) | +2,5 |
+| 8 | 952 | 0,733 | 0,768 (0,017) | +3,5 |
+| 9 | 952 | 0,847 | 0,901 (0,013) | +5,4 |
+| 10 | 952 | 0,953 | 0,970 (0,007) | +1,6 |
+
+Crece con la predicha: sí; mayor distancia 5,4 puntos; G1 PASA.
+Por tick: t = 500: 2833 obs., predicha 0,510, observada 0,512; t = 1000: 2531 obs., predicha 0,510, observada 0,510; t = 2000: 2091 obs., predicha 0,512, observada 0,507; t = 4000: 1440 obs., predicha 0,500, observada 0,502; t = 8000: 622 obs., predicha 0,510, observada 0,523.
+
+### Paseos normalizados: estimador 2000 (9517 observaciones en 2833 ventanas)
+
+| decil | observaciones | P predicha media | frecuencia observada (ee) | diferencia (puntos) |
+|---|---|---|---|---|
+| 1 | 951 | 0,053 | 0,026 (0,006) | -2,7 |
+| 2 | 952 | 0,175 | 0,121 (0,013) | -5,4 |
+| 3 | 952 | 0,290 | 0,253 (0,017) | -3,7 |
+| 4 | 951 | 0,386 | 0,356 (0,020) | -3,0 |
+| 5 | 952 | 0,470 | 0,468 (0,021) | -0,1 |
+| 6 | 952 | 0,548 | 0,572 (0,020) | +2,5 |
+| 7 | 951 | 0,634 | 0,658 (0,020) | +2,4 |
+| 8 | 952 | 0,733 | 0,768 (0,018) | +3,5 |
+| 9 | 952 | 0,847 | 0,901 (0,013) | +5,4 |
+| 10 | 952 | 0,953 | 0,970 (0,007) | +1,6 |
+
+Crece con la predicha: sí; mayor distancia 5,4 puntos; G1 PASA.
+Por tick: t = 500: 2833 obs., predicha 0,510, observada 0,512; t = 1000: 2531 obs., predicha 0,510, observada 0,510; t = 2000: 2091 obs., predicha 0,512, observada 0,507; t = 4000: 1440 obs., predicha 0,500, observada 0,502; t = 8000: 622 obs., predicha 0,510, observada 0,523.
+
+### Paseos normalizados: estimador 10 ticks (9517 observaciones en 2833 ventanas)
+
+| decil | observaciones | P predicha media | frecuencia observada (ee) | diferencia (puntos) |
+|---|---|---|---|---|
+| 1 | 951 | 0,021 | 0,020 (0,006) | -0,1 |
+| 2 | 952 | 0,118 | 0,127 (0,014) | +0,9 |
+| 3 | 952 | 0,245 | 0,243 (0,017) | -0,3 |
+| 4 | 951 | 0,360 | 0,366 (0,020) | +0,5 |
+| 5 | 952 | 0,463 | 0,471 (0,021) | +0,7 |
+| 6 | 952 | 0,558 | 0,570 (0,021) | +1,3 |
+| 7 | 951 | 0,666 | 0,660 (0,020) | -0,5 |
+| 8 | 952 | 0,783 | 0,775 (0,017) | -0,8 |
+| 9 | 952 | 0,905 | 0,894 (0,013) | -1,1 |
+| 10 | 952 | 0,984 | 0,968 (0,008) | -1,6 |
+
+Crece con la predicha: sí; mayor distancia 1,6 puntos; G1 PASA.
+Por tick: t = 500: 2833 obs., predicha 0,512, observada 0,512; t = 1000: 2531 obs., predicha 0,512, observada 0,510; t = 2000: 2091 obs., predicha 0,513, observada 0,507; t = 4000: 1440 obs., predicha 0,500, observada 0,502; t = 8000: 622 obs., predicha 0,510, observada 0,523.
+
+### Otras acciones: estimador S2/t (32234 observaciones en 9490 ventanas)
+
+| decil | observaciones | P predicha media | frecuencia observada (ee) | diferencia (puntos) |
+|---|---|---|---|---|
+| 1 | 3223 | 0,018 | 0,022 (0,005) | +0,4 |
+| 2 | 3223 | 0,096 | 0,092 (0,011) | -0,3 |
+| 3 | 3224 | 0,212 | 0,189 (0,018) | -2,2 |
+| 4 | 3223 | 0,328 | 0,292 (0,023) | -3,6 |
+| 5 | 3224 | 0,426 | 0,381 (0,025) | -4,5 |
+| 6 | 3223 | 0,513 | 0,510 (0,026) | -0,3 |
+| 7 | 3223 | 0,608 | 0,622 (0,025) | +1,4 |
+| 8 | 3224 | 0,722 | 0,717 (0,021) | -0,5 |
+| 9 | 3223 | 0,861 | 0,848 (0,021) | -1,3 |
+| 10 | 3224 | 0,976 | 0,953 (0,011) | -2,3 |
+
+Crece con la predicha: sí; mayor distancia 4,5 puntos; G1 PASA.
+Por tick: t = 500: 9490 obs., predicha 0,467, observada 0,452; t = 1000: 8496 obs., predicha 0,472, observada 0,457; t = 2000: 6998 obs., predicha 0,479, observada 0,464; t = 4000: 4981 obs., predicha 0,482, observada 0,472; t = 8000: 2269 obs., predicha 0,505, observada 0,500.
+
+### Otras acciones: estimador 2000 (32234 observaciones en 9490 ventanas)
+
+| decil | observaciones | P predicha media | frecuencia observada (ee) | diferencia (puntos) |
+|---|---|---|---|---|
+| 1 | 3223 | 0,018 | 0,022 (0,005) | +0,4 |
+| 2 | 3223 | 0,095 | 0,094 (0,011) | -0,1 |
+| 3 | 3224 | 0,212 | 0,184 (0,017) | -2,8 |
+| 4 | 3223 | 0,328 | 0,295 (0,023) | -3,3 |
+| 5 | 3224 | 0,425 | 0,381 (0,025) | -4,5 |
+| 6 | 3223 | 0,513 | 0,510 (0,026) | -0,3 |
+| 7 | 3223 | 0,608 | 0,624 (0,025) | +1,5 |
+| 8 | 3224 | 0,724 | 0,714 (0,022) | -1,0 |
+| 9 | 3223 | 0,863 | 0,851 (0,021) | -1,2 |
+| 10 | 3224 | 0,977 | 0,951 (0,012) | -2,5 |
+
+Crece con la predicha: sí; mayor distancia 4,5 puntos; G1 PASA.
+Por tick: t = 500: 9490 obs., predicha 0,467, observada 0,452; t = 1000: 8496 obs., predicha 0,472, observada 0,457; t = 2000: 6998 obs., predicha 0,479, observada 0,464; t = 4000: 4981 obs., predicha 0,483, observada 0,472; t = 8000: 2269 obs., predicha 0,507, observada 0,500.
+
+### Otras acciones: estimador 10 ticks (32234 observaciones en 9490 ventanas)
+
+| decil | observaciones | P predicha media | frecuencia observada (ee) | diferencia (puntos) |
+|---|---|---|---|---|
+| 1 | 3223 | 0,003 | 0,029 (0,006) | +2,6 |
+| 2 | 3223 | 0,039 | 0,096 (0,012) | +5,7 |
+| 3 | 3224 | 0,143 | 0,195 (0,019) | +5,2 |
+| 4 | 3223 | 0,284 | 0,280 (0,022) | -0,5 |
+| 5 | 3224 | 0,410 | 0,377 (0,024) | -3,3 |
+| 6 | 3223 | 0,515 | 0,512 (0,027) | -0,3 |
+| 7 | 3223 | 0,634 | 0,636 (0,024) | +0,2 |
+| 8 | 3224 | 0,781 | 0,714 (0,023) | -6,7 |
+| 9 | 3223 | 0,927 | 0,842 (0,020) | -8,5 |
+| 10 | 3224 | 0,994 | 0,944 (0,013) | -5,0 |
+
+Crece con la predicha: sí; mayor distancia 8,5 puntos; G1 PASA.
+Por tick: t = 500: 9490 obs., predicha 0,464, observada 0,452; t = 1000: 8496 obs., predicha 0,468, observada 0,457; t = 2000: 6998 obs., predicha 0,476, observada 0,464; t = 4000: 4981 obs., predicha 0,480, observada 0,472; t = 8000: 2269 obs., predicha 0,506, observada 0,500.
+
+### Cinco empresas: estimador S2/t (9336 observaciones en 2739 ventanas)
+
+| decil | observaciones | P predicha media | frecuencia observada (ee) | diferencia (puntos) |
+|---|---|---|---|---|
+| 1 | 933 | 0,004 | 0,000 (0,000) | -0,4 |
+| 2 | 934 | 0,042 | 0,041 (0,025) | -0,1 |
+| 3 | 933 | 0,133 | 0,158 (0,053) | +2,5 |
+| 4 | 934 | 0,261 | 0,285 (0,080) | +2,4 |
+| 5 | 934 | 0,386 | 0,363 (0,081) | -2,3 |
+| 6 | 933 | 0,490 | 0,471 (0,079) | -1,9 |
+| 7 | 934 | 0,593 | 0,589 (0,072) | -0,4 |
+| 8 | 933 | 0,714 | 0,707 (0,058) | -0,7 |
+| 9 | 934 | 0,836 | 0,797 (0,066) | -4,0 |
+| 10 | 934 | 0,958 | 0,920 (0,034) | -3,8 |
+
+Crece con la predicha: sí; mayor distancia 4,0 puntos; G1 PASA.
+Por tick: t = 500: 2739 obs., predicha 0,433, observada 0,427; t = 1000: 2453 obs., predicha 0,443, observada 0,436; t = 2000: 2050 obs., predicha 0,443, observada 0,434; t = 4000: 1459 obs., predicha 0,441, observada 0,438; t = 8000: 635 obs., predicha 0,471, observada 0,433.
+
+### Cinco empresas: estimador 2000 (9336 observaciones en 2739 ventanas)
+
+| decil | observaciones | P predicha media | frecuencia observada (ee) | diferencia (puntos) |
+|---|---|---|---|---|
+| 1 | 933 | 0,003 | 0,000 (0,000) | -0,3 |
+| 2 | 934 | 0,041 | 0,040 (0,023) | -0,1 |
+| 3 | 933 | 0,134 | 0,163 (0,055) | +2,9 |
+| 4 | 934 | 0,262 | 0,275 (0,078) | +1,3 |
+| 5 | 934 | 0,387 | 0,365 (0,082) | -2,2 |
+| 6 | 933 | 0,490 | 0,473 (0,079) | -1,7 |
+| 7 | 934 | 0,593 | 0,591 (0,071) | -0,2 |
+| 8 | 933 | 0,715 | 0,711 (0,061) | -0,4 |
+| 9 | 934 | 0,839 | 0,792 (0,065) | -4,6 |
+| 10 | 934 | 0,958 | 0,920 (0,033) | -3,8 |
+
+Crece con la predicha: sí; mayor distancia 4,6 puntos; G1 PASA.
+Por tick: t = 500: 2739 obs., predicha 0,433, observada 0,427; t = 1000: 2453 obs., predicha 0,443, observada 0,436; t = 2000: 2050 obs., predicha 0,443, observada 0,434; t = 4000: 1459 obs., predicha 0,442, observada 0,438; t = 8000: 635 obs., predicha 0,476, observada 0,433.
+
+### Cinco empresas: estimador 10 ticks (9336 observaciones en 2739 ventanas)
+
+| decil | observaciones | P predicha media | frecuencia observada (ee) | diferencia (puntos) |
+|---|---|---|---|---|
+| 1 | 933 | 0,000 | 0,001 (0,001) | +0,1 |
+| 2 | 934 | 0,011 | 0,061 (0,031) | +5,0 |
+| 3 | 933 | 0,071 | 0,167 (0,057) | +9,6 |
+| 4 | 934 | 0,202 | 0,272 (0,077) | +7,0 |
+| 5 | 934 | 0,355 | 0,351 (0,078) | -0,4 |
+| 6 | 933 | 0,488 | 0,469 (0,080) | -1,8 |
+| 7 | 934 | 0,617 | 0,595 (0,071) | -2,2 |
+| 8 | 933 | 0,769 | 0,742 (0,057) | -2,7 |
+| 9 | 934 | 0,906 | 0,776 (0,074) | -12,9 |
+| 10 | 934 | 0,986 | 0,894 (0,045) | -9,2 |
+
+Crece con la predicha: sí; mayor distancia 12,9 puntos; G1 no pasa.
+Por tick: t = 500: 2739 obs., predicha 0,431, observada 0,427; t = 1000: 2453 obs., predicha 0,441, observada 0,436; t = 2000: 2050 obs., predicha 0,442, observada 0,434; t = 4000: 1459 obs., predicha 0,442, observada 0,438; t = 8000: 635 obs., predicha 0,474, observada 0,433.
+
+## Resumen
+
+| conjunto | estimador | crece | mayor distancia (puntos) | G1 |
+|---|---|---|---|---|
+| Paseos normalizados | verdadero | sí | 2,0 | pasa |
+| Paseos normalizados | S2/t | sí | 5,4 | pasa |
+| Paseos normalizados | 2000 | sí | 5,4 | pasa |
+| Paseos normalizados | 10 ticks | sí | 1,6 | pasa |
+| Otras acciones | S2/t | sí | 4,5 | pasa |
+| Otras acciones | 2000 | sí | 4,5 | pasa |
+| Otras acciones | 10 ticks | sí | 8,5 | pasa |
+| Cinco empresas | S2/t | sí | 4,0 | pasa |
+| Cinco empresas | 2000 | sí | 4,6 | pasa |
+| Cinco empresas | 10 ticks | sí | 12,9 | no pasa |
+
+## v^2 estimado en los puntos de observación (percentiles 10, 50 y 90)
+
+| conjunto | estimador | p10 | p50 | p90 |
+|---|---|---|---|---|
+| Paseos normalizados | verdadero | 0,269 | 0,581 | 1,120 |
+| Paseos normalizados | S2/t | 0,435 | 0,746 | 1,298 |
+| Paseos normalizados | 2000 | 0,435 | 0,745 | 1,298 |
+| Paseos normalizados | 10 ticks | 0,277 | 0,589 | 1,151 |
+| Otras acciones | S2/t | 0,294 | 0,617 | 1,319 |
+| Otras acciones | 2000 | 0,292 | 0,612 | 1,318 |
+| Otras acciones | 10 ticks | 0,156 | 0,453 | 1,248 |
+| Cinco empresas | S2/t | 0,268 | 0,553 | 1,018 |
+| Cinco empresas | 2000 | 0,267 | 0,546 | 1,038 |
+| Cinco empresas | 10 ticks | 0,146 | 0,403 | 0,917 |
