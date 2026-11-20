@@ -701,7 +701,7 @@ def fila_metricas(cx, r, k, rb, nombre, idx=None, T=None, Tx=None):
     m = E.metricas(r, idx, cx.R, T)
     p, q = Tx.puntos(r["W"])
     d, ee = delta(cx.G, r, rb, idx)
-    mm = mano(cx.G, r["W"], cx.R[E.RIVAL_TESLA], idx, f"{k}-{nombre}")
+    mm = mano(cx.G, r["W"], cx.R[E.RIVAL_TESLA], idx, k)   # mismos sorteos para todas las estrategias
     inf = [x for x in (r["info"][i] for i in idx) if x]
     disp = 100 * sum(1 for x in inf if len(x) > 2 and x[2]) / len(idx) if inf else 0.0
     tope = 100 * sum(1 for x in inf if len(x) > 3 and x[3]) / len(idx) if inf else 0.0
@@ -861,7 +861,7 @@ def accion_examen(procesos):
             L.append(CAB_M)
             L.append(SEP_M)
             for nm, r in filas:
-                txt, m = fila_examen(conj, R, r, b40, sel, T, Tx, f"{k}-{cn}-{nm}")
+                txt, m = fila_examen(conj, R, r, b40, sel, T, Tx, f"{k}-{cn}")   # mismos sorteos que la sección 10
                 L.append(f"| {nm} " + txt)
                 resumen[(k, cn, nm)] = m
     L.append("\n## Criterio de la sección 9\n")
