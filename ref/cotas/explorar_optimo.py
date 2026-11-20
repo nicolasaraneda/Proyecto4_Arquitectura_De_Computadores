@@ -34,6 +34,10 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import explorar_regimen as XR  # noqa: E402
 import paseo_optimo as P       # noqa: E402
 
+# Las cachés de conjuntos de explorar_regimen.py se escribieron corriéndolo como programa principal, así que
+# guardan la clase como __main__.Datos; se la presta aquí para poder leerlas.
+sys.modules["__main__"].Datos = XR.Datos
+
 TS = (500, 1000, 2000, 4000, 8000)
 EST = ("S2/t", "2000", "10 ticks")
 CACHE = P.CACHE
