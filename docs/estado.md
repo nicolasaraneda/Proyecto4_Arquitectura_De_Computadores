@@ -2,6 +2,29 @@
 
 Se actualiza al cerrar cada tramo de trabajo. La versión anterior queda en el historial de git.
 
+## Tramo 22: política óptima del paseo normalizado (19 y 20/11)
+
+Rama `minutos-reales`. Sección 13 de `docs/exploracion_ideas.md`; bitácora `docs/bitacora/exploracion.md` (sexto pedido). Decisión T140. Solo Python. **La regla de los peldaños no se cambió.**
+
+| Paso | Resultado | Dónde |
+|------|-----------|-------|
+| 1. Modelo | Paseo con volatilidad v condicionado a mínimo 100 y máximo 255: g_A, g_B, g_C, g_D y h_A por recurrencia hacia atrás para 8 valores de v², verificados contra paseos simulados | Sección 13.1; `ref/cotas/paseo_optimo.py` |
+| 2. G1 | Pasa con S2/t: 2,0 puntos con el v verdadero en paseos, 4,5 en las otras, 4,0 en las cinco | Sección 13.2; `optimo_g1.txt` |
+| 3. Programación dinámica | V1, V2 y V3, log y lineal. En la fase A compra en dos intervalos: un bloque alto que no llega al 255 y, con v² alto, uno bajo. Con la política apagada, 0 diferencias con la banda 40 (otras y población de las cinco) | Secciones 13.3 y 13.4 |
+| 4. G2 y G3 | V3 log con S2/t: +299 (ee 73) en las otras, la comprimida conserva 98,9 % | Sección 13.4; `optimo_g2.txt`, `optimo_g3.txt` |
+| 5. Diagnóstico y guardas | La pérdida contra el rival sale de las compras de la fase A. Elegida por la regla de Nicolás: V3 log con (b), 1,857 puntos, 3,4 % de torneos perdidos contra el rival, +146 (ee 43) | Sección 13.5; `optimo_guardas.txt` |
+| 6. Factibilidad | Con el reparto de 4 hilos: unos 700 ciclos de 1131, 512 bytes de tabla, aritmética de placa probada sin diferencias; equivalencia exacta solo con caja 10 000 y comisión 5. Alternativa V1 log con a16 y c preparada (unos 330 ciclos, sin contabilidad, sin examen) | Secciones 13.6 y 13.7; `ref/cotas/optimo_placa.py` |
+| 7. Examen en las cinco | Población: +124 (ee 77), 1,869 puntos contra 1,852, pierde 2,2 % de los torneos contra el rival. Años: -7 (ee 179), 1,869 contra 1,870. Empresas: +82 (ee 102). Caso S unos -500, caso B unos +1000; el equilibrio está cerca de 66 % de casos S | Sección 13.8; `optimo_examen.txt`, `optimo_casos_otras.txt` |
+| 8. Criterio | No se cumple en los puntos 1 y 2; el 3 sí se cumple (2,2 % con tope de 10 %) | Sección 13.9 |
+
+### Lo que decides tú
+
+Banda 40 (lo que sigue del criterio), V3 log con (b), V1 log con a16 y c, o banda 40 con el módulo A. Mi recomendación, etiquetada en la sección 13.10, es la banda 40. Siguen pendientes la decisión de banda 40 o 60 (sección 6) y la variante del caso S (sección 11).
+
+### Qué conviene atacar después
+
+Si compite la banda 40, nada de esta rama entra al programa y queda como material de defensa: el modelo exacto, su calibración, la política óptima y su forma, y por qué no se puede demostrar con cinco empresas. Si entra V3 con (b), hay que escribir `fondo.s` con el reparto de 13.6, su referencia exacta (`optimo_estrategia.Optima` con `placa=True, comprimida=True`) y pasar las puertas de R1 y R2 antes del corte del 22/11. Lo primero sería medir el camino de la respuesta, que es la parte más justa (unos 700 de 1131 ciclos).
+
 ## Tramo 21: política por régimen filtrado (19/11)
 
 Rama `minutos-reales`. Sección 12 de `docs/exploracion_ideas.md`; bitácora `docs/bitacora/exploracion.md` (quinto pedido). Decisión T139. Solo Python. **La regla de los peldaños no se cambió.**

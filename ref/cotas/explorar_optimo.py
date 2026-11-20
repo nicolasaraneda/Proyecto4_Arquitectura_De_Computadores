@@ -648,9 +648,39 @@ def accion_examen(procesos):
     print(txt)
 
 
+def accion_casos(procesos):
+    """Diferencia de la elegida (V3 con guarda) con la banda 40 por caso S y B en las otras acciones, desde la caché.
+    Sirve para leer el examen: en qué proporción de casos S la ventaja se anula."""
+    cx = XR.CtxO(procesos)
+    b40 = cx.ev([E.B40], info=False)[0]
+    sp = pickle.load(open(os.path.join(CACHE, "elegidas_guardas.pkl"), "rb"))["V3"]
+    r = cx.ev([sp])[0]
+    caso = [x[1] for x in r["info"]]
+    L = ["# Elegida contra la banda 40 por caso S y B en las otras acciones", "",
+         f"ref/cotas/explorar_optimo.py casos, commit {XR.commit()}. {nombre_spec(sp)}, {nombre_guarda(sp[1].get('guarda'))}, "
+         "tabla comprimida y clase de placa. Caso S: el 100 llega antes que el 255; caso B: al revés. Error estándar como en "
+         "optimo_guardas.txt. Proporción de equilibrio: la fracción de casos S con la que la diferencia media sería cero, "
+         "d_B / (d_B - d_S).", "",
+         "| subconjunto | ventanas | caso S: ventanas (%) | Δ caso S (ee) | caso B: ventanas (%) | Δ caso B (ee) | equilibrio en S |",
+         "|---|---|---|---|---|---|---|"]
+    for k in ("todas", "anios-validacion", "grupos-validacion"):
+        ix = cx.idx[k]
+        c = []
+        for cs in (1, 2):
+            sel = [i for i in ix if caso[i] == cs]
+            d, ee = XR.delta(cx.G, r, b40, sel)
+            c.append((len(sel), d, ee))
+        (nS, dS, eS), (nB, dB, eB) = c
+        L.append(f"| {k} | {len(ix)} | {nS} ({fmt(100 * nS / len(ix), 1)}) | {dS:+.0f} ({eS:.0f}) | {nB} ({fmt(100 * nB / len(ix), 1)}) "
+                 f"| {dB:+.0f} ({eB:.0f}) | {fmt(100 * dB / (dB - dS), 1)} % |")
+    txt = "\n".join(L) + "\n"
+    open(os.path.join(SALIDA, "optimo_casos_otras.txt"), "w").write(txt)
+    print(txt)
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
-    ap.add_argument("accion", choices=["g1", "g2", "g3", "equivalencia", "guardas", "examen"])
+    ap.add_argument("accion", choices=["g1", "g2", "g3", "equivalencia", "guardas", "examen", "casos"])
     ap.add_argument("--conjunto", default="otras")
     ap.add_argument("--procesos", type=int, default=None)
     a = ap.parse_args()
@@ -664,6 +694,8 @@ def main():
         accion_guardas(a.procesos)
     elif a.accion == "examen":
         accion_examen(a.procesos)
+    elif a.accion == "casos":
+        accion_casos(a.procesos)
     elif a.accion == "equivalencia":
         accion_equivalencia(a.procesos, a.conjunto)
 

@@ -622,3 +622,284 @@ Dos advertencias para cuando se escriba:
 | Equivalencia con la banda 40 | `python3 ref/cotas/explorar_regimen.py equivalencia --conjunto cinco` (unos 32 minutos) y `--conjunto otras` | `regimen_equivalencia_cinco.txt`, `regimen_equivalencia_otras.txt` |
 | Ajuste del módulo A | `python3 ref/cotas/explorar_regimen.py ajuste --sin-d` (unos 14 minutos) | `regimen_ajuste.txt` |
 | Examen final | `python3 ref/cotas/explorar_regimen.py examen` (unos 21 minutos) | `regimen_examen.txt` |
+
+
+## 13. La política óptima del paseo normalizado (19 y 20/11)
+
+Diseño de Nicolás ("Última idea: la política óptima del paseo normalizado"), que reemplaza al módulo A como candidato. Como el efecto de la sección 12 aparece igual en paseos aleatorios normalizados, el juego tiene un modelo exacto: un paseo con volatilidad v por tick condicionado a que su mínimo sea 100 y su máximo 255. Para ese modelo se calcula la política óptima en vez de adivinarla. Solo Python; no se tocó `rtl/`, `sw/`, `main` ni los bitstreams.
+
+Decisiones de Nicolás durante el trabajo: visto bueno a G1; S2/t como estimador base contra la ventana de 2000; ver G2 antes del examen; seguir con V3 log; el punto 3 del criterio pasa a ser "pierde a lo más 10 % de los torneos de 3 rondas contra el rival de Tesla" (decidido antes del examen); guardas en la fase A con una regla de elección fijada por él; un reparto de hilos obligatorio para la factibilidad.
+
+### 13.0 Resumen
+
+- **El modelo calibra.** G1 pasa con S2/t en paseos (2,0 puntos de mayor distancia con el v verdadero, 5,4 con S2/t), en las otras acciones (4,5) y en las cinco (4,0). No hizo falta el factor sobre v.
+- **La política óptima en la fase A tiene dos intervalos**: un bloque alto que no llega al 255 y, con v² alto y mucho tiempo por delante, uno bajo. Comprimida cabe en 512 bytes.
+- **G2 y G3 pasan en las otras acciones:** V3 log con S2/t gana +299 (ee 73) a la banda 40; la tabla comprimida conserva 98,9 %.
+- **La pérdida contra el rival de Tesla sale de las compras de la fase A** con v² de 1/2 a 2. Por la regla de Nicolás se eligió **V3 log con la guarda (b)** (nunca más de media posición en la fase A): en las otras, 1,857 puntos contra 1,842, pierde 3,4 % de los torneos de 3 rondas contra el rival (la banda 40, 3,7 %) y +146 (ee 43); también gana en las dos validaciones internas.
+- **Examen en las cinco (una sola vez, segunda mirada):** en la población es la mejor de las tres estrategias: 1,869 puntos contra 1,852 de la banda 40 y 1,856 del módulo A, +124 (ee 77), primera sola 50,8 % contra 35,6 %, y pierde 2,2 % de los torneos contra el rival (banda 40, 2,7 %).
+- **El criterio no se cumple en los puntos 1 y 2.** En la validación por años empata con la banda 40 (1,869 contra 1,870 puntos; -7 con ee 179). En la de empresas gana en puntos (1,863 contra 1,845), pero +82 queda bajo su ee de 102. El punto 3 nuevo se cumple (2,2 % contra el tope de 10 %).
+- **Por qué:** la ganancia depende de la proporción de casos S. Con la guarda (b), V3 pierde unos 500 por ronda en el caso S y gana unos 1000 en el B, tanto en las otras acciones como en las cinco. El equilibrio está cerca de 66 % de casos S. Las ventanas de las cinco que empiezan en 2023 o 2024 tienen 67 % de casos S; las de las otras acciones en esos mismos años, 56 %.
+- **Factibilidad:** cabe con el reparto de hilos pedido (unos 700 ciclos de 1131, tabla de 512 bytes, unos 800 bytes en total). La equivalencia con la referencia es exacta solo con la contabilidad oficial (caja 10 000, comisión 5). Queda preparada la alternativa V1 log con a16 y c, sin contabilidad y de unos 330 ciclos, que no pasó por el examen.
+- **Según el criterio no compite.** Opciones y recomendación en 13.10.
+
+### 13.1 El modelo y su verificación
+
+`ref/cotas/paseo_optimo.py`. Paso: gaussiana discretizada en los enteros con varianza exacta v² (con v² = 1/8, discretizar con s = v daría 0,035). Para cada v² en {1/8, 1/4, 3/8, 1/2, 3/4, 1, 3/2, 2} y r de 0 a 19 999, por recurrencia hacia atrás: g_D (no salir de [100, 255]), g_B (tocar 255 sin salir), g_C (tocar 100 sin salir), g_A (tocar los dos sin salir) y h_A (los dos, con el 255 primero). P(255 antes que 100 | fase A) = h_A / g_A. Unos 10 segundos por v² en un núcleo.
+
+- g_D contra paseos de la red simulados en la banda completa: 0,1179 contra 0,1177 (v² = 2, x = 177, r = 6000), 0,3454 contra 0,3435 (v² = 1/2, r = 12 000), con 24 000 paseos.
+- Tocar exactamente los dos bordes sin salir es raro en 156 niveles, así que g_A y h_A se probaron con el mismo código en una banda de 100 a 130: g_A 0,0011 contra 0,0011 (ee 0,0002) y del mismo orden en los otros tres casos; h_A / g_A dentro del ruido.
+- La prueba completa del cálculo es G1 en paseos con el v verdadero (tabla de 13.2): mayor distancia 2,0 puntos.
+
+Observación hecha antes de ejecutar: el modelo usa la varianza de largo plazo por tick, y S2/t en series redondeadas la sobrestima, porque el redondeo agrega ruido a cada diferencia de un tick y no al largo plazo. En paseos, S2/t da una mediana de 0,75 contra 0,58 verdadera.
+
+### 13.2 G1: calibración
+
+Observaciones en t = 500, 1000, 2000, 4000 y 8000 de cada ventana que sigue en la fase A, con r = 19 999 - t; probabilidad del modelo interpolada en v² entre las tablas vecinas; deciles de la predicha. Pasa si ningún decil cae respecto del anterior en más de 2 ee y ninguno se aleja más de 10 puntos (`optimo_g1.txt`).
+
+| Decil | Otras acciones: predicha / observada (ee) | Cinco empresas: predicha / observada (ee) | Paseos con S2/t: predicha / observada | Paseos con el v verdadero: predicha / observada |
+|---|---|---|---|---|
+| 1 | 0,018 / 0,022 (0,005) | 0,004 / 0,000 (0,000) | 0,053 / 0,026 | 0,019 / 0,017 |
+| 2 | 0,096 / 0,092 (0,011) | 0,042 / 0,041 (0,025) | 0,175 / 0,121 | 0,114 / 0,116 |
+| 3 | 0,212 / 0,189 (0,018) | 0,133 / 0,158 (0,053) | 0,290 / 0,252 | 0,241 / 0,261 |
+| 4 | 0,328 / 0,292 (0,023) | 0,261 / 0,285 (0,080) | 0,386 / 0,359 | 0,358 / 0,363 |
+| 5 | 0,426 / 0,381 (0,025) | 0,386 / 0,363 (0,081) | 0,470 / 0,468 | 0,462 / 0,471 |
+| 6 | 0,513 / 0,510 (0,026) | 0,490 / 0,471 (0,079) | 0,548 / 0,570 | 0,559 / 0,571 |
+| 7 | 0,608 / 0,622 (0,025) | 0,593 / 0,589 (0,072) | 0,634 / 0,659 | 0,668 / 0,655 |
+| 8 | 0,722 / 0,717 (0,021) | 0,714 / 0,707 (0,058) | 0,733 / 0,768 | 0,787 / 0,770 |
+| 9 | 0,861 / 0,848 (0,021) | 0,836 / 0,797 (0,066) | 0,847 / 0,901 | 0,909 / 0,897 |
+| 10 | 0,976 / 0,953 (0,011) | 0,958 / 0,920 (0,034) | 0,953 / 0,970 | 0,986 / 0,975 |
+| Mayor distancia | 4,5 puntos: pasa | 4,0: pasa | 5,4: pasa | 2,0: pasa |
+
+Con S2/t no hizo falta el factor sobre v que permitía el diseño. Las diferencias de 10 ticks (estimador agregado, solo informativo) corrigen el redondeo en los paseos (1,6 puntos), pero en datos reales dejan al modelo demasiado seguro en los deciles altos (otras: 0,927 predicha, 0,842 observada; en las cinco no pasa). La ventana de 2000 da casi lo mismo que S2/t.
+
+### 13.3 Programación dinámica, variantes y forma de la política
+
+Estados (fase, x, r, s), con s la posición que viaja al precio siguiente y s' la que se ejecuta en él; esperanza bajo P(x → y | condición) = K(y - x) g_F'(y, r - 1) / g_F(x, r). Log: E[log(1 - s + s y/x)] más el costo de cambiar (10 / 15 000 por un cambio completo, la mitad por media posición) más E[V(y, r - 1, s')]; lineal: el producto. V1: óptima en la fase A, banda 40 en la D, B invertido y C en caja. V2: óptima en las cuatro fases. V3: V1 con media posición. Para medir la ganancia dentro del modelo se evaluó también la banda 40 en el mismo modelo. 56 tablas en 5 minutos.
+
+Ganancia dentro del modelo, empezando en caja en la fase A con r = 19 999 (diferencia de E[log patrimonio] con la banda 40, en %, para x0 = 140 / 177 / 215):
+
+| v² | V1 | V2 | V3 |
+|---|---|---|---|
+| 1/8 | 0,04 / 14,20 / 16,82 | 0,04 / 14,22 / 16,88 | 0,04 / 14,20 / 16,82 |
+| 1/4 | 1,08 / 11,61 / 15,00 | 1,14 / 11,77 / 15,34 | 1,08 / 11,62 / 15,00 |
+| 3/8 | 2,49 / 8,89 / 10,96 | 2,71 / 9,27 / 11,67 | 2,49 / 8,91 / 10,96 |
+| 1/2 | 2,98 / 6,21 / 6,52 | 3,59 / 6,91 / 7,70 | 2,99 / 6,25 / 6,54 |
+| 3/4 | 2,16 / 2,51 / 1,87 | 4,63 / 4,52 / 4,50 | 2,39 / 2,58 / 1,92 |
+| 1 | 5,37 / 2,84 / 1,57 | 11,07 / 7,40 / 6,91 | 5,73 / 3,18 / 1,76 |
+| 3/2 | 16,83 / 10,78 / 6,93 | 31,51 / 23,53 / 20,81 | 17,21 / 11,20 / 7,24 |
+| 2 | 28,78 / 21,14 / 15,64 | 54,39 / 44,48 / 40,38 | 29,19 / 21,60 / 16,01 |
+
+**Forma de la política en la fase A (paso 8 del encargo): dos intervalos.** Con s = 0 compra en un bloque alto que no llega al 255 (con v² = 1/4 y r = 19 000, de 184 a 250: cerca del 255 queda poco por ganar) y, a veces, en 101, justo antes del 100. Con v² alto y mucho tiempo por delante compra abajo (con v² = 1 y r = 19 000, de 101 a 146) y no arriba: el paseo tiene que ir al 100 y después al 255. Con s = 1 mantiene en bloques algo más anchos (histéresis). En V3 la media posición aparece en los bordes de esos bloques. Compresión por celda (clase de v², tramo de 1250 ticks), del r del medio del tramo: con dos posiciones, 4 bytes (compra si x ≥ alto o x ≤ bajo con s = 0; mantiene si x ≥ salida o x ≤ bajo1 con s = 1; se ignora el corte superior del bloque alto), 512 bytes en la fase A; con tres posiciones, 12 bytes (1536). Con la guarda (b) elegida, en la fase A la posición es solo caja o media y bastan los dos umbrales de "media o más" de cada s: vuelve a 512 bytes, y decide igual que la de 1536 en los 39 424 casos (128 celdas, 2 posiciones, 154 precios).
+
+### 13.4 G2 y G3 en las otras acciones
+
+Reglas fijadas antes de evaluar: variante y objetivo por puntos de torneo en todas las otras acciones con S2/t; la ventana de 2000 reemplaza a S2/t solo si tiene más puntos y gana por más de 1 ee; G2: la elegida completa gana a la banda 40 por más de 2 ee; G3: la comprimida conserva al menos 80 %. Antes de G2, la política apagada decide igual que la banda 40 en la muestra de las otras (0 diferencias en 240 millones de decisiones) y en la población completa de las cinco (0 en 27 365 millones).
+
+| Estrategia (otras acciones, 12 000 ventanas) | Pts sin copia | 1.ª sola % | Media | p5 | Peor | Órdenes | Δ con banda 40 (ee) | Torneos de 3 rondas perdidos contra el rival % |
+|---|---|---|---|---|---|---|---|---|
+| banda 40 | 1,842 | 37,9 | 21 303 | 10 746 | 8490 | 3,8 | 0 | 3,7 |
+| V1 log | 1,852 | 52,9 | 21 643 | 11 579 | 5649 | 7,2 | +339 (72) | 8,7 |
+| V1 lineal | 1,852 | 53,0 | 21 648 | 11 502 | 5879 | 7,0 | +345 (71) | 8,3 |
+| V2 log | 1,847 | 59,2 | 22 176 | 12 020 | 5639 | 14,0 | +872 (109) | 11,2 |
+| V2 lineal | 1,849 | 59,7 | 22 262 | 11 746 | 5886 | 12,6 | +958 (104) | 10,6 |
+| **V3 log** | **1,855** | 52,7 | 21 603 | 11 636 | 6122 | 7,9 | **+299 (73)** | 8,2 |
+| V3 lineal | 1,852 | 53,0 | 21 651 | 11 508 | 5879 | 7,0 | +348 (71) | 8,3 |
+| V3 log, ventana de 2000 | 1,854 | 52,3 | 21 577 | 11 652 | 6202 | 8,6 | +273 (75) | 8,9 |
+| V3 log, comprimida | 1,855 | 52,9 | 21 600 | 11 646 | 6156 | 7,9 | +296 (73) | 8,3 |
+
+Elegida V3 log con S2/t (la ventana de 2000 da -26, ee 28). **G2 pasa: +299 (ee 73). G3 pasa: la comprimida conserva 98,9 %.** La de V1 (512 bytes) conserva 96 %. V2 gana tres veces más en media pero tiene menos puntos y pierde más torneos contra el rival.
+
+### 13.5 Diagnóstico, guardas y elección
+
+Todo con la tabla comprimida y la clase de placa. El reparto de hilos pedido calcula la clase con histéresis en el hilo 1, y los cortes geométricos de la grilla son irracionales; antes de evaluar se alineó la referencia con lo que la placa puede hacer: 64 S2 ≥ N_j (t - 1) con N_j = 11, 20, 28, 39, 55, 78 y 111 (cortes redondeados a 1/64, comparados con sumas corridas) e histéresis de 64 ticks. V3 sin guarda se volvió a evaluar así: +312 (ee 75), 1,856 puntos, pierde 8,1 % de los torneos contra el rival (`optimo_guardas.txt`).
+
+**Diagnóstico de V3 sin guarda (otras acciones).** La diferencia de patrimonio se reparte según la fase y la clase de v² del tick en que ocurrió cada cambio (porcentaje del total neto; negativo es pérdida).
+
+| En los 1611 torneos que pierde contra el rival (de 20 000) | antes de 390 | 1/8 | 1/4 | 3/8 | 1/2 | 3/4 | 1 | 3/2 | 2 | total |
+|---|---|---|---|---|---|---|---|---|---|---|
+| Fase A | 0 | +1 | -1 | -6 | -26 | -16 | -25 | -21 | -13 | **-107** |
+| Fase B | 0 | 0 | +3 | +9 | +22 | +10 | +6 | -12 | -9 | +30 |
+| Fase C | 0 | 0 | 0 | 0 | -2 | 0 | 0 | 0 | 0 | -2 |
+| Fase D | 0 | 0 | 0 | 0 | -2 | -6 | -9 | -3 | +1 | -21 |
+
+| En el 1 % de peores ventanas (120, patrimonio de 5828 a 10 243), resultado propio | antes de 390 | 1/8 | 1/4 | 3/8 | 1/2 | 3/4 | 1 | 3/2 | 2 | total |
+|---|---|---|---|---|---|---|---|---|---|---|
+| Fase A | 0 | +2 | -15 | -43 | -102 | -28 | +5 | +2 | 0 | **-178** |
+| Fase B | 0 | 0 | 0 | 0 | 0 | +29 | +17 | -1 | 0 | +46 |
+| Fase C | 0 | -1 | 0 | -1 | -48 | -2 | -1 | 0 | 0 | -52 |
+| Fase D | 0 | 0 | +1 | +4 | +21 | +49 | +8 | +2 | 0 | +85 |
+
+La pérdida contra el rival se origina en las compras de la fase A, con v² de 1/2 a 2; la fase B la compensa en parte. Las peores ventanas pierden sobre todo en la fase A con v² de 1/4 a 1/2, y después en la C con v² 1/2 (lo que se pierde entre ver el 255 y vender una posición comprada en A).
+
+**Guardas sobre las compras de la fase A** (solas y combinadas): (a) tope de d niveles bajo la entrada, sin volver a entrar en esa ronda; (b) nunca más de media posición en la fase A; (c) no aumentar la posición con v² en las dos clases más altas.
+
+| V3 log (otras acciones) | Pts sin copia | 1.ª sola % | Media | p5 | Peor | Órdenes | Δ con banda 40 (ee) | 3 rondas perdidas contra el rival % |
+|---|---|---|---|---|---|---|---|---|
+| banda 40 | 1,842 | 37,9 | 21 303 | 10 746 | 8490 | 3,8 | 0 | 3,7 |
+| sin guarda | 1,856 | 53,0 | 21 615 | 11 659 | 5828 | 7,4 | +312 (75) | 8,1 |
+| a16 | 1,845 | 49,6 | 21 423 | 10 937 | 8000 | 6,3 | +120 (40) | 5,6 |
+| a24 | 1,847 | 50,7 | 21 462 | 11 122 | 7373 | 6,8 | +158 (47) | 6,6 |
+| a32 | 1,848 | 51,4 | 21 496 | 11 320 | 5828 | 7,0 | +192 (58) | 7,3 |
+| **b** | **1,857** | 51,3 | 21 449 | 11 359 | 7642 | 6,0 | **+146 (43)** | **3,4** |
+| c | 1,854 | 52,8 | 21 509 | 11 561 | 5828 | 6,7 | +205 (54) | 6,7 |
+| a16+b | 1,845 | 48,6 | 21 358 | 10 938 | 9181 | 5,6 | +55 (22) | 3,8 |
+| a24+b | 1,847 | 49,3 | 21 375 | 11 079 | 8651 | 5,8 | +71 (28) | 3,5 |
+| a32+b | 1,849 | 49,8 | 21 391 | 11 170 | 7642 | 5,9 | +87 (34) | 3,6 |
+| a16+c | 1,846 | 50,0 | 21 406 | 10 937 | 8000 | 6,0 | +103 (33) | 5,3 |
+| a24+c | 1,848 | 51,0 | 21 429 | 11 122 | 7373 | 6,3 | +125 (42) | 5,9 |
+| a32+c | 1,849 | 51,6 | 21 458 | 11 304 | 5828 | 6,5 | +154 (48) | 6,4 |
+| b+c | 1,852 | 51,1 | 21 397 | 11 327 | 7642 | 5,7 | +94 (33) | 3,3 |
+| a16+b+c | 1,845 | 48,8 | 21 352 | 10 935 | 8490 | 5,4 | +49 (20) | 3,8 |
+| a24+b+c | 1,847 | 49,5 | 21 357 | 11 079 | 8490 | 5,5 | +53 (25) | 3,5 |
+| a32+b+c | 1,848 | 50,1 | 21 370 | 11 166 | 7642 | 5,6 | +66 (29) | 3,5 |
+
+**Elegida (regla 1 de Nicolás: más puntos entre las que pierden a lo más 5 %): V3 log con (b)**, 1,857 puntos, pierde 3,4 % de los torneos contra el rival (menos que la banda 40), +146 (ee 43). Validación interna, informativa: +207 (ee 60) en años y +144 (ee 50) en grupos, con 2,6 % y 3,4 % de torneos perdidos contra el rival. Los topes (a) cortan compras que después llegan al 255: bajan puntos y no bajan las pérdidas contra el rival tanto como (b).
+
+### 13.6 Factibilidad en la placa con el reparto de hilos pedido
+
+Reparto obligatorio: hilo 0 corredor (fases, lectura de lo publicado, decisión, única escritura en `DECISION`, banda 40 de respaldo), hilo 1 régimen (S2 y clase con histéresis), hilo 2 política (lee la celda y publica la posición objetivo), hilo 3 reloj y contabilidad (ticks, tramo, caja y acciones propias, cantidad de la próxima orden, supuestos y modo seguro). Es un conteo sobre la referencia, no un programa escrito; la aritmética del hilo 3 está escrita y probada en `ref/cotas/optimo_placa.py`.
+
+**Cantidad de la media posición sin dividir ni multiplicar.** La referencia fija, al pasar a media posición, el objetivo en acciones floor((caja + acc p) / (2 p)), y después va hacia él con órdenes de hasta 63. En la placa: acc p por Horner con duplicaciones (r = r + r por cada bit de acc, y r = r + p si el bit está; los bits se sacan comparando con una tabla de potencias de dos, sin desplazar), y el cociente por restas: se arman 2p, 4p, ..., 2p·2^8 por sumas y se restan de mayor a menor. Con la guarda (b) la media posición solo aparece en la fase A, entrando desde caja, así que en la práctica acc = 0 y queda floor(caja / (2 p)); se deja el cálculo general para que sea exacto en cualquier caso. Prueba exhaustiva contra la aritmética de Python: 0 diferencias en 2 079 480 casos; peor caso, 91 operaciones.
+
+**Contabilidad después de salidas y reentradas.** El hilo 3 repite en cada tick la contabilidad oficial con el byte que la maestra leyó (el que el hilo 0 escribió después del precio anterior y publicó con su número de tick) y el precio que acaba de llegar, que es al que se ejecutó: compra q = min(cantidad, floor((caja - 5) / p)) (el cociente con 6 bits da 63 si es 64 o más), caja -= q p + 5, acc += q; venta q = min(cantidad, acc), caja += q p - 5, acc -= q; una orden que queda en cero no hace nada. Como cada orden se repite así, las salidas y reentradas no necesitan nada especial: la caja y las acciones de la placa son las de la maestra mientras la contabilidad sea la oficial (caja inicial 10 000, comisión 5, el recorte del testbench). Recorte y q p: 37 y 30 operaciones en el peor caso, 0 diferencias en pruebas exhaustivas.
+
+**Instrucciones por tick, peor caso** (variante elegida, V3 log con (b)):
+
+| Hilo | Trabajo | Instrucciones |
+|---|---|---|
+| 0, corredor | Lee `PRICE` y publica precio y tick (4); fases, caso y pmáx (12); banda 40 de respaldo (6); espera la cantidad del hilo 3 con el tick actual (sondeo); arma el byte: completa "comprar 63", caja "vender 63", media la cantidad del hilo 3 (6); escribe `DECISION` y publica el byte con su tick (3) | unas 35 más el sondeo |
+| 1, régimen | Diferencia, valor absoluto y tope en 15 (6); 64 d² desde una tabla de 16 palabras y suma a 64 S2 (4); siete sumas corridas N_j (t - 1) (7); comparaciones de la clase (hasta 14); histéresis (6); publica clase y tick (2) | unas 40 |
+| 2, política | Espera clase y fase del tick; dirección de la celda: base de la clase (tabla de 8 punteros), desplazamiento del tramo (lo lleva el hilo 3 restando 4 cada 1250 ticks) y s (sumas) (6); dos cargas (a1, b1) y dos comparaciones (6); fases B, C y D sin tabla (4); guarda (b) (2); publica objetivo y tick (2) | unas 25 |
+| 3, reloj y contabilidad | Tick y tramo (5); precio entre 100 y 255 y tick hasta 20 000 (5); repite la orden ejecutada: compra 37 + 30 + 4, venta 30 + 4 (hasta 71); cantidad: media posición nueva 91, si no la diferencia con el objetivo topada en 63 (6); publica cantidad y tick (2) | unas 180 |
+
+Camino de la respuesta: el hilo 3 repite la orden ejecutada mientras los hilos 1 y 2 calculan (en paralelo); en serie quedan la publicación del precio (4), la clase (40), la celda (25), la cantidad (hasta 97) y el byte (9): unas 175 instrucciones de cada hilo, unos 700 ciclos en el barrel de 4 hilos (una instrucción de cada hilo cada 4 ciclos), contra 1131 de la puerta (la mitad de 2262). Cabe, pero sin la holgura de la banda 40 sola (83 a 88 ciclos). El tope por hilo, unas 565 instrucciones a 0,1 ms, no se acerca.
+
+**Memoria.** Tabla de la fase A: 128 celdas (8 clases por 16 tramos) por 2 posiciones por 2 umbrales = 512 bytes, una BRAM, cambiable con `icebram`. Además: 16 palabras de 64 d², 7 constantes N_j y 7 sumas corridas, 8 punteros de clase, 9 potencias de dos, unas 14 palabras de buzones (valor y tick de precio, fase, clase, tramo, objetivo, cantidad y byte), 5 de contabilidad (caja, acc, objetivo de acciones, entrada, estado). Unas 70 palabras más la tabla: cerca de 800 bytes. Hay que confirmar contra el mapa de memoria de R1 que la tabla cabe en la BRAM libre.
+
+**Protocolo de memoria compartida para que las decisiones sean idénticas a la referencia.**
+1. Un solo escritor por palabra. Cada dato publicado lleva el número de tick: el escritor guarda primero el valor y después el tick; el lector espera a ver el tick actual y recién entonces lee el valor. Necesita que los stores de un hilo se vean en orden en los otros, lo que el barrel cumple si tiene un solo puerto de memoria y ejecuta en orden (hay que confirmarlo en su prueba de memoria compartida, P1).
+2. Orden de cada tick: hilo 0 publica precio y tick; hilos 1 y 3 arrancan con él (clase; repetición de la orden ejecutada); hilo 2 espera clase y fase del tick; hilo 3 espera el objetivo; hilo 0 espera la cantidad y escribe. Nadie usa un dato de otro tick, así que el resultado no depende de la velocidad relativa de los hilos.
+3. El hilo 0 publica siempre el byte que escribió, venga de la tabla o del respaldo, y el hilo 3 repite ese. Así la contabilidad sigue bien aunque se use el respaldo.
+4. Respaldo: si la cantidad no llega antes de un plazo fijo, o el hilo 3 publicó modo seguro, el hilo 0 escribe el byte de la banda 40. En operación normal no ocurre, y entonces la placa decide igual que `optimo_estrategia.Optima` (tabla comprimida, clase de placa, guarda (b)), cuya contabilidad es la del motor, que es la oficial.
+5. Para que la referencia sea exacta hay que fijar en ella lo mismo que la placa: los cortes N_j, la histéresis de 64, los umbrales de 512 bytes, la fórmula de la media posición y el orden de las órdenes de hasta 63. Ya están así en `optimo_estrategia.py` con `placa=True, comprimida=True`.
+
+**¿Cabe y permite equivalencia exacta?** Sí, con dos condiciones. La primera es de presupuesto: unos 700 ciclos de 1131 en el peor caso, con poca holgura para el sondeo; habría que medirlo. La segunda es de supuestos: la media posición sale de la contabilidad propia, que es exacta solo si la maestra usa la contabilidad del testbench (caja inicial 10 000, comisión 5). Si el día de la competencia cambian, la placa sigue funcionando, pero la media posición queda mal dimensionada y deja de coincidir con la referencia calculada con los valores supuestos. Por eso se deja preparada la alternativa.
+
+### 13.7 Alternativa preparada: V1 log con el mismo reparto
+
+Dos posiciones (caja o invertido), 512 bytes, sin contabilidad: las órdenes son "comprar 63" y "vender 63", idempotentes, así que no dependen de la caja ni de la comisión. Con la misma regla de elección sobre sus guardas ((b) no aplica), ninguna pierde a lo más 5 % de los torneos contra el rival, y por la regla 2 queda **V1 log con a16 y c**: 1,843 puntos (banda 40 1,842), pierde 6,3 % de los torneos contra el rival, +115 (ee 33) en las otras acciones; +146 (ee 47) en la validación por años y +119 (ee 49) en la de grupos.
+
+| V1 log (otras acciones) | Pts sin copia | Media | Peor | Δ con banda 40 (ee) | 3 rondas perdidas contra el rival % |
+|---|---|---|---|---|---|
+| sin guarda | 1,853 | 21 650 | 5648 | +347 (73) | 8,7 |
+| a16 | 1,840 | 21 436 | 6957 | +132 (38) | 6,8 |
+| a24 | 1,845 | 21 509 | 6957 | +206 (50) | 7,7 |
+| a32 | 1,846 | 21 533 | 5648 | +230 (60) | 8,3 |
+| c | 1,851 | 21 530 | 5648 | +227 (52) | 7,3 |
+| **a16+c** | 1,843 | 21 418 | 7762 | +115 (33) | 6,3 |
+| a24+c | 1,846 | 21 469 | 7363 | +166 (43) | 6,9 |
+| a32+c | 1,847 | 21 497 | 5648 | +194 (47) | 7,2 |
+
+En la placa: hilo 3 sin contabilidad (ticks, tramo, supuestos: unas 12 instrucciones); hilo 2 con la celda de 4 bytes, el tope (a) (la entrada se guarda al comprar y se compara con p + 16) y la guarda (c) (unas 30); hilos 0 y 1 iguales. Camino de la respuesta: unas 4 + 40 + 30 + 9 = 83 instrucciones, unos 330 ciclos. Memoria: 512 bytes de tabla y unas 50 palabras. No fue al examen: si se quiere, sería otra mirada a las cinco empresas.
+
+### 13.8 Examen en las cinco empresas
+
+Una sola corrida (`optimo_examen.txt`, 52 minutos), con la población completa: 1 368 253 ventanas. Compara la variante elegida en las otras acciones con la banda 40 y con la banda 40 más el módulo A de la sección 12. Es la segunda mirada a las cinco empresas, después del examen del módulo A. Con ellas no se ajustó ni se eligió nada. Error estándar por empresa y bloque de 20 días de inicio, como en las secciones 10 a 12. Los torneos usan los mismos sorteos para las tres estrategias. "Contra el rival" es el mano a mano de una ronda; "3 rondas" es la suma de tres ventanas sorteadas.
+
+| Subconjunto | Estrategia | Pts sin copia | 1.ª sola % | Media | p5 | Peor | Órdenes | Δ con banda 40 (ee) | Contra el rival: gana / empata / pierde % | 3 rondas: gana / pierde % |
+|---|---|---|---|---|---|---|---|---|---|---|
+| Población (1 368 253) | banda 40 | 1,852 | 35,6 | 21 289 | 10 578 | 8948 | 3,8 | 0 | 60,6 / 34,0 / 5,4 | 93,3 / 2,7 |
+| Población (1 368 253) | banda 40 + módulo A | 1,856 | 43,6 | 21 349 | 10 699 | 8622 | 4,1 | +60 (30) | 70,6 / 21,7 / 7,7 | 96,2 / 2,8 |
+| Población (1 368 253) | **V3 log con (b)** | 1,869 | 50,8 | 21 413 | 10 970 | 8122 | 5,7 | +124 (77) | 81,2 / 10,4 / 8,4 | 97,7 / 2,2 |
+| Validación por años (391 320) | banda 40 | 1,870 | 40,2 | 22 422 | 11 214 | 9472 | 3,9 | 0 | 68,0 / 25,7 / 6,2 | 96,7 / 1,6 |
+| Validación por años (391 320) | banda 40 + módulo A | 1,867 | 45,1 | 22 433 | 11 460 | 8622 | 4,3 | +11 (76) | 75,3 / 15,9 / 8,9 | 97,8 / 1,9 |
+| Validación por años (391 320) | **V3 log con (b)** | 1,869 | 50,6 | 22 415 | 11 934 | 8122 | 6,2 | -7 (179) | 81,6 / 6,7 / 11,7 | 97,0 / 3,0 |
+| Validación por empresas (547 338) | banda 40 | 1,845 | 35,6 | 20 372 | 10 422 | 9372 | 3,7 | 0 | 53,7 / 41,2 / 5,1 | 89,5 / 3,5 |
+| Validación por empresas (547 338) | banda 40 + módulo A | 1,860 | 45,1 | 20 519 | 10 620 | 8622 | 4,0 | +146 (49) | 67,2 / 25,6 / 7,2 | 95,2 / 3,3 |
+| Validación por empresas (547 338) | **V3 log con (b)** | 1,863 | 49,0 | 20 454 | 10 865 | 8122 | 5,5 | +82 (102) | 78,4 / 12,7 / 8,9 | 96,7 / 3,1 |
+
+Por caso. Caso S: el 100 llega antes que el 255. Caso B: el 255 llega primero.
+
+| Subconjunto | Caso (ventanas, % del subconjunto) | Estrategia | Pts sin copia | Media | p5 | Δ con banda 40 (ee) | 3 rondas: gana / pierde % |
+|---|---|---|---|---|---|---|---|
+| Población | S (790 173, 57,8) | banda 40 | 1,992 | 25 668 | 24 198 | 0 | 100,0 / 0,0 |
+| Población | S (790 173, 57,8) | banda 40 + módulo A | 1,986 | 25 592 | 22 480 | -76 (26) | 99,9 / 0,1 |
+| Población | S (790 173, 57,8) | **V3 log con (b)** | 1,953 | 25 187 | 20 930 | -481 (93) | 99,1 / 0,9 |
+| Población | B (578 080, 42,2) | banda 40 | 1,297 | 15 303 | 10 152 | 0 | 22,8 / 25,8 |
+| Población | B (578 080, 42,2) | banda 40 + módulo A | 1,350 | 15 548 | 10 236 | +246 (56) | 62,3 / 24,2 |
+| Población | B (578 080, 42,2) | **V3 log con (b)** | 1,466 | 16 254 | 10 413 | +951 (99) | 91,6 / 6,9 |
+| Validación por años | S (262 490, 67,1) | banda 40 | 1,993 | 25 556 | 23 684 | 0 | 100,0 / 0,0 |
+| Validación por años | S (262 490, 67,1) | banda 40 + módulo A | 1,981 | 25 401 | 21 835 | -155 (69) | 99,9 / 0,1 |
+| Validación por años | S (262 490, 67,1) | **V3 log con (b)** | 1,937 | 24 909 | 20 232 | -647 (218) | 97,7 / 2,3 |
+| Validación por años | B (128 830, 32,9) | banda 40 | 1,165 | 16 036 | 10 323 | 0 | 16,0 / 36,8 |
+| Validación por años | B (128 830, 32,9) | banda 40 + módulo A | 1,231 | 16 386 | 10 484 | +350 (158) | 61,6 / 27,1 |
+| Validación por años | B (128 830, 32,9) | **V3 log con (b)** | 1,375 | 17 334 | 10 667 | +1298 (235) | 95,7 / 3,4 |
+| Validación por empresas | S (284 347, 52,0) | banda 40 | 1,986 | 25 745 | 23 714 | 0 | 99,9 / 0,1 |
+| Validación por empresas | S (284 347, 52,0) | banda 40 + módulo A | 1,983 | 25 705 | 22 723 | -40 (27) | 99,9 / 0,1 |
+| Validación por empresas | S (284 347, 52,0) | **V3 log con (b)** | 1,950 | 25 228 | 20 573 | -518 (137) | 99,0 / 1,0 |
+| Validación por empresas | B (262 991, 48,0) | banda 40 | 1,341 | 14 563 | 10 150 | 0 | 17,8 / 18,9 |
+| Validación por empresas | B (262 991, 48,0) | banda 40 + módulo A | 1,419 | 14 911 | 10 214 | +348 (90) | 66,7 / 18,4 |
+| Validación por empresas | B (262 991, 48,0) | **V3 log con (b)** | 1,496 | 15 293 | 10 400 | +730 (94) | 91,7 / 6,5 |
+
+**Lectura.** El patrón por caso es el mismo de las otras acciones (`optimo_casos_otras.txt`: -527 con ee 49 en el caso S y +1016 con ee 48 en el B). En el caso S, V3 compra en la fase A, el precio baja hasta el 100 y desde ahí la regla sigue igual que la banda 40. Pierde unos 500 por ronda y el percentil 5 baja de 24 198 a 20 930. En el caso B, la banda 40 queda en caja hasta ver el 100, que llega después del 255: V3 gana unos 1000 por ronda y pasa de 22,8 % a 91,6 % de torneos de 3 rondas ganados contra el rival. La diferencia en un subconjunto es casi exactamente la mezcla de los dos casos. El equilibrio está en d_B / (d_B - d_S):
+
+| Conjunto | Casos S | Equilibrio | Δ con banda 40 (ee) |
+|---|---|---|---|
+| Cinco, población | 57,8 % | 66,4 % | +124 (77) |
+| Cinco, validación por años | 67,1 % | 66,7 % | -7 (179) |
+| Cinco, validación por empresas | 52,0 % | 58,5 % | +82 (102) |
+| Otras, todas | 56,4 % | 65,8 % | +146 (43) |
+| Otras, validación por años | 56,5 % | 70,6 % | +207 (60) |
+| Otras, validación por grupos | 56,2 % | 65,7 % | +144 (50) |
+
+La validación por años de las cinco (2023 y 2024) es el único subconjunto con más casos S que el equilibrio, y ahí la ventaja desaparece. En las otras acciones, en esos mismos años, la proporción fue la de siempre. El error estándar en las cinco es alto porque son solo cinco empresas y las ventanas vecinas se traslapan: aun sin el efecto de los años, +82 en la validación por empresas no alcanza a separarse del ruido.
+
+### 13.9 Criterio de la sección 7 del diseño, punto por punto
+
+Puntos 1 y 2 como en la sección 12. El punto 3 lo cambió Nicolás antes del examen: "no pierde contra el rival de Tesla en más de 10 % de los torneos de 3 rondas". El criterio se evaluó con los valores sin redondear.
+
+| Punto | V3 log con (b) | Se cumple | Banda 40 + módulo A (mismo examen) | Se cumple |
+|---|---|---|---|---|
+| 1. Más puntos que la banda 40, sin la copia `espera_banda40`, en las dos validaciones | Años: 1,869 contra 1,870. Empresas: 1,863 contra 1,845 | no (falla en años) | Años: 1,867. Empresas: 1,860 | no (falla en años) |
+| 2. Diferencia de patrimonio medio con la banda 40 mayor que 1 ee, en las dos validaciones | Años: -7 (ee 179). Empresas: +82 (ee 102). Población: +124 (ee 77) | no (falla en las dos) | Años: +11 (ee 76). Empresas: +146 (ee 49) | no (falla en años) |
+| 3. Pierde a lo más 10 % de los torneos de 3 rondas contra el rival (población) | 2,2 % | sí | 2,8 % | sí |
+
+Con el punto 3 original del diseño (no perder más torneos que la banda 40, que pierde 2,7 %), V3 con (b) también lo cumpliría y el módulo A no. **V3 con (b) no cumple el criterio.** Según la regla de la sección 12, compite la banda 40.
+
+### 13.10 Opciones, sin decidir
+
+| Opción | Qué se gana | Qué se pierde |
+|---|---|---|
+| **Banda 40** (lo que sigue del criterio, como en la sección 12) | Es la regla de los bitstreams R0, R1 y R2 que ya están pasando las puertas, sin código nuevo antes del corte del 22/11. Responde en 83 a 88 ciclos. No depende de la caja ni de la comisión. Es mejor en el caso S (percentil 5: 24 198 contra 20 930) y en el peor caso (8948 contra 8122) | La ventaja de V3 en la población: +124 (ee 77) por ronda, +0,017 puntos, 15 puntos más de primera sola y 0,5 puntos menos de torneos perdidos contra el rival. Sobre todo pierde el caso B, donde gana solo 22,8 % de los torneos de 3 rondas contra el rival (V3, 91,6 %) |
+| **V3 log con (b)**, con el reparto de 4 hilos de 13.6 | Lo anterior. Es la mejor de las tres en puntos y en primera sola en la población y en la validación por empresas. En las otras acciones gana a la banda 40 en las dos validaciones internas | No cumple el criterio fijado antes del examen. Su ganancia media es una apuesta a que los casos S sean menos de dos tercios. Pierde unos 500 por ronda en cada caso S. Hay que escribir un `fondo.s` nuevo con contabilidad y protocolo, más su referencia exacta, y pasar las puertas antes del corte del 22/11 y de la maestra del 26/11. Sube a unos 700 de 1131 ciclos. Si el 1/12 cambian la caja o la comisión, la media posición queda mal dimensionada y deja de coincidir con la referencia |
+| **V1 log con a16 y c** (alternativa preparada en 13.7) | Sin contabilidad: las órdenes son idempotentes. Unos 330 ciclos, 512 bytes de tabla | No pasó por el examen; examinarla sería la tercera mirada a las cinco. En las otras gana menos (+115, ee 33) y pierde más torneos contra el rival que la banda 40 (6,3 % contra 3,7 %). Exige el mismo trabajo de programa y puertas |
+| **Banda 40 + módulo A** (sección 12) | +60 (ee 30) en la población, +146 (ee 49) en la validación por empresas, programa más simple que V3 | Con el punto 3 nuevo cumple ese punto, pero sigue sin cumplir el 1 y el 2. En todo lo que mide el examen queda por debajo de V3 con (b) |
+
+**Recomendación (mía, etiquetada como tal): competir con la banda 40.** Tengo tres razones:
+
+1. El criterio se fijó antes del examen y no se cumple. Adoptar V3 después de ver el examen convertiría a las cinco empresas en datos de ajuste.
+2. El examen sí explica lo que pasa, y la explicación es la misma en las otras acciones y en las cinco. Por eso la decisión se reduce a una apuesta sobre cuántas series ocultas suben y cuántas bajan. Con menos de dos tercios de casos S, V3 gana en promedio. Las cinco empresas en 2023 y 2024 estuvieron justo sobre ese límite, y nada de la serie dice de antemano en qué lado va a caer la competencia.
+3. Implementarla obliga a escribir y verificar un programa de 4 hilos con contabilidad propia a dos días del corte, y su equivalencia exacta depende de que la caja y la comisión no cambien.
+
+Lo que podría inclinar la decisión hacia V3 es el perfil de riesgo registrado en `docs/decisiones.md` (A2): maximizar el patrimonio esperado y ganar por diferencia. En esa medida V3 con (b) es la mejor estimación que hay, con +124 (ee 77) en las cinco y +146 (ee 43) en las otras, y además pierde menos torneos contra el rival que la banda 40. Si se elige así, la elección va contra el criterio y debe quedar registrada de esa forma.
+
+Como material de defensa, la conclusión del intento es esta: el juego tiene un modelo exacto que calibra en datos reales, y su política óptima sí gana en promedio. Pero gana apostando en la fase A a qué extremo llega primero, y esa apuesta tiene un resultado de unos 1500 de diferencia entre un caso y otro, demasiado grande para demostrarla con cinco empresas.
+
+La decisión es de Nicolás.
+
+### 13.11 Comandos
+
+Todos con `export P4_DATOS=$HOME/proyectos/datos_p4`, desde la raíz de la rama. Salidas en `docs/mediciones/exploracion/` salvo que se diga otra cosa.
+
+| Resultado | Comando | Salida |
+|-----------|---------|--------|
+| Recurrencia contra paseos simulados | `python3 ref/cotas/paseo_optimo.py prueba` | pantalla |
+| Tablas de la programación dinámica (56, unos 5 minutos) | `cd ref/cotas && python3 -c "import paseo_optimo as P; P.politicas()"` | `build/cotas/optimo/` |
+| G1 | `python3 ref/cotas/explorar_optimo.py g1` (unos 8 minutos) | `optimo_g1.txt` |
+| Equivalencia con la banda 40 | `python3 ref/cotas/explorar_optimo.py equivalencia --conjunto otras` y `--conjunto cinco` (unos 29 minutos) | `optimo_equivalencia_otras.txt`, `optimo_equivalencia_cinco.txt` |
+| G2 | `python3 ref/cotas/explorar_optimo.py g2` | `optimo_g2.txt` |
+| G3 | `python3 ref/cotas/explorar_optimo.py g3` | `optimo_g3.txt` |
+| Diagnóstico, guardas y elección | `python3 ref/cotas/explorar_optimo.py guardas` (unos 12 minutos) | `optimo_guardas.txt` |
+| Elegida por caso en las otras | `python3 ref/cotas/explorar_optimo.py casos` (desde la caché) | `optimo_casos_otras.txt` |
+| Examen | `python3 ref/cotas/explorar_optimo.py examen` (unos 52 minutos) | `optimo_examen.txt` |
+| Aritmética de placa | `python3 ref/cotas/optimo_placa.py` | pantalla |

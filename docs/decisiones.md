@@ -809,3 +809,12 @@ Las decisiones T87 a T99 son del paquete P6 de R1 y R2 y las T100 a T119 del paq
 - **Torneos de 3 rondas contra el rival con los mismos sorteos para las dos estrategias**, como en la sección 10. La primera versión del reporte del examen sorteaba distinto por estrategia; se rehízo desde la caché, sin volver a evaluar.
 - **Resultado:** el módulo A no cumple el criterio de la sección 9 del diseño. La regla de los peldaños no se cambió.
 
+
+### T140. Política óptima del paseo normalizado: se presenta, no se decide (19 y 20/11)
+
+- **Estimador de v²:** S2/t acumulado, por decisión de Nicolás después de G1; la ventana de 2000 se comparó en G2 y no la mejora (-26, ee 28). Las diferencias de 10 ticks calibran mejor en paseos y peor en datos reales, así que quedaron solo como información.
+- **Variante V3 log**, elegida en G2 por puntos de torneo en las otras acciones y confirmada por Nicolás. V2 gana más en patrimonio medio pero tiene menos puntos y pierde más torneos contra el rival.
+- **Referencia alineada con la placa antes de las guardas y el examen:** clase de v² con cortes en 1/64 (64 S2 ≥ N_j (t - 1)), histéresis de 64 ticks y tabla comprimida. Lo que se pierde: nada medible (en las otras, +312 con la clase de placa contra +296 con la clase exacta, las dos con la tabla comprimida). La alternativa, evaluar con la clase exacta, dejaba a la referencia sin equivalencia posible con el reparto de hilos pedido.
+- **Criterio, punto 3 cambiado por Nicolás antes del examen:** pierde a lo más 10 % de los torneos de 3 rondas contra el rival de Tesla. Regla de elección de guardas fijada por él, también antes del examen: más puntos entre las que pierden a lo más 5 %; si ninguna, la que menos pierde entre las que superan en puntos a la banda 40. Resultado: V3 log con (b) (nunca más de media posición en la fase A), que además cabe en 512 bytes.
+- **Alternativa V1 log con a16 y c preparada sin examen**, para no hacer una tercera mirada a las cinco empresas sin pedirlo.
+- **Resultado:** V3 log con (b) no cumple el criterio (puntos 1 y 2; cumple el 3). En la población de las cinco es la mejor de las tres, +124 (ee 77). Su ganancia depende de la proporción de casos S, con el equilibrio cerca de dos tercios. La regla de los peldaños no se cambió.

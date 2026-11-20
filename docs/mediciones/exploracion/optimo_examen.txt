@@ -1,0 +1,80 @@
+# Examen de la política óptima del paseo en las cinco empresas (una sola vez)
+
+ref/cotas/explorar_optimo.py examen, commit 666f154. Población completa (1368253 ventanas). Variante elegida en las otras acciones (optimo_guardas.txt): V3 log, S2/t, comprimida, b, tabla comprimida y clase de placa. Es la segunda mirada a las cinco empresas (la primera fue el examen del módulo A). Error estándar por grupos de ventanas vecinas (empresa y bloque de 20 días de inicio), como en las secciones 10 a 12. Torneos contra el rival con los mismos sorteos de la sección 10. En la columna del módulo A, para V3: ventanas en que usó la tabla / en que cortó por la guarda (a).
+
+### todas, caso todas (1368253 ventanas)
+
+| estrategia | ventanas | pts sin copia | 1.ª sola % | media | p5 | peor | órdenes | Δ con banda 40 (ee) | módulo A: dispara / tope % | contra el rival: gana / empata / pierde % | Δ con el rival (ee) | 3 rondas: gana / pierde % |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| banda 40 | 1368253 | 1,852 | 35.6 | 21289 | 10578 | 8948 | 3.8 | +0 (0) | 0.0 / 0.0 | 60.6 / 34.0 / 5.4 | +2393 (174) | 93.3 / 2.7 |
+| banda 40 + módulo A | 1368253 | 1,856 | 43.6 | 21349 | 10699 | 8622 | 4.1 | +60 (30) | 15.6 / 4.0 | 70.6 / 21.7 / 7.7 | +2453 (168) | 96.2 / 2.8 |
+| V3 log, b | 1368253 | 1,869 | 50.8 | 21413 | 10970 | 8122 | 5.7 | +124 (77) | 79.3 / 0.0 | 81.2 / 10.4 / 8.4 | +2517 (163) | 97.7 / 2.2 |
+
+### todas, caso S (790173 ventanas)
+
+| estrategia | ventanas | pts sin copia | 1.ª sola % | media | p5 | peor | órdenes | Δ con banda 40 (ee) | módulo A: dispara / tope % | contra el rival: gana / empata / pierde % | Δ con el rival (ee) | 3 rondas: gana / pierde % |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| banda 40 | 790173 | 1,992 | 53.1 | 25668 | 24198 | 14746 | 4.6 | +0 (0) | 0.0 / 0.0 | 98.5 / 0.0 / 1.5 | +3908 (198) | 100.0 / 0.0 |
+| banda 40 + módulo A | 790173 | 1,986 | 52.5 | 25592 | 22480 | 14746 | 4.6 | -76 (26) | 2.7 / 2.7 | 97.9 / 0.0 / 2.1 | +3832 (201) | 99.9 / 0.1 |
+| V3 log, b | 790173 | 1,953 | 61.1 | 25187 | 20930 | 14746 | 6.2 | -481 (93) | 78.0 / 0.0 | 93.1 / 0.0 / 6.9 | +3427 (190) | 99.1 / 0.9 |
+
+### todas, caso B (578080 ventanas)
+
+| estrategia | ventanas | pts sin copia | 1.ª sola % | media | p5 | peor | órdenes | Δ con banda 40 (ee) | módulo A: dispara / tope % | contra el rival: gana / empata / pierde % | Δ con el rival (ee) | 3 rondas: gana / pierde % |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| banda 40 | 578080 | 1,297 | 1.2 | 15303 | 10152 | 8948 | 2.7 | +0 (0) | 0.0 / 0.0 | 8.8 / 80.5 / 10.7 | +322 (148) | 22.8 / 25.8 |
+| banda 40 + módulo A | 578080 | 1,350 | 2.7 | 15548 | 10236 | 8622 | 3.3 | +246 (56) | 33.1 / 5.8 | 33.3 / 51.4 / 15.3 | +567 (157) | 62.3 / 24.2 |
+| V3 log, b | 578080 | 1,466 | 4.2 | 16254 | 10413 | 8122 | 5.1 | +951 (99) | 81.0 / 0.0 | 64.9 / 24.5 / 10.6 | +1273 (210) | 91.6 / 6.9 |
+
+### anios-validacion, caso todas (391320 ventanas)
+
+| estrategia | ventanas | pts sin copia | 1.ª sola % | media | p5 | peor | órdenes | Δ con banda 40 (ee) | módulo A: dispara / tope % | contra el rival: gana / empata / pierde % | Δ con el rival (ee) | 3 rondas: gana / pierde % |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| banda 40 | 391320 | 1,870 | 40.2 | 22422 | 11214 | 9472 | 3.9 | +0 (0) | 0.0 / 0.0 | 68.0 / 25.7 / 6.2 | +2790 (357) | 96.7 / 1.6 |
+| banda 40 + módulo A | 391320 | 1,867 | 45.1 | 22433 | 11460 | 8622 | 4.3 | +11 (76) | 14.8 / 5.9 | 75.3 / 15.9 / 8.9 | +2802 (337) | 97.8 / 1.9 |
+| V3 log, b | 391320 | 1,869 | 50.6 | 22415 | 11934 | 8122 | 6.2 | -7 (179) | 79.9 / 0.0 | 81.6 / 6.7 / 11.7 | +2784 (373) | 97.0 / 3.0 |
+
+### anios-validacion, caso S (262490 ventanas)
+
+| estrategia | ventanas | pts sin copia | 1.ª sola % | media | p5 | peor | órdenes | Δ con banda 40 (ee) | módulo A: dispara / tope % | contra el rival: gana / empata / pierde % | Δ con el rival (ee) | 3 rondas: gana / pierde % |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| banda 40 | 262490 | 1,993 | 56.4 | 25556 | 23684 | 14746 | 4.6 | +0 (0) | 0.0 / 0.0 | 98.4 / 0.1 / 1.4 | +3902 (369) | 100.0 / 0.0 |
+| banda 40 + módulo A | 262490 | 1,981 | 55.3 | 25401 | 21835 | 14746 | 4.7 | -155 (69) | 5.3 / 5.3 | 96.7 / 0.1 / 3.2 | +3747 (382) | 99.9 / 0.1 |
+| V3 log, b | 262490 | 1,937 | 59.9 | 24909 | 20232 | 14746 | 6.4 | -647 (218) | 78.6 / 0.0 | 87.5 / 0.0 / 12.5 | +3255 (404) | 97.7 / 2.3 |
+
+### anios-validacion, caso B (128830 ventanas)
+
+| estrategia | ventanas | pts sin copia | 1.ª sola % | media | p5 | peor | órdenes | Δ con banda 40 (ee) | módulo A: dispara / tope % | contra el rival: gana / empata / pierde % | Δ con el rival (ee) | 3 rondas: gana / pierde % |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| banda 40 | 128830 | 1,165 | 0.5 | 16036 | 10323 | 9472 | 2.7 | +0 (0) | 0.0 / 0.0 | 6.0 / 78.0 / 16.0 | +524 (519) | 16.0 / 36.8 |
+| banda 40 + módulo A | 128830 | 1,231 | 1.9 | 16386 | 10484 | 8622 | 3.4 | +350 (158) | 34.2 / 7.0 | 31.6 / 48.0 / 20.4 | +874 (535) | 61.6 / 27.1 |
+| V3 log, b | 128830 | 1,375 | 3.2 | 17334 | 10667 | 8122 | 5.6 | +1298 (235) | 82.7 / 0.0 | 69.7 / 20.2 / 10.1 | +1823 (700) | 95.7 / 3.4 |
+
+### empresas-validacion, caso todas (547338 ventanas)
+
+| estrategia | ventanas | pts sin copia | 1.ª sola % | media | p5 | peor | órdenes | Δ con banda 40 (ee) | módulo A: dispara / tope % | contra el rival: gana / empata / pierde % | Δ con el rival (ee) | 3 rondas: gana / pierde % |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| banda 40 | 547338 | 1,845 | 35.6 | 20372 | 10422 | 9372 | 3.7 | +0 (0) | 0.0 / 0.0 | 53.7 / 41.2 / 5.1 | +2144 (293) | 89.5 / 3.5 |
+| banda 40 + módulo A | 547338 | 1,860 | 45.1 | 20519 | 10620 | 8622 | 4.0 | +146 (49) | 17.9 / 3.1 | 67.2 / 25.6 / 7.2 | +2291 (283) | 95.2 / 3.3 |
+| V3 log, b | 547338 | 1,863 | 49.0 | 20454 | 10865 | 8122 | 5.5 | +82 (102) | 80.5 / 0.0 | 78.4 / 12.7 / 8.9 | +2226 (257) | 96.7 / 3.1 |
+
+### empresas-validacion, caso S (284347 ventanas)
+
+| estrategia | ventanas | pts sin copia | 1.ª sola % | media | p5 | peor | órdenes | Δ con banda 40 (ee) | módulo A: dispara / tope % | contra el rival: gana / empata / pierde % | Δ con el rival (ee) | 3 rondas: gana / pierde % |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| banda 40 | 284347 | 1,986 | 55.5 | 25745 | 23714 | 17301 | 4.8 | +0 (0) | 0.0 / 0.0 | 97.0 / 0.0 / 3.0 | +3994 (384) | 99.9 / 0.1 |
+| banda 40 + módulo A | 284347 | 1,983 | 55.2 | 25705 | 22723 | 17301 | 4.8 | -40 (27) | 1.6 / 1.6 | 97.0 / 0.0 / 3.0 | +3954 (386) | 99.9 / 0.1 |
+| V3 log, b | 284347 | 1,950 | 61.3 | 25228 | 20573 | 16397 | 6.3 | -518 (137) | 80.6 / 0.0 | 91.9 / 0.0 / 8.1 | +3476 (379) | 99.0 / 1.0 |
+
+### empresas-validacion, caso B (262991 ventanas)
+
+| estrategia | ventanas | pts sin copia | 1.ª sola % | media | p5 | peor | órdenes | Δ con banda 40 (ee) | módulo A: dispara / tope % | contra el rival: gana / empata / pierde % | Δ con el rival (ee) | 3 rondas: gana / pierde % |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| banda 40 | 262991 | 1,341 | 0.9 | 14563 | 10150 | 9372 | 2.4 | +0 (0) | 0.0 / 0.0 | 6.9 / 85.7 / 7.4 | +145 (102) | 17.8 / 18.9 |
+| banda 40 + módulo A | 262991 | 1,419 | 2.5 | 14911 | 10214 | 8622 | 3.2 | +348 (90) | 35.6 / 4.8 | 34.9 / 53.3 / 11.8 | +493 (136) | 66.7 / 18.4 |
+| V3 log, b | 262991 | 1,496 | 3.6 | 15293 | 10400 | 8122 | 4.7 | +730 (94) | 80.3 / 0.0 | 63.8 / 26.5 / 9.7 | +875 (137) | 91.7 / 6.5 |
+
+## Criterio (sección 7 del diseño, con el punto 3 cambiado por Nicolás antes del examen)
+
+- banda 40 + módulo A: 1. más puntos sin la copia que la banda 40 en las dos validaciones: no (años 1,867 contra 1,870; empresas 1,860 contra 1,845); 2. Δ con la banda 40 mayor que 1 ee en las dos: no (años +11 con ee 76; empresas +146 con ee 49); 3. pierde a lo más 10 % de los torneos de 3 rondas contra el rival en la población: sí (2,8 %)
+- V3 log, b: 1. más puntos sin la copia que la banda 40 en las dos validaciones: no (años 1,869 contra 1,870; empresas 1,863 contra 1,845); 2. Δ con la banda 40 mayor que 1 ee en las dos: no (años -7 con ee 179; empresas +82 con ee 102); 3. pierde a lo más 10 % de los torneos de 3 rondas contra el rival en la población: sí (2,2 %)

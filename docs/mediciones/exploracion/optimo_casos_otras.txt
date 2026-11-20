@@ -1,0 +1,9 @@
+# Elegida contra la banda 40 por caso S y B en las otras acciones
+
+ref/cotas/explorar_optimo.py casos, commit 666f154. V3 log, S2/t, comprimida, b, tabla comprimida y clase de placa. Caso S: el 100 llega antes que el 255; caso B: al revés. Error estándar como en optimo_guardas.txt. Proporción de equilibrio: la fracción de casos S con la que la diferencia media sería cero, d_B / (d_B - d_S).
+
+| subconjunto | ventanas | caso S: ventanas (%) | Δ caso S (ee) | caso B: ventanas (%) | Δ caso B (ee) | equilibrio en S |
+|---|---|---|---|---|---|---|
+| todas | 12000 | 6768 (56,4) | -527 (49) | 5232 (43,6) | +1016 (48) | 65,8 % |
+| anios-validacion | 4800 | 2714 (56,5) | -433 (62) | 2086 (43,5) | +1040 (60) | 70,6 % |
+| grupos-validacion | 4800 | 2699 (56,2) | -521 (64) | 2101 (43,8) | +1000 (65) | 65,7 % |
