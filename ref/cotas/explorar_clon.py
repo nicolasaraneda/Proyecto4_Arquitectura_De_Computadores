@@ -27,6 +27,7 @@ Uso (con export P4_DATOS=~/proyectos/datos_p4):
   python3 ref/cotas/explorar_clon.py simular   las estrategias que faltan en la caché (idea 1 y
                                                bandas 30, 50 y 60 en Python), una vez
   python3 ref/cotas/explorar_clon.py parte1    métricas desde la caché -> clon_parte1.txt
+  python3 ref/cotas/explorar_clon.py parte3    candado (partes 3, 4 y 6) -> clon_parte3.txt
 """
 import argparse
 import hashlib
@@ -148,12 +149,30 @@ _T = {}
 
 
 def _mano(args):
-    """Métricas de un par (estrategia, rival) sobre sorteos fijos. x[i] = W propio - W del rival."""
+    """Métricas de un par (estrategia, rival) sobre sorteos fijos. x[i] = W propio - W del rival.
+    Con ("mem", (Wc, Wcl, Wr)) en lugar de x: memoria entre rondas (parte 4); en el orden del
+    sorteo, si la suma de D = Wc - Wcl (contra el clon emulado) ya es positiva al terminar una
+    ronda, las siguientes copian al clon desde el inicio (patrimonio Wcl)."""
     clave, x, sub = args
     tr, n_idx = _T[sub]
     N = len(tr)
+    if isinstance(x, tuple) and x[0] == "mem":
+        Wc, Wcl, Wr = x[1]
+        S = []
+        for t in tr:
+            cum, own, copia = 0, 0, False
+            for i in t:
+                if copia:
+                    own += Wcl[i]
+                else:
+                    own += Wc[i]
+                    cum += Wc[i] - Wcl[i]
+                    copia = cum > 0
+            S.append(own - Wr[t[0]] - Wr[t[1]] - Wr[t[2]])
+        x = Wc
+    else:
+        S = [x[a] + x[b] + x[c] for a, b, c in tr]
     lim = 3 * EMPATE
-    S = [x[a] + x[b] + x[c] for a, b, c in tr]
     g = sum(1 for s in S if s >= lim)
     p = sum(1 for s in S if s <= -lim)
     dfc = [(-s / 3.0 if s < 0 else 0.0) for s in S]
@@ -193,6 +212,10 @@ def torneos(c, Ws, Rs, subconjuntos, procesos=None):
         for s, W in Ws.items():
             for r, Wr in Rs.items():
                 tareas.append(((sub, s, r), [W[i] - Wr[i] for i in range(c.n)], sub))
+    return correr_torneos(c, tareas, procesos)
+
+
+def correr_torneos(c, tareas, procesos=None):
     out = {}
     with Pool(procesos or os.cpu_count()) as pool:
         for clave, met, contrib in pool.imap_unordered(_mano, tareas):
@@ -298,6 +321,257 @@ def parte1(procesos):
     print(txt)
 
 
+# --- partes 3, 4 y 6: candado -------------------------------------------------------------------
+
+MS = (25, 50, 100, 200, 400, 800)
+LS = (None, 500, 1000, 2000, 4000)
+CONTROL_VENTANAS = 120          # ventanas de la referencia directa (Candado en ideas.correr)
+CONTROL_COMBOS = ((25, None), (100, 1000), (800, 500), (400, 4000))
+PLACA_VENTANAS = 240            # ventanas del conteo del hilo del clon (parte 6)
+
+
+def bases_candado():
+    el = pickle.load(open(os.path.join(XO.CACHE, "elegidas_guardas.pkl"), "rb"))
+    fin = pickle.load(open(os.path.join(XR.CACHE, "finales.pkl"), "rb"))
+    return {"V2": OE.spec("V2", "log", "S2/t"), "V3 con (b)": el["V3"], "módulo A": RG.spec_politica(None, fin["A"])}
+
+
+def _combos(ids):
+    import candado as CD
+    conj, specs = _G3["conj"], _G3["specs"]
+    return ids, [CD.ventana_combos(conj.ventana(i), specs, MS, LS) for i in ids]
+
+
+def _control(i):
+    import candado as CD
+    import ideas
+    conj, specs = _G3["conj"], _G3["specs"]
+    w = conj.ventana(i)
+    out = []
+    for k, sp in enumerate(specs):
+        for M, L in CONTROL_COMBOS:
+            s = CD.Candado(sp, M, L)
+            W, n, _ = ideas.correr(w, s)
+            out.append(((k, M, L), W, n, s.estado))
+    return i, out
+
+
+def _placa(i):
+    import candado as CD
+    import ideas
+    w = _G3["conj"].ventana(i)
+    Ds, peor, media, det = CD.hilo_clon_placa(w)
+    # D exacto con las dos cuentas de ideas.Cuenta
+    cl, pr = ideas.Cuenta(ideas.crear(CD.CLON)), ideas.Cuenta(ideas.crear(("banda", {"w": 60})))
+    mal = 0
+    for p, D in zip(w, Ds):
+        cl.paso(p)
+        pr.paso(p)
+        mal += (pr.W - cl.W) != D
+    return i, peor, media, det, mal
+
+
+_G3 = {}
+
+
+def clave_parte3(cx, specs):
+    h = hashlib.sha256(repr((specs, MS, LS, cx.conj.clave(), E.codigo(), E.CODIGO_EXTRA.get("optima"),
+                             E.CODIGO_EXTRA.get("regimen_pol"))).encode())
+    h.update(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "candado.py"), "rb").read())
+    return h.hexdigest()[:16]
+
+
+def simular_parte3(c, specs, procesos):
+    """Todas las combinaciones en las 12 000 ventanas (caché por código), más los controles."""
+    cx = c.cx
+    ruta = os.path.join(XO.CACHE, f"clon_parte3_{clave_parte3(cx, specs)}.pkl")
+    if os.path.exists(ruta):
+        return pickle.load(open(ruta, "rb"))
+    _G3["conj"], _G3["specs"] = cx.conj, specs
+    if cx.conj.ventanas is None:
+        cx.conj.cargar_series()
+    ids = list(range(c.n))
+    tr = max(10, c.n // ((procesos or os.cpu_count()) * 8))
+    res = [None] * c.n
+    with Pool(procesos or os.cpu_count()) as pool:
+        for idsr, out in pool.imap_unordered(_combos, [ids[a:a + tr] for a in range(0, c.n, tr)]):
+            for i, o in zip(idsr, out):
+                res[i] = o
+        rng = random.Random(f"control-candado-{SEMILLA}")
+        ctl_ids = sorted(rng.sample(ids, CONTROL_VENTANAS))
+        control = list(pool.imap_unordered(_control, ctl_ids))
+        pl_ids = sorted(rng.sample(ids, PLACA_VENTANAS))
+        placa = list(pool.imap_unordered(_placa, pl_ids))
+    out = dict(res=res, control=control, placa=placa)
+    pickle.dump(out, open(ruta, "wb"))
+    return out
+
+
+def parte3(procesos):
+    c = Ctx(procesos)
+    avisos = []
+    Rs = rivales(c, avisos)
+    Wd = estrategias(c, avisos)
+    specs_d = bases_candado()
+    nombres = list(specs_d)
+    specs = [specs_d[k] for k in nombres]
+    sim = simular_parte3(c, specs, procesos)
+    res = sim["res"]
+    todos = list(range(c.n))
+    b40 = Rs["banda 40"]
+
+    L = ["# Candado contra el clon de la banda 40: partes 3, 4 y 6", "",
+         f"ref/cotas/explorar_clon.py parte3, commit {XR.commit()}. Otras acciones: {c.n} ventanas. Torneos: los mismos "
+         f"{SORTEOS} sorteos de la parte 1. El clon emulado es la banda 40 exacta; D = patrimonio propio - patrimonio del "
+         "clon al precio actual. Con D >= M (candado arriba) o D <= -L (tope) se igualan las acciones del clon, con "
+         "órdenes de hasta 63 y comisión 5, y se lo copia hasta el final de la ronda.", ""]
+
+    # controles
+    L.append("## Controles\n")
+    cl_mal = sum(1 for i in todos if res[i]["clon"][0] != b40[i])
+    L.append(f"- Clon emulado contra la banda 40 de la caché: {cl_mal} ventanas distintas de {c.n}.")
+    ref = {"V2": Wd["V2"]["W"], "V3 con (b)": Wd["V3 con (b)"]["W"], "módulo A": Wd["módulo A"]["W"]}
+    for k, nm in enumerate(nombres):
+        mal = sum(1 for i in todos if res[i][("base", k)][0] != ref[nm][i])
+        L.append(f"- Base {nm} recorrida con el código actual contra la caché de la parte 1: {mal} ventanas distintas de {c.n}.")
+    mal = 0
+    for i, out in sim["control"]:
+        for (k, M, Lt), W, n, est in out:
+            Wf, e, nord, _, _ = res[i][(k, M, Lt)]
+            mal += (W != Wf) or (n != nord) or (est != e)
+    L.append(f"- Camino rápido contra la referencia directa (`candado.Candado` en `ideas.correr`), {CONTROL_VENTANAS} "
+             f"ventanas, 3 bases y {len(CONTROL_COMBOS)} combinaciones: {mal} diferencias en patrimonio, órdenes o estado.")
+    L.append("")
+
+    # métricas por combinación
+    Ws, filas = {}, {}
+    for k, nm in enumerate(nombres):
+        Ws[(nm, "base")] = [res[i][("base", k)][0] for i in todos]
+        for M in MS:
+            for Lt in LS:
+                Ws[(nm, M, Lt)] = [res[i][(k, M, Lt)][0] for i in todos]
+    tareas = [((("todas",) + (key if isinstance(key, tuple) else (key,))), [W[i] - b40[i] for i in todos], "todas")
+              for key, W in Ws.items()]
+    _T["todas"] = (sorteos(todos, "todas", SORTEOS), c.n)
+    met = correr_torneos(c, tareas, procesos)
+
+    def nombre_combo(nm, M, Lt):
+        return f"{nm}, M {M}, L {'sin tope' if Lt is None else Lt}"
+
+    L.append("## Parte 3: todas las combinaciones contra la banda 40 (rival real = clon emulado)\n")
+    L.append("Por ronda: porcentaje de rondas que terminan con candado arriba, en el tope y sin tocar ninguno, con la "
+             "diferencia media con el clon de cada grupo; órdenes por ronda y órdenes extra (las del seguidor menos las "
+             "del clon después del candado). Por torneo de 3 rondas, las métricas de la parte 1.\n")
+    L.append("| Base | M | L | Arriba % (Δ) | Tope % (Δ) | Ninguno % (Δ) | Órdenes | Extra | Δ por ronda (ee) | Gana % | Empata % | Pierde % (ee) | Déficit (ee) | p5 | Peor |")
+    L.append("|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|")
+    ranking = []
+    for k, nm in enumerate(nombres):
+        mb = met[("todas", nm, "base")]
+        ob = sum(res[i][("base", k)][1] for i in todos) / c.n
+        L.append(f"| {nm} | sin candado | | | | 100,0 ({mb['m']:+.0f}) | {fmt(ob)} | | {fmt_ee(mb['m'], mb['ee_m'], 0, True)} | "
+                 f"{fmt(mb['g'])} | {fmt(mb['e'])} | {fmt_ee(mb['p'], mb['ee_p'])} | {fmt_ee(mb['d'], mb['ee_d'], 0)} | "
+                 f"{mb['p5']:+.0f} | {mb['peor']:+.0f} |")
+        for M in MS:
+            for Lt in LS:
+                r = [res[i][(k, M, Lt)] for i in todos]
+                grupos = {}
+                for i, x in zip(todos, r):
+                    grupos.setdefault(x[1], []).append(x[0] - b40[i])
+                cel = []
+                for e in (1, 2, 0):
+                    g = grupos.get(e, [])
+                    cel.append(f"{fmt(100 * len(g) / c.n)} ({(sum(g) / len(g)) if g else 0:+.0f})")
+                o = sum(x[2] for x in r) / c.n
+                ex = [x[3] for x in r if x[1]]
+                exm = sum(ex) / len(ex) if ex else 0.0
+                m = met[("todas", nm, M, Lt)]
+                L.append(f"| {nm} | {M} | {'sin tope' if Lt is None else Lt} | {cel[0]} | {cel[1]} | {cel[2]} | {fmt(o)} | "
+                         f"{fmt(exm)} | {fmt_ee(m['m'], m['ee_m'], 0, True)} | {fmt(m['g'])} | {fmt(m['e'])} | "
+                         f"{fmt_ee(m['p'], m['ee_p'])} | {fmt_ee(m['d'], m['ee_d'], 0)} | {m['p5']:+.0f} | {m['peor']:+.0f} |")
+                ranking.append(((m["d"], m["p"], -m["m"]), (nm, M, Lt)))
+    ranking.sort(key=lambda x: x[0])
+    top = [x[1] for x in ranking[:3]]
+    L.append("\nCriterio para elegir las 3 que se repiten (el objetivo del pedido: quedar debajo del clon resta y ganarle "
+             "no suma): menor déficit esperado contra la banda 40; a igual déficit, menor porcentaje de torneos "
+             "perdidos, y después mayor diferencia media. Las 3: " + "; ".join(nombre_combo(*t) for t in top) + ".")
+    L.append("\nLas 10 primeras por ese criterio: " + "; ".join(
+        f"{nombre_combo(*t)} (déficit {d:.0f}, pierde {fmt(p)} %, Δ {-mm:+.0f})" for (d, p, mm), t in ranking[:10]) + ".\n")
+
+    # las 3 primeras salen casi iguales (módulo A con M 25 casi nunca llega al tope): se repite además la
+    # mejor de cada base con el mismo criterio
+    por_base = []
+    for nm in nombres:
+        t = next(t for _, t in ranking if t[0] == nm)
+        if t not in top:
+            por_base.append(t)
+    L.append("La mejor de cada base por el mismo criterio (se repiten también): " +
+             "; ".join(nombre_combo(*t) for t in por_base) + ".\n")
+    top = top + por_base
+
+    # repetición con otros rivales y parte 4
+    tareas = []
+    for t in top:
+        W = Ws[t]
+        for rv, Wr in Rs.items():
+            tareas.append((("r",) + t + (rv,), [W[i] - Wr[i] for i in todos], "todas"))
+            tareas.append((("mem",) + t + (rv,), ("mem", (W, b40, Wr)), "todas"))
+    for k, nm in enumerate(nombres):
+        for rv, Wr in Rs.items():
+            tareas.append((("r", nm, "base", None, rv), [Ws[(nm, "base")][i] - Wr[i] for i in todos], "todas"))
+    met2 = correr_torneos(c, tareas, procesos)
+
+    L.append("## Las 3 mejores con el rival real en otra banda (el emulado sigue siendo la banda 40)\n")
+    L.append("Degradación: cambio del déficit y del porcentaje perdido respecto del mismo candado contra la banda 40.\n")
+    L.append("| Combinación | Rival real | Δ por ronda (ee) | Gana % | Empata % | Pierde % (ee) | Déficit (ee) | p5 | Peor | Degradación: déficit / pierde |")
+    L.append("|---|---|---|---|---|---|---|---|---|---|")
+    for t in top:
+        m40 = met2[("r",) + t + ("banda 40",)]
+        for rv in Rs:
+            m = met2[("r",) + t + (rv,)]
+            L.append(f"| {nombre_combo(*t)} | {rv} | {fmt_ee(m['m'], m['ee_m'], 0, True)} | {fmt(m['g'])} | {fmt(m['e'])} | "
+                     f"{fmt_ee(m['p'], m['ee_p'])} | {fmt_ee(m['d'], m['ee_d'], 0)} | {m['p5']:+.0f} | {m['peor']:+.0f} | "
+                     f"{m['d'] - m40['d']:+.0f} / {m['p'] - m40['p']:+.1f} |".replace(".", ","))
+    L.append("\nLas bases sin candado contra los mismos rivales (referencia):\n")
+    L.append("| Base | Rival real | Δ por ronda (ee) | Gana % | Empata % | Pierde % (ee) | Déficit (ee) | p5 | Peor |")
+    L.append("|---|---|---|---|---|---|---|---|---|")
+    for nm in nombres:
+        for rv in Rs:
+            m = met2[("r", nm, "base", None, rv)]
+            L.append(f"| {nm} | {rv} | {fmt_ee(m['m'], m['ee_m'], 0, True)} | {fmt(m['g'])} | {fmt(m['e'])} | "
+                     f"{fmt_ee(m['p'], m['ee_p'])} | {fmt_ee(m['d'], m['ee_d'], 0)} | {m['p5']:+.0f} | {m['peor']:+.0f} |")
+
+    L.append("\n## Parte 4 (solo como dato): memoria entre rondas\n")
+    L.append("En el orden del sorteo: si la suma de D contra el clon emulado ya es positiva al terminar una ronda, las "
+             "rondas siguientes copian al clon desde el inicio. Mismos sorteos.\n")
+    L.append("| Combinación | Rival real | Δ por ronda (ee) | Gana % | Empata % | Pierde % (ee) | Déficit (ee) | p5 | Peor | Cambio contra sin memoria: déficit / pierde |")
+    L.append("|---|---|---|---|---|---|---|---|---|---|")
+    for t in top:
+        for rv in Rs:
+            m = met2[("mem",) + t + (rv,)]
+            m0 = met2[("r",) + t + (rv,)]
+            L.append(f"| {nombre_combo(*t)} | {rv} | {fmt_ee(m['m'], m['ee_m'], 0, True)} | {fmt(m['g'])} | {fmt(m['e'])} | "
+                     f"{fmt_ee(m['p'], m['ee_p'])} | {fmt_ee(m['d'], m['ee_d'], 0)} | {m['p5']:+.0f} | {m['peor']:+.0f} | "
+                     f"{m['d'] - m0['d']:+.0f} / {m['p'] - m0['p']:+.1f} |".replace(".", ","))
+
+    # parte 6
+    pl = sim["placa"]
+    peor = max(x[1] for x in pl)
+    media = sum(x[2] for x in pl) / len(pl)
+    det = max(pl, key=lambda x: x[1])[3]
+    mal = sum(x[4] for x in pl)
+    L.append("\n## Parte 6: instrucciones por tick del hilo que emula al clon y lleva D\n")
+    L.append(f"`candado.hilo_clon_placa`, en {PLACA_VENTANAS} ventanas completas ({PLACA_VENTANAS * 20000} ticks), con la "
+             "aritmética de `optimo_placa.py` (sumas, restas, comparaciones y tablas; el producto por duplicaciones y el "
+             f"recorte por restas). D de la placa contra D exacto: {mal} ticks distintos.\n")
+    L.append(f"- Peor caso: {peor} operaciones en un tick; media {fmt(media)}.")
+    L.append("- Reparto del peor tick: " + ", ".join(f"{k} {v}" for k, v in det.items()) + ", más 6 de lectura y lazo.")
+    L.append(f"- Tope por hilo a 0,1 ms: unas 565 instrucciones. {'Cabe' if peor <= 565 else 'No cabe'}.")
+
+    txt = "\n".join(L) + "\n"
+    open(os.path.join(SALIDA, "clon_parte3.txt"), "w").write(txt)
+    print(txt)
+
+
 _B40N = {}
 
 
@@ -327,13 +601,15 @@ def main():
     import multiprocessing
     multiprocessing.set_start_method("fork", force=True)
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("accion", choices=("simular", "parte1"))
+    ap.add_argument("accion", choices=("simular", "parte1", "parte3"))
     ap.add_argument("--procesos", type=int, default=None)
     a = ap.parse_args()
     if a.accion == "simular":
         simular(a.procesos)
-    else:
+    elif a.accion == "parte1":
         parte1(a.procesos)
+    else:
+        parte3(a.procesos)
 
 
 if __name__ == "__main__":
