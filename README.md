@@ -14,9 +14,9 @@ Hay una escalera de tres bitstreams. Compite el más alto que pase las tres puer
 
 | Peldaño | Hardware | Programa | Archivo |
 |---------|----------|----------|---------|
-| R0 | Espino base del curso, con un reset más largo | `sw/trade.s`: `max_media`, reversión a la media, 40 palabras | `bitstreams/r0_base_max_media.bin` |
-| R1 | Espino barrel de 4 hilos con las instrucciones `emad` y `devk` y una tabla de parámetros en BRAM | `sw/fondo.s`: un supervisor y tres gestores que votan | `bitstreams/r1_fondo.bin` |
-| R2 | R1 más un vigilante que, si el programa deja de responder, reconfigura la FPGA con R0 | El mismo | `bitstreams/r2_multi.bin` |
+| R0 | Espino base del curso, con un reset más largo | `sw/trade.s`: regla de cotas con banda 40 (T140), sin saltos | `bitstreams/r0_banda40.bin` |
+| R1 | Espino barrel de 4 hilos con las instrucciones `emad` y `devk` y una tabla de parámetros en BRAM | `sw/fondo.s`: la misma regla en el hilo 0, con los umbrales leídos de la tabla | `bitstreams/r1_banda40.bin` |
+| R2 | R1 más un vigilante que, si el programa deja de responder, reconfigura la FPGA con R0 | El mismo | `bitstreams/r2_banda40_multi.bin` |
 
 Hoy el diseño por defecto (el que ejercita el testbench oficial sin opciones) es R0. Cuando se sepa qué peldaño compite, `make peldano-fijar PELDANO=r1` lo cambia (`docs/peldano.md`).
 
@@ -82,7 +82,7 @@ La lista completa, pieza por pieza, está en `docs/comandos.md`.
 
 ```bash
 mkdir -p build                                              # carpeta de salida, si no existe
-python3 ref/trader.py tb/practica.csv                       # max_media contra no operar y comprar y mantener
+python3 ref/trader.py tb/practica.csv                       # la regla oficial contra no operar y comprar y mantener
 python3 ref/trader.py tb/practica.csv -o build/ref.csv      # decisiones.csv de referencia de R0
 python3 ref/fondo.py tb/practica.csv -o build/ref_fondo.csv # decisiones.csv de referencia de R1 y R2
 make test-ref test-fondo                                    # pruebas de las referencias y del mercado
@@ -96,8 +96,8 @@ Los bitstreams ya probados están en `bitstreams/`, con su hash, el commit del q
 
 ```bash
 cd bitstreams && sha256sum -c SHA256SUMS && cd ..   # todos deben decir OK
-iceprog bitstreams/r1_fondo.bin                     # o r0_base_max_media.bin
-iceprog -b bitstreams/r2_multi.bin                  # imagen múltiple: -b borra la flash entera
+iceprog bitstreams/r1_banda40.bin                   # o r0_banda40.bin
+iceprog -b bitstreams/r2_banda40_multi.bin          # imagen múltiple: -b borra la flash entera
 ```
 
 `iceprog` escribe la flash de la Go Board, conectada por USB, y termina con "VERIFY OK". En WSL la placa se pasa con `usbipd` (`docs/autoprueba.md`, sección 5).
@@ -121,6 +121,7 @@ Una sección por pieza: qué es, el comando que la prueba y el número que la re
 
 ### Algoritmo y protocolo de evaluación
 Reversión a la media: la serie de práctica tiene razón de varianza 0,77 a 10 ticks. `max_media` compra cuando el precio cae más de 3 unidades bajo su media exponencial y vende al recuperarla, con órdenes de 63 acciones. Se eligió con 10 bloques de práctica, 1 000 remuestreos y 14 familias sintéticas calibradas.
+Desde el 17/11 compite otra regla, la de cotas (T133): las rondas se normalizan entre 100 y 255, así que se compra al ver 100, se vende al ver 255 y, después de ver los dos, se compra con 140 o menos y se vende con 215 o más (banda 40 desde el 19/11, T140). Da 21 392 en la serie Meta normalizada, 20 795 en la ronda de Tesla de la clase del 18/11 y 26 470 con AMD (`docs/cotas.md`).
 - Prueba: `make tabla-3-1` (segundos) y `make algoritmo` (unos 3 minutos; reescribe archivos de `docs/mediciones/`).
 - Número: 25 973 de patrimonio en los 20 000 ticks de práctica, contra 6 497 de comprar y mantener (`docs/mediciones/tabla_3_1.txt`).
 - Documento: `docs/algoritmo.md`, `docs/protocolo.md`.
@@ -170,7 +171,7 @@ Ocho criterios que un bitstream debe pasar antes de la placa, más una matriz de
 ### Autoprueba en placa
 El SoC de cada peldaño con una maestra SPI dentro de la FPGA y una firma CRC-16 de las decisiones en los 7 segmentos. Es la puerta de placa: prueba la placa sin la maestra del curso.
 - Prueba: `make autoprueba-r0` (unos 20 minutos), `make autoprueba-r1` y `make autoprueba-r2` (unos 25 minutos cada uno).
-- Número: R0, firma `a23c` en el gemelo, la referencia, el RTL y el bitstream ruteado. R1 y R2, firma `15d7`; en R2, 18 millones de precios en el gemelo (media hora a 0,1 ms) sin que el vigilante pueda dispararse, y el relevo con la falla inyectada en la transacción esperada. En la placa, el 16/11: R0 mostró a los tres períodos la mitad baja de su firma (`3C`) y falta la mitad alta (`A2`); R2 pasó la firma a 0,1 ms y media hora sin disparo, y el relevo se midió en 35,50 ms por la UART con `tools/medir_relevo.py`; faltan R1, R2 a 1 ms y 10 ms, y ver la imagen testigo de R2 después del relevo (`docs/mediciones/placa_16nov.md`, `docs/puertas.md`).
+- Número: desde el 19/11 (T141) la maestra interna manda una caminata entre 100 y 255 con pasos de 4 (semilla 0xE3AA), que toca los dos extremos y entra a la banda. Firma `a639` en los tres peldaños con banda 40, en el gemelo a los tres períodos, la referencia, el RTL y el bitstream ruteado; con la banda 60 sería `8610`, y la autoprueba la rechaza. En R2, 18 millones de precios en el gemelo (media hora a 0,1 ms) sin que el vigilante pueda dispararse, y el relevo con la falla inyectada en la transacción esperada. Las autopruebas anteriores (`a23c`, `15d7`) pasaron en la placa el 16/11 a 0,1 ms y el relevo se midió en 35,50 ms (`docs/mediciones/placa_16nov.md`); las nuevas están por correr en la placa (`docs/autoprueba.md`, sección 11).
 - Documento: `docs/autoprueba.md`.
 
 ### Co-diseño: variantes, Amdahl, escalera y roofline

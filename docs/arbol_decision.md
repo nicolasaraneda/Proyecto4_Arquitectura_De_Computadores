@@ -4,6 +4,8 @@ Grupo: Nicolás Araneda, Vicente Calderón y Santiago Muñoz.
 
 Una página. Se recorre de arriba abajo, y la primera regla que se cumple decide. Cada cifra sale de un archivo del repositorio, citado al final.
 
+Desde el 19/11 los tres peldaños corren la regla de cotas con banda 40 (T140): `r0_banda40.bin`, `r1_banda40.bin` y `r2_banda40_multi.bin`. Los límites de las reglas 3 y 4 (115 kHz y 27 µs) se fijaron con el fondo que votaba, cuando R1 respondía en hasta 444 ciclos; con la regla de cotas R1 responde en 128 y R0 en 60, así que esos límites quedan conservadores. Se mantienen mientras Nicolás no decida otros (`docs/pendientes_nicolas.md`). La tabla de la sección 2 se calculó para `max_media` y no se ha rehecho para la regla de cotas: también queda pendiente.
+
 ## 1. Qué peldaño compite
 
 | # | Si... | Entonces | Por qué |
@@ -12,8 +14,8 @@ Una página. Se recorre de arriba abajo, y la primera regla que se cumple decide
 | 2 | R1 no pasó la puerta de maestra el 26/11 (perdió precios o decisiones, o el patrimonio no coincide con el gemelo) | **R0** | Solo compite hardware probado con la maestra real |
 | 3 | En la ronda 3 el SCLK real es **menor que 115 kHz** (medidor, medida 0: valor mayor que 217, `0x00D9`) | **R0** | Con 100 kHz quedan 237 ciclos y R1 necesita hasta 444. R1 responde a tiempo desde 110 kHz; 115 deja margen. R0 responde en 44 ciclos |
 | 4 | El período real de la ronda 3 es menor que 27 µs | **R0** | Período mínimo con SCLK de 1 MHz: R1 26,94 µs, R0 11,34 µs |
-| 5 | R2 pasó la puerta de placa (relevo al inyectar la falla, ninguno en media hora) y la de maestra, y nadie del curso prohibió de forma explícita reconfigurar la FPGA durante una ronda | **R2** (`r2_multi.bin`) | El vigilante cambia a R0 si R2 deja de responder 5 precios seguidos: 361 ticks sin decisión nueva a 0,1 ms con los 35,50 ms de reconfiguración medidos el 16/11. Reconfigurar está cubierto por la respuesta general del profesor, sin confirmación específica (T126). Estado al 16/11: media hora sin disparo y firma a 0,1 ms en la placa; faltan la firma a 1 y 10 ms y ver la testigo después del relevo (`docs/puertas.md`, puerta de placa) |
-| 6 | En cualquier otro caso | **R1** (`r1_fondo.bin`) | Es el diseño elegido (decisión T50) |
+| 5 | R2 pasó la puerta de placa (relevo al inyectar la falla, ninguno en media hora) y la de maestra, y nadie del curso prohibió de forma explícita reconfigurar la FPGA durante una ronda | **R2** (`r2_banda40_multi.bin`, con `iceprog -b`) | El vigilante cambia a R0 si R2 deja de responder 5 precios seguidos: 361 ticks sin decisión nueva a 0,1 ms con los 35,50 ms de reconfiguración medidos el 16/11. Reconfigurar está cubierto por la respuesta general del profesor, sin confirmación específica (T126). Estado al 16/11: media hora sin disparo y firma a 0,1 ms en la placa; faltan la firma a 1 y 10 ms y ver la testigo después del relevo (`docs/puertas.md`, puerta de placa) |
+| 6 | En cualquier otro caso | **R1** (`r1_banda40.bin`) | Es el diseño elegido (decisión T50) |
 
 R0 es el respaldo de toda la escalera y no depende de ninguna respuesta del curso. Ninguna regla depende ya de una respuesta pendiente: la regla 1 la resolvió el profesor y la 5 solo cambia ante una prohibición explícita.
 

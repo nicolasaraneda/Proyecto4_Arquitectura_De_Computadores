@@ -51,12 +51,12 @@ Hacerlo público no es la opción: a las 10:00 los demás grupos todavía no han
 
 | Rol | Archivo | Cuándo |
 |-----|---------|--------|
-| Principal | El peldaño que dé el árbol: `r2_multi.bin`, `r1_fondo.bin` o `r0_base_max_media.bin` | Grabado antes de llegar a la sala |
+| Principal | El peldaño que dé el árbol: `r2_banda40_multi.bin`, `r1_banda40.bin` o `r0_banda40.bin` (banda 40, T140) | Grabado antes de llegar a la sala |
 | Respaldo 1 | El peldaño inmediatamente inferior (R1 si compite R2; R0 si compite R1) | Si el principal falla entre rondas |
-| Respaldo 2 | `r0_base_max_media.bin` | Si todo lo demás falla. Ya pasó la puerta de simulación, la de placa y (el 26/11) la de maestra |
+| Respaldo 2 | `r0_banda40.bin` | Si todo lo demás falla. Ya pasó la puerta de simulación, la de placa y (el 26/11) la de maestra |
 | Contingencia | `bitstreams/contingencia/` | Solo si anuncian otra comisión (árbol, sección 2) |
 
-Se graba con `iceprog bitstreams/ARCHIVO.bin` (Nicolás, con la placa conectada a WSL por `usbipd`); las imágenes múltiples (`r2_multi.bin` y las `*_multi.bin`) con `iceprog -b`, que borra la flash entera. Al terminar debe decir "VERIFY OK".
+Se graba con `iceprog bitstreams/ARCHIVO.bin` (Nicolás, con la placa conectada a WSL por `usbipd`); las imágenes múltiples (`r2_banda40_multi.bin` y las demás `*_multi.bin`) con `iceprog -b`, que borra la flash entera. Al terminar debe decir "VERIFY OK".
 
 Con los cables del PMOD puestos y la maestra encendida, desconectar y conectar el USB de la Go Board antes de la primera ronda: los pines del SPI no tienen pull-up, y así la FPGA parte de cero con la maestra ya fijando el nivel de las líneas (`docs/checklist_26nov.md`, sección 2).
 

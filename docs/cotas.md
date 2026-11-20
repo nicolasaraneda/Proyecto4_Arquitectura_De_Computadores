@@ -122,7 +122,7 @@ Con rivales que también usan los extremos, "espera con banda" queda primera en 
 ### 5.5 Conclusión
 
 - **Si cada ronda se normaliza por separado, las reglas de extremos dominan**: casi duplican el patrimonio y superan a `max_media` en más del 90 % de las ventanas, en las cinco empresas, en los tres largos y en las dos validaciones.
-- **Recomendada: "espera" con banda 60** (centro de la meseta). Es la de mayor media y mayor puntaje cuando otros grupos usan los extremos, y la única que no pierde si la hipótesis es falsa.
+- **Recomendada el 17/11: "espera" con banda 60** (centro de la meseta). **Desde el 19/11 compite la banda 40 (T140)**, elegida con los minutos reales de Alpaca: +205 por ronda con error estándar 101 sobre todas las ventanas reales, y la que menos pierde contra el rival de Tesla de la clase del 18/11 (`docs/decisiones.md`, T140). En la ronda de Tesla da 20 795 contra 18 779 de la banda 60, en AMD 26 470 contra 21 895 y en la serie Meta 21 392 contra 19 214. Es la de mayor media y mayor puntaje cuando otros grupos usan los extremos, y la única que no pierde si la hipótesis es falsa.
 - **Alternativa: comprar 20 al inicio con banda 70.** Mejor percentil 5 y más puntaje si nadie más usa los extremos, pero pierde hasta 2 100 si la hipótesis es falsa.
 - **Lo que no se sabe**: si las rondas de la competencia se normalizan por separado (pregunta al ayudante) y cómo es la forma por minuto de las otras cuatro empresas (el modelo usa la de Meta; con los minutos reales de Alpaca se puede repetir todo con `python3 ref/cotas/experimento.py`).
 
