@@ -455,3 +455,170 @@ Placa: (a) es un bit que recuerda que el 100 llegó primero y bloquea la compra 
 | Mano a mano contra el rival de Tesla | `python3 ref/cotas/explorar_rival.py mano --semilla 18` (corre la población si falta, unos 50 minutos) | `mano.txt` |
 | Traza de la ronda de AMD | `python3 ref/cotas/explorar_rival.py amd` | `amd.txt` |
 | Variante del caso S | `python3 ref/cotas/explorar_rival.py casos --semilla 18` | `caso_s.txt` |
+
+
+## 12. Política por régimen filtrado (19/11)
+
+Diseño de Nicolás ("Último intento: política por régimen filtrado"), encargo de su sección 11. La tesis: como la maestra normaliza con el mínimo y el máximo de toda la ronda, la volatilidad en niveles por tick, v = 155 s / R, medida en los primeros ticks revela cuántas volatilidades de un minuto mide el rango que la ventana va a recorrer. Con v bajo la ventana tendría que ser de tendencia; con v alto, de vaivén. La política es la banda 40 más tres módulos: D (bandas según caso, clase y tramo en la fase D), A (entrada temprana por ruptura en la fase A) y E (orden condicionada a los bits del precio que llega). Solo Python; no se tocó `rtl/`, `sw/`, `main` ni los bitstreams. Decisiones de Nicolás del 19/11: lista de acciones aprobada, módulo D con c2 y k compartidos entre casos (10 parámetros, 14 con el A), ajuste desde la banda 40 moviendo un parámetro a la vez, N en {33, 63}, el módulo A como principal y el D descartado si F1 pasa solo en las fases A a C.
+
+### 12.0 Resumen
+
+- **F1 pasa en las fases A a C y no en la D**, en las otras acciones, en las cinco empresas y en paseos aleatorios normalizados. El efecto sale de la normalización (los paseos lo muestran sin ningún mercado detrás), así que estaría igual en las series de la competencia. En la fase D el precio revierte en todas las clases y la clase no distingue nada: **el módulo D se descarta**.
+- **F2 pasa con holgura.** Partiendo del primer máximo nuevo de 220 o más en la fase A, con clase 0 el 255 llega antes de caer 16 niveles en el 85,7 % de las ventanas de las otras acciones, 29,6 puntos sobre lo que daría un paseo sin memoria (ee 1,5).
+- **F3 no pasa.** Decidir con el precio completo valdría +242 por ronda en las cinco y +291 en las otras, pero con la restricción de bits la orden condicional pierde. **El módulo E no se construye.**
+- **Con los módulos apagados, la política decide igual que la banda 40** en toda la población de las cinco (27 365 millones de decisiones por regla) y en la muestra de las otras: 0 diferencias.
+- **Módulo A ajustado en las otras acciones:** kA 1, θA 220, d 24, N 63. Validación interna: +92 (ee 27) por años y +107 (ee 26) por grupos contra la banda 40.
+- **Examen final en las cinco (una sola vez):** +60 (ee 30) en la población, +146 (ee 49) en la validación por empresas y +11 (ee 76) en la de años. Gana en el caso B (+246, ee 56) y pierde en el S (-76, ee 26).
+- **El criterio de la sección 9 del diseño no se cumple en ninguno de sus tres puntos** (por poco en el 1 y el 3). Según esa misma sección, compite la banda 40.
+
+### 12.1 Datos: las otras acciones
+
+- **Lista** (`tools/datos/otras_acciones.txt`, `tools/datos/candidatas.py`): 198 candidatas grandes que cotizaron todo 2020 a 2024 sin cambio de símbolo, fusión ni escisión conocida; en cada uno de cinco grupos de sectores (tecnología y comunicaciones, financiero, salud, consumo, e industria con energía, materiales, servicios básicos e inmobiliario; asignación propia cercana a GICS) las 20 de mayor monto transado mediano en enero de 2020, más dos suplentes.
+- **Descarga** (`tools/datos/alpaca.py`): 110 acciones (las 100 y las suplentes), 2 de enero de 2020 a 31 de diciembre de 2024, feed SIP, ajuste por splits, 4 hilos con tope común de 190 llamadas por minuto (el límite de la cuenta es 200), unos 45 minutos, 1,9 GB fuera del repositorio. Sin fallas.
+- **Suplentes.** La receta de sesión (un precio por minuto de 9:30 a 15:59, sin los días con menos de 200 minutos con operaciones) le deja a BKNG 848 de 1258 días: por su precio alto tiene minutos sin operaciones, y los días descartados empalman días no consecutivos (avisó un salto falso de +29 %). REGN queda con 1206 y BLK con 1219; las demás, con 1245 o más. Regla aplicada: una elegida falla si le quedan menos del 98 % de los días, y entra la primera suplente de su grupo. BKNG por EL, REGN por HCA, BLK por ICE. La receta no se cambió.
+- **Saltos entre días sobre 25 %** (todos reales): ROKU, INTC, BIIB, SNAP (resultados o noticias) y el desplome del petróleo del 9/3/2020 (OXY, SLB, COP, EOG).
+- **Muestra:** 24 ventanas por acción y año de inicio (12 000), con inicios en múltiplos de 97 minutos para sacar los rivales de la caché en C con ese paso. Validación interna por años (ajuste: inicio en 2020 a 2022; validación: inicio en 2023 o 2024) y por grupos (ajuste: financiero, salud e industria; validación: tecnología y consumo, los sectores de las cinco).
+- **Error estándar** por grupos de ventanas: bloques de 20 y 60 días hábiles de la fecha de inicio, con todas las empresas juntas porque comparten fechas, y en las otras acciones también en dos sentidos (fecha y empresa); se usa el mayor.
+- **Sesgo de supervivencia:** todas las acciones existen hoy, igual que las cinco. Por eso F2 se informa también por año de inicio (2022 fue año de caída).
+
+### 12.2 Filtros
+
+Reglas fijadas en la bitácora antes de correrlos. F1 pasa en un grupo de fases si en los tres K (1000, 2000 y 4000) y los dos h (390 y 1950) la persistencia de la clase 0 supera a la de la clase 3 por más de 2 ee; en D y en "todas" además deben crecer los cruces (b). Decide el conjunto de las otras acciones. Clases con los umbrales del diseño (v² < 1/4, 1/2, 1): en las otras, clase 0 de 4,7 % a 6,9 % y clase 3 de 20 % a 21 %; en las cinco, 7,5 % a 9,9 % y 10,5 % a 12,7 %.
+
+**F1 (c): persistencia de la clase 0 menos la de la clase 3** (entre paréntesis, t). Cada celda da K = 1000 / 2000 / 4000.
+
+| Conjunto | Fases | h = 390 | h = 1950 | Veredicto |
+|---|---|---|---|---|
+| Otras acciones | A a C | +0,092 (5,0) / +0,095 (4,7) / +0,106 (5,2) | +0,326 (18,5) / +0,363 (17,8) / +0,395 (19,8) | pasa |
+| Otras acciones | D | +0,010 (0,5) / +0,007 (0,3) / -0,001 (0,0) | -0,057 (-1,5) / -0,074 (-2,0) / -0,104 (-1,9) | no pasa |
+| Cinco empresas | A a C | +0,066 (3,2) / +0,061 (2,4) / +0,064 (2,1) | +0,237 (5,4) / +0,231 (4,6) / +0,278 (4,7) | pasa |
+| Cinco empresas | D | -0,071 (-1,4) / -0,051 (-0,9) / -0,107 (-2,3) | +0,001 (0,0) / +0,001 (0,0) / +0,048 (0,5) | no pasa |
+| Paseos normalizados | A a C | +0,221 (9,8) / +0,272 (28,4) / +0,193 (2,6) | +0,502 (4,8) / +0,651 (63,5) / +0,762 (6,8) | pasa |
+
+- **(a)** La correlación de v² de los ticks 1 a K con v² del resto de la ventana va de 0,64 a 0,69 en las otras y de 0,70 a 0,77 en las cinco (0,99 en los paseos, que tienen volatilidad constante).
+- **(b)** Los cruces de 140/215 en D crecen con la clase en las otras (K = 2000: 0,05, 0,08, 0,23 y 0,56 por ventana). En las cinco no crecen estrictamente con K = 4000 (0,06 en la clase 0 y 0,05 en la 1), así que allí "todas las fases" no pasa.
+- **En la fase D la persistencia es negativa en todas las clases** (de -0,02 a -0,29): el precio revierte, como en toda la exploración, y la clase no separa nada.
+- **Por caso:** en las otras, S y B pasan en A a C (S: +0,065 a +0,074 con h = 390, t 4,3 a 5,6; B: +0,120 a +0,140, t 6,3 a 9,3) y ninguno en D. En las cinco, B pasa en A a C y S no (h = 390: +0,024 a +0,043, t 0,6 a 1,5).
+
+**F2: primer máximo nuevo de 220 o más en la fase A desde t = 390, d = 16.** Tasa de ver 255 antes de caer d, y exceso sobre la base d / (255 - p0 + d) en puntos porcentuales (ee).
+
+| Conjunto | Clase 0 | Clases 0 y 1 | Clase 3 | Celdas sobre 2 ee (de 16) |
+|---|---|---|---|---|
+| Otras acciones | 85,7 %, +29,6 (1,5), 377 ventanas | 69,2 %, +21,5 (1,8), 1690 | 34,2 %, -5,4 (1,9) | 16 y 16 |
+| Otras, inicio en 2022 | 82,4 %, +28,4 (5,0), 34 | 66,6 %, +17,9 (4,1), 362 | 37,6 %, -2,8 (5,3) | |
+| Cinco empresas | 83,7 %, +18,2 (7,6), 43 | 65,7 %, +19,8 (5,0), 490 | 34,7 %, -8,7 (6,4) | |
+| Cinco, inicio en 2022 | 83,3 %, +18,3 (7,8), 42 | 78,2 %, +24,8 (6,3), 238 | 38,6 %, -3,4 (9,9) | |
+| Paseos normalizados | (1 ventana) | 75,3 %, +21,7 (2,5), 328 | 31,0 %, -6,0 (2,2) | |
+
+En las otras el exceso de las clases 0 y 1 está entre +17,9 y +26,6 en cada uno de los cinco años de inicio. F2 no se separa por caso S y B como se pidió: ver el 255 antes de caer d hace que la ventana sea del caso B, así que en el caso S la tasa es 0 por construcción. Por eso, para revisar el sesgo de supervivencia, se separa por año de inicio.
+
+**F3: techo del módulo E** (diferencia de patrimonio medio con la banda 40, ee).
+
+| Variante | Cinco empresas (3600 ventanas) | Otras acciones (12 000) |
+|---|---|---|
+| Decide con p(n) completo (techo) | +242 (55) | +291 (15) |
+| Orden condicional armada a 1 nivel del umbral | -90 (35) | -14 (18) |
+| Orden condicional armada a 2 niveles | -283 (40) | -140 (31) |
+
+La regla de bits reproduce los casos del diseño (con umbral 100 compra 56 acciones a 104 y 48 a 116, y mantiene a 128; con umbral 255 vende 63 a 254 y 0 a 191, y mantiene a 127). Con o sin comisión por cantidad 0 da lo mismo: en estas ventanas no salió ninguna orden de cantidad 0. No separé de dónde sale la pérdida. La explicación más probable es que la condición por bits deja pasar órdenes antes del umbral (con umbral 140, compra completa a 141 y 62 acciones a 142), y que eso cuesta más de lo que se gana al ver el precio un tick antes.
+
+### 12.3 Política y equivalencia
+
+`ref/cotas/regimen.py` implementa las variables de la sección 3 (S2 con la diferencia acotada a 15 y una tabla de 16 cuadrados; la clase comparando t con 4 S2, 2 S2 y S2 armados con sumas; histéresis de 64 ticks; tramo) y la política de la sección 4, con enteros, sumas, comparaciones y tablas. Al entrar a la fase D se vende en el caso S y se compra en el B, como la banda 40 (son certezas que ningún módulo toca). Equivalencia (`regimen_equivalencia_cinco.txt`, `regimen_equivalencia_otras.txt`): la banda 40, la política con los módulos apagados y la política con el módulo D en su punto neutro (140/215 en toda la tabla) deciden lo mismo en los 20 000 ticks de las 1 368 253 ventanas de las cinco y de las 12 000 de las otras. 0 diferencias.
+
+### 12.4 Ajuste del módulo A y validación interna
+
+Grilla de 64 (kA en {0, 1}, θA en {180, 200, 220, 235}, d en {8, 12, 16, 24}, N en {33, 63}), elección por puntos de torneo de 3 rondas en la parte de ajuste. Las dos separaciones y el ajuste con todas las otras eligen kA 1, θA 200 o 220, d 24, N 63, y las cinco mejores de cada ajuste están en kA 1, θA 200 a 220, d 16 a 24: una meseta. Parámetros finales (ajuste con todas las otras): **kA 1, θA 220, d 24, N 63**. Comprobaciones: la banda 40 en Python y `espera_banda40` en C dan lo mismo en las 12 000 ventanas.
+
+| Parte | Estrategia | Ventanas | Pts sin copia | 1.ª sola % | Media | p5 | Peor | Órdenes | Δ con banda 40 (ee) | A dispara / tope % | Contra el rival: gana / empata / pierde % | Δ con el rival (ee) | 3 rondas: gana / pierde % |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| Ajuste años | banda 40 | 7200 | 1,851 | 38,9 | 21433 | 10813 | 9405 | 3,8 | +0 (0) | 0,0 / 0,0 | 57,5 / 35,2 / 7,3 | +2413 (153) | 91,9 / 3,9 |
+| Ajuste años | banda 40 + A(kA 1, theta 200, d 24, N 63) | 7200 | 1,859 | 47,5 | 21536 | 10970 | 8317 | 4,2 | +103 (37) | 16,9 / 4,5 | 68,5 / 21,5 / 10,0 | +2516 (127) | 95,2 / 3,8 |
+| Validación años | banda 40 | 4800 | 1,829 | 35,8 | 21109 | 10680 | 8490 | 3,7 | +0 (0) | 0,0 / 0,0 | 57,7 / 36,0 / 6,2 | +2288 (114) | 92,1 / 3,1 |
+| Validación años | banda 40 + A(kA 1, theta 200, d 24, N 63) | 4800 | 1,837 | 44,5 | 21201 | 10791 | 7714 | 4,1 | +92 (27) | 17,7 / 5,2 | 69,0 / 21,7 / 9,3 | +2380 (114) | 95,3 / 3,7 |
+| Ajuste grupos | banda 40 | 7200 | 1,840 | 38,0 | 21328 | 10795 | 8490 | 3,8 | +0 (0) | 0,0 / 0,0 | 57,7 / 35,3 / 7,1 | +2365 (113) | 91,8 / 3,7 |
+| Ajuste grupos | banda 40 + A(kA 1, theta 220, d 24, N 63) | 7200 | 1,846 | 45,8 | 21399 | 10935 | 8490 | 4,1 | +72 (18) | 14,4 / 3,3 | 67,8 / 23,0 / 9,2 | +2436 (103) | 95,2 / 3,6 |
+| Validación grupos | banda 40 | 4800 | 1,840 | 37,6 | 21267 | 10677 | 9465 | 3,8 | +0 (0) | 0,0 / 0,0 | 57,5 / 35,9 / 6,7 | +2361 (141) | 91,7 / 3,7 |
+| Validación grupos | banda 40 + A(kA 1, theta 220, d 24, N 63) | 4800 | 1,849 | 47,0 | 21374 | 10888 | 7714 | 4,1 | +107 (26) | 16,8 / 3,1 | 70,1 / 21,5 / 8,4 | +2468 (131) | 95,8 / 3,3 |
+
+### 12.5 Examen final en las cinco empresas
+
+Una sola corrida con los parámetros fijos, en la población completa (`regimen_examen.txt`). El error estándar es por grupos de ventanas vecinas (empresa y bloque de 20 días de inicio), como en las secciones 10 y 11. Los torneos de 3 rondas contra el rival usan los mismos sorteos para las dos estrategias y que la sección 10. La primera versión del reporte usaba sorteos distintos por estrategia; se corrigió y se rehízo el reporte desde la caché, sin volver a evaluar ni tocar los parámetros. Con sorteos distintos la banda 40 perdía 2,8 % de los torneos contra el rival y el módulo A 2,9 %; con los mismos sorteos, 2,7 % y 2,8 %.
+
+| Subconjunto | Caso | Estrategia | Ventanas | Pts sin copia | 1.ª sola % | Media | p5 | Peor | Órdenes | Δ con banda 40 (ee) | A dispara / tope % | Contra el rival: gana / empata / pierde % | Δ con el rival (ee) | 3 rondas: gana / pierde % |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| Población | todas | banda 40 | 1368253 | 1,852 | 35,6 | 21289 | 10578 | 8948 | 3,8 | +0 (0) | 0,0 / 0,0 | 60,6 / 34,0 / 5,4 | +2393 (174) | 93,3 / 2,7 |
+| Población | todas | banda 40 + módulo A | 1368253 | 1,856 | 43,6 | 21349 | 10699 | 8622 | 4,1 | +60 (30) | 15,6 / 4,0 | 70,6 / 21,7 / 7,7 | +2453 (168) | 96,2 / 2,8 |
+| Población | S | banda 40 | 790173 | 1,992 | 53,1 | 25668 | 24198 | 14746 | 4,6 | +0 (0) | 0,0 / 0,0 | 98,5 / 0,0 / 1,5 | +3908 (198) | 100,0 / 0,0 |
+| Población | S | banda 40 + módulo A | 790173 | 1,986 | 52,5 | 25592 | 22480 | 14746 | 4,6 | -76 (26) | 2,7 / 2,7 | 97,9 / 0,0 / 2,1 | +3832 (201) | 99,9 / 0,1 |
+| Población | B | banda 40 | 578080 | 1,297 | 1,2 | 15303 | 10152 | 8948 | 2,7 | +0 (0) | 0,0 / 0,0 | 8,8 / 80,5 / 10,7 | +322 (148) | 22,8 / 25,8 |
+| Población | B | banda 40 + módulo A | 578080 | 1,350 | 2,7 | 15548 | 10236 | 8622 | 3,3 | +246 (56) | 33,1 / 5,8 | 33,3 / 51,4 / 15,3 | +567 (157) | 62,3 / 24,2 |
+| Validación años | todas | banda 40 | 391320 | 1,870 | 40,2 | 22422 | 11214 | 9472 | 3,9 | +0 (0) | 0,0 / 0,0 | 68,0 / 25,7 / 6,2 | +2790 (357) | 96,7 / 1,6 |
+| Validación años | todas | banda 40 + módulo A | 391320 | 1,867 | 45,1 | 22433 | 11460 | 8622 | 4,3 | +11 (76) | 14,8 / 5,9 | 75,3 / 15,9 / 8,9 | +2802 (337) | 97,8 / 1,9 |
+| Validación años | S | banda 40 | 262490 | 1,993 | 56,4 | 25556 | 23684 | 14746 | 4,6 | +0 (0) | 0,0 / 0,0 | 98,4 / 0,1 / 1,4 | +3902 (369) | 100,0 / 0,0 |
+| Validación años | S | banda 40 + módulo A | 262490 | 1,981 | 55,3 | 25401 | 21835 | 14746 | 4,7 | -155 (69) | 5,3 / 5,3 | 96,7 / 0,1 / 3,2 | +3747 (382) | 99,9 / 0,1 |
+| Validación años | B | banda 40 | 128830 | 1,165 | 0,5 | 16036 | 10323 | 9472 | 2,7 | +0 (0) | 0,0 / 0,0 | 6,0 / 78,0 / 16,0 | +524 (519) | 16,0 / 36,8 |
+| Validación años | B | banda 40 + módulo A | 128830 | 1,231 | 1,9 | 16386 | 10484 | 8622 | 3,4 | +350 (158) | 34,2 / 7,0 | 31,6 / 48,0 / 20,4 | +874 (535) | 61,6 / 27,1 |
+| Validación empresas | todas | banda 40 | 547338 | 1,845 | 35,6 | 20372 | 10422 | 9372 | 3,7 | +0 (0) | 0,0 / 0,0 | 53,7 / 41,2 / 5,1 | +2144 (293) | 89,5 / 3,5 |
+| Validación empresas | todas | banda 40 + módulo A | 547338 | 1,860 | 45,1 | 20519 | 10620 | 8622 | 4,0 | +146 (49) | 17,9 / 3,1 | 67,2 / 25,6 / 7,2 | +2291 (283) | 95,2 / 3,3 |
+| Validación empresas | S | banda 40 | 284347 | 1,986 | 55,5 | 25745 | 23714 | 17301 | 4,8 | +0 (0) | 0,0 / 0,0 | 97,0 / 0,0 / 3,0 | +3994 (384) | 99,9 / 0,1 |
+| Validación empresas | S | banda 40 + módulo A | 284347 | 1,983 | 55,2 | 25705 | 22723 | 17301 | 4,8 | -40 (27) | 1,6 / 1,6 | 97,0 / 0,0 / 3,0 | +3954 (386) | 99,9 / 0,1 |
+| Validación empresas | B | banda 40 | 262991 | 1,341 | 0,9 | 14563 | 10150 | 9372 | 2,4 | +0 (0) | 0,0 / 0,0 | 6,9 / 85,7 / 7,4 | +145 (102) | 17,8 / 18,9 |
+| Validación empresas | B | banda 40 + módulo A | 262991 | 1,419 | 2,5 | 14911 | 10214 | 8622 | 3,2 | +348 (90) | 35,6 / 4,8 | 34,9 / 53,3 / 11,8 | +493 (136) | 66,7 / 18,4 |
+
+Lectura:
+
+- **Dónde gana y dónde pierde.** En el caso B (el 255 antes que el 100) el módulo A compra en la fase A en un tercio de las ventanas y sube la media +246 (ee 56) en la población. En el caso S dispara en 1,6 % a 5,3 % de las ventanas y siempre termina en el tope (el 100 llega antes que el 255, así que la ruptura falla por construcción): -76 (ee 26) en la población. El percentil 5 del caso S baja de 24 198 a 22 480 y el peor caso general, de 8948 a 8622.
+- **Contra el rival de Tesla.** En el caso B pasa de ganar 22,8 % de los torneos de 3 rondas a 62,3 %, porque el rival y la banda 40 hacen casi lo mismo en la fase A (esperar) y el módulo los separa. En toda la población gana más torneos (96,2 % contra 93,3 %) y pierde un poco más (2,8 % contra 2,7 %).
+- **Primera sola** sube de 35,6 % a 43,6 % en la población y de 5 a 10 puntos en las dos validaciones.
+- **La validación por años** (ventanas enteras en 2024) es la débil: +11 (ee 76) y 1,867 puntos contra 1,870. En 2024 el módulo disparó en 14,8 % de las ventanas y cortó por tope en 5,9 %, el doble que en la validación por empresas (3,1 %).
+- **Comparado con lo esperado.** En las otras acciones el módulo daba +72 a +107 por ventana, y en las cinco +60 en la población. Es menos que lo que el diseño estimaba (1 % a 3 % por ronda, unos 200 a 600) y el error estándar es de la mitad del efecto.
+
+### 12.6 Criterio de la sección 9 del diseño
+
+| Punto | Banda 40 + módulo A | Se cumple |
+|---|---|---|
+| 1. Más puntos de torneo que la banda 40, sin la copia `espera_banda40`, en las dos validaciones | Años: 1,867 contra 1,870. Empresas: 1,860 contra 1,845 | no (falla en años) |
+| 2. Diferencia de patrimonio medio con la banda 40 mayor que 1 ee | Años: +11 (ee 76). Empresas: +146 (ee 49). Población: +60 (ee 30) | no (falla en años) |
+| 3. No pierde contra el rival de Tesla en más torneos de 3 rondas que la banda 40 (población) | 2,8 % contra 2,7 % | no (por 0,1 puntos) |
+
+Los módulos D y E quedaron fuera en sus filtros y no tienen examen.
+
+### 12.7 Instrucciones por tick de cada hilo
+
+Estimación contando instrucciones de RV32E sin desplazamientos ni multiplicación (la ALU de competencia no desplaza), para la política que quedó en pie: la banda 40 más el módulo A. No está escrita en `sw/`: es un conteo a mano.
+
+| Hilo | Rol | Trabajo por tick | Instrucciones, peor caso |
+|---|---|---|---|
+| 0 | Corredor | Lee `PRICE` y publica precio y número de tick (4); fases A a D, caso y pmáx (unas 12); banda 40 en D (6); módulo A: espera la clase del tick, compara clase, p con pmáx y con θA, guarda la entrada y arma la orden, o compara con el tope (unas 15); escribe `DECISION` (1) | unas 40 |
+| 1 | Régimen | Diferencia, valor absoluto y tope en 15 (6); dirección en la tabla de cuadrados con dos sumas, carga y suma a S2 (5); t y precio anterior (2); clase cruda con 2 S2 y 4 S2 por sumas y tres comparaciones (hasta 9); histéresis (hasta 6); publica clase y tick (2) | unas 33 |
+| 2 | Política | Sin el módulo D no tiene tabla que leer. Puede quedar libre o recalcular la banda 40 como control | 0 a 20 |
+| 3 | Reloj y centinela | t, precio entre 100 y 255, no más de 20 000 ticks, modo seguro (unas 10); el histograma del día (20) ya no lo usa ningún módulo | 10 a 30 |
+
+Todo cabe: el tope es de unas 565 instrucciones por hilo a 0,1 ms. El camino de la respuesta es el del hilo 0 esperando la clase del hilo 1 del mismo tick: unas 3 + 33 + 15 instrucciones de cada hilo, unos 200 a 250 ciclos en el barrel de 4 hilos, contra 1131 ciclos que pide la puerta (la mitad de 2262). Memoria: 16 palabras de cuadrados y 4 parámetros (kA, θA, d, N) en la tabla de BRAM, que se pueden cambiar con `icebram`. S2 llega a lo más a 20 000 × 225 = 4,5 millones: cabe en 32 bits. Sin hardware nuevo.
+
+Dos advertencias para cuando se escriba:
+
+- **Para que `make equiv` dé igual que `regimen.py`, el hilo 0 tiene que usar la clase del mismo tick**, porque la referencia actualiza la clase con p(n) antes de decidir. Con la clase del tick anterior, las decisiones cambiarían en los ticks en que la clase cambia. La forma simple es esperar la clase con el número de tick actual y, si no llega a tiempo, decidir con la banda 40 (la regla de degradación).
+- **Toda la política cabe en un solo hilo** (unas 75 instrucciones) y decidiría lo mismo. Los hilos no suman ganancia, como ya dice la sección 5 del diseño.
+
+### 12.8 Opciones, sin decidir
+
+| Opción | Qué se gana | Qué se pierde |
+|---|---|---|
+| **Banda 40** (lo que manda la sección 9 del diseño, porque el criterio no se cumple) | La regla ya probada, sin código nuevo antes del corte del 22/11; mejor percentil 5 en el caso S y mejor peor caso; 0,1 puntos menos de torneos perdidos contra el rival | El efecto del módulo A: +60 (ee 30) por ronda en la población y de 5 a 10 puntos de primera sola. En el caso B, la ventaja contra el rival de Tesla (62 % contra 23 % de torneos ganados) |
+| **Banda 40 + módulo A** (kA 1, θA 220, d 24, N 63) | +60 (ee 30) en la población, +146 (ee 49) en la validación por empresas, +92 y +107 en la validación interna de las otras acciones; más primeros lugares; el caso B mucho mejor contra el rival | No cumple el criterio que fijó el propio diseño: en la validación por años no gana (+11, ee 76; 1,867 contra 1,870 puntos). Cuesta en el caso S (-76) y en el peor caso (8622 contra 8948). Hay que escribir los hilos 0 y 1, la referencia exacta y pasar las puertas de R1 y R2 antes del corte |
+
+**Recomendación (mía, etiquetada como tal): competir con la banda 40**, como dice la sección 9 del diseño. El módulo A tiene una base sólida: el filtro F2 es fuerte, sale igual en paseos aleatorios y la elección del ajuste es estable. Pero lo que vale en patrimonio es chico frente a su error (+60 ± 30), no aparece en las ventanas de 2024 y obliga a escribir y verificar código nuevo a tres días del corte. Si se quiere guardar como material de defensa, la conclusión del intento es: la normalización sí filtra el régimen, pero solo en las fases A a C, donde la regla ya está en caja esperando, y lo que se puede sacar de ahí es del orden del ruido de una ronda. La decisión es de Nicolás.
+
+### 12.9 Comandos
+
+| Resultado | Comando | Salida |
+|-----------|---------|--------|
+| Liquidez y cobertura de las candidatas | `python3 tools/datos/candidatas.py` (pide 4 barras diarias por grupo de 60) | pantalla |
+| Descarga de las otras acciones | `python3 tools/datos/alpaca.py --lista tools/datos/otras_acciones.txt --desde 2020-01-01 --hasta 2024-12-31 --salida $P4_DATOS/otras --procesos 4 --gzip` (unos 45 minutos) | `$P4_DATOS/otras` |
+| F1 y F2 | `python3 ref/cotas/explorar_regimen.py filtros --conjunto otras` (y `cinco`, `paseo`) | `filtros_otras.txt`, `filtros_cinco.txt`, `filtros_paseo.txt` |
+| F3 | `python3 ref/cotas/explorar_regimen.py f3 --conjunto otras` (y `cinco`) | `f3_otras.txt`, `f3_cinco.txt` |
+| Equivalencia con la banda 40 | `python3 ref/cotas/explorar_regimen.py equivalencia --conjunto cinco` (unos 32 minutos) y `--conjunto otras` | `regimen_equivalencia_cinco.txt`, `regimen_equivalencia_otras.txt` |
+| Ajuste del módulo A | `python3 ref/cotas/explorar_regimen.py ajuste --sin-d` (unos 14 minutos) | `regimen_ajuste.txt` |
+| Examen final | `python3 ref/cotas/explorar_regimen.py examen` (unos 21 minutos) | `regimen_examen.txt` |

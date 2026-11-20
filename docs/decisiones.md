@@ -800,3 +800,12 @@ Las decisiones T87 a T99 son del paquete P6 de R1 y R2 y las T100 a T119 del paq
 - **Variante (b) en las tres bandas:** la posición total queda en un tercio del patrimonio, fijado al recomprar, sin reajustes tick a tick (reajustar cada tick haría órdenes de una acción). Alternativa descartada: escalar cada banda a un tercio (un noveno por banda), que no es lo que dice el pedido.
 - **Resultado:** (a) y (b) bajan la media del caso S y los puntos en los tres subconjuntos. La regla de los peldaños no se cambió.
 
+### T139. Política por régimen filtrado: se presenta, no se decide (19/11)
+
+- **Otras acciones:** 20 por grupo de sectores, las de mayor monto transado en enero de 2020 (dato del inicio del período), en vez de las de mayor capitalización hoy. Lo que se pierde: nada en cantidad; el sesgo de supervivencia sigue, porque todas existen hoy.
+- **Suplentes por días faltantes:** una elegida falla si la receta de sesión le deja menos del 98 % de los días (BKNG, REGN, BLK). Alternativa descartada: cambiar la receta para aceptar días con menos de 200 minutos con operaciones; el pedido decía usar la receta calibrada.
+- **Reglas de paso fijadas antes de correr los filtros**, con el error estándar mayor entre grupos por fecha (20 y 60 días) y en dos sentidos (fecha y empresa). F1 por grupo de fases, porque el módulo D actúa solo en la fase D. F2 por año de inicio en vez de por caso S y B, porque ver el 255 antes de caer d hace que la ventana sea del caso B.
+- **Módulos D y E descartados en sus filtros** (F1 no pasa en la fase D; F3 no pasa). Regla de Nicolás: con F1 solo en A a C, se sigue con el módulo A.
+- **Torneos de 3 rondas contra el rival con los mismos sorteos para las dos estrategias**, como en la sección 10. La primera versión del reporte del examen sorteaba distinto por estrategia; se rehízo desde la caché, sin volver a evaluar.
+- **Resultado:** el módulo A no cumple el criterio de la sección 9 del diseño. La regla de los peldaños no se cambió.
+

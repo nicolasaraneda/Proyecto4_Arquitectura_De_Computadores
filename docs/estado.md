@@ -2,6 +2,28 @@
 
 Se actualiza al cerrar cada tramo de trabajo. La versión anterior queda en el historial de git.
 
+## Tramo 21: política por régimen filtrado (19/11)
+
+Rama `minutos-reales`. Sección 12 de `docs/exploracion_ideas.md`; bitácora `docs/bitacora/exploracion.md` (quinto pedido). Decisión T139. Solo Python. **La regla de los peldaños no se cambió.**
+
+| Paso | Resultado | Dónde |
+|------|-----------|-------|
+| 1. Otras acciones | 100 acciones en 5 grupos de 20 (las de mayor monto transado en enero de 2020), 2020 a 2024, bajadas de Alpaca en unos 45 minutos (1,9 GB). BKNG, REGN y BLK reemplazadas por EL, HCA e ICE (la receta de sesión les deja menos del 98 % de los días) | Sección 12.1; `tools/datos/otras_acciones.txt` |
+| 2. Filtros | F1 pasa en las fases A a C y no en la D (otras, cinco y paseos aleatorios). F2 pasa: con clase 0, 85,7 % de ver 255 antes de caer 16 (exceso +29,6, ee 1,5). F3 no pasa. El efecto viene de la normalización (los paseos lo muestran). Módulos D y E descartados | Sección 12.2; `filtros_*.txt`, `f3_*.txt` |
+| 3. Política y equivalencia | `ref/cotas/regimen.py`. Con los módulos apagados, 0 diferencias con la banda 40 en toda la población de las cinco y en la muestra de las otras | Sección 12.3 |
+| 4. Ajuste del módulo A | kA 1, θA 220, d 24, N 63 (meseta). Validación interna: +92 (ee 27) por años, +107 (ee 26) por grupos | Sección 12.4; `regimen_ajuste.txt` |
+| 5. Examen en las cinco | +60 (ee 30) en la población; +146 (ee 49) en la validación por empresas; +11 (ee 76) en la de años. Caso B +246, caso S -76 | Sección 12.5; `regimen_examen.txt` |
+| 6. Criterio de la sección 9 | No se cumple en ninguno de los tres puntos (años: 1,867 contra 1,870 puntos y +11 con ee 76; torneos perdidos contra el rival 2,8 % contra 2,7 %) | Sección 12.6 |
+| 7. Instrucciones por hilo | Corredor unas 40, régimen unas 33, centinela 10 a 30: todo cabe (565 por hilo); respuesta de unos 200 a 250 ciclos | Sección 12.7 |
+
+### Lo que decides tú
+
+Banda 40 (lo que dice la sección 9 del diseño) o banda 40 con el módulo A. Mi recomendación, etiquetada en el documento: banda 40. Siguen pendientes la decisión de banda 40 o 60 (sección 6) y la variante del caso S (sección 11).
+
+### Qué conviene atacar después
+
+Si compite la banda 40, nada de esta rama entra al programa: lo que queda es material de defensa (la normalización filtra el régimen en las fases A a C, medido en 100 acciones y en paseos). Si entra el módulo A, hay que escribir los hilos 0 y 1, la referencia exacta y pasar las puertas de R1 y R2 antes del corte del 22/11.
+
 ## Tramo 20: mano a mano contra el rival de Tesla, ronda de AMD y variante del caso S (19/11)
 
 Rama `minutos-reales`. Secciones 10 y 11 de `docs/exploracion_ideas.md`; bitácora `docs/bitacora/exploracion.md`. Decisión T138. Solo Python. **La regla de los peldaños no se cambió.**
