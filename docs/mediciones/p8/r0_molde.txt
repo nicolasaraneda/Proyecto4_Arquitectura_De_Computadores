@@ -8,6 +8,6 @@ icebram con el programa de R0 sobre el molde e icepack: 0.09 s
   sha256 de bitstreams/r0_base_max_media.bin  67f6f1c4986966320596303fc105532e627e22449f36c4b627274d4edb172204
   sha256 del molde con el programa de R0       67f6f1c4986966320596303fc105532e627e22449f36c4b627274d4edb172204
 PASS: el molde con el programa de R0 da R0 byte por byte. Guardado en bitstreams/moldes/r0_molde.asc.gz
-  sha256 de bitstreams/r0_cotas.bin            616f799a816d5bdd4ba29f0713f769e35beb980d7f5a1f8734ddd5a763ec64a1
-  sha256 del molde con sw/trade.hex (cotas)    616f799a816d5bdd4ba29f0713f769e35beb980d7f5a1f8734ddd5a763ec64a1
-PASS: el molde con sw/trade.hex (la regla de cotas, T133) da bitstreams/r0_cotas.bin byte por byte
+  sha256 de bitstreams/r0_banda40.bin  390edbfad65b2e269c059e646259f7c3e117398a5ececb1d64816fe8fdd4fd5f
+  sha256 del molde con sw/trade.hex      390edbfad65b2e269c059e646259f7c3e117398a5ececb1d64816fe8fdd4fd5f
+PASS: el molde con sw/trade.hex da bitstreams/r0_banda40.bin byte por byte

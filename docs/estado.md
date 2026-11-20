@@ -2,6 +2,27 @@
 
 Se actualiza al cerrar cada tramo de trabajo. La versión anterior queda en el historial de git.
 
+## Tramo 17: regla base con banda 40 en R0, R1 y R2 (19 y 20/11, rama `banda-40`)
+
+**Qué quedó hecho.** La regla de cotas pasa de banda 60 (compra con 160 o menos, vende con 195 o más) a banda 40 (140 y 215), con todo lo demás igual (T140). El hardware no cambió: en R0 cambian dos inmediatos de `sw/trade.s`, y en R1 y R2 dos palabras de la tabla en BRAM (el binario de `sw/fondo.s` es el mismo). La autoprueba manda ahora una caminata entre 100 y 255 con pasos de 4 (T141), con `PASO`, `PISO` y `SEMILLA` como constantes de `tools/autoprueba.py` para probar otras volatilidades. Bitácora: `docs/bitacora/banda40.md`.
+
+**Qué se midió.**
+
+| Paso | Resultado | Dónde |
+|------|-----------|-------|
+| Referencia | Banda 60: Tesla 18 779 (control), AMD 21 895, Meta 19 214. Banda 40: Tesla 20 795, AMD 26 470, Meta 21 392 | `docs/bitacora/banda40.md` |
+| Puerta de R0 | Oficial 4/4 (60 ciclos); equivalencia con la serie Meta por el RTL a los tres períodos, 3810 series en el gemelo, exhaustiva (1275 combinaciones por período), series reales por el RTL y el gemelo; fases; estrés (único FAIL, la exploración de 11,5 µs, igual que con banda 60) | `docs/mediciones/r0_banda40_puerta.txt` |
+| Puertas de R1 y R2 | Oficial 4/4 (127 ciclos); Meta a los tres períodos; 1050 series por el RTL y 1051 por el gemelo a los tres períodos; series reales; fases (128 ciclos, holgura 94,3 %); degradación 17 de 17; controles 15 de 15; estrés 57 de 57; `make vig-relevo` en verde | `docs/mediciones/fondo/r1/puerta_banda40.txt`, `r2/` |
+| Bitstreams | Desde los moldes con `icebram`; el control reproduce los anteriores byte por byte; `icetime` igual (43,27, 52,61 y 51,66 MHz); los tres `.asc` por los pines idénticos a la referencia; R2 colgado pide el relevo en la transacción 105 | `docs/mediciones/fondo/molde_banda40.txt`, `bitstreams/SHA256SUMS` |
+| Autopruebas | Firma `a639` en los tres peldaños, a los tres períodos, en el RTL y en el bitstream ruteado; con la banda 60 da `8610` y se rechaza | `docs/autoprueba.md`, sección 11 |
+| Integración continua local | 24 de 24 pasos. En la primera corrida falló uno, por el chequeo: `tools/p8/r0_molde.sh` comparaba con el R0 de la banda 60. Se corrigió y se repitió ese paso: el molde de R0, sintetizado de nuevo, con el `sw/trade.hex` nuevo da `r0_banda40.bin` byte por byte | `docs/mediciones/ci_local_banda40.txt` |
+
+Reutilizado sin repetir: timing en 10 semillas, verificación del core (criterio 5) y equivalencia formal, porque dependen solo del hardware, que no cambió (lo comprueban el control del molde y `icetime`).
+
+**Qué falta.** Correr en la placa las autopruebas nuevas (`docs/pendientes_nicolas.md`, acción 3). Decidir los límites del árbol de decisión con la regla de cotas (pendientes, decisión 6) y qué hacer con la tabla de contingencia del árbol, que quedó obsoleta. Pasar la rama a `main` cuando Nicolás lo decida.
+
+**Qué conviene después.** Las pruebas de placa primero, porque son lo único que falta para que los bitstreams de banda 40 suban a la escalera antes del 26/11. Después, la decisión 6, que solo cambia documentos.
+
 ## Para la clase del 18/11 (actualizado en la madrugada)
 
 **Qué quedó listo.** Todo en `docs/clase_18nov.md`, con los comandos para la carpeta principal y lo que se ve en cada bitstream.

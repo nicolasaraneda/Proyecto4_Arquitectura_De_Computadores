@@ -1,0 +1,50 @@
+Integracion continua local de la rama banda-40 (la de GitHub no corre por facturacion; docs/pendientes_nicolas.md, accion 0)
+Los mismos 24 pasos de ~/proyectos/cola/ci_local.sh, en una carpeta aparte (git worktree) con el commit indicado.
+
+Corrida 1: commit 5a5a166, 20/11 03:34 a 04:02
+PASS: make test-asm
+PASS: make test-ref
+PASS: make test-candidatos
+PASS: make check-hex
+PASS: make tb
+PASS: make -j4 equiv
+PASS: make fases
+PASS: bash -c make tabla-3-1 && git diff --exit-code docs/mediciones/tabla_3_1.txt
+PASS: make cosim
+PASS: make equiv-gemelo
+PASS: make cpi
+PASS: make tb-mv2x2
+PASS: make bin
+PASS: make check-seg
+PASS: make check-barrel
+PASS: make r0-reproducir
+PASS: make check-xd BARREL_JOBS=4
+FAIL: make r0-molde check-p8
+PASS: make check-fondo HW=r1 FONDO_JOBS=4
+PASS: make check-fondo HW=r2 FONDO_JOBS=4
+PASS: make check-vigilante
+PASS: make cosim-barrel-corta FONDO_JOBS=4
+PASS: make fondo-gemelo-series
+PASS: make report
+RESULTADO: 1 pasos con FAIL
+
+El FAIL es del chequeo, no del diseño: tools/p8/r0_molde.sh exigia que sw/trade.hex sobre el molde diera
+bitstreams/r0_cotas.bin (banda 60). Corregido para comparar con el R0 vigente, r0_banda40.bin (commit 28bb004).
+
+Corrida 2, solo el paso que fallo: commit 28bb004, 20/11 04:03 a 04:05
+PASS: make r0-molde check-p8
+PASS: el molde con el programa de R0 da R0 byte por byte. Guardado en bitstreams/moldes/r0_molde.asc.gz
+PASS: el molde con sw/trade.hex da bitstreams/r0_banda40.bin byte por byte
+PASS: 70 comprobaciones, cero fallas
+PASS flanco_de_bajada: detectado (8 comprobaciones fallan)
+PASS periodo_sin_escala: detectado (15 comprobaciones fallan)
+PASS sin_primera_subida: detectado (15 comprobaciones fallan)
+PASS sin_alarma: detectado (2 comprobaciones fallan)
+PASS sin_alarma_cs_alto: detectado (2 comprobaciones fallan)
+PASS sin_alarma_modo: detectado (2 comprobaciones fallan)
+PASS: 10 de 10 semillas cierran a 25 MHz
+PASS: 70 comprobaciones por los pines del bitstream, cero fallas
+PASS: medidor listo
+PASS: 0 celdas que cuentan no pasan
+
+RESULTADO: 24 de 24 pasos en PASS (23 en la corrida 1 y el restante en la corrida 2; el cambio entre las dos solo toca tools/p8/r0_molde.sh)
