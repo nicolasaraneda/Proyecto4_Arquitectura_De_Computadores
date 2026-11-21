@@ -744,7 +744,18 @@ def main():
             raise SystemExit(f"FAIL: {r_asm} no coincide con lo generado")
         print(f"PASS: {r_asm} es el que genera tools/c1/generar.py (la tabla no se revisa: make c1-generar)")
         return
-    T = TB.palabras(parametros_tabla(par))
+    en_sw = os.path.abspath(a.salida) == os.path.join(RAIZ, "sw")
+    try:
+        T = TB.palabras(parametros_tabla(par))
+    except SystemExit:
+        # Sin el modelo calculado (una copia limpia del repositorio): las variantes de prueba (-o a otra
+        # carpeta) toman las celdas de sw/c1_tabla.hex, que make c1-generar comprueba contra el modelo,
+        # y solo cambian las palabras de parámetros. sw/c1_tabla.hex mismo sale siempre del modelo.
+        if en_sw or a.check:
+            raise
+        T = TB.leer_hex(os.path.join(RAIZ, "sw", "c1_tabla.hex"))
+        for i, v in parametros_tabla(par).items():
+            T[i] = v & 0xFFFF
     hexa = "".join(f"{v:04x}\n" for v in T)
     r_asm, r_hex = os.path.join(a.salida, "c1.s"), os.path.join(a.salida, "c1_tabla.hex")
     if a.check:
