@@ -1,0 +1,48 @@
+Perfil del tick con la regla de cotas: en que fase se van los ciclos (punto 3.3, perfilado)
+Generado por tools/p7/cotas.py. La deteccion es la respuesta medida menos las fases que van antes de DECISION.
+
+== Espino base, sw/trade.s
+   fase                               ciclos/tick instr./tick  % resp. % kernel
+   Detectar el precio (sondeo)               9.50           -     16.8        -
+   Leer PRICE                                3.00        1.00      5.3      6.0
+   Comparar con los umbrales                12.00        6.00     21.2     24.0
+   Decidir y armar el byte                  30.00       15.00     53.1     60.0
+   Escribir DECISION                         2.00        1.00      3.5      4.0
+   Volver al sondeo                          3.00        1.00        -      6.0
+   respuesta medida (gemelo)                56.50
+   kernel (sin la deteccion)                50.00       24.00
+
+== Segmentado, sw/trade.s
+   fase                               ciclos/tick instr./tick  % resp. % kernel
+   Detectar el precio (sondeo)               4.00           -     14.3        -
+   Leer PRICE                                2.00        1.00      7.1      7.7
+   Comparar con los umbrales                 6.00        6.00     21.4     23.1
+   Decidir y armar el byte                  15.00       15.00     53.6     57.7
+   Escribir DECISION                         1.00        1.00      3.6      3.8
+   Volver al sondeo                          2.00        1.00        -      7.7
+   respuesta medida (gemelo)                28.00
+   kernel (sin la deteccion)                26.00       24.00
+
+== Barrel, sw/trade.s en un hilo
+   fase                               ciclos/tick instr./tick  % resp. % kernel
+   Detectar el precio (sondeo)              15.00           -     14.0        -
+   Leer PRICE                                4.00        1.00      3.7      4.2
+   Comparar con los umbrales                24.00        6.00     22.4     25.0
+   Decidir y armar el byte                  60.00       15.00     56.1     62.5
+   Escribir DECISION                         4.00        1.00      3.7      4.2
+   Volver al sondeo                          4.00        1.00        -      4.2
+   respuesta medida (gemelo)               107.00
+   kernel (sin la deteccion)                96.00       24.00
+
+== R1 y R2: barrel, tabla y vigilante, sw/fondo.s
+   fase                               ciclos/tick instr./tick  % resp. % kernel
+   Detectar el precio (sondeo)              15.00           -     12.2        -
+   Leer PRICE                                4.00        1.00      3.3      2.4
+   Comparar con los umbrales                40.00       10.00     32.5     23.8
+   Decidir y armar el byte                  60.00       15.00     48.8     35.7
+   Escribir DECISION                         4.00        1.00      3.3      2.4
+   Telemetría                               56.00       14.00        -     33.3
+   Volver al sondeo                          4.00        1.00        -      2.4
+   respuesta medida (gemelo)               123.00
+   kernel (sin la deteccion)               168.00       42.00
+

@@ -1,0 +1,66 @@
+Amdahl generalizado con la regla de cotas: speedup predicho contra medido (punto 3.3)
+Generado por tools/p7/cotas.py. S = 1 / sum(f_i / F_i); f_i del perfil de R0; F_i predicho = modelo de costo de la
+variante nueva aplicado a las instrucciones de la fase; F_i medido = cociente de los ciclos medidos de la fase.
+La deteccion del sondeo se predice escalando la de R0 por la duracion de una vuelta del lazo.
+
+  modelo base       ALU 2, load 3, store 2, salto tomado 3; vuelta del sondeo 8 ciclos
+  modelo seg_clase  ALU 1, load 2, store 1, salto tomado 3; vuelta del sondeo 6 ciclos
+  modelo seg        ALU 1, load 2, store 1, salto tomado 2; vuelta del sondeo 5 ciclos
+  modelo barrel     ALU 4, load 4, store 4, salto tomado 4; vuelta del sondeo 12 ciclos
+
+=== Ventana: respuesta (de byte_done a DECISION)
+--- R0 -> segmentado, con el CPI que estimó la clase 7
+    fase                           ciclos antes       f F predicho  F medido
+    Leer PRICE                             3.00   0.053      1.500     1.500
+    Comparar con los umbrales             12.00   0.212      2.000     2.000
+    Decidir y armar el byte               30.00   0.531      2.000     2.000
+    Escribir DECISION                      2.00   0.035      2.000     2.000
+    Detectar el precio (sondeo)            9.50   0.168      1.333     2.375
+    S predicho 1.815 (31.12 ciclos), S medido 2.018 (28.00 ciclos), diferencia -10.0 %
+--- R0 -> segmentado, con el modelo de costo medido
+    fase                           ciclos antes       f F predicho  F medido
+    Leer PRICE                             3.00   0.053      1.500     1.500
+    Comparar con los umbrales             12.00   0.212      2.000     2.000
+    Decidir y armar el byte               30.00   0.531      2.000     2.000
+    Escribir DECISION                      2.00   0.035      2.000     2.000
+    Detectar el precio (sondeo)            9.50   0.168      1.600     2.375
+    S predicho 1.887 (29.94 ciclos), S medido 2.018 (28.00 ciclos), diferencia -6.5 %
+--- R0 -> barrel, sw/trade.s en un hilo
+    fase                           ciclos antes       f F predicho  F medido
+    Leer PRICE                             3.00   0.053      0.750     0.750
+    Comparar con los umbrales             12.00   0.212      0.500     0.500
+    Decidir y armar el byte               30.00   0.531      0.500     0.500
+    Escribir DECISION                      2.00   0.035      0.500     0.500
+    Detectar el precio (sondeo)            9.50   0.168      0.667     0.633
+    S predicho 0.532 (106.25 ciclos), S medido 0.528 (107.00 ciclos), diferencia +0.7 %
+
+=== Ventana: kernel (de leer PRICE a volver al sondeo)
+--- R0 -> segmentado, con el CPI que estimó la clase 7
+    fase                           ciclos antes       f F predicho  F medido
+    Leer PRICE                             3.00   0.060      1.500     1.500
+    Comparar con los umbrales             12.00   0.240      2.000     2.000
+    Decidir y armar el byte               30.00   0.600      2.000     2.000
+    Escribir DECISION                      2.00   0.040      2.000     2.000
+    Volver al sondeo                       3.00   0.060      1.000     1.500
+    S predicho 1.852 (27.00 ciclos), S medido 1.923 (26.00 ciclos), diferencia -3.7 %
+--- R0 -> segmentado, con el modelo de costo medido
+    fase                           ciclos antes       f F predicho  F medido
+    Leer PRICE                             3.00   0.060      1.500     1.500
+    Comparar con los umbrales             12.00   0.240      2.000     2.000
+    Decidir y armar el byte               30.00   0.600      2.000     2.000
+    Escribir DECISION                      2.00   0.040      2.000     2.000
+    Volver al sondeo                       3.00   0.060      1.500     1.500
+    S predicho 1.923 (26.00 ciclos), S medido 1.923 (26.00 ciclos), diferencia +0.0 %
+--- R0 -> barrel, sw/trade.s en un hilo
+    fase                           ciclos antes       f F predicho  F medido
+    Leer PRICE                             3.00   0.060      0.750     0.750
+    Comparar con los umbrales             12.00   0.240      0.500     0.500
+    Decidir y armar el byte               30.00   0.600      0.500     0.500
+    Escribir DECISION                      2.00   0.040      0.500     0.500
+    Volver al sondeo                       3.00   0.060      0.750     0.750
+    S predicho 0.521 (96.00 ciclos), S medido 0.521 (96.00 ciclos), diferencia +0.0 %
+
+=== R2 no es un speedup del mismo kernel
+    El hilo 0 de R2 ejecuta 42.00 instrucciones en el kernel contra 24.00 de R0: agrega los cuatro
+    loads de la tabla en BRAM y la telemetria. Cada instruccion cuesta 4 ciclos, y la prediccion por modelo de costo
+    del barrel es exacta por construccion. Los otros tres hilos solo dan vueltas a un salto.

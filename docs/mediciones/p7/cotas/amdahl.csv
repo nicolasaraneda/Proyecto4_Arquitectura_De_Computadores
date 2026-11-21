@@ -1,0 +1,7 @@
+ventana,caso,descripcion,s_predicho,s_medido,ciclos_predichos,ciclos_medidos
+resp,seg_clase,"R0 -> segmentado, con el CPI que estimó la clase 7",1.815,2.018,31.12,28.00
+resp,seg,"R0 -> segmentado, con el modelo de costo medido",1.887,2.018,29.94,28.00
+resp,barrel,"R0 -> barrel, sw/trade.s en un hilo",0.532,0.528,106.25,107.00
+kernel,seg_clase,"R0 -> segmentado, con el CPI que estimó la clase 7",1.852,1.923,27.00,26.00
+kernel,seg,"R0 -> segmentado, con el modelo de costo medido",1.923,1.923,26.00,26.00
+kernel,barrel,"R0 -> barrel, sw/trade.s en un hilo",0.521,0.521,96.00,96.00

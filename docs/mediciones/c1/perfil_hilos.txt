@@ -1,0 +1,61 @@
+Perfil por hilo de R3 (sw/c1.s) con el gemelo digital
+Generado por tools/p7/c1_perfil.py (make p7-c1-perfil). No editar a mano.
+
+Programa sw/c1.s (sha256 353f6806d5482d14...), tabla sw/c1_tabla.hex (sha256 9954f116f860faca...)
+Serie data/practica_meta.csv, 20000 ticks a 0,1 ms; 19998 ticks con escritura de DECISION.
+
+Patrimonio final:          22682
+Peor caso precio->decision: 783 ciclos (disponibles: 2262)
+Testbenchs aprobados: 4/4
+Gemelo: 19998 ticks medidos. Respuesta: 529.86 ciclos e IC 132.72 en promedio, peor caso 783 ciclos e IC 196. Tick completo: 553.86 ciclos e IC 137.72 en promedio, peor caso 807 ciclos e IC 201
+
+Por hilo, por tick (incluye las vueltas de los lazos de espera): el barrel ejecuta una instruccion de cada
+hilo cada 4 ciclos, asi que CPI 4 por hilo y 1 agregado por construccion.
+ hilo  IC por tick  ciclos por tick    CPI
+    0       625.01          2500.05  4.000
+    1       625.01          2500.05  4.000
+    2       625.01          2500.05  4.000
+    3       625.01          2500.05  4.000
+
+Por rutina (la etiqueta anterior de sw/c1.s); las que terminan en _espera son los lazos de espera.
+ hilo rutina         IC por tick ciclos por tick
+    0 h0_espera           538.30         2153.19
+    0 h0_sondeo            78.72          314.86
+    0 h0_escribe            6.00           24.00
+    0 h0_llego              2.00            8.00
+    1 h1_espera           513.39         2053.57
+    1 h1_suma              38.53          154.12
+    1 h1_menor             28.00          111.99
+    1 h1_publica           11.00           44.00
+    1 h1_tope               7.00           28.00
+    1 h1_calcula            6.20           24.79
+    1 h1_ca                 4.00           16.01
+    1 h1_activa             3.92           15.69
+    1 h1_primero            3.02           12.08
+    1 h1_reloj              3.00           12.01
+    1 h1_abs                2.00            8.00
+    1 h1_cm                 2.00            8.00
+    1 h1_fin                1.00            4.00
+    1 h1_seguir             0.98            3.92
+    1 h1_igual              0.96            3.84
+    2 h2_espera           570.04         2280.16
+    2 h2_reg               24.00           95.99
+    2 h2_fase              18.08           72.33
+    2 h2_a                  6.35           25.38
+    2 h2_publica            6.00           24.00
+    2 h2_fijo               0.55            2.19
+    3 h3_espera           482.19         1928.76
+    3 ejecutar             38.68          154.73
+    3 producto             36.50          145.99
+    3 h3_publica           16.00           64.00
+    3 h3_div                9.92           39.69
+    3 h3_clon               8.24           32.95
+    3 h3_div1               7.82           31.28
+    3 h3_fase               6.55           26.19
+    3 h3_sin_p              5.00           20.00
+    3 h3_fase_a             4.80           19.20
+    3 h3_modo_a             4.07           16.29
+    3 h3_tab                2.75           11.01
+    3 h3_no_a               0.90            3.61
+    3 h3_copia              0.90            3.61
+    3 h3_hacia              0.68            2.73

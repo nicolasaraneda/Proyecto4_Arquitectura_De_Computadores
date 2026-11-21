@@ -1,0 +1,58 @@
+Ciclos por tick de las variantes con la regla de cotas (banda 40), con el gemelo digital
+Generado por tools/p7/cotas.py (make p7-cotas). No editar a mano.
+
+Commit de partida: 5fabe62
+Serie data/practica_meta.csv (sha256 fed122e0a9861276...), tabla sw/fondo_tabla.hex (sha256 a90aacf30968a690...)
+
+== variante r0: build/gemelo  --hex build/p7/cotas/sw/trade.hex (sha256 4ba987032b990a84...)
+r0 r1 | Patrimonio final:          10000
+r0 r1 | Peor caso precio->decision: 60 ciclos (disponibles: 249762)
+r0 r1 | Testbenchs aprobados: 4/4
+r0 r2 | Patrimonio final:          21392
+r0 r2 | Peor caso precio->decision: 60 ciclos (disponibles: 24762)
+r0 r2 | Testbenchs aprobados: 4/4
+r0 r3 | Patrimonio final:          21392
+r0 r3 | Peor caso precio->decision: 60 ciclos (disponibles: 2262)
+r0 r3 | Testbenchs aprobados: 4/4
+r0 r3 | Gemelo: 19998 ticks medidos. Respuesta: 56.50 ciclos e IC 27.13 en promedio, peor caso 60 ciclos e IC 29. Tick completo: 61.50 ciclos e IC 28.13 en promedio, peor caso 65 ciclos e IC 30
+r0 perfil | docs/mediciones/p7/cotas/perfil/r0.txt, 20000 ticks a 0,1 ms sin atajo
+
+== variante seg: build/gemelo --pipeline --hex build/p7/cotas/sw/trade.hex (sha256 4ba987032b990a84...)
+seg r1 | Patrimonio final:          10000
+seg r1 | Peor caso precio->decision: 28 ciclos (disponibles: 249762)
+seg r1 | Testbenchs aprobados: 4/4
+seg r2 | Patrimonio final:          21392
+seg r2 | Peor caso precio->decision: 28 ciclos (disponibles: 24762)
+seg r2 | Testbenchs aprobados: 4/4
+seg r3 | Patrimonio final:          21392
+seg r3 | Peor caso precio->decision: 28 ciclos (disponibles: 2262)
+seg r3 | Testbenchs aprobados: 4/4
+seg r3 | Gemelo: 19998 ticks medidos. Respuesta: 28.00 ciclos e IC 26.00 en promedio, peor caso 28 ciclos e IC 26. Tick completo: 31.00 ciclos e IC 27.00 en promedio, peor caso 31 ciclos e IC 27
+seg perfil | docs/mediciones/p7/cotas/perfil/seg.txt, 20000 ticks a 0,1 ms sin atajo
+
+== variante barrel: build/gemelo --barrel --hex build/p7/cotas/sw/trade_h0.hex (sha256 1d3b5b39538e61b1...)
+barrel r1 | Patrimonio final:          10000
+barrel r1 | Peor caso precio->decision: 111 ciclos (disponibles: 249762)
+barrel r1 | Testbenchs aprobados: 4/4
+barrel r2 | Patrimonio final:          21392
+barrel r2 | Peor caso precio->decision: 111 ciclos (disponibles: 24762)
+barrel r2 | Testbenchs aprobados: 4/4
+barrel r3 | Patrimonio final:          21392
+barrel r3 | Peor caso precio->decision: 111 ciclos (disponibles: 2262)
+barrel r3 | Testbenchs aprobados: 4/4
+barrel r3 | Gemelo: 19998 ticks medidos. Respuesta: 107.00 ciclos e IC 27.00 en promedio, peor caso 111 ciclos e IC 28. Tick completo: 115.00 ciclos e IC 28.00 en promedio, peor caso 119 ciclos e IC 29
+barrel perfil | docs/mediciones/p7/cotas/perfil/barrel.txt, 20000 ticks a 0,1 ms sin atajo
+
+== variante r2: build/gemelo --barrel --xd 3 --tabla sw/fondo_tabla.hex --hex build/p7/cotas/sw/fondo.hex (sha256 af18f381042fd64f...)
+r2 r1 | Patrimonio final:          10000
+r2 r1 | Peor caso precio->decision: 127 ciclos (disponibles: 249762)
+r2 r1 | Testbenchs aprobados: 4/4
+r2 r2 | Patrimonio final:          21392
+r2 r2 | Peor caso precio->decision: 127 ciclos (disponibles: 24762)
+r2 r2 | Testbenchs aprobados: 4/4
+r2 r3 | Patrimonio final:          21392
+r2 r3 | Peor caso precio->decision: 127 ciclos (disponibles: 2262)
+r2 r3 | Testbenchs aprobados: 4/4
+r2 r3 | Gemelo: 19998 ticks medidos. Respuesta: 123.00 ciclos e IC 31.00 en promedio, peor caso 127 ciclos e IC 32. Tick completo: 187.00 ciclos e IC 46.00 en promedio, peor caso 211 ciclos e IC 52
+r2 perfil | docs/mediciones/p7/cotas/perfil/r2.txt, 20000 ticks a 0,1 ms sin atajo
+

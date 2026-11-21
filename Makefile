@@ -790,7 +790,13 @@ peldano-fijar:
 #   p7-caida-seg  por qué la fmax mínima del segmentado bajó de 51,59 (P1) a 45,34 MHz (P7):
 #                 el mismo comando en cuatro commits, 40 semillas, órdenes de lectura y
 #                 equivalencia formal (unos 3 minutos; no es parte de p7)
-.PHONY: p7 p7-rapido p7-variantes p7-amdahl p7-recursos p7-medir p7-rtl p7-pll p7-doble p7-caida-seg
+.PHONY: p7 p7-rapido p7-variantes p7-amdahl p7-recursos p7-medir p7-rtl p7-pll p7-doble p7-caida-seg p7-cotas p7-c1-perfil
+# p7-cotas: el punto 3.3 medido con la regla de cotas (banda 40) en R0, segmentado, barrel y R2, con el gemelo
+#   (docs/mediciones/p7/cotas/). p7-c1-perfil: IC, ciclos, CPI y perfil por hilo de R3 (docs/mediciones/c1/).
+p7-cotas:
+	$(PYTHON) tools/p7/cotas.py
+p7-c1-perfil:
+	$(PYTHON) tools/p7/c1_perfil.py
 p7-caida-seg:
 	tools/p7/caida_segmentado.sh 40
 p7-recursos:
