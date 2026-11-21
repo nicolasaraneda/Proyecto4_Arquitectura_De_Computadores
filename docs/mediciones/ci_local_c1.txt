@@ -1,0 +1,52 @@
+Integracion continua local de la rama c1 (la de GitHub no corre por facturacion; docs/pendientes_nicolas.md, accion 0)
+Los 24 pasos de ~/proyectos/cola/ci_local.sh mas make check-c1 (el trabajo nuevo de R3), los hash de bitstreams/ y que nada
+de bitstreams/, sw/ ni rtl/ cambie al correrlos. En una carpeta aparte (git worktree) con el commit indicado.
+
+Corrida 1: commit b339add, 21/11 14:39, a 15:12
+PASS: make test-asm
+PASS: make test-ref
+PASS: make test-candidatos
+PASS: make check-hex
+PASS: make tb
+PASS: make -j4 equiv
+PASS: make fases
+PASS: bash -c make tabla-3-1 && git diff --exit-code docs/mediciones/tabla_3_1.txt
+PASS: make cosim
+PASS: make equiv-gemelo
+PASS: make cpi
+PASS: make tb-mv2x2
+PASS: make bin
+PASS: make check-seg
+PASS: make check-barrel
+PASS: make r0-reproducir
+PASS: make check-xd BARREL_JOBS=4
+PASS: make r0-molde check-p8
+PASS: make check-fondo HW=r1 FONDO_JOBS=4
+PASS: make check-fondo HW=r2 FONDO_JOBS=4
+PASS: make check-vigilante
+PASS: make cosim-barrel-corta FONDO_JOBS=4
+PASS: make fondo-gemelo-series
+PASS: make report
+FAIL: make check-c1 C1_JOBS=8
+PASS: bash -c cd bitstreams && sha256sum -c SHA256SUMS > /dev/null
+PASS: bash -c git status --porcelain bitstreams sw rtl | grep . && exit 1 || exit 0
+RESULTADO: 1 pasos con FAIL, 21/11 15:12
+
+El FAIL es del paso nuevo y no del diseño: en una copia limpia no existe el modelo calculado (build/c1/modelo) y
+tools/c1/generar.py no podia armar las variantes de las pruebas de degradacion (programa con otro N_RONDA, tabla con la
+politica apagada). Ahora, sin el modelo, las variantes toman las celdas de sw/c1_tabla.hex (commit 06566dc). En esta maquina,
+con el modelo, la tabla apagada sale identica por los dos caminos. sw/c1_tabla.hex sigue saliendo siempre del modelo.
+
+Corrida 2, solo el paso que fallo: commit 06566dc, 21/11 15:13, a 15:18
+PASS: make check-c1 C1_JOBS=8
+PASS: bash -c git status --porcelain bitstreams sw rtl | grep . && exit 1 || exit 0
+PASS: 0 fallas
+PASS: 4/4
+PASS: decisiones.csv identico byte a byte al de ref/c1/c1.py (2001 lineas, sha256 32d4a678fcb54f2a...)
+PASS: 90 de 90 series identicas a la referencia (bytes, estado y protocolo), 180000 ticks
+PASS: el peor caso, 915 ciclos, es menor que 1131 (holgura de 59.54 % del presupuesto)
+PASS: 9 de 9 casos con la decision esperada y a tiempo. Peor caso 907 ciclos de 1131 (programa sano en las mismas series: 727)
+PASS: 25 de 25 controles detectados, y el control en blanco pasa
+PASS: 57 de 57 casos de la matriz pasan. Peor caso de la respuesta en la matriz: 779 ciclos
+
+RESULTADO: 27 de 27 pasos en PASS (26 en la corrida 1 y el restante en la corrida 2; el cambio entre las dos solo toca tools/c1/generar.py)

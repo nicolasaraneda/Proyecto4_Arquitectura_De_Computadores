@@ -16,7 +16,7 @@ Se actualiza al cerrar cada tramo de trabajo. La versión anterior queda en el h
 | Puerta b: assembly contra referencia | Pasa: Tesla (21 224), AMD (27 199) y Meta (22 682) por el RTL a 0,1 y 1 ms, Meta a 10 ms, 200 ventanas reales, y las 203 series en el gemelo a los tres períodos | `puerta_b.txt` |
 | Puerta c: criterios 1 a 8 | Pasa: oficial 4/4 (759 ciclos), 1 081 series sintéticas, fases (779 sano, 916 con un hilo colgado, de 1131), core (7,97 millones de instrucciones), degradación 26 de 26, controles 25 de 25, estrés 57 de 57, bitstream por los pines | `puerta.txt` y los registros de cada paso |
 | Puerta d: síntesis | Pasa: 1038 celdas, 14 bloques, 10 de 10 semillas, mínima 48,41 MHz | `timing.txt`, `bitstreams.txt` |
-| Integración local | Ver `docs/mediciones/ci_local_c1.txt` | |
+| Integración local | 27 de 27 pasos: los 24 de la rama (R0, R1 y R2 intactos) en la primera corrida; `make check-c1` en la segunda, después de un arreglo del generador para copias limpias | `docs/mediciones/ci_local_c1.txt` |
 | Memoria del programa | 482 de 512 palabras (94,1 %); las puertas no pidieron ningún arreglo y quedan 30 libres | `docs/mediciones/c1/tamano.txt` |
 
 Bitstreams en `bitstreams/` (hash en `SHA256SUMS` y en `docs/puertas.md`): `r3_c1.bin`, `r3_c1_multi.bin`, `r3_c1_apagada_multi.bin`, `r3_c1_falla_multi.bin` y el molde.
