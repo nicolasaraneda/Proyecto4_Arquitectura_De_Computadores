@@ -19,6 +19,7 @@ Estos documentos **resumen y ordenan** los documentos de estudio de `docs/`, que
 | `barrel.md` | Cuatro hilos por cuatro etapas: por qué no hay riesgos, dónde viven los contextos, qué cuesta en latencia |
 | `extension.md` | `emad` y `devk` en custom-0: especificación, construcción, por qué k fijo en 5, verificación |
 | `fondo.md` | `sw/fondo.s`: supervisor y gestores, protocolo de memoria compartida, degradación, qué aportan los gestores |
+| `c1.md` | R3, `sw/c1.s`: C1 en los cuatro hilos. Qué hace cada hilo, la máquina de modos, de dónde salen las tablas y por qué no son precios guardados, degradación, y lo medido en el examen y en las puertas |
 | `tabla_vigilante.md` | Tabla en BRAM, `icebram` con moldes, vigilante con `SB_WARMBOOT`, relevo e imagen múltiple |
 | `algoritmo.md` | De la serie al modelo, reversión a la media, `max_media`, protocolo de evaluación, por qué no otras ideas, suerte y sobreajuste |
 | `verificacion.md` | El flujo completo: referencia en Python, gemelo digital, equivalencia, formal, mutaciones, puertas, matriz de estrés, simulación del bitstream, placa y maestra |

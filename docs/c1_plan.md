@@ -127,7 +127,8 @@ Lo que mostraron las pruebas de degradación (`make c1-degradacion`, `docs/medic
 
 - El hilo 3 calcula en cada tick el patrimonio propio emulado, caja más acciones por el precio, y lo deja en una palabra de datos (`D_W`), con el modo en su byte alto. Las tres palabras que siguen son la caja propia, las acciones propias y la caja del clon.
 - Los dos dígitos de 7 segmentos muestran en hexadecimal un byte de esas cuatro palabras. Los cuatro botones eligen cuál (0 a 15, SW1 es el bit 0): bytes 0 a 2, el patrimonio; byte 3, el modo (00 fase A, 01 motor, 02 candado); 4 a 7, la caja; 8 a 11, las acciones; 12 a 15, la caja del clon.
-- Al terminar la ronda no llegan más precios y los valores quedan fijos. Por ejemplo, 22 682 es `0x589A`: se ve `9A` y, con SW1 apretado, `58`. Se compara con el patrimonio que muestra la maestra.
+- Por ejemplo, 22 682 es `0x589A`: se ve `9A` y, con SW1 apretado, `58`. Se compara con el patrimonio que muestra la maestra.
+- **Límite: el display solo se actualiza cuando llega un precio.** Los botones se leen y los 7 segmentos se escriben una vez por tick, fuera del camino de la respuesta. Al terminar la ronda el display queda congelado en el byte que elegían los botones en el último precio, y apretar botones después no cambia nada. Sin tocar nada queda el byte bajo del patrimonio; los demás bytes se leen en vivo (cómodo a 10 ms) o manteniendo la combinación apretada hasta el final. Corregirlo es mover esas cuatro instrucciones al lazo de espera del hilo 3: cero palabras, y hasta 16 ciclos más en el camino de la respuesta porque el lazo pasa de 2 a 6 instrucciones. Cambia el binario y obliga a repetir las puertas; no se aplicó porque el bitstream de R3 está congelado.
 - LED1: modo seguro (encendido si la política quedó fuera).
 - `python3 ref/c1/c1.py SERIE.csv --placa` imprime lo que debe verse con cada combinación de botones.
 

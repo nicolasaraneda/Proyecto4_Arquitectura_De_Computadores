@@ -340,3 +340,28 @@ Los mismos pasos de las secciones 5 y 9, con otros dígitos. En los tres peldañ
 | LED4 con "10" ("86" con SW4) | Firma `8610`: la placa corre un programa con la banda 60 (161 y 195) en vez de la banda 40 |
 | LED4 con otros dígitos | Alguna decisión fue distinta o llegó tarde: anotar los cuatro dígitos y el período, y seguir la tabla de 9.5 |
 | LED2 y LED3 con "D7" o "3C" | Se grabó una autoprueba anterior al 19/11 (firmas `15d7` y `a23c` con la caminata vieja); comprobar el `sha256sum` |
+
+## 12. R3: C1 en los cuatro hilos (21/11)
+
+El top, la maestra, la caminata y el testbench son los mismos. `tools/autoprueba.py` tiene un peldaño más, `r3`: las definiciones de R3 (las de R2 y `-DESPINO_TABLA_512`), `sw/c1.s` con `sw/c1_tabla.hex`, la referencia `ref/c1/c1.py`, el control negativo con la política apagada en la tabla y la falla con `tools/c1/variante.py cuelga:0:100`. Para R0, R1 y R2 no cambia nada: sus firmas siguen en `a639`.
+
+`make autoprueba-r3` (`docs/mediciones/autoprueba_r3.txt`):
+
+| Prueba | R3 |
+|--------|----|
+| Firma esperada | `984c` en el gemelo a 10 ms, 1 ms y 0,1 ms y en `ref/c1/c1.py`, bytes idénticos. Peor caso de respuesta 706 ciclos de 2196 |
+| Qué ejercita | Primer extremo en el tick 12, tabla activa desde el 390, motor y candado en el 578 (D 1318). 9 bytes distintos de la banda 40. No ejercita la apuesta de la fase A: la caminata se mueve en todos los ticks y la clase de volatilidad sale alta |
+| RTL con SW3, SW2 y SW1 (por los pines) | `984c` con LED2 y LED3 en los tres, 2 s más en modo continuo sin disparo |
+| Control negativo (política apagada) | El gemelo, `ref/c1/c1.py` y `ref/fondo.py` dan `a639`; la autoprueba lo rechaza con LED4 |
+| Hilo 0 colgado en el tick 100 | BOOT sube con S1 S0 = 01 al terminar la transacción 103, a los tres períodos |
+| Bitstream ruteado | SW3: `984c`, sin disparo. La imagen con la falla pide el relevo en el mismo instante. La testigo responde |
+| Media hora en el gemelo | 180 000, 1 800 000 y 18 000 000 precios: peor caso 802 ciclos, el vigilante no llega a 5 |
+| Recursos | 1208 de 1280 celdas (R3 solo: 1038), 14 de 16 BRAM, 50,55 MHz (testigo: 83 celdas) |
+
+| Archivo | sha256 |
+|---------|--------|
+| `autoprueba_r3_multi.bin` (imagen 0 la autoprueba de R3, imagen 1 la testigo) | `062167ba173f5f7a8ef1aca4905f34109c0a5eae08b9129b91dcb6d8e4e67a56` |
+| `relevo_r3_multi.bin` (la autoprueba con el hilo 0 colgado en el tick 100, y la testigo) | `beb964d43dab3bf15dfb9750a90eeb41098b4fcf674b6ae0c0274d5a8c8095ea` |
+| `relevo_r3_multi_sin_dormir.bin` | `4b7f04b7ccfe177c6289d825af284a713048ebf334e0b650bfc717de06feb32a` |
+
+Los pasos para la placa, con cada comando explicado, están en `docs/c1_dia_de_prueba.md`, sección 9. Al terminar cada corrida: **LED2 y LED3 encendidos, "4C" en los 7 segmentos y "98" con SW4 apretado**. Con "39" y LED4, la placa decidió la banda 40.

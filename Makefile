@@ -840,6 +840,12 @@ autoprueba-r2:
 	$(PYTHON) tools/autoprueba.py todo r2
 autoprueba-r2-firma:
 	$(PYTHON) tools/autoprueba.py firma r2
+# R3 (C1, docs/c1_dia_de_prueba.md): la misma maestra y la misma caminata; firma 984c
+.PHONY: autoprueba-r3 autoprueba-r3-firma
+autoprueba-r3:
+	$(PYTHON) tools/autoprueba.py todo r3
+autoprueba-r3-firma:
+	$(PYTHON) tools/autoprueba.py firma r3
 relevo-placa:
 	$(PYTHON) tools/medir_relevo.py --esperado > docs/mediciones/relevo_placa.txt; \
 	  $(PYTHON) tools/medir_relevo.py --prueba >> docs/mediciones/relevo_placa.txt; r=$$?; \

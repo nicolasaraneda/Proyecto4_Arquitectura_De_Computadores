@@ -2,7 +2,7 @@
 
 Grupo: Nicolás Araneda, Vicente Calderón y Santiago Muñoz.
 
-Complementa `docs/checklist_26nov.md` (conexión, medidor, registrador y peldaños R0 a R2), que no cambia. Aquí está solo lo de R3: en qué orden se carga, cómo se lee en la placa la cuenta que R3 emula y contra qué se compara. La regla del día la fijó Nicolás (21/11): **si la caja o el patrimonio no calzan con la pantalla de la maestra, se anota la diferencia y compite la banda 40**. Este documento no decide qué peldaño compite.
+Complementa `docs/checklist_26nov.md` (conexión, medidor, registrador y peldaños R0 a R2), que no cambia. Aquí está solo lo de R3: en qué orden se carga, la rutina de cada ronda, cómo se lee en la placa la cuenta que R3 emula, contra qué se compara, y la autoprueba que se puede correr antes sin la maestra (sección 9). La regla del día la fijó Nicolás (21/11): **si la caja o el patrimonio no calzan con la pantalla de la maestra, se anota la diferencia y compite la banda 40**. Este documento no decide qué peldaño compite.
 
 ## 1. Qué se lleva de R3
 
@@ -14,8 +14,9 @@ Complementa `docs/checklist_26nov.md` (conexión, medidor, registrador y peldañ
 | `r3_c1_multi.bin` | R3: imagen 0 C1, imagen 1 R0 con la banda 40 |
 | `r3_c1_apagada_multi.bin` | R3 con la política apagada en la tabla: el hardware de R3 decidiendo la banda 40. Sirve para separar un problema del hardware nuevo de un problema de la política |
 | `r3_c1_falla_multi.bin` | R3 con el hilo 0 colgado en el tick 100 y R0 de respaldo: el relevo del vigilante en el ruteo de R3 |
+| `autoprueba_r3_multi.bin` y `relevo_r3_multi.bin` | La autoprueba de R3, para correrla antes sin la maestra (sección 9) |
 
-Las cuatro son imágenes múltiples: se graban con `iceprog -b` (borra la flash entera; sin `-b` la verificación falló el 18/11).
+Todas son imágenes múltiples: se graban con `iceprog -b` (borra la flash entera; sin `-b` la verificación falló el 18/11).
 
 ## 2. Orden de carga
 
@@ -23,16 +24,53 @@ Las cuatro son imágenes múltiples: se graban con `iceprog -b` (borra la flash 
 2. **R3 después.** `iceprog -b bitstreams/r3_c1_multi.bin`. Las mismas rondas, leyendo la placa al final de cada una (secciones 3 y 4).
 3. Si queda tiempo: `r3_c1_apagada_multi.bin` (sección 6) y `r3_c1_falla_multi.bin` (sección 7).
 
-**Antes de cada ronda de R3, desconectar y conectar el USB de la Go Board**, con los cables del PMOD puestos y la maestra encendida. Para R2 basta hacerlo antes de la primera ronda; para R3 hace falta en todas, por dos razones:
+Decisión de Nicolás (21/11): **entre rondas se desconecta y se conecta el USB**. C1 no se rearma sola y no hace falta que lo haga. La razón:
 
 - C1 supone una ronda de 20 000 ticks contada desde el encendido: el reloj de tramos, el modo (el candado no tiene vuelta) y las dos cuentas emuladas parten de cero solo con el reset.
-- Pasado el tick 20 000 sin reset, R3 entra a modo seguro (LED1 encendido) y desde ahí decide la banda 40 sin política. No falla, pero ya no es C1 lo que se está probando.
+- Pasado el tick 20 000 sin reset, R3 entra a modo seguro (LED1 encendido) y desde ahí decide la banda 40 sin política. No falla, pero ya no es C1.
 
-Si la maestra no deja reiniciar entre rondas, se anota: en la primera ronda corre C1 y en las siguientes la banda 40.
+### 2.1 Rutina por ronda
+
+Con los cables del PMOD puestos y la maestra encendida, antes de cada partida:
+
+| Paso | Qué se hace | Qué se tiene que ver |
+|------|-------------|----------------------|
+| 1 | Desconectar el USB de la Go Board. Esperar un par de segundos | Todo apagado |
+| 2 | Conectar el USB | |
+| 3 | Esperar la carga: contar dos segundos | Los 7 segmentos en `00` y los cuatro LED apagados |
+| 4 | Revisar el LED1 | **Apagado** |
+| 5 | Recién ahí, pedir la partida | Apenas llegan precios: `10` en los 7 segmentos y, mientras se mantiene SW1 apretado, `27` (los 10 000 iniciales) |
+
+**Cuánto demora la carga.** Al conectar, la FPGA lee su configuración desde la flash. Leer la imagen demora unos 35 ms: es lo que se midió en la placa el 16/11 para una reconfiguración (35,50 ms, una sola medición; la hoja de datos da 53 ms como valor típico). En el encendido en frío se suma lo que tarda en subir la alimentación, que no está medido. Después el SoC tiene su propio reset de 0,16 ms. En total es bastante menos de un segundo: los dos segundos del paso 3 sobran, y son sobre todo para que el computador vuelva a reconocer el USB.
+
+**Si en el paso 3 no se ve `00` con los LED apagados**, no partir:
+
+| Se ve antes de partir | Qué pasó | Qué hacer |
+|-----------------------|----------|-----------|
+| Dígitos distintos de `00` | La placa no se reinició: está mostrando el último byte de la ronda anterior | Repetir los pasos 1 a 3 |
+| LED1 encendido | La placa viene de una ronda anterior y ya está en modo seguro (banda 40), o recibió precios falsos por ruido con los cables sueltos | Repetir los pasos 1 a 3, con los cables puestos y la maestra encendida antes de conectar |
+| Dígitos que cambian solos sin que la maestra haya partido | Llegan transacciones que nadie mandó: cables sueltos o mala tierra | Revisar la conexión (tierra primero) y repetir |
+
+**Si la placa quedó en banda 40 durante la ronda**, se reconoce así:
+
+| Se ve durante o al final de la ronda | Qué significa |
+|--------------------------------------|---------------|
+| LED1 encendido, los 7 segmentos siguen mostrando la cuenta | R3 pasó a modo seguro y desde ese tick decidió la banda 40. La cuenta emulada sigue valiendo: se anota igual. Causas: más de 20 000 ticks desde el reset, un precio bajo 100, o un hilo que no publicó a tiempo |
+| LED1 encendido desde el primer precio | Se grabó `r3_c1_apagada_multi.bin` (política apagada) y no `r3_c1_multi.bin`. Comprobar el hash |
+| Los 7 segmentos se quedan en `00` toda la ronda y los LED apagados, pero la maestra muestra que el grupo opera | La placa pasó a la imagen de respaldo, R0 con la banda 40, que no tiene telemetría: el vigilante se disparó. Anotar en qué ronda. Si fue al principio, también puede ser que R3 no esté recibiendo precios: mirar si la maestra registra decisiones |
+| `10` y `27` todo el tiempo, con el modo en `00` | R3 recibe precios pero nunca operó: la serie no tocó ningún extremo ni cumplió la apuesta. Con una serie normalizada de 20 000 ticks no debería pasar |
+
+En los tres primeros casos la placa decidió la banda 40 en toda la ronda o en parte: el patrimonio de la pantalla se compara con el de R2 en la misma serie, y se anota que esa ronda no prueba a C1.
 
 ## 3. Qué muestra la placa
 
-R3 lleva dentro una copia de la contabilidad oficial (caja 10 000, comisión 5): la cuenta propia y la de un clon que opera la banda 40. Los 7 segmentos muestran **un byte en hexadecimal** de esas cuentas, y los cuatro botones eligen cuál. Hay que mantenerlos apretados mientras se lee.
+R3 lleva dentro una copia de la contabilidad oficial (caja 10 000, comisión 5): la cuenta propia y la de un clon que opera la banda 40. Los 7 segmentos muestran **un byte en hexadecimal** de esas cuentas, y los cuatro botones eligen cuál.
+
+**Importante: el display solo se actualiza cuando llega un precio.** El programa lee los botones y escribe los 7 segmentos una vez por tick. Mientras la maestra manda precios, el display sigue a los botones. Cuando la ronda termina, el display queda congelado en el byte que elegían los botones **en el último precio**, y apretar botones después ya no cambia nada. Por eso:
+
+- Sin tocar nada, al terminar la ronda queda a la vista el **byte bajo del patrimonio**.
+- Para dejar congelado otro byte hay que mantener apretada su combinación desde antes de que termine la ronda y soltar después del último precio.
+- Los demás bytes se leen **en vivo**, con la ronda corriendo. En la ronda de 10 ms (200 segundos) hay tiempo de sobra; en la de 1 ms (20 segundos) alcanza para uno o dos; en la de 0,1 ms (2 segundos) solo queda el byte congelado.
 
 | Botones apretados | Qué se ve |
 |-------------------|-----------|
@@ -49,32 +87,41 @@ R3 lleva dentro una copia de la contabilidad oficial (caja 10 000, comisión 5):
 | SW4 + SW3 + SW1 | Caja del clon, segundo byte |
 | SW4 + SW3 + SW2 | Caja del clon, tercer byte |
 
-- **LED1**: modo seguro. Apagado es lo normal. Encendido significa que R3 dejó la política y decide la banda 40: precio bajo 100, más de 20 000 ticks sin reset, o un hilo que no publicó a tiempo dos ticks seguidos.
+- **LED1**: modo seguro. Apagado es lo normal. Encendido significa que R3 dejó la política y decide la banda 40. El LED también se escribe una vez por tick y queda como estaba en el último precio.
 - LED2 a LED4 no se usan: apagados.
-- El patrimonio emulado es caja más acciones por el último precio recibido. Cambia en cada tick durante la ronda; cuando la maestra deja de mandar precios queda fijo y se puede leer con calma.
+- El patrimonio emulado es caja más acciones por el último precio recibido. Con acciones en la mano cambia en cada tick; en caja queda quieto. La caja y las acciones solo cambian cuando se ejecuta una orden, así que se leen bien en vivo.
 - Para pasar a decimal: patrimonio = tercer byte x 65 536 + segundo x 256 + byte bajo. Por ejemplo `58` y `9A` son 0x589A = 22 682 (`python3 -c "print(0x589A)"`).
-
-Comprobación rápida al partir: antes del primer precio los 7 segmentos muestran `00`. Apenas llega el primero muestran `10`, y con SW1 `27`: 0x2710 son los 10 000 iniciales. Si no se ve eso, R3 no está recibiendo precios.
 
 ## 4. Qué se anota y qué se compara, por ronda
 
-Al terminar cada ronda de R3, con la placa quieta:
+Lo que se puede leer depende del período:
 
-| Dato | Cómo se lee | Contra qué se compara |
-|------|-------------|-----------------------|
-| Patrimonio emulado | Sin botones, SW1 y SW2 | **El patrimonio de nuestro grupo en la pantalla de la maestra. Tiene que ser igual, peso por peso** |
-| Caja emulada | SW3, SW3 + SW1, SW3 + SW2 | La caja que muestre la maestra, si la muestra. Si solo muestra patrimonio, sirve igual para saber si quedó con acciones |
-| Acciones | SW4, SW4 + SW1 | Las acciones que muestre la maestra, si las muestra |
-| Modo | SW1 + SW2 | Se anota. `02` es candado: desde ahí R3 copia a la banda 40 |
-| LED1 | A la vista | Tiene que estar apagado |
-| Caja del clon | SW4 + SW3 y sus bytes | El patrimonio que la maestra le dio a R2 en la misma ronda, si la serie es la misma y el clon terminó sin acciones |
-| Patrimonio de R3 en la pantalla | Pantalla | El de R2 en la misma ronda. Se anota la diferencia, a favor o en contra |
+| Ronda | Cómo se lee |
+|-------|-------------|
+| 10 ms | En los últimos 30 segundos, con la ronda corriendo: SW1 (segundo byte del patrimonio), SW1 + SW2 (modo), SW3 y SW3 + SW1 (caja), SW4 (acciones). Soltar todo antes del final: queda congelado el byte bajo del patrimonio |
+| 1 ms | Mantener SW1 apretado durante toda la ronda y soltar al terminar: queda congelado el segundo byte. O no tocar nada y queda el byte bajo. Uno de los dos por partida |
+| 0,1 ms | Igual que a 1 ms: un byte por partida |
+
+Qué se compara:
+
+| Dato de la placa | Contra qué | Qué prueba |
+|------------------|------------|------------|
+| Byte bajo del patrimonio (sin botones, congelado al final) | El patrimonio de la pantalla de la maestra, módulo 256: `python3 -c "print(hex(PATRIMONIO % 256))"` | Detecta cualquier diferencia chica, por ejemplo una comisión distinta de 5: con dos cuentas distintas el byte bajo coincide por azar una vez de cada 256 |
+| Segundo byte del patrimonio (SW1) | El patrimonio de la pantalla dividido por 256, sin decimales: `python3 -c "print(hex(PATRIMONIO // 256))"` | Detecta diferencias grandes |
+| Caja y acciones (ronda de 10 ms, en vivo) | La caja y las acciones que muestre la maestra, si las muestra | Lo mismo, por separado |
+| Modo (SW1 + SW2) | Se anota. `02` es candado: desde ahí R3 copia a la banda 40 | |
+| LED1 | Tiene que estar apagado | |
+| Patrimonio de R3 en la pantalla | El de R2 en la misma ronda. Se anota la diferencia, a favor o en contra | Lo que C1 ganó o perdió contra la banda 40 |
+
+Con las tres rondas se juntan los dos bytes: en la de 10 ms se leen todos, y en las otras dos conviene dejar una vez el byte bajo y otra el segundo.
 
 Qué dice cada resultado:
 
-- **Patrimonio emulado igual al de la pantalla**: la copia de la contabilidad que lleva R3 es la de la maestra. Es la condición para que C1 funcione como se midió, porque el candado se decide con esa cuenta.
-- **Distinto**: se anota la diferencia exacta, la ronda, el modo y la caja. Según la regla de Nicolás, compite la banda 40. Causas posibles, para revisar esa noche con la serie registrada: comisión o caja inicial distintas de 5 y 10 000, una regla de recorte distinta a la del testbench, o un precio que la placa no vio.
+- **Los bytes calzan con la pantalla**: la copia de la contabilidad que lleva R3 es la de la maestra. Es la condición para que C1 funcione como se midió, porque el candado se decide con esa cuenta.
+- **No calzan**: se anota la diferencia, la ronda, el modo y los bytes leídos. Según la regla de Nicolás, compite la banda 40. Causas posibles, para revisar esa noche con la serie registrada: comisión o caja inicial distintas de 5 y 10 000, una regla de recorte distinta a la del testbench, o un precio que la placa no vio.
 - **LED1 encendido** sin haber pasado de 20 000 ticks ni haber visto un precio bajo 100: un hilo se atrasó o se colgó. Se anota en qué ronda. La decisión siguió saliendo (banda 40), pero es un hallazgo.
+
+Si la serie quedó registrada, esa noche se compara todo de una vez: `python3 ref/c1/c1.py SERIE.csv --placa` imprime el patrimonio, la caja, las acciones, el modo y el byte de cada combinación de botones, y el patrimonio tiene que ser el de la pantalla.
 
 ## 5. Valores esperados si la serie es conocida
 
@@ -110,7 +157,7 @@ Si la maestra parte con la placa recién reiniciada y manda precios antes de 164
 
 - LED1 queda encendido desde el primer precio (modo seguro: es lo que apaga la política).
 - En la misma serie, el patrimonio de la pantalla tiene que ser **el mismo de R2**.
-- Los 7 segmentos siguen mostrando la cuenta emulada: tiene que calzar con la pantalla igual que en la sección 4.
+- Los 7 segmentos siguen mostrando la cuenta emulada, con las mismas reglas de lectura de las secciones 3 y 4: tiene que calzar con la pantalla.
 
 Si R3 apagado calza con R2 y R3 con la política no calza con su cuenta, el problema está en la política o en la contabilidad emulada y no en el hardware nuevo. Si R3 apagado tampoco calza con R2, el problema es del hardware o del ruteo de R3.
 
@@ -122,10 +169,97 @@ Se reconoce el relevo porque la telemetría desaparece: R0 no escribe los 7 segm
 
 ## 8. Plantilla
 
-| Ronda | Período | Ticks | Patrimonio en pantalla | Patrimonio en la placa (hex y decimal) | Caja en la placa | Acciones | Modo | LED1 | Patrimonio de R2 en la misma ronda | ¿Calza? |
-|-------|---------|-------|------------------------|-----------------------------------------|------------------|----------|------|------|------------------------------------|---------|
-| 1 | 10 ms | | | | | | | | | |
-| 2 | 1 ms | | | | | | | | | |
-| 3 | 0,1 ms | | | | | | | | | |
+| Ronda | Período | Ticks | Patrimonio en pantalla | Byte bajo en la placa | Segundo byte (SW1) | Caja en la placa | Acciones | Modo | LED1 | Patrimonio de R2 en la misma ronda | ¿Calza? |
+|-------|---------|-------|------------------------|-----------------------|--------------------|------------------|----------|------|------|------------------------------------|---------|
+| 1 | 10 ms | | | | | | | | | | |
+| 2 | 1 ms | | | | | | | | | | |
+| 3 | 0,1 ms | | | | | | | | | | |
 
 Hash grabado (lo que imprime `sha256sum bitstreams/r3_c1_multi.bin`): ________
+
+## 9. Autoprueba de R3 en la placa (antes del día de prueba, sin maestra)
+
+### 9.1 Qué es y qué prueba
+
+`bitstreams/autoprueba_r3_multi.bin` es un bitstream aparte: **el de competencia (`r3_c1_multi.bin`) no se toca**. Adentro va el mismo SoC de R3 (mismo RTL, mismo `sw/c1.s`, misma tabla) con una maestra SPI interna que le manda 2000 precios y junta en una firma de 16 bits todos los bytes de decisión que lee. La firma esperada va dentro del bitstream y un LED dice si coincide.
+
+Se reutilizó todo lo que existía para R0 a R2 (`docs/autoprueba.md`): el mismo top, la misma maestra, la misma caminata de precios (pasos de 4 entre 100 y 255) y el mismo testbench. Lo único nuevo es la configuración del peldaño en `tools/autoprueba.py`: la referencia es `ref/c1/c1.py`, el control negativo es la tabla con la política apagada y la falla es el hilo 0 colgado.
+
+| | |
+|---|---|
+| Firma esperada | **`984c`**: "4C" en los 7 segmentos y "98" con SW4. Calculada con el gemelo a los tres períodos y con `ref/c1/c1.py`: los mismos 2000 bytes |
+| Qué recorre C1 en esos 2000 precios | Ve el primer extremo en el tick 12, la tabla se activa en el 390, opera con el motor y llega al candado en el 578. Difiere de la banda 40 en 9 bytes |
+| Si la placa decidiera la banda 40 | La firma sería `a639`, la de las autopruebas de R0, R1 y R2: LED4 con "39" |
+| Costo | 1208 de 1280 celdas (R3 solo: 1038), 14 de 16 bloques de memoria, 50,55 MHz |
+| Verificación | Por el RTL y por el bitstream ya ruteado, apretando los botones por los pines: `984c` a los tres períodos. Con la política apagada: `a639` y LED4. Media hora en el gemelo sin que el vigilante llegue a contar 5 (`docs/mediciones/autoprueba_r3.txt`) |
+
+Qué **no** prueba:
+
+- La apuesta de la fase A (la media posición). La caminata se mueve en todos los ticks, la volatilidad sale alta y la tabla nunca apuesta. Eso queda cubierto por la simulación y por la maestra.
+- La conexión con una maestra externa ni los cables: los precios se generan dentro de la FPGA.
+- La ubicación exacta del bitstream de competencia: es el mismo circuito, ruteado de nuevo junto con la maestra interna. Además aquí la telemetría de R3 no se ve (los 7 segmentos y los LED muestran la firma).
+
+### 9.2 Comandos, uno por uno
+
+Desde la raíz del repositorio, en WSL.
+
+1. **Comprobar los archivos.**
+
+   ```bash
+   cd bitstreams && sha256sum -c SHA256SUMS && cd ..
+   ```
+
+   Calcula el hash de cada bitstream guardado y lo compara con el anotado. Todas las líneas tienen que decir `OK`, en particular `autoprueba_r3_multi.bin` (`062167ba...`) y `relevo_r3_multi.bin` (`beb964d4...`). No escribe nada.
+
+2. **Pasar la placa a WSL**, si `iceprog` no la encuentra. En una PowerShell de Windows como administrador:
+
+   ```
+   usbipd list
+   usbipd attach --wsl --busid X-Y
+   ```
+
+   El primero muestra los dispositivos USB: la Go Board aparece como un FTDI (0403:6010) con un número de bus `X-Y`. El segundo la entrega a WSL; hay que repetirlo cada vez que se reconecta el USB y se va a programar. En WSL, `lsusb` tiene que mostrar el FTDI.
+
+3. **Grabar la autoprueba.**
+
+   ```bash
+   iceprog -b bitstreams/autoprueba_r3_multi.bin
+   ```
+
+   Escribe el archivo en la flash de la placa. El `-b` borra la flash entera antes: el archivo trae dos imágenes y ocupa más de 32 kB (sin `-b` la verificación falló el 18/11). Tiene que terminar con "VERIFY OK" y "cdone: high". La FPGA se configura sola al terminar: **los cuatro LED apagados y "FF"** en los 7 segmentos. Si aparecen los cuatro LED encendidos y "--", arrancó la imagen 1 (la testigo): volver a grabar.
+
+4. **Ronda 3 (0,1 ms).** Apretar SW3 un instante. En 0,2 segundos: **LED2 y LED3 encendidos y "4C"**. Mantener SW4 apretado: **"98"**. Al soltar vuelve "4C". LED1 queda a media luz, porque la maestra sigue mandando precios.
+
+5. **Ronda 2 (1 ms).** Desconectar y conectar el USB (la firma supone que el programa parte de cero). Apretar SW2. En 2 segundos, lo mismo: LED2, LED3, "4C", y "98" con SW4.
+
+6. **Ronda 1 (10 ms).** Desconectar y conectar. Apretar SW1. LED1 parpadea unos 20 segundos (cambia cada 0,64 s) y después LED2, LED3, "4C" y "98".
+
+7. **Media hora sin relevo (optativo).** Desconectar y conectar, anotar la hora, apretar SW3 y dejar la placa 30 minutos. Al final tiene que verse lo mismo: LED2 y LED3, LED1 a media luz, "4C". En ese tiempo la maestra mandó 18 millones de precios. A los 2 segundos R3 pasó los 20 000 ticks y entró a modo seguro: no cambia la firma, que quedó fija en el precio 2000, y es justamente el caso de una placa que sigue recibiendo precios sin reset. Si aparecen los cuatro LED encendidos y "--", el vigilante disparó sin falla: anotar los minutos que muestra con SW4.
+
+8. **El relevo con la falla inyectada (optativo).**
+
+   ```bash
+   iceprog -b bitstreams/relevo_r3_multi.bin
+   ```
+
+   Es la misma autoprueba con el hilo 0 colgado a propósito en el precio 100. Al quedar configurada: LED apagados y "FF". Apretar SW3: a los 10 ms el vigilante pide el relevo y aparece la testigo, **los cuatro LED encendidos y "--"**. Si los 7 segmentos se apagan y no vuelven, grabar `relevo_r3_multi_sin_dormir.bin` y repetir (`docs/autoprueba.md`, sección 9.5).
+
+9. **Volver al bitstream de competencia.**
+
+   ```bash
+   iceprog -b bitstreams/r3_c1_multi.bin
+   ```
+
+   La flash queda con la autoprueba hasta que se grabe otra cosa. Para R2, `iceprog -b bitstreams/r2_banda40_multi.bin`.
+
+### 9.3 Qué anotar y cómo leerlo
+
+Para cada período: los LED encendidos y los cuatro dígitos (sin y con SW4).
+
+| Se ve | Qué significa | Qué hacer |
+|-------|---------------|-----------|
+| LED2 y LED3, "4C" y "98", en los tres períodos | Los 2000 bytes son los de la referencia: R3 pasa la autoprueba | Seguir |
+| LED4 con "39" ("A6" con SW4) | Firma `a639`: la placa decidió la banda 40. La política no actuó: la tabla no se lee bien o un hilo no publica | Anotar el período. Si pasa en los tres, es una falla de R3 en la FPGA que la simulación no vio |
+| LED4 con otros dígitos | Alguna decisión fue distinta o llegó tarde | Anotar los cuatro dígitos y el período. Si falla solo a 0,1 ms es de tiempo; si en los tres, de lógica o de memoria |
+| Los cuatro LED encendidos y "--" sin haber grabado la falla | El vigilante disparó con el programa sano | Anotar la hora y los minutos con SW4 |
+| Al configurar ya corre, o no pasa nada al apretar | Botones o configuración | Revisar "cdone: high" y probar otro botón |

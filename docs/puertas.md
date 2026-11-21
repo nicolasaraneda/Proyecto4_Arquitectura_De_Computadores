@@ -87,7 +87,7 @@ Bitstreams (`make c1-bitstreams`, copiados a `bitstreams/` con `GUARDAR=1`):
 | `moldes/r3_molde.asc.gz` | `709a0516e6c8598d486c62e43fcf1cf2813011cb8fcddabe5c8f9dbc21aa3dec` |
 | `moldes/molde_tabla512.hex` | `b78ca6b58510199084ae274a17331a59685d54fade64cf3cc6bd88bea96685a5` |
 
-R3 pasó la puerta de simulación. Le faltan la de placa y la de la maestra real el 26/11 (`docs/c1_dia_de_prueba.md`). No tiene todavía un bitstream de autoprueba como los de R0 a R2.
+R3 pasó la puerta de simulación. Le faltan la de placa y la de la maestra real el 26/11 (`docs/c1_dia_de_prueba.md`). Para la de placa tiene su autoprueba, `bitstreams/autoprueba_r3_multi.bin` (firma `984c`, 1208 celdas; `docs/autoprueba.md`, sección 12).
 
 ## R0 con banda 40 (T140, 19/11)
 

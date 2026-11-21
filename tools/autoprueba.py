@@ -38,7 +38,9 @@ CRC-16. Este script:
 
 Peldaños (docs/peldano.md y docs/puertas.md): r0 es el core base con sw/trade.s
 (la regla de cotas); r1 el barrel con emad, devk y la tabla, con sw/fondo.s; r2 es r1
-con el vigilante y SB_WARMBOOT.
+con el vigilante y SB_WARMBOOT; r3 es r2 con la tabla de 512 palabras y sw/c1.s (C1 en
+los cuatro hilos, docs/c1_plan.md), con ref/c1/c1.py de referencia. Para r0, r1 y r2
+nada cambia con r3: sus entradas, su caminata y sus firmas son las mismas.
 
 Uso, desde la raíz:
     python3 tools/autoprueba.py firma r1
@@ -66,6 +68,9 @@ import fondo     # noqa: E402
 import market    # noqa: E402
 import regla_cotas  # noqa: E402
 import trader    # noqa: E402
+sys.path.insert(1, os.path.join(RAIZ, "ref", "c1"))
+import c1 as ref_c1          # noqa: E402
+import tablas as tablas_c1   # noqa: E402
 
 NTICKS = 2000
 PERIODOS = {1: 250000, 2: 25000, 3: 2500}           # ciclos de 40 ns por botón
@@ -80,6 +85,8 @@ T0_NS = 500_860
 TABLA = "sw/fondo_tabla.hex"
 R1_DEFS = "-DESPINO_BARREL -DESPINO_XD_EMAD -DESPINO_XD_DEVK -DESPINO_TABLA"
 R2_DEFS = R1_DEFS + " -DESPINO_VIGILANTE"
+R3_DEFS = R2_DEFS + " -DESPINO_TABLA_512"
+TABLA_C1 = "sw/c1_tabla.hex"
 GEMELO_FONDO = ["--barrel", "--xd", "3"]
 
 # Caminata de la maestra interna (decisión T141): cada tick sube o baja PASO, sin
@@ -107,6 +114,9 @@ PELDANOS = {
     "r0": dict(defs="", fuente="sw/trade.s", asm=[], gemelo=[], ref="trader", tabla=None, continuo=0),
     "r1": dict(defs=R1_DEFS, fuente="sw/fondo.s", asm=[], gemelo=GEMELO_FONDO, ref="fondo", tabla=TABLA, continuo=0),
     "r2": dict(defs=R2_DEFS, fuente="sw/fondo.s", asm=[], gemelo=GEMELO_FONDO, ref="fondo", tabla=TABLA, continuo=1),
+    # R3: la misma caminata. En ella C1 ve el primer extremo en el tick 12, pasa por el motor y
+    # llega al candado en el 578; difiere de la banda 40 en 9 bytes, así que su firma no es a639
+    "r3": dict(defs=R3_DEFS, fuente="sw/c1.s", asm=[], gemelo=GEMELO_FONDO, ref="c1", tabla=TABLA_C1, continuo=1),
 }
 # Control negativo: algo que la autoprueba tiene que rechazar (LED4). Desde la
 # banda 40 (T140) es la banda 60 (161 y 195): en R0 en el programa, en R1 y R2 en
@@ -117,6 +127,9 @@ CONTROL = {
     "r0": dict(asm=["-D", "BANDA_COMPRA=161", "-D", "BANDA_VENTA=195"], texto="banda 60 en sw/trade.s (161 y 195)"),
     "r1": dict(param=BANDA60, texto="la tabla de la banda 60 (161 y 195)"),
     "r2": dict(param=BANDA60, texto="la tabla de la banda 60 (161 y 195)"),
+    # R3: la tabla con la política apagada. El programa no cambia y decide la banda 40: la firma
+    # es la de R0, R1 y R2. Es lo que importa reconocer en la placa: R3 sin C1
+    "r3": dict(apagada=True, texto="la tabla de C1 con la politica apagada (decide la banda 40)"),
 }
 FALLA_TICK = 100             # cuelgue_sup:100 en la prueba del relevo
 VIG_N = 4                    # rtl/pochoco_soc.v, parámetro VigN
@@ -228,7 +241,10 @@ def firma(peldano, informe):
         peor = re.search(r"Peor caso precio->decision: (\d+) ciclos \(disponibles: (\d+)\)", r.stdout)
         firmas[boton] = (crc16(leidos), leidos, peor.group(1), peor.group(2))
     p = precios()
-    estrategia = fondo.Fondo() if pd["ref"] == "fondo" else trader.Oficial()
+    if pd["ref"] == "c1":
+        estrategia = ref_c1.C1(tablas_c1.leer_hex(os.path.join(RAIZ, pd["tabla"])))
+    else:
+        estrategia = fondo.Fondo() if pd["ref"] == "fondo" else trader.Oficial()
     esperados = trader.decisiones(p, estrategia, 0)
     f_ref = crc16(esperados)
     m = market.simular(p, esperados)
@@ -238,11 +254,20 @@ def firma(peldano, informe):
         informe.append(f"     toca 100 en el tick {p.index(100)} y 255 en el tick {p.index(255)}: la regla entra a la banda")
     else:
         informe.append("     AVISO: la caminata no toca 100 y 255: la regla de cotas no entra a la banda y la firma no la ve")
-    informe.append(f"Referencia ref/{pd['ref']}.py: firma {f_ref:04x}, {sum(a != b for a, b in zip(esperados, esperados[1:]))} "
+    nombre_ref = "ref/c1/c1.py" if pd["ref"] == "c1" else f"ref/{pd['ref']}.py"
+    informe.append(f"Referencia {nombre_ref}: firma {f_ref:04x}, {sum(a != b for a, b in zip(esperados, esperados[1:]))} "
                    f"cambios de byte, patrimonio {m.w} con {m.ordenes} ordenes")
-    # Qué tan distinta es la firma de la que daría el programa anterior (banda 60)
-    b60 = trader.decisiones(p, fondo.Fondo(BANDA60) if pd["ref"] == "fondo" else regla_cotas.Cotas("espera", banda=60), 0)
-    informe.append(f"     con la banda 60 daria {crc16(b60):04x}: {sum(a != b for a, b in zip(b60, esperados))} bytes distintos")
+    if pd["ref"] == "c1":
+        # Qué tan distinta es la firma de la que daría la banda 40 sola (R3 en modo seguro o con la política apagada)
+        b40 = trader.decisiones(p, fondo.Fondo(), 0)
+        k_ext = next((k for k, x in enumerate(p, 1) if x <= 100 or x >= 255), None)
+        informe.append(f"     C1: primer extremo en el tick {k_ext}, modo final {estrategia.modo} (2 es candado), D {estrategia.D}, "
+                       f"modo seguro {estrategia.seguro}")
+        informe.append(f"     con la banda 40 sola daria {crc16(b40):04x}: {sum(a != b for a, b in zip(b40, esperados))} bytes distintos")
+    else:
+        # Qué tan distinta es la firma de la que daría el programa anterior (banda 60)
+        b60 = trader.decisiones(p, fondo.Fondo(BANDA60) if pd["ref"] == "fondo" else regla_cotas.Cotas("espera", banda=60), 0)
+        informe.append(f"     con la banda 60 daria {crc16(b60):04x}: {sum(a != b for a, b in zip(b60, esperados))} bytes distintos")
     ok = True
     for boton, (f, leidos, peor, disp) in firmas.items():
         igual = leidos == esperados
@@ -333,6 +358,13 @@ def simular(peldano, informe, botones):
 def tabla_control(peldano):
     """Escribe la tabla del control negativo. Devuelve su ruta."""
     ruta = f"{carpeta(peldano)}/control_tabla.hex"
+    if CONTROL[peldano].get("apagada"):
+        # R3: la tabla de sw/c1.s con la palabra POLITICA en 0
+        T = tablas_c1.leer_hex(os.path.join(RAIZ, PELDANOS[peldano]["tabla"]))
+        T[tablas_c1.T_POLITICA] = tablas_c1.POLITICA_APAGADA
+        with open(os.path.join(RAIZ, ruta), "w", newline="\n") as f:
+            f.write("".join(f"{v & 0xFFFF:04x}\n" for v in T))
+        return ruta
     with open(os.path.join(RAIZ, ruta), "w", newline="\n") as f:
         f.write(fondo.tabla_hex(CONTROL[peldano]["param"]))
     return ruta
@@ -356,9 +388,17 @@ def control(peldano, informe):
     nota = ""
     if tabla:
         p = precios()
-        ref = trader.decisiones(p, fondo.Fondo(c["param"]), 0)
-        nota = (f"; ref/fondo.py con ese parametro da {crc16(ref):04x}"
-                f"{'' if ref == leidos else ' (DISTINTO del gemelo)'}")
+        if c.get("apagada"):
+            ref = trader.decisiones(p, ref_c1.C1(tablas_c1.leer_hex(os.path.join(RAIZ, tabla))), 0)
+            b40 = trader.decisiones(p, fondo.Fondo(), 0)
+            nota = (f"; ref/c1/c1.py con esa tabla da {crc16(ref):04x}{'' if ref == leidos else ' (DISTINTO del gemelo)'}, "
+                    f"{'la misma' if ref == b40 else 'DISTINTA de la'} firma de la banda 40 de ref/fondo.py ({crc16(b40):04x})")
+            if ref != b40:
+                f_control = -1
+        else:
+            ref = trader.decisiones(p, fondo.Fondo(c["param"]), 0)
+            nota = (f"; ref/fondo.py con ese parametro da {crc16(ref):04x}"
+                    f"{'' if ref == leidos else ' (DISTINTO del gemelo)'}")
         if ref != leidos:
             f_control = -1
     sim = compilar_rtl(peldano, hexfile, "obj_control", tabla)
@@ -375,7 +415,10 @@ def control(peldano, informe):
 
 def programa_falla(peldano):
     d = carpeta(peldano)
-    r = sh([sys.executable, "tools/fondo/variante.py", f"cuelgue_sup:{FALLA_TICK}", "-o", f"{d}/falla.s"])
+    if PELDANOS[peldano]["ref"] == "c1":
+        r = sh([sys.executable, "tools/c1/variante.py", f"cuelga:0:{FALLA_TICK}", "-o", f"{d}/falla.s"])
+    else:
+        r = sh([sys.executable, "tools/fondo/variante.py", f"cuelgue_sup:{FALLA_TICK}", "-o", f"{d}/falla.s"])
     if r.returncode != 0:
         raise SystemExit(f"FAIL: variante.py\n{r.stdout}{r.stderr}")
     ensamblar(f"{d}/falla.s", f"{d}/falla.hex")

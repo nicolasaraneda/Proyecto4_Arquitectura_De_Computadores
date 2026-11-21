@@ -23,12 +23,13 @@ Bitstreams en `bitstreams/` (hash en `SHA256SUMS` y en `docs/puertas.md`): `r3_c
 
 **Qué falta.**
 
-- La puerta de placa y la de maestra de R3 (Nicolás, 26/11, `docs/c1_dia_de_prueba.md`). R3 no tiene bitstream de autoprueba.
+- La puerta de placa y la de maestra de R3 (Nicolás, `docs/c1_dia_de_prueba.md`). La autoprueba de R3 está lista: `bitstreams/autoprueba_r3_multi.bin`, firma `984c`, 1208 celdas (`docs/autoprueba.md`, sección 12).
 - La decisión de qué peldaño compite. Regla de Nicolás para el día de prueba: si la caja o el patrimonio de la placa no calzan con la pantalla de la maestra, compite la banda 40.
-- El documento de estudio de R3 para la defensa y su lugar en el informe.
+- El lugar de R3 en el informe. El documento de estudio está en `docs/defensa/c1.md`; falta sumar sus preguntas al banco y a las guías por integrante.
+- Decidir si se corrige la telemetría (T153): hoy el display solo se actualiza cuando llega un precio, así que al terminar la ronda queda a la vista un solo byte. Corregirlo cambia el binario y obliga a repetir las puertas.
 - La rama `c1` no está integrada en `banda-40` ni en `main`.
 
-**Qué conviene después.** Antes del 25/11, decidir si R3 entra en la etiqueta `v-maestra-26nov`: su hardware es nuevo y solo puede competir si pasa por la maestra. Si entra, conviene un bitstream de autoprueba de R3 para probar la placa antes (el de R2 ocupa 1199 celdas; el de R3 quedaría cerca de 1220 de 1280, hay que medirlo). Dos límites que el día de prueba tiene que tener presentes: C1 supone una ronda de 20 000 ticks contada desde el encendido (con rondas seguidas sin reset, desde la segunda decide la banda 40), y responde más lento que R2 (hasta 916 ciclos contra 128).
+**Qué conviene después.** Correr la autoprueba de R3 en la placa (`docs/c1_dia_de_prueba.md`, sección 9) y, antes del 25/11, decidir si R3 entra en la etiqueta `v-maestra-26nov`: su hardware es nuevo y solo puede competir si pasa por la maestra. Tres límites que el día de prueba tiene que tener presentes: C1 supone una ronda de 20 000 ticks contada desde el encendido (Nicolás decidió reconectar el USB entre rondas, T153), responde más lento que R2 (hasta 916 ciclos contra 128), y su telemetría solo se actualiza mientras llegan precios.
 
 ## Tramo 17: regla base con banda 40 en R0, R1 y R2 (19 y 20/11, rama `banda-40`)
 
