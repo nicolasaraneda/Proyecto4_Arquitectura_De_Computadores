@@ -1,0 +1,101 @@
+# V4: candado selectivo con máquina de modos (parte 7, etapa 1)
+
+ref/cotas/explorar_v4.py, commit a2de3f9. Otras acciones: 12000 ventanas; los mismos 200000 sorteos de las partes 1 y 3. D = patrimonio propio - patrimonio del clon (banda 40 emulada). Interpretación y motores en el encabezado de ref/cotas/candado_v4.py.
+
+## Controles
+
+- Clon emulado contra la banda 40 de la caché: 0 ventanas distintas de 12000.
+- Base V1 sola, recorrida con el código actual, contra la caché de la parte 1: 0 ventanas distintas.
+- Base V3 con (b) sola, recorrida con el código actual, contra la caché de la parte 1: 0 ventanas distintas.
+- Base V2 (fase A) sola, recorrida con el código actual, contra la caché de la parte 1: 0 ventanas distintas.
+- V1, E0, M inf, L sin piso (sin candado) contra la base sola: 0 ventanas distintas.
+- V3 con (b), E0, M inf, L sin piso (sin candado) contra la base sola: 0 ventanas distintas.
+- V2 (fase A), E0, M inf, L sin piso (sin candado) contra V2 sola: 10802 ventanas distintas. No es un control: después de la fase A copia al clon, y V2 sola sigue con su política en B, C y D.
+- V2 (fase A), E1, M inf, L sin piso, ambición (sin candado) contra la base sola: 0 ventanas distintas.
+- Por eventos contra la referencia directa (`candado_v4.V4` en `ideas.correr`), 120 ventanas, las 24 combinaciones de la etapa: 0 diferencias en patrimonio, órdenes o grupo.
+
+## Las 10 primeras por (gana % - pierde %) entre las 0 de 24 combinaciones con diferencia media >= 0, contra la banda 40
+
+| Combinación | Δ por ronda (ee) | Gana % | Empata % | Pierde % | Gana - pierde | Déficit | Media del torneo | p5 | Peor | Órdenes |
+|---|---|---|---|---|---|---|---|---|---|---|
+| referencia: V2 con M 25, sin tope (parte 3) | -27 (11) | 69,2 | 7,4 | 23,4 | 45,8 | 93 | -25 | -271 | -9632 | nan |
+| referencia: V3 con (b) sin candado | +146 (43) | 56,3 | 4,1 | 39,6 | 16,7 | 338 | +146 | -1676 | -5969 | 6,0 |
+
+## Por ronda y por caso, las 10 primeras
+
+Grupos: candado tras apuesta ganada, candado tras recuperación, sin recuperar, piso, sin desviar (sin apuesta y sin ambición). Porcentaje de las rondas del caso y, entre paréntesis, la D final media del grupo.
+
+| Combinación | Caso | Δ (ee) | Candado tras apuesta | Candado tras recuperación | Sin recuperar | Piso | Sin desviar |
+|---|---|---|---|---|---|---|---|
+
+## Las 0 primeras con el rival real en otra banda (el emulado sigue siendo la banda 40)
+
+| Combinación | Rival real | Δ por ronda (ee) | Gana % | Empata % | Pierde % | Gana - pierde | Déficit | p5 | Peor |
+|---|---|---|---|---|---|---|---|---|---|
+
+## Dato aparte: memoria entre rondas para las 0 primeras
+
+En el orden del sorteo: si la D acumulada contra el clon emulado ya es >= M al empezar una ronda, esa ronda copia al clon entera.
+
+| Combinación | Rival real | Gana % | Empata % | Pierde % | Gana - pierde | Déficit | Media del torneo | p5 | Peor |
+|---|---|---|---|---|---|---|---|---|---|
+
+## Todas las combinaciones (24), contra la banda 40
+
+| Combinación | Δ (ee) | Δ S (ee) | Δ B (ee) | Gana % | Empata % | Pierde % | Déficit | Media | p5 | Peor | Órdenes | S: apuesta / recuperación / sin recuperar / piso / sin desviar | B: ídem |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| V1, E0, M 25, L sin piso | -161 (49) | -866 (63) | +750 (35) | 57,8 | 4,0 | 38,1 | 517 | -160 | -2742 | -10875 | 6,0 | 25,7 (+860) / 7,4 (+149) / 40,1 (-2742) / 0,0 / 26,9 (+0) | 62,4 (+1282) / 0,0 / 4,4 (-1119) / 0,0 / 33,2 (+0) |
+| V1, E0, M 25, L sin piso, ambición | -161 (49) | -866 (63) | +750 (35) | 57,8 | 4,0 | 38,1 | 517 | -160 | -2742 | -10875 | 6,0 | 25,7 (+860) / 7,4 (+149) / 66,9 (-1640) / 0,0 / 0,0 | 62,4 (+1282) / 0,0 / 37,6 (-132) / 0,0 / 0,0 |
+| V1, E1, M 25, L sin piso | -91 (47) | -733 (67) | +740 (35) | 65,3 | 3,9 | 30,8 | 482 | -88 | -2837 | -31753 | 6,9 | 25,7 (+860) / 20,6 (+142) / 26,8 (-3664) / 0,0 / 26,9 (+0) | 62,4 (+1282) / 2,1 (+80) / 2,3 (-2629) / 0,0 / 33,2 (+0) |
+| V1, E1, M 25, L sin piso, ambición | -95 (49) | -726 (67) | +720 (40) | 66,7 | 1,2 | 32,1 | 501 | -92 | -2923 | -31753 | 7,9 | 25,7 (+860) / 40,4 (+122) / 33,9 (-2940) / 0,0 / 0,0 | 62,4 (+1282) / 33,2 (+87) / 4,4 (-2467) / 0,0 / 0,0 |
+| V1, E2 d20, M 25, L sin piso | -156 (48) | -853 (69) | +746 (35) | 60,5 | 4,0 | 35,5 | 526 | -155 | -2848 | -24357 | 6,2 | 25,7 (+860) / 11,9 (+163) / 35,5 (-3083) / 0,0 / 26,9 (+0) | 62,4 (+1282) / 0,8 (+87) / 3,7 (-1503) / 0,0 / 33,2 (+0) |
+| V1, E2 d20, M 25, L sin piso, ambición | -155 (49) | -852 (71) | +746 (35) | 61,5 | 2,1 | 36,5 | 533 | -154 | -2859 | -24357 | 6,7 | 25,7 (+860) / 18,2 (+177) / 56,1 (-1972) / 0,0 / 0,0 | 62,4 (+1282) / 15,0 (+113) / 22,6 (-314) / 0,0 / 0,0 |
+| V1, E3 k5, M 25, L sin piso | -161 (50) | -864 (67) | +749 (35) | 60,7 | 3,7 | 35,7 | 528 | -160 | -2812 | -10990 | 6,3 | 25,7 (+860) / 19,7 (+109) / 27,7 (-3988) / 0,0 / 26,9 (+0) | 62,4 (+1282) / 1,5 (+80) / 2,9 (-1803) / 0,0 / 33,2 (+0) |
+| V1, E3 k5, M 25, L sin piso, ambición | -159 (49) | -857 (66) | +744 (35) | 60,6 | 1,0 | 38,4 | 532 | -158 | -2810 | -10921 | 7,2 | 25,7 (+860) / 41,7 (+100) / 32,6 (-3435) / 0,0 / 0,0 | 62,4 (+1282) / 27,6 (+91) / 10,0 (-809) / 0,0 / 0,0 |
+| V3 con (b), E0, M 25, L sin piso | -127 (28) | -567 (41) | +443 (19) | 56,3 | 4,2 | 39,4 | 325 | -125 | -1593 | -5887 | 5,5 | 25,7 (+483) / 5,8 (+108) / 42,3 (-1648) / 0,0 / 26,2 (+0) | 67,4 (+690) / 0,0 (+20) / 3,8 (-566) / 0,0 / 28,8 (+0) |
+| V3 con (b), E0, M 25, L sin piso, ambición | -127 (28) | -567 (41) | +443 (19) | 56,3 | 4,2 | 39,4 | 325 | -125 | -1593 | -5887 | 5,5 | 25,7 (+483) / 5,8 (+108) / 68,5 (-1019) / 0,0 / 0,0 | 67,4 (+690) / 0,0 (+20) / 32,6 (-66) / 0,0 / 0,0 |
+| V3 con (b), E1, M 25, L sin piso | -67 (29) | -449 (46) | +428 (20) | 67,7 | 3,8 | 28,5 | 302 | -65 | -1688 | -29714 | 6,3 | 25,7 (+483) / 23,3 (+128) / 24,8 (-2436) / 0,0 / 26,2 (+0) | 67,4 (+690) / 2,3 (+105) / 1,6 (-2484) / 0,0 / 28,8 (+0) |
+| V3 con (b), E1, M 25, L sin piso, ambición | -73 (31) | -443 (46) | +406 (26) | 68,6 | 1,5 | 29,9 | 323 | -70 | -1822 | -29714 | 7,2 | 25,7 (+483) / 42,6 (+117) / 31,6 (-1951) / 0,0 / 0,0 | 67,4 (+690) / 29,2 (+91) / 3,4 (-2509) / 0,0 / 0,0 |
+| V3 con (b), E2 d20, M 25, L sin piso | -131 (31) | -573 (50) | +439 (19) | 60,5 | 4,2 | 35,3 | 346 | -130 | -1800 | -21598 | 5,7 | 25,7 (+483) / 11,8 (+169) / 36,3 (-1973) / 0,0 / 26,2 (+0) | 67,4 (+690) / 0,7 (+80) / 3,1 (-837) / 0,0 / 28,8 (+0) |
+| V3 con (b), E2 d20, M 25, L sin piso, ambición | -131 (32) | -572 (52) | +440 (19) | 61,3 | 2,4 | 36,3 | 355 | -129 | -1830 | -21598 | 6,1 | 25,7 (+483) / 18,0 (+179) / 56,3 (-1293) / 0,0 / 0,0 | 67,4 (+690) / 13,4 (+117) / 19,2 (-212) / 0,0 / 0,0 |
+| V3 con (b), E3 k5, M 25, L sin piso | -123 (29) | -561 (45) | +443 (19) | 60,2 | 3,4 | 36,5 | 336 | -123 | -1673 | -6226 | 5,8 | 25,7 (+483) / 21,0 (+97) / 27,1 (-2602) / 0,0 / 26,2 (+0) | 67,4 (+690) / 2,0 (+82) / 1,8 (-1263) / 0,0 / 28,8 (+0) |
+| V3 con (b), E3 k5, M 25, L sin piso, ambición | -121 (29) | -555 (44) | +440 (20) | 59,2 | 1,2 | 39,5 | 341 | -120 | -1677 | -6226 | 6,7 | 25,7 (+483) / 42,4 (+95) / 31,9 (-2258) / 0,0 / 0,0 | 67,4 (+690) / 24,9 (+92) / 7,7 (-613) / 0,0 / 0,0 |
+| V2 (fase A), E0, M 25, L sin piso | -161 (49) | -866 (63) | +750 (35) | 57,8 | 4,0 | 38,1 | 517 | -160 | -2742 | -10875 | 6,0 | 25,7 (+860) / 7,4 (+149) / 40,1 (-2742) / 0,0 / 26,9 (+0) | 62,4 (+1282) / 0,0 / 4,4 (-1119) / 0,0 / 33,2 (+0) |
+| V2 (fase A), E0, M 25, L sin piso, ambición | -161 (49) | -866 (63) | +750 (35) | 57,8 | 4,0 | 38,1 | 517 | -160 | -2742 | -10875 | 6,0 | 25,7 (+860) / 7,4 (+149) / 66,9 (-1640) / 0,0 / 0,0 | 62,4 (+1282) / 0,0 / 37,6 (-132) / 0,0 / 0,0 |
+| V2 (fase A), E1, M 25, L sin piso | -91 (47) | -733 (67) | +740 (35) | 65,3 | 3,9 | 30,8 | 482 | -88 | -2837 | -31753 | 6,9 | 25,7 (+860) / 20,6 (+142) / 26,8 (-3664) / 0,0 / 26,9 (+0) | 62,4 (+1282) / 2,1 (+80) / 2,3 (-2629) / 0,0 / 33,2 (+0) |
+| V2 (fase A), E1, M 25, L sin piso, ambición | -95 (49) | -726 (67) | +720 (40) | 66,7 | 1,2 | 32,1 | 501 | -92 | -2923 | -31753 | 7,9 | 25,7 (+860) / 40,4 (+122) / 33,9 (-2940) / 0,0 / 0,0 | 62,4 (+1282) / 33,2 (+87) / 4,4 (-2467) / 0,0 / 0,0 |
+| V2 (fase A), E2 d20, M 25, L sin piso | -156 (48) | -853 (69) | +746 (35) | 60,5 | 4,0 | 35,5 | 526 | -155 | -2848 | -24357 | 6,2 | 25,7 (+860) / 11,9 (+163) / 35,5 (-3083) / 0,0 / 26,9 (+0) | 62,4 (+1282) / 0,8 (+87) / 3,7 (-1503) / 0,0 / 33,2 (+0) |
+| V2 (fase A), E2 d20, M 25, L sin piso, ambición | -155 (49) | -852 (71) | +746 (35) | 61,5 | 2,1 | 36,5 | 533 | -154 | -2859 | -24357 | 6,7 | 25,7 (+860) / 18,2 (+177) / 56,1 (-1972) / 0,0 / 0,0 | 62,4 (+1282) / 15,0 (+113) / 22,6 (-314) / 0,0 / 0,0 |
+| V2 (fase A), E3 k5, M 25, L sin piso | -161 (50) | -864 (67) | +749 (35) | 60,7 | 3,7 | 35,7 | 528 | -160 | -2812 | -10990 | 6,3 | 25,7 (+860) / 19,7 (+109) / 27,7 (-3988) / 0,0 / 26,9 (+0) | 62,4 (+1282) / 1,5 (+80) / 2,9 (-1803) / 0,0 / 33,2 (+0) |
+| V2 (fase A), E3 k5, M 25, L sin piso, ambición | -159 (49) | -857 (66) | +744 (35) | 60,6 | 1,0 | 38,4 | 532 | -158 | -2810 | -10921 | 7,2 | 25,7 (+860) / 41,7 (+100) / 32,6 (-3435) / 0,0 / 0,0 | 62,4 (+1282) / 27,6 (+91) / 10,0 (-809) / 0,0 / 0,0 |
+
+## Rondas en candado (24 combinaciones)
+
+Candado = grupos apuesta y recuperación. Razón = patrimonio propio / patrimonio del clon emulado, al cerrar el candado (al precio de ese tick) y al final de la ronda. D = propio - clon al final.
+
+| Combinación | En candado (% de las rondas) | En S | En B | Razón al cerrar, media (mín) | Razón al final, media (mín) | Terminan con D < 0 (% de las en candado) | D final media en candado |
+|---|---|---|---|---|---|---|---|
+| V1, E0, M 25, L sin piso | 5502 (45,9) | 2237 | 3265 | 1.1055 (1.0023) | 1.0660 (0.5675) | 26 (0,5) | +1046 |
+| V1, E0, M 25, L sin piso, ambición | 5502 (45,9) | 2237 | 3265 | 1.1055 (1.0023) | 1.0660 (0.5675) | 26 (0,5) | +1046 |
+| V1, E1, M 25, L sin piso | 6507 (54,2) | 3132 | 3375 | 1.0906 (1.0010) | 1.0567 (0.5675) | 297 (4,6) | +905 |
+| V1, E1, M 25, L sin piso, ambición | 9476 (79,0) | 4474 | 5002 | 1.0650 (1.0010) | 1.0405 (0.5675) | 1017 (10,7) | +651 |
+| V1, E2 d20, M 25, L sin piso | 5853 (48,8) | 2547 | 3306 | 1.0997 (1.0009) | 1.0625 (0.5675) | 131 (2,2) | +994 |
+| V1, E2 d20, M 25, L sin piso, ambición | 7026 (58,5) | 2974 | 4052 | 1.0844 (1.0009) | 1.0532 (0.5675) | 432 (6,1) | +852 |
+| V1, E3 k5, M 25, L sin piso | 6416 (53,5) | 3071 | 3345 | 1.0913 (1.0010) | 1.0572 (0.5675) | 333 (5,2) | +909 |
+| V1, E3 k5, M 25, L sin piso, ambición | 9271 (77,3) | 4562 | 4709 | 1.0657 (1.0010) | 1.0411 (0.5675) | 1029 (11,1) | +657 |
+| V3 con (b), E0, M 25, L sin piso | 5662 (47,2) | 2134 | 3528 | 1.0599 (1.0022) | 1.0369 (0.7677) | 9 (0,2) | +585 |
+| V3 con (b), E0, M 25, L sin piso, ambición | 5662 (47,2) | 2134 | 3528 | 1.0599 (1.0022) | 1.0369 (0.7677) | 9 (0,2) | +585 |
+| V3 con (b), E1, M 25, L sin piso | 6965 (58,0) | 3321 | 3644 | 1.0503 (1.0010) | 1.0310 (0.7677) | 348 (5,0) | +501 |
+| V3 con (b), E1, M 25, L sin piso, ambición | 9683 (80,7) | 4628 | 5055 | 1.0387 (1.0010) | 1.0237 (0.7600) | 1000 (10,3) | +387 |
+| V3 con (b), E2 d20, M 25, L sin piso | 6104 (50,9) | 2539 | 3565 | 1.0563 (1.0009) | 1.0348 (0.7677) | 126 (2,1) | +559 |
+| V3 con (b), E2 d20, M 25, L sin piso, ambición | 7186 (59,9) | 2957 | 4229 | 1.0489 (1.0009) | 1.0306 (0.7677) | 395 (5,5) | +497 |
+| V3 con (b), E3 k5, M 25, L sin piso | 6794 (56,6) | 3162 | 3632 | 1.0509 (1.0010) | 1.0314 (0.7677) | 360 (5,3) | +503 |
+| V3 con (b), E3 k5, M 25, L sin piso, ambición | 9439 (78,7) | 4612 | 4827 | 1.0389 (1.0010) | 1.0240 (0.7677) | 1008 (10,7) | +388 |
+| V2 (fase A), E0, M 25, L sin piso | 5502 (45,9) | 2237 | 3265 | 1.1055 (1.0023) | 1.0660 (0.5675) | 26 (0,5) | +1046 |
+| V2 (fase A), E0, M 25, L sin piso, ambición | 5502 (45,9) | 2237 | 3265 | 1.1055 (1.0023) | 1.0660 (0.5675) | 26 (0,5) | +1046 |
+| V2 (fase A), E1, M 25, L sin piso | 6507 (54,2) | 3132 | 3375 | 1.0906 (1.0010) | 1.0567 (0.5675) | 297 (4,6) | +905 |
+| V2 (fase A), E1, M 25, L sin piso, ambición | 9476 (79,0) | 4474 | 5002 | 1.0650 (1.0010) | 1.0405 (0.5675) | 1017 (10,7) | +651 |
+| V2 (fase A), E2 d20, M 25, L sin piso | 5853 (48,8) | 2547 | 3306 | 1.0997 (1.0009) | 1.0625 (0.5675) | 131 (2,2) | +994 |
+| V2 (fase A), E2 d20, M 25, L sin piso, ambición | 7026 (58,5) | 2974 | 4052 | 1.0844 (1.0009) | 1.0532 (0.5675) | 432 (6,1) | +852 |
+| V2 (fase A), E3 k5, M 25, L sin piso | 6416 (53,5) | 3071 | 3345 | 1.0913 (1.0010) | 1.0572 (0.5675) | 333 (5,2) | +909 |
+| V2 (fase A), E3 k5, M 25, L sin piso, ambición | 9271 (77,3) | 4562 | 4709 | 1.0657 (1.0010) | 1.0411 (0.5675) | 1029 (11,1) | +657 |

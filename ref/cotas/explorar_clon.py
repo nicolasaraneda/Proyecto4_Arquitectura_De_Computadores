@@ -157,7 +157,8 @@ def _mano(args):
     tr, n_idx = _T[sub]
     N = len(tr)
     if isinstance(x, tuple) and x[0] == "mem":
-        Wc, Wcl, Wr = x[1]
+        Wc, Wcl, Wr = x[1][:3]
+        umbral = x[1][3] if len(x[1]) > 3 else None   # parte 7: copia si la D acumulada ya es >= M
         S = []
         for t in tr:
             cum, own, copia = 0, 0, False
@@ -167,7 +168,7 @@ def _mano(args):
                 else:
                     own += Wc[i]
                     cum += Wc[i] - Wcl[i]
-                    copia = cum > 0
+                    copia = cum > 0 if umbral is None else cum >= umbral
             S.append(own - Wr[t[0]] - Wr[t[1]] - Wr[t[2]])
         x = Wc
     else:
