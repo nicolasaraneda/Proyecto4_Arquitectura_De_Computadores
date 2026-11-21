@@ -926,6 +926,7 @@ Código: `ref/cotas/v5.py` (rivales, fase A con opciones, máquina de modos desd
 9. **Caben en la placa** (estimación, no programa escrito): 1024 de los 1536 bytes libres, ninguna celda, y unos 760 ciclos de 1131 en el camino de respuesta si la cuenta propia va en un hilo aparte del clon (15.10).
 10. **No sirvieron:** niveles propios en la fase D (plano), audacia al final (-0,6 a -7,1), frenos y pisos (bajan el índice o no lo mueven), bandas propias como motor, entrada cerca del piso y del techo (E3), cobertura con mezclas de bandas, motor con objetivo lineal. Cifras en 15.7.
 11. **No se corrió** la programación dinámica con objetivo relativo (arista 5). Queda formulada, con su costo y con la cota de lo que podría agregar (15.11).
+12. **Examen de C1 en las cinco empresas (21/11, después de la decisión de Nicolás; 15.14).** Con el criterio que él fijó para el examen (g de C1 al menos 20 puntos sobre la banda 40 y nd a lo más 8 puntos debajo), C1 cumple los dos puntos: g 81,8 contra 45,7 (+36,1, ee 2,4) y nd 83,3 contra 90,4 (-7,1, ee 2,5). El segundo se cumple por 0,9 puntos, menos que su error estándar.
 
 ### 15.1 Índice, rivales y errores estándar
 
@@ -1266,7 +1267,7 @@ Dos cosas que sí cambiaría si la decisión fuera otra:
 - **Si quedar primero solo vale algo** (λ sobre 0,1), o si se espera un campo con varias bandas distintas a la vez, el candidato es C3 o C1 según cuánto, y en ningún caso V4b: C1 la reemplaza con ventaja en todo lo medido. En un campo de 8 rivales sorteados con el pronóstico, C1 queda primera sola en 56 % de los torneos, C3 en 40 % y la banda 40 sola en 6 %.
 - **La banda 30 merece una decisión aparte.** Es la única opción que mejora "no queda debajo" y cuesta dos constantes. No la recomiendo todavía porque pierde en media y en déficit ponderado, porque en unidades de la nota no supera a la banda 40 (de -0,002 a -0,013 según el campo), y porque su ventaja depende de que el pronóstico acierte en que el mejor rival es extremos o Fila 5 y no una banda más angosta. Si Nicolás confía en ese pronóstico más que en la media, es la primera que conviene examinar en las cinco empresas.
 
-El examen en las cinco empresas no se hizo. Lo decide Nicolás.
+Al cerrar esta parte el examen en las cinco empresas no estaba hecho. Se hizo después, con la decisión de Nicolás ya tomada (C1 como candidato y la banda 40 sola como respaldo): está en 15.14.
 
 ### 15.13 Comandos
 
@@ -1290,3 +1291,105 @@ Dependencias: las tablas de la sección 13 (`paseo_optimo.politicas()`), la mues
 | Puntaje esperado bajo el pronóstico | `python3 ref/cotas/v5_puntaje.py` | `v5_puntaje.txt` |
 | Cobertura con mezclas | `python3 ref/cotas/v5_mezclas.py` | `v5_mezclas.txt` |
 | Cuándo cierra candado el motor (por caso, clase y tiempo) | `python3 ref/cotas/v5_diag.py` | `v5_diag.txt` |
+| Examen de C1 y la banda 40 sola en las cinco empresas (15.14; una sola corrida, unos 65 segundos) | `python3 ref/cotas/v5_examen.py` | `c1_examen.txt` |
+| Ensayo del guion del examen en las otras acciones (repite las cifras de `v5_finalistas.txt`) | `python3 ref/cotas/v5_examen.py --ensayo` | `build/clon/c1_examen_ensayo.txt` |
+
+### 15.14 Examen de C1 en las cinco empresas (21/11)
+
+**Decisión de Nicolás, tomada antes del examen:** el candidato es C1 (apuesta en la fase A solo con probabilidad de 0,95 o más de que el 255 llegue antes que el 100, motor V2 comprimido desde el primer extremo, candado copiar con M 100) y la banda 40 sola queda como respaldo. El examen compara solo esas dos.
+
+**Criterio fijado de antemano por Nicolás**, sobre las cifras ponderadas de todas las ventanas:
+
+1. g de C1 mayor o igual que g de la banda 40 más 20 puntos.
+2. nd de C1 mayor o igual que nd de la banda 40 menos 8 puntos.
+
+Si fallaba cualquiera de los dos, competía la banda 40, sin buscar variantes.
+
+**Qué se corrió.** Una sola corrida de `ref/cotas/v5_examen.py` con el código congelado de V5 (`v5.py` y `explorar_v5.py` del commit `6c063e0`, sin cambios): el mismo precálculo, la misma simulación tick a tick, el mismo índice y los mismos errores estándar. No se ajustó ni se eligió nada con estos datos. **Es la tercera mirada a las cinco empresas**: la primera fue el examen del módulo A (sección 12) y la segunda el de la política óptima (sección 13). Salida completa: `docs/mediciones/exploracion/c1_examen.txt`.
+
+- Conjunto: Meta, Apple, Netflix, AMD y Tesla, ventanas que empiezan en 2022, 2023 y 2024. Es la muestra estratificada vigente de las cinco (240 ventanas por empresa y año de inicio, semilla 18, 3600 ventanas), la misma de los filtros de las secciones 12 y 13.
+- Rivales y pesos: extremos puros 30 %, regla de Fila 5 30 %, bandas 30, 50 y 60 con 10 % cada una y banda 40 exacta 10 %.
+- Torneos de 3 rondas: 200 000 sorteos en todas las ventanas y 60 000 dentro de cada subconjunto (caso, año de inicio, empresa).
+- Errores estándar agrupados por fecha y empresa, con diferencias pareadas. Aquí hay 36 bloques de 20 días, 12 de 60 días y 5 empresas: con tan pocos grupos el ee es aproximado.
+
+Dos elecciones mías, hechas antes de correr:
+
+- **Muestra y no población completa.** Los dos exámenes anteriores usaron las 1 368 253 ventanas. El banco de V5 simula tick a tick en Python y guarda el precálculo de todas las ventanas en memoria, y el ee del índice necesita muchas apariciones de cada ventana en los sorteos (aquí, unas 167). Con la población completa habría que cambiar el código congelado. Las ventanas vecinas comparten casi todos sus minutos, así que lo que limita la precisión son los grupos de fecha y empresa, no la cantidad de ventanas.
+- **Prueba del guion antes de la corrida.** El mismo guion sobre las otras acciones (`--ensayo`) repite las cifras de `v5_finalistas.txt`: banda 40 sola 87,9 (0,5) y 45,5 (0,6), C1 83,0 (0,7) y 81,9 (0,7), y las mismas tablas por rival, año y grupo. Solo después se corrió en las cinco.
+
+**Controles, verificados antes de calcular el índice. Todos en cero.**
+
+| Control | Resultado |
+|---|---|
+| Todo apagado (sin fase A, sin motor) contra la banda 40, patrimonio | 0 ventanas distintas de 3600 |
+| Todo apagado, byte a byte contra la banda 40 desde el primer extremo | 0 bytes distintos en 120 ventanas |
+| C1 (`v5.fase_a` y `v5.post`) contra la segunda implementación (`v5.V5Ref` en `ideas.correr`, tick a tick) | 0 diferencias en patrimonio u órdenes en 120 ventanas |
+| Rivales b40, b60 y f5 en Python contra la caché en C de la misma muestra | 0 ventanas distintas de 3600 en cada uno |
+
+**El criterio, punto por punto.**
+
+| Punto | Banda 40 sola | C1 | Umbral | Diferencia pareada (ee) | Margen | Resultado |
+|---|---|---|---|---|---|---|
+| 1. g de C1 >= g de la banda 40 + 20 | 45,7 (2,1) | 81,8 (2,5) | 65,7 | +36,1 (2,4) | +16,1 | **se cumple** |
+| 2. nd de C1 >= nd de la banda 40 - 8 | 90,4 (0,8) | 83,3 (2,3) | 82,4 | -7,1 (2,5) | +0,9 | **se cumple** |
+
+**C1 cumple los dos puntos.** El primero con holgura (más de 6 ee sobre el umbral). El segundo por 0,9 puntos, que es menos de medio error estándar: con esta muestra no se distingue una caída de 7,1 de una de 8. El criterio se fijó sobre las cifras medidas, y con las cifras medidas se cumple.
+
+**Contra cada rival y ponderado, todas las ventanas.** Δ media es la diferencia de patrimonio por ronda contra el rival; déficit, la media de lo que queda debajo; p5 y peor, sobre la diferencia de promedio del torneo. En la fila ponderada, p5 y peor son los de la mezcla de rivales.
+
+| Estrategia | Rival | Δ media (ee) | nd % (ee) | g % (ee) | Déficit (ee) | p5 | Peor |
+|---|---|---|---|---|---|---|---|
+| Banda 40 sola | ext | +770 (189) | 90,3 (1,4) | 31,5 (4,4) | 71 (16) | -557 | -4 134 |
+| Banda 40 sola | f5 | +2 459 (233) | 97,6 (0,9) | 93,5 (3,0) | 9 (4) | 0 | -3 109 |
+| Banda 40 sola | b30 | +92 (122) | 73,5 (3,5) | 13,2 (2,8) | 194 (37) | -1 157 | -6 210 |
+| Banda 40 sola | b50 | +109 (94) | 88,1 (3,3) | 34,1 (3,8) | 168 (54) | -1 243 | -9 012 |
+| Banda 40 sola | b60 | +213 (166) | 78,4 (4,2) | 34,3 (4,1) | 282 (71) | -1 848 | -10 175 |
+| Banda 40 sola | b40 | 0 | 100,0 | 0,0 | 0 | 0 | 0 |
+| Banda 40 sola | **ponderado** | +1 010 (133) | **90,4 (0,8)** | **45,7 (2,1)** | 89 (10) | -579 | -10 175 |
+| C1 | ext | +922 (222) | 80,1 (2,9) | 78,0 (3,3) | 117 (24) | -904 | -5 735 |
+| C1 | f5 | +2 611 (233) | 98,3 (0,5) | 98,2 (0,6) | 9 (3) | +351 | -4 791 |
+| C1 | b30 | +244 (140) | 66,9 (3,2) | 64,5 (3,5) | 201 (33) | -1 155 | -8 407 |
+| C1 | b50 | +261 (130) | 77,0 (4,5) | 75,0 (4,8) | 208 (50) | -1 457 | -8 712 |
+| C1 | b60 | +365 (204) | 70,3 (4,4) | 68,5 (4,7) | 299 (64) | -1 762 | -9 974 |
+| C1 | b40 | +152 (52) | 83,4 (3,4) | 80,8 (3,8) | 78 (32) | -683 | -5 957 |
+| C1 | **ponderado** | +1 162 (144) | **83,3 (2,3)** | **81,8 (2,5)** | 117 (22) | -871 | -9 974 |
+
+C1 menos la banda 40 sola, pareada. La diferencia media por ronda es +152 (ee 52), la misma contra cualquier rival.
+
+| Rival | Δnd (ee) | Δg (ee) | Δ déficit (ee) |
+|---|---|---|---|
+| ext | -10,2 (3,3) | +46,5 (4,1) | +46 (28) |
+| f5 | +0,7 (0,6) | +4,7 (2,5) | 0 (4) |
+| b30 | -6,7 (3,6) | +51,3 (3,3) | +7 (36) |
+| b50 | -11,2 (3,3) | +40,9 (3,4) | +40 (29) |
+| b60 | -8,0 (3,1) | +34,2 (3,4) | +18 (29) |
+| b40 | -16,6 (3,4) | +80,8 (3,8) | +78 (32) |
+| **ponderado** | **-7,1 (2,5)** | **+36,1 (2,4)** | +28 (22) |
+
+**Por caso, por año de inicio y por empresa (ponderado).** Los torneos de cada fila se sortean dentro del subconjunto. Las dos últimas columnas aplican los umbrales del criterio a cada fila solo como lectura: el criterio se evalúa en todas las ventanas.
+
+| Subconjunto | Ventanas | Banda 40: nd / g | C1: nd / g | Δnd (ee) | Δg (ee) | Déficit: banda 40 / C1 | Δ por ronda (ee) | Punto 1 | Punto 2 |
+|---|---|---|---|---|---|---|---|---|---|
+| Todas | 3600 | 90,4 / 45,7 | 83,3 / 81,8 | -7,1 (2,5) | +36,1 (2,4) | 89 / 117 | +154 (52) | sí | sí |
+| Caso S | 2101 | 92,7 / 45,1 | 74,6 / 71,1 | -18,1 (3,1) | +26,0 (3,4) | 82 / 159 | -44 (55) | sí | no |
+| Caso B | 1499 | 82,7 / 27,6 | 88,9 / 88,3 | +6,3 (2,3) | +60,7 (5,9) | 112 / 79 | +431 (62) | sí | sí |
+| Inicio en 2022 | 1200 | 88,8 / 44,1 | 85,6 / 84,4 | -3,3 (2,9) | +40,3 (4,5) | 102 / 98 | +215 (71) | sí | sí |
+| Inicio en 2023 | 1200 | 91,3 / 43,9 | 82,5 / 80,2 | -8,8 (4,7) | +36,3 (3,6) | 93 / 114 | +120 (70) | sí | no |
+| Inicio en 2024 | 1200 | 90,8 / 48,0 | 81,2 / 79,8 | -9,6 (3,4) | +31,9 (4,4) | 73 / 137 | +126 (100) | sí | no |
+| META | 720 | 91,3 / 51,2 | 82,8 / 81,1 | -8,6 (3,9) | +29,9 (4,7) | 74 / 93 | +208 (75) | sí | no |
+| AAPL | 720 | 90,0 / 48,9 | 83,8 / 82,1 | -6,2 (3,9) | +33,1 (5,1) | 92 / 97 | +165 (58) | sí | sí |
+| NFLX | 720 | 91,3 / 36,7 | 73,1 / 70,9 | -18,2 (6,0) | +34,2 (5,6) | 94 / 234 | -91 (130) | sí | no |
+| AMD | 720 | 87,3 / 45,3 | 86,5 / 85,4 | -0,8 (2,4) | +40,1 (5,8) | 115 / 100 | +264 (68) | sí | sí |
+| TSLA | 720 | 91,6 / 44,0 | 88,6 / 87,5 | -3,1 (2,8) | +43,5 (5,1) | 74 / 74 | +222 (65) | sí | sí |
+
+Mecánica de C1 por ronda: en el caso S (58,4 % de las ventanas) el motor cierra candado en 50,6 % de las rondas (D media +221) y queda sin recuperar en 49,4 % (-316); en el caso B, 55,2 % cierra con la apuesta (+706), 35,3 % con el motor (+221) y 9,5 % queda sin recuperar (-391). Por ronda C1 queda sobre la banda 40 en 66,8 % de las ventanas, igual en 10,3 % y debajo en 22,8 %.
+
+**Lectura.**
+
+- **Lo que se repite respecto de las otras acciones.** El intercambio es el mismo: g +36,1 (ee 2,4) aquí contra +36,4 (1,0) en las ajenas, diferencia media +152 (52) contra +151 (20), déficit ponderado +28 (22) contra +31 (8). El punto 1 se cumple en los diez subconjuntos.
+- **Lo que sale peor.** La caída de nd es mayor: -7,1 (2,5) contra -5,0 (0,8). No porque C1 baje (83,3 contra 83,0), sino porque la banda 40 sola sube en las cinco (90,4 contra 87,9). La diferencia entre los dos conjuntos, 2,1 puntos, está dentro de un error estándar.
+- **Dónde está el costo.** En el caso S: nd -18,1 (ee 3,1) y, por ronda, -44 (55). En el caso B, C1 gana en las dos cifras (+6,3 y +60,7) y +431 por ronda. Aquí el motor recupera menos en el caso S que en las ajenas: cierra candado en 50,6 % de las rondas S contra 63,7 %.
+- **Subconjuntos que no pasarían el punto 2 por sí solos:** caso S, inicio en 2023 y en 2024, Meta y Netflix. Netflix es el peor: nd -18,2 (ee 6,0), déficit 234 contra 94 y -91 por ronda; tiene 71 % de casos S. Las ventanas que empiezan en 2023 y 2024 tienen 65 % de casos S, contra 44 % en 2022. Es la misma dependencia de la mezcla de casos que se vio en 13.8.
+- **Déficit y cola.** El déficit ponderado sube de 89 a 117 (+28, ee 22) y el p5 de la mezcla baja de -579 a -871. El peor torneo es parecido (-9 974 contra -10 175).
+
+**Lo que este examen no mide.** C1 sigue siendo una referencia en Python: no hay programa de placa escrito ni medido (15.10 es un conteo), y su ventaja depende de llevar dos cuentas exactas con caja 10 000 y comisión 5. El pronóstico de rivales y sus pesos son un supuesto: contra el clon exacto de la banda 40 C1 queda debajo en 16,6 % de los torneos, y contra extremos, en 19,9 % contra 9,7 % de la banda 40 sola.

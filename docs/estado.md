@@ -18,10 +18,11 @@ Rama `minutos-reales`. Sección 15 de `docs/exploracion_ideas.md`; bitácora `do
 | 7b. Campo con varios rivales | Campos sorteados de 1 a 8 rivales con los pesos del pronóstico: la banda 40 sola es la que más queda arriba (60,7 % con 8) pero casi nunca sola (6,3 %); C1 57,6 % y 56,0 % sola; la diferencia de nota de C1 va de -0,006 a cero. Con las seis reglas a la vez, C1 +0,0045 (ee 0,0028) | 15.5; `v5_puntaje.txt` |
 | 8. Criterio | No se cumple: ningún candidato supera a la banda 40 en las dos cifras y los tres pierden contra extremos más torneos que el tope | 15.9 |
 | 9. Cabida | 1024 de 1536 bytes, 0 celdas, unos 760 ciclos de 1131 con la cuenta propia en un hilo aparte (conteo, no programa) | 15.10 |
+| 10. Examen de C1 en las cinco empresas (21/11) | Decisión de Nicolás: candidato C1, respaldo la banda 40 sola. Una corrida con el código congelado, tercera mirada a las cinco, controles en 0. Banda 40 sola: nd 90,4 (0,8), g 45,7 (2,1). C1: nd 83,3 (2,3), g 81,8 (2,5). Criterio de Nicolás: punto 1 (g +20) se cumple con +36,1 (ee 2,4); punto 2 (nd -8) se cumple con -7,1 (ee 2,5), por 0,9 puntos. El costo está en el caso S (-18,1 de nd) y en Netflix (-18,2) | 15.14; `c1_examen.txt` |
 
-**Qué falta.** La decisión de Nicolás entre las opciones de 15.12 (recomendación etiquetada: banda 40 sola). El examen en las cinco empresas no se hizo. La programación dinámica con objetivo relativo no se corrió (15.11). Redactar la sección 14.
+**Qué falta.** C1 pasó el examen con el criterio fijado, pero sigue siendo una referencia en Python: no hay programa de placa (cuatro hilos, dos cuentas, 1024 bytes de tablas y candado), ni referencia exacta para `make equiv`, ni puertas. El corte del diseño es el 22/11 a medianoche. La programación dinámica con objetivo relativo no se corrió (15.11). Redactar la sección 14.
 
-**Qué conviene atacar después y por qué.** Si se quiere mirar algo más antes del corte del 22/11, la banda 30 sola en las cinco empresas con este índice: es la única opción que mejora "no queda debajo", cuesta dos constantes y su ventaja depende del pronóstico. Si no, seguir con las puertas de R0, R1 y R2 con la banda 40.
+**Qué conviene atacar después y por qué.** Decidir primero si C1 alcanza a llegar a la placa antes del corte: lo que no se ha medido es el tamaño del programa y el camino de respuesta real con el sondeo entre hilos (15.10). Mientras tanto, las puertas de R0, R1 y R2 con la banda 40 siguen siendo el respaldo y no dependen de esto.
 
 ## Tramo 22: política óptima del paseo normalizado (19 y 20/11)
 

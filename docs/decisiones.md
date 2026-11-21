@@ -828,3 +828,10 @@ Las decisiones T87 a T99 son del paquete P6 de R1 y R2 y las T100 a T119 del paq
 - **Margen por deslizamiento fuera de C1:** suma +0,5 / +0,9 pero sube el déficit contra la banda 40 de 111 a 148; queda como ajuste opcional.
 - **Programación dinámica relativa no corrida:** costo alto en Python puro y ganancia acotada (a lo más 4,9 de nd y 6 de g sobre C1, sin pasar a la banda 40). Quedó formulada.
 - **Resultado:** ningún candidato cumple el criterio. C1 domina a V4b. La banda 40 sola es la mejor en déficit ponderado y en nota esperada; la banda 30 sola, en "no queda debajo". La regla de los peldaños no se cambió.
+
+### T142. Examen de C1 en las cinco empresas (21/11)
+
+- **Decisión de Nicolás:** el candidato es C1 (apuesta en la fase A solo con probabilidad de 0,95 o más de que el 255 llegue antes que el 100, motor V2 comprimido desde el primer extremo, candado copiar con M 100), con la banda 40 sola como respaldo. Criterio fijado por él antes del examen, sobre las cifras ponderadas: g de C1 al menos 20 puntos sobre la banda 40 y nd a lo más 8 puntos debajo; si falla cualquiera, compite la banda 40.
+- **Conjunto: la muestra estratificada vigente de las cinco (3600 ventanas) y no la población completa.** Alternativa: las 1 368 253 ventanas de los dos exámenes anteriores. Se perdió la comparación directa con esos exámenes; se ganó no tocar el código congelado de V5 (precálculo en memoria, sorteos con unas 167 apariciones por ventana para el ee). La precisión la limitan los grupos de fecha y empresa (12 bloques de 60 días y 5 empresas), no la cantidad de ventanas.
+- **Subconjuntos con sorteos propios** (60 000 torneos dentro de cada caso, año de inicio y empresa), como en `v5_finalistas.txt`. En la fila ponderada, p5 y peor caso son los de la mezcla de rivales con los pesos del pronóstico.
+- **Resultado:** controles en 0. Punto 1 se cumple (+36,1, ee 2,4, contra +20). Punto 2 se cumple (-7,1, ee 2,5, contra -8): por 0,9 puntos, menos de medio error estándar. No se buscó ninguna variante. Sección 15.14 de `docs/exploracion_ideas.md`.

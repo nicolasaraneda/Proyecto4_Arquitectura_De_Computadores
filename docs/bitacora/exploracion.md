@@ -206,3 +206,15 @@ Pedido de Nicolás: la mejor estrategia contra el campo que espera (60 % extremo
 15. **Corrida prematura cortada.** Lancé la repetición completa antes de terminar de tocar `v5.py` y la corté por PID. Después de congelar el código se repitieron todas las etapas (`ref/cotas/v5_todo.sh`).
 16. **Commits.** El trabajo pendiente de la parte 7 (V4 y V4b) quedó en su propio commit, `6a2fc71`, antes de tocar la bitácora. V5 va en el siguiente.
 17. **Criterio:** ningún candidato lo cumple. Sección 15 de `docs/exploracion_ideas.md` con las opciones y la recomendación etiquetada. El examen en las cinco empresas no se hizo: lo decide Nicolás.
+
+### Examen de C1 en las cinco empresas (21/11)
+
+Decisión de Nicolás: el candidato es C1 y la banda 40 sola es el respaldo. Pedido: examen en las cinco empresas, una sola corrida con el código congelado de V5, solo C1 y la banda 40 sola, con el criterio fijado por él (g de C1 >= g de la banda 40 + 20; nd de C1 >= nd de la banda 40 - 8). Tercera mirada a las cinco.
+
+1. **Guion** (`ref/cotas/v5_examen.py`). No toca `v5.py` ni `explorar_v5.py`: usa su precálculo, `evaluar`, `indices` y `dif`. Lo propio: el conjunto, los subconjuntos (caso, año de inicio, empresa), el déficit por rival con su ee, el p5 y el peor de la mezcla de rivales, y el informe. La clave de caché de las variantes de `explorar_v5` no incluye el conjunto, así que las cinco van a una caché aparte (`build/cotas/v5_cinco`).
+2. **Conjunto, fijado antes de correr:** la muestra estratificada vigente de las cinco (`explorar_regimen.cargar("cinco")`, 3600 ventanas, 240 por empresa y año de inicio, semilla 18) y no la población completa, que obligaría a cambiar el código congelado (precálculo en memoria y sorteos por ventana).
+3. **Ensayo en las otras acciones** (`--ensayo`, 19 s, todo desde la caché): repite `v5_finalistas.txt` (banda 40 sola 87,9 / 45,5; C1 83,0 / 81,9; mismas cifras por rival, año y grupo). El déficit por rival calculado aparte coincide con el del índice (comprobación dentro del guion).
+4. **Corrida única** (01:10 a 01:11, 65 s). Controles en 0: todo apagado contra la banda 40 (3600 ventanas en patrimonio, 120 byte a byte), C1 contra `v5.V5Ref` en 120 ventanas, y los rivales b40, b60 y f5 en Python contra la caché en C de la misma muestra.
+5. **Resultado** (`c1_examen.txt`). Banda 40 sola: nd 90,4 (0,8), g 45,7 (2,1). C1: nd 83,3 (2,3), g 81,8 (2,5). Pareadas: Δg +36,1 (2,4) y Δnd -7,1 (2,5). Punto 1: se cumple, margen +16,1. Punto 2: se cumple, margen +0,9 (menos de medio ee). Diferencia media por ronda +152 (52); déficit ponderado 117 contra 89 (+28, ee 22).
+6. **Por subconjunto.** Caso S: Δnd -18,1 (3,1), -44 (55) por ronda. Caso B: +6,3 (2,3), +431 (62). No pasarían el punto 2 por sí solos: caso S, inicio en 2023 y 2024, Meta y Netflix (el peor: -18,2, ee 6,0, con 71 % de casos S).
+7. **Cierre.** Sección 15.14 de `docs/exploracion_ideas.md`, estado (tramo 23, paso 10) y T142. No se buscó ninguna variante.
