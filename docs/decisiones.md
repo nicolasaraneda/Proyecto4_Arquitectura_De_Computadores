@@ -779,3 +779,23 @@ Las decisiones T87 a T99 son del paquete P6 de R1 y R2 y las T100 a T119 del paq
 - **Paso como constante.** Pedido de Nicolás: el paso queda como una constante fácil de cambiar, para autopruebas con pasos más chicos que ejerciten otras volatilidades. Es `PASO` al comienzo de `tools/autoprueba.py` (o `--paso N`, con `--semilla` y `--piso`), que alimenta el RTL, la síntesis, el gemelo y la referencia. Con valores distintos de los de competencia, los productos van a carpetas y registros con sufijo (`_pasoN_sSEMILLA`). Con pasos chicos la caminata puede no tocar los extremos en 2000 ticks (con 2 y la semilla 0xE3AA llega a 198); el informe de la firma lo avisa, y habrá que elegir otra semilla.
 - **Control negativo** de la autoprueba: la banda 60 (en R0 en el programa, en R1 y R2 en la tabla), que tiene que terminar en LED4.
 - **Lo que se pierde**: las firmas del 16/11 (`a23c` y `15d7`) ya no sirven de comparación; la prueba en placa de las autopruebas se repite desde cero.
+
+### T150. C1 como cuarto peldaño (R3): diseño del borrador (21/11)
+
+- **Encargo de Nicolás** (21/11): implementar C1 de la exploración (rama `minutos-reales`, sección 15) como R3 sobre el barrel con vigilante, en la rama `c1`, sin tocar R0, R1 ni R2. No decide cuál compite. La numeración salta a T150 porque la rama `minutos-reales` usa T140 a T142 para otras decisiones.
+- **Decisiones técnicas mías, siguiendo el encargo** (`docs/c1_plan.md`):
+  - Reparto: hilo 0 corredor, hilo 1 régimen y reloj, hilo 2 tablas, hilo 3 emulador (las dos cuentas, D, modos y byte de la política). Alternativa: la cuenta del clon en el hilo 2, en paralelo con la propia; acorta el camino de la respuesta, pero el encargo pide el emulador en un solo hilo y el camino ya cabe (71 %).
+  - Una sola rutina voraz ejecuta compras y ventas con los múltiplos de p; el producto de D va por los bits de p. Alternativa: llevar D de forma incremental con la diferencia de precio; ahorra unas 8 palabras y complica el código.
+  - Formato de la tabla: dos niveles por palabra de 16 bits, leídos con `lbu`. Las celdas quedan en 640 bytes porque dos de los cuatro umbrales del motor nunca se usan.
+  - Parámetros de la contabilidad (caja, comisión, M, largo de la ronda, plazo) como palabras de datos del programa y no en la tabla. Se pierde cambiarlos con solo la tabla; se cambian generando el programa, que también entra por `icebram`.
+  - Modo seguro: precio menor que 100, ronda de más de 20 000 ticks, o política más vieja que el tick anterior con el plazo vencido. Es para siempre. Alternativa: volver a confiar en el hilo cuando reaparece; se descartó porque una cuenta que se saltó un tick ya no es exacta.
+  - Regla del tick anterior: con el plazo vencido y la política del tick anterior, se sostiene una orden completa y una parcial se cambia por mantener. Alternativa: usar la banda 40 en ese tick; vende o compra 63 por un atraso de un tick.
+  - Telemetría: el patrimonio propio emulado en los 7 segmentos, en hexadecimal, con los interruptores 1 y 2 eligiendo el byte. Sin celdas.
+- **Lo medido**: la referencia entera da los mismos bytes que el C1 de la exploración en 2400 ventanas; el borrador da los mismos bytes y el mismo estado que la referencia en la serie Meta y en 40 ventanas reales por el RTL.
+
+### T151. Pendiente de Nicolás: R3 necesita la tabla de 512 palabras y el programa ocupa el 94 % (21/11)
+
+- **Hecho**: C1 no cabe en el hardware de R2. Necesita la tabla de 512 palabras (`rtl/pochoco_tabla512.v`, `-DESPINO_TABLA_512`: 1 bloque y 23 celdas más; 10 de 10 semillas a 25 MHz, mínima 48,41 MHz) y el programa ocupa 482 de 512 palabras. El encargo pide detenerse en los dos casos.
+- **Opciones** (`docs/c1_plan.md`, sección 10): A, seguir con el borrador; B, seguir con el programa recortado (89 % de memoria, menos margen de tiempo); C, no construir R3. Mi recomendación es A, y dejo dicho que elegir entre A y C no es una cuestión técnica.
+- **Qué no cambia**: sin la definición nueva el SoC es el mismo texto. R0 y R2 sintetizados antes y después dan el mismo `.asc`.
+

@@ -2,6 +2,25 @@
 
 Se actualiza al cerrar cada tramo de trabajo. La versión anterior queda en el historial de git.
 
+## Tramo 18: C1 como cuarto peldaño, R3 (21/11, rama `c1`). Detenido en el plan, con una decisión pendiente
+
+**Qué quedó hecho.** El plan (`docs/c1_plan.md`), las tablas generadas desde el modelo, la referencia entera y un borrador del programa de cuatro hilos que ya corre en el RTL. R0, R1 y R2 no se tocaron: el cambio de RTL está bajo una definición nueva y sus `.asc` salen idénticos. Bitácora: `docs/bitacora/c1.md`. Decisiones T150 y T151.
+
+**Qué se midió.**
+
+| Paso | Resultado | Dónde |
+|------|-----------|-------|
+| Tablas desde el modelo del paseo normalizado | 0 celdas distintas contra las de la exploración; 640 bytes de celdas | `ref/c1/tablas.py`, `sw/c1_tabla.hex` |
+| Referencia entera contra el C1 de la exploración | 2400 ventanas, 48 millones de bytes: 0 diferencias en bytes, órdenes, patrimonio y D. Política apagada: igual a la banda 40 de R2 | `docs/mediciones/c1/contra_exploracion.txt` |
+| Borrador contra la referencia por el RTL, a 0,1 ms | Serie Meta: 20 000 bytes y estados idénticos, 22 682 (la banda 40 da 21 392). 40 ventanas reales: 40 de 40 idénticas | `docs/mediciones/c1/meta_ticks.txt`, `lote40.txt` |
+| Respuesta | 799 ciclos en el peor tick medido (71 % de 1131); 907 con el plazo vencido | los mismos |
+| Hardware de R3 | 1038 celdas, 14 bloques, 48,41 MHz la mínima, 10 de 10 semillas | `docs/mediciones/c1/timing.txt` |
+| Memoria del programa | 482 de 512 palabras (94,1 %) | `docs/c1_plan.md`, sección 5 |
+
+**Qué falta.** La decisión de Nicolás (T151): el encargo pedía detenerse si algo pasaba del 85 % de su presupuesto o exigía cambiar hardware, y pasan las dos cosas (memoria del programa al 94 % y tabla de 512 palabras). Con la decisión: las puertas del paso 5, el gemelo con la tabla nueva, los bitstreams y la integración local (`docs/c1_plan.md`, sección 11). No se corrió ninguna puerta.
+
+**Qué conviene después.** Decidir T151 pronto: si R3 va a la maestra el 26/11, su hardware tiene que estar etiquetado el 25/11 y antes pasar la puerta de simulación completa. Si la respuesta es no, la rama queda como experimento documentado y no hay nada que deshacer.
+
 ## Tramo 17: regla base con banda 40 en R0, R1 y R2 (19 y 20/11, rama `banda-40`)
 
 **Qué quedó hecho.** La regla de cotas pasa de banda 60 (compra con 160 o menos, vende con 195 o más) a banda 40 (140 y 215), con todo lo demás igual (T140). El hardware no cambió: en R0 cambian dos inmediatos de `sw/trade.s`, y en R1 y R2 dos palabras de la tabla en BRAM (el binario de `sw/fondo.s` es el mismo). La autoprueba manda ahora una caminata entre 100 y 255 con pasos de 4 (T141), con `PASO`, `PISO` y `SEMILLA` como constantes de `tools/autoprueba.py` para probar otras volatilidades. Bitácora: `docs/bitacora/banda40.md`.
