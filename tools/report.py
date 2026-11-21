@@ -40,10 +40,21 @@ RAIZ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SERIE_PRACTICA = "data/practica_meta.csv"
 sys.path.insert(0, os.path.join(RAIZ, "ref"))
 
+import importlib.util  # noqa: E402
+
 import fondo     # noqa: E402
 import market    # noqa: E402
 import series    # noqa: E402
 import trader    # noqa: E402
+
+
+def _normalizar():
+    """La normalización del profesor (mínimo 100, máximo 255) de ref/cotas/comun.py. Se carga por
+    ruta porque el módulo ref/cotas.py ocupa el nombre del paquete ref/cotas/."""
+    spec = importlib.util.spec_from_file_location("cotas_comun", os.path.join(RAIZ, "ref", "cotas", "comun.py"))
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod.normalizar
 
 G = "informe/generado"
 M = "docs/mediciones"
@@ -126,7 +137,7 @@ def estrategia(peldano):
 def punto_31(c, peldano):
     practica = market.leer_serie(os.path.join(RAIZ, SERIE_PRACTICA))
     nuevo = estrategia(peldano)
-    nombre = "\\texttt{max\\_media}" if peldano == "r0" else "fondo en un chip"
+    nombre = "regla de cotas, banda 40"
     filas = []
     for etiqueta, n, per in (("20\\,000 ticks", 20000, None), ("2\\,000 ticks, testbench", 2000, 100000)):
         p = practica[:n]
@@ -134,7 +145,7 @@ def punto_31(c, peldano):
         mc = comprar_y_mantener(p)
         cym = mc.w
         candidatos = [("No operar", None), ("Comprar y mantener", "cym"),
-                      ("Regla base del grupo (hasta el 15/11)", lambda: trader.ReglaBase()),
+                      ("Regla base (media exponencial)", lambda: trader.ReglaBase()),
                       (f"Nuestro algoritmo ({nombre})", nuevo)]
         for nom, est in candidatos:
             if est is None:
@@ -147,6 +158,10 @@ def punto_31(c, peldano):
                 fila = [nom, num(m.w), num(m.ordenes), num(m.comisiones), num(m.max_dd)]
                 if nom.startswith("Nuestro"):
                     sufijo = "Veinte" if n == 20000 else "Dos"
+                    # la misma regla con la banda de 60, la que compitió del 17 al 19/11 (T133)
+                    import regla_cotas   # noqa: E402
+                    b60 = market.simular(p, trader.decisiones(p, regla_cotas.Cotas("espera", banda=60), perd))
+                    c[f"PatrimonioBandaSesenta{sufijo}"] = num(b60.w)
                     c[f"Patrimonio{sufijo}"] = num(m.w)
                     c[f"Ordenes{sufijo}"] = num(m.ordenes)
                     c[f"Comisiones{sufijo}"] = num(m.comisiones)
@@ -163,14 +178,18 @@ def punto_31(c, peldano):
     tabla(os.path.join(RAIZ, G, "t31.tex"), ["Estrategia", "Patrimonio", "Órdenes", "Comisiones", "Pérdida máx."],
           filas, "lrrrr")
 
-    # Bloques de 2 000 ticks y familias plausibles
+    # Bloques de 2 000 ticks. Cada ronda de la competencia llega normalizada por separado (mínimo 100,
+    # máximo 255), así que cada bloque se normaliza antes de correr: sin eso un tramo que no contiene
+    # los extremos de toda la serie no le da nada que hacer a la regla de cotas.
+    normalizar = _normalizar()
+    bloques = [normalizar(b) for b in series.bloques(practica, 2000)]
+    cyms = [market.comprar_y_mantener(b) for b in bloques]
     filas = []
-    for nom, est in (("Comprar y mantener", "cym"), ("Regla base del grupo", lambda: trader.ReglaBase()),
-                     (f"Nuestro algoritmo", nuevo)):
+    for nom, est in (("Comprar y mantener", "cym"), ("Regla base (media exponencial)", lambda: trader.ReglaBase()),
+                     ("Nuestro algoritmo", nuevo)):
         ws = []
-        for b in series.bloques(practica, 2000):
+        for b in bloques:
             ws.append(market.comprar_y_mantener(b) if est == "cym" else market.simular(b, trader.decisiones(b, est())).w)
-        cyms = [market.comprar_y_mantener(b) for b in series.bloques(practica, 2000)]
         gana = sum(w > y for w, y in zip(ws, cyms))
         filas.append([nom, num(sum(ws) / len(ws)), num(min(ws)), num(max(ws)),
                       "n/a" if est == "cym" else f"{gana} de {len(ws)}"])
@@ -214,32 +233,31 @@ def punto_32(c, peldano):
         t = leer(f"{M}/fondo/{peldano}/ticks.txt")
         r3 = t.split("=== Ronda 3")[1].split("=== Ronda")[0]
         hilos = []
-        for nombre, patron in (("0, supervisor", r"0, supervisor"), ("1, gestor \\texttt{max\\_media}", r"1, gestor max_media"),
-                               ("2, gestor base", r"2, gestor base"), ("3, gestor activo", r"3, gestor activo"),
-                               ("Los cuatro (agregado)", r"los cuatro \(agregado\)")):
+        for nombre, patron in (("0, hilo que decide", r"0, trabajo \(fuera del sondeo\)"), ("1, en espera", r"1, lazo de espera"),
+                               ("2, en espera", r"2, lazo de espera"), ("3, en espera", r"3, lazo de espera")):
             mi, pr, ma, cp, cm, cpi = re.search(patron + r"\s+(\d+)\s+([\d.]+)\s+(\d+)\s+([\d.]+)\s+(\d+)\s+([\d.]+)", r3).groups()
             hilos.append([nombre, mi, num(float(pr), 2), ma, num(float(cp), 2), cm, num(float(cpi), 3)])
         tabla(os.path.join(RAIZ, G, "t32hilos.tex"),
               ["Hilo", "IC mín.", "IC prom.", "IC máx.", "Ciclos prom.", "Ciclos máx.", "CPI"], hilos, "lrrrrrr",
-              f"Ronda 3, 20\\,000 ticks de la práctica. Fuente: \\texttt{{docs/mediciones/fondo/{peldano}/ticks.txt}}.")
+              "Ronda 3, 20\\,000 ticks de la práctica. IC: instrucciones fuera del lazo de espera, por tick. "
+              f"Fuente: \\texttt{{docs/mediciones/fondo/{peldano}/ticks.txt}}.")
         for ronda, nombre, presu in ((1, "10 ms", 249762), (2, "1 ms", 24762), (3, "0,1 ms", 2262)):
             T = {1: 10e6, 2: 1e6, 3: 1e5}[ronda]
             if f"=== Ronda {ronda}" in t:
                 rr = t.split(f"=== Ronda {ronda}")[1].split("=== Ronda")[0]
-                fila = re.search(r"DECISION \(respuesta\), todos los ticks\s+(\d+)\s+([\d.]+)\s+(\d+)", rr)
+                fila = re.search(r"DECISION \(respuesta\)\s+(\d+)\s+([\d.]+)\s+(\d+)", rr)
                 prom, peor = float(fila.group(2)), int(fila.group(3))
                 fuente = ""
             else:
-                # La ronda 1 no se midió por el RTL (10 ms por tick son 35 minutos de Verilator):
+                # La ronda 1 no se midió por el RTL (10 ms por tick son más de 20 minutos de Verilator):
                 # sale del gemelo, validado contra el RTL en make cosim-barrel
                 prom, peor = gemelo_respuesta(T)
                 rr = r3
                 fuente = "$^*$"
-            ic = re.search(r"los cuatro \(agregado\)\s+(\d+)\s+([\d.]+)\s+(\d+)", rr)
-            sup = re.search(r"0, supervisor\s+(\d+)\s+([\d.]+)\s+(\d+)", rr)
-            filas.append([f"{ronda} ({nombre}){fuente}", "Promedio", num(float(sup.group(2)), 2), num(float(ic.group(2)), 2),
-                          num(prom, 1), "4 / 1", num(prom * 0.04, 2), num(prom * 40 / T * 100, 3), num(presu)])
-            filas.append(["", "Peor caso", sup.group(3), ic.group(3), num(peor), "4 / 1", num(peor * 0.04, 2),
+            ic = re.search(r"0, trabajo \(fuera del sondeo\)\s+(\d+)\s+([\d.]+)\s+(\d+)", rr)
+            filas.append([f"{ronda} ({nombre}){fuente}", "Promedio", num(float(ic.group(2)), 2), num(prom, 1), "4 / 1",
+                          num(prom * 0.04, 2), num(prom * 40 / T * 100, 3), num(presu)])
+            filas.append(["", "Peor caso", ic.group(3), num(peor), "4 / 1", num(peor * 0.04, 2),
                           num(peor * 40 / T * 100, 3), ""])
             if ronda == 3:
                 c["RespPeor"] = num(peor)
@@ -247,13 +265,12 @@ def punto_32(c, peldano):
                 c["UsoRondaTres"] = num(peor * 40 / T * 100, 2)
                 c["UsoPresuRondaTres"] = num(100.0 * peor / presu, 2)
         tabla(os.path.join(RAIZ, G, "t32.tex"),
-              ["Ronda", "Caso", "IC supervisor", "IC 4 hilos", "Ciclos", "CPI hilo / agregado", "Tiempo ($\\mu$s)",
-               "\\% de $T$", "Presupuesto"], filas, "llrrrrrrr",
+              ["Ronda", "Caso", "IC del hilo 0", "Ciclos", "CPI hilo / agregado", "Tiempo ($\\mu$s)",
+               "\\% de $T$", "Presupuesto"], filas, "llrrrrrr",
               "Ciclos: desde \\texttt{byte\\_done} hasta la escritura en \\texttt{DECISION}. IC: instrucciones de "
-              f"trabajo del tick. Fuente: \\texttt{{docs/mediciones/fondo/{peldano}/ticks.txt}}, por el RTL. "
+              f"trabajo del hilo 0 en el tick (los otros tres hilos solo esperan). Fuente: \\texttt{{docs/mediciones/fondo/{peldano}/ticks.txt}}, por el RTL. "
               "$^*$La ronda 1 no se midió por el RTL: los ciclos salen del gemelo digital (2\\,000 ticks) y las "
-              "instrucciones son las de la ronda 3, porque el trabajo por tick no depende del período (las rondas 2 y 3 "
-              "coinciden en las dos primeras decimales).")
+              "instrucciones son las de la ronda 3, porque el trabajo por tick no depende del período.")
         c["CPIPrograma"] = "4 por hilo y 1 agregado"
 
 

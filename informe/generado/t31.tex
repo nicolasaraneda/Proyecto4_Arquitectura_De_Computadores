@@ -6,13 +6,13 @@ Estrategia & Patrimonio & Órdenes & Comisiones & Pérdida máx. \\
 \multicolumn{5}{l}{\textit{Serie de práctica completa, 20\,000 ticks}} \\
 No operar & 10\,000 & 0 & 0 & 0 \\
 Comprar y mantener & 9\,695 & 1 & 5 & 9\,300 \\
-Regla base del grupo (hasta el 15/11) & 8\,904 & 159 & 795 & 3\,110 \\
-Nuestro algoritmo (\texttt{max\_media}) & 9\,722 & 249 & 1\,245 & 3\,717 \\
+Regla base (media exponencial) & 8\,904 & 159 & 795 & 3\,110 \\
+Nuestro algoritmo (regla de cotas, banda 40) & 21\,392 & 4 & 20 & 3\,168 \\
 \midrule
 \multicolumn{5}{l}{\textit{Primeros 2\,000 ticks, como el testbench (pierde 2 precios en el reset)}} \\
 No operar & 10\,000 & 0 & 0 & 0 \\
 Comprar y mantener & 11\,375 & 1 & 5 & 1\,560 \\
-Regla base del grupo (hasta el 15/11) & 10\,846 & 12 & 60 & 260 \\
-Nuestro algoritmo (\texttt{max\_media}) & 10\,768 & 18 & 90 & 302 \\
+Regla base (media exponencial) & 10\,846 & 12 & 60 & 260 \\
+Nuestro algoritmo (regla de cotas, banda 40) & 10\,000 & 0 & 0 & 0 \\
 \bottomrule
 \end{tabular}

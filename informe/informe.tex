@@ -36,50 +36,50 @@
 \begin{document}
 \maketitle
 
-\noindent Diseño que compite: \textbf{\cifraPeldano}. \ifpeldanofondo Es el Espino barrel de cuatro hilos con dos instrucciones propias (\texttt{emad} y \texttt{devk}), una tabla de parámetros en BRAM\ifpeldanodos{} y un vigilante que reconfigura la FPGA con un respaldo\fi, corriendo \arch{sw/trade.s}, que es el fondo de cuatro hilos de \arch{sw/fondo.s}.\else Es el Espino base del curso corriendo \arch{sw/trade.s} con la regla \texttt{max\_media}.\fi{} Cada número de este informe se regenera con \texttt{make report} desde el repositorio (commit \texttt{\commitinforme}); cada tabla indica su archivo de medición, y \arch{docs/comandos.md} el comando que produce cada uno.
+\noindent Diseño descrito: \textbf{\cifraPeldano}. R0, R1 y R2 corren la misma regla, la de cotas con banda 40 (decisiones T133 y T140 de \arch{docs/decisiones.md}). \ifpeldanofondo R1 y R2 son el Espino barrel de cuatro hilos con una tabla de parámetros en BRAM\ifpeldanodos{} y un vigilante que reconfigura la FPGA con un respaldo\fi: el hilo 0 ejecuta la regla y los otros tres esperan (\arch{sw/fondo.s}, líneas 1 a 8).\else R0 es el Espino base del curso corriendo \arch{sw/trade.s}.\fi{} Cada número de este informe se regenera con \texttt{make report} desde el repositorio (commit \texttt{\commitinforme}); cada tabla indica su archivo de medición, y \arch{docs/comandos.md} el comando que produce cada uno.
 
 % ==============================================================================
 \section{Algoritmo de predicción y decisión (3.1)}
 
 \subsection{Idea}
 
-La serie de práctica revierte a su nivel reciente. La razón de varianza $\mathrm{VR}(k)$, que vale 1 en un paseo aleatorio, es \cifraVRDiez{} a 10 ticks, \cifraVRCincuenta{} a 50 y \cifraVRCien{} a 100, y la autocorrelación de los cambios de un tick es \cifraAutocorrUno. Seguir la tendencia pierde y comprar barato respecto del nivel reciente gana. Por eso el algoritmo es de reversión a la media: estima el nivel con una media exponencial y compara el precio con ella.
+Cada ronda llega normalizada por separado, de modo que su precio mínimo es \cifraPrecioMin{} y su máximo \cifraPrecioMax{} (\arch{docs/cotas.md}, sección 1). Ver \cifraPrecioMin{} es entonces ver el mínimo de la ronda y ver \cifraPrecioMax{} es ver el máximo: comprar en el mínimo no puede salir peor que comprar en cualquier otro tick, y vender en el máximo no puede salir peor que vender en otro. Es el formato de la serie que anunció el profesor, igual para todos los grupos. La regla no guarda ninguna serie ni usa datos de fuera: decide con el precio que ve.
 
-La regla, que llamamos \texttt{max\_media}, mantiene la media $m$ con $\alpha = 1/32$ y una posición $\mathit{pos}$:
+La regla, de cotas con banda 40 (\arch{ref/cotas.py} y \arch{docs/cotas.md}, sección 2), parte en caja y no lleva un estimador del nivel:
 \begin{itemize}
-  \item si $p < m - 3$, quiere estar comprado;
-  \item si $p > m$, quiere estar vendido;
+  \item si $p \le 100$ quiere estar comprado y recuerda que vio el mínimo; si $p \ge 255$ quiere estar vendido y recuerda que vio el máximo;
+  \item una vez vistos los dos extremos, compra con $p \le 140$ y vende con $p \ge 215$: una banda de 40 unidades desde cada extremo;
   \item en otro caso conserva la posición.
 \end{itemize}
-Se validó fuera de la placa, en Python (\arch{ref/trader.py}), con la serie de práctica en bloques de 2\,000 ticks y con familias sintéticas calibradas contra ella (\arch{docs/algoritmo.md}). El umbral de entrada está en una meseta: los umbrales vecinos dan medias parecidas, así que la elección no depende de un punto afinado a la serie. $\alpha = 1/32$ fue el mejor compromiso entre los estimadores probados: con un $\alpha$ mayor la media sigue al precio y no queda desviación que operar, y con uno menor empeoran los remuestreos (\arch{docs/algoritmo.md}, secciones 5.1 y 5.2).
+Mientras no ha visto los dos extremos solo opera en 100 y en 255. Por eso en los primeros 2\,000 ticks de la serie de práctica, tal como están en el archivo, termina en 10\,000 con \cifraOrdenesDos{} órdenes: ese tramo no llega ni a 100 ni a 255. Una ronda real sí los contiene, porque llega normalizada; la tabla~\ref{tab:31b} evalúa los bloques de la práctica de esa forma.
 
 \ifpeldanofondo
-El diseño que compite corre esta regla en un \emph{fondo} de cuatro hilos (\arch{ref/fondo.py}). Tres gestores corren cada uno una banda de la misma regla (entrar 3, 4 y 2 unidades bajo la media) y votan por memoria compartida; un supervisor combina los votos con pesos que se ajustan cada 512 ticks según lo que habría ganado cada gestor, y escribe la decisión. El supervisor calcula además \texttt{max\_media} por su cuenta y la usa en lugar de cualquier voto que no llegue a tiempo, de modo que la decisión nunca depende de que otro hilo esté vivo.
+En el diseño de cuatro hilos el hilo 0 decide sin saltos que dependan del precio y es el único que toca el SPI y el periférico; los otros tres esperan. Los cuatro umbrales (101, 255, 141 y 215) se leen en cada tick de una tabla en BRAM de solo lectura, así que se pueden cambiar sin sintetizar de nuevo (\arch{sw/fondo.s}, líneas 23 a 26, y \arch{docs/tabla\_vigilante.md}).
 \fi
 
 \subsection{Recursos y cantidad}
 
-Todo es aritmética entera. La media se guarda multiplicada por 32 (5 bits de fracción) en un registro de 32 bits, y la regla solo usa sumas, restas y comparaciones. \ifpeldanofondo El programa ocupa \cifraPalabrasPrograma{} de las 512 palabras de memoria y las 20 constantes del algoritmo están en una BRAM de solo lectura.\else El programa ocupa \cifraPalabrasPrograma{} palabras y una palabra de trabajo.\fi{} El costo por tick está en la sección~\ref{sec:ticks}: se usa el \cifraUsoRondaTres\,\% del período de la ronda más corta en el peor caso.
+Todo es aritmética entera. La regla no lleva media ni multiplica: compara el precio con constantes y combina los resultados con \texttt{and}, \texttt{or} y \texttt{xor}. Su estado son tres valores, el último byte escrito y las banderas de mínimo y de máximo vistos. \ifpeldanofondo El programa ocupa \cifraPalabrasPrograma{} de las 512 palabras de memoria y no usa la RAM de datos; los cuatro umbrales están en la BRAM de solo lectura.\else El programa ocupa \cifraPalabrasPrograma{} palabras y no usa la RAM de datos.\fi{} El costo por tick está en la sección~\ref{sec:ticks}: se usa el \cifraUsoRondaTres\,\% del período de la ronda más corta en el peor caso.
 
 La cantidad $q$ no se calcula: la orden es siempre por 63 acciones, \emph{comprar 63} (\texttt{0x7F}) cuando se quiere estar comprado y \emph{vender 63} (\texttt{0xBF}) cuando no. La maestra recorta la compra a lo que alcanza la caja y la venta a las acciones que se tienen, y una orden recortada a cero no se ejecuta ni paga comisión. Así el byte expresa una posición objetivo, el programa no necesita llevar la contabilidad y repetir la orden en cada tick no cuesta nada.
 
 \subsection{Comparación con las referencias}
 
-La tabla~\ref{tab:31} compara el algoritmo con no operar, con comprar al inicio y mantener, y con la regla base que el grupo usó hasta el 15/11 (entrar 4 unidades bajo la media en vez de 3), en la serie de práctica completa y en los primeros 2\,000 ticks con el período y los precios perdidos del testbench. La pérdida máxima es la mayor caída del patrimonio desde un máximo anterior.
+La tabla~\ref{tab:31} compara el algoritmo con no operar, con comprar al inicio y mantener, y con la regla base, la de la media exponencial que el grupo usó hasta el 15/11 (entrar 4 unidades bajo la media), en la serie de práctica completa y en los primeros 2\,000 ticks con el período y los precios perdidos del testbench. La pérdida máxima es la mayor caída del patrimonio desde un máximo anterior.
 
 \begin{table}[H]\centering
 \caption{Patrimonio final, órdenes, comisiones y pérdida máxima en la serie de práctica.}\label{tab:31}
 \input{generado/t31.tex}
 \end{table}
 
-En la serie completa el algoritmo termina con \cifraPatrimonioVeinte, contra \cifraCymVeinte{} de comprar y mantener y 10\,000 de no operar. Para no elegir con una sola serie, la tabla~\ref{tab:31b} lo mide en los 10 bloques de 2\,000 ticks: en promedio \cifraBloquesMedia, en el peor bloque \cifraBloquesPeor, y supera a comprar y mantener en \cifraBloquesGana{} de los 10.
-
-La regla base del grupo termina sobre \texttt{max\_media} en la serie completa y en los bloques. Sus parámetros se eligieron mirando esta misma serie, así que esa ventaja está sesgada a su favor. Evaluadas con una semilla reservada, que no se usó para elegir nada, en remuestreos por bloques de la práctica y en familias sintéticas plausibles, \texttt{max\_media} gana a la regla base, y en los 10 bloques la diferencia entre las dos queda dentro del error (\arch{docs/algoritmo.md}, sección 7, y \arch{docs/mediciones/frontera.txt}). Por eso se eligió \texttt{max\_media}.
+En la serie completa el algoritmo termina con \cifraPatrimonioVeinte{} y \cifraOrdenesVeinte{} órdenes, contra \cifraCymVeinte{} de comprar y mantener y 10\,000 de no operar. En los primeros 2\,000 ticks no opera y termina en 10\,000, por lo que ahí lo superan comprar y mantener (\cifraCymDos) y la regla base. La tabla~\ref{tab:31b} mide los 10 bloques de 2\,000 ticks de la práctica, cada uno normalizado entre 100 y 255 como llega una ronda: en promedio \cifraBloquesMedia, en el peor bloque \cifraBloquesPeor, y supera a comprar y mantener en \cifraBloquesGana{} de los 10. Los diez bloques salen de una sola serie, así que no son diez pruebas independientes; la evidencia más amplia es la población simulada de cinco empresas de \arch{docs/cotas.md}, sección 5.
 
 \begin{table}[H]\centering
-\caption{Patrimonio final en los 10 bloques de 2\,000 ticks de la serie de práctica.}\label{tab:31b}
+\caption{Patrimonio final en los 10 bloques de 2\,000 ticks de la serie de práctica, cada bloque normalizado entre 100 y 255.}\label{tab:31b}
 \input{generado/t31bloques.tex}
 \end{table}
+
+La banda de 40 unidades es una elección dentro de una meseta. En la población simulada, cualquier banda entre 40 y 76 queda a menos del 2\,\% de la mejor (\arch{docs/cotas.md}, sección 5.2). Dentro de esa meseta se eligió 40 con los minutos reales de Alpaca: $+205$ por ronda con error estándar 101 sobre todas las ventanas reales, una mejora modesta frente a su error, y es la que menos pierde contra el rival de la ronda de Tesla de la clase del 18/11 (\arch{docs/decisiones.md}, T140). Con la serie de práctica da \cifraPatrimonioVeinte{} contra \cifraPatrimonioBandaSesentaVeinte{} de la banda 60, que fue la elegida el 17/11; con la ronda de Tesla, 20\,795 contra 18\,779, y con la de AMD, 26\,470 contra 21\,895 (\arch{docs/bitacora/banda40.md}).
 
 % ==============================================================================
 \section{Implementación en assembly (3.2)}
@@ -87,55 +87,54 @@ La regla base del grupo termina sobre \texttt{max\_media} en la serie completa y
 \subsection{Estructura del ciclo principal}
 
 \ifpeldanofondo
-Cada hilo del barrel tiene su propio ciclo. El supervisor (hilo 0) es el único que toca el SPI:
+El hilo 0 es el único que toca el SPI y el periférico; los hilos 1 a 3 solo esperan. Su ciclo es:
 \begin{enumerate}
-  \item \textbf{Esperar el precio}: sondea el bit de precio nuevo del registro de estado del esclavo SPI.
-  \item \textbf{Leer y publicar}: lee \texttt{PRICE} y publica el precio y el número de tick en memoria compartida.
-  \item \textbf{Actualizar y predecir}: calcula su propia \texttt{max\_media} (desviación y actualización de la media).
-  \item \textbf{Decidir}: lee los votos de los tres gestores, con un plazo; cada voto lleva el número de tick al que responde, así que uno viejo se reconoce y se reemplaza por la \texttt{max\_media} propia. Combina los votos con sus pesos.
-  \item \textbf{Escribir \texttt{DECISION}}: una sola escritura por tick, con la decisión definitiva; después la telemetría y el ajuste de pesos.
+  \item \textbf{Esperar el precio}: sondea el bit de precio nuevo del registro de estado del esclavo SPI (\texttt{lw}, \texttt{andi}, \texttt{beqz}).
+  \item \textbf{Leer}: \texttt{lw} de \texttt{PRICE}, que además baja la bandera.
+  \item \textbf{Comparar}: lee los cuatro umbrales de la tabla en BRAM y hace cuatro comparaciones sin signo (\texttt{sltu}), independientes entre sí.
+  \item \textbf{Decidir sin saltos}: actualiza las banderas de mínimo y de máximo vistos y arma el byte (\texttt{0x7F} o \texttt{0xBF}) con máscaras; si ninguna orden cambia, conserva el último byte.
+  \item \textbf{Escribir \texttt{DECISION}}: un solo \texttt{sw} por tick, con la decisión definitiva. Después viene la telemetría, un store al periférico.
 \end{enumerate}
-Cada gestor (hilos 1 a 3) espera a que cambie el número de tick publicado, actualiza su media y su puntaje, y publica su voto con el tick.
 \else
 \begin{enumerate}
-  \item \textbf{Esperar el precio}: lazo de tres instrucciones (\texttt{lw}, \texttt{andi}, \texttt{beq}) sobre el bit de precio nuevo del registro de estado del esclavo SPI.
+  \item \textbf{Esperar el precio}: lazo de tres instrucciones (\texttt{lw}, \texttt{andi}, \texttt{beqz}) sobre el bit de precio nuevo del registro de estado del esclavo SPI.
   \item \textbf{Leer}: \texttt{lw} de \texttt{PRICE}, que además baja la bandera.
-  \item \textbf{Predecir}: la desviación $\mathit{dev} = 32p - S$.
-  \item \textbf{Decidir}: dos comparaciones con los umbrales y la posición nueva.
-  \item \textbf{Escribir \texttt{DECISION}} y actualizar la media para el tick siguiente.
+  \item \textbf{Comparar}: cuatro comparaciones con \texttt{sltiu} contra constantes, independientes entre sí.
+  \item \textbf{Decidir sin saltos}: actualiza las banderas de mínimo y de máximo vistos y arma el byte (\texttt{0x7F} o \texttt{0xBF}) con máscaras.
+  \item \textbf{Escribir \texttt{DECISION}} con un solo \texttt{sw} y volver al sondeo.
 \end{enumerate}
 \fi
+Ningún salto depende del precio: el único salto que depende de algo externo es el del sondeo, así que el tiempo de respuesta no depende de los datos (\arch{sw/trade.s}, líneas 32 y 33).
 
-\subsection{Registros, memoria y punto fijo}
+\subsection{Registros y memoria}
 
-La media se lleva como $S = 32\,m$ (13 bits) y la desviación como $\mathit{dev} = 32p - S$, ambas enteras con signo; los umbrales se comparan en la misma escala ($-96$ para entrar, $1$ para salir). La actualización es $S \leftarrow S + ((32p - S) \gg 5)$.
 \ifpeldanofondo
-Cada hilo tiene su banco de 16 registros en las BRAM del banco de registros. La memoria compartida tiene una zona por hilo: el supervisor escribe el precio y el tick, cada gestor su voto y su puntaje, y nadie escribe en la zona de otro (\arch{docs/fondo.md}, sección 3).
+Cada hilo tiene su banco de 16 registros en las BRAM del banco de registros. El hilo 0 usa los mismos registros que \arch{sw/trade.s} más \texttt{x1}, la base de la tabla, y \texttt{x3}, el número de tick para la telemetría (\arch{sw/fondo.s}, líneas 38 a 41). Los hilos 1 a 3 no leen ni escriben memoria, así que no hay datos compartidos entre hilos.
 \else
-El programa usa 8 registros y una palabra de trabajo (\arch{docs/trade\_s.md}):
+El programa usa 13 registros y ninguna palabra de la RAM de datos (\arch{sw/trade.s}, líneas 35 a 48):
 \begin{center}\small
 \begin{tabular}{ll}
 \toprule
-Registro o dirección & Contenido \\
+Registro & Contenido \\
 \midrule
 \texttt{x2} & Base del esclavo SPI (\texttt{0x8001\_0000}) \\
-\texttt{x3} & $S$, la media por 32 \\
-\texttt{x4} & $\mathit{pos}$: 0 en caja, 1 comprado \\
+\texttt{x4} & $q$, el último byte escrito (\texttt{0x00}, \texttt{0x7F} o \texttt{0xBF}) \\
 \texttt{x5} & $p$, el último precio \\
-\texttt{x6} & $32p$, y después $\mathit{dev}$ \\
-\texttt{x7}, \texttt{x9} & Temporales \\
-\texttt{x8} & Byte de decisión \\
-\texttt{TMP} (\texttt{0x7FC}) & Palabra de trabajo para el desplazamiento, última de la RAM \\
+\texttt{x6}, \texttt{x7} & $p \le 100$ y $p \ge 255$ \\
+\texttt{x10}, \texttt{x11} & Se vio el mínimo, se vio el máximo \\
+\texttt{x8} & Los dos extremos ya vistos \\
+\texttt{x9}, \texttt{x12} & Comprar y vender \\
+\texttt{x13}, \texttt{x14}, \texttt{x15} & Máscara de cambio, byte nuevo y temporal \\
 \bottomrule
 \end{tabular}
 \end{center}
 \fi
 
-\textbf{Operaciones que Espino no tiene.} Los desplazamientos están deshabilitados y no hay multiplicación ni división. \ifpeldanofondo En el diseño que compite se resolvieron en hardware: \texttt{emad} calcula $r_d = r_{s2} + (r_{s1} \gg 5)$ y \texttt{devk} calcula $r_d = (r_{s1} \ll 5) - r_{s2}$ usando el mismo sumador de la ALU con un operando desplazado, sin estado y sin cambiar el control del pipeline (\arch{docs/extension\_isa.md}). En software, sin la extensión, \fi Multiplicar por 32 son cinco sumas. El desplazamiento aritmético de un número con signo se evita con la identidad $(32p - S) \gg 5 = p - ((S + 31) \gg 5)$, donde $S + 31$ es positivo, y $x \gg 5$ con $x$ positivo se obtiene como $(8x) \gg 8$: se guarda $8x$ en una palabra y se lee su segundo byte con \texttt{lbu}.
+\textbf{Operaciones que Espino no tiene.} Los desplazamientos están deshabilitados y no hay multiplicación ni división. La regla de cotas no los necesita: solo compara con constantes y combina con \texttt{and}, \texttt{or}, \texttt{xor} y restas, que Espino sí tiene.
 
 \subsection{Mismas decisiones que la referencia}
 
-El testbench del curso, sin modificar, da 4/4 y su \texttt{decisiones.csv} es idéntico byte a byte al de la referencia. Además, con el gemelo digital del SoC (un simulador exacto al ciclo, validado contra el RTL), la serie de práctica completa a los tres períodos y \cifraEqSeries{} series sintéticas de 2\,000 ticks dan \cifraEqDistintas{} diferencias en \cifraEqTicks{} ticks. \ifpeldanofondo\else Por el RTL, \texttt{make equiv} compara además con Verilator los 20\,000 ticks de la práctica a 0,1~ms y a 1~ms, con cero diferencias (\arch{docs/puertas.md}, criterio 2 de R0).\fi\ifpeldanofondo Por el RTL, con Verilator, el fondo además se comparó en \cifraSeriesRTL{} series y en la práctica a los tres períodos, incluido el estado interno en cada decisión (\arch{docs/mediciones/fondo/r1/series.txt}).\fi
+El testbench del curso, sin modificar, da 4/4 y su \texttt{decisiones.csv} es idéntico byte a byte al de la referencia. Además, con el gemelo digital del SoC (un simulador exacto al ciclo, validado contra el RTL), la serie de práctica completa a los tres períodos y \cifraEqSeries{} series sintéticas de 2\,000 ticks dan \cifraEqDistintas{} diferencias en \cifraEqTicks{} ticks. \ifpeldanofondo Por el RTL, con Verilator, R1 y R2 se compararon con \arch{ref/fondo.py} en \cifraSeriesRTL{} series y en la práctica a los tres períodos, incluido el estado interno en cada decisión (\arch{docs/mediciones/fondo/r2/series.txt}).\else Por el RTL, con Verilator, R0 se comparó con \arch{ref/trader.py} en los 20\,000 ticks de la práctica a los tres períodos, con cero diferencias, y el gemelo en el lote de series sintéticas de \texttt{make equiv-gemelo} (\arch{docs/mediciones/r0\_banda40\_puerta.txt}, líneas 49 a 57).\fi
 
 \subsection{Mediciones por tick}\label{sec:ticks}
 
@@ -151,7 +150,7 @@ La tabla~\ref{tab:32} da, para cada ronda, las instrucciones, los ciclos, el CPI
 \caption{Instrucciones y ciclos de trabajo por hilo en la ronda 3.}\label{tab:32h}
 \tablaancha{generado/t32hilos.tex}
 \end{table}
-En el barrel cada hilo ejecuta una instrucción cada 4 ciclos: CPI 4 por hilo y 1 agregado, por construcción. La respuesta peor es de \cifraRespPeor{} ciclos (\cifraUsoRondaTres\,\% del período de la ronda 3), y ocurre en los ticks donde se ajustan los pesos.
+En el barrel cada hilo ejecuta una instrucción cada 4 ciclos: CPI 4 por hilo y 1 agregado, por construcción. La respuesta promedio es de \cifraRespProm{} ciclos y la peor de \cifraRespPeor{} (\cifraUsoRondaTres\,\% del período de la ronda 3). La diferencia entre ticks viene solo de la fase en que cae el precio respecto del sondeo, no de los datos.
 \else
 Contando también el lazo de sondeo, el CPI medido de todo el programa es \cifraCPIPrograma: 2 ciclos por instrucción más uno en cada \texttt{load} y en cada salto tomado. La respuesta peor es de \cifraRespPeor{} ciclos, el \cifraUsoRondaTres\,\% del período de la ronda 3.
 \fi

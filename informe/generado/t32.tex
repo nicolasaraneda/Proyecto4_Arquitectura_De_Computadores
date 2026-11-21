@@ -1,14 +1,14 @@
 % Generado por tools/report.py (make report). No editar a mano.
 \begin{tabular}{llrrrrrr}
 \toprule
-Ronda & Caso & IC & Ciclos & CPI & Tiempo ($\mu$s) & \% de $T$ & Presupuesto \\
+Ronda & Caso & IC del hilo 0 & Ciclos & CPI hilo / agregado & Tiempo ($\mu$s) & \% de $T$ & Presupuesto \\
 \midrule
-1 (10 ms) & Promedio & 19{,}5 & 41 & 2{,}103 & 1{,}64 & 0{,}016 & 249\,762 \\
- & Peor caso & 21{,}0 & 44 & 2{,}095 & 1{,}76 & 0{,}018 &  \\
-2 (1 ms) & Promedio & 19{,}5 & 41 & 2{,}103 & 1{,}64 & 0{,}164 & 24\,762 \\
- & Peor caso & 21{,}0 & 44 & 2{,}095 & 1{,}76 & 0{,}176 &  \\
-3 (0,1 ms) & Promedio & 19{,}5 & 41 & 2{,}103 & 1{,}64 & 1{,}640 & 2\,262 \\
- & Peor caso & 21{,}0 & 44 & 2{,}095 & 1{,}76 & 1{,}760 &  \\
+1 (10 ms)$^*$ & Promedio & 45{,}00 & 123{,}0 & 4 / 1 & 4{,}92 & 0{,}049 & 249\,762 \\
+ & Peor caso & 50 & 127 & 4 / 1 & 5{,}08 & 0{,}051 &  \\
+2 (1 ms) & Promedio & 45{,}00 & 123{,}0 & 4 / 1 & 4{,}92 & 0{,}492 & 24\,762 \\
+ & Peor caso & 50 & 127 & 4 / 1 & 5{,}08 & 0{,}508 &  \\
+3 (0,1 ms) & Promedio & 45{,}00 & 123{,}0 & 4 / 1 & 4{,}92 & 4{,}920 & 2\,262 \\
+ & Peor caso & 50 & 127 & 4 / 1 & 5{,}08 & 5{,}080 &  \\
 \bottomrule
 \end{tabular}
-\par\smallskip{\footnotesize Respuesta: desde que el esclavo SPI entrega el precio (\texttt{byte\_done}) hasta la escritura en \texttt{DECISION}. Fuente: \texttt{docs/mediciones/ticks\_software.txt}.}
+\par\smallskip{\footnotesize Ciclos: desde \texttt{byte\_done} hasta la escritura en \texttt{DECISION}. IC: instrucciones de trabajo del hilo 0 en el tick (los otros tres hilos solo esperan). Fuente: \texttt{docs/mediciones/fondo/r2/ticks.txt}, por el RTL. $^*$La ronda 1 no se midió por el RTL: los ciclos salen del gemelo digital (2\,000 ticks) y las instrucciones son las de la ronda 3, porque el trabajo por tick no depende del período.}

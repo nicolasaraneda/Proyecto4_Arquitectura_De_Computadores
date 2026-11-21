@@ -3,13 +3,15 @@
 \toprule
 Fase & Ciclos por tick & Instrucciones & \% de la respuesta & \% del kernel \\
 \midrule
-Detectar el precio & 10{,}00 & n/a & 24{,}4 & n/a \\
-Leer \texttt{PRICE} & 3{,}00 & 1{,}00 & 7{,}3 & 5{,}9 \\
-Desviación a la media & 12{,}00 & 6{,}00 & 29{,}3 & 23{,}5 \\
-Decidir & 14{,}00 & 7{,}00 & 34{,}1 & 27{,}5 \\
-Escribir \texttt{DECISION} & 2{,}00 & 1{,}00 & 4{,}9 & 3{,}9 \\
-Actualizar la media & 17{,}00 & 8{,}00 & n/a & 33{,}3 \\
-Volver al sondeo & 3{,}00 & 1{,}00 & n/a & 5{,}9 \\
+Detectar el precio & 14{,}64 & n/a & 6{,}6 & n/a \\
+Leer \texttt{PRICE} & 4{,}00 & 1{,}00 & 1{,}8 & 1{,}5 \\
+Publicar precio y tick & 12{,}00 & 3{,}00 & 5{,}4 & 4{,}6 \\
+Regla propia (\texttt{max\_media}) & 44{,}00 & 11{,}00 & 19{,}7 & 16{,}8 \\
+Esperar y leer votos & 88{,}08 & 22{,}02 & 39{,}5 & 33{,}6 \\
+Ajuste de pesos & 4{,}29 & 1{,}07 & 1{,}9 & 1{,}6 \\
+Combinar votos & 52{,}00 & 13{,}00 & 23{,}3 & 19{,}8 \\
+Escribir \texttt{DECISION} & 4{,}00 & 1{,}00 & 1{,}8 & 1{,}5 \\
+Telemetría & 54{,}00 & 13{,}50 & n/a & 20{,}6 \\
 \bottomrule
 \end{tabular}
-\par\smallskip{\footnotesize Perfil medido con el gemelo digital (\texttt{--perfil}), R0. Fuente: \texttt{docs/mediciones/p7/perfil.txt}.}
+\par\smallskip{\footnotesize Perfil medido con el gemelo digital (\texttt{--perfil}), R1, hilo supervisor. Fuente: \texttt{docs/mediciones/p7/perfil.txt}.}
