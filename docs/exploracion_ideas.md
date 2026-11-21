@@ -903,3 +903,390 @@ Todos con `export P4_DATOS=$HOME/proyectos/datos_p4`, desde la raíz de la rama.
 | Elegida por caso en las otras | `python3 ref/cotas/explorar_optimo.py casos` (desde la caché) | `optimo_casos_otras.txt` |
 | Examen | `python3 ref/cotas/explorar_optimo.py examen` (unos 52 minutos) | `optimo_examen.txt` |
 | Aritmética de placa | `python3 ref/cotas/optimo_placa.py` | pantalla |
+
+
+## 15. V5: el índice de competencia contra el campo esperado (20 y 21/11)
+
+Pedido de Nicolás del 20/11 en la noche: diseñar la mejor estrategia contra el campo que espera y no solo contra el clon exacto. Pronóstico del mejor rival: 60 % extremos o una regla tipo Fila 5, 30 % una banda parecida (30, 50 o 60) y 10 % la banda 40 exacta. La medida es un índice de dos cifras por torneo de 3 rondas mano a mano. Once aristas de partida, criterio fijado de antemano (15.9), tope de 4 horas, solo Python y solo las 100 acciones ajenas (12 000 ventanas, los mismos 200 000 sorteos de la sección 14). Las cinco empresas no se tocaron. Aquí no se decide nada.
+
+La sección 14 (la vara contra un clon de la banda 40, con V4 y V4b) todavía no está redactada en este documento: sus resultados están en la bitácora y en `clon_parte1.txt`, `clon_parte3.txt`, `clon_parte7_etapa1.txt` y `clon_parte7_etapa1b.txt`.
+
+Código: `ref/cotas/v5.py` (rivales, fase A con opciones, máquina de modos desde el primer extremo y una segunda implementación para el control) y `ref/cotas/explorar_v5.py` (etapas, índice y errores estándar). Salidas: `docs/mediciones/exploracion/v5_*.txt`. Bitácora: `docs/bitacora/exploracion.md`, "Sección 15".
+
+### 15.0 Resumen
+
+1. **Las dos varas tiran en sentidos opuestos.** Banda 40 sola: no queda debajo en 87,9 % de los torneos (ee 0,5) y gana 45,5 % (0,6). V4b: 77,2 % (0,9) y 75,8 % (0,9). Ninguna domina a la otra.
+2. **V4b queda dominada.** El mejor candidato, C1, la supera en las dos cifras por unos 7 ee pareados: 83,0 / 81,9, es decir +5,7 (0,8) y +6,1 (0,8), con signo positivo en los cinco años y en los cinco grupos de empresas. Además baja el déficit contra la banda 40 de 329 a 111 y el peor torneo de -28 180 a -8 106. Si se quiere un desempate sobre la banda 40, V4b ya no es la opción.
+3. **De dónde sale la mejora.** De dos cambios sobre V4b. Primero, dejar de apostar casi siempre en la fase A: la apuesta de V3 con (b) solo se toma cuando el modelo da 0,95 o más de probabilidad de que el 255 llegue antes que el 100 (arista 1). Segundo, correr el motor de recuperación desde el primer extremo aunque no haya nada que recuperar, hasta ganarle 100 al clon, y ahí cerrar el candado (la "ambición" de la etapa 1 de la sección 14, que se había descartado por media; arista 9).
+4. **Ningún candidato supera a la banda 40 sola en "no queda debajo".** C1 queda 5,0 puntos abajo (ee 0,8); C3, el más conservador, 2,3 (0,4). No es un problema de ajuste: con la banda 40 en la fase D, un desempate perfecto llega a lo más al mismo 87,9, porque solo convierte empates en victorias. Todo desempate que a veces falla convierte empates en derrotas.
+5. **Hallazgo no pedido: la banda 30 sola tiene más "no queda debajo" que la banda 40 sola** bajo este pronóstico: 90,0 contra 87,9 (+2,1, ee 0,4, positivo en todos los años y grupos). Casi todo sale de extremos y Fila 5 (92,4 y 98,1 contra 88,6 y 96,3). A cambio pierde en media (-103 por ronda contra la banda 40) y en déficit ponderado (158 contra 126; +32, ee 6): queda debajo menos veces, pero por más.
+6. **En déficit ponderado, que es lo que se parece al puntaje lineal, nada le gana a la banda 40 sola:** 126 (ee 7), contra 145 de C3, 149 de C2, 157 de C1, 158 de la banda 30 y 262 de V4b. Traducido a la nota de 0 a 2 con un peor grupo en 10 000, la banda 40 sola queda en 1,980; C1, C2, C3 y la banda 30 sola, entre 0,003 y 0,006 más abajo; V4b, 0,022 más abajo. Lo que está en juego entre estas opciones es menos de una centésima de la nota.
+7. **Con varios rivales a la vez el costo del desempate se achica, pero no se vuelve ganancia.** En campos de 1 a 8 rivales sorteados con los pesos del pronóstico, la banda 40 sola es la que más veces queda arriba, aunque casi nunca sola: con 8 rivales, 60,7 % arriba y 6,3 % sola, contra 57,6 % y 56,0 % de C1. La diferencia de nota de C1 pasa de -0,006 con un rival a cero con 8. Solo con las seis reglas presentes a la vez los candidatos suman algo (+0,003 a +0,005, en 2 ee).
+8. **El criterio no se cumple.** Ningún candidato pasa el punto 1 con la lectura fijada de antemano (las dos cifras), y los tres fallan el punto 3 contra extremos (pierden 14,8 % a 18,2 % de los torneos contra un tope de 13,4 %). Detalle en 15.9.
+9. **Caben en la placa** (estimación, no programa escrito): 1024 de los 1536 bytes libres, ninguna celda, y unos 760 ciclos de 1131 en el camino de respuesta si la cuenta propia va en un hilo aparte del clon (15.10).
+10. **No sirvieron:** niveles propios en la fase D (plano), audacia al final (-0,6 a -7,1), frenos y pisos (bajan el índice o no lo mueven), bandas propias como motor, entrada cerca del piso y del techo (E3), cobertura con mezclas de bandas, motor con objetivo lineal. Cifras en 15.7.
+11. **No se corrió** la programación dinámica con objetivo relativo (arista 5). Queda formulada, con su costo y con la cota de lo que podría agregar (15.11).
+
+### 15.1 Índice, rivales y errores estándar
+
+Rivales, simulados tick a tick con la contabilidad oficial (`v5.rival`):
+
+| Rival | Regla | Peso |
+|---|---|---|
+| ext | Extremos puros: compra 63 repetido desde el primer 100, vende al ver 255 ya comprado y no vuelve | 0,30 |
+| f5 | Fila 5 (el rival de Tesla): lo mismo con venta en 220 o más | 0,30 |
+| b30, b50, b60 | Regla de los peldaños con banda 30 (130/225), 50 (150/205) y 60 (160/195) | 0,10 cada una |
+| b40 | Regla de los peldaños con banda 40 (140/215) | 0,10 |
+
+El reparto del 60 % en mitades es mío: el pedido no lo separa. Como el índice es lineal en los pesos, con las tablas por rival se puede recalcular con cualquier otro reparto.
+
+Índice de una estrategia: promedio ponderado por rival de dos cifras por torneo de 3 rondas. **nd** es el porcentaje de torneos en que no queda debajo (promedio propio menos promedio del rival mayor que -10) y **g** el porcentaje que gana (diferencia de 10 o más). Agregué una tercera cifra, el **déficit ponderado**: la suma por rival de peso por la media de max(0, promedio del rival menos promedio propio). Es la que más se parece al puntaje, que es lineal entre el peor y el mejor.
+
+Errores estándar como en la sección 14: cada cifra es un estadístico U de orden 3, su parte lineal se estima con los mismos sorteos y se agrupa por bloques de 20 y de 60 días y en dos sentidos (fecha y empresa); se informa el mayor. Las diferencias entre dos estrategias son pareadas (diferencia de las contribuciones por ventana).
+
+Lectura del criterio fijada antes de ver resultados: el punto 1 exige superar a las dos varas en las dos cifras por más de 2 ee pareados. Se informa aparte la lectura con una sola cifra, (nd + g) / 2.
+
+### 15.2 Revisión de la medición (arista 11)
+
+Fue lo primero. No encontré nada que infle los resultados. `ref/cotas/v5_causal.py` (`v5_causal.txt`):
+
+| Revisión | Resultado |
+|---|---|
+| Fuga de futuro en las señales | En 40 ventanas se cambió todo el futuro después de un tick al azar (el sufijo de otra ventana). Los bytes hasta el corte no cambian: 0 diferencias en la referencia directa de V4b (`candado_v4.V4` en `ideas.correr`) y 0 en `v5.post`. Lo único que mira el futuro es la normalización de la ronda, que es parte del juego |
+| Ventanas traslapadas | Cada minuto de una empresa cae en 5,0 ventanas en promedio y la ventana siguiente de la misma empresa comparte 81 %. Las 12 000 ventanas no son 12 000 datos independientes. El ee agrupado lo recoge, pero con pocos grupos de fecha: 21 bloques de 60 días y 61 de 20. Con 21 grupos, 2 ee es algo menos que 95 % de confianza |
+| Independencia de los sorteos | 0,03 % de los torneos repite una ventana, 2,9 % tiene dos de la misma empresa y 23,4 % tiene dos ventanas de fechas traslapadas (casi siempre de empresas distintas). No sé si las tres rondas reales vienen del mismo período: si vinieran, los torneos reales tendrían más correlación entre rondas que estos |
+| Elección sobre la misma muestra | V4b se eligió entre 24 combinaciones y aquí se probaron unas 300 variantes de la máquina y más de 500 bandas puras sobre las mismas ventanas. Lo compensa en parte que los efectos principales pasan 5 ee y tienen meseta (15.6), pero el examen en las cinco empresas sigue pendiente |
+| Tiempo de la decisión | El byte decidido con el precio n se ejecuta al precio n + 1, en el motor, en el clon emulado y en todos los rivales |
+
+Controles obligatorios, todos en cero:
+
+| Control | Resultado |
+|---|---|
+| Rivales f5, b30, b40, b50 y b60 contra las cachés de la sección 14 (C y Python) | 0 ventanas distintas de 12 000 |
+| V4b tick a tick (`v5.post`) contra la caché por eventos de la etapa 1b | 0 de 12 000 |
+| Motor apagado contra la base V3 con (b) | 0 de 12 000 |
+| Fase A reescrita (`v5.fase_a`) contra `optimo_estrategia.Optima` | 0 de 12 000 |
+| Todo apagado (sin fase A, sin motor) contra la banda 40: patrimonio en las 12 000 y bytes en 120 ventanas | 0 y 0 |
+| Cada finalista contra una segunda implementación (`v5.V5Ref` en `ideas.correr`, armada sobre `Optima` e `ideas.Cuenta`) en 120 ventanas | 0 diferencias en patrimonio u órdenes |
+
+Dato, no control: ext vende una sola vez; `espera` de la caché en C vuelve a comprar si el 100 aparece otra vez. Difieren en 21 de las 6 768 ventanas del caso S.
+
+### 15.3 Las dos varas y el campo
+
+`v5_varas.txt`. Cada celda por rival es nd / g.
+
+| Estrategia | nd (ee) | g (ee) | ext | f5 | b30 | b50 | b60 | b40 |
+|---|---|---|---|---|---|---|---|---|
+| Banda 40 sola | 87,9 (0,5) | 45,5 (0,6) | 88,6 / 32,9 | 96,3 / 91,7 | 70,5 / 14,1 | 83,3 / 34,9 | 71,0 / 32,6 | 100,0 / 0,0 |
+| V4b | 77,2 (0,9) | 75,8 (0,9) | 73,7 / 71,9 | 96,1 / 96,0 | 63,6 / 61,7 | 66,4 / 64,9 | 61,3 / 59,9 | 71,7 / 68,5 |
+| V3 con (b) sola | 72,8 (1,1) | 71,0 (1,1) | 68,1 / 65,8 | 96,5 / 96,3 | 56,6 / 54,3 | 60,2 / 58,2 | 57,2 / 55,5 | 60,4 / 56,3 |
+
+V4b menos banda 40, pareada: nd -10,7 (ee 1,0) y g +30,3 (ee 1,3). Lo que explica la tabla: contra extremos la banda 40 empata 55,7 % de los torneos, porque en la mayoría de las rondas las dos reglas hacen exactamente lo mismo. Cualquier apuesta rompe esos empates hacia un lado o hacia el otro, y con la medida "no queda debajo" un empate vale lo mismo que una victoria.
+
+Cada rival del pronóstico jugado como estrategia propia (la matriz del campo):
+
+| Si jugáramos | nd (ee) | g (ee) | ext | f5 | b30 | b50 | b60 | b40 |
+|---|---|---|---|---|---|---|---|---|
+| ext | 83,5 (0,6) | 31,4 (0,5) | 100,0 / 0,0 | 92,2 / 87,2 | 73,1 / 7,6 | 62,2 / 15,0 | 56,1 / 18,1 | 67,1 / 11,4 |
+| f5 | 37,1 (1,0) | 4,0 (0,4) | 12,8 / 7,8 | 100,0 / 0,0 | 7,0 / 1,9 | 8,5 / 4,8 | 8,8 / 6,0 | 8,3 / 3,7 |
+| **b30** | **90,0 (0,3)** | 44,7 (0,7) | 92,4 / 26,9 | 98,1 / 93,0 | 100,0 / 0,0 | 75,7 / 28,2 | 67,2 / 29,1 | 85,9 / 29,5 |
+| b40 | 87,9 (0,5) | 45,5 (0,6) | 88,6 / 32,9 | 96,3 / 91,7 | 70,5 / 14,1 | 83,3 / 34,9 | 71,0 / 32,6 | 100,0 / 0,0 |
+| b50 | 85,4 (0,6) | 46,6 (0,8) | 85,0 / 37,8 | 95,2 / 91,5 | 71,8 / 24,3 | 100,0 / 0,0 | 76,0 / 36,8 | 65,1 / 16,7 |
+| b60 | 82,9 (0,8) | 49,1 (1,0) | 81,9 / 43,9 | 94,0 / 91,2 | 70,9 / 32,8 | 63,2 / 24,0 | 100,0 / 0,0 | 67,4 / 29,0 |
+
+La banda más ancha gana más veces y por menos: mano a mano, la banda 30 queda sobre la banda 40 en 29,5 % de los torneos y debajo en 14,1 %, aunque en media pierde 103 por ronda. Fila 5 es la peor regla del campo: en el caso S vende en 220 lo que todas las demás venden en 255.
+
+### 15.4 Qué aportó cada arista
+
+Cada fila es una variante completa; las diferencias son contra V4b, pareadas.
+
+| Paso | Arista | Estrategia | nd | g | Δnd (ee) | Δg (ee) | Déficit contra b40 | Peor torneo contra b40 |
+|---|---|---|---|---|---|---|---|---|
+| 0 | | V4b: V3 con (b) en A, motor V2 solo tras una apuesta, candado copiar con M 100 | 77,2 | 75,8 | | | 329 | -28 180 |
+| 1 | 1 | Solo el umbral: apuesta con pA >= 0,95, motor solo tras una apuesta | 85,8 | 71,3 | +8,6 (0,9) | -4,5 (1,2) | 58 | -5 007 |
+| 2 | 9 | Solo la ambición: sin apuesta en A, motor desde D = 0 | 81,4 | 79,7 | +4,2 (1,0) | +3,8 (1,0) | 92 | -8 199 |
+| 3 | 1 y 9 | Las dos: pA >= 0,95 y motor desde D = 0 | 83,4 | 82,4 | +6,1 (0,8) | +6,5 (0,8) | 108 | -8 264 |
+| 4 | cabida | Lo mismo en forma de placa (fase A de 2 bytes por celda, motor comprimido de 8 tramos, clase con histéresis): **C1** | 83,0 | 81,9 | +5,7 (0,8) | +6,1 (0,8) | 111 | -8 106 |
+| 5 | 8 | C1 con margen de 2 por acción de diferencia en el candado | 83,4 | 82,8 | +6,2 (0,8) | +6,9 (0,8) | 148 | -10 637 |
+| 6 | 3 | C1 con la ambición solo si la clase de v² al primer extremo es 5 o más: **C2** | 84,4 | 77,0 | +7,2 (0,8) | +1,2 (1,0) | 79 | -8 132 |
+| 7 | 6 | C1 sobre un clon de la banda 30 | 83,7 | 82,7 | +6,5 (0,8) | +6,8 (0,8) | 372 | -24 597 |
+
+pA es la probabilidad, según el modelo de la sección 13, de que el 255 llegue antes que el 100 dado el precio, los ticks restantes y la clase de v². Los pasos 1 a 3 usan el motor V2 con la tabla completa, que no cabe; el paso 4 es lo que cabría.
+
+Lectura por arista:
+
+- **Arista 1 (fase A).** La apuesta de V3 con (b) gana casi siempre en el caso B y pierde en el S. Exigir pA >= 0,95 deja solo las apuestas casi seguras: se apuesta en 60,7 % de las rondas B (52,6 % cierran candado de inmediato con la apuesta ganada) y en 3,2 % de las S. Hay meseta: con pA de 0,90, 0,95, 0,97 y 0,99 y ambición (motor completo o de placa), nd va de 82,4 a 83,6 y g de 81,5 a 82,4. El tamaño importa menos: 1/8 y 1/4 dan +2,1 / +1,2 y +1,9 / +1,5 sobre V4b; posición completa, -5,0 / -4,8. La regla solo por probabilidad (sin la tabla) queda dentro de la frontera (84,1 / 73,5 con 0,95 y sin ambición).
+- **Arista 9 (ambición).** Con D = 0 al primer extremo, el motor de V2 sale a ganarle 100 al clon y cierra. En el caso S lo logra en 63,7 % de las rondas (D media +246) y en el resto pierde poco (-402). Con el índice, que cuenta veces y no montos, eso es mejor que la apuesta de la fase A, que en el caso S dejaba 31,7 % de rondas sin recuperar con -2 346.
+- **Arista 3 (regímenes).** El motor desde D = 0 cierra candado en 33 % a 52 % de las rondas S con clase de v² de 0 a 3 y en 91 % a 96 % con clases 6 y 7. Condicionarlo a la clase no corre la frontera: es una perilla entre C3 y C1 (clase >= 4: 83,7 / 79,5; >= 5: 84,4 / 77,0; >= 6: 85,3 / 74,1). Condicionarlo al tiempo restante no cambia nada (±0,1).
+- **Arista 8 (mecánica de órdenes).** Las rondas en candado que terminan con D negativa (10,0 % en S y 4,0 % en B con C1) salen del cierre: el candado se decide con D >= 100 al precio actual, pero igualar al clon toma dos o tres órdenes a los precios siguientes. Exigir 2 más por cada acción de diferencia las baja a 2,3 % y 0,9 % y suma +0,5 (0,2) / +0,9 (0,2) sobre C1. Con 4 por acción ya resta. No lo incluí en C1 porque sube el déficit contra la banda 40 de 111 a 148; queda como ajuste opcional.
+- **Arista 6 (fase D).** Ver 15.7. Lo único que sirve es cambiar la banda entera: sobre un clon de la banda 30, C1 y C3 suben +0,7 y +1,2 de nd.
+- **Arista 2 (cola de V4b).** La cola se resuelve por otro lado: sin la apuesta grande de la fase A, el peor torneo contra la banda 40 pasa de -28 180 a -8 106 sin ningún freno.
+
+### 15.5 Finalistas
+
+Tres puntos de la misma frontera, todos en forma de placa (fase A con pA >= 0,95 en 2 bytes por celda, motor V2 comprimido de 8 tramos en las fases B, C y D, candado copiar con M 100):
+
+- **C1:** el motor corre siempre desde el primer extremo (ambición siempre).
+- **C2:** el motor corre sin apuesta previa solo si la clase de v² al primer extremo es 5 o más.
+- **C3:** el motor corre solo después de una apuesta.
+
+`v5_finalistas.txt`:
+
+| Estrategia | nd (ee) | g (ee) | Δnd contra b40 (ee) | Δg contra b40 (ee) | Δnd contra V4b (ee) | Δg contra V4b (ee) | Déficit ponderado (ee) | Órdenes |
+|---|---|---|---|---|---|---|---|---|
+| Banda 40 sola | 87,9 (0,5) | 45,5 (0,6) | | | +10,7 (1,0) | -30,3 (1,3) | 126 (7) | 3,8 |
+| V4b | 77,2 (0,9) | 75,8 (0,9) | -10,7 (1,0) | +30,3 (1,3) | | | 262 (14) | 7,2 |
+| **C1** | 83,0 (0,7) | 81,9 (0,7) | -5,0 (0,8) | +36,4 (1,0) | +5,7 (0,8) | +6,1 (0,8) | 157 (8) | 6,6 |
+| **C2** | 84,4 (0,5) | 77,0 (1,2) | -3,5 (0,5) | +31,5 (1,5) | +7,2 (0,8) | +1,2 (1,0) | 149 (7) | 5,3 |
+| **C3** | 85,7 (0,5) | 71,2 (1,5) | -2,3 (0,4) | +25,6 (1,9) | +8,4 (0,9) | -4,7 (1,2) | 145 (7) | 4,6 |
+| Banda 30 sola | 90,0 (0,3) | 44,7 (0,7) | +2,1 (0,4) | -0,9 (0,4) | +12,8 (0,9) | -31,2 (1,3) | 158 (11) | 3,8 |
+| C1 sobre la banda 30 | 83,7 (0,7) | 82,7 (0,7) | -4,2 (0,9) | +37,1 (1,0) | +6,5 (0,8) | +6,8 (0,8) | 192 (11) | 6,4 |
+| C3 sobre la banda 30 | 86,9 (0,5) | 71,3 (1,5) | -1,1 (0,6) | +25,7 (1,9) | +9,6 (0,9) | -4,6 (1,3) | 181 (10) | 4,4 |
+| Sin fase A, motor de 16 tramos, ambición siempre | 81,0 (0,5) | 79,0 (0,5) | -6,9 (0,6) | +33,5 (0,7) | +3,8 (1,1) | +3,2 (1,1) | 150 (6) | 6,5 |
+
+**En unidades de la nota** (`v5_puntaje.txt`). El puntaje es lineal entre el peor grupo (0) y el mejor (2). Con un campo supuesto de tres (nosotros, el mejor rival del pronóstico y un peor grupo con patrimonio fijo), el puntaje de un torneo es 2 si no quedamos debajo del rival y 2 (P - w) / (R - w) si quedamos, con P y R los promedios y w el peor. Es un supuesto sobre el campo, no una medición; sirve para poner nd y el déficit en la misma unidad.
+
+| Estrategia | Peor grupo en 10 000: puntaje (ee) | Diferencia con la banda 40 (ee) | Peor grupo en 15 000: puntaje (ee) | Diferencia con la banda 40 (ee) |
+|---|---|---|---|---|
+| Banda 40 sola | 1,9802 (0,0010) | | 1,9551 (0,0037) | |
+| Banda 30 sola | 1,9763 (0,0014) | -0,0039 (0,0008) | 1,9533 (0,0032) | -0,0017 (0,0017) |
+| C3 | 1,9769 (0,0010) | -0,0033 (0,0008) | 1,9479 (0,0039) | -0,0072 (0,0019) |
+| C2 | 1,9761 (0,0012) | -0,0042 (0,0011) | 1,9455 (0,0040) | -0,0095 (0,0025) |
+| C1 | 1,9745 (0,0014) | -0,0057 (0,0015) | 1,9422 (0,0045) | -0,0129 (0,0033) |
+| C3 sobre la banda 30 | 1,9721 (0,0014) | -0,0081 (0,0011) | 1,9412 (0,0040) | -0,0139 (0,0025) |
+| C1 sobre la banda 30 | 1,9697 (0,0016) | -0,0105 (0,0015) | 1,9348 (0,0046) | -0,0203 (0,0034) |
+| V4b | 1,9588 (0,0020) | -0,0215 (0,0022) | 1,9163 (0,0048) | -0,0388 (0,0043) |
+| Extremos puros | 1,9426 (0,0031) | -0,0376 (0,0023) | 1,8918 (0,0069) | -0,0633 (0,0042) |
+
+Con esta cuenta la banda 40 sola es la mejor y todo lo demás, salvo V4b y extremos, queda a menos de 0,013 de los 2 puntos. La banda 30 no se distingue de la banda 40 si el peor grupo está en 15 000 (-0,0017, ee 0,0017) y queda algo abajo si está en 10 000.
+
+**Si en el campo hay varios rivales a la vez** (mismo archivo). El índice supone un solo mejor rival, de un tipo sorteado con los pesos. Una competencia con varios grupos se parece más a un campo de K rivales donde el mejor de cada torneo es el de mayor promedio. Primero, campos sorteados: K rivales, cada uno de un tipo sorteado con los pesos del pronóstico (pueden repetirse), los mismos campos para todas las estrategias. Con K = 1 es el índice. Celda: nd / g / diferencia de puntaje con la banda 40 sola (ee), con el peor grupo en 10 000.
+
+| Estrategia | K = 1 | K = 3 | K = 5 | K = 8 |
+|---|---|---|---|---|
+| Banda 40 sola | 88,0 / 45,7 | 74,6 / 18,3 | 67,3 / 10,9 | 60,7 / 6,3 |
+| Banda 30 sola | 90,0 / 44,8 / -0,0041 (0,0008) | 77,8 / 18,6 / -0,0093 (0,0020) | 71,1 / 12,1 / -0,0117 (0,0025) | 65,2 / 7,7 / -0,0128 (0,0029) |
+| C3 | 85,8 / 71,3 / -0,0032 (0,0008) | 72,4 / 52,5 / -0,0023 (0,0012) | 65,7 / 45,6 / -0,0011 (0,0013) | 59,6 / 40,1 / +0,0004 (0,0014) |
+| C2 | 84,5 / 77,2 / -0,0041 (0,0010) | 71,1 / 60,9 / -0,0030 (0,0016) | 64,5 / 54,3 / -0,0014 (0,0018) | 58,6 / 48,6 / +0,0005 (0,0019) |
+| C1 | 83,1 / 82,0 / -0,0057 (0,0014) | 69,6 / 68,1 / -0,0046 (0,0021) | 63,2 / 61,7 / -0,0026 (0,0023) | 57,6 / 56,0 / -0,0004 (0,0025) |
+| V4b | 77,3 / 75,9 / -0,0215 (0,0022) | 63,7 / 61,8 / -0,0254 (0,0033) | 58,6 / 56,7 / -0,0233 (0,0037) | 54,3 / 52,4 / -0,0199 (0,0040) |
+
+Lo que muestra: a medida que el campo crece, la banda 40 sola sigue quedando arriba (60,7 % con 8 rivales) pero casi nunca sola (6,3 %), porque empata con cualquier clon; los candidatos quedan arriba unas pocas veces menos (C3 -1,1 con ee 0,7 y C1 -3,1 con ee 1,1 con 8 rivales) y casi siempre solos (40 % y 56 %). En nota, el costo de un desempate se achica con el campo y llega a cero con 8 rivales; no se vuelve ganancia. La banda 30 gana nd con el campo (+2,0 con un rival, +4,5 con 8) y pierde nota (de -0,004 a -0,013).
+
+Dos campos fijos como extremos. Con los seis rivales juntos (todas las bandas presentes a la vez), la banda 40 sola queda arriba en 48,6 % de los torneos y nunca sola; C1 en 47,2 % (-1,3, ee 1,2) y sola en 45,8 %, con +0,0045 de nota (ee 0,0028); C3, -0,1 de nd y +0,0032 (0,0016). Con solo ext, f5 y la banda 40, C1 pierde 9,0 puntos de nd y 0,0131 de nota, y C3, 3,8 y 0,0062.
+
+Contra cada rival, todas las ventanas (Δ por ronda es la diferencia media de patrimonio; lo demás, por torneo de 3 rondas):
+
+| Estrategia | Rival | Δ por ronda (ee) | No debajo % (ee) | Gana % (ee) | Pierde % | Déficit | p5 | Peor |
+|---|---|---|---|---|---|---|---|---|
+| banda 40 | ext | +806 (49) | 88,6 (0,7) | 32,9 (1,1) | 11,4 | 74 | -597 | -3632 |
+| banda 40 | f5 | +2363 (99) | 96,3 (0,5) | 91,7 (1,5) | 3,7 | 12 | +0 | -2476 |
+| banda 40 | b30 | +103 (30) | 70,5 (1,2) | 14,1 (0,7) | 29,5 | 220 | -1154 | -11734 |
+| banda 40 | b50 | -39 (35) | 83,3 (1,0) | 34,9 (1,2) | 16,7 | 317 | -2352 | -39429 |
+| banda 40 | b60 | -55 (51) | 71,0 (1,5) | 32,6 (1,3) | 29,0 | 468 | -2589 | -16154 |
+| banda 40 | b40 | +0 (0) | 100,0 (0,0) | 0,0 (0,0) | 0,0 | 0 | +0 | +0 |
+| V4b | ext | +1039 (60) | 73,7 (1,3) | 71,9 (1,3) | 26,3 | 233 | -1495 | -7357 |
+| V4b | f5 | +2595 (91) | 96,1 (0,5) | 96,0 (0,5) | 3,9 | 25 | +135 | -5472 |
+| V4b | b30 | +336 (49) | 63,6 (1,4) | 61,7 (1,4) | 36,4 | 417 | -2100 | -31223 |
+| V4b | b50 | +194 (42) | 66,4 (1,2) | 64,9 (1,2) | 33,6 | 507 | -2784 | -36673 |
+| V4b | b60 | +177 (59) | 61,3 (1,3) | 59,9 (1,4) | 38,7 | 589 | -3032 | -18870 |
+| V4b | b40 | +232 (41) | 71,7 (1,5) | 68,5 (1,5) | 28,3 | 329 | -1887 | -28180 |
+| C1 | ext | +957 (55) | 81,8 (1,0) | 80,4 (1,0) | 18,2 | 111 | -865 | -5920 |
+| C1 | f5 | +2514 (91) | 97,1 (0,4) | 97,0 (0,4) | 2,9 | 19 | +209 | -4124 |
+| C1 | b30 | +254 (35) | 67,8 (1,1) | 66,2 (1,1) | 32,2 | 238 | -1329 | -12479 |
+| C1 | b50 | +112 (40) | 74,8 (1,1) | 73,5 (1,2) | 25,2 | 359 | -2328 | -37167 |
+| C1 | b60 | +96 (54) | 65,7 (1,4) | 64,6 (1,4) | 34,3 | 470 | -2523 | -15839 |
+| C1 | b40 | +151 (20) | 84,7 (1,1) | 82,9 (1,1) | 15,3 | 111 | -815 | -8106 |
+| C2 | ext | +924 (52) | 83,6 (0,8) | 73,5 (1,7) | 16,4 | 105 | -847 | -4647 |
+| C2 | f5 | +2480 (89) | 97,3 (0,3) | 97,1 (0,4) | 2,7 | 14 | +198 | -3491 |
+| C2 | b30 | +221 (34) | 68,4 (1,1) | 58,0 (1,8) | 31,6 | 233 | -1282 | -12479 |
+| C2 | b50 | +79 (40) | 77,3 (1,1) | 68,4 (1,8) | 22,7 | 349 | -2315 | -37973 |
+| C2 | b60 | +63 (55) | 67,5 (1,4) | 60,2 (1,8) | 32,5 | 473 | -2554 | -16008 |
+| C2 | b40 | +118 (17) | 88,5 (0,8) | 72,0 (2,3) | 11,5 | 79 | -577 | -8132 |
+| C3 | ext | +896 (51) | 85,2 (0,8) | 66,0 (2,1) | 14,8 | 101 | -826 | -4647 |
+| C3 | f5 | +2452 (89) | 97,3 (0,3) | 97,0 (0,4) | 2,7 | 12 | +182 | -3547 |
+| C3 | b30 | +193 (33) | 69,0 (1,1) | 49,4 (2,3) | 31,0 | 236 | -1279 | -11734 |
+| C3 | b50 | +51 (39) | 79,1 (1,0) | 62,6 (2,0) | 20,9 | 343 | -2325 | -39429 |
+| C3 | b60 | +34 (55) | 68,6 (1,4) | 55,5 (2,0) | 31,4 | 474 | -2549 | -16154 |
+| C3 | b40 | +89 (14) | 92,5 (0,8) | 55,2 (3,3) | 7,5 | 56 | -336 | -4571 |
+
+Una ronda, por caso (S: el 100 llega primero; B: el 255):
+
+| Estrategia | Caso | Candado tras apuesta % (D media) | Candado tras el motor % (D media) | Sin recuperar % (D media) | Sin desviar % | Rondas en candado con D final negativa % | Δ contra la banda 40 (ee) |
+|---|---|---|---|---|---|---|---|
+| V4b | S | 11,8 (+2422) | 30,4 (+300) | 31,7 (-2346) | 26,2 | 7,1 | -366 (55) |
+| V4b | B | 64,3 (+1617) | 4,9 (+224) | 2,1 (-2121) | 28,8 | 0,8 | +1005 (48) |
+| C1 | S | 0,0 | 63,7 (+246) | 36,3 (-402) | 0,0 | 10,0 | +11 (20) |
+| C1 | B | 52,6 (+624) | 37,8 (+330) | 9,6 (-1264) | 0,0 | 4,0 | +331 (28) |
+| C2 | S | 0,0 | 19,6 (+289) | 5,5 (-1743) | 74,9 | 12,9 | -39 (17) |
+| C2 | B | 52,6 (+624) | 20,0 (+326) | 5,1 (-1432) | 22,3 | 3,5 | +320 (23) |
+| C3 | S | 0,0 | 0,5 (+383) | 2,7 (-2877) | 96,9 | 9,7 | -76 (13) |
+| C3 | B | 52,6 (+624) | 4,8 (+289) | 3,3 (-1276) | 39,3 | 1,0 | +300 (20) |
+
+En el caso S, C3 casi nunca se desvía y aun así pierde 76 por ronda: el 3,2 % de rondas S con apuesta sale de series que llegaron a pA >= 0,95 y después cayeron al 100.
+
+### 15.6 Validación por año y por grupo de empresas
+
+Diferencia pareada del índice en cada subconjunto (60 000 sorteos dentro de cada uno). Celda: Δnd (ee) / Δg (ee).
+
+Contra V4b:
+
+| Estrategia | 2020 | 2021 | 2022 | 2023 | 2024 | tec | fin | sal | con | ind |
+|---|---|---|---|---|---|---|---|---|---|---|
+| C1 | +9,2 (2,4) / +9,7 (2,5) | +4,1 (1,4) / +4,2 (1,4) | +5,5 (1,7) / +5,8 (1,6) | +3,7 (1,3) / +4,0 (1,3) | +6,3 (1,7) / +6,7 (1,7) | +5,1 (1,3) / +5,5 (1,3) | +6,2 (1,4) / +6,5 (1,3) | +7,5 (1,4) / +7,8 (1,4) | +7,0 (1,2) / +7,3 (1,2) | +2,2 (1,3) / +2,7 (1,2) |
+| C2 | +10,3 (2,3) / +3,6 (3,6) | +5,8 (1,7) / -1,1 (1,0) | +6,6 (2,0) / +2,9 (1,1) | +5,2 (1,7) / -0,8 (2,0) | +8,2 (1,6) / +0,8 (1,6) | +6,5 (1,4) / +0,5 (1,2) | +7,8 (1,6) / +1,3 (1,6) | +8,3 (1,3) / +2,5 (1,7) | +8,8 (1,3) / +2,0 (1,6) | +3,9 (1,4) / -1,2 (1,3) |
+| C3 | +11,4 (2,5) / -4,6 (5,2) | +7,5 (1,7) / -6,9 (2,0) | +7,4 (2,3) / -2,5 (1,6) | +6,6 (1,9) / -5,9 (2,2) | +9,2 (1,7) / -5,0 (1,3) | +7,6 (1,4) / -5,3 (2,0) | +8,9 (1,7) / -5,6 (1,6) | +9,4 (1,4) / -4,3 (1,9) | +10,1 (1,3) / -2,9 (1,8) | +5,1 (1,3) / -6,8 (1,5) |
+| Sin fase A | +7,9 (2,8) / +7,8 (3,0) | +4,0 (1,8) / +3,3 (1,9) | +3,3 (3,5) / +2,6 (3,6) | +0,2 (2,2) / -0,6 (2,3) | +4,1 (1,7) / +3,6 (1,9) | +2,1 (1,7) / +1,4 (1,8) | +6,1 (1,5) / +5,6 (1,6) | +5,7 (1,7) / +5,1 (1,8) | +5,8 (1,5) / +5,0 (1,6) | -0,7 (1,5) / -1,2 (1,5) |
+
+Contra la banda 40:
+
+| Estrategia | 2020 | 2021 | 2022 | 2023 | 2024 | tec | fin | sal | con | ind |
+|---|---|---|---|---|---|---|---|---|---|---|
+| C1 | -3,5 (1,8) / +36,7 (3,0) | -6,8 (1,1) / +34,3 (1,5) | -3,5 (1,7) / +36,3 (3,4) | -5,0 (1,7) / +37,8 (1,9) | -6,1 (1,3) / +37,1 (2,2) | -4,2 (1,2) / +38,5 (2,1) | -5,8 (1,6) / +35,4 (1,8) | -4,7 (1,3) / +35,0 (1,4) | -5,5 (1,3) / +35,8 (1,7) | -4,9 (1,0) / +37,3 (1,7) |
+| C2 | -2,4 (1,1) / +30,6 (4,4) | -5,1 (0,9) / +29,0 (2,2) | -2,5 (1,4) / +33,4 (4,5) | -3,5 (1,0) / +33,0 (2,5) | -4,2 (1,0) / +31,2 (2,7) | -2,8 (1,0) / +33,5 (2,3) | -4,2 (1,3) / +30,2 (2,3) | -3,9 (1,0) / +29,8 (1,6) | -3,7 (1,0) / +30,5 (2,1) | -3,3 (0,7) / +33,5 (1,9) |
+| C3 | -1,2 (0,8) / +22,3 (6,0) | -3,4 (0,9) / +23,2 (3,6) | -1,7 (1,1) / +28,0 (5,1) | -2,1 (0,8) / +27,8 (2,8) | -3,2 (0,9) / +25,4 (2,4) | -1,7 (0,7) / +27,6 (3,0) | -3,1 (1,0) / +23,3 (2,6) | -2,8 (1,0) / +22,9 (2,0) | -2,5 (0,9) / +25,6 (2,4) | -2,0 (0,5) / +27,9 (2,2) |
+| Banda 30 sola | +1,7 (1,0) / -1,4 (0,8) | +1,9 (0,7) / -1,1 (1,0) | +3,9 (0,6) / +1,1 (0,9) | +2,2 (0,5) / -0,6 (0,9) | +0,6 (0,7) / -2,5 (0,9) | +2,5 (0,7) / -0,3 (1,0) | +2,3 (0,7) / -0,2 (0,9) | +1,9 (0,6) / -1,3 (0,8) | +1,3 (0,9) / -1,8 (1,1) | +2,3 (0,6) / -0,7 (0,9) |
+
+Lo que queda en pie con la regla de descartar lo que cambia de signo:
+
+- **C1 contra V4b:** las dos cifras positivas en los diez subconjuntos. Se sostiene.
+- **C2 contra V4b:** nd positivo en los diez; g cambia de signo (2021, 2023 e industria) y en total no pasa 2 ee (+1,2, ee 1,0). C2 mejora a V4b en nd y la iguala en g.
+- **C3 contra V4b:** nd positivo y g negativo en los diez. Es un intercambio, no una mejora en las dos cifras.
+- **Sin fase A contra V4b:** cambia de signo en 2023 y en industria. Descartada como mejora; queda como dato (es la más simple: no necesita la tabla de la fase A).
+- **Los tres contra la banda 40:** nd negativo y g positivo en los diez. El intercambio es estable.
+- **Banda 30 contra banda 40:** nd positivo en los diez (en 2024 y en consumo, bajo 2 ee).
+
+### 15.7 Lo que se probó y no sirvió
+
+Diferencias contra V4b salvo que se diga otra cosa (nd / g). Salidas: `v5_motor.txt`, `v5_faseA.txt`, `v5_faseD.txt`, `v5_compuestas.txt`, `v5_ambicion.txt`, `v5_fino.txt`, `v5_regimen.txt`, `v5_base30.txt`, `v5_mezclas.txt`, `v5_diag.txt`.
+
+| Arista | Qué se probó | Resultado |
+|---|---|---|
+| 6 | Niveles de compra y venta en la fase D por caso (156 bandas puras por caso y 256 combinaciones de los dos casos), contra la banda 40 sola | Plano: casi todo entre -1 y +1 de nd. No recomprar en el caso S: -2,2. Vender en 220 en el caso B (como Fila 5): +0,2. Lo mejor es la banda 30 entera, +2,1; con niveles cercanos (compra 130, venta 215 a 235) queda entre +1,6 y +1,8 |
+| 2 | Freno por rendimiento del clon: deja de desviarse cuando el clon completa 1 o 2 ventas en la fase D y seguimos abajo | Índice igual (0,0 / 0,0); el peor torneo contra la banda 40 baja de -28 180 a -19 238 y -23 310. No hace daño y no arregla la cola |
+| 2 | Freno cuando el motor pierde 500, 1000 o 2000 desde que empezó; piso fijo en D de 1000, 2000 o 4000 | De -2,2 / -2,1 (piso 4000) a -4,2 / -4,1 (freno 500). Cortan la cola (peor de -5 969 a -10 362) a costa de las dos cifras |
+| 2 | Freno por crecimiento del patrimonio del clon desde el primer extremo | Mal definido: en el caso S el clon siempre crece entre el 100 y el 255, así que apaga el motor y da lo mismo que no tenerlo (-4,5 / -4,7) |
+| 3 | Audacia al final: con 500 a 4000 ticks restantes y D negativa, jugar lo contrario del clon, comprar o quedarse en caja | De -0,6 / -0,5 a -7,1 / -7,0. Con "lo contrario" en los últimos 2000 ticks la diferencia media con la banda 40 pasa de +232 a -165: la posición contraria a la del clon tiene deriva en contra |
+| 3 | M de 1, 25 y 400; M 1 al final; motor solo en algunas fases o tramos de tiempo | M: de -0,1 a -0,3. M 1 con 2000 o menos restantes: +0,1 / 0,0. Motor solo en la fase B: -0,6 / -0,6. Motor solo con más de 10 000 restantes: -1,7 / -2,0 |
+| 3 y 9 | Bandas propias como motor (E2), de 130/225 a 170/185 | Tras una apuesta: de -3,0 / -3,3 a -4,5 / -4,8. Con ambición y sin fase A: nd 85,0 a 87,1 y g 47,7 a 62,8, dentro de la frontera que arman C3 y C1 (no usan tablas) |
+| 7 | Entrada cerca del piso en la fase C y salida cerca del techo en la B (E3 con k de 3, 5 y 10), con ambición | nd 72,1 a 73,1 y g 70,4 a 71,3: bajo V4b por 4 a 5 puntos. En la fase C el 100 está garantizado, así que comprar antes regala niveles |
+| 1 | Posición completa en la fase A; V3 sin la guarda (b) | -5,0 / -4,8 y -1,9 / -1,8 |
+| 1 | Solo ciertas clases de v²; solo con mucho tiempo por delante | Clases 0 a 1 (parecido al módulo A de la sección 12): 85,5 / 56,6 con el motor, dominado por pA >= 0,95 (85,8 / 71,3). Con 10 000 o más ticks restantes: -0,5 / -0,5 |
+| 9 | Cobertura: mezclas de bandas como subcuentas (aproximadas por el promedio de los patrimonios), contra la banda 40 sola | Déficit ponderado 121 a 132 contra 126 (sin diferencia) y nd entre 1,2 y 6,2 puntos más bajo. Con extremos en la mezcla el déficit sube a 158 o más |
+| 5 | Motor V2 con objetivo lineal en vez de logarítmico (lo más barato para sondear otro objetivo) | -0,3 / -0,1 sobre C1 y -0,9 / -1,1 sin fase A |
+| 4 | Varios rivales emulados | No encontré una regla que lo aproveche. Mientras el clon está en caja, D contra extremos y D contra el clon se mueven igual, así que llevar las dos no agrega información; cuando difieren, la diferencia es el resultado de la banda del clon, que no se puede cubrir sin dejar de empatar con él. Copiar a otro rival es cambiar de base: C3 sobre b30, b50 y b60 da 86,9, 83,2 y 81,3 de nd |
+| 10 | Memoria entre rondas (dato aparte, no entra en ningún candidato): si la D acumulada ya es 100 o más, la ronda siguiente copia a la banda 40 entera | C1: de 83,0 / 81,9 a 84,6 / 83,8. C3: +0,4 / +0,4. V4b: de 77,2 / 75,8 a 81,4 / 80,1. Saber qué ronda es por el período del tick no agrega nada si no hay memoria: sin ella, las tres rondas se juegan igual |
+
+### 15.8 Por qué ningún desempate pasa a la banda 40 en "no queda debajo"
+
+Con la banda 40 en la fase D, un torneo contra un rival termina de una de tres formas: la banda gana por lo que hizo en la fase D, pierde por lo mismo, o empata porque las dos reglas hicieron lo mismo. Un desempate (una apuesta en la fase A o el motor) le suma a nuestra cuenta una cantidad chica con signo. Si acierta, convierte empates en victorias: sube g y deja nd igual. Si falla, convierte empates en derrotas: baja nd. Para subir nd tendría que dar vuelta derrotas grandes, y un desempate de 100 a 600 por ronda no alcanza para eso salvo contra Fila 5 (ahí C1 sube de 96,3 a 97,1).
+
+La cota: un desempate que nunca fallara dejaría nd en 87,9 y subiría g hasta cerca de 87,9. C1 está en 83,0 / 81,9, así que a un motor mejor le quedan a lo más 4,9 puntos de nd y 6 de g. Para pasar de 87,9 hay que cambiar la base, no el desempate, y la única base que lo logra aquí es una banda más ancha (15.3).
+
+### 15.9 El criterio, punto por punto
+
+Fijado antes de correr, en las ajenas. Tope del punto 3: lo que pierde la banda 40 sola (11,4 % contra ext y 3,7 % contra f5) más 2 puntos.
+
+| Punto | C1 | C2 | C3 |
+|---|---|---|---|
+| 1a. Índice mayor que el de V4b por más de 2 ee (las dos cifras) | nd +5,7 (0,8), g +6,1 (0,8): **sí** | nd +7,2 (0,8) sí, g +1,2 (1,0) no: **no** | nd +8,4 (0,9) sí, g -4,7 (1,2) no: **no** |
+| 1b. Índice mayor que el de la banda 40 sola por más de 2 ee (las dos cifras) | nd -5,0 (0,8) no, g +36,4 (1,0) sí: **no** | nd -3,5 (0,5) no, g +31,5 (1,5) sí: **no** | nd -2,3 (0,4) no, g +25,6 (1,9) sí: **no** |
+| 2. Diferencia media no negativa contra cada rival | +957, +2514, +254, +112, +96 y +151: **sí** | +924, +2480, +221, +79, +63 y +118: **sí** | +896, +2452, +193, +51, +34 y +89: **sí** |
+| 3. Contra ext y f5 no pierde más torneos que la banda 40 sola, con 2 puntos de tolerancia (topes 13,4 % y 5,7 %) | ext 18,2 %, f5 2,9 %: **no** (falla en ext) | ext 16,4 %, f5 2,7 %: **no** | ext 14,8 %, f5 2,7 %: **no** |
+| 4. Cabe en la placa | sí (estimación, 15.10) | sí | sí |
+
+**Ningún candidato cumple el criterio.** No fuerzo ninguno.
+
+Dos notas para leer la tabla:
+
+- Si las dos cifras del índice se promedian en una sola, (nd + g) / 2, el punto 1 sí se cumple para los tres: C1 82,4 contra 66,7 de la banda 40 (+15,7, ee 0,8) y 76,5 de V4b (+5,9, ee 0,8); C2 +14,0 (1,0) y +4,2 (0,8); C3 +11,7 (1,0) y +1,9 (0,8). No es la lectura que fijé, y el punto 3 falla igual.
+- Los candidatos sobre la banda 30 fallan además el punto 2: la banda 30 pierde en media contra las bandas 40, 50 y 60 (-103, -142 y -158 por ronda), y C3 sobre la banda 30 queda en -17, -56 y -72. C3 sobre la banda 30 sí cumple el punto 3 (11,7 % y 2,4 %).
+
+### 15.10 Cabida en la placa
+
+Es un conteo sobre la referencia, como en 13.6, no un programa escrito. La aritmética (producto por duplicaciones, recorte y cociente por restas, clase de placa) es la de `ref/cotas/optimo_placa.py`, ya probada de forma exhaustiva, y el hilo del clon con la cuenta propia y D es el de la parte 6 de la sección 14 (249 operaciones en el peor tick, D exacto en 4,8 millones de ticks).
+
+| Pieza | C1, C2 y C3 | Sin fase A | Banda 30 sola | V4b como se midió |
+|---|---|---|---|---|
+| Tabla de la fase A | 256 bytes: por celda de clase y tramo, nivel de entrada (el mayor entre el de la tabla de V3 y el de pA >= 0,95) y nivel de salida | no tiene | no tiene | 512 bytes (V3 con (b), 13.6) |
+| Tabla del motor en B, C y D | 768 bytes: 3 fases por 8 clases por 8 tramos por 4 umbrales | 1536 con 16 tramos (81,0 / 79,0) o 768 con 8 (80,6 / 78,4) | no tiene | La tabla completa de V2 no cabe. Con la comprimida de 8 tramos serían 768 |
+| Total de tablas | **1024 de 1536 bytes** | 1536 o 768 | 0 (dos constantes en la tabla de parámetros) | 1280 con el motor comprimido, que no es lo que se midió |
+| Celdas lógicas | 0 | 0 | 0 | 0 |
+
+Operaciones por tick, peor caso, con un reparto de cuatro hilos:
+
+| Hilo | Trabajo | Operaciones |
+|---|---|---|
+| 0, corredor | Lee `PRICE`, publica precio y tick, fases y caso, elige el byte según el modo (fase A, motor, copia del clon), escribe `DECISION` | unas 40 |
+| 1, régimen y tablas | S2 y clase con histéresis (40), dirección de la celda (6), fase A: 2 cargas y 2 comparaciones (4), motor: 4 cargas, 2 comparaciones y su posición interna (12). El tick en que fija la media posición suma el cociente por restas (91) | unas 65; 155 en ese tick |
+| 2, clon | La banda 40 emulada: ejecuta su orden (73), decide (8), D con el producto de la diferencia de acciones (44), candado (hasta 45), lectura y lazo (6) | unas 176 |
+| 3, reloj y cuenta propia | Tick y tramo (10), repite la orden propia ejecutada (73), publica (2) | unas 85 |
+
+Si la cuenta propia va en el mismo hilo que el clon, ese hilo llega a las 249 operaciones medidas en la sección 14 y el camino de respuesta queda en unos 1050 ciclos de 1131: cabe, pero casi sin margen. Con la cuenta propia en el hilo 3, en paralelo con el clon, el camino en serie es precio (4), cuenta propia (85), D y candado (89) y byte (10): unas 190 instrucciones de cada hilo, unos 760 ciclos de 1131. El tope de 565 operaciones por hilo no se acerca en ningún caso.
+
+Lo que no medí y hay que confirmar antes de comprometerse: el tamaño del programa (las rutinas de producto y cociente se comparten entre hilos, pero el programa actual ya ocupa su parte de las 512 palabras) y el camino de respuesta real con el sondeo entre hilos.
+
+Riesgo que el índice no ve: todo el desempate depende de llevar dos cuentas exactas (la propia y la del clon) con caja 10 000 y comisión 5. Si el día de la competencia cambian, D queda mal calculada y el candado cierra donde no debe. La banda 40 y la banda 30 solas no dependen de eso.
+
+Regla 4: las tablas salen del modelo del paseo normalizado (sección 13) y de parámetros; no hay precios guardados. Emular al clon es calcular con la serie recibida.
+
+### 15.11 Arista 5: programación dinámica con objetivo relativo (no corrida)
+
+No la corrí. Dejo la formulación, el costo y lo que podría agregar.
+
+**Formulación.** Lo que importa del estado relativo es cuánto falta para el candado. Mientras copiamos al clon, la razón entre los dos patrimonios no cambia, así que el estado es el déficit relativo e (en logaritmo). Mientras nos desviamos (comprados con el clon en caja, o al revés), el candado se alcanza cuando el precio cruza un nivel fijo p* = x0 exp(±e), con x0 el precio al desviarse: es un problema de primer paso. El estado queda en (fase, precio, ticks restantes, estado del clon, e o p*) y el objetivo es la probabilidad de llegar al candado antes del final, con un castigo por el déficit que quede.
+
+**Costo.** Con la recurrencia por tick de `paseo_optimo.py`, son unas 930 filas de 156 niveles por tick en vez de una decena: del orden de una hora por clase de v² en un núcleo, y la maximización estado por estado en Python puro lo multiplica. Con pasos de 10 ticks baja a unos 15 minutos por clase, a cambio de aproximar los cruces dentro del paso justo cerca de los extremos, que es donde las fases B y C deciden. Más el simulador del motor nuevo y su control. No entraba en el presupuesto con garantías.
+
+**Qué podría agregar.** La solución de primer orden ya está medida: maximizar el logaritmo esperado del patrimonio relativo al clon es lo mismo que maximizar el del propio (el del clon no depende de nosotros), y eso es V2; cerrar el candado al primer cruce es la parte de primer paso. La programación dinámica completa agregaría lo de segundo orden: desviarse más cuando se va abajo y queda poco tiempo. La cota de 15.8 dice que a un motor perfecto le quedan a lo más 4,9 puntos de nd y 6 de g sobre C1, y en ningún caso pasa a la banda 40 en nd. Las dos pruebas baratas en esa dirección salieron mal: la audacia al final (-0,6 a -7,1) y el objetivo lineal (-0,3 / -0,1).
+
+**¿Se puede comprimir la tabla?** La tabla relativa tiene dos dimensiones más que la de V2: el estado del clon y el nivel de déficit. Con la misma forma de umbrales por celda, 3 fases por 8 clases por 8 tramos por 2 estados del clon por 4 niveles de déficit por 4 bytes son unos 6 kB, contra 1,5 kB libres. Cabe solo si el déficit se reduce a dos estados (abajo o con candado), y eso es exactamente la máquina de modos con la tabla de V2 que ya se midió.
+
+### 15.12 Opciones, sin decidir
+
+El índice no elige solo, porque las dos cifras se intercambian. Sea λ cuánto vale ganar en vez de empatar arriba, como fracción de lo que vale no quedar debajo. Con las cifras de 15.5 y la banda 40 de base: con λ menor que 0,09 conviene la banda 40 sola; entre 0,09 y 0,22, C3; entre 0,22 y 0,29, C2; sobre 0,29, C1. Con "empatar arriba vale lo mismo que ganar", λ es 0.
+
+| Opción | Qué se gana | Qué se pierde |
+|---|---|---|
+| **Banda 40 sola** (lo que hay) | La que menos déficit ponderado tiene de todo lo probado (126) y la segunda en "no queda debajo" (87,9). Sin código nuevo, con R0, R1 y R2 ya pasando puertas. No depende de la caja ni de la comisión | Gana solo 45,5 % de los torneos: contra un clon exacto empata siempre y contra extremos empata 55,7 %. Si lo que se busca es quedar primero solo, es la peor de la tabla |
+| **Banda 30 sola** (dos constantes: compra en 130, venta en 225) | La más alta en "no queda debajo": 90,0 (+2,1, ee 0,4, en todos los años y grupos). Contra extremos pierde 7,6 % de los torneos en vez de 11,4 % y contra Fila 5 1,9 % en vez de 3,7 %. Mismo programa | Media: -103 por ronda contra la banda 40 (ee 30), y la sección 3 mostró que 140/215 es el óptimo en patrimonio. Déficit ponderado 158 contra 126 (+32, ee 6): cuando queda debajo de una banda más angosta, queda por más (déficit 323 contra la banda 40, 502 contra la 50, 593 contra la 60). No pasó por las cinco empresas con este índice. Cambia los bitstreams ya probados |
+| **C3** (apuesta solo con pA >= 0,95; motor solo tras una apuesta) | Gana 71,2 % de los torneos (+25,6) con el menor costo en "no queda debajo" entre los candidatos (-2,3). Déficit contra la banda 40 exacta: 56 | No cumple el criterio. Queda debajo 2,3 puntos más que la banda 40 y contra extremos pierde 14,8 % de los torneos. Programa nuevo de cuatro hilos con dos cuentas, tablas y candado, a un día del corte del algoritmo. Depende de caja 10 000 y comisión 5 |
+| **C2** (C3 más el motor desde D = 0 cuando la clase de v² es 5 o más) | Punto intermedio: 84,4 / 77,0 | Lo de C3, con 1,3 puntos más de torneos debajo. Contra V4b su g no se distingue (+1,2, ee 1,0, con cambios de signo) |
+| **C1** (C3 más el motor siempre) | La que más gana: 81,9 % de los torneos, y 82,9 % contra el clon exacto. Domina a V4b en las dos cifras, en déficit y en peor caso, en todos los años y grupos | No cumple el criterio. Queda debajo en 17 % de los torneos contra 12,1 % de la banda 40 sola, y contra extremos pierde 18,2 % contra 11,4 %. Mismo trabajo de programa que C3 |
+| **V4b** | Nada que C1 no dé | Dominada por C1. Además, como se midió no cabe (usa la tabla completa de V2) |
+
+**Recomendación (mía, etiquetada como tal): competir con la banda 40 sola, y no llevar ningún V5 a la placa.** Mis razones:
+
+1. El criterio se fijó antes de correr y ningún candidato lo cumple. El punto que falla es el más ligado al puntaje: los tres quedan debajo más veces que la banda 40, sobre todo contra extremos, que es la mitad del 60 % del pronóstico.
+2. Con la premisa del pedido (empatar arriba vale lo mismo que ganar), lo que cuenta es no quedar debajo y por cuánto. En esas dos medidas la banda 40 sola es mejor que C1, C2 y C3, y la cota de 15.8 dice que ningún desempate lo puede cambiar. En unidades de la nota, con un solo mejor rival la banda 40 sola queda primera y la diferencia con cualquiera de las otras opciones es de 0,003 a 0,013 de los 2 puntos. Con más rivales a la vez esa diferencia se achica hasta cero (campos sorteados de 8) y solo se invierte, por +0,003 a +0,005 y justo en 2 ee, si están las seis reglas juntas. En todos los casos, lo que un V5 puede mover de la nota es menos de una centésima y media.
+3. Un V5 exige un programa nuevo de cuatro hilos con contabilidad doble a un día del corte del algoritmo, y su ventaja depende de que la caja y la comisión sean las del testbench.
+
+Dos cosas que sí cambiaría si la decisión fuera otra:
+
+- **Si quedar primero solo vale algo** (λ sobre 0,1), o si se espera un campo con varias bandas distintas a la vez, el candidato es C3 o C1 según cuánto, y en ningún caso V4b: C1 la reemplaza con ventaja en todo lo medido. En un campo de 8 rivales sorteados con el pronóstico, C1 queda primera sola en 56 % de los torneos, C3 en 40 % y la banda 40 sola en 6 %.
+- **La banda 30 merece una decisión aparte.** Es la única opción que mejora "no queda debajo" y cuesta dos constantes. No la recomiendo todavía porque pierde en media y en déficit ponderado, porque en unidades de la nota no supera a la banda 40 (de -0,002 a -0,013 según el campo), y porque su ventaja depende de que el pronóstico acierte en que el mejor rival es extremos o Fila 5 y no una banda más angosta. Si Nicolás confía en ese pronóstico más que en la media, es la primera que conviene examinar en las cinco empresas.
+
+El examen en las cinco empresas no se hizo. Lo decide Nicolás.
+
+### 15.13 Comandos
+
+Todos con `export P4_DATOS=$HOME/proyectos/datos_p4`, desde la raíz de la rama. Salidas en `docs/mediciones/exploracion/`. Cada etapa guarda por variante y deja su avance en `build/clon/v5_<etapa>.log`; lo que ya está en la caché no se recalcula. `ref/cotas/v5_todo.sh` las corre todas en orden (unos 30 minutos con 24 núcleos; ninguna pasa de 6).
+
+Dependencias: las tablas de la sección 13 (`paseo_optimo.politicas()`), la muestra y los rivales de las otras acciones (`explorar_regimen.py`), las bandas 30 y 50 de la sección 14 (`explorar_clon.py simular`) y, para el control de V4b, la etapa 1b (`explorar_v4.py --etapa 1b`).
+
+| Resultado | Comando | Salida |
+|-----------|---------|--------|
+| Precálculo por ventana (una vez, unos 40 segundos) | `python3 ref/cotas/explorar_v5.py pre` | `build/cotas/v5/` |
+| Varas, controles de partida y matriz del campo | `python3 ref/cotas/explorar_v5.py varas` | `v5_varas.txt` |
+| Fase D por caso (arista 6) | `python3 ref/cotas/explorar_v5.py faseD` y `compuestas` | `v5_faseD.txt`, `v5_compuestas.txt` |
+| Motores, frenos y audacia (aristas 2 y 3) | `python3 ref/cotas/explorar_v5.py motor` | `v5_motor.txt` |
+| Fase A (arista 1) | `python3 ref/cotas/explorar_v5.py faseA` | `v5_faseA.txt` |
+| Ambición, motor de placa y apuestas selectivas | `python3 ref/cotas/explorar_v5.py ambicion` | `v5_ambicion.txt` |
+| Forma de placa, margen, E3 | `python3 ref/cotas/explorar_v5.py fino` | `v5_fino.txt` |
+| Ambición por régimen | `python3 ref/cotas/explorar_v5.py regimen` | `v5_regimen.txt` |
+| Clon de la banda 30, motor lineal | `python3 ref/cotas/explorar_v5.py base30` | `v5_base30.txt` |
+| Finalistas, validación, controles y memoria | `python3 ref/cotas/explorar_v5.py finalistas` | `v5_finalistas.txt` |
+| Causalidad, traslape y sorteos (arista 11) | `python3 ref/cotas/v5_causal.py` | `v5_causal.txt` |
+| Puntaje esperado bajo el pronóstico | `python3 ref/cotas/v5_puntaje.py` | `v5_puntaje.txt` |
+| Cobertura con mezclas | `python3 ref/cotas/v5_mezclas.py` | `v5_mezclas.txt` |
+| Cuándo cierra candado el motor (por caso, clase y tiempo) | `python3 ref/cotas/v5_diag.py` | `v5_diag.txt` |

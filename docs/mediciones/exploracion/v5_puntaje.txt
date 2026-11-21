@@ -1,0 +1,124 @@
+# V5: puntaje esperado de la competencia bajo el pronóstico
+
+ref/cotas/v5_puntaje.py, commit 6a2fc71. Campo supuesto: nosotros, el mejor rival del pronóstico y un peor grupo con patrimonio fijo. Puntaje por torneo de 3 rondas: 2 si nuestro promedio no queda debajo del rival; si no, 2 (P - w) / (R - w), con w el menor entre el peor grupo, P y R. Promedio ponderado por rival con los pesos del índice. Entre paréntesis, ee agrupado; las diferencias contra la banda 40 sola son pareadas.
+
+
+## Peor grupo en 10000
+
+| Estrategia | Puntaje esperado (ee) | Diferencia con la banda 40 sola (ee) | ext | f5 | b30 | b50 | b60 | b40 |
+|---|---|---|---|---|---|---|---|---|
+| banda 40 sola | 1,9802 (0,0010) | +0,0000 (0,0000) | 1,986 | 1,997 | 1,967 | 1,955 | 1,930 | 2,000 |
+| banda 30 sola | 1,9763 (0,0014) | -0,0039 (0,0008) | 1,993 | 1,996 | 2,000 | 1,929 | 1,912 | 1,955 |
+| banda 50 sola | 1,9763 (0,0010) | -0,0040 (0,0008) | 1,978 | 1,992 | 1,946 | 2,000 | 1,947 | 1,957 |
+| extremos puros | 1,9426 (0,0031) | -0,0376 (0,0023) | 2,000 | 1,978 | 1,899 | 1,865 | 1,851 | 1,877 |
+| C1: pA 0,95, motor de placa, ambición siempre | 1,9745 (0,0014) | -0,0057 (0,0015) | 1,980 | 1,995 | 1,964 | 1,947 | 1,929 | 1,981 |
+| C2: pA 0,95, motor de placa, ambición solo con clase >= 5 | 1,9761 (0,0012) | -0,0042 (0,0011) | 1,981 | 1,996 | 1,965 | 1,950 | 1,929 | 1,986 |
+| C3: pA 0,95, motor de placa solo tras una apuesta | 1,9769 (0,0010) | -0,0033 (0,0008) | 1,982 | 1,997 | 1,965 | 1,951 | 1,929 | 1,990 |
+| C1 sobre la banda 30 | 1,9697 (0,0016) | -0,0105 (0,0015) | 1,984 | 1,993 | 1,981 | 1,926 | 1,914 | 1,945 |
+| C3 sobre la banda 30 | 1,9721 (0,0014) | -0,0081 (0,0011) | 1,987 | 1,995 | 1,989 | 1,926 | 1,912 | 1,949 |
+| V4b | 1,9588 (0,0020) | -0,0215 (0,0022) | 1,959 | 1,994 | 1,938 | 1,926 | 1,913 | 1,950 |
+| sin fase A, motor de placa de 16 tramos, ambición siempre | 1,9747 (0,0012) | -0,0055 (0,0011) | 1,981 | 1,994 | 1,964 | 1,948 | 1,928 | 1,984 |
+
+## Peor grupo en 15000
+
+| Estrategia | Puntaje esperado (ee) | Diferencia con la banda 40 sola (ee) | ext | f5 | b30 | b50 | b60 | b40 |
+|---|---|---|---|---|---|---|---|---|
+| banda 40 sola | 1,9551 (0,0037) | +0,0000 (0,0000) | 1,967 | 1,980 | 1,929 | 1,918 | 1,862 | 2,000 |
+| banda 30 sola | 1,9533 (0,0032) | -0,0017 (0,0017) | 1,984 | 1,988 | 2,000 | 1,869 | 1,830 | 1,920 |
+| banda 50 sola | 1,9427 (0,0046) | -0,0124 (0,0020) | 1,948 | 1,966 | 1,889 | 2,000 | 1,896 | 1,903 |
+| extremos puros | 1,8918 (0,0069) | -0,0633 (0,0042) | 2,000 | 1,942 | 1,826 | 1,757 | 1,724 | 1,785 |
+| C1: pA 0,95, motor de placa, ambición siempre | 1,9422 (0,0045) | -0,0129 (0,0033) | 1,949 | 1,980 | 1,924 | 1,896 | 1,858 | 1,956 |
+| C2: pA 0,95, motor de placa, ambición solo con clase >= 5 | 1,9455 (0,0040) | -0,0095 (0,0025) | 1,952 | 1,982 | 1,926 | 1,901 | 1,859 | 1,966 |
+| C3: pA 0,95, motor de placa solo tras una apuesta | 1,9479 (0,0039) | -0,0072 (0,0019) | 1,955 | 1,983 | 1,925 | 1,905 | 1,860 | 1,974 |
+| C1 sobre la banda 30 | 1,9348 (0,0046) | -0,0203 (0,0034) | 1,959 | 1,977 | 1,957 | 1,857 | 1,831 | 1,896 |
+| C3 sobre la banda 30 | 1,9412 (0,0040) | -0,0139 (0,0025) | 1,966 | 1,982 | 1,973 | 1,860 | 1,830 | 1,904 |
+| V4b | 1,9163 (0,0048) | -0,0388 (0,0043) | 1,914 | 1,978 | 1,883 | 1,862 | 1,836 | 1,904 |
+| sin fase A, motor de placa de 16 tramos, ambición siempre | 1,9328 (0,0072) | -0,0223 (0,0042) | 1,942 | 1,967 | 1,911 | 1,890 | 1,847 | 1,953 |
+
+## Campo con varios rivales a la vez: los seis rivales a la vez
+
+El mejor rival de cada torneo es el de mayor promedio entre los del campo. nd = % de torneos en que no quedamos debajo de ese mejor (diferencia mayor que -10); g = % en que lo superamos por 10 o más; puntaje con el peor grupo en 10000.
+
+| Estrategia | nd % (ee) | g % (ee) | Puntaje (ee) | Δnd con la banda 40 (ee) | Δg con la banda 40 (ee) | Δ puntaje con la banda 40 (ee) |
+|---|---|---|---|---|---|---|
+| banda 40 sola | 48,6 (1,5) | 0,0 (0,0) | 1,8870 (0,0057) | +0,0 (0,0) | +0,0 (0,0) | +0,0000 (0,0000) |
+| banda 30 sola | 55,8 (1,3) | 0,0 (0,0) | 1,8754 (0,0070) | +7,2 (0,9) | +0,0 (0,0) | -0,0116 (0,0036) |
+| banda 50 sola | 49,8 (1,3) | 0,0 (0,0) | 1,8898 (0,0040) | +1,2 (1,0) | +0,0 (0,0) | +0,0028 (0,0038) |
+| extremos puros | 45,4 (1,6) | 0,0 (0,0) | 1,7871 (0,0099) | -3,1 (0,7) | +0,0 (0,0) | -0,0999 (0,0057) |
+| C1: pA 0,95, motor de placa, ambición siempre | 47,2 (1,5) | 45,8 (1,5) | 1,8914 (0,0048) | -1,3 (1,2) | +45,8 (1,5) | +0,0045 (0,0028) |
+| C2: pA 0,95, motor de placa, ambición solo con clase >= 5 | 47,8 (1,5) | 38,8 (1,8) | 1,8912 (0,0051) | -0,7 (0,9) | +38,8 (1,8) | +0,0042 (0,0021) |
+| C3: pA 0,95, motor de placa solo tras una apuesta | 48,4 (1,4) | 31,2 (2,1) | 1,8902 (0,0051) | -0,1 (0,8) | +31,2 (2,1) | +0,0032 (0,0016) |
+| C1 sobre la banda 30 | 52,9 (1,3) | 51,4 (1,3) | 1,8764 (0,0062) | +4,3 (1,6) | +51,4 (1,3) | -0,0105 (0,0044) |
+| C3 sobre la banda 30 | 54,9 (1,3) | 34,9 (2,3) | 1,8760 (0,0064) | +6,3 (1,3) | +34,9 (2,3) | -0,0110 (0,0038) |
+| V4b | 46,6 (1,4) | 44,9 (1,4) | 1,8754 (0,0044) | -1,9 (1,6) | +44,9 (1,4) | -0,0116 (0,0045) |
+| sin fase A, motor de placa de 16 tramos, ambición siempre | 43,7 (1,2) | 41,1 (1,2) | 1,8878 (0,0050) | -4,9 (0,9) | +41,1 (1,2) | +0,0008 (0,0018) |
+
+## Campo con varios rivales a la vez: sin la banda 40 exacta (ext, f5, b30, b50, b60)
+
+El mejor rival de cada torneo es el de mayor promedio entre los del campo. nd = % de torneos en que no quedamos debajo de ese mejor (diferencia mayor que -10); g = % en que lo superamos por 10 o más; puntaje con el peor grupo en 10000.
+
+| Estrategia | nd % (ee) | g % (ee) | Puntaje (ee) | Δnd con la banda 40 (ee) | Δg con la banda 40 (ee) | Δ puntaje con la banda 40 (ee) |
+|---|---|---|---|---|---|---|
+| banda 40 sola | 48,6 (1,5) | 8,6 (0,5) | 1,8870 (0,0057) | +0,0 (0,0) | +0,0 (0,0) | +0,0000 (0,0000) |
+| banda 30 sola | 57,5 (1,3) | 0,0 (0,0) | 1,8843 (0,0066) | +8,9 (1,0) | -8,6 (0,5) | -0,0026 (0,0029) |
+| banda 50 sola | 55,4 (1,3) | 0,0 (0,0) | 1,9000 (0,0037) | +6,8 (0,8) | -8,6 (0,5) | +0,0130 (0,0036) |
+| extremos puros | 46,4 (1,6) | 0,0 (0,0) | 1,7951 (0,0096) | -2,1 (0,7) | -8,6 (0,5) | -0,0918 (0,0052) |
+| C1: pA 0,95, motor de placa, ambición siempre | 47,8 (1,5) | 46,5 (1,5) | 1,8924 (0,0048) | -0,7 (1,2) | +37,8 (1,4) | +0,0054 (0,0027) |
+| C2: pA 0,95, motor de placa, ambición solo con clase >= 5 | 48,4 (1,5) | 40,6 (1,7) | 1,8918 (0,0051) | -0,2 (0,9) | +32,0 (1,6) | +0,0048 (0,0021) |
+| C3: pA 0,95, motor de placa solo tras una apuesta | 48,7 (1,4) | 35,0 (1,9) | 1,8905 (0,0051) | +0,1 (0,7) | +26,4 (1,8) | +0,0035 (0,0016) |
+| C1 sobre la banda 30 | 54,1 (1,3) | 52,6 (1,4) | 1,8848 (0,0057) | +5,5 (1,5) | +44,0 (1,5) | -0,0022 (0,0038) |
+| C3 sobre la banda 30 | 56,3 (1,3) | 35,7 (2,4) | 1,8846 (0,0059) | +7,7 (1,3) | +27,1 (2,4) | -0,0024 (0,0031) |
+| V4b | 47,5 (1,4) | 46,1 (1,3) | 1,8771 (0,0043) | -1,1 (1,5) | +37,4 (1,4) | -0,0099 (0,0045) |
+| sin fase A, motor de placa de 16 tramos, ambición siempre | 44,5 (1,2) | 42,1 (1,2) | 1,8887 (0,0050) | -4,1 (0,9) | +33,5 (1,2) | +0,0017 (0,0018) |
+
+## Campo con varios rivales a la vez: ext, f5 y la banda 40
+
+El mejor rival de cada torneo es el de mayor promedio entre los del campo. nd = % de torneos en que no quedamos debajo de ese mejor (diferencia mayor que -10); g = % en que lo superamos por 10 o más; puntaje con el peor grupo en 10000.
+
+| Estrategia | nd % (ee) | g % (ee) | Puntaje (ee) | Δnd con la banda 40 (ee) | Δg con la banda 40 (ee) | Δ puntaje con la banda 40 (ee) |
+|---|---|---|---|---|---|---|
+| banda 40 sola | 86,4 (0,8) | 0,0 (0,0) | 1,9845 (0,0011) | +0,0 (0,0) | +0,0 (0,0) | +0,0000 (0,0000) |
+| banda 30 sola | 78,9 (0,8) | 21,8 (0,9) | 1,9480 (0,0039) | -7,5 (0,9) | +21,8 (0,9) | -0,0364 (0,0036) |
+| banda 50 sola | 63,9 (1,2) | 16,2 (1,0) | 1,9446 (0,0024) | -22,5 (1,0) | +16,2 (1,0) | -0,0398 (0,0019) |
+| extremos puros | 66,7 (1,1) | 0,0 (0,0) | 1,8755 (0,0062) | -19,7 (1,3) | +0,0 (0,0) | -0,1090 (0,0061) |
+| C1: pA 0,95, motor de placa, ambición siempre | 77,5 (1,1) | 75,6 (1,1) | 1,9714 (0,0024) | -9,0 (1,2) | +75,6 (1,1) | -0,0131 (0,0023) |
+| C2: pA 0,95, motor de placa, ambición solo con clase >= 5 | 79,8 (0,9) | 65,0 (2,1) | 1,9755 (0,0018) | -6,6 (0,9) | +65,0 (2,1) | -0,0090 (0,0018) |
+| C3: pA 0,95, motor de placa solo tras una apuesta | 82,6 (0,9) | 49,7 (3,0) | 1,9782 (0,0015) | -3,8 (0,7) | +49,7 (3,0) | -0,0062 (0,0013) |
+| C1 sobre la banda 30 | 72,6 (1,1) | 71,1 (1,2) | 1,9406 (0,0039) | -13,9 (1,5) | +71,1 (1,2) | -0,0438 (0,0037) |
+| C3 sobre la banda 30 | 75,9 (0,9) | 56,1 (2,2) | 1,9433 (0,0037) | -10,5 (1,1) | +56,1 (2,2) | -0,0411 (0,0034) |
+| V4b | 67,4 (1,4) | 64,4 (1,5) | 1,9426 (0,0033) | -19,0 (1,6) | +64,4 (1,5) | -0,0419 (0,0035) |
+| sin fase A, motor de placa de 16 tramos, ambición siempre | 74,4 (0,8) | 71,1 (0,9) | 1,9729 (0,0020) | -12,0 (0,8) | +71,1 (0,9) | -0,0116 (0,0017) |
+
+## Campo sorteado de K rivales
+
+En cada torneo el campo tiene K rivales, cada uno de un tipo sorteado con los pesos del pronóstico (pueden repetirse); el mejor rival es el de mayor promedio. Con K = 1 es el índice. Los mismos campos para todas las estrategias. Celda: nd % / g % / diferencia de puntaje con la banda 40 sola (ee), con el peor grupo en 10000.
+
+| Estrategia | K = 1 | K = 2 | K = 3 | K = 5 | K = 8 |
+|---|---|---|---|---|---|
+| banda 40 sola | 88,0 / 45,7 / +0,0000 (0,0000) | 80,0 / 26,6 / +0,0000 (0,0000) | 74,6 / 18,3 / +0,0000 (0,0000) | 67,3 / 10,9 / +0,0000 (0,0000) | 60,7 / 6,3 / +0,0000 (0,0000) |
+| banda 30 sola | 90,0 / 44,8 / -0,0041 (0,0008) | 82,9 / 26,4 / -0,0070 (0,0014) | 77,8 / 18,6 / -0,0093 (0,0020) | 71,1 / 12,1 / -0,0117 (0,0025) | 65,2 / 7,7 / -0,0128 (0,0029) |
+| banda 50 sola | 85,4 / 46,7 / -0,0039 (0,0009) | 77,3 / 28,1 / -0,0044 (0,0013) | 72,0 / 19,5 / -0,0039 (0,0019) | 65,5 / 12,2 / -0,0028 (0,0024) | 60,1 / 7,0 / -0,0003 (0,0030) |
+| extremos puros | 83,5 / 31,4 / -0,0378 (0,0024) | 73,7 / 12,3 / -0,0592 (0,0035) | 67,4 / 5,5 / -0,0719 (0,0042) | 59,9 / 1,6 / -0,0855 (0,0049) | 54,1 / 0,4 / -0,0940 (0,0054) |
+| C1: pA 0,95, motor de placa, ambición siempre | 83,1 / 82,0 / -0,0057 (0,0014) | 74,7 / 73,3 / -0,0055 (0,0019) | 69,6 / 68,1 / -0,0046 (0,0021) | 63,2 / 61,7 / -0,0026 (0,0023) | 57,6 / 56,0 / -0,0004 (0,0025) |
+| C2: pA 0,95, motor de placa, ambición solo con clase >= 5 | 84,5 / 77,2 / -0,0041 (0,0010) | 76,3 / 66,7 / -0,0039 (0,0014) | 71,1 / 60,9 / -0,0030 (0,0016) | 64,5 / 54,3 / -0,0014 (0,0018) | 58,6 / 48,6 / +0,0005 (0,0019) |
+| C3: pA 0,95, motor de placa solo tras una apuesta | 85,8 / 71,3 / -0,0032 (0,0008) | 77,8 / 59,0 / -0,0030 (0,0011) | 72,4 / 52,5 / -0,0023 (0,0012) | 65,7 / 45,6 / -0,0011 (0,0013) | 59,6 / 40,1 / +0,0004 (0,0014) |
+| C1 sobre la banda 30 | 83,7 / 82,6 / -0,0106 (0,0014) | 75,9 / 74,6 / -0,0136 (0,0022) | 71,2 / 69,8 / -0,0150 (0,0026) | 65,5 / 64,0 / -0,0156 (0,0032) | 60,7 / 59,2 / -0,0150 (0,0036) |
+| C3 sobre la banda 30 | 86,9 / 71,4 / -0,0082 (0,0010) | 79,5 / 59,7 / -0,0113 (0,0016) | 74,7 / 53,7 / -0,0130 (0,0021) | 68,6 / 47,6 / -0,0142 (0,0026) | 63,3 / 42,8 / -0,0143 (0,0030) |
+| V4b | 77,3 / 75,9 / -0,0215 (0,0022) | 68,4 / 66,7 / -0,0255 (0,0029) | 63,7 / 61,8 / -0,0254 (0,0033) | 58,6 / 56,7 / -0,0233 (0,0037) | 54,3 / 52,4 / -0,0199 (0,0040) |
+| sin fase A, motor de placa de 16 tramos, ambición siempre | 81,1 / 79,1 / -0,0056 (0,0010) | 72,1 / 69,6 / -0,0056 (0,0013) | 66,7 / 64,0 / -0,0050 (0,0015) | 60,1 / 57,3 / -0,0038 (0,0016) | 54,3 / 51,5 / -0,0024 (0,0018) |
+
+Diferencia de nd con la banda 40 sola (ee) en cada K:
+
+| Estrategia | K = 1 | K = 2 | K = 3 | K = 5 | K = 8 |
+|---|---|---|---|---|---|
+| banda 40 sola | +0,0 (0,0) | +0,0 (0,0) | +0,0 (0,0) | +0,0 (0,0) | +0,0 (0,0) |
+| banda 30 sola | +2,0 (0,4) | +2,9 (0,6) | +3,2 (0,7) | +3,7 (0,8) | +4,5 (0,9) |
+| banda 50 sola | -2,6 (0,3) | -2,8 (0,4) | -2,5 (0,6) | -1,8 (0,7) | -0,6 (0,8) |
+| extremos puros | -4,5 (0,5) | -6,4 (0,7) | -7,1 (0,8) | -7,4 (0,8) | -6,6 (0,8) |
+| C1: pA 0,95, motor de placa, ambición siempre | -4,9 (0,8) | -5,3 (1,0) | -4,9 (1,1) | -4,1 (1,1) | -3,1 (1,1) |
+| C2: pA 0,95, motor de placa, ambición solo con clase >= 5 | -3,5 (0,6) | -3,7 (0,7) | -3,4 (0,8) | -2,8 (0,8) | -2,1 (0,8) |
+| C3: pA 0,95, motor de placa solo tras una apuesta | -2,2 (0,5) | -2,3 (0,6) | -2,1 (0,6) | -1,6 (0,6) | -1,1 (0,7) |
+| C1 sobre la banda 30 | -4,3 (0,8) | -4,1 (1,2) | -3,3 (1,3) | -1,8 (1,4) | +0,0 (1,5) |
+| C3 sobre la banda 30 | -1,1 (0,6) | -0,5 (0,8) | +0,1 (0,9) | +1,3 (1,1) | +2,6 (1,1) |
+| V4b | -10,7 (1,0) | -11,6 (1,3) | -10,8 (1,4) | -8,7 (1,5) | -6,4 (1,5) |
+| sin fase A, motor de placa de 16 tramos, ambición siempre | -6,9 (0,6) | -7,9 (0,7) | -7,8 (0,8) | -7,2 (0,8) | -6,4 (0,9) |

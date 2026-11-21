@@ -818,3 +818,13 @@ Las decisiones T87 a T99 son del paquete P6 de R1 y R2 y las T100 a T119 del paq
 - **Criterio, punto 3 cambiado por Nicolás antes del examen:** pierde a lo más 10 % de los torneos de 3 rondas contra el rival de Tesla. Regla de elección de guardas fijada por él, también antes del examen: más puntos entre las que pierden a lo más 5 %; si ninguna, la que menos pierde entre las que superan en puntos a la banda 40. Resultado: V3 log con (b) (nunca más de media posición en la fase A), que además cabe en 512 bytes.
 - **Alternativa V1 log con a16 y c preparada sin examen**, para no hacer una tercera mirada a las cinco empresas sin pedirlo.
 - **Resultado:** V3 log con (b) no cumple el criterio (puntos 1 y 2; cumple el 3). En la población de las cinco es la mejor de las tres, +124 (ee 77). Su ganancia depende de la proporción de casos S, con el equilibrio cerca de dos tercios. La regla de los peldaños no se cambió.
+
+### T141. V5 contra el campo esperado: se presenta, no se decide (20 y 21/11)
+
+- **Lectura del criterio fijada antes de correr:** el índice son dos cifras (no queda debajo y gana) y el punto 1 exige superar a las dos varas en las dos por más de 2 ee pareados. Alternativa: promediarlas en una sola, que daría el punto 1 por cumplido; se informa, pero no es la que se fijó.
+- **Reparto del 60 % de "extremos o Fila 5" en mitades** (30 % extremos puros, 30 % Fila 5). El pedido no lo separa; como el índice es lineal en los pesos, las tablas por rival permiten rehacerlo.
+- **Extremos puros como "una vez"** (compra desde el primer 100, vende al ver 255 y no vuelve), como dice el pedido, y no como `espera` de la caché, que vuelve a comprar en un segundo 100. Difieren en 21 de 6 768 ventanas del caso S.
+- **Finalistas en forma de placa:** fase A en 2 bytes por celda y motor V2 comprimido de 8 tramos con clase de histéresis, para que lo medido sea lo que cabría. Lo que se pierde frente a las tablas completas: 0,4 de nd y 0,5 de g.
+- **Margen por deslizamiento fuera de C1:** suma +0,5 / +0,9 pero sube el déficit contra la banda 40 de 111 a 148; queda como ajuste opcional.
+- **Programación dinámica relativa no corrida:** costo alto en Python puro y ganancia acotada (a lo más 4,9 de nd y 6 de g sobre C1, sin pasar a la banda 40). Quedó formulada.
+- **Resultado:** ningún candidato cumple el criterio. C1 domina a V4b. La banda 40 sola es la mejor en déficit ponderado y en nota esperada; la banda 30 sola, en "no queda debajo". La regla de los peldaños no se cambió.

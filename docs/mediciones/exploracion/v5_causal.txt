@@ -1,0 +1,8 @@
+# V5, arista 11: revisión de la medición
+
+ref/cotas/v5_causal.py. Otras acciones: 12 000 ventanas.
+
+- (a) causal: 40 ventanas con el futuro cambiado después de un tick al azar; referencia directa de V4b con bytes distintos hasta el corte: 0; v5.post con bytes distintos hasta el corte: 0
+- (b) traslape: 100 empresas, 12000 ventanas; fracción de traslape con la ventana siguiente de la misma empresa: media 0.81, mediana 0.86; cada minuto de una empresa cae en 5.0 ventanas en promedio
+- grupos para el error estándar: b20 61, b60 21, emp 100, emp_b60 2055
+- (c) sorteos: 200000 torneos; con una ventana repetida 0.029 %; con dos ventanas de la misma empresa 2.9 %; con dos ventanas cuyas fechas se traslapan (inicios a menos de 52 días hábiles) 23.4 %

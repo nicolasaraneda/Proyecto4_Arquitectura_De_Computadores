@@ -1,0 +1,78 @@
+# V5: las dos varas (banda 40 sola y V4b) con el índice de competencia
+
+ref/cotas/explorar_v5.py varas, commit 6a2fc71. Otras acciones: 12000 ventanas; los mismos 200000 sorteos de la sección 14. Rivales: ext (extremos puros: compra desde el primer 100, vende al ver 255 y no vuelve), f5 (Fila 5: lo mismo con venta en 220 o más), b30, b50, b60 y b40 (bandas). Pesos del índice: ext 0.30, f5 0.30, b30 0.10, b50 0.10, b60 0.10, b40 0.10. nd = % de torneos de 3 rondas en que no queda debajo (diferencia de promedio > -10); g = % que gana (diferencia >= 10).
+
+## Controles
+
+- Rival f5 de v5.py contra la caché: 0 ventanas distintas de 12000.
+- Rival b40 de v5.py contra la caché: 0 ventanas distintas de 12000.
+- Rival b60 de v5.py contra la caché: 0 ventanas distintas de 12000.
+- Rival b30 de v5.py contra la caché: 0 ventanas distintas de 12000.
+- Rival b50 de v5.py contra la caché: 0 ventanas distintas de 12000.
+- Dato (no es un control): ext vende una sola vez; `espera` de la caché en C vuelve a comprar si el 100 aparece otra vez después del 255. En el caso S difieren en 21 ventanas de 6768.
+- V4b de v5.py (tick a tick) contra la caché de la etapa 1b (por eventos): 0 ventanas distintas de 12000.
+- Motor apagado (E0, sin candado) contra la base V3 con (b) de la caché: 0 ventanas distintas de 12000.
+- Fase A reescrita (v5.fase_a con las opciones por omisión) contra optimo_estrategia.Optima: 0 ventanas distintas de 12000.
+
+## Índice, todas las ventanas
+
+| Estrategia | Índice nd (ee) | Índice g (ee) | ext: nd / g | f5: nd / g | b30: nd / g | b50: nd / g | b60: nd / g | b40: nd / g |
+|---|---|---|---|---|---|---|---|---|
+| banda 40 | 87,9 (0,5) | 45,5 (0,6) | 88,6 / 32,9 | 96,3 / 91,7 | 70,5 / 14,1 | 83,3 / 34,9 | 71,0 / 32,6 | 100,0 / 0,0 |
+| V4b | 77,2 (0,9) | 75,8 (0,9) | 73,7 / 71,9 | 96,1 / 96,0 | 63,6 / 61,7 | 66,4 / 64,9 | 61,3 / 59,9 | 71,7 / 68,5 |
+| V3 con (b) sola | 72,8 (1,1) | 71,0 (1,1) | 68,1 / 65,8 | 96,5 / 96,3 | 56,6 / 54,3 | 60,2 / 58,2 | 57,2 / 55,5 | 60,4 / 56,3 |
+
+V4b menos banda 40 (pareada): nd -10,7 (ee 1,0), g +30,3 (ee 1,3),
+
+## Contra cada rival, todas las ventanas
+
+| Estrategia | Rival | Δ por ronda (ee) | No debajo % (ee) | Gana % (ee) | Pierde % | Déficit | p5 | Peor |
+|---|---|---|---|---|---|---|---|---|
+| banda 40 | ext | +806 (49) | 88,6 (0,7) | 32,9 (1,1) | 11,4 | 74 | -597 | -3632 |
+| banda 40 | f5 | +2363 (99) | 96,3 (0,5) | 91,7 (1,5) | 3,7 | 12 | +0 | -2476 |
+| banda 40 | b30 | +103 (30) | 70,5 (1,2) | 14,1 (0,7) | 29,5 | 220 | -1154 | -11734 |
+| banda 40 | b50 | -39 (35) | 83,3 (1,0) | 34,9 (1,2) | 16,7 | 317 | -2352 | -39429 |
+| banda 40 | b60 | -55 (51) | 71,0 (1,5) | 32,6 (1,3) | 29,0 | 468 | -2589 | -16154 |
+| banda 40 | b40 | +0 (0) | 100,0 (0,0) | 0,0 (0,0) | 0,0 | 0 | +0 | +0 |
+| V4b | ext | +1039 (60) | 73,7 (1,3) | 71,9 (1,3) | 26,3 | 233 | -1495 | -7357 |
+| V4b | f5 | +2595 (91) | 96,1 (0,5) | 96,0 (0,5) | 3,9 | 25 | +135 | -5472 |
+| V4b | b30 | +336 (49) | 63,6 (1,4) | 61,7 (1,4) | 36,4 | 417 | -2100 | -31223 |
+| V4b | b50 | +194 (42) | 66,4 (1,2) | 64,9 (1,2) | 33,6 | 507 | -2784 | -36673 |
+| V4b | b60 | +177 (59) | 61,3 (1,3) | 59,9 (1,4) | 38,7 | 589 | -3032 | -18870 |
+| V4b | b40 | +232 (41) | 71,7 (1,5) | 68,5 (1,5) | 28,3 | 329 | -1887 | -28180 |
+| V3 con (b) sola | ext | +953 (62) | 68,1 (1,5) | 65,8 (1,6) | 31,9 | 268 | -1513 | -5678 |
+| V3 con (b) sola | f5 | +2509 (88) | 96,5 (0,5) | 96,3 (0,5) | 3,5 | 17 | +152 | -3178 |
+| V3 con (b) sola | b30 | +250 (47) | 56,6 (1,6) | 54,3 (1,7) | 43,4 | 444 | -2088 | -16884 |
+| V3 con (b) sola | b50 | +108 (49) | 60,2 (1,6) | 58,2 (1,7) | 39,8 | 513 | -2629 | -36673 |
+| V3 con (b) sola | b60 | +92 (65) | 57,2 (1,7) | 55,5 (1,7) | 42,8 | 615 | -2964 | -19439 |
+| V3 con (b) sola | b40 | +146 (42) | 60,4 (1,8) | 56,3 (1,9) | 39,6 | 338 | -1676 | -5969 |
+
+## Índice por año de inicio y por grupo de empresas (nd / g)
+
+| Estrategia | 2020 | 2021 | 2022 | 2023 | 2024 | tec | fin | sal | con | ind |
+|---|---|---|---|---|---|---|---|---|---|---|
+| banda 40 | 88,0 / 46,8 | 87,8 / 45,5 | 85,9 / 45,2 | 88,0 / 44,1 | 90,4 / 46,0 | 88,0 / 44,3 | 88,4 / 46,1 | 87,8 / 47,0 | 88,3 / 46,0 | 87,3 / 44,0 |
+| V4b | 75,3 / 73,7 | 76,9 / 75,6 | 76,9 / 75,7 | 79,3 / 77,9 | 78,1 / 76,4 | 78,8 / 77,2 | 76,4 / 75,0 | 75,6 / 74,3 | 75,8 / 74,5 | 80,2 / 78,7 |
+| V3 con (b) sola | 68,4 / 66,6 | 72,9 / 71,2 | 72,6 / 71,2 | 75,1 / 73,3 | 75,0 / 72,8 | 74,9 / 73,1 | 71,2 / 69,5 | 70,4 / 68,8 | 72,2 / 70,5 | 75,7 / 73,7 |
+
+## Cada rival del pronóstico como estrategia propia (matriz del campo)
+
+Fila: la regla que jugaríamos; columnas: su nd / g contra cada rival y el índice.
+
+| Estrategia | Índice nd (ee) | Índice g (ee) | ext: nd / g | f5: nd / g | b30: nd / g | b50: nd / g | b60: nd / g | b40: nd / g |
+|---|---|---|---|---|---|---|---|---|
+| ext (Δnd con banda 40 -4,5, ee 0,5) | 83,5 (0,6) | 31,4 (0,5) | 100,0 / 0,0 | 92,2 / 87,2 | 73,1 / 7,6 | 62,2 / 15,0 | 56,1 / 18,1 | 67,1 / 11,4 |
+| f5 (Δnd con banda 40 -50,9, ee 1,3) | 37,1 (1,0) | 4,0 (0,4) | 12,8 / 7,8 | 100,0 / 0,0 | 7,0 / 1,9 | 8,5 / 4,8 | 8,8 / 6,0 | 8,3 / 3,7 |
+| b30 (Δnd con banda 40 +2,1, ee 0,4) | 90,0 (0,3) | 44,7 (0,7) | 92,4 / 26,9 | 98,1 / 93,0 | 100,0 / 0,0 | 75,7 / 28,2 | 67,2 / 29,1 | 85,9 / 29,5 |
+| b50 (Δnd con banda 40 -2,6, ee 0,3) | 85,4 (0,6) | 46,6 (0,8) | 85,0 / 37,8 | 95,2 / 91,5 | 71,8 / 24,3 | 100,0 / 0,0 | 76,0 / 36,8 | 65,1 / 16,7 |
+| b60 (Δnd con banda 40 -5,0, ee 0,6) | 82,9 (0,8) | 49,1 (1,0) | 81,9 / 43,9 | 94,0 / 91,2 | 70,9 / 32,8 | 63,2 / 24,0 | 100,0 / 0,0 | 67,4 / 29,0 |
+| b40 (Δnd con banda 40 +0,0, ee 0,0) | 87,9 (0,5) | 45,5 (0,6) | 88,6 / 32,9 | 96,3 / 91,7 | 70,5 / 14,1 | 83,3 / 34,9 | 71,0 / 32,6 | 100,0 / 0,0 |
+
+## Una ronda: banda 40 contra ext y f5, por caso
+
+| Rival | Caso | Rondas | Gana % | Empata % | Pierde % | Δ media |
+|---|---|---|---|---|---|---|
+| ext | S | 6768 | 11,3 | 84,5 | 4,2 | +893 |
+| ext | B | 5232 | 14,6 | 79,2 | 6,2 | +687 |
+| f5 | S | 6768 | 97,2 | 0,9 | 1,9 | +3965 |
+| f5 | B | 5232 | 6,3 | 80,3 | 13,4 | +291 |

@@ -2,6 +2,27 @@
 
 Se actualiza al cerrar cada tramo de trabajo. La versión anterior queda en el historial de git.
 
+## Tramo 23: V5 contra el campo esperado (20 y 21/11)
+
+Rama `minutos-reales`. Sección 15 de `docs/exploracion_ideas.md`; bitácora `docs/bitacora/exploracion.md` ("Sección 15"). Decisión T141. Solo Python, solo las 100 acciones ajenas. **La regla de los peldaños no se cambió y no se decidió nada.** El trabajo anterior sobre el clon de la banda 40 (V4 y V4b, parte 7) quedó en el commit `6a2fc71`; la sección 14 del documento sigue sin redactar.
+
+| Paso | Resultado | Dónde |
+|------|-----------|-------|
+| 1. Banco de pruebas y controles | `ref/cotas/v5.py` y `ref/cotas/explorar_v5.py`, tick a tick. Controles en 0: rivales contra las cachés, V4b contra la etapa 1b, todo apagado contra la banda 40 (patrimonio y bytes), finalistas contra una segunda implementación | 15.2; `v5_varas.txt`, `v5_finalistas.txt` |
+| 2. Revisión de la medición | Sin fuga de futuro (0 bytes distintos al cambiar el futuro en 40 ventanas). Cada minuto cae en 5 ventanas y hay 21 grupos de fecha de 60 días: el ee agrupado lo recoge, con pocos grupos | 15.2; `v5_causal.txt` |
+| 3. Varas | Banda 40 sola: nd 87,9 (0,5), g 45,5 (0,6). V4b: 77,2 (0,9) y 75,8 (0,9) | 15.3 |
+| 4. Mejor candidato | C1 (apuesta en la fase A solo con pA >= 0,95, motor V2 comprimido desde el primer extremo, candado copiar con M 100): 83,0 / 81,9. Domina a V4b: +5,7 (0,8) y +6,1 (0,8), en todos los años y grupos | 15.4 a 15.6 |
+| 5. Frontera | C3 (motor solo tras una apuesta) 85,7 / 71,2 y C2 (intermedio) 84,4 / 77,0. Ninguno pasa a la banda 40 en nd; un desempate perfecto llegaría a lo más a 87,9 | 15.5, 15.8 |
+| 6. Banda 30 | La banda 30 sola tiene nd 90,0 (+2,1, ee 0,4) y pierde en media (-103) y en déficit ponderado (158 contra 126) | 15.3, 15.12 |
+| 7. Nota esperada | Con un peor grupo en 10 000: banda 40 sola 1,980 de 2; las demás opciones entre 0,003 y 0,006 abajo; V4b 0,022 abajo | 15.5; `v5_puntaje.txt` |
+| 7b. Campo con varios rivales | Campos sorteados de 1 a 8 rivales con los pesos del pronóstico: la banda 40 sola es la que más queda arriba (60,7 % con 8) pero casi nunca sola (6,3 %); C1 57,6 % y 56,0 % sola; la diferencia de nota de C1 va de -0,006 a cero. Con las seis reglas a la vez, C1 +0,0045 (ee 0,0028) | 15.5; `v5_puntaje.txt` |
+| 8. Criterio | No se cumple: ningún candidato supera a la banda 40 en las dos cifras y los tres pierden contra extremos más torneos que el tope | 15.9 |
+| 9. Cabida | 1024 de 1536 bytes, 0 celdas, unos 760 ciclos de 1131 con la cuenta propia en un hilo aparte (conteo, no programa) | 15.10 |
+
+**Qué falta.** La decisión de Nicolás entre las opciones de 15.12 (recomendación etiquetada: banda 40 sola). El examen en las cinco empresas no se hizo. La programación dinámica con objetivo relativo no se corrió (15.11). Redactar la sección 14.
+
+**Qué conviene atacar después y por qué.** Si se quiere mirar algo más antes del corte del 22/11, la banda 30 sola en las cinco empresas con este índice: es la única opción que mejora "no queda debajo", cuesta dos constantes y su ventaja depende del pronóstico. Si no, seguir con las puertas de R0, R1 y R2 con la banda 40.
+
 ## Tramo 22: política óptima del paseo normalizado (19 y 20/11)
 
 Rama `minutos-reales`. Sección 13 de `docs/exploracion_ideas.md`; bitácora `docs/bitacora/exploracion.md` (sexto pedido). Decisión T140. Solo Python. **La regla de los peldaños no se cambió.**
