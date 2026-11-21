@@ -1,0 +1,89 @@
+Puertas de R3: C1 en los cuatro hilos del Espino barrel con vigilante y la tabla de 512 palabras
+Generado por tools/c1/puerta.sh, commit 5cd9b68 con cambios sin commit.
+sw/c1.s sha256 353f6806d5482d14..., sw/c1_tabla.hex sha256 9954f116f860faca...
+
+Referencia, tablas y hardware nuevo
+== generar: no se corre ahora; vale el registro build/c1/puerta/generar.log
+PASS generar (registro build/c1/puerta/generar.log)
+     PASS: /home/nicolasaraneda/proyectos/Proyecto4_Arquitectura_De_Computadores/sw/c1.s y /home/nicolasaraneda/proyectos/Proyecto4_Arquitectura_De_Computadores/sw/c1_tabla.hex son los que genera tools/c1/generar.py
+     PASS: sw/c1_tabla.hex coincide con el modelo en las celdas y en los parámetros (POLITICA = 1)
+== tb_tabla: no se corre ahora; vale el registro docs/mediciones/c1/tb_tabla.txt
+PASS tb_tabla (registro docs/mediciones/c1/tb_tabla.txt)
+     PASS: 1039 comparaciones, cero errores (contenido de sw/c1_tabla.hex)
+     PASS: 1039 comparaciones, cero errores (patron propio, todas las palabras distintas)
+== cosim: no se corre ahora; vale el registro docs/mediciones/c1/cosim.txt
+PASS cosim (registro docs/mediciones/c1/cosim.txt)
+     PASS: 0 fallas
+
+Puerta a: con la politica apagada, las ordenes de la banda 40 de R2
+== a: no se corre ahora; vale el registro docs/mediciones/c1/puerta_a.txt
+PASS a (registro docs/mediciones/c1/puerta_a.txt)
+     PASS periodo 100000 ns (2 precios perdidos en el reset): 203 de 203 series identicas a la referencia, a la banda 40 de ref/fondo.py y al programa de R2 en el gemelo; respuesta promedio 199.0 ciclos, peor caso 203
+     PASS periodo 1000000 ns (1 precios perdidos en el reset): 203 de 203 series identicas a la referencia, a la banda 40 de ref/fondo.py y al programa de R2 en el gemelo; respuesta promedio 199.0 ciclos, peor caso 203
+     PASS periodo 10000000 ns (1 precios perdidos en el reset): 203 de 203 series identicas a la referencia, a la banda 40 de ref/fondo.py y al programa de R2 en el gemelo; respuesta promedio 199.0 ciclos, peor caso 203
+     PASS: 0 corridas con diferencias
+
+Puerta b: assembly contra la referencia entera, orden por orden
+== b: no se corre ahora; vale el registro docs/mediciones/c1/puerta_b.txt
+PASS b (registro docs/mediciones/c1/puerta_b.txt)
+     PASS periodo 100000 ns (2 precios perdidos en el reset): 203 de 203 series identicas a la referencia; respuesta promedio 514.1 ciclos, peor caso 807
+     PASS periodo 1000000 ns (1 precios perdidos en el reset): 203 de 203 series identicas a la referencia; respuesta promedio 506.4 ciclos, peor caso 799
+     PASS periodo 10000000 ns (1 precios perdidos en el reset): 203 de 203 series identicas a la referencia; respuesta promedio 506.4 ciclos, peor caso 799
+     PASS: 0 corridas con diferencias
+
+Puerta c: la puerta de simulacion de R0, R1 y R2 (docs/puertas.md)
+1. Testbench oficial sin modificar, y 2. copias del oficial a los tres periodos
+== oficial: no se corre ahora; vale el registro docs/mediciones/c1/oficial.txt
+PASS oficial (registro docs/mediciones/c1/oficial.txt)
+     PASS copia del oficial, data/practica_meta.csv, periodo 1000000 ns, 20000 ticks, Peor caso precio->decision: 775 ciclos (disponibles: 24762), 4/4, 20000 filas identicas, patrimonio 22682
+     PASS copia del oficial, tb/practica.csv, periodo 1000000 ns, 20000 ticks, Peor caso precio->decision: 751 ciclos (disponibles: 24762), 4/4, 20000 filas identicas, patrimonio 9729
+     PASS copia del oficial, data/practica_meta.csv, periodo 10000000 ns, 20000 ticks, Peor caso precio->decision: 775 ciclos (disponibles: 249762), 4/4, 20000 filas identicas, patrimonio 22682
+     PASS copia del oficial, tb/practica.csv, periodo 10000000 ns, 20000 ticks, Peor caso precio->decision: 751 ciclos (disponibles: 249762), 4/4, 20000 filas identicas, patrimonio 9729
+2. Equivalencia en series sinteticas (la de series reales es la puerta b)
+== series: no se corre ahora; vale el registro docs/mediciones/c1/series.txt
+PASS series (registro docs/mediciones/c1/series.txt)
+     PASS periodo 100000 ns (2 precios perdidos en el reset): 1081 de 1081 series identicas a la referencia; respuesta promedio 449.2 ciclos, peor caso 807
+     PASS periodo 1000000 ns (1 precios perdidos en el reset): 1081 de 1081 series identicas a la referencia; respuesta promedio 442.8 ciclos, peor caso 799
+     PASS periodo 10000000 ns (1 precios perdidos en el reset): 1081 de 1081 series identicas a la referencia; respuesta promedio 442.8 ciclos, peor caso 799
+     PASS: 0 corridas con diferencias
+4. Fases
+== fases: no se corre ahora; vale el registro docs/mediciones/c1/fases.txt
+PASS fases (registro docs/mediciones/c1/fases.txt)
+     PASS programa sano, 24 fases corridas 13 ns: 24 de 24 corridas iguales a la referencia, peor caso por corrida entre 725 y 736 ciclos (limite 1131)
+     PASS programa sano, periodo de 2501 ciclos: 2 de 2 corridas iguales a la referencia, peor caso por corrida entre 728 y 779 ciclos (limite 1131)
+     PASS hilo 3 colgado desde el tick 700 (plazo vencido y modo seguro), 24 fases: 24 de 24 corridas iguales a la referencia, peor caso por corrida entre 905 y 916 ciclos (limite 1131)
+     PASS: el peor caso, 916 ciclos, es menor que 1131 (holgura de 59.50 % del presupuesto)
+5. Core en la configuracion exacta
+== criterio5: no se corre ahora; vale el registro docs/mediciones/c1/criterio5_verificacion.txt
+PASS criterio5 (registro docs/mediciones/c1/criterio5_verificacion.txt)
+6. Degradacion y controles negativos
+== degradacion: no se corre ahora; vale el registro docs/mediciones/c1/degradacion.txt
+PASS degradacion (registro docs/mediciones/c1/degradacion.txt)
+     PASS seguro_ronda_larga: 2600 bytes, 2600 ticks de estado, patrimonio 8116, 11 órdenes, modo final 1, seguro 1, plazo vencido en 0 ticks, peor caso 703 de 1131 ciclos, banda 40 desde el precio 1501
+     PASS seguro_apagada: 2600 bytes, 2600 ticks de estado, patrimonio 10881, 3 órdenes, modo final 1, seguro 1, plazo vencido en 0 ticks, peor caso 203 de 1131 ciclos, banda 40 desde el precio 1
+     PASS cuelga3_motor_1ms: 2600 bytes, 2600 ticks de estado, patrimonio 10663, 6 órdenes, modo final 1, seguro 1, plazo vencido en 2 ticks, peor caso 907 de 1131 ciclos, banda 40 desde el precio 574
+     PASS: 26 de 26 casos con la decision esperada y a tiempo. Peor caso 907 ciclos de 1131 (programa sano en las mismas series: 727)
+== controles: no se corre ahora; vale el registro docs/mediciones/c1/controles.txt
+PASS controles (registro docs/mediciones/c1/controles.txt)
+     PASS: 25 de 25 controles detectados, y el control en blanco pasa
+7. Estres
+== estres: no se corre ahora; vale el registro docs/mediciones/c1/estres.txt
+PASS estres (registro docs/mediciones/c1/estres.txt)
+     PASS: 57 de 57 casos de la matriz pasan. Peor caso de la respuesta en la matriz: 779 ciclos
+Mediciones por tick (punto 3.2)
+== ticks: no se corre ahora; vale el registro docs/mediciones/c1/ticks.txt
+PASS ticks (registro docs/mediciones/c1/ticks.txt)
+     PASS ronda3: 20000 bytes, 19998 ticks de estado, patrimonio 22682, 6 órdenes, modo final 2, seguro 0, plazo vencido en 0 ticks, peor caso 783 de 1131 ciclos
+     PASS ronda2: 3000 bytes, 2999 ticks de estado, patrimonio 10000, 0 órdenes, modo final 0, seguro 0, plazo vencido en 0 ticks, peor caso 751 de 1131 ciclos
+     PASS: con las 16 combinaciones de botones el byte mostrado es el de la referencia en cada tick (patrimonio y modo, caja, acciones, caja del clon)
+
+Puerta d: sintesis
+3. Timing en 10 semillas, celdas y bloques de memoria
+== timing: no se corre ahora; vale el registro docs/mediciones/c1/timing.txt
+PASS timing (registro docs/mediciones/c1/timing.txt)
+     c1_r3                  celdas 1038 de 1280, BRAM 14 de 16, LUT4  861, fmax min  48.41 mediana  51.35 max  53.07 MHz, cierran a 25 MHz 10 de 10
+8. Bitstream: molde con icebram, simulacion desde el .asc, vigilante e imagen multiple
+== bitstreams: env GUARDAR=1 tools/c1/bitstreams.sh
+PASS bitstreams (15 min)
+
+PASS: R3 paso todos los pasos

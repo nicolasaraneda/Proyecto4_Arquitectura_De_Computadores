@@ -2,24 +2,33 @@
 
 Se actualiza al cerrar cada tramo de trabajo. La versión anterior queda en el historial de git.
 
-## Tramo 18: C1 como cuarto peldaño, R3 (21/11, rama `c1`). Detenido en el plan, con una decisión pendiente
+## Tramo 18: C1 como cuarto peldaño, R3 (21/11, rama `c1`). Puertas pasadas y bitstream congelado
 
-**Qué quedó hecho.** El plan (`docs/c1_plan.md`), las tablas generadas desde el modelo, la referencia entera y un borrador del programa de cuatro hilos que ya corre en el RTL. R0, R1 y R2 no se tocaron: el cambio de RTL está bajo una definición nueva y sus `.asc` salen idénticos. Bitácora: `docs/bitacora/c1.md`. Decisiones T150 y T151.
+**Qué quedó hecho.** R3: el hardware de R2 con la tabla de 512 palabras y `sw/c1.s`, que corre C1 (la banda 40 más el desempate de la exploración) en los cuatro hilos. El trabajo se detuvo en el plan porque la memoria del programa queda en 94 % y C1 exige cambiar hardware; Nicolás eligió seguir (opción A, T151). Después: el gemelo con la tabla de 512 palabras, la herramienta de fallas, las cuatro puertas, el bitstream congelado con su molde y sus hash, los recortes de reserva documentados sin aplicar y los pasos del día de prueba. R0, R1 y R2 no se tocaron. Plan: `docs/c1_plan.md`. Puertas: `docs/puertas.md`. Día de prueba: `docs/c1_dia_de_prueba.md`. Bitácora: `docs/bitacora/c1.md`. Decisiones T150 a T152.
 
 **Qué se midió.**
 
 | Paso | Resultado | Dónde |
 |------|-----------|-------|
-| Tablas desde el modelo del paseo normalizado | 0 celdas distintas contra las de la exploración; 640 bytes de celdas | `ref/c1/tablas.py`, `sw/c1_tabla.hex` |
-| Referencia entera contra el C1 de la exploración | 2400 ventanas, 48 millones de bytes: 0 diferencias en bytes, órdenes, patrimonio y D. Política apagada: igual a la banda 40 de R2 | `docs/mediciones/c1/contra_exploracion.txt` |
-| Borrador contra la referencia por el RTL, a 0,1 ms | Serie Meta: 20 000 bytes y estados idénticos, 22 682 (la banda 40 da 21 392). 40 ventanas reales: 40 de 40 idénticas | `docs/mediciones/c1/meta_ticks.txt`, `lote40.txt` |
-| Respuesta | 799 ciclos en el peor tick medido (71 % de 1131); 907 con el plazo vencido | los mismos |
-| Hardware de R3 | 1038 celdas, 14 bloques, 48,41 MHz la mínima, 10 de 10 semillas | `docs/mediciones/c1/timing.txt` |
-| Memoria del programa | 482 de 512 palabras (94,1 %) | `docs/c1_plan.md`, sección 5 |
+| Referencia entera contra el C1 de la exploración | 2400 ventanas, 48 millones de bytes: 0 diferencias | `docs/mediciones/c1/contra_exploracion.txt` |
+| Gemelo con la tabla de 512 palabras contra el RTL | 17 configuraciones, 42,4 millones de eventos idénticos | `docs/mediciones/c1/cosim.txt` |
+| Puerta a: política apagada igual a la banda 40 de R2 | Pasa: archivos de bytes idénticos a los de R2 en 46 corridas por el RTL; 203 series a los tres períodos en el gemelo | `puerta_a.txt` |
+| Puerta b: assembly contra referencia | Pasa: Tesla (21 224), AMD (27 199) y Meta (22 682) por el RTL a 0,1 y 1 ms, Meta a 10 ms, 200 ventanas reales, y las 203 series en el gemelo a los tres períodos | `puerta_b.txt` |
+| Puerta c: criterios 1 a 8 | Pasa: oficial 4/4 (759 ciclos), 1 081 series sintéticas, fases (779 sano, 916 con un hilo colgado, de 1131), core (7,97 millones de instrucciones), degradación 26 de 26, controles 25 de 25, estrés 57 de 57, bitstream por los pines | `puerta.txt` y los registros de cada paso |
+| Puerta d: síntesis | Pasa: 1038 celdas, 14 bloques, 10 de 10 semillas, mínima 48,41 MHz | `timing.txt`, `bitstreams.txt` |
+| Integración local | Ver `docs/mediciones/ci_local_c1.txt` | |
+| Memoria del programa | 482 de 512 palabras (94,1 %); las puertas no pidieron ningún arreglo y quedan 30 libres | `docs/mediciones/c1/tamano.txt` |
 
-**Qué falta.** La decisión de Nicolás (T151): el encargo pedía detenerse si algo pasaba del 85 % de su presupuesto o exigía cambiar hardware, y pasan las dos cosas (memoria del programa al 94 % y tabla de 512 palabras). Con la decisión: las puertas del paso 5, el gemelo con la tabla nueva, los bitstreams y la integración local (`docs/c1_plan.md`, sección 11). No se corrió ninguna puerta.
+Bitstreams en `bitstreams/` (hash en `SHA256SUMS` y en `docs/puertas.md`): `r3_c1.bin`, `r3_c1_multi.bin`, `r3_c1_apagada_multi.bin`, `r3_c1_falla_multi.bin` y el molde.
 
-**Qué conviene después.** Decidir T151 pronto: si R3 va a la maestra el 26/11, su hardware tiene que estar etiquetado el 25/11 y antes pasar la puerta de simulación completa. Si la respuesta es no, la rama queda como experimento documentado y no hay nada que deshacer.
+**Qué falta.**
+
+- La puerta de placa y la de maestra de R3 (Nicolás, 26/11, `docs/c1_dia_de_prueba.md`). R3 no tiene bitstream de autoprueba.
+- La decisión de qué peldaño compite. Regla de Nicolás para el día de prueba: si la caja o el patrimonio de la placa no calzan con la pantalla de la maestra, compite la banda 40.
+- El documento de estudio de R3 para la defensa y su lugar en el informe.
+- La rama `c1` no está integrada en `banda-40` ni en `main`.
+
+**Qué conviene después.** Antes del 25/11, decidir si R3 entra en la etiqueta `v-maestra-26nov`: su hardware es nuevo y solo puede competir si pasa por la maestra. Si entra, conviene un bitstream de autoprueba de R3 para probar la placa antes (el de R2 ocupa 1199 celdas; el de R3 quedaría cerca de 1220 de 1280, hay que medirlo). Dos límites que el día de prueba tiene que tener presentes: C1 supone una ronda de 20 000 ticks contada desde el encendido (con rondas seguidas sin reset, desde la segunda decide la banda 40), y responde más lento que R2 (hasta 916 ciclos contra 128).
 
 ## Tramo 17: regla base con banda 40 en R0, R1 y R2 (19 y 20/11, rama `banda-40`)
 

@@ -1,0 +1,70 @@
+Bitstream de R3 (C1 sobre el barrel con vigilante y la tabla de 512 palabras)
+Generado por tools/c1/bitstreams.sh (make c1-bitstreams). No editar a mano.
+
+Herramientas:
+  Yosys 0.68+195 (git sha1 435977e97-dirty, Release, Clang /usr/bin/clang++ 21.1.8)
+  "nextpnr-ice40" -- Next Generation Place and Route (Version nextpnr-0.11.1-19-g8dbcee5c)
+  Icarus Verilog version 14.0 (devel) (s20260301-403-g5ab23063f-dirty)
+Commit de partida: 5cd9b68 (rama c1)
+  Verilator 5.053 devel rev v5.052-22-g7cf8c5cca (mod)
+Hardware (R3): pochoco_soc con -DESPINO_BARREL -DESPINO_XD_EMAD -DESPINO_XD_DEVK -DESPINO_TABLA -DESPINO_VIGILANTE -DESPINO_TABLA_512
+Programa: sw/c1.s (sha256 353f6806d5482d14...), tabla sw/c1_tabla.hex (sha256 9954f116f860faca...), referencia ref/c1/c1.py
+
+nextpnr-ice40 --hx1k --package vq100 --freq 25 --seed 1, goboard.pcf.
+
+1. Sintesis
+  r3: celdas 1038 de 1280, BRAM 14 de 16, frecuencia maxima 50.00 MHz, PASS a 25 MHz, 32220 bytes, sha256 cd0f7f6544990ff5a32af2d64dc01b360b4bd2c569a27b41457b28d4174293a7
+  r3_molde: celdas 1038 de 1280, BRAM 14 de 16, frecuencia maxima 50.00 MHz, PASS a 25 MHz, 32220 bytes, sha256 0ce2617f88313aae2b0d795e4404db870bbd4273354956d649a1b89fc19ffd47
+PASS r3: cierra a 25 MHz (icetime: Total path delay: 19.92 ns (50.20 MHz))
+
+2. icebram sobre el molde (programa y tabla), contra la sintesis directa
+PASS r3: el .asc del molde con icebram es identico al de la sintesis directa (0.10 s con icepack)
+
+3. Criterio 8: bitstream simulado desde el .asc por los pines (Icarus, tb/tb_bitstream.sv), periodo de 0,1 ms
+PASS R3, primeros 2000 ticks de la serie Meta: 2000 ticks identicos a la referencia, patrimonio 10000
+PASS R3, serie hecha a mano (apuesta en la fase A y candado): 2000 ticks identicos a la referencia, patrimonio 10290
+PASS R3, ventana de la serie Meta con motor: 2000 ticks identicos a la referencia, patrimonio 28787
+PASS R3, meta: SB_WARMBOOT no se dispara
+PASS R3, mano: SB_WARMBOOT no se dispara
+PASS R3, motor: SB_WARMBOOT no se dispara
+
+4. Politica apagada con icebram, sin sintetizar
+  Palabras de la tabla que cambian: 1
+PASS R3 con la politica apagada, ventana con motor, contra ref/c1/c1.py con esa tabla: 2000 ticks identicos a la referencia, patrimonio 28118
+PASS R3 con la politica apagada contra la banda 40 de R2 (ref/fondo.py): 2000 ticks identicos a la referencia, patrimonio 28118
+PASS R3 con la politica apagada: SB_WARMBOOT no se dispara
+  Bytes en que C1 difiere de la banda 40 en esa ventana: 5 de 2000
+  Tiempo de punta a punta (generar la tabla, icebram e icepack): 0.14 s
+
+5a. Vigilante dentro del bitstream: hilo 0 colgado en el tick 100 (programa puesto con icebram en el molde)
+  WARMBOOT t_ns=10513580 s1s0=01 cs_n=1
+  BOOT sube durante el periodo de la transaccion 105 (la primera es la 0). El programa no ve las 2 primeras: su tick 100 es la transaccion 101.
+PASS el vigilante pide la imagen 01 con CS_n en alto, al terminar la transaccion 105: la quinta sin respuesta (101 a 105)
+
+5b. Hilo 3 colgado en el tick 700: el hilo 0 sigue decidiendo, sin relevo
+PASS R3 con el hilo 3 colgado, contra la referencia con esa falla (un tick sostenido y despues la banda 40): 2000 ticks identicos a la referencia, patrimonio 10290
+PASS R3 con el hilo 3 colgado: SB_WARMBOOT no se dispara
+
+6. Imagen multiple: icemulti -p0, imagen 0 R3 e imagen 1 R0 (bitstreams/r0_banda40.bin)
+  archivo: build/c1/bitstreams/r3_c1_multi.bin
+  tamaño: 64600 bytes de 131072 (49.3 %), sobran 66472
+  sha256: c0b8a4cc3ed7d24d7096b0102e5033f6d93f4de2eeea11afe09ff755f1dc94c0
+  vector 0 (encendido ) -> 0x0000A0   modo 0x00, oscilador de configuración en frecuencia baja, warm boot habilitado
+  vector 1 (S1 S0 = 00) -> 0x0000A0   modo 0x00, oscilador de configuración en frecuencia baja, warm boot habilitado
+  vector 2 (S1 S0 = 01) -> 0x007E7C   modo 0x00, oscilador de configuración en frecuencia baja, warm boot habilitado
+  vector 3 (S1 S0 = 10) -> 0x0000A0   modo 0x00, oscilador de configuración en frecuencia baja, warm boot habilitado
+  vector 4 (S1 S0 = 11) -> 0x0000A0   modo 0x00, oscilador de configuración en frecuencia baja, warm boot habilitado
+  imágenes distintas: 2, en 0x0000A0, 0x007E7C
+  imagen 0: build/c1/bitstreams/r3.bin, 32220 bytes, sha256 cd0f7f6544990ff5a32af2d64dc01b360b4bd2c569a27b41457b28d4174293a7, copia idéntica
+  imagen 1: bitstreams/r0_banda40.bin, 32220 bytes, sha256 390edbfad65b2e269c059e646259f7c3e117398a5ececb1d64816fe8fdd4fd5f, copia idéntica
+  RESULTADO: correcto
+PASS imagen multiple correcta y cabe en la flash de 131072 bytes
+PASS las imagenes multiples de la falla (hilo 0 colgado en el tick 100) y de la politica apagada tambien
+
+Archivos:
+  r3.bin: 32220 bytes, sha256 cd0f7f6544990ff5a32af2d64dc01b360b4bd2c569a27b41457b28d4174293a7
+  r3_c1_multi.bin: 64600 bytes, sha256 c0b8a4cc3ed7d24d7096b0102e5033f6d93f4de2eeea11afe09ff755f1dc94c0
+  r3_c1_falla_multi.bin: 64600 bytes, sha256 ab755baa483c514663ea51beaf3d6445446e35e9998d82a91504e387d972b51f
+  r3_apagada.bin: 32220 bytes, sha256 7918d8d4df17336ed202901d298cfc4c6652e20aadce17669546e24c50ff7a8d
+  r3_c1_apagada_multi.bin: 64600 bytes, sha256 a3c14f00a48da9ced7f6dd7fd7a4073ed871b52eeb92fc1c517639c8b2c97a24
+  r3_molde.bin: 32220 bytes, sha256 0ce2617f88313aae2b0d795e4404db870bbd4273354956d649a1b89fc19ffd47

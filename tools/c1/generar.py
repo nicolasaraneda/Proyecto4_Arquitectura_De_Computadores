@@ -726,6 +726,8 @@ def main():
     ap.add_argument("-o", "--salida", default=os.path.join(RAIZ, "sw"))
     ap.add_argument("--check", action="store_true")
     ap.add_argument("--apagada", action="store_true")
+    ap.add_argument("--solo-asm", action="store_true",
+                    help="con --check: revisa solo sw/c1.s, sin calcular el modelo (para la integración continua)")
     for nombre in ("plazo", "caja", "comision", "m", "n_ronda", "p_min"):
         ap.add_argument("--" + nombre.replace("_", "-"), type=int)
     a = ap.parse_args()
@@ -736,6 +738,12 @@ def main():
     if a.apagada:
         par["politica"] = TB.POLITICA_APAGADA
     asm = texto_asm(par)
+    if a.check and a.solo_asm:
+        r_asm = os.path.join(a.salida, "c1.s")
+        if not os.path.exists(r_asm) or open(r_asm).read() != asm:
+            raise SystemExit(f"FAIL: {r_asm} no coincide con lo generado")
+        print(f"PASS: {r_asm} es el que genera tools/c1/generar.py (la tabla no se revisa: make c1-generar)")
+        return
     T = TB.palabras(parametros_tabla(par))
     hexa = "".join(f"{v:04x}\n" for v in T)
     r_asm, r_hex = os.path.join(a.salida, "c1.s"), os.path.join(a.salida, "c1_tabla.hex")

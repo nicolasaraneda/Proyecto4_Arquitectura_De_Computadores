@@ -1,0 +1,60 @@
+Mediciones por tick de R3 (C1 en los cuatro hilos)
+Generado por tools/c1/ticks.sh (make c1-ticks). No editar a mano.
+
+Herramientas:
+  Yosys 0.68+195 (git sha1 435977e97-dirty, Release, Clang /usr/bin/clang++ 21.1.8)
+  "nextpnr-ice40" -- Next Generation Place and Route (Version nextpnr-0.11.1-19-g8dbcee5c)
+  Icarus Verilog version 14.0 (devel) (s20260301-403-g5ab23063f-dirty)
+Commit de partida: 5cd9b68 (rama c1)
+  Verilator 5.053 devel rev v5.052-22-g7cf8c5cca (mod)
+Hardware (R3): pochoco_soc con -DESPINO_BARREL -DESPINO_XD_EMAD -DESPINO_XD_DEVK -DESPINO_TABLA -DESPINO_VIGILANTE -DESPINO_TABLA_512
+Programa: sw/c1.s (sha256 353f6806d5482d14...), tabla sw/c1_tabla.hex (sha256 9954f116f860faca...), referencia ref/c1/c1.py
+
+=== Ronda 3: periodo de 0,1 ms, 20 000 ticks de la serie Meta (data/practica_meta.csv) ===
+PASS ronda3: 20000 bytes, 19998 ticks de estado, patrimonio 22682, 6 órdenes, modo final 2, seguro 0, plazo vencido en 0 ticks, peor caso 783 de 1131 ciclos
+
+  Ticks medidos: 19996. Ciclo de 40 ns. Trabajo: instrucciones fuera del lazo de espera del hilo.
+    hilo        mínimo  promedio  máximo  ciclos prom.  ciclos máx.    CPI
+    0              100    132.72     196        530.87          784  4.000
+    1              110    118.68     133        474.73          532  4.000
+    2               47     57.97     156        231.90          624  4.000
+    3              129    156.51     218        626.05          872  4.000
+
+  Ciclos desde que llega el precio (byte_done)
+    hito                                      mínimo  promedio  máximo  tiempo máx.
+    el hilo 0 publica el precio (D_PUB)           35     35.00      35      1.40 us
+    el hilo 1 publica la clase (D_REG)           120    129.96     536     21.44 us
+    el hilo 2 publica las posiciones (D_TAB)     225    270.86     665     26.60 us
+    el hilo 3 publica la política (D_POL)        374    496.36     742     29.68 us
+    DECISION (respuesta)                         399    529.87     783     31.32 us
+    el hilo 0 vuelve a sondear                   423    553.87     807     32.28 us
+
+    ronda 1 (10 ms)   presupuesto  249762 ciclos, uso   0.313 %, holgura  99.69 %
+    ronda 2 (1 ms)    presupuesto   24762 ciclos, uso   3.162 %, holgura  96.84 %
+    ronda 3 (0,1 ms)  presupuesto    2262 ciclos, uso  34.615 %, holgura  65.38 %
+
+=== Ronda 2: periodo de 1 ms, 3000 ticks de la serie Meta ===
+PASS ronda2: 3000 bytes, 2999 ticks de estado, patrimonio 10000, 0 órdenes, modo final 0, seguro 0, plazo vencido en 0 ticks, peor caso 751 de 1131 ciclos
+
+  Ticks medidos: 2997. Ciclo de 40 ns. Trabajo: instrucciones fuera del lazo de espera del hilo.
+    hilo        mínimo  promedio  máximo  ciclos prom.  ciclos máx.    CPI
+    0              118    151.28     190        605.13          760  4.000
+    1              110    119.26     133        477.06          532  4.000
+    2               47     58.41     156        233.65          624  4.000
+    3              142    175.40     216        701.61          864  4.000
+
+  Ciclos desde que llega el precio (byte_done)
+    hito                                      mínimo  promedio  máximo  tiempo máx.
+    el hilo 0 publica el precio (D_PUB)           27     27.00      27      1.08 us
+    el hilo 1 publica la clase (D_REG)           112    121.40     528     21.12 us
+    el hilo 2 publica las posiciones (D_TAB)     217    266.39     657     26.28 us
+    el hilo 3 publica la política (D_POL)        434    563.27     718     28.72 us
+    DECISION (respuesta)                         463    596.13     751     30.04 us
+    el hilo 0 vuelve a sondear                   487    620.13     775     31.00 us
+
+    ronda 1 (10 ms)   presupuesto  249762 ciclos, uso   0.301 %, holgura  99.70 %
+    ronda 2 (1 ms)    presupuesto   24762 ciclos, uso   3.033 %, holgura  96.97 %
+    ronda 3 (0,1 ms)  presupuesto    2262 ciclos, uso  33.201 %, holgura  66.80 %
+
+=== Telemetria: el byte de los 7 segmentos con cada combinacion de botones, 2600 ticks de una ventana con motor y candado ===
+PASS: con las 16 combinaciones de botones el byte mostrado es el de la referencia en cada tick (patrimonio y modo, caja, acciones, caja del clon)

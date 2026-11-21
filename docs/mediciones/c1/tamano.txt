@@ -1,0 +1,23 @@
+Tamano de sw/c1.s por bloque, en palabras de 32 bits
+Generado por tools/c1/ticks.sh (make c1-ticks). No editar a mano.
+
+Herramientas:
+  Yosys 0.68+195 (git sha1 435977e97-dirty, Release, Clang /usr/bin/clang++ 21.1.8)
+  "nextpnr-ice40" -- Next Generation Place and Route (Version nextpnr-0.11.1-19-g8dbcee5c)
+  Icarus Verilog version 14.0 (devel) (s20260301-403-g5ab23063f-dirty)
+Commit de partida: 5cd9b68 (rama c1)
+  Verilator 5.053 devel rev v5.052-22-g7cf8c5cca (mod)
+Hardware (R3): pochoco_soc con -DESPINO_BARREL -DESPINO_XD_EMAD -DESPINO_XD_DEVK -DESPINO_TABLA -DESPINO_VIGILANTE -DESPINO_TABLA_512
+Programa: sw/c1.s (sha256 353f6806d5482d14...), tabla sw/c1_tabla.hex (sha256 9954f116f860faca...), referencia ref/c1/c1.py
+
+  tabla de arranque                             4
+  hilo 0: corredor                             80
+  lazo de un hilo muerto                        1
+  hilo 1: regimen y reloj                      99
+  hilo 2: politica (tablas)                    51
+  hilo 3: cuentas, D, modos y telemetria      114
+  rutina ejecutar (contabilidad oficial)       62
+  rutina producto                              33
+  datos (desde 0x768)                          38
+
+Codigo: 444 palabras. Datos: 38 palabras. Total 482 de 512 (94.1 %). Libres entre el codigo y los datos: 30.

@@ -1,0 +1,72 @@
+Pruebas de degradacion de R3
+Generado por tools/c1/degradacion.sh (make c1-degradacion). No editar a mano.
+
+Herramientas:
+  Yosys 0.68+195 (git sha1 435977e97-dirty, Release, Clang /usr/bin/clang++ 21.1.8)
+  "nextpnr-ice40" -- Next Generation Place and Route (Version nextpnr-0.11.1-19-g8dbcee5c)
+  Icarus Verilog version 14.0 (devel) (s20260301-403-g5ab23063f-dirty)
+Commit de partida: 5cd9b68 (rama c1)
+  Verilator 5.053 devel rev v5.052-22-g7cf8c5cca (mod)
+Hardware (R3): pochoco_soc con -DESPINO_BARREL -DESPINO_XD_EMAD -DESPINO_XD_DEVK -DESPINO_TABLA -DESPINO_VIGILANTE -DESPINO_TABLA_512
+Programa: sw/c1.s (sha256 353f6806d5482d14...), tabla sw/c1_tabla.hex (sha256 9954f116f860faca...), referencia ref/c1/c1.py
+
+2600 ticks por corrida. Limite del peor caso: 1131 ciclos. La referencia modela cada falla (ref/c1/c1.py, faltas y tardias).
+
+--- programa sano, las mismas series ---
+PASS sano_mano: 2600 bytes, 2600 ticks de estado, patrimonio 10290, 2 órdenes, modo final 2, seguro 0, plazo vencido en 0 ticks, peor caso 727 de 1131 ciclos
+PASS sano_motor: 2600 bytes, 2600 ticks de estado, patrimonio 11291, 15 órdenes, modo final 2, seguro 0, plazo vencido en 0 ticks, peor caso 703 de 1131 ciclos
+
+--- hilo 1 colgado en el tick 200 (antes, serie mano) ---
+PASS cuelga1_antes: 2600 bytes, 2600 ticks de estado, patrimonio 10000, 0 órdenes, modo final 1, seguro 1, plazo vencido en 2 ticks, peor caso 899 de 1131 ciclos, banda 40 desde el precio 201
+--- hilo 1 colgado en el tick 549 (entrada, serie mano) ---
+PASS cuelga1_entrada: 2600 bytes, 2600 ticks de estado, patrimonio 10290, 2 órdenes, modo final 2, seguro 1, plazo vencido en 2 ticks, peor caso 899 de 1131 ciclos, banda 40 desde el precio 550
+--- hilo 1 colgado en el tick 559 (media, serie mano) ---
+PASS cuelga1_media: 2600 bytes, 2600 ticks de estado, patrimonio 10290, 2 órdenes, modo final 2, seguro 1, plazo vencido en 2 ticks, peor caso 899 de 1131 ciclos, banda 40 desde el precio 560
+--- hilo 1 colgado en el tick 573 (motor, serie motor) ---
+PASS cuelga1_motor: 2600 bytes, 2600 ticks de estado, patrimonio 10663, 6 órdenes, modo final 1, seguro 1, plazo vencido en 2 ticks, peor caso 907 de 1131 ciclos, banda 40 desde el precio 574
+--- hilo 1 colgado en el tick 2132 (candado): el hilo 3 ya no lo necesita, la política sigue llegando y es la banda 40 ---
+PASS cuelga1_candado: 2600 bytes, 2600 ticks de estado, patrimonio 11291, 15 órdenes, modo final 2, seguro 0, plazo vencido en 0 ticks, peor caso 727 de 1131 ciclos, banda 40 desde el precio 2133
+--- hilo 2 colgado en el tick 200 (antes, serie mano) ---
+PASS cuelga2_antes: 2600 bytes, 2600 ticks de estado, patrimonio 10000, 0 órdenes, modo final 1, seguro 1, plazo vencido en 2 ticks, peor caso 899 de 1131 ciclos, banda 40 desde el precio 201
+--- hilo 2 colgado en el tick 549 (entrada, serie mano) ---
+PASS cuelga2_entrada: 2600 bytes, 2600 ticks de estado, patrimonio 10290, 2 órdenes, modo final 2, seguro 1, plazo vencido en 2 ticks, peor caso 899 de 1131 ciclos, banda 40 desde el precio 550
+--- hilo 2 colgado en el tick 559 (media, serie mano) ---
+PASS cuelga2_media: 2600 bytes, 2600 ticks de estado, patrimonio 10290, 2 órdenes, modo final 2, seguro 1, plazo vencido en 2 ticks, peor caso 899 de 1131 ciclos, banda 40 desde el precio 560
+--- hilo 2 colgado en el tick 573 (motor, serie motor) ---
+PASS cuelga2_motor: 2600 bytes, 2600 ticks de estado, patrimonio 10663, 6 órdenes, modo final 1, seguro 1, plazo vencido en 2 ticks, peor caso 907 de 1131 ciclos, banda 40 desde el precio 574
+--- hilo 2 colgado en el tick 2132 (candado): el hilo 3 ya no lo necesita, la política sigue llegando y es la banda 40 ---
+PASS cuelga2_candado: 2600 bytes, 2600 ticks de estado, patrimonio 11291, 15 órdenes, modo final 2, seguro 0, plazo vencido en 0 ticks, peor caso 703 de 1131 ciclos, banda 40 desde el precio 2133
+--- hilo 3 colgado en el tick 200 (antes, serie mano) ---
+PASS cuelga3_antes: 2600 bytes, 2600 ticks de estado, patrimonio 10000, 0 órdenes, modo final 1, seguro 1, plazo vencido en 2 ticks, peor caso 899 de 1131 ciclos, banda 40 desde el precio 201
+--- hilo 3 colgado en el tick 549 (entrada, serie mano) ---
+PASS cuelga3_entrada: 2600 bytes, 2600 ticks de estado, patrimonio 10290, 2 órdenes, modo final 2, seguro 1, plazo vencido en 2 ticks, peor caso 899 de 1131 ciclos, banda 40 desde el precio 550
+--- hilo 3 colgado en el tick 559 (media, serie mano) ---
+PASS cuelga3_media: 2600 bytes, 2600 ticks de estado, patrimonio 10290, 2 órdenes, modo final 2, seguro 1, plazo vencido en 2 ticks, peor caso 899 de 1131 ciclos, banda 40 desde el precio 560
+--- hilo 3 colgado en el tick 573 (motor, serie motor) ---
+PASS cuelga3_motor: 2600 bytes, 2600 ticks de estado, patrimonio 10663, 6 órdenes, modo final 1, seguro 1, plazo vencido en 2 ticks, peor caso 907 de 1131 ciclos, banda 40 desde el precio 574
+--- hilo 3 colgado en el tick 2132 (candado, serie motor) ---
+PASS cuelga3_candado: 2600 bytes, 2600 ticks de estado, patrimonio 11291, 15 órdenes, modo final 2, seguro 1, plazo vencido en 2 ticks, peor caso 907 de 1131 ciclos, banda 40 desde el precio 2133
+--- hilo 1 atrasado 1200 ciclos en el tick 573 (motor): dato viejo, se sostiene la orden completa ---
+PASS tarde1_motor: 2600 bytes, 2600 ticks de estado, patrimonio 11291, 15 órdenes, modo final 2, seguro 0, plazo vencido en 1 ticks, peor caso 907 de 1131 ciclos
+--- hilo 2 atrasado 1200 ciclos en el tick 573 (motor) ---
+PASS tarde2_motor: 2600 bytes, 2600 ticks de estado, patrimonio 11291, 15 órdenes, modo final 2, seguro 0, plazo vencido en 1 ticks, peor caso 907 de 1131 ciclos
+--- hilo 2 atrasado en el tick 559 (media posición): mantiene un tick ---
+PASS tarde2_media: 2600 bytes, 2600 ticks de estado, patrimonio 10290, 2 órdenes, modo final 2, seguro 0, plazo vencido en 1 ticks, peor caso 899 de 1131 ciclos
+--- hilo 2 atrasado en el tick 549: la orden parcial anterior no se repite ---
+PASS tarde2_entrada: 2600 bytes, 2600 ticks de estado, patrimonio 10290, 2 órdenes, modo final 2, seguro 0, plazo vencido en 1 ticks, peor caso 899 de 1131 ciclos
+--- dos ticks seguidos con el dato atrasado (573 y 574): se sostiene la política que llegó tarde ---
+PASS tarde_dos_seguidos: 2600 bytes, 2600 ticks de estado, patrimonio 11291, 15 órdenes, modo final 2, seguro 0, plazo vencido en 2 ticks, peor caso 907 de 1131 ciclos
+--- hilo 1 atrasado 5600 ciclos en el tick 573: se salta precios y queda el modo seguro ---
+PASS salta1_motor: 2600 bytes, 2600 ticks de estado, patrimonio 10663, 6 órdenes, modo final 1, seguro 1, plazo vencido en 2 ticks, peor caso 907 de 1131 ciclos, banda 40 desde el precio 574
+--- hilo 2 atrasado 5600 ciclos en el tick 559: modo seguro ---
+PASS salta2_media: 2600 bytes, 2600 ticks de estado, patrimonio 10290, 2 órdenes, modo final 2, seguro 1, plazo vencido en 2 ticks, peor caso 899 de 1131 ciclos, banda 40 desde el precio 560
+--- precio 90 en el tick 579, con la media posición tomada: modo seguro ---
+PASS seguro_precio_bajo: 2600 bytes, 2600 ticks de estado, patrimonio 33253, 14 órdenes, modo final 1, seguro 1, plazo vencido en 0 ticks, peor caso 727 de 1131 ciclos, banda 40 desde el precio 579
+--- programa generado con N_RONDA 1500 y ronda de 2600 ticks: modo seguro desde el tick 1501 ---
+PASS seguro_ronda_larga: 2600 bytes, 2600 ticks de estado, patrimonio 8116, 11 órdenes, modo final 1, seguro 1, plazo vencido en 0 ticks, peor caso 703 de 1131 ciclos, banda 40 desde el precio 1501
+--- política apagada en la tabla: banda 40 desde el primer tick ---
+PASS seguro_apagada: 2600 bytes, 2600 ticks de estado, patrimonio 10881, 3 órdenes, modo final 1, seguro 1, plazo vencido en 0 ticks, peor caso 203 de 1131 ciclos, banda 40 desde el precio 1
+--- hilo 3 colgado en el tick 573, período de 1 ms ---
+PASS cuelga3_motor_1ms: 2600 bytes, 2600 ticks de estado, patrimonio 10663, 6 órdenes, modo final 1, seguro 1, plazo vencido en 2 ticks, peor caso 907 de 1131 ciclos, banda 40 desde el precio 574
+
+PASS: 26 de 26 casos con la decision esperada y a tiempo. Peor caso 907 ciclos de 1131 (programa sano en las mismas series: 727)

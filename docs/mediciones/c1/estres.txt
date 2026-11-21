@@ -1,0 +1,78 @@
+Matriz de estres de R3
+Generado por tools/c1/estres.sh (make c1-estres). No editar a mano.
+
+Herramientas:
+  Yosys 0.68+195 (git sha1 435977e97-dirty, Release, Clang /usr/bin/clang++ 21.1.8)
+  "nextpnr-ice40" -- Next Generation Place and Route (Version nextpnr-0.11.1-19-g8dbcee5c)
+  Icarus Verilog version 14.0 (devel) (s20260301-403-g5ab23063f-dirty)
+Commit de partida: 5cd9b68 (rama c1)
+  Verilator 5.053 devel rev v5.052-22-g7cf8c5cca (mod)
+Hardware (R3): pochoco_soc con -DESPINO_BARREL -DESPINO_XD_EMAD -DESPINO_XD_DEVK -DESPINO_TABLA -DESPINO_VIGILANTE -DESPINO_TABLA_512
+Programa: sw/c1.s (sha256 353f6806d5482d14...), tabla sw/c1_tabla.hex (sha256 9954f116f860faca...), referencia ref/c1/c1.py
+
+PASS sclk_200k: perdidos en reset 2, respuestas 1998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, violaciones 0, vigilante 0 (max 1), modo seguro 0, ciclos prom 501.7 peor 725 de 1362
+PASS sclk_500k: perdidos en reset 2, respuestas 1998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, violaciones 0, vigilante 0 (max 1), modo seguro 0, ciclos prom 499.2 peor 726 de 2037
+PASS sclk_1M: perdidos en reset 2, respuestas 1998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, violaciones 0, vigilante 0 (max 1), modo seguro 0, ciclos prom 511.7 peor 735 de 2262
+PASS cs_setup500_hold40: perdidos en reset 2, respuestas 998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, violaciones 0, vigilante 0 (max 1), modo seguro 0, ciclos prom 521.3 peor 736 de 2299
+PASS cs_setup500_hold100: perdidos en reset 2, respuestas 998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, violaciones 0, vigilante 0 (max 1), modo seguro 0, ciclos prom 521.3 peor 736 de 2297
+PASS cs_setup500_hold500: perdidos en reset 2, respuestas 998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, violaciones 0, vigilante 0 (max 1), modo seguro 0, ciclos prom 521.3 peor 736 de 2287
+PASS cs_setup500_hold5000: perdidos en reset 2, respuestas 998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, violaciones 0, vigilante 0 (max 1), modo seguro 0, ciclos prom 521.3 peor 736 de 2175
+PASS cs_setup600_hold40: perdidos en reset 2, respuestas 998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, violaciones 0, vigilante 0 (max 1), modo seguro 0, ciclos prom 518.3 peor 733 de 2296
+PASS cs_setup600_hold100: perdidos en reset 2, respuestas 998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, violaciones 0, vigilante 0 (max 1), modo seguro 0, ciclos prom 518.3 peor 733 de 2295
+PASS cs_setup600_hold500: perdidos en reset 2, respuestas 998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, violaciones 0, vigilante 0 (max 1), modo seguro 0, ciclos prom 518.3 peor 733 de 2285
+PASS cs_setup600_hold5000: perdidos en reset 2, respuestas 998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, violaciones 0, vigilante 0 (max 1), modo seguro 0, ciclos prom 518.3 peor 733 de 2172
+PASS cs_setup1000_hold40: perdidos en reset 2, respuestas 998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, violaciones 0, vigilante 0 (max 1), modo seguro 0, ciclos prom 518.3 peor 735 de 2286
+PASS cs_setup1000_hold100: perdidos en reset 2, respuestas 998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, violaciones 0, vigilante 0 (max 1), modo seguro 0, ciclos prom 518.3 peor 735 de 2285
+PASS cs_setup1000_hold500: perdidos en reset 2, respuestas 998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, violaciones 0, vigilante 0 (max 1), modo seguro 0, ciclos prom 518.3 peor 735 de 2275
+PASS cs_setup1000_hold5000: perdidos en reset 2, respuestas 998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, violaciones 0, vigilante 0 (max 1), modo seguro 0, ciclos prom 518.3 peor 735 de 2162
+PASS cs_setup5000_hold40: perdidos en reset 2, respuestas 998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, violaciones 0, vigilante 0 (max 1), modo seguro 0, ciclos prom 514.3 peor 731 de 2186
+PASS cs_setup5000_hold100: perdidos en reset 2, respuestas 998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, violaciones 0, vigilante 0 (max 1), modo seguro 0, ciclos prom 514.3 peor 731 de 2185
+PASS cs_setup5000_hold500: perdidos en reset 2, respuestas 998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, violaciones 0, vigilante 0 (max 1), modo seguro 0, ciclos prom 514.3 peor 731 de 2175
+PASS cs_setup5000_hold5000: perdidos en reset 2, respuestas 998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, violaciones 0, vigilante 0 (max 1), modo seguro 0, ciclos prom 514.3 peor 731 de 2062
+PASS cs_setup20000_hold40: perdidos en reset 2, respuestas 998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, violaciones 0, vigilante 0 (max 1), modo seguro 0, ciclos prom 513.3 peor 728 de 1811
+PASS cs_setup20000_hold100: perdidos en reset 2, respuestas 998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, violaciones 0, vigilante 0 (max 1), modo seguro 0, ciclos prom 513.3 peor 728 de 1810
+PASS cs_setup20000_hold500: perdidos en reset 2, respuestas 998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, violaciones 0, vigilante 0 (max 1), modo seguro 0, ciclos prom 513.3 peor 728 de 1800
+PASS cs_setup20000_hold5000: perdidos en reset 2, respuestas 998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, violaciones 0, vigilante 0 (max 1), modo seguro 0, ciclos prom 513.3 peor 728 de 1687
+PASS reset_flanco_0: perdidos en reset 0, respuestas 500, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, violaciones 0, vigilante 0 (max 1), modo seguro 0, ciclos prom 486.7 peor 710 de 2262
+PASS reset_flanco_1: perdidos en reset 1, respuestas 499, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, violaciones 0, vigilante 0 (max 1), modo seguro 0, ciclos prom 483.8 peor 731 de 2262
+PASS reset_flanco_2: perdidos en reset 1, respuestas 499, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, violaciones 0, vigilante 0 (max 1), modo seguro 0, ciclos prom 484.8 peor 732 de 2262
+PASS reset_flanco_3: perdidos en reset 1, respuestas 499, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, violaciones 0, vigilante 0 (max 1), modo seguro 0, ciclos prom 485.8 peor 733 de 2262
+PASS reset_flanco_4: perdidos en reset 1, respuestas 499, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, violaciones 0, vigilante 0 (max 1), modo seguro 0, ciclos prom 486.8 peor 734 de 2262
+PASS reset_flanco_5: perdidos en reset 1, respuestas 499, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, violaciones 0, vigilante 0 (max 1), modo seguro 0, ciclos prom 487.8 peor 735 de 2262
+PASS reset_flanco_6: perdidos en reset 1, respuestas 499, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, violaciones 0, vigilante 0 (max 1), modo seguro 0, ciclos prom 488.8 peor 736 de 2262
+PASS reset_flanco_7: perdidos en reset 1, respuestas 499, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, violaciones 0, vigilante 0 (max 1), modo seguro 0, ciclos prom 479.7 peor 725 de 2262
+PASS reset_flanco_8: perdidos en reset 1, respuestas 499, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, violaciones 0, vigilante 0 (max 1), modo seguro 0, ciclos prom 480.7 peor 726 de 2262
+PASS reset_inicio_0: perdidos en reset 2, respuestas 498, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, violaciones 0, vigilante 0 (max 1), modo seguro 0, ciclos prom 489.0 peor 727 de 2262
+PASS reset_inicio_1: perdidos en reset 2, respuestas 498, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, violaciones 0, vigilante 0 (max 1), modo seguro 0, ciclos prom 488.0 peor 726 de 2262
+PASS reset_inicio_20: perdidos en reset 2, respuestas 498, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, violaciones 0, vigilante 0 (max 1), modo seguro 0, ciclos prom 488.0 peor 726 de 2262
+PASS reset_inicio_100000: perdidos en reset 1, respuestas 499, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, violaciones 0, vigilante 0 (max 1), modo seguro 0, ciclos prom 481.7 peor 727 de 2262
+PASS reset_inicio_163000: perdidos en reset 0, respuestas 500, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, violaciones 0, vigilante 0 (max 1), modo seguro 0, ciclos prom 480.7 peor 704 de 2262
+PASS reset_inicio_162440: perdidos en reset 0, respuestas 500, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, violaciones 0, vigilante 0 (max 1), modo seguro 0, ciclos prom 484.6 peor 706 de 2262
+PASS reset_inicio_162441: perdidos en reset 0, respuestas 500, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, violaciones 0, vigilante 0 (max 1), modo seguro 0, ciclos prom 483.6 peor 705 de 2262
+PASS reset_inicio_162480: perdidos en reset 0, respuestas 500, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, violaciones 0, vigilante 0 (max 1), modo seguro 0, ciclos prom 483.6 peor 705 de 2262
+PASS pegada_1: perdidos en reset 2, respuestas 998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, violaciones 0, vigilante 0 (max 1), modo seguro 1, ciclos prom 199.0 peor 203 de 2262
+PASS pegada_255: perdidos en reset 2, respuestas 998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, violaciones 0, vigilante 0 (max 1), modo seguro 0, ciclos prom 483.0 peor 687 de 2262
+PASS alterna_1_255: perdidos en reset 2, respuestas 998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, violaciones 0, vigilante 0 (max 1), modo seguro 1, ciclos prom 199.0 peor 203 de 2262
+PASS pegada_1_luego_255: perdidos en reset 2, respuestas 998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, violaciones 0, vigilante 0 (max 1), modo seguro 1, ciclos prom 199.0 peor 203 de 2262
+PASS al_azar_1_255: perdidos en reset 2, respuestas 1998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, violaciones 0, vigilante 0 (max 1), modo seguro 1, ciclos prom 199.0 peor 203 de 2262
+PASS familia_plana: perdidos en reset 2, respuestas 1998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, violaciones 0, vigilante 0 (max 1), modo seguro 0, ciclos prom 456.6 peor 759 de 2262
+PASS familia_borde_bajo: perdidos en reset 2, respuestas 1998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, violaciones 0, vigilante 0 (max 1), modo seguro 1, ciclos prom 199.0 peor 203 de 2262
+PASS familia_borde_alto: perdidos en reset 2, respuestas 1998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, violaciones 0, vigilante 0 (max 1), modo seguro 0, ciclos prom 483.6 peor 735 de 2262
+PASS familia_saltos: perdidos en reset 2, respuestas 1998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, violaciones 0, vigilante 0 (max 1), modo seguro 1, ciclos prom 293.7 peor 735 de 2262
+PASS familia_tendencia: perdidos en reset 2, respuestas 1998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, violaciones 0, vigilante 0 (max 1), modo seguro 1, ciclos prom 199.0 peor 203 de 2262
+PASS familia_paseo: perdidos en reset 2, respuestas 1998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, violaciones 0, vigilante 0 (max 1), modo seguro 0, ciclos prom 592.0 peor 759 de 2262
+PASS rondas_10ms_1ms_01ms: perdidos en reset 1, respuestas 599, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, violaciones 0, vigilante 0 (max 1), modo seguro 0, ciclos prom 534.3 peor 755 de 2262
+PASS rondas_01ms_1ms_10ms: perdidos en reset 2, respuestas 598, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, violaciones 0, vigilante 0 (max 1), modo seguro 0, ciclos prom 533.9 peor 751 de 2262
+PASS rondas_3x2000_01ms: perdidos en reset 2, respuestas 5998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, violaciones 0, vigilante 0 (max 1), modo seguro 0, ciclos prom 482.3 peor 779 de 2262
+PASS periodo_50000ns: perdidos en reset 4, respuestas 1996, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, violaciones 0, vigilante 0 (max 1), modo seguro 0, ciclos prom 504.9 peor 709 de 1012
+PASS sclk_100k_periodo_1ms: perdidos en reset 1, respuestas 999, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, violaciones 0, vigilante 0 (max 1), modo seguro 0, ciclos prom 491.8 peor 734 de 22737
+PASS sclk_200k_periodo_1ms: perdidos en reset 1, respuestas 999, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, violaciones 0, vigilante 0 (max 1), modo seguro 0, ciclos prom 484.8 peor 729 de 23862
+
+Exploracion (no cuenta para la puerta): casos fuera del rango pedido o que dejan menos de 1000 ciclos entre transacciones
+  no funciona sclk_100k: perdidos en reset 2, respuestas 1997, bytes distintos 2, X 0, sin leer 0, sin respuesta 1, violaciones 0, vigilante 0 (max 1), modo seguro 0, ciclos prom 503.2 peor 730 de 237
+  funciona sclk_2M: perdidos en reset 2, respuestas 1998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, violaciones 0, vigilante 0 (max 1), modo seguro 0, ciclos prom 502.7 peor 726 de 2356
+  funciona sclk_4M: perdidos en reset 2, respuestas 1998, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, violaciones 0, vigilante 0 (max 1), modo seguro 0, ciclos prom 507.2 peor 734 de 2403
+  no funciona sclk_5M: perdidos en reset 2, respuestas 1998, bytes distintos 1611, X 0, sin leer 0, sin respuesta 0, violaciones 0, vigilante 0 (max 1), modo seguro 0, ciclos prom 507.7 peor 731 de 2412
+  funciona periodo_40000ns: perdidos en reset 4, respuestas 1996, bytes distintos 0, X 0, sin leer 0, sin respuesta 0, violaciones 0, vigilante 0 (max 1), modo seguro 0, ciclos prom 501.9 peor 703 de 762
+
+PASS: 57 de 57 casos de la matriz pasan. Peor caso de la respuesta en la matriz: 779 ciclos

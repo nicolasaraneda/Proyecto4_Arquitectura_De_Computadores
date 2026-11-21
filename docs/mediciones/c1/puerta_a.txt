@@ -1,0 +1,33 @@
+Puerta a de R3: con la politica apagada, las ordenes de la banda 40 de R2
+Generado por tools/c1/puerta_a.sh (make c1-puerta-a). No editar a mano.
+
+Herramientas:
+  Yosys 0.68+195 (git sha1 435977e97-dirty, Release, Clang /usr/bin/clang++ 21.1.8)
+  "nextpnr-ice40" -- Next Generation Place and Route (Version nextpnr-0.11.1-19-g8dbcee5c)
+  Icarus Verilog version 14.0 (devel) (s20260301-403-g5ab23063f-dirty)
+Commit de partida: 5cd9b68 (rama c1)
+  Verilator 5.053 devel rev v5.052-22-g7cf8c5cca (mod)
+Hardware (R3): pochoco_soc con -DESPINO_BARREL -DESPINO_XD_EMAD -DESPINO_XD_DEVK -DESPINO_TABLA -DESPINO_VIGILANTE -DESPINO_TABLA_512
+Programa: sw/c1.s (sha256 353f6806d5482d14...), tabla sw/c1_tabla.hex (sha256 9954f116f860faca...), referencia ref/c1/c1.py
+
+PASS: el programa con la politica apagada es sw/c1.s sin cambios
+PASS: la tabla cambia en una sola palabra, la 4 (POLITICA): 0001 pasa a 0000
+
+1. RTL: R3 con la politica apagada (tb/c1/tb_c1.sv) y R2 (sw/fondo.s, tb/fondo/tb_fondo.sv), las mismas series
+PASS tesla_100000: los 20000 bytes de R3 apagado son los de R2 (archivos identicos), y cada uno igual a su referencia. patrimonio 20795, 4 órdenes
+PASS tesla_1000000: los 20000 bytes de R3 apagado son los de R2 (archivos identicos), y cada uno igual a su referencia. patrimonio 20795, 4 órdenes
+PASS amd_100000: los 20000 bytes de R3 apagado son los de R2 (archivos identicos), y cada uno igual a su referencia. patrimonio 26470, 8 órdenes
+PASS amd_1000000: los 20000 bytes de R3 apagado son los de R2 (archivos identicos), y cada uno igual a su referencia. patrimonio 26470, 8 órdenes
+PASS meta_100000: los 20000 bytes de R3 apagado son los de R2 (archivos identicos), y cada uno igual a su referencia. patrimonio 21392, 4 órdenes
+PASS meta_1000000: los 20000 bytes de R3 apagado son los de R2 (archivos identicos), y cada uno igual a su referencia. patrimonio 21392, 4 órdenes
+PASS: 46 de 46 corridas (6 de series completas y 40 ventanas), 920000 ticks: R3 con la politica apagada escribe los mismos bytes que R2. Peor caso de R3 apagado: 203 ciclos
+
+2. Gemelo, 203 series a los tres periodos: R3 apagado contra ref/c1/c1.py, ref/fondo.py y el programa de R2
+203 series, 4060000 ticks por periodo. Tabla build/c1/puerta_a/apagada/c1_tabla.hex. Primera transaccion a los 4 us, como el testbench oficial. Limite del peor caso: 1131 ciclos.
+
+PASS periodo 100000 ns (2 precios perdidos en el reset): 203 de 203 series identicas a la referencia, a la banda 40 de ref/fondo.py y al programa de R2 en el gemelo; respuesta promedio 199.0 ciclos, peor caso 203
+PASS periodo 1000000 ns (1 precios perdidos en el reset): 203 de 203 series identicas a la referencia, a la banda 40 de ref/fondo.py y al programa de R2 en el gemelo; respuesta promedio 199.0 ciclos, peor caso 203
+PASS periodo 10000000 ns (1 precios perdidos en el reset): 203 de 203 series identicas a la referencia, a la banda 40 de ref/fondo.py y al programa de R2 en el gemelo; respuesta promedio 199.0 ciclos, peor caso 203
+
+Ticks comparados: 12180000 (203 series por 3 periodos). Tiempo: 20 s.
+PASS: 0 corridas con diferencias

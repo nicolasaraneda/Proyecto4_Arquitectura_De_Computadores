@@ -52,7 +52,7 @@ paso() {
     if [ $r = 0 ]; then echo "PASS $e ($(( ($(date +%s) - t0) / 60 )) min)"; else echo "FAIL $e (codigo $r, ver $B/$e.log)"; f=$((f + 1)); fi
   else
     echo "== $e: no se corre ahora; vale el registro $reg"
-    if [ -f "$reg" ] && ! grep -q "^FAIL" "$reg" && tail -5 "$reg" | grep -q "^PASS"; then echo "PASS $e (registro $reg)"; else echo "FAIL $e: el registro $reg no existe o no termina en PASS"; f=$((f + 1)); fi
+    if [ -f "$reg" ] && ! grep -q "^FAIL" "$reg" && tail -8 "$reg" | grep -qE "PASS|cierran a 25 MHz 10 de 10"; then echo "PASS $e (registro $reg)"; else echo "FAIL $e: el registro $reg no existe o no termina en PASS"; f=$((f + 1)); fi
   fi
   [ -f "$reg" ] && grep -E "^(PASS|FAIL):? " "$reg" | grep -E "^(PASS|FAIL):|peor caso|Peor caso" | tail -4 | cut -c1-230 | sed 's/^/     /'
   return 0

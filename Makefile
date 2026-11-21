@@ -1035,9 +1035,10 @@ c1-bitstreams:
 # repetir las corridas largas; GUARDAR=1 copia los bitstreams si todo pasa
 c1-puerta:
 	JOBS=$(C1_JOBS) tools/c1/puerta.sh
-# Versión corta para la integración continua: sin datos fuera del repositorio
+# Versión corta para la integración continua: sin datos fuera del repositorio y sin
+# recalcular el modelo (eso es make c1-generar, unos 10 minutos con 20 procesos)
 check-c1:
-	$(PYTHON) tools/c1/generar.py --check && $(PYTHON) ref/c1/tablas.py --check sw/c1_tabla.hex
+	$(PYTHON) tools/c1/generar.py --check --solo-asm
 	SALIDA=$(BUILD)/c1/tb_tabla_corta.txt tools/c1/tb_tabla.sh
 	$(PYTHON) tools/c1/cosim.py --corta --jobs $(C1_JOBS)
 	CORTA=1 JOBS=$(C1_JOBS) SALIDA=$(BUILD)/c1/oficial_corta.txt tools/c1/oficial.sh

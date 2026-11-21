@@ -23,6 +23,10 @@
 # cortas de la equivalencia, del lote de series, del barrido de fases, de la
 # degradación, de los controles negativos y de la matriz de estrés. Después las
 # pruebas del vigilante (make check-vigilante).
+# R3, C1 en los cuatro hilos con la tabla de 512 palabras (make check-c1), en otro
+# trabajo: sw/c1.s es el generado, testbench de la tabla nueva, gemelo contra el RTL
+# de R3, testbench oficial con sw/c1.s, y las versiones cortas de las series, del
+# barrido de fases, de la degradación, de los controles negativos y del estrés.
 # Usa la misma versión de OSS CAD Suite que usamos en el desarrollo.
 #
 # Los 20 000 ticks con Icarus, el simulador del testbench oficial, no corren
@@ -162,6 +166,21 @@ jobs:
 
       - name: El fondo en el gemelo contra su referencia (1 051 series a los tres períodos)
         run: make fondo-gemelo-series
+
+  c1:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Instalar OSS CAD Suite
+        uses: YosysHQ/setup-oss-cad-suite@v4
+        with:
+          version: '2026-09-06'
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: R3 (programa generado, tabla de 512 palabras, gemelo contra el RTL, oficial 4/4, series, fases, degradación, controles y estrés)
+        run: make check-c1 C1_JOBS=4
 
   # El informe en PDF: make report con LaTeX instalado en la máquina de GitHub.
   # El PDF queda como artefacto de la corrida (pestaña Summary).

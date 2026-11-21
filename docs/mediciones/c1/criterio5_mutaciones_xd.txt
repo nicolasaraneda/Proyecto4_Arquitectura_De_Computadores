@@ -1,0 +1,70 @@
+Controles negativos de la verificacion por simulacion de la extension de la ISA
+Generado por tools/xd/mutaciones.sh (make xd-mutaciones). No editar a mano.
+Subconjunto de la extension: mascara 3 ( -DESPINO_XD_EMAD -DESPINO_XD_DEVK ). Mutaciones: MUTA_XD_K MUTA_XD_SRL MUTA_XD_K4 MUTA_XD_WE MUTA_XD_HILO MUTA_XD_SUMA
+Definiciones adicionales en los dos SoC de la comparacion: -DESPINO_TABLA -DESPINO_TABLA_512 -DESPINO_VIGILANTE (corrida de tools/fondo/criterio5.sh)
+
+Herramientas:
+  Yosys 0.68+195 (git sha1 435977e97-dirty, Release, Clang /usr/bin/clang++ 21.1.8)
+  "nextpnr-ice40" -- Next Generation Place and Route (Version nextpnr-0.11.1-19-g8dbcee5c)
+  Icarus Verilog version 14.0 (devel) (s20260301-403-g5ab23063f-dirty)
+Commit de partida: 5cd9b68 (rama c1)
+  Verilator 5.053 devel rev v5.052-22-g7cf8c5cca (mod)
+
+Sin mutacion: las seis comparaciones deben pasar
+   PASS U: 12000 instrucciones comparadas una por una (hilos: 3000 3000 3000 3000)
+   PASS B: 12000 instrucciones comparadas una por una (hilos: 3000 3000 3000 3000)
+   PASS C: 12000 instrucciones comparadas una por una (hilos: 3000 3000 3000 3000)
+   PASS D: 12000 instrucciones comparadas una por una (hilos: 3000 3000 3000 3000)
+   PASS L: 436 instrucciones comparadas una por una (hilos: 109 109 109 109)
+   PASS P: 396 instrucciones comparadas una por una (hilos: 99 99 99 99)
+
+PASS MUTA_XD_K: detectada por 5 de las 6 comparaciones
+      espino_xd_dec no revisa k: emad y devk con cualquier k se ejecutan con k = 5
+      U: hilo 2, instruccion 111: escritura al banco de registros
+      B: hilo 1, instruccion 43: escritura al banco de registros
+      C: no la detecta
+      D: hilo 1, instruccion 43: escritura al banco de registros
+      L: hilo 3, instruccion 38: escritura al banco de registros
+      P: hilo 2, instruccion 41: escritura al banco de registros
+PASS MUTA_XD_SRL: detectada por 6 de las 6 comparaciones
+      espino_xd_opa: el desplazamiento a la derecha de emad es logico
+      U: hilo 2, instruccion 25: escritura al banco de registros
+      B: hilo 0, instruccion 25: escritura al banco de registros
+      C: hilo 3, instruccion 29: escritura al banco de registros
+      D: hilo 0, instruccion 25: escritura al banco de registros
+      L: hilo 0, instruccion 43: escritura al banco de registros
+      P: hilo 2, instruccion 36: escritura al banco de registros
+PASS MUTA_XD_K4: detectada por 6 de las 6 comparaciones
+      espino_xd_opa: devk desplaza 4 en vez de 5
+      U: hilo 2, instruccion 39: escritura al banco de registros
+      B: hilo 1, instruccion 30: escritura al banco de registros
+      C: hilo 2, instruccion 30: escritura al banco de registros
+      D: hilo 1, instruccion 30: escritura al banco de registros
+      L: hilo 0, instruccion 31: escritura al banco de registros
+      P: hilo 2, instruccion 31: escritura al banco de registros
+PASS MUTA_XD_WE: detectada por 6 de las 6 comparaciones
+      core: las instrucciones nuevas no escriben rd
+      U: hilo 2, instruccion 25: escritura al banco de registros
+      B: hilo 0, instruccion 25: escritura al banco de registros
+      C: hilo 3, instruccion 29: escritura al banco de registros
+      D: hilo 0, instruccion 25: escritura al banco de registros
+      L: hilo 0, instruccion 31: escritura al banco de registros
+      P: hilo 2, instruccion 31: escritura al banco de registros
+PASS MUTA_XD_HILO: detectada por 6 de las 6 comparaciones
+      core: espino_xd_opa recibe el funct3 de la instruccion que sale de la memoria (de otro hilo)
+      U: hilo 2, instruccion 39: escritura al banco de registros
+      B: hilo 0, instruccion 25: escritura al banco de registros
+      C: hilo 1, instruccion 30: escritura al banco de registros
+      D: hilo 0, instruccion 25: escritura al banco de registros
+      L: hilo 0, instruccion 32: escritura al banco de registros
+      P: hilo 2, instruccion 31: escritura al banco de registros
+PASS MUTA_XD_SUMA: detectada por 6 de las 6 comparaciones
+      core: devk suma en vez de restar
+      U: hilo 2, instruccion 39: escritura al banco de registros
+      B: hilo 2, instruccion 32: escritura al banco de registros
+      C: hilo 2, instruccion 30: escritura al banco de registros
+      D: hilo 2, instruccion 32: escritura al banco de registros
+      L: hilo 0, instruccion 31: escritura al banco de registros
+      P: hilo 2, instruccion 31: escritura al banco de registros
+
+RESULTADO: PASS, 6 de 6 mutaciones detectadas y el core sin mutar pasa

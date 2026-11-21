@@ -316,6 +316,8 @@ def main():
     ap.add_argument("-o", "--salida", help="escribir el decisiones.csv de referencia (formato del testbench oficial)")
     ap.add_argument("--faltas", default="", help="ticks en que la política no llega nunca: a-b,c (un hilo colgado)")
     ap.add_argument("--tardias", default="", help="ticks en que la política llega después del plazo: a,b")
+    ap.add_argument("--placa", action="store_true",
+                    help="imprime lo que deben mostrar los 7 segmentos al terminar la ronda, con cada combinación de botones")
     a = ap.parse_args()
     sys.path.insert(0, os.path.dirname(AQUI))
     import market
@@ -337,6 +339,17 @@ def main():
     print(f"Serie {a.serie}: {len(precios)} ticks, precios iniciales que el programa no ve: {perdidos}")
     print(f"R3 (sw/c1.s): patrimonio final {m.w}, {m.ordenes} ordenes, modo final {c.modo}, cuenta emulada {c.W}, "
           f"D {c.D}, modo seguro {c.seguro}")
+    if a.placa:
+        # la telemetría de sw/c1.s: el byte elegido con los botones, de [patrimonio y modo, caja, acciones, caja del clon]
+        bloque = ((c.W & 0xFFFFFF) | (c.modo << 24), c.caja & U32, c.acc & U32, c.cajac & U32)
+        nombres = ("patrimonio emulado", "caja", "acciones", "caja del clon")
+        print(f"En la placa, al terminar la ronda (LED1 {'encendido: modo seguro' if c.seguro else 'apagado'}):")
+        print(f"  patrimonio emulado {c.W}, modo {c.modo} (0 fase A, 1 motor, 2 candado), caja {c.caja}, acciones {c.acc}, "
+              f"caja del clon {c.cajac}")
+        for n in range(16):
+            botones = "+".join(f"SW{i + 1}" for i in range(4) if n >> i & 1) or "ninguno"
+            que = "modo" if n == 3 else f"{nombres[n >> 2]}, byte {n & 3}"
+            print(f"  {botones:16s} {(bloque[n >> 2] >> (8 * (n & 3))) & 0xFF:02X}   {que}")
 
 
 if __name__ == "__main__":

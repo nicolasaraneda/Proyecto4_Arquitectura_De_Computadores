@@ -1,0 +1,67 @@
+Controles negativos de las pruebas de R3
+Generado por tools/c1/controles.sh (make c1-controles). No editar a mano.
+
+Herramientas:
+  Yosys 0.68+195 (git sha1 435977e97-dirty, Release, Clang /usr/bin/clang++ 21.1.8)
+  "nextpnr-ice40" -- Next Generation Place and Route (Version nextpnr-0.11.1-19-g8dbcee5c)
+  Icarus Verilog version 14.0 (devel) (s20260301-403-g5ab23063f-dirty)
+Commit de partida: 5cd9b68 (rama c1)
+  Verilator 5.053 devel rev v5.052-22-g7cf8c5cca (mod)
+Hardware (R3): pochoco_soc con -DESPINO_BARREL -DESPINO_XD_EMAD -DESPINO_XD_DEVK -DESPINO_TABLA -DESPINO_VIGILANTE -DESPINO_TABLA_512
+Programa: sw/c1.s (sha256 353f6806d5482d14...), tabla sw/c1_tabla.hex (sha256 9954f116f860faca...), referencia ref/c1/c1.py
+
+2600 ticks por corrida, tres series por control. Un control esta bien cuando la comparacion FALLA en alguna.
+
+DETECTADO tabla_entrada: tabla: el umbral de entrada de la fase A un precio más abajo en todas las celdas
+    5 bytes distintos a la referencia, el primero en el tick 544; byte en el tick 544: 84 y se esperaba 191; byte de la política en el tick 544: 139348 y se esperaba 139455; objetivo en el tick 544: 20 y se esperaba 0; D en 
+DETECTADO tabla_salida: tabla: el umbral de salida de la fase A 80 precios más arriba (tope 255)
+    348 bytes distintos a la referencia, el primero en el tick 549; byte en el tick 549: 191 y se esperaba 0; byte de la política en el tick 549: 140735 y se esperaba 140544; D en el tick 550: 10 y se esperaba 15; patrimonio
+DETECTADO tabla_motor: tabla: el nivel de compra del motor un precio más arriba en todas las celdas
+    24 bytes distintos a la referencia, el primero en el tick 562; byte en el tick 562: 127 y se esperaba 191; byte de la política en el tick 562: 143999 y se esperaba 144063; posición del motor en el tick 562: 1 y se espera
+DETECTADO tabla_n64: tabla: los siete umbrales de la clase de v^2 corridos
+    sumas N_j (t - 1) en el tick 2: [17, 26, 34, 45, 61, 84, 117] y se esperaba [11, 20, 28, 39, 55, 78, 111]; clase en el tick 996: 192 y se esperaba 256
+DETECTADO tabla_cuad: tabla: 64 d^2 mal para d = 1
+    382 bytes distintos a la referencia, el primero en el tick 548; clase en el tick 390: 320 y se esperaba 192; byte en el tick 548: 191 y se esperaba 84; byte de la política en el tick 548: 140479 y se esperaba 140372; obj
+DETECTADO tabla_banda_compra: tabla: la banda 40 compra un precio más arriba
+    D en el tick 1000: -8692 y se esperaba -8697; caja del clon en el tick 1000: 12477 y se esperaba 21365; acciones del clon en el tick 1000: 63 y se esperaba 0
+DETECTADO tabla_banda_venta: tabla: la banda 40 vende un precio más abajo
+    D en el tick 690: -6625 y se esperaba -6630; caja del clon en el tick 690: 13531 y se esperaba 54; acciones del clon en el tick 690: 36 y se esperaba 99
+DETECTADO tabla_apagada: tabla: la política apagada (la referencia la espera encendida)
+    159 bytes distintos a la referencia, el primero en el tick 390; LED de modo seguro en el tick 1: 1 y se esperaba 0; byte en el tick 390: 0 y se esperaba 191; byte de la política en el tick 549: 140628 y se esperaba 14054
+DETECTADO par_plazo: parámetro: plazo de 8 vueltas, la política no alcanza a llegar
+    159 bytes distintos a la referencia, el primero en el tick 390; LED de modo seguro en el tick 1: 1 y se esperaba 0; byte en el tick 390: 0 y se esperaba 191; byte de la política en el tick 549: 140628 y se esperaba 14054
+DETECTADO par_comision: parámetro: las cuentas emuladas con comisión 4
+    D en el tick 549: -4 y se esperaba -5; patrimonio emulado en el tick 549: 9996 y se esperaba 9995; 7 segmentos en el tick 549: 12 y se esperaba 11; caja en el tick 549: 5216 y se esperaba 5215
+DETECTADO par_caja: parámetro: las cuentas emuladas parten con caja 9999
+    patrimonio emulado en el tick 1: 9999 y se esperaba 10000; 7 segmentos en el tick 1: 15 y se esperaba 16; caja en el tick 1: 9999 y se esperaba 10000; caja del clon en el tick 1: 9999 y se esperaba 10000
+DETECTADO par_p_min: parámetro: precio mínimo válido 101 (el 100 dispara el modo seguro)
+    473 bytes distintos a la referencia, el primero en el tick 1079; LED de modo seguro en el tick 914: 1 y se esperaba 0; byte en el tick 1079: 127 y se esperaba 191; D en el tick 1080: -4982 y se esperaba -4987; patrimonio
+DETECTADO par_n_ronda: parámetro: ronda supuesta de 2000 ticks
+    LED de modo seguro en el tick 2001: 1 y se esperaba 0
+DETECTADO par_m: parámetro: candado con D >= 400
+    233 bytes distintos a la referencia, el primero en el tick 1485; modo en el tick 638: 1 y se esperaba 2; byte en el tick 1485: 127 y se esperaba 191; byte de la política en el tick 1485: 380287 y se esperaba 380351; D en
+PASS control en blanco: una linea agregada que no cambia el binario pasa en las tres series
+DETECTADO prog_hist_63: programa: histéresis de la clase de 40 ticks en vez de 64
+    clase en el tick 972: 256 y se esperaba 192
+DETECTADO prog_t_min: programa: la tabla se activa en el tick 301
+    89 bytes distintos a la referencia, el primero en el tick 301; byte en el tick 301: 191 y se esperaba 0; byte de la política en el tick 301: 77247 y se esperaba 77056
+DETECTADO prog_largo_a: programa: tramos de la fase A de 1000 ticks
+    cuenta del tramo de la fase A en el tick 1250: 1000 y se esperaba 1250; tramo de la fase A en el tick 2250: 52 y se esperaba 56
+DETECTADO prog_largo_m: programa: tramos del motor de 500 ticks
+    cuenta del tramo del motor en el tick 2500: 500 y se esperaba 2500
+DETECTADO prog_dos_decisiones: programa: el hilo 0 escribe DECISION dos veces por tick
+    escrituras en DECISION en el tick 1: 2 y se esperaba 1; dec_distinto_de_1 = 2600 y se esperaba 0
+DETECTADO prog_dos_escritores: programa: el hilo 2 escribe una palabra del hilo 1
+    violaciones = 2600 y se esperaba 0
+DETECTADO prog_store_tabla: programa: el hilo 2 hace un store a la tabla
+    violaciones = 2600 y se esperaba 0
+DETECTADO prog_spi_hilo1: programa: el hilo 1 lee el SPI
+    violaciones = 2600 y se esperaba 0
+DETECTADO prog_clon: programa: el clon nunca recibe órdenes
+    473 bytes distintos a la referencia, el primero en el tick 1079; D en el tick 915: -3303 y se esperaba -3298; caja del clon en el tick 915: 10000 y se esperaba 3506; acciones del clon en el tick 915: 0 y se esperaba 63; 
+DETECTADO prog_candado: programa: el candado no llega nunca (M 5000)
+    594 bytes distintos a la referencia, el primero en el tick 1485; modo en el tick 638: 1 y se esperaba 2; byte en el tick 1485: 127 y se esperaba 191; byte de la política en el tick 1485: 380287 y se esperaba 380351; D en
+DETECTADO prog_dato_viejo: programa: con el dato atrasado no sostiene la orden completa (la regla compara con 62)
+    1 bytes distintos a la referencia, el primero en el tick 573; byte en el tick 573: 0 y se esperaba 127
+
+PASS: 25 de 25 controles detectados, y el control en blanco pasa

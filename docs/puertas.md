@@ -9,6 +9,7 @@ Un bitstream sube a la escalera solo si pasa tres puertas, en orden: simulación
 | R0 | Espino base, sin hardware agregado | `sw/trade.s` con `max_media` | `bitstreams/r0_base_max_media.bin` |
 | R1 | Espino barrel con `emad` y `devk` y la tabla, sin vigilante | `sw/fondo.s` | `bitstreams/r1_fondo.bin` |
 | R2 | R1 con vigilante y dos imágenes | `sw/fondo.s`, y R0 como imagen de respaldo | `bitstreams/r2_multi.bin` |
+| R3 (desde el 21/11, T150 a T152) | R2 con la tabla de 512 palabras | `sw/c1.s` (C1 en los cuatro hilos), y R0 con banda 40 como imagen de respaldo | `bitstreams/r3_c1_multi.bin` |
 
 ## Puerta de simulación
 
@@ -24,6 +25,69 @@ Un bitstream sube a la escalera solo si pasa tres puertas, en orden: simulación
 | 8 | Simulación del bitstream ya ruteado, 2 000 ticks idénticos a la referencia | `make sim-bitstream` |
 
 `tb/tb_estres.sv` es una maestra con la misma transacción y la misma medición que el testbench oficial, pero con los tiempos elegidos en tiempo de ejecución (decisión T53). `tools/estres.py` compara cada byte que lee la maestra con `ref/trader.py`, exige MISO sin X y ningún precio sin leer ni sin respuesta, y modela como perdidos los precios que llegan antes de que termine el reset de encendido. Los casos con SCLK sobre 1 MHz son exploración y no cuentan para la puerta.
+
+## R3: C1 en los cuatro hilos, con la tabla de 512 palabras (T150 a T152, 21/11)
+
+Rama `c1`, creada desde `banda-40`. R3 es el hardware de R2 (barrel con `emad` y `devk`, vigilante) con la tabla de 512 palabras (`rtl/pochoco_tabla512.v`, `-DESPINO_TABLA_512`) y el programa `sw/c1.s`: la banda 40 de R2 más el desempate C1 de la exploración (`docs/c1_plan.md`). Referencia: `ref/c1/c1.py`. R0, R1 y R2 no cambian. Todo se corre con `make c1-puerta` (`tools/c1/puerta.sh`); el resumen está en `docs/mediciones/c1/puerta.txt` y los registros en `docs/mediciones/c1/`. Bitácora: `docs/bitacora/c1.md`.
+
+El encargo pedía cuatro puertas. Las cuatro pasan con el programa del commit `5cd9b68` (`sw/c1.s` sha256 `353f6806...`, `sw/c1_tabla.hex` `9954f116...`).
+
+| Puerta | Qué se exige | Resultado |
+|--------|--------------|-----------|
+| a | Con la política apagada (una palabra de la tabla en 0), las órdenes de la banda 40 de R2 | **Pasa.** El archivo de bytes de R3 apagado es idéntico al de R2 (`sw/fondo.s` en su hardware y con su testbench) en 46 corridas por el RTL: Tesla, AMD y Meta completas a 0,1 y 1 ms y 40 ventanas reales (920 000 ticks). En el gemelo, 203 series a los tres períodos (12,18 millones de ticks): iguales a `ref/c1/c1.py`, a `ref/fondo.py` y al programa de R2. Responde en 203 ciclos |
+| b | Assembly contra la referencia entera, orden por orden, en Tesla, AMD, Meta y al menos 200 ventanas más, a los tres ritmos | **Pasa.** Por el RTL, bytes y estado tick a tick: Tesla, AMD y Meta a 0,1 y 1 ms, Meta a 10 ms, y 200 ventanas reales de 20 000 ticks a 0,1 ms (4,14 millones de ticks, 1210 órdenes, 129 ventanas terminan en candado). En el gemelo con la tabla de 512 palabras, las 203 series a 0,1, 1 y 10 ms (12,18 millones de ticks). Cero diferencias. Tesla 21 224, AMD 27 199, Meta 22 682 |
+| c | La misma puerta de simulación de R0, R1 y R2, y la integración local | **Pasa** (tabla siguiente) |
+| d | Síntesis: celdas, bloques de memoria y temporización | **Pasa.** 1038 celdas de 1280, 14 bloques de 16, 10 de 10 semillas a 25 MHz, mínima 48,41 MHz, mediana 51,35 y máxima 53,07 |
+
+Puerta c, criterio por criterio:
+
+| N.º | Criterio | Resultado | Registro |
+|-----|----------|-----------|----------|
+| 1 | Testbench oficial sin modificar | 4/4, peor caso 759 ciclos de 2262, `decisiones.csv` idéntico al de `ref/c1/c1.py` | `oficial.txt` |
+| 2 | Equivalencia | Cero diferencias. Copia del oficial con la serie Meta y con la anterior a 0,1, 1 y 10 ms (4/4 en las seis; 22 682 en la serie Meta). La puerta b. 30 series de 20 000 ticks (15 familias, crudas y normalizadas) y 1 050 de 2000 por el RTL (2,1 millones de ticks); las mismas 1 081 en el gemelo a los tres períodos | `oficial.txt`, `puerta_b.txt`, `series.txt` |
+| 3 | Timing | 10 de 10 semillas, mínima 48,41 MHz. El bitstream guardado (semilla 1): 50,00 MHz, 50,20 con `icetime` | `timing.txt`, `bitstreams.txt` |
+| 4 | Peor caso barriendo la fase | Programa sano: 779 ciclos (48 fases de un ciclo en dos series, 24 corridas 13 ns y el período de 2501 ciclos). Con el hilo 3 colgado, 24 fases: 916. Contra 1131 | `fases.txt` |
+| 5 | Core en la configuración exacta | El core es el de R1 y R2. La campaña se repitió sobre el SoC de R3: 7 974 963 instrucciones, 92,80 % distintas, cero diferencias; 6 de 6 mutaciones de la extensión y 21 de 21 del barrel detectadas | `criterio5_*.txt` |
+| 6 | Degradación | 26 de 26 casos, peor caso 907 ciclos: cada hilo (1, 2 y 3) colgado en cinco situaciones, dato viejo (un tick, dos seguidos y un atraso que se salta precios) y modo seguro (precio bajo 100, ronda larga, política apagada). Donde queda el modo seguro, los bytes son los de la banda 40 de `ref/fondo.py`. 25 de 25 controles negativos detectados y el control en blanco pasa | `degradacion.txt`, `controles.txt` |
+| 7 | Estrés | 57 de 57, peor caso 779 ciclos, el vigilante no dispara en ninguno | `estres.txt` |
+| 8 | Bitstream simulado desde el `.asc` | El molde con `icebram` da el mismo `.asc` que la síntesis directa. 2000 ticks por los pines idénticos a la referencia en tres series (los primeros 2000 de la serie Meta, la serie hecha a mano que apuesta en la fase A y llega al candado, y una ventana con motor), sin disparo. Con la política apagada por `icebram`: 2000 ticks iguales a la banda 40. Con el hilo 0 colgado en el tick 100, BOOT pide la imagen 01 al terminar la transacción 105. Con el hilo 3 colgado en el tick 700, sin relevo y con los bytes de la referencia | `bitstreams.txt` |
+| | Integración local | Los 24 pasos de la rama más `make check-c1` | `docs/mediciones/ci_local_c1.txt` |
+
+Además: el gemelo con la tabla de 512 palabras da la misma traza que el RTL de R3 en 17 configuraciones (42,4 millones de eventos, `cosim.txt`); el testbench del módulo nuevo pasa y sus tres controles se detectan (`tb_tabla.txt`); y la telemetría (el byte de los 7 segmentos con cada una de las 16 combinaciones de botones) coincide con la referencia en cada tick (`ticks.txt`).
+
+Lo que no se repitió y por qué vale: la prueba formal del vigilante y el relevo de punta a punta con las dos imágenes en un testbench (`make check-vigilante`) son del módulo `rtl/vigilante.v` y de la imagen de respaldo, que no cambian; en R3 se comprobó el disparo dentro de su propio bitstream (criterio 8). La prueba formal de las tres mutaciones de `mulstep` que no aplican es del core.
+
+Dos cosas que conviene saber antes de la maestra (detalle en `docs/c1_plan.md`, sección 6, y `docs/c1_dia_de_prueba.md`):
+
+- C1 supone una ronda de 20 000 ticks contada desde el encendido. Pasado ese tick sin reset, R3 decide la banda 40 (modo seguro, LED1). Con rondas seguidas sin reset solo la primera corre C1.
+- R3 responde en hasta 807 ciclos sano y 916 con un hilo colgado: el período mínimo que soporta con holgura es de unos 50 µs (R2: 13,5 µs).
+
+Recursos de R3:
+
+| Recurso | Uso | Presupuesto |
+|---------|-----|-------------|
+| Celdas | 1038 (R2: 1015) | 1280 |
+| Bloques de memoria | 14 (R2: 13) | 16 |
+| Frecuencia máxima | 48,41 MHz la mínima de 10 semillas | 25 MHz |
+| Memoria del programa | 482 palabras (444 de código y 38 de datos) | 512 |
+| Tabla | 348 palabras usadas | 512 |
+| Respuesta, programa sano | 807 ciclos en el peor tick | 1131 (la mitad de 2262) |
+| Respuesta con el plazo vencido | 916 ciclos | 1131 |
+| Instrucciones por hilo y por tick | 228 en el hilo 3, el mayor | 565 |
+| Flash, imagen múltiple | 64 600 bytes | 131 072 |
+
+Bitstreams (`make c1-bitstreams`, copiados a `bitstreams/` con `GUARDAR=1`):
+
+| Archivo | sha256 |
+|---------|--------|
+| `r3_c1.bin` | `cd0f7f6544990ff5a32af2d64dc01b360b4bd2c569a27b41457b28d4174293a7` |
+| `r3_c1_multi.bin` (imagen 0 R3, imagen 1 R0 banda 40) | `c0b8a4cc3ed7d24d7096b0102e5033f6d93f4de2eeea11afe09ff755f1dc94c0` |
+| `r3_c1_apagada_multi.bin` (R3 con la política apagada, imagen 1 R0) | `a3c14f00a48da9ced7f6dd7fd7a4073ed871b52eeb92fc1c517639c8b2c97a24` |
+| `r3_c1_falla_multi.bin` (R3 con el hilo 0 colgado en el tick 100, imagen 1 R0) | `ab755baa483c514663ea51beaf3d6445446e35e9998d82a91504e387d972b51f` |
+| `moldes/r3_molde.asc.gz` | `709a0516e6c8598d486c62e43fcf1cf2813011cb8fcddabe5c8f9dbc21aa3dec` |
+| `moldes/molde_tabla512.hex` | `b78ca6b58510199084ae274a17331a59685d54fade64cf3cc6bd88bea96685a5` |
+
+R3 pasó la puerta de simulación. Le faltan la de placa y la de la maestra real el 26/11 (`docs/c1_dia_de_prueba.md`). No tiene todavía un bitstream de autoprueba como los de R0 a R2.
 
 ## R0 con banda 40 (T140, 19/11)
 

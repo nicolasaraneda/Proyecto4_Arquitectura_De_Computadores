@@ -1,6 +1,6 @@
 Gemelo digital con la tabla de 512 palabras y sw/c1.s contra el RTL de R3
 Generado por tools/c1/cosim.py (make c1-cosim). No editar a mano.
-Commit 6a70a3d con cambios sin commit. Verilator 5.053 devel rev v5.052-22-g7cf8c5cca (mod)
+Commit 5cd9b68. Verilator 5.053 devel rev v5.052-22-g7cf8c5cca (mod)
 Hardware: pochoco_soc con -DESPINO_BARREL -DESPINO_XD_EMAD -DESPINO_XD_DEVK -DESPINO_TABLA -DESPINO_TABLA_512
 
 Traza, mediciones por tick y decisiones.csv del RTL (tb/barrel/tb_gemelo.sv, Verilator)

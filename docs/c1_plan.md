@@ -2,7 +2,7 @@
 
 Grupo: Nicolás Araneda, Vicente Calderón y Santiago Muñoz.
 
-Rama `c1`, creada desde `banda-40`. Escrito el 21/11. Este documento es el paso 1 del encargo: el plan, con los presupuestos medidos sobre un borrador que ya ensambla y corre. **Dos presupuestos quedan fuera de lo pedido (sección 9) y por eso el trabajo se detiene aquí, con opciones para decidir (sección 10).** Nada de esto toca R0, R1 ni R2.
+Rama `c1`, creada desde `banda-40`. Escrito el 21/11. Este documento es el paso 1 del encargo: el plan, con los presupuestos medidos. Dos presupuestos quedaban fuera de lo pedido (sección 9: la memoria del programa al 94 % y el cambio de hardware) y el trabajo se detuvo ahí. **Nicolás eligió seguir con la opción A (sección 10); las puertas se construyeron y pasaron, y su estado está en `docs/puertas.md`.** Nada de esto toca R0, R1 ni R2.
 
 ## 1. Qué es C1 y qué se construye
 
@@ -100,7 +100,7 @@ Memoria del programa: 512 palabras de 32 bits, código y datos juntos (medido so
 | **Total** | **482 de 512 (94,1 %)** |
 | Libres | 30 |
 
-Periféricos: `0x8001_0000` SPI (solo el hilo 0), `0x8000_0000` periférico de la placa (el hilo 0 escribe los LED; el hilo 3 lee los interruptores y escribe los 7 segmentos), `0x8002_0000` tabla de solo lectura.
+Periféricos: `0x8001_0000` SPI (solo el hilo 0), `0x8000_0000` periférico de la placa (el hilo 0 escribe los LED; el hilo 3 lee los botones y escribe los 7 segmentos), `0x8002_0000` tabla de solo lectura.
 
 ## 6. Degradación
 
@@ -115,29 +115,38 @@ Las mismas reglas de R2, con el hilo 0 decidiendo siempre:
 
 El hilo 0 publica siempre el byte que escribió de verdad, venga de la política o del respaldo, y el hilo 3 ejecuta ese. Así la cuenta propia sigue exacta aunque se use el respaldo. Un hilo 1 o 2 colgado deja al hilo 3 esperando y el hilo 0 termina en modo seguro por la regla 4. El vigilante de R2 no cambia: el hilo 0 escribe `DECISION` en todos los ticks.
 
-## 7. Telemetría: el patrimonio propio en la placa
+Lo que mostraron las pruebas de degradación (`make c1-degradacion`, `docs/mediciones/c1/degradacion.txt`), además de lo anterior:
 
-Propuesta para el día de prueba, ya incluida en el borrador. **No cuesta ninguna celda: es solo programa** (13 palabras y unas 45 instrucciones por tick fuera del camino de la respuesta).
+- **En el candado los hilos 1 y 2 ya no hacen falta.** El hilo 3 copia al clon con lo que publica el hilo 0 y no espera a nadie más. Si el hilo 1 o el 2 se cuelga después del candado, la política sigue llegando a tiempo y es la banda 40: no hay plazo vencido ni modo seguro, y los bytes son los mismos.
+- **Dos atrasos seguidos.** Si la política del tick n llega después del plazo, queda como "la del tick anterior" para el tick n + 1. La referencia distingue los dos casos: `faltas` (no llega nunca) y `tardias` (llega tarde).
+- **Límite conocido, sin corregir.** El hilo 3 lee `D_ORD` (el byte que el hilo 0 escribió en el tick anterior) apenas ve el precio, unos 90 ciclos después de `byte_done`, y no mira su número de tick. El hilo 0 la reescribe a los 200 ciclos en modo seguro y a los 500 a 907 en modo normal. Para leer la del tick equivocado el hilo 3 tendría que partir más de 100 ciclos tarde, y no tiene de quién esperar antes de ese punto: en el programa sano no pasa, y un hilo 3 que se salta un precio se detiene solo (lazo `muerto`). Cerrarlo del todo cuesta 4 palabras y 16 ciclos en el camino de la respuesta; queda anotado y no se aplicó.
 
-- El hilo 3 calcula en cada tick el patrimonio propio emulado, caja más acciones por el precio, y lo deja en una palabra de datos.
-- Los dos dígitos de 7 segmentos muestran un byte de esa palabra en hexadecimal. Los interruptores 1 y 2 eligen cuál: ninguno apretado, el byte bajo; el 1, el segundo byte; el 2, el tercero (patrimonio sobre 65 535); los dos, el modo (00 fase A, 01 recuperación, 02 candado).
-- Al terminar la ronda no llegan más precios y el valor queda fijo: se lee el byte bajo, se aprieta el interruptor 1 y se lee el segundo. Por ejemplo, 22 682 es `0x589A`: se ve `9A` y, con el interruptor 1, `58`. Se compara con el patrimonio que muestra la maestra.
-- LED 0: modo seguro (encendido si la política quedó fuera).
+## 7. Telemetría: la cuenta emulada en la placa
 
-En la simulación el patrimonio emulado coincide con el de la contabilidad oficial en todas las ventanas comparadas (sección 8).
+**No cuesta ninguna celda: es solo programa** (13 palabras y unas 45 instrucciones por tick fuera del camino de la respuesta). Los pasos del día de prueba están en `docs/c1_dia_de_prueba.md`.
 
-## 8. Qué está hecho y medido del borrador
+- El hilo 3 calcula en cada tick el patrimonio propio emulado, caja más acciones por el precio, y lo deja en una palabra de datos (`D_W`), con el modo en su byte alto. Las tres palabras que siguen son la caja propia, las acciones propias y la caja del clon.
+- Los dos dígitos de 7 segmentos muestran en hexadecimal un byte de esas cuatro palabras. Los cuatro botones eligen cuál (0 a 15, SW1 es el bit 0): bytes 0 a 2, el patrimonio; byte 3, el modo (00 fase A, 01 motor, 02 candado); 4 a 7, la caja; 8 a 11, las acciones; 12 a 15, la caja del clon.
+- Al terminar la ronda no llegan más precios y los valores quedan fijos. Por ejemplo, 22 682 es `0x589A`: se ve `9A` y, con SW1 apretado, `58`. Se compara con el patrimonio que muestra la maestra.
+- LED1: modo seguro (encendido si la política quedó fuera).
+- `python3 ref/c1/c1.py SERIE.csv --placa` imprime lo que debe verse con cada combinación de botones.
+
+El borrador mostraba solo el patrimonio y el modo (botones 1 y 2). Mostrar la caja y las acciones no costó palabras: cambió la máscara de los botones (de 3 a 15) y el orden de cuatro datos. `make c1-ticks` corre una ventana con cada una de las 16 combinaciones y compara el byte mostrado con la referencia en cada tick.
+
+## 8. Qué está hecho y medido
+
+El detalle de cada puerta, con sus registros, está en `docs/puertas.md` (sección de R3). Resumen:
 
 | Paso | Resultado | Dónde |
 |------|-----------|-------|
 | Tablas desde el modelo | Calculadas desde cero; 0 celdas distintas contra las de la exploración | `ref/c1/tablas.py`, `sw/c1_tabla.hex` |
-| Referencia entera contra el C1 de la exploración (paso 2 del encargo) | 2400 ventanas de las cinco empresas, 48 millones de bytes: **0 bytes distintos** contra `v5.V5Ref`, 0 diferencias de órdenes y de patrimonio contra `v5.fase_a` más `v5.post` (la del examen), 0 en D final. Con la política apagada, 0 diferencias contra la banda 40 de `ref/fondo.py` | `docs/mediciones/c1/contra_exploracion.txt` |
-| Borrador del programa contra la referencia, por el RTL | Serie Meta completa a 0,1 ms: 20 000 bytes y el estado de los 20 000 ticks idénticos; patrimonio 22 682 contra 21 392 de la banda 40. 40 ventanas reales de 20 000 ticks a 0,1 ms: 40 de 40 idénticas en bytes y estado | `tools/c1/caso.py`, `tb/c1/tb_c1.sv` |
-| Degradación, primera prueba | Hilo 3 colgado en el tick 5000: sostiene un tick, pasa a modo seguro y sigue con la banda 40, con los mismos bytes que la referencia; respuesta de 907 ciclos en los dos ticks con el plazo vencido y de unos 200 después | misma herramienta, con `--faltas` |
-| Síntesis del hardware de R3 | 1038 celdas, 14 bloques, 10 de 10 semillas a 25 MHz, mínima 48,41 MHz | `build/variantes/c1_r3` |
-| R0 y R2 después del cambio de RTL | El `.asc` de cada uno es idéntico al de antes del cambio, con la misma semilla | `build/variantes/c1_ctl_*` |
-
-No está hecho: las puertas (paso 5), el barrido de fases y alineaciones, el estrés, el gemelo con la tabla de 512, los bitstreams y la integración local.
+| Referencia entera contra el C1 de la exploración (paso 2 del encargo) | 2400 ventanas de las cinco empresas, 48 millones de bytes: **0 bytes distintos** contra `v5.V5Ref`, 0 diferencias de órdenes y de patrimonio contra `v5.fase_a` más `v5.post` (la del examen), 0 en D final | `docs/mediciones/c1/contra_exploracion.txt` |
+| Gemelo con la tabla de 512 palabras contra el RTL de R3 | 17 configuraciones, 42 millones de eventos idénticos ciclo a ciclo | `docs/mediciones/c1/cosim.txt` |
+| Puerta a: política apagada | R3 escribe los mismos bytes que R2 en 46 corridas por el RTL (archivos idénticos) y en 203 series a los tres períodos en el gemelo | `docs/mediciones/c1/puerta_a.txt` |
+| Puerta b: assembly contra referencia | Tesla, AMD y Meta por el RTL a 0,1 y 1 ms, Meta a 10 ms, 200 ventanas a 0,1 ms y las 203 series en el gemelo a los tres períodos: todo idéntico, en bytes y en estado | `docs/mediciones/c1/puerta_b.txt` |
+| Puerta c: la puerta de simulación de R0 a R2 | Los criterios 1 a 8 pasan | `docs/mediciones/c1/puerta.txt` |
+| Puerta d: síntesis | 1038 celdas, 14 bloques, 10 de 10 semillas a 25 MHz, mínima 48,41 MHz | `docs/mediciones/c1/timing.txt` |
+| R0 y R2 después del cambio de RTL | El `.asc` de cada uno es idéntico al de antes del cambio, con la misma semilla. Sin `-DESPINO_TABLA_512` el SoC no instancia el módulo nuevo | `build/variantes/c1_ctl_*`, `docs/mediciones/c1/tb_tabla.txt` |
 
 ## 9. Presupuestos
 
@@ -145,55 +154,59 @@ Umbral pedido: 85 % de cada presupuesto.
 
 | Recurso | Presupuesto | Uso medido | % | Estado |
 |---------|-------------|------------|---|--------|
-| Operaciones por hilo y por tick a 0,1 ms | 565 | Hilo 0: 202. Hilo 1: 135. Hilo 2: 158. Hilo 3: 228 (máximos de las series medidas, contando las vueltas de espera entre hilos) | 40 % | Dentro |
-| Camino de la respuesta, caso sano | 1131 ciclos (la mitad de 2262) | 799 en el peor tick de 41 series; promedio 497 a 516 | 71 % | Dentro |
-| Camino de la respuesta con el plazo vencido | 1131 ciclos | 907 con el plazo de 28 vueltas (955 con 30) | 80 % | Dentro, con poco margen |
+| Operaciones por hilo y por tick a 0,1 ms | 565 | Hilo 0: 202. Hilo 1: 135. Hilo 2: 158. Hilo 3: 228 (máximos de las series medidas, contando las vueltas de espera entre hilos; en la serie Meta, 196, 133, 156 y 218) | 40 % | Dentro |
+| Camino de la respuesta, caso sano | 1131 ciclos (la mitad de 2262) | 807 en el peor tick de las puertas (203 series reales, 1081 sintéticas y el barrido de fases); promedio 500 a 530 | 71 % | Dentro |
+| Camino de la respuesta con el plazo vencido | 1131 ciclos | 916 barriendo 24 fases con el hilo 3 colgado (907 en la fase del testbench oficial), con el plazo de 28 vueltas | 81 % | Dentro, con poco margen |
 | Bytes de tabla nuevos | 3 bloques de 512 bytes | 1 bloque. La tabla usa 348 de sus 512 palabras | 33 % de los bloques, 68 % de la tabla | Dentro |
 | Celdas | Unas 235 libres (265 medidas en R2: 1015 de 1280) | 23 más que R2 | 9 % a 10 % | Dentro |
 | Temporización | 25 MHz en 10 de 10 semillas | 48,41 MHz la mínima | | Dentro |
-| **Memoria del programa** | **512 palabras** | **482** | **94,1 %** | **Pasa del 85 %** |
-| **Hardware** | El de R2 | Tabla de 512 palabras: un módulo nuevo y una síntesis nueva | | **Exige cambiar hardware** |
+| **Memoria del programa** | **512 palabras** | **482** | **94,1 %** | **Pasa del 85 %. Aceptado por Nicolás (opción A)** |
+| **Hardware** | El de R2 | Tabla de 512 palabras: un módulo nuevo y una síntesis nueva | | **Exige cambiar hardware. Aceptado por Nicolás (opción A)** |
 
-**Memoria del programa.** No estaba medida en la exploración (15.10 lo advertía). Con todo lo pedido el programa ocupa 482 palabras y quedan 30. Es un recurso estático: el programa cabe o no cabe al ensamblar, y cabe. Lo que se pierde es margen para cambios. Revisé qué se puede recortar sin cambiar lo que decide:
-
-| Recorte | Palabras | Costo |
-|---------|----------|-------|
-| `producto` como lazo en vez de 8 pasos escritos | 24 | Estimado, no medido: 17 instrucciones más en el camino de la respuesta. El peor caso sano subiría a unos 870 ciclos (77 %) y con plazo vencido a unos 980 (87 %) |
-| Sin telemetría (7 segmentos y LED) | 13 | Se pierde lo del paso 6 |
-| Sin el chequeo de tick saltado del hilo 3 y sin guardar D | 4 | Menos red de seguridad y menos estado para comparar |
-
-Con los tres recortes queda en 441 palabras (86,1 %): ni así baja del 85 %, y cada uno cuesta algo. No hay cómo agrandar la memoria del programa: 512 palabras más son 8 bloques y quedan 2.
+**Memoria del programa.** No estaba medida en la exploración (15.10 lo advertía). Con todo lo pedido el programa ocupa 482 palabras y quedan 30. Es un recurso estático: el programa cabe o no cabe al ensamblar, y cabe. Lo que se pierde es margen para cambios. Las puertas no pidieron ningún arreglo del programa, así que las 30 palabras siguen libres. Los recortes posibles, que ni juntos bajan del 85 % (441 palabras, 86,1 %), están en la sección 10 como reserva. No hay cómo agrandar la memoria del programa: 512 palabras más son 8 bloques y quedan 2.
 
 **Hardware.** C1 no cabe en el hardware de R2 sin tocarlo. Las celdas de las tablas son 640 bytes; la tabla de R2 tiene 252 palabras libres (504 bytes) y la memoria del programa ya está al 94 %. El cambio mínimo es duplicar la tabla: `rtl/pochoco_tabla512.v` (el mismo módulo con 512 palabras) y un `ifdef` en `rtl/pochoco_soc.v`. Sin la definición `ESPINO_TABLA_512` el SoC es texto idéntico al de antes y R0, R1 y R2 no cambian (comprobado con la síntesis). Lo que el cambio implica:
 
-- R3 no es "el molde de R2 más `icebram`". Es una síntesis nueva, con su propio molde, su temporización (ya medida), su bitstream simulado y su imagen múltiple.
-- El hardware de R3 no es el que ya pasó por la maestra el 18/11. Para competir tendría que pasar la prueba del 26/11 por su cuenta, igual que R1 y R2 con banda 40. El core, el SPI y el vigilante son los mismos; cambia una memoria de solo lectura.
-- La verificación del core (criterio 5) y la equivalencia formal de la extensión no dependen de la tabla. El gemelo del barrel hay que ampliarlo a la tabla de 512 para las corridas largas.
+- R3 no es "el molde de R2 más `icebram`". Es una síntesis nueva, con su propio molde (`bitstreams/moldes/r3_molde.asc.gz`), su temporización, su bitstream simulado por los pines y su imagen múltiple.
+- El hardware de R3 no es el que ya pasó por la maestra el 18/11. Para competir tiene que pasar la prueba del 26/11 por su cuenta. El core, el SPI y el vigilante son los mismos; cambia una memoria de solo lectura.
+- La verificación del core (criterio 5) se repitió igual sobre el SoC de R3, y el gemelo del barrel se amplió a la tabla de 512 palabras y se validó contra el RTL.
 
-## 10. Opciones, sin decidir
+## 10. Decisión y reserva de recortes
 
-| Opción | Qué es | Qué se gana | Qué se pierde o arriesga |
-|--------|--------|-------------|--------------------------|
-| **A. Seguir con el borrador tal como está** | Tabla de 512 palabras (1 bloque y 23 celdas más), programa de 482 palabras | Es lo que ya decide igual que la referencia en 41 series. Camino de la respuesta en 71 %. Telemetría incluida | Memoria del programa al 94 %: 30 palabras para cualquier arreglo que pidan las puertas. Hardware nuevo, con su propia prueba el 26/11 |
-| **B. Seguir con el programa recortado** | Lo mismo con `producto` en lazo (458 palabras, 89 %) | 54 palabras libres en vez de 30 | Peor caso sano en unos 77 % y con plazo vencido en unos 87 % (estimados): se cambia margen de memoria por margen de tiempo. Sigue sobre el 85 % en memoria |
-| **C. No construir R3** | C1 queda como referencia entera verificada y borrador medido, en la rama `c1` | No se gasta más tiempo antes del corte del 22/11 y del congelamiento del 25/11. La banda 40 queda intacta, como respaldo y como titular | C1 no llega a la placa |
+**Decisión de Nicolás (21/11): opción A.** Se sigue con el borrador tal como está: tabla de 512 palabras (hardware nuevo para R3, un bloque de memoria y 23 celdas más que R2) y programa de 482 palabras. Las opciones que se presentaron fueron A (seguir así), B (seguir con el programa recortado) y C (no construir R3); quedan en la decisión T151.
 
-No hay una opción sin cambio de hardware: el programa y las tablas juntos no caben en la memoria de R2.
+No hay una versión de C1 sin cambio de hardware: el programa y las tablas juntos no caben en la memoria de R2.
 
-Mi recomendación, etiquetada como mía: **la opción A**. El 94 % es de un recurso que no falla en vivo, y el recorte de B gasta el margen que sí importa en vivo, que es el tiempo. Si en las puertas aparece un arreglo que no quepa en 30 palabras, el primer recorte sería la telemetría de los LED y después `producto` en lazo. Lo que decide entre A y C no es técnico: es si vale la pena llevar a la maestra un hardware que cambió, a cinco días de la prueba, por un desempate cuyo efecto en la nota la exploración midió en menos de una centésima y media.
+### Reserva: los recortes de la opción B (no aplicados)
 
-Decisiones que necesito para seguir:
+Quedan 30 palabras libres entre el código y los datos. Si un arreglo necesita más, estos son los recortes, en el orden en que conviene aplicarlos. **Ninguno está aplicado.** Cada uno cambia el binario, así que después de aplicarlo hay que repetir todas las puertas (`make c1-puerta`).
 
-1. A, B o C.
-2. Si es A o B: confirmar que la tabla de 512 palabras es un cambio de hardware aceptado para R3.
+| N.º | Recorte | Palabras que libera | Costo en el camino de la respuesta | Qué se pierde | Dónde se hace |
+|-----|---------|---------------------|-------------------------------------|---------------|---------------|
+| 1 | Sacar la telemetría de la cuenta (el bloque del hilo 3 después de publicar `D_POL`: producto de las acciones por el precio, `D_W`, lectura de botones y escritura de los 7 segmentos) | 13 | Ninguno: está fuera del camino | Leer en la placa el patrimonio, la caja y el modo. Queda el LED1 de modo seguro. `tools/c1/caso.py` compara `D_W` y los 7 segmentos: hay que sacar esas dos comparaciones | `tools/c1/generar.py`, plantilla, entre "fuera del camino de la respuesta" y `j h3_espera` |
+| 2 | Sacar el chequeo de tick saltado del hilo 3 (`addi x15`, `bne ... muerto`) y la palabra `D_DIF` con su store | 4 | 2 instrucciones menos (8 ciclos a favor) | Que un hilo 3 que se salta un precio se detenga solo. Seguiría publicando con la cuenta corrida en un tick. `D_DIF` solo la miran las pruebas | Plantilla, inicio del hilo 3 y cálculo de D |
+| 3 | `producto` en lazo en vez de desenrollado: 8 vueltas que duplican el resultado, miran el bit 7 de una copia del precio y la duplican | 22 a 24 (la rutina baja de 33 palabras a unas 10) | Unas 17 a 26 instrucciones más (70 a 100 ciclos) en los ticks en que las acciones propias y las del clon difieren. Hay que subir el plazo de 28 a unas 31 vueltas | Margen de tiempo: peor caso sano de unos 870 ciclos (77 % de 1131) y con el plazo vencido de unos 980 (87 %). Estimados, sin medir | Función `producto()` de `tools/c1/generar.py` y `--plazo` |
 
-## 11. Si se sigue: lo que falta, en orden
+Con los tres el programa queda en unas 441 palabras (86 %): 71 libres en vez de 30. El orden importa: los dos primeros no gastan tiempo de respuesta, que es el margen que sí importa en vivo; el tercero cambia memoria por tiempo y por eso va al final.
 
-1. Herramienta de variantes con fallas y referencia de la degradación para todas las pruebas del criterio 6.
-2. Gemelo del barrel con la tabla de 512 palabras y `lbu` sobre la tabla, validado contra el RTL.
-3. Puertas del paso 5: (a) política apagada contra la banda 40 de R2; (b) assembly contra la referencia en Tesla, AMD, Meta y al menos 200 ventanas a los tres ritmos; (c) la puerta de simulación de R1 y R2 (oficial, equivalencia, fases y alineaciones, degradación, controles negativos, estrés, bitstream por los pines, relevo) y la integración local; (d) síntesis.
-4. Molde, bitstreams de R3 con y sin vigilante, imagen múltiple con R0 de respaldo, y sus hash.
-5. Documento de estudio, `docs/puertas.md`, `docs/estado.md` y la bitácora.
+Lo que no se puede recortar sin cambiar lo que C1 decide: la rutina `ejecutar` (la contabilidad oficial exacta, 62 palabras), las siete sumas de la clase de v² y la división de la media posición.
+
+## 11. Estado y pendientes
+
+Las puertas están construidas y su estado, con los números, está en `docs/puertas.md` (sección de R3). Las herramientas:
+
+| Paso del encargo | Dónde | Comando |
+|------------------|-------|---------|
+| Gemelo con la tabla de 512 palabras, validado contra el RTL | `ref/gemelo/gemelo.c`, `tools/c1/cosim.py` | `make c1-cosim` |
+| Herramienta de fallas y referencia de la degradación | `tools/c1/variante.py`, `ref/c1/c1.py` (`faltas` y `tardias`) | `make c1-degradacion` |
+| Puerta a: política apagada igual a la banda 40 de R2 | `tools/c1/puerta_a.sh` | `make c1-puerta-a` |
+| Puerta b: assembly contra referencia en Tesla, AMD, Meta y 200 ventanas a los tres ritmos | `tools/c1/puerta_b.sh` | `make c1-puerta-b` |
+| Puerta c: oficial, equivalencia, fases, core, degradación, controles, estrés y bitstream | `tools/c1/oficial.sh`, `series.sh`, `fases.sh`, `criterio5.sh`, `degradacion.sh`, `controles.sh`, `estres.sh`, `bitstreams.sh` | `make c1-oficial`, `c1-series`, `c1-fases`, `c1-criterio5`, `c1-degradacion`, `c1-controles`, `c1-estres`, `c1-bitstreams` |
+| Puerta d: síntesis | `tools/medir_variante.sh`, `tools/c1/bitstreams.sh` | `make c1-timing`, `make c1-bitstreams` |
+| Todo en orden, con resumen | `tools/c1/puerta.sh` | `make c1-puerta` |
+| Pasos del día de prueba | `docs/c1_dia_de_prueba.md` | |
+
+Pendiente, fuera de este encargo: la puerta de placa y la de maestra (las corre Nicolás), el documento de estudio de R3 para la defensa, y la decisión de qué peldaño compite.
 
 ## 12. Cómo reproducir lo de este documento
 

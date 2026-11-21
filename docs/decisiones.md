@@ -799,3 +799,21 @@ Las decisiones T87 a T99 son del paquete P6 de R1 y R2 y las T100 a T119 del paq
 - **Opciones** (`docs/c1_plan.md`, sección 10): A, seguir con el borrador; B, seguir con el programa recortado (89 % de memoria, menos margen de tiempo); C, no construir R3. Mi recomendación es A, y dejo dicho que elegir entre A y C no es una cuestión técnica.
 - **Qué no cambia**: sin la definición nueva el SoC es el mismo texto. R0 y R2 sintetizados antes y después dan el mismo `.asc`.
 
+### T151, resuelta. Nicolás elige la opción A (21/11)
+
+- **Decisión de Nicolás** (21/11, textual en lo esencial): "Opción A. Sigue con las cuatro puertas completas, por la cola." Con cinco encargos más: la puerta b completa (Tesla, AMD, Meta y 200 ventanas a los tres ritmos, con la tabla de 512 palabras en el gemelo); pruebas de degradación con la herramienta de fallas (un hilo colgado por vez, dato viejo y modo seguro, con la decisión a tiempo y cayendo a la banda 40); dejar documentados los recortes de la opción B como reserva, sin aplicarlos; congelar R3 cuando las puertas pasen (molde, bitstream y hash, igual que R0 a R2); y una lista de pasos para el día de prueba (R2 primero, R3 después). Regla del día: si la caja o el patrimonio no calzan con la pantalla de la maestra, se anota la diferencia y compite la banda 40.
+- **Qué queda aceptado**: la tabla de 512 palabras como hardware de R3 (un bloque de memoria y 23 celdas más que R2) y el programa en 482 de 512 palabras.
+- **Qué no cambia**: R0, R1 y R2, sus moldes y sus bitstreams. La decisión de qué peldaño compite sigue siendo de Nicolás.
+
+### T152. Decisiones técnicas de las puertas de R3 (21/11)
+
+Tomadas por mí siguiendo el encargo de T151. Detalle en `docs/c1_plan.md` y `docs/bitacora/c1.md`.
+
+- **Gemelo.** `ref/gemelo/gemelo.c` acepta una tabla de 256 o de 512 valores y toma el tamaño del archivo. Para R0, R1 y R2 no cambia nada (misma tabla de 256). Alternativa: una copia del gemelo para R3; duplicaba 1100 líneas. Validado contra el RTL de R3 con el testbench de traza sin tocar (`make c1-cosim`).
+- **Referencia de la degradación.** Dos clases de tick sin política: `faltas` (no llega nunca: un hilo colgado) y `tardias` (llega después del plazo). Hacía falta distinguirlas porque una política que llega tarde sirve de "anterior" para el tick siguiente. Alternativa: modelar ciclos en la referencia; mucho más código para lo mismo.
+- **Atrasos solo en los hilos 1 y 2.** El hilo 3 lee el byte del tick anterior (`D_ORD`) apenas ve el precio, sin mirar su número de tick. Atrasarlo ahí no es un dato que llega tarde sino un hilo roto, y eso lo cubre el hilo 3 colgado. Cerrar ese caso con un chequeo del tick cuesta 4 palabras y 16 ciclos en el camino de la respuesta: no se aplicó (el programa sano no puede llegar ahí) y queda anotado como límite conocido.
+- **Candado con los hilos 1 o 2 colgados.** El hilo 3 ya no los necesita: la política sigue llegando y es la banda 40. No se fuerza el modo seguro en ese caso; los bytes son los mismos.
+- **Telemetría ampliada.** Los cuatro botones eligen entre 16 bytes: patrimonio y modo, caja, acciones y caja del clon. Costó cero palabras (una máscara y el orden de cuatro datos). Se hizo porque la regla del día de prueba habla de caja y de patrimonio, y el borrador solo mostraba el patrimonio. Cambió el binario: todas las puertas se corrieron con el programa final.
+- **Estrés.** Cuentan para la puerta los casos que dejan al menos 1000 ciclos entre transacciones (R3 responde en hasta 907 con un hilo colgado). El período de 50 µs cuenta; el de 40 µs y SCLK de 100 kHz a 0,1 ms quedan como exploración, igual que en el fondo anterior al 17/11 con su límite de 600.
+- **Criterio 5.** La campaña del core y las mutaciones se repitieron sobre el SoC de R3 aunque el core no cambió. La prueba formal de las tres mutaciones que no aplican es del core y vale la de R2.
+- **Bitstream.** R3 se sintetiza (semilla 1, como R1 y R2) y se guarda con su molde y un patrón de tabla nuevo de 512 palabras. La imagen de respaldo es `r0_banda40.bin`. Se guardan además la imagen con la política apagada y la de la falla del hilo 0, para el día de prueba.
