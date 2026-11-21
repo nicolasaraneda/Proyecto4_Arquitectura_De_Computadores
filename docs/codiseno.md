@@ -408,3 +408,14 @@ Archivos de P7:
 6. **¿Por qué no usaron el PLL?** El VQ100 no lo tiene: nextpnr no lo puede ubicar. En un TQ144 R1 cerraría a 50 MHz, pero no ganaría patrimonio. Sección 9.
 7. **¿Por qué no hay base con la extensión?** Porque `emad` y `devk` están en el core barrel y llevarlas al base toca el RTL de R0, que ya pasó la puerta. Está predicho: 31 ciclos de respuesta, 1,32 veces R0. Sección 4.
 8. **¿En qué se gasta la energía?** En esperar. Decidir cuesta 2,6 nJ sobre 2,8 µJ por tick en el ASIC. Sección 10.
+
+## 12. El co-diseño con la regla de cotas (banda 40), desde el 21/11
+
+Las secciones 1 a 11 miden el co-diseño con la regla anterior, `max_media`. Desde T133 y T140 el programa de R0, R1 y R2 es la regla de cotas con banda 40, que no tiene estimador, así que el kernel y las fases son otros. `make p7-cotas` (`tools/p7/cotas.py`) rehace las mediciones del punto 3.3 con ese programa en el Espino base, el segmentado, el barrel de un hilo y R2, con el gemelo, y `make p7-cotas-rtl` las confirma con el RTL. Todo queda en `docs/mediciones/p7/cotas/`.
+
+- **Operaciones útiles: 11 por tick** (decisión de Nicolás, 21/11): 4 comparaciones, 2 `or` de mínimo y máximo vistos, 1 `and` de los dos extremos, y 2 + 2 para comprar y vender. Armar el byte, loads, stores, saltos, sondeo y telemetría no cuentan.
+- **Techos**: base 12,5 MOPS, segmentado 25, barrel con un hilo útil 6,25 y R2 25 (con `max_media` valía 50 porque usaba la extensión; la regla de cotas no la usa).
+- **Resultados** (tabla en `docs/mediciones/p7/cotas/variantes.txt`): R0 responde en 56,5 ciclos de promedio y 60 de peor caso (5,50 MOPS), el segmentado en 28 (10,58 MOPS), el barrel de un hilo en 107 promedio y 111 peor (2,87 MOPS) y R2 en 123 promedio y 127 peor (1,64 MOPS: su kernel incluye los cuatro loads de la tabla y la telemetría, y tres hilos esperan). R0 y el segmentado coinciden con el RTL fila por fila en 19 998 ticks, y R2 con la medición del RTL del 20/11 (mismo hash de programa y tabla).
+- **Amdahl**: R0 a segmentado, 1,923 medido en el kernel (la predicción con el costo medido da lo mismo; con el CPI de la clase queda 3,7 % abajo); R0 a barrel, 0,521, exacto. La respuesta difiere 6,5 % y 0,7 %: la detección del sondeo.
+- **La extensión `emad` y `devk`** queda como alternativa evaluada con sus números de `max_media` (secciones anteriores) y una frase en el informe que dice que la regla actual no la usa.
+- **R3**: `make p7-c1-perfil` deja IC, ciclos, CPI y perfil por hilo en `docs/mediciones/c1/perfil_hilos.txt`. Amdahl y roofline de R3 quedan para la pasada de R3, después del 26/11 (T155).

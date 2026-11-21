@@ -2,6 +2,16 @@
 
 Se actualiza al cerrar cada tramo de trabajo. La versión anterior queda en el historial de git.
 
+## Tramo 19: el informe pasa a la regla de cotas con banda 40 (21/11, rama `c1`)
+
+**Qué quedó hecho.** `informe/informe.tex` describe la regla de cotas con banda 40 (T154, T155): introducción, 3.1, 3.2 y 3.3. La tabla de 3.1 es la serie de práctica completa contra no operar y comprar y mantener; los bloques de 2000 ticks salieron del informe (`docs/mediciones/bloques_2000.txt`). R0 por tick vuelto a medir con la serie Meta. 3.3 medido con la regla de cotas en base, segmentado, barrel y R2 (`tools/p7/cotas.py`, `docs/mediciones/p7/cotas/`), con 11 operaciones útiles y la extensión `emad`/`devk` como alternativa evaluada sobre `max_media`. R3: IC, ciclos, CPI y perfil por hilo guardados (`docs/mediciones/c1/perfil_hilos.txt`). T153 resuelta.
+
+**Qué se midió.** R0 56,5 ciclos de promedio y 60 de peor caso (RTL y gemelo idénticos fila por fila); segmentado 28; barrel de un hilo 107 y 111; R2 123 y 127; R3 529,9 y 783. Amdahl: R0 a segmentado 1,923 medido en el kernel; R0 a barrel 0,521, exacto.
+
+**Qué falta.** Compilar el PDF (no hay LaTeX en esta máquina; la CI lo hace al hacer push). Pasada de R3 en el informe después del 26/11, con Amdahl y roofline de R3. Rehacer la tabla ASIC con la regla de cotas si se quiere (hoy es de `max_media`). Las cifras de Tesla y AMD de 3.1 están escritas a mano con su fuente. La rama `c1` no está integrada.
+
+**Qué conviene después.** Hacer el push de la rama para que la CI compile el informe, o compilarlo en Overleaf, antes de tocar nada más del texto.
+
 ## Tramo 18: C1 como cuarto peldaño, R3 (21/11, rama `c1`). Puertas pasadas y bitstream congelado
 
 **Qué quedó hecho.** R3: el hardware de R2 con la tabla de 512 palabras y `sw/c1.s`, que corre C1 (la banda 40 más el desempate de la exploración) en los cuatro hilos. El trabajo se detuvo en el plan porque la memoria del programa queda en 94 % y C1 exige cambiar hardware; Nicolás eligió seguir (opción A, T151). Después: el gemelo con la tabla de 512 palabras, la herramienta de fallas, las cuatro puertas, el bitstream congelado con su molde y sus hash, los recortes de reserva documentados sin aplicar y los pasos del día de prueba. R0, R1 y R2 no se tocaron. Plan: `docs/c1_plan.md`. Puertas: `docs/puertas.md`. Día de prueba: `docs/c1_dia_de_prueba.md`. Bitácora: `docs/bitacora/c1.md`. Decisiones T150 a T152.

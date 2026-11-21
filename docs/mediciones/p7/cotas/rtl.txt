@@ -1,0 +1,25 @@
+Confirmacion con el RTL de los ciclos por tick del gemelo (regla de cotas, banda 40)
+Generado por tools/p7/cotas_rtl.sh (make p7-cotas-rtl). No editar a mano.
+
+Herramientas:
+  Yosys 0.68+195 (git sha1 435977e97-dirty, Release, Clang /usr/bin/clang++ 21.1.8)
+  "nextpnr-ice40" -- Next Generation Place and Route (Version nextpnr-0.11.1-19-g8dbcee5c)
+  Verilator 5.053 devel rev v5.052-22-g7cf8c5cca (mod)
+  cc (Ubuntu 15.2.0-16ubuntu1) 15.2.0
+Commit de partida: feeaaef (rama c1)
+
+1. tb/tb_cpi.sv con Verilator contra build/gemelo, serie Meta a 0,1 ms (sw/trade.hex)
+PASS r0: 19998 filas por tick identicas byte a byte (ciclo del precio, respuesta, tick completo e IC)
+    RTL r0:   respuesta, promedio          IC   27.13   ciclos   56.50   CPI 2.083   tiempo   2.260 us   ( 2.260 % de T)
+    RTL r0:   respuesta, peor caso         IC   29.00   ciclos   60.00   CPI 2.069   tiempo   2.400 us   ( 2.400 % de T)
+    RTL r0:   tick completo, promedio      IC   28.13   ciclos   61.50   CPI 2.187   tiempo   2.460 us   ( 2.460 % de T)
+    RTL r0:   tick completo, peor caso     IC   30.00   ciclos   65.00   CPI 2.167   tiempo   2.600 us   ( 2.600 % de T)
+PASS seg: 19998 filas por tick identicas byte a byte (ciclo del precio, respuesta, tick completo e IC)
+    RTL seg:   respuesta, promedio          IC   26.00   ciclos   28.00   CPI 1.077   tiempo   1.120 us   ( 1.120 % de T)
+    RTL seg:   respuesta, peor caso         IC   26.00   ciclos   28.00   CPI 1.077   tiempo   1.120 us   ( 1.120 % de T)
+    RTL seg:   tick completo, promedio      IC   27.00   ciclos   31.00   CPI 1.148   tiempo   1.240 us   ( 1.240 % de T)
+    RTL seg:   tick completo, peor caso     IC   27.00   ciclos   31.00   CPI 1.148   tiempo   1.240 us   ( 1.240 % de T)
+
+2. R2: medicion del RTL (tools/fondo/ticks.sh) contra el gemelo, ronda 3
+   gemelo: respuesta promedio y peor, tick completo promedio y peor: 123.00 127 187.00 211
+PASS r2: RTL 123.00 127 187.00 211 , igual al gemelo a un decimal (docs/mediciones/fondo/r2/ticks.txt, mismo sha256 de programa y tabla)

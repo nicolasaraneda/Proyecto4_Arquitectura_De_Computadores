@@ -153,3 +153,69 @@ def punto_33(c, peldano, tabla, num, leer):
     # Figura y macros de P7
     shutil.copyfile(os.path.join(P7, "roofline.tex"), os.path.join(G, "roofline.tex"))
     shutil.copyfile(os.path.join(P7, "cifras.tex"), os.path.join(G, "cifras_p7.tex"))
+
+    # --- La regla de cotas (banda 40), medida con tools/p7/cotas.py ---------------------------
+    cotas(c, tabla, num)
+
+
+def cotas(c, tabla, num):
+    """Tablas de 3.3 con la regla de cotas: variantes, perfil, Amdahl y roofline (docs/mediciones/p7/cotas/)."""
+    d = os.path.join(P7, "cotas")
+    f = lambda x, k=2: num(float(x), k)   # noqa: E731
+
+    def filas_c(nombre):
+        with open(os.path.join(d, nombre), encoding="utf-8") as fh:
+            return list(csv.DictReader(fh))
+
+    nombres = {"r0": "R0: base, \\texttt{trade.s}", "seg": "Segmentado, \\texttt{trade.s}",
+               "barrel": "Barrel, 1 hilo, \\texttt{trade.s}", "r2": "R2: barrel de 4 hilos, \\texttt{fondo.s}"}
+    filas = []
+    for v in filas_c("variantes.csv"):
+        filas.append([nombres[v["variante"]], f"{v['celdas']} / {v['lut4']} / {v['bram']}", f(v["fmax_min_mhz"]),
+                      f"{f(v['resp_prom_ciclos'], 1)} / {v['resp_peor_ciclos']}", f(v["ciclos_kernel"], 1),
+                      f(v["ic_kernel"], 1), f(v["cpi_kernel"], 3), f(v["mops_logrado"]), f(v["ppeak_mops"]),
+                      f(v["speedup_resp"]), f(v["uso_r3_pct"])])
+    tabla(os.path.join(G, "t33cvariantes.tex"),
+          ["Variante", "Celdas / LUT4 / BRAM", "$f_{\\max}$ mín. (MHz)", "Resp. prom. / peor", "Ciclos kernel", "IC kernel",
+           "CPI kernel", "MOPS", "$P_{peak}$", "Speedup resp.", "\\% ronda 3"], filas, "lrrrrrrrrrr",
+          "Recursos: 10 semillas de nextpnr a 25 MHz (todas cierran; el programa no cambia el hardware). Ciclos: práctica "
+          "a 0,1 ms con el gemelo digital, confirmado con el RTL en R0, segmentado y R2. Kernel: de leer \\texttt{PRICE} a "
+          "volver al sondeo; el de R2 incluye los cuatro loads de la tabla y la telemetría. Operaciones útiles: 11 por tick. "
+          "MOPS = operaciones útiles $\\times$ 25 MHz / ciclos del kernel. Fuente: \\texttt{docs/mediciones/p7/cotas/variantes.txt} "
+          "(\\texttt{make p7-cotas}).")
+
+    per = {}
+    for p in filas_c("perfil.csv"):
+        per.setdefault(p["variante"], {})[p["fase"]] = p
+    fases = ["deteccion", "leer", "comparar", "decidir", "escribir", "telemetria", "volver"]
+    nombre_fase = {"deteccion": "Detectar el precio (sondeo)", "leer": "Leer \\texttt{PRICE}", "comparar": "Comparar con los umbrales",
+                   "decidir": "Decidir y armar el byte", "escribir": "Escribir \\texttt{DECISION}", "telemetria": "Telemetría",
+                   "volver": "Volver al sondeo"}
+    filas = []
+    for fa in fases:
+        fila = [nombre_fase[fa]]
+        for v in ("r0", "r2"):
+            p = per[v].get(fa)
+            if p is None:
+                fila += ["--", "--", "--"]
+            else:
+                fila += [f(p["ciclos_tick"]), f(p["instrucciones_tick"]) if p["instrucciones_tick"] else "--",
+                         f(p["pct_kernel"], 1) if p["pct_kernel"] else "--"]
+        filas.append(fila)
+    tabla(os.path.join(G, "t33cperfil.tex"), ["Fase", "R0 ciclos", "R0 instr.", "R0 \\% kernel", "R2 ciclos", "R2 instr.",
+                                               "R2 \\% kernel"], filas, "lrrrrrr",
+          "Perfil medido con el gemelo digital (\\texttt{--perfil}), por tick; en R2, el hilo 0. Fuente: "
+          "\\texttt{docs/mediciones/p7/cotas/perfil.txt}.")
+
+    filas = []
+    for a in filas_c("amdahl.csv"):
+        filas.append(["Respuesta" if a["ventana"] == "resp" else "Kernel", a["descripcion"].replace("->", "$\\to$"),
+                      f(a["s_predicho"], 3), f(a["s_medido"], 3), f"{f(a['ciclos_predichos'])} / {f(a['ciclos_medidos'])}"])
+    tabla(os.path.join(G, "t33camdahl.tex"), ["Ventana", "Cambio", "$S$ predicho", "$S$ medido", "Ciclos pred. / med."], filas,
+          "llrrr", "Amdahl generalizado, $S = 1 / \\sum_i (f_i / F_i)$, con las fracciones del perfil de R0. Fuente: "
+          "\\texttt{docs/mediciones/p7/cotas/amdahl.txt}.")
+
+    shutil.copyfile(os.path.join(d, "roofline.tex"), os.path.join(G, "roofline_cotas.tex"))
+    shutil.copyfile(os.path.join(d, "cifras.tex"), os.path.join(G, "cifras_cotas.tex"))
+    ints = [float(r["intensidad_op_por_byte"]) for r in filas_c("roofline.csv") if r["tipo"] == "medido"]
+    c["CotasIntMin"], c["CotasIntMax"] = num(min(ints), 2), num(max(ints), 2)

@@ -1,0 +1,14 @@
+% Generado por tools/report.py (make report). No editar a mano.
+\begin{tabular}{llrrr}
+\toprule
+Ventana & Cambio & $S$ predicho & $S$ medido & Ciclos pred. / med. \\
+\midrule
+Respuesta & R0 $\to$ segmentado, con el CPI que estimó la clase 7 & 1{,}815 & 2{,}018 & 31{,}12 / 28{,}00 \\
+Respuesta & R0 $\to$ segmentado, con el modelo de costo medido & 1{,}887 & 2{,}018 & 29{,}94 / 28{,}00 \\
+Respuesta & R0 $\to$ barrel, sw/trade.s en un hilo & 0{,}532 & 0{,}528 & 106{,}25 / 107{,}00 \\
+Kernel & R0 $\to$ segmentado, con el CPI que estimó la clase 7 & 1{,}852 & 1{,}923 & 27{,}00 / 26{,}00 \\
+Kernel & R0 $\to$ segmentado, con el modelo de costo medido & 1{,}923 & 1{,}923 & 26{,}00 / 26{,}00 \\
+Kernel & R0 $\to$ barrel, sw/trade.s en un hilo & 0{,}521 & 0{,}521 & 96{,}00 / 96{,}00 \\
+\bottomrule
+\end{tabular}
+\par\smallskip{\footnotesize Amdahl generalizado, $S = 1 / \sum_i (f_i / F_i)$, con las fracciones del perfil de R0. Fuente: \texttt{docs/mediciones/p7/cotas/amdahl.txt}.}

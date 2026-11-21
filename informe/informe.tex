@@ -25,6 +25,7 @@
 \input{generado/peldano.tex}
 \input{generado/cifras.tex}
 \input{generado/cifras_p7.tex}
+\input{generado/cifras_cotas.tex}
 
 \newcommand{\tablaancha}[1]{\resizebox{\linewidth}{!}{\input{#1}}}
 \newcommand{\arch}[1]{\texttt{#1}}
@@ -155,21 +156,21 @@ Contando también el lazo de sondeo, el CPI medido de todo el programa es \cifra
 
 \subsection{En qué se gastan los ciclos y qué predice Amdahl}
 
-El perfil se midió con el gemelo digital, que cuenta instrucciones y ciclos por dirección del programa (tabla~\ref{tab:perfil}). Una operación útil es una de las \pSieteOpsTrade{} operaciones aritméticas o de comparación que \texttt{max\_media} necesita por tick (4 para la media y 4 para decidir); el fondo hace \pSieteOpsFondo. El \emph{kernel} va de leer \texttt{PRICE} a volver al sondeo.
+El perfil se midió con el gemelo digital, que cuenta instrucciones y ciclos por dirección del programa (tabla~\ref{tab:perfil}). Una operación útil es una de las \pCotasOps{} operaciones de la regla de cotas por tick: 4 comparaciones con los umbrales, 2 que recuerdan el mínimo y el máximo vistos, 1 que reúne los dos extremos y 4 que arman comprar y vender. Armar el byte, los \texttt{load} y \texttt{store}, los saltos y el sondeo no cuentan (\arch{tools/p7/cotas.py}, encabezado). El \emph{kernel} va de leer \texttt{PRICE} a volver al sondeo.
 
 \begin{table}[H]\centering
-\caption{Perfil del tick\ifpeldanofondo{} del supervisor de R1\else{} de R0\fi.}\label{tab:perfil}
-\input{generado/t33perfil.tex}
+\caption{Perfil del tick de la regla de cotas: R0 y el hilo 0 de R2.}\label{tab:perfil}
+\tablaancha{generado/t33cperfil.tex}
 \end{table}
 
-En R0 el estimador, es decir, la desviación a la media y su actualización, concentra la mayor parte del kernel. Con Amdahl, si se aceleran solo esas dos fases ($f = \pSieteAmdahlFmedia$, la suma de sus fracciones en la tabla~\ref{tab:perfil}) por un factor $F = \pSieteAmdahlFfactor$, el kernel ganaría $S = 1/((1-f) + f/F)$; el límite con $F$ infinito es \pSieteAmdahlLimite. La tabla~\ref{tab:amdahl} compara el speedup que predice Amdahl generalizado, fase por fase, con el medido en cada variante construida.
+La fase que más pesa es decidir y armar el byte, seguida de comparar con los umbrales; no hay un estimador que concentre el trabajo, como lo había con la regla de la media. Amdahl generalizado predice el speedup al pasar de R0 a otra variante fase por fase: $S = 1/\sum_i (f_i/F_i)$, con $f_i$ del perfil de R0 y $F_i$ de aplicar el costo por clase de instrucción de la variante nueva. La tabla~\ref{tab:amdahl} compara lo predicho con lo medido.
 
 \begin{table}[H]\centering
-\caption{Speedup predicho por Amdahl contra el medido.}\label{tab:amdahl}
-\tablaancha{generado/t33amdahl.tex}
+\caption{Speedup predicho por Amdahl contra el medido, con la regla de cotas.}\label{tab:amdahl}
+\tablaancha{generado/t33camdahl.tex}
 \end{table}
 
-En el segmentado la clase estimaba 3 ciclos por salto tomado y se miden 2, por eso la predicción con el CPI de la clase queda \cifraAmdahlErrClase\,\% bajo lo medido; con el modelo de costo medido la diferencia es de \cifraAmdahlErrModelo\,\%. En el barrel la predicción es exacta porque toda instrucción de un hilo cuesta 4 ciclos.
+En el segmentado la clase estimaba 3 ciclos por salto tomado y se miden 2, por eso la predicción con el CPI de la clase queda \pCotasAmdahlErrRespSegClase\,\% de la respuesta medida y \pCotasAmdahlErrKernelSegClase\,\% del kernel; con el modelo de costo medido la diferencia es de \pCotasAmdahlErrRespSeg\,\% y \pCotasAmdahlErrKernelSeg\,\%. Lo que queda en la respuesta viene de la detección del precio por el sondeo, la fase que peor se predice. En el barrel la predicción es exacta en el kernel (\pCotasAmdahlErrKernelBarrel\,\%) porque toda instrucción de un hilo cuesta 4 ciclos, y difiere \pCotasAmdahlErrRespBarrel\,\% en la respuesta por el mismo sondeo.
 
 \subsection{Alternativas de hardware}
 
@@ -177,52 +178,54 @@ Se construyeron, verificaron y midieron cuatro alternativas además de la versi�
 \begin{enumerate}
   \item \textbf{Espino segmentado}: pipeline de 3 etapas; la memoria de instrucciones se lee en el flanco de bajada y el banco de registros adelanta el dato recién escrito. Ataca el CPI.
   \item \textbf{Espino barrel}: cuatro hilos que rotan por un pipeline de 4 etapas, sin adelantamiento ni burbujas. Ataca el trabajo por ciclo: CPI 1 agregado.
-  \item \textbf{Extensión de la ISA} en custom-0, \texttt{emad} y \texttt{devk}: ataca el IC del kernel.
-  \item \textbf{Diseño integrado}: el barrel con la extensión, la tabla de parámetros en BRAM\ifpeldanodos{} y el vigilante\fi, corriendo el fondo.
+  \item \textbf{Extensión de la ISA} en custom-0, \texttt{emad} y \texttt{devk}: ataca el IC de la actualización de la media. Se evaluó sobre la regla anterior, \texttt{max\_media}; la regla de cotas no tiene estimador y no usa la extensión, aunque el hardware de R1 y R2 la conserva (\arch{sw/fondo.s}, líneas 12 y 13). Sus números están en la subsección siguiente.
+  \item \textbf{Diseño integrado}, R2: el barrel con la tabla de parámetros en BRAM\ifpeldanodos{} y el vigilante\fi, donde el hilo 0 ejecuta la regla y los otros tres esperan.
 \end{enumerate}
 
 \begin{table}[H]\centering
-\caption{Métricas de cada variante.}\label{tab:variantes}
-\tablaancha{generado/t33variantes.tex}
+\caption{Métricas de cada variante con la regla de cotas.}\label{tab:variantes}
+\tablaancha{generado/t33cvariantes.tex}
 \end{table}
 
 Las frecuencias de la tabla salen de una sola síntesis de cada variante, y eso tiene un límite que medimos. El segmentado daba \cifraFminSegPuno{}~MHz de mínima en su primera medición y da \cifraFminSeg{}~MHz ahora, sin ningún cambio de lógica: la equivalencia formal entre las dos versiones del SoC pasa, y la diferencia aparece porque Yosys entrega otra netlist equivalente que nextpnr rutea peor. Con exactamente el mismo RTL leído en otro orden, la mediana del segmentado va de \cifraSintMedMin{} a \cifraSintMedMax{}~MHz y la mínima de \cifraSintMinMin{} a \cifraSintMinMax{}~MHz. Por eso no atribuimos al diseño diferencias de frecuencia de unos pocos MHz entre variantes; lo que sí es del diseño es que todas cierran a 25~MHz.
 
-El Espino base y el segmentado con la extensión no se construyeron, porque habría que cambiar el RTL de R0, que ya pasó la puerta de simulación (\arch{docs/puertas.md}); su speedup queda predicho en la tabla~\ref{tab:amdahl}.
+El Espino base y el segmentado con la extensión no se construyeron, porque habría que cambiar el RTL de R0, que ya pasó la puerta de simulación (\arch{docs/puertas.md}); su speedup queda predicho con Amdahl, sobre \texttt{max\_media}, en la subsección siguiente.
 
-\subsection{La escalera de la clase y el roofline}
+\subsection{La extensión \texttt{emad} y \texttt{devk}, evaluada sobre \texttt{max\_media}}
 
-La tabla~\ref{tab:escalera} aplica a nuestro kernel la escalera de la clase 7 (extensión de la ISA, pipeline, instrucciones a medida y SIMD), con cada paso medido cuando existe y estimado con CPI ideal cuando no.
+Con \texttt{max\_media} el kernel era la actualización de la media, 14 instrucciones por tick que \texttt{emad} y \texttt{devk} reducían a 2. En el barrel de un hilo la extensión baja el kernel de \pSieteAmdahlCiclosPredKernelBarrel{} a \pSieteAmdahlCiclosPredKernelXdSobreBarrel{} ciclos (speedup medido \pSieteAmdahlMedKernelXdSobreBarrel) y la respuesta de \pSieteAmdahlCiclosPredRespBarrel{} a \pSieteAmdahlCiclosPredRespXdSobreBarrel{} (\pSieteAmdahlMedRespXdSobreBarrel), y la predicción de Amdahl coincide con lo medido. Cuesta \pSieteCeldasBarrelXd{} celdas contra \pSieteCeldasBarrel{} del barrel solo. En el Espino base y en el segmentado, que no la tienen en el RTL, se predice un speedup del kernel de \pSieteAmdahlPredKernelBaseXd{} y \pSieteAmdahlPredKernelSegXd. La tabla~\ref{tab:escalera} la pone en la escalera de la clase 7 (extensión, pipeline, instrucciones a medida y SIMD), con cada paso medido cuando existe y estimado con CPI ideal cuando no. \textbf{La regla que se describe en este informe no usa la extensión}: estos números son de la regla anterior y se conservan porque la extensión existe, está verificada y quedó medida.
 
 \begin{table}[H]\centering
-\caption{Escalera de co-diseño sobre el kernel de \texttt{max\_media}.}\label{tab:escalera}
+\caption{Escalera de co-diseño sobre el kernel de \texttt{max\_media}, la regla anterior.}\label{tab:escalera}
 \tablaancha{generado/t33escalera.tex}
 \end{table}
 
-En el roofline (figura~\ref{fig:roofline}) el ancho de banda de Pochoco es $B_s = 4$~B por ciclo a 25~MHz, \pSieteBs~MB/s, y el quiebre queda en \pSieteQuiebre~Op/B. Cada variante tiene su techo $P_{peak} = f \times \text{instrucciones por ciclo}$. Todos los kernels quedan a la derecha del quiebre, entre \cifraIntMin{} y \cifraIntMax~Op/B: están limitados por cómputo, y ninguno llega a su techo porque no todas las instrucciones del kernel son trabajo útil: leer \texttt{PRICE}, escribir \texttt{DECISION}, armar el byte de la orden, volver al sondeo y las instrucciones que reemplazan a los desplazamientos que Espino no tiene no cuentan como operaciones (\arch{docs/codiseno.md}, sección 3).
+\subsection{Roofline}
+
+En el roofline (figura~\ref{fig:roofline}) el ancho de banda de Pochoco es $B_s = 4$~B por ciclo a 25~MHz, \pSieteBs~MB/s, y el quiebre queda en \pSieteQuiebre~Op/B. Cada variante tiene su techo $P_{peak} = f \times \text{instrucciones por ciclo} \times \text{operaciones por instrucción}$: 12,5 MOPS el base, 25 el segmentado, 6,25 el barrel con un hilo útil y 25 R2 (cuatro hilos, una instrucción por ciclo agregada, una operación por instrucción porque la regla no usa la extensión). Todos los kernels quedan a la derecha del quiebre, entre \cifraCotasIntMin{} y \cifraCotasIntMax~Op/B: están limitados por cómputo, y ninguno llega a su techo porque no todas las instrucciones del kernel son trabajo útil: leer \texttt{PRICE}, escribir \texttt{DECISION}, armar el byte y volver al sondeo no cuentan como operaciones. R2 es el más lejano: su kernel incluye los loads de la tabla y la telemetría, y los otros tres hilos esperan.
 
 \begin{figure}[H]\centering
-\resizebox{0.9\linewidth}{!}{\input{generado/roofline.tex}}
-\caption{Roofline de Espino con los techos de cada variante y la posición del kernel.}\label{fig:roofline}
+\resizebox{0.9\linewidth}{!}{\input{generado/roofline_cotas.tex}}
+\caption{Roofline de Espino con los techos de cada variante y la posición del kernel de la regla de cotas.}\label{fig:roofline}
 \end{figure}
 
-Como referencia de eficiencia, la versión ASIC del SoC (GF180MCU, LibreLane) consume \pSieteAsicPcalculoBase~mW calculando; la energía por decisión en la ronda 3 es de \pSieteAsicErtresBase~$\mu$J en el base, casi toda en esperar el precio con el reloj corriendo (tabla~\ref{tab:asic}).
+Como referencia de eficiencia, la versión ASIC del SoC (GF180MCU, LibreLane) consume \pSieteAsicPcalculoBase~mW calculando en el Espino base; la energía por decisión en la ronda 3 es de \pSieteAsicErtresBase~$\mu$J, casi toda en esperar el precio con el reloj corriendo (tabla~\ref{tab:asic}). Esta tabla se midió con la regla anterior y no se rehízo para la regla de cotas.
 
 \begin{table}[H]\centering
-\caption{Edición ASIC: Ops/W y energía por decisión.}\label{tab:asic}
+\caption{Edición ASIC: Ops/W y energía por decisión, con \texttt{max\_media}.}\label{tab:asic}
 \input{generado/t33asic.tex}
 \end{table}
 
 \subsection{PLL y doble frecuencia}
 
-El encapsulado VQ100 de la Go Board no tiene PLL: nextpnr termina con \emph{PLL couldn't be placed anywhere, no suitable BEL found}, con R0 y con R1 (\arch{docs/mediciones/p7/pll.txt}). Como alternativa se probó un duplicador de reloj por lógica: con un oscilador real de 45 a 55\,\% de ciclo de trabajo y en la esquina de retardo máximo, el segmentado con el reloj doblado cierra en \pSieteDobleSemillas{} de \pSieteDobleSemillasTotal{} semillas y el Espino base en \pSieteDobleSemillasBase{}, sin margen (\arch{docs/mediciones/p7/negativos.txt}). Si se pudiera llegar a 50~MHz el presupuesto de la ronda 3 pasaría de \pSietePresupuestoRtres{} a \pSietePresupuestoDobleRtres{} ciclos; el diseño que compite usa en el peor caso el \cifraUsoPresuRondaTres\,\% del presupuesto actual, así que el patrimonio no cambiaría. Los dos quedan como resultados negativos documentados.
+El encapsulado VQ100 de la Go Board no tiene PLL: nextpnr termina con \emph{PLL couldn't be placed anywhere, no suitable BEL found}, con R0 y con R1 (\arch{docs/mediciones/p7/pll.txt}). Como alternativa se probó un duplicador de reloj por lógica: con un oscilador real de 45 a 55\,\% de ciclo de trabajo y en la esquina de retardo máximo, el segmentado con el reloj doblado cierra en \pSieteDobleSemillas{} de \pSieteDobleSemillasTotal{} semillas y el Espino base en \pSieteDobleSemillasBase{}, sin margen (\arch{docs/mediciones/p7/negativos.txt}). Si se pudiera llegar a 50~MHz el presupuesto de la ronda 3 pasaría de \pSietePresupuestoRtres{} a \pSietePresupuestoDobleRtres{} ciclos; el diseño descrito usa en el peor caso el \cifraUsoPresuRondaTres\,\% del presupuesto actual, así que el patrimonio no cambiaría. Los dos quedan como resultados negativos documentados.
 
-\subsection{Variante final}
+\subsection{Variante descrita}
 
 \ifpeldanofondo
-Compite el diseño integrado. No es la más rápida por hilo: lo es el segmentado, que responde en \pSieteRespPeorSeg{} ciclos contra \pSieteRespPeorRuno. Lo elegimos porque hace \pSieteOpsFondo{} operaciones útiles por tick contra \pSieteOpsTrade{} de R0 (\pSieteMopsRuno{} MOPS contra \pSieteMopsRcero), cabe con margen (\pSieteCeldasRuno{} de 1\,280 celdas) y la latencia no cambia el patrimonio mientras la decisión llegue antes del tick siguiente. Medido en la serie de práctica, el fondo no gana más que \texttt{max\_media} sola: la elección privilegia el co-diseño por sobre los puntos esperados, y el riesgo queda cubierto con una escalera de respaldo (R0, el Espino base, listo para grabar).
+El diseño descrito es R2. En los términos del enunciado ninguna variante gana patrimonio: todas ejecutan la misma regla, responden antes del tick siguiente y toman las mismas decisiones. La más rápida es el segmentado, que responde en \pCotasRespPeorSeg{} ciclos en el peor caso contra \pCotasRespPeorRdos{} de R2, y R2 es la de menor desempeño logrado (\pCotasMopsRdos{} MOPS contra \pCotasMopsRcero{} de R0). No se elige por velocidad: cabe con margen (\pCotasCeldasRdos{} de 1\,280 celdas), usa el \cifraUsoPresuRondaTres\,\% del presupuesto de la ronda 3 y aporta lo que las otras no tienen, los umbrales en una BRAM que se cambia sin sintetizar de nuevo y un vigilante que reconfigura la FPGA con un respaldo si el hilo 0 deja de escribir. El riesgo queda cubierto con una escalera de respaldo en la que R0, el Espino base con la misma regla, está listo para grabar.
 \else
-Compite el Espino base con \texttt{max\_media}. En los términos del enunciado, ninguna variante gana más patrimonio: las que corren \arch{sw/trade.s} toman las mismas decisiones, porque todas responden antes del tick siguiente, y el fondo de R1 no gana más que \texttt{max\_media} sola en la serie de práctica: empata a 0,1~ms y pierde a 1~ms y 10~ms (\arch{docs/mediciones/fondo/r1/equiv.txt}). La más rápida es el segmentado (\pSieteRespPeorSeg{} ciclos en el peor caso), y la que hace más operaciones útiles por tick es el fondo (\pSieteOpsFondo{} contra \pSieteOpsTrade). R0 se elige por balance: responde en \pSieteRespPeorRcero{} ciclos, el \pSieteUsoRtresRcero\,\% del presupuesto de la ronda 3, no agrega hardware al core del curso y pasó la puerta de simulación completa (\arch{docs/puertas.md}); la prueba con la maestra real está programada para el 26/11. Las otras variantes quedan en el repositorio, medidas y verificadas, como edición de exhibición.
+El diseño descrito es R0, el Espino base con la regla de cotas. En los términos del enunciado ninguna variante gana patrimonio: todas ejecutan la misma regla, responden antes del tick siguiente y toman las mismas decisiones. La más rápida es el segmentado (\pCotasRespPeorSeg{} ciclos en el peor caso). R0 responde en \cifraRespPeor{} ciclos, el \cifraUsoPresuRondaTres\,\% del presupuesto de la ronda 3, no agrega hardware al core del curso y pasó la puerta de simulación completa (\arch{docs/puertas.md}). Las otras variantes quedan en el repositorio, medidas y verificadas, como edición de exhibición.
 \fi
 
 \end{document}
