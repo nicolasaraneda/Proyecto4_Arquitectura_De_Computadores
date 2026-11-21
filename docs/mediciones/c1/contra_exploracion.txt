@@ -1,0 +1,16 @@
+# Referencia entera de C1 (ref/c1/c1.py) contra el C1 de la exploración
+
+Generado por tools/c1/contra_exploracion.py. Exploración: /home/nicolasaraneda/proyectos/P4_wt_min (rama minutos-reales). Conjunto `cinco`: 3600 ventanas de 20 000 ticks; se comparan 2400 elegidas al azar (semilla fija).
+
+- Tablas: 0 celdas distintas entre el modelo recalculado (ref/c1/tablas.py) y las tablas en caché de la exploración (320 celdas, 640 niveles).
+- Byte por byte contra `v5.V5Ref`: 2400 ventanas idénticas de 2400; 0 bytes distintos en total (48000000 comparados).
+- Órdenes ejecutadas (tick, acción y cantidad) contra `v5.V5Ref`: 0 ventanas con alguna diferencia.
+- Patrimonio final contra `v5.V5Ref`: 0 ventanas distintas.
+- Patrimonio y cantidad de órdenes contra `v5.fase_a` + `v5.post` (la del examen): 0 ventanas distintas.
+- D final (patrimonio propio menos el del clon) contra `v5.post`: 0 ventanas distintas.
+- Cuenta propia emulada por el hilo 3 contra el patrimonio de la contabilidad oficial: 0 ventanas distintas.
+- Política apagada, byte por byte contra la banda 40 de `ref/fondo.py`: 0 ventanas con diferencias.
+- Ventanas que terminan en modo seguro: 0.
+- Modo al final: fase A 0, recuperación 758, candado 1642. Órdenes por ronda: 6.3. Patrimonio medio: 21499.
+
+PASS: 0 diferencias. Tiempo: 52 s.
