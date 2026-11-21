@@ -52,7 +52,8 @@
   // Tabla de parámetros de solo lectura en una BRAM (rtl/pochoco_tabla.v), en
   // 0x8002_0000. Se elige con -DESPINO_TABLA. Vigilante con SB_WARMBOOT
   // (rtl/vigilante.v): -DESPINO_VIGILANTE. Las dos son del diseño integrado
-  // (docs/tabla_vigilante.md) y solo se usan con el barrel.
+  // (docs/tabla_vigilante.md) y solo se usan con el barrel. -DESPINO_TABLA_512
+  // (junto con -DESPINO_TABLA) cambia la tabla por la de 512 palabras de R3.
 `elsif ESPINO_ROM
   `define ESPINO_PIPELINE_DEF 2
 `elsif ESPINO_SEGMENTADO
@@ -84,7 +85,13 @@ module pochoco_soc #(
   // Tabla de parámetros: 0 no hay, 1 BRAM de 256 x 16 de solo lectura.
   // TablaFile es su contenido (un valor de 16 bits por línea).
   parameter Tabla      = `ESPINO_TABLA_DEF,
+`ifdef ESPINO_TABLA_512
+  // R3 (docs/c1_plan.md): con -DESPINO_TABLA_512 la tabla tiene 512 palabras
+  // (rtl/pochoco_tabla512.v, dos BRAM) y su contenido es el de sw/c1.s.
+  parameter TablaFile  = "sw/c1_tabla.hex",
+`else
   parameter TablaFile  = "sw/fondo_tabla.hex",
+`endif
   // Vigilante: si quedan VigN precios seguidos sin escritura en DECISION y
   // llega uno más, la FPGA se reconfigura con la imagen VigDestino (S1 S0 de
   // SB_WARMBOOT).
@@ -202,12 +209,21 @@ module pochoco_soc #(
   // Tabla de parámetros de solo lectura
   generate
     if (Tabla != 0) begin : g_tabla
+`ifdef ESPINO_TABLA_512
+      pochoco_tabla512 #(.MemFile(TablaFile)) u_tabla (
+        .clk_i   (clk),
+        .rd_i    (data_req & tab_sel & ~data_we),
+        .idx_i   (data_addr[10:2]),
+        .rdata_o (tab_rdata)
+      );
+`else
       pochoco_tabla #(.MemFile(TablaFile)) u_tabla (
         .clk_i   (clk),
         .rd_i    (data_req & tab_sel & ~data_we),
         .idx_i   (data_addr[9:2]),
         .rdata_o (tab_rdata)
       );
+`endif
     end else begin : g_sin_tabla
       assign tab_rdata = 32'b0;
     end

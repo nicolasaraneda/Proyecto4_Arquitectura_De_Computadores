@@ -1,0 +1,46 @@
+40 ventanas reales de 20 000 ticks (tools/c1/ventanas.py --n 40, semilla 21) por el RTL a 0,1 ms,
+contra ref/c1/c1.py: bytes y estado tick a tick (tools/c1/caso.py).
+Programa sw/c1.s sha256 3b65ccabb825e3d7..., tabla sw/c1_tabla.hex sha256 9954f116f860faca...
+
+PASS v_aapl_1667: 20000 bytes, 20000 ticks de estado, patrimonio 21132, 8 órdenes, modo final 2, seguro 0, plazo vencido en 0 ticks, peor caso 775 de 1131 ciclos
+PASS v_aapl_210419: 20000 bytes, 20000 ticks de estado, patrimonio 25684, 9 órdenes, modo final 2, seguro 0, plazo vencido en 0 ticks, peor caso 775 de 1131 ciclos
+PASS v_aapl_213264: 20000 bytes, 20000 ticks de estado, patrimonio 25226, 4 órdenes, modo final 1, seguro 0, plazo vencido en 0 ticks, peor caso 751 de 1131 ciclos
+PASS v_aapl_219149: 20000 bytes, 20000 ticks de estado, patrimonio 25296, 8 órdenes, modo final 2, seguro 0, plazo vencido en 0 ticks, peor caso 751 de 1131 ciclos
+PASS v_aapl_248851: 20000 bytes, 20000 ticks de estado, patrimonio 21928, 9 órdenes, modo final 2, seguro 0, plazo vencido en 0 ticks, peor caso 775 de 1131 ciclos
+PASS v_aapl_60717: 20000 bytes, 20000 ticks de estado, patrimonio 13578, 4 órdenes, modo final 2, seguro 0, plazo vencido en 0 ticks, peor caso 775 de 1131 ciclos
+PASS v_aapl_65471: 20000 bytes, 20000 ticks de estado, patrimonio 19336, 6 órdenes, modo final 2, seguro 0, plazo vencido en 0 ticks, peor caso 751 de 1131 ciclos
+PASS v_aapl_75980: 20000 bytes, 20000 ticks de estado, patrimonio 10284, 6 órdenes, modo final 2, seguro 0, plazo vencido en 0 ticks, peor caso 751 de 1131 ciclos
+PASS v_amd_12176: 20000 bytes, 20000 ticks de estado, patrimonio 11494, 4 órdenes, modo final 2, seguro 0, plazo vencido en 0 ticks, peor caso 751 de 1131 ciclos
+PASS v_amd_121999: 20000 bytes, 20000 ticks de estado, patrimonio 25118, 4 órdenes, modo final 1, seguro 0, plazo vencido en 0 ticks, peor caso 727 de 1131 ciclos
+PASS v_amd_147459: 20000 bytes, 20000 ticks de estado, patrimonio 11318, 6 órdenes, modo final 2, seguro 0, plazo vencido en 0 ticks, peor caso 751 de 1131 ciclos
+PASS v_amd_17862: 20000 bytes, 20000 ticks de estado, patrimonio 13311, 4 órdenes, modo final 2, seguro 0, plazo vencido en 0 ticks, peor caso 751 de 1131 ciclos
+PASS v_amd_194535: 20000 bytes, 20000 ticks de estado, patrimonio 25325, 4 órdenes, modo final 1, seguro 0, plazo vencido en 0 ticks, peor caso 775 de 1131 ciclos
+PASS v_amd_237569: 20000 bytes, 20000 ticks de estado, patrimonio 19485, 4 órdenes, modo final 2, seguro 0, plazo vencido en 0 ticks, peor caso 751 de 1131 ciclos
+PASS v_amd_79218: 20000 bytes, 20000 ticks de estado, patrimonio 24683, 11 órdenes, modo final 2, seguro 0, plazo vencido en 0 ticks, peor caso 727 de 1131 ciclos
+PASS v_amd_96249: 20000 bytes, 20000 ticks de estado, patrimonio 25368, 8 órdenes, modo final 2, seguro 0, plazo vencido en 0 ticks, peor caso 727 de 1131 ciclos
+PASS v_meta_113253: 20000 bytes, 20000 ticks de estado, patrimonio 25323, 8 órdenes, modo final 2, seguro 0, plazo vencido en 0 ticks, peor caso 727 de 1131 ciclos
+PASS v_meta_123761: 20000 bytes, 20000 ticks de estado, patrimonio 25226, 4 órdenes, modo final 1, seguro 0, plazo vencido en 0 ticks, peor caso 727 de 1131 ciclos
+PASS v_meta_179789: 20000 bytes, 20000 ticks de estado, patrimonio 25037, 4 órdenes, modo final 1, seguro 0, plazo vencido en 0 ticks, peor caso 799 de 1131 ciclos
+PASS v_meta_229038: 20000 bytes, 20000 ticks de estado, patrimonio 25527, 7 órdenes, modo final 1, seguro 0, plazo vencido en 0 ticks, peor caso 751 de 1131 ciclos
+PASS v_meta_260860: 20000 bytes, 20000 ticks de estado, patrimonio 24969, 8 órdenes, modo final 2, seguro 0, plazo vencido en 0 ticks, peor caso 775 de 1131 ciclos
+PASS v_meta_36314: 20000 bytes, 20000 ticks de estado, patrimonio 12994, 6 órdenes, modo final 2, seguro 0, plazo vencido en 0 ticks, peor caso 727 de 1131 ciclos
+PASS v_meta_46380: 20000 bytes, 20000 ticks de estado, patrimonio 30407, 20 órdenes, modo final 2, seguro 0, plazo vencido en 0 ticks, peor caso 775 de 1131 ciclos
+PASS v_meta_86481: 20000 bytes, 20000 ticks de estado, patrimonio 25091, 4 órdenes, modo final 1, seguro 0, plazo vencido en 0 ticks, peor caso 727 de 1131 ciclos
+PASS v_nflx_10249: 20000 bytes, 20000 ticks de estado, patrimonio 9893, 2 órdenes, modo final 1, seguro 0, plazo vencido en 0 ticks, peor caso 703 de 1131 ciclos
+PASS v_nflx_121767: 20000 bytes, 20000 ticks de estado, patrimonio 25127, 4 órdenes, modo final 1, seguro 0, plazo vencido en 0 ticks, peor caso 727 de 1131 ciclos
+PASS v_nflx_193172: 20000 bytes, 20000 ticks de estado, patrimonio 25190, 4 órdenes, modo final 1, seguro 0, plazo vencido en 0 ticks, peor caso 727 de 1131 ciclos
+PASS v_nflx_219168: 20000 bytes, 20000 ticks de estado, patrimonio 24876, 4 órdenes, modo final 1, seguro 0, plazo vencido en 0 ticks, peor caso 751 de 1131 ciclos
+PASS v_nflx_231651: 20000 bytes, 20000 ticks de estado, patrimonio 22785, 12 órdenes, modo final 2, seguro 0, plazo vencido en 0 ticks, peor caso 799 de 1131 ciclos
+PASS v_nflx_254124: 20000 bytes, 20000 ticks de estado, patrimonio 25115, 8 órdenes, modo final 2, seguro 0, plazo vencido en 0 ticks, peor caso 727 de 1131 ciclos
+PASS v_nflx_268674: 20000 bytes, 20000 ticks de estado, patrimonio 25506, 8 órdenes, modo final 2, seguro 0, plazo vencido en 0 ticks, peor caso 775 de 1131 ciclos
+PASS v_nflx_7403: 20000 bytes, 20000 ticks de estado, patrimonio 12276, 6 órdenes, modo final 2, seguro 0, plazo vencido en 0 ticks, peor caso 751 de 1131 ciclos
+PASS v_tsla_172453: 20000 bytes, 20000 ticks de estado, patrimonio 21930, 6 órdenes, modo final 2, seguro 0, plazo vencido en 0 ticks, peor caso 775 de 1131 ciclos
+PASS v_tsla_22195: 20000 bytes, 20000 ticks de estado, patrimonio 14480, 6 órdenes, modo final 2, seguro 0, plazo vencido en 0 ticks, peor caso 775 de 1131 ciclos
+PASS v_tsla_224495: 20000 bytes, 20000 ticks de estado, patrimonio 25262, 4 órdenes, modo final 1, seguro 0, plazo vencido en 0 ticks, peor caso 775 de 1131 ciclos
+PASS v_tsla_251186: 20000 bytes, 20000 ticks de estado, patrimonio 23777, 4 órdenes, modo final 1, seguro 0, plazo vencido en 0 ticks, peor caso 799 de 1131 ciclos
+PASS v_tsla_264809: 20000 bytes, 20000 ticks de estado, patrimonio 24876, 4 órdenes, modo final 1, seguro 0, plazo vencido en 0 ticks, peor caso 751 de 1131 ciclos
+PASS v_tsla_81166: 20000 bytes, 20000 ticks de estado, patrimonio 11970, 2 órdenes, modo final 1, seguro 0, plazo vencido en 0 ticks, peor caso 727 de 1131 ciclos
+PASS v_tsla_84462: 20000 bytes, 20000 ticks de estado, patrimonio 19070, 4 órdenes, modo final 2, seguro 0, plazo vencido en 0 ticks, peor caso 799 de 1131 ciclos
+PASS v_tsla_97994: 20000 bytes, 20000 ticks de estado, patrimonio 25091, 4 órdenes, modo final 1, seguro 0, plazo vencido en 0 ticks, peor caso 727 de 1131 ciclos
+
+PASS: 40 de 40

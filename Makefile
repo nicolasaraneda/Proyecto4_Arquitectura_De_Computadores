@@ -962,3 +962,36 @@ asic-barrel-post:
 	asic/scripts/post_barrel.sh barrel_xd3_t40 && asic/scripts/post_barrel.sh barrel_xd7_t40
 asic-barrel-imagen:
 	asic/layout/imagen.sh asic/runs/barrel_xd3_t40
+
+# === C1 como cuarto peldaño, R3 (docs/c1_plan.md) ============================
+# Borrador: el plan está detenido en una decisión (sección 10 del plan). Estos
+# objetivos reproducen lo medido hasta ahí; las puertas todavía no existen.
+.PHONY: c1-modelo c1-generar c1-contra-exploracion c1-sim c1-meta c1-timing
+C1_DEFS := -DESPINO_BARREL -DESPINO_XD_EMAD -DESPINO_XD_DEVK -DESPINO_TABLA -DESPINO_TABLA_512 -DESPINO_VIGILANTE
+C1_SIM  := $(BUILD)/c1/r3/obj/sim
+# Tablas desde el modelo del paseo normalizado (menos de 10 minutos la primera vez)
+c1-modelo:
+	$(PYTHON) ref/c1/tablas.py --calcular
+# sw/c1.s y sw/c1_tabla.hex son los que genera tools/c1/generar.py desde el modelo
+c1-generar: c1-modelo
+	$(PYTHON) tools/c1/generar.py --check && $(PYTHON) ref/c1/tablas.py --check sw/c1_tabla.hex
+# Referencia entera contra el C1 de la exploración (necesita ~/proyectos/P4_wt_min y los minutos reales)
+c1-contra-exploracion: c1-modelo
+	$(PYTHON) tools/c1/contra_exploracion.py --ventanas 2400 --salida docs/mediciones/c1/contra_exploracion.txt
+$(C1_SIM): $(wildcard rtl/*.v rtl/espino_core/*.v) tb/c1/tb_c1.sv
+	mkdir -p $(BUILD)/c1/r3
+	verilator --binary --timing -Wno-fatal -Wno-lint -Wno-style --top-module tb_c1 -O3 -DNO_ICE40_DEFAULT_ASSIGNMENTS \
+	  --Mdir $(BUILD)/c1/r3/obj -o sim $$(yosys-config --datdir)/ice40/cells_sim.v $(C1_DEFS) \
+	  rtl/*.v rtl/espino_core/*.v tb/c1/tb_c1.sv > $(BUILD)/c1/r3/verilator.log 2>&1
+c1-sim: $(C1_SIM)
+# La serie Meta completa por el RTL a 0,1 ms: bytes y estado contra ref/c1/c1.py, con mediciones por tick
+c1-meta: $(C1_SIM)
+	mkdir -p docs/mediciones/c1
+	$(PYTHON) tools/c1/caso.py $(BUILD)/c1/casos/meta20000 --nticks 20000 --inicio-ns 200000 --medir > docs/mediciones/c1/meta_ticks.txt; \
+	  r=$$?; cat docs/mediciones/c1/meta_ticks.txt; exit $$r
+# Recursos y temporización del hardware de R3 en 10 semillas
+c1-timing:
+	mkdir -p $(BUILD)/c1 docs/mediciones/c1
+	$(PYTHON) $(ASM) sw/c1.s -o $(BUILD)/c1/c1.hex
+	DEFS="$(C1_DEFS)" HEX=$(BUILD)/c1/c1.hex EXIGIR=1 tools/medir_variante.sh c1_r3 10 > docs/mediciones/c1/timing.txt; \
+	  r=$$?; cat docs/mediciones/c1/timing.txt; exit $$r

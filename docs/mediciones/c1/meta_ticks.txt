@@ -1,0 +1,21 @@
+PASS meta20000: 20000 bytes, 20000 ticks de estado, patrimonio 22682, 6 órdenes, modo final 2, seguro 0, plazo vencido en 0 ticks, peor caso 775 de 1131 ciclos
+
+  Ticks medidos: 19998. Ciclo de 40 ns. Trabajo: instrucciones fuera del lazo de espera del hilo.
+    hilo        mínimo  promedio  máximo  ciclos prom.  ciclos máx.    CPI
+    0              100    132.74     196        530.97          784  4.000
+    1              110    118.68     133        474.72          532  4.000
+    2               47     57.97     156        231.90          624  4.000
+    3              129    156.52     218        626.06          872  4.000
+
+  Ciclos desde que llega el precio (byte_done)
+    hito                                      mínimo  promedio  máximo  tiempo máx.
+    el hilo 0 publica el precio (D_PUB)           27     27.00      27      1.08 us
+    el hilo 1 publica la clase (D_REG)           112    121.99     528     21.12 us
+    el hilo 2 publica las posiciones (D_TAB)     221    262.93     657     26.28 us
+    el hilo 3 publica la política (D_POL)        362    488.34     738     29.52 us
+    DECISION (respuesta)                         391    521.97     775     31.00 us
+    el hilo 0 vuelve a sondear                   415    545.97     799     31.96 us
+
+    ronda 1 (10 ms)   presupuesto  249762 ciclos, uso   0.310 %, holgura  99.69 %
+    ronda 2 (1 ms)    presupuesto   24762 ciclos, uso   3.130 %, holgura  96.87 %
+    ronda 3 (0,1 ms)  presupuesto    2262 ciclos, uso  34.262 %, holgura  65.74 %

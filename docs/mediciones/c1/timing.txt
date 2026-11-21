@@ -1,0 +1,1 @@
+c1_r3                  celdas 1038 de 1280, BRAM 14 de 16, LUT4  861, fmax min  48.41 mediana  51.35 max  53.07 MHz, cierran a 25 MHz 10 de 10
