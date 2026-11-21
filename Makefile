@@ -964,9 +964,10 @@ asic-barrel-imagen:
 	asic/layout/imagen.sh asic/runs/barrel_xd3_t40
 
 # === C1 como cuarto peldaño, R3 (docs/c1_plan.md) ============================
-# Borrador: el plan está detenido en una decisión (sección 10 del plan). Estos
-# objetivos reproducen lo medido hasta ahí; las puertas todavía no existen.
-.PHONY: c1-modelo c1-generar c1-contra-exploracion c1-sim c1-meta c1-timing
+# Decisión T151 (21/11): opción A, se construye. Las puertas están en tools/c1 y
+# su estado en docs/puertas.md. R0, R1 y R2 no cambian.
+.PHONY: c1-modelo c1-generar c1-contra-exploracion c1-sim c1-meta c1-timing c1-cosim c1-tb-tabla c1-puerta-a c1-puerta-b \
+        c1-oficial c1-series c1-fases c1-criterio5 c1-degradacion c1-controles c1-estres c1-ticks c1-bitstreams c1-puerta check-c1
 C1_DEFS := -DESPINO_BARREL -DESPINO_XD_EMAD -DESPINO_XD_DEVK -DESPINO_TABLA -DESPINO_TABLA_512 -DESPINO_VIGILANTE
 C1_SIM  := $(BUILD)/c1/r3/obj/sim
 # Tablas desde el modelo del paseo normalizado (menos de 10 minutos la primera vez)
@@ -995,3 +996,53 @@ c1-timing:
 	$(PYTHON) $(ASM) sw/c1.s -o $(BUILD)/c1/c1.hex
 	DEFS="$(C1_DEFS)" HEX=$(BUILD)/c1/c1.hex EXIGIR=1 tools/medir_variante.sh c1_r3 10 > docs/mediciones/c1/timing.txt; \
 	  r=$$?; cat docs/mediciones/c1/timing.txt; exit $$r
+
+C1_JOBS ?= 12
+# El gemelo con la tabla de 512 palabras contra el RTL de R3 (traza ciclo a ciclo)
+c1-cosim:
+	$(PYTHON) tools/c1/cosim.py --jobs $(C1_JOBS)
+# Testbench del hardware que R3 agrega: la tabla de 512 palabras
+c1-tb-tabla:
+	tools/c1/tb_tabla.sh
+# Puerta a: política apagada = banda 40 de R2. Puerta b: assembly contra referencia
+# en Tesla, AMD, Meta y 200 ventanas a los tres ritmos (necesitan $$P4_DATOS)
+c1-puerta-a:
+	JOBS=$(C1_JOBS) tools/c1/puerta_a.sh
+c1-puerta-b:
+	RONDA1=1 JOBS=$(C1_JOBS) tools/c1/puerta_b.sh
+# Puerta c: los criterios de docs/puertas.md, uno por objetivo
+c1-oficial:
+	RONDA1=1 JOBS=$(C1_JOBS) tools/c1/oficial.sh
+c1-series:
+	JOBS=$(C1_JOBS) tools/c1/series.sh
+c1-fases:
+	JOBS=$(C1_JOBS) tools/c1/fases.sh
+c1-criterio5:
+	JOBS=$(C1_JOBS) tools/c1/criterio5.sh
+c1-degradacion:
+	JOBS=$(C1_JOBS) tools/c1/degradacion.sh
+c1-controles:
+	JOBS=$(C1_JOBS) tools/c1/controles.sh
+c1-estres:
+	JOBS=$(C1_JOBS) tools/c1/estres.sh
+c1-ticks:
+	tools/c1/ticks.sh
+# Criterio 8 y molde: síntesis de R3 y de su molde, icebram, simulación desde el
+# .asc, vigilante dentro del bitstream e imagen múltiple con R0 (unos 20 minutos)
+c1-bitstreams:
+	tools/c1/bitstreams.sh
+# Todas las puertas de R3 en orden (unas 3 horas). SALTAR="b criterio5" para no
+# repetir las corridas largas; GUARDAR=1 copia los bitstreams si todo pasa
+c1-puerta:
+	JOBS=$(C1_JOBS) tools/c1/puerta.sh
+# Versión corta para la integración continua: sin datos fuera del repositorio
+check-c1:
+	$(PYTHON) tools/c1/generar.py --check && $(PYTHON) ref/c1/tablas.py --check sw/c1_tabla.hex
+	SALIDA=$(BUILD)/c1/tb_tabla_corta.txt tools/c1/tb_tabla.sh
+	$(PYTHON) tools/c1/cosim.py --corta --jobs $(C1_JOBS)
+	CORTA=1 JOBS=$(C1_JOBS) SALIDA=$(BUILD)/c1/oficial_corta.txt tools/c1/oficial.sh
+	CORTA=1 JOBS=$(C1_JOBS) SALIDA=$(BUILD)/c1/series_corta.txt tools/c1/series.sh
+	CORTA=1 JOBS=$(C1_JOBS) SALIDA=$(BUILD)/c1/fases_corta.txt tools/c1/fases.sh
+	CORTA=1 JOBS=$(C1_JOBS) SALIDA=$(BUILD)/c1/degradacion_corta.txt tools/c1/degradacion.sh
+	JOBS=$(C1_JOBS) SALIDA=$(BUILD)/c1/controles_corta.txt tools/c1/controles.sh
+	JOBS=$(C1_JOBS) SALIDA=$(BUILD)/c1/estres_corta.txt tools/c1/estres.sh

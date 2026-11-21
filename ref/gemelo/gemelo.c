@@ -387,8 +387,11 @@ static void sacar_r(Sim *s, int64_t x) {
 
 /* Tabla de parámetros (-DESPINO_TABLA): BRAM de 256 palabras de 16 bits, de
  * solo lectura, en 0x8002_0000. Se lee con extensión de signo. No pasa por el
- * esclavo SPI ni por los periféricos, y un store ahí no hace nada. */
-static int16_t tabla[256];
+ * esclavo SPI ni por los periféricos, y un store ahí no hace nada. Con
+ * -DESPINO_TABLA_512 (R3, rtl/pochoco_tabla512.v) son 512 palabras: el tamaño
+ * sale de la cantidad de valores del archivo y tabla_mask es 255 o 511. */
+static int16_t tabla[512];
+static int     tabla_mask = 255;
 /* --perfil: instrucciones y ciclos por hilo y por palabra del programa. En el
  * base y el segmentado cada instrucción suma sus ciclos (hilo 0); en el barrel
  * cada instrucción de un hilo ocupa 4 ciclos de ese hilo. Solo se cuenta: no
@@ -404,7 +407,7 @@ static uint32_t bus_leer(Sim *s, int64_t x, uint32_t addr) {
   if (s->f_traza || (addr & 0x80000000u)) spi_avanzar(s, x);
   if (s->f_traza) { fprintf(s->f_traza, "%lld L %08x\n", (long long)x, addr & ~3u); sacar_r(s, x); }
   if (!(addr & 0x80000000u)) return s->mem[(addr >> 2) & (NWORDS - 1)];
-  if (es_tabla(addr)) return (uint32_t)(int32_t)tabla[(addr >> 2) & 255];
+  if (es_tabla(addr)) return (uint32_t)(int32_t)tabla[(addr >> 2) & tabla_mask];
   s->mmio++;
   int off = (addr >> 2) & 63;
   if (!(addr & 0x10000u)) return 0;        /* perifericos: los botones valen 0 en el testbench */
@@ -918,7 +921,8 @@ static void ayuda(void) {
        "  --ticks ARCHIVO       escribir una fila por tick, igual a la de tb/tb_cpi.sv\n"
        "  --traza ARCHIVO       escribir la traza de eventos, igual a la de tb/tb_cpi.sv\n"
        "  --tabla ARCHIVO       tabla de parametros en 0x80020000, 256 valores hex de 16 bits\n"
-       "                        (sw/fondo_tabla.hex; como -DESPINO_TABLA)\n"
+       "                        (sw/fondo_tabla.hex; como -DESPINO_TABLA) o 512 (sw/c1_tabla.hex;\n"
+       "                        como -DESPINO_TABLA_512)\n"
        "  --callado             no imprimir el resumen\n"
        "  --perfil ARCHIVO      escribir, por hilo y por direccion del programa, cuantas veces se\n"
        "                        ejecuto cada instruccion y cuantos ciclos ocupo (apaga el atajo)");
@@ -990,9 +994,10 @@ int main(int argc, char **argv) {
     FILE *ft = fopen(cfg.tabla, "r");
     if (!ft) morir("no se pudo abrir la tabla", cfg.tabla);
     unsigned v16; int nt = 0;
-    while (nt < 256 && fscanf(ft, "%x", &v16) == 1) tabla[nt++] = (int16_t)(uint16_t)v16;
+    while (nt < 512 && fscanf(ft, "%x", &v16) == 1) tabla[nt++] = (int16_t)(uint16_t)v16;
     fclose(ft);
-    if (nt != 256) morir("la tabla debe traer 256 valores:", cfg.tabla);
+    if (nt != 256 && nt != 512) morir("la tabla debe traer 256 valores (o 512, la de R3):", cfg.tabla);
+    tabla_mask = nt - 1;
     hay_tabla = 1;
   }
 

@@ -14,11 +14,14 @@ C1 (docs/exploracion_ideas.md de la rama minutos-reales, sección 15): la banda 
 Solo usa sumas, restas, comparaciones y lecturas de tabla, en el mismo orden que el programa de los
 cuatro hilos (docs/c1_plan.md). Cada bloque dice qué hilo lo calcula. La referencia no modela
 ciclos: con los cuatro hilos sanos la decisión no depende de cuánto demora cada uno. Las fallas
-(un hilo que no publica a tiempo) se modelan con `faltas`, que dice en qué ticks el hilo 0 no
-recibe la política.
+(un hilo que no publica a tiempo) se modelan con dos conjuntos de ticks:
+  faltas    la política de ese tick no llega nunca (un hilo colgado)
+  tardias   llega después del plazo y antes del plazo del tick siguiente (dato viejo)
 
 Uso, desde la raíz:
-  python3 ref/c1/c1.py SERIE.csv [--tabla sw/c1_tabla.hex] [--decisiones salida.csv] [--nticks N]
+  python3 ref/c1/c1.py SERIE.csv [--tabla sw/c1_tabla.hex] [--nticks N] [--periodo-ns P] [-o decisiones.csv]
+Con --periodo-ns modela los precios que el programa no ve durante el reset del testbench, y -o
+escribe el decisiones.csv del testbench oficial (ref/market.py).
 """
 import argparse
 import os
@@ -106,9 +109,10 @@ def hacia(obj, acc):
 
 class C1:
     """Un objeto por ronda. paso(p) recibe el precio del tick y devuelve el byte que el hilo 0
-    escribe en DECISION. `faltas`: ticks (desde 1) en que la política no llega dentro del plazo."""
+    escribe en DECISION. `faltas` y `tardias`: ticks (desde 1) en que la política no llega dentro
+    del plazo; en los de `tardias` llega después (queda como la del tick anterior para el siguiente)."""
 
-    def __init__(self, tabla, faltas=(), programa=None):
+    def __init__(self, tabla, faltas=(), programa=None, tardias=()):
         T = tabla
         self.T = T
         par = dict(TB.PROGRAMA)
@@ -119,6 +123,7 @@ class C1:
         self.caja0 = par["caja"]
         self.com, self.hist, self.p_min = par["comision"], TB.HISTERESIS, par["p_min"]
         self.faltas = faltas
+        self.tardias = tardias
         # hilo 0: corredor
         self.k = 0
         self.q = M_
@@ -254,7 +259,7 @@ class C1:
         # --- hilo 0: elige el byte ---
         if self.seguro:
             byte = q
-        elif k in self.faltas:
+        elif k in self.faltas or k in self.tardias:
             # degradación: el plazo venció sin la política de este tick
             self.vencidos += 1
             if self.pol_tick == k - 1:
@@ -263,15 +268,19 @@ class C1:
             else:
                 self.seguro = 1
                 byte = q
+            if k in self.tardias:
+                self.pol_tick, self.pol_byte = k, b             # llegó tarde: sirve de anterior para el tick k + 1
         else:
             self.pol_tick, self.pol_byte = k, b
             byte = b
         self.ord = byte
         return byte
 
+    decidir = paso                      # la interfaz de ref/trader.py
 
-def correr(precios, tabla, faltas=(), programa=None):
-    c = C1(tabla, faltas, programa)
+
+def correr(precios, tabla, faltas=(), programa=None, tardias=()):
+    c = C1(tabla, faltas, programa, tardias)
     return [c.paso(p) for p in precios], c
 
 
@@ -301,24 +310,33 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("serie")
     ap.add_argument("--tabla", default=os.path.join(os.path.dirname(os.path.dirname(AQUI)), "sw", "c1_tabla.hex"))
-    ap.add_argument("--decisiones")
     ap.add_argument("--nticks", type=int)
+    ap.add_argument("--periodo-ns", type=int, help="período del testbench: modela los precios que se pierden en el reset")
+    ap.add_argument("--perdidos", type=int, help="fijar a mano cuántos precios iniciales no se ven")
+    ap.add_argument("-o", "--salida", help="escribir el decisiones.csv de referencia (formato del testbench oficial)")
+    ap.add_argument("--faltas", default="", help="ticks en que la política no llega nunca: a-b,c (un hilo colgado)")
+    ap.add_argument("--tardias", default="", help="ticks en que la política llega después del plazo: a,b")
     a = ap.parse_args()
     sys.path.insert(0, os.path.dirname(AQUI))
     import market
-    precios = market.leer_serie(a.serie)
-    if a.nticks:
-        precios = precios[:a.nticks]
-    T = TB.leer_hex(a.tabla)
-    bs, c = correr(precios, T)
-    W, nord = patrimonio(precios, bs, c.caja0, c.com)
-    if a.decisiones:
-        with open(a.decisiones, "w") as f:
-            f.write("tick,precio,decision\n")
-            for i, (p, b) in enumerate(zip(precios, bs)):
-                f.write(f"{i},{p},{b}\n")
-    print(f"{a.serie}: {len(precios)} ticks, patrimonio {W}, ordenes {nord}, modo final {c.modo}, "
-          f"cuenta emulada {c.W}, D {c.D}, seguro {c.seguro}")
+    import trader
+    precios = market.leer_serie(a.serie, a.nticks)
+    perdidos = a.perdidos if a.perdidos is not None else trader.ticks_perdidos(a.periodo_ns) if a.periodo_ns else 0
+
+    def ticks(texto):
+        out = set()
+        for parte in filter(None, texto.split(",")):
+            lo, _, hi = parte.partition("-")
+            out.update(range(int(lo), int(hi or lo) + 1))
+        return out
+    c = C1(TB.leer_hex(a.tabla), ticks(a.faltas), None, ticks(a.tardias))
+    filas = [] if a.salida else None
+    m = market.simular(precios, trader.decisiones(precios, c, perdidos), c.caja0, c.com, filas)
+    if a.salida:
+        market.escribir_csv(a.salida, filas)
+    print(f"Serie {a.serie}: {len(precios)} ticks, precios iniciales que el programa no ve: {perdidos}")
+    print(f"R3 (sw/c1.s): patrimonio final {m.w}, {m.ordenes} ordenes, modo final {c.modo}, cuenta emulada {c.W}, "
+          f"D {c.D}, modo seguro {c.seguro}")
 
 
 if __name__ == "__main__":

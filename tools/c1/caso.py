@@ -9,7 +9,8 @@ Un caso es una serie, un período y un programa. Comprueba:
   1. Bytes: cada byte que leyó la maestra es el de la referencia entera.
   2. Estado tick a tick (salvo --sin-estado): el byte escrito, el byte de la política, el modo,
      D, el patrimonio propio emulado, las dos cuentas (caja y acciones), el objetivo de la media
-     posición, la clase de v^2, la posición del motor y el LED de modo seguro.
+     posición, la clase de v^2, las sumas y el reloj de tramos del hilo 1, la posición del motor y
+     el LED de modo seguro.
   3. Conteos del testbench: llegaron todos los precios, una sola escritura en DECISION por tick,
      MISO sin X, ninguna violación del protocolo, el vigilante sin disparar, y el peor caso de
      la respuesta bajo el límite.
@@ -19,7 +20,12 @@ Imprime una línea PASS o FAIL. Con --medir agrega instrucciones por hilo y los 
 Uso, desde la raíz (el simulador se compila con tools/c1/comun.sh, función compilar_sim):
   python3 tools/c1/caso.py CARPETA --serie S.csv --nticks N [--periodo-ns P] [--inicio-ns I]
         [--asm sw/c1.s] [--tabla sw/c1_tabla.hex] [--sim build/c1/r3/obj/sim] [--faltas a-b,c]
-        [--espera-seguro TICK] [--limite CICLOS] [--plus "+X=1 ..."] [--medir] [--sin-estado]
+        [--tardias a,b] [--limite CICLOS] [--plus "+X=1 ..."] [--medir] [--sin-estado]
+
+Con fallas (tools/c1/variante.py): --faltas son los ticks en que la política no llega nunca (un hilo
+colgado) y --tardias los ticks en que llega después del plazo. Desde la primera falta el estado de
+los hilos 1 a 3 queda congelado y no se compara; el byte, la escritura única en DECISION y el LED
+de modo seguro se comparan siempre.
 """
 import argparse
 import csv
@@ -33,6 +39,7 @@ sys.path.insert(0, os.path.join(RAIZ, "ref"))
 sys.path.insert(0, os.path.join(RAIZ, "ref", "c1"))
 sys.path.insert(0, os.path.join(RAIZ, "tools", "fondo"))
 
+import fondo              # noqa: E402
 import c1 as R            # noqa: E402
 import tablas as TB       # noqa: E402
 import market             # noqa: E402
@@ -80,9 +87,9 @@ def faltas_de(texto):
     return out
 
 
-def referencia(precios, perdidos, T, faltas=(), programa=None):
+def referencia(precios, perdidos, T, faltas=(), programa=None, tardias=()):
     """Bytes que lee la maestra y el estado de la referencia después de cada precio recibido."""
-    c = R.C1(T, faltas, programa)
+    c = R.C1(T, faltas, programa, tardias)
     salida, estados = [], []
     actual = 0
     for n, p in enumerate(precios):
@@ -91,7 +98,8 @@ def referencia(precios, perdidos, T, faltas=(), programa=None):
             actual = c.paso(p)
             estados.append(dict(k=c.k, p=p, byte=actual, pol=c.pol_ultimo, modo=c.modo, D=c.D, W=c.W, caja=c.caja,
                                 acc=c.acc, cajac=c.cajac, accc=c.accc, obj=c.obj, cv=c.cv, sm=c.sm, seguro=c.seguro,
-                                activa=1 if c.k >= c.t_min else 0))
+                                activa=1 if c.k >= c.t_min else 0, tr_a=c.tr_a, c_a=c.c_a, tr_m=c.tr_m, c_m=c.c_m,
+                                B=list(c.B)))
     return salida, estados, c
 
 
@@ -109,8 +117,14 @@ def main(argv=None):
     ap.add_argument("--inicio-ns", type=int, default=4000)
     ap.add_argument("--asm", default="sw/c1.s")
     ap.add_argument("--tabla", default="sw/c1_tabla.hex")
+    ap.add_argument("--tabla-ref", help="tabla de la referencia, si no es la del simulador (controles negativos)")
     ap.add_argument("--sim", default="build/c1/r3/obj/sim")
-    ap.add_argument("--faltas", help="ticks en que la política no llega a tiempo (a-b,c): los decide la degradación")
+    ap.add_argument("--faltas", help="ticks en que la política no llega nunca (a-b,c): los decide la degradación")
+    ap.add_argument("--tardias", help="ticks en que la política llega después del plazo (a,b)")
+    ap.add_argument("--congelado-desde", type=int, metavar="K",
+                    help="desde el precio K no se compara el estado de los hilos 1 a 3 (un hilo colgado que ya no hace falta)")
+    ap.add_argument("--banda40-desde", type=int, metavar="K",
+                    help="exige además que desde el precio K (contado desde 1) los bytes sean los de la banda 40 de ref/fondo.py")
     ap.add_argument("--programa", action="append", default=[], help="parámetro del programa para la referencia: nombre=valor")
     ap.add_argument("--limite", type=int, default=LIMITE_PUERTA)
     ap.add_argument("--plus", default="")
@@ -134,9 +148,11 @@ def main(argv=None):
     errores = []
     precios = market.leer_serie(a.serie, a.nticks)
     perdidos = trader.ticks_perdidos(a.periodo_ns, inicio_ns=a.inicio_ns)
-    T = TB.leer_hex(a.tabla)
+    T = TB.leer_hex(a.tabla_ref or a.tabla)
     programa = {t.split("=")[0]: int(t.split("=")[1], 0) for t in a.programa}
-    salida, estados, c = referencia(precios, perdidos, T, faltas_de(a.faltas), programa)
+    faltas = faltas_de(a.faltas)
+    congelado = a.congelado_desde or (min(faltas) if faltas else None)   # desde ese tick los hilos 1 a 3 no publican
+    salida, estados, c = referencia(precios, perdidos, T, faltas, programa, faltas_de(a.tardias))
 
     # 1. Bytes
     with open(os.path.join(d, "salida.csv"), encoding="utf-8") as fd:
@@ -146,6 +162,15 @@ def main(argv=None):
     difs = [n for n, (x, y) in enumerate(zip(tb, salida)) if int(x[2], 16) != y]
     if difs:
         errores.append(f"{len(difs)} bytes distintos a la referencia, el primero en el tick {difs[0]}")
+
+    if a.banda40_desde:
+        b40 = trader.decisiones(precios, fondo.Fondo(), perdidos)
+        desde = perdidos + a.banda40_desde          # el byte del precio K lo lee la maestra en el tick siguiente
+        malos = [n for n in range(desde, min(len(tb), len(b40))) if int(tb[n][2], 16) != b40[n]]
+        if malos:
+            errores.append(f"{len(malos)} bytes distintos a la banda 40 desde el precio {a.banda40_desde}, el primero en el tick {malos[0]}")
+        if not c.seguro and c.modo != R.MODO_COPIA:
+            errores.append("la referencia no termina en modo seguro ni en el candado")
 
     # 2. Estado
     est = []
@@ -171,7 +196,7 @@ def main(argv=None):
             revisar("byte", int(fila[4], 16), e["byte"])
             revisar("escrituras en DECISION", int(fila[5]), 1)
             revisar("LED de modo seguro", int(fila[cab.index("leds")]), e["seguro"])
-            if e["pol"] is not None:      # el hilo 3 publicó en este tick
+            if congelado is None or e["k"] < congelado:      # los hilos 1 a 3 publicaron en este tick
                 revisar("byte de la política", dato(fila, "D_POL"), (e["k"] << 8) | e["pol"])
                 revisar("modo", dato(fila, "D_MODO"), e["modo"])
                 revisar("D", s32(dato(fila, "D_DIF")), e["D"])
@@ -183,6 +208,12 @@ def main(argv=None):
                 revisar("objetivo", dato(fila, "D_OBJ"), e["obj"])
                 if e["activa"]:
                     revisar("clase", dato(fila, "D_CVA"), 64 * e["cv"])
+                # el reloj del hilo 1, ya avanzado para el tick siguiente, y sus siete sumas
+                revisar("tramo de la fase A", dato(fila, "D_TRA"), 4 * e["tr_a"])
+                revisar("cuenta del tramo de la fase A", dato(fila, "D_CA"), e["c_a"])
+                revisar("tramo del motor", dato(fila, "D_TRM"), 4 * e["tr_m"])
+                revisar("cuenta del tramo del motor", dato(fila, "D_CM"), e["c_m"])
+                revisar("sumas N_j (t - 1)", [int(fila[nfijos + (sb["D_B"] - base) // 4 + j], 16) for j in range(7)], e["B"])
                 if e["modo"] != R.MODO_COPIA:
                     revisar("posición del motor", (dato(fila, "D_TAB") >> 2) & 1, e["sm"])
             n_estado += 1
@@ -209,6 +240,7 @@ def main(argv=None):
     estado = "FAIL" if errores else "PASS"
     print(f"{estado} {etiqueta}: {len(tb)} bytes, {n_estado} ticks de estado, patrimonio {W}, {nord} órdenes, modo final "
           f"{c.modo}, seguro {c.seguro}, plazo vencido en {c.vencidos} ticks, peor caso {r.get('peor_caso', '?')} de {a.limite} ciclos"
+          + (f", banda 40 desde el precio {a.banda40_desde}" if a.banda40_desde and not errores else "")
           + ("" if not errores else ". " + "; ".join(errores)))
     if a.medir and filas:
         medir(cab, filas[1:-1], a.periodo_ns)

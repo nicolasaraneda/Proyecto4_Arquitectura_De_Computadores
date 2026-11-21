@@ -1,0 +1,38 @@
+Gemelo digital con la tabla de 512 palabras y sw/c1.s contra el RTL de R3
+Generado por tools/c1/cosim.py (make c1-cosim). No editar a mano.
+Commit 6a70a3d con cambios sin commit. Verilator 5.053 devel rev v5.052-22-g7cf8c5cca (mod)
+Hardware: pochoco_soc con -DESPINO_BARREL -DESPINO_XD_EMAD -DESPINO_XD_DEVK -DESPINO_TABLA -DESPINO_TABLA_512
+
+Traza, mediciones por tick y decisiones.csv del RTL (tb/barrel/tb_gemelo.sv, Verilator)
+contra el gemelo (build/gemelo --barrel --xd 3 --tabla sw/c1_tabla.hex), byte a byte.
+
+Series: fase_a: serie hecha a mano, media posición en el tick 549 y candado en el 638; motor: serie Meta desde 500, primer extremo en el tick 411; candado: serie Meta desde 0, candado en el tick 431
+
+PASS A_oficial_fase_a [c1]: traza igual (2457630 lineas), ticks igual (999 lineas), csv igual (1001 lineas); eventos R=1418408 L=1010252 W=26974 B=998 C=998
+PASS control negativo neg_borde: la traza difiere del RTL
+PASS control negativo neg_tabla: la traza difiere del RTL
+PASS B_motor [c1]: traza igual (2950349 lineas), ticks igual (1199 lineas), csv igual (1201 lineas); eventos R=1702480 L=1213517 W=31956 B=1198 C=1198
+PASS C_candado [c1]: traza igual (6143238 lineas), ticks igual (2499 lineas), csv igual (2501 lineas); eventos R=3545311 L=2527536 W=65395 B=2498 C=2498
+PASS D1_fases_sclk500k [c1]: traza igual (1719878 lineas), ticks igual (699 lineas), csv igual (701 lineas); eventos R=992592 L=706950 W=18940 B=698 C=698
+PASS D2_sclk100k_reset63 [c1_por6]: traza igual (4482933 lineas), ticks igual (451 lineas), csv igual (451 lineas); eventos R=2467664 L=2001875 W=12494 B=450 C=450
+PASS D3_tiempos_raros [c1]: traza igual (1018484 lineas), ticks igual (698 lineas), csv igual (701 lineas); eventos R=613790 L=384155 W=19145 B=697 C=697
+PASS E1_hilo1_colgado [c1]: traza igual (1301966 lineas), ticks igual (560 lineas), csv igual (562 lineas); eventos R=788137 L=499964 W=12747 B=559 C=559
+PASS E2_hilo2_colgado [c1]: traza igual (1632681 lineas), ticks igual (698 lineas), csv igual (700 lineas); eventos R=964410 L=648921 W=17956 B=697 C=697
+PASS E3_hilo3_colgado [c1]: traza igual (1300705 lineas), ticks igual (560 lineas), csv igual (562 lineas); eventos R=752521 L=532643 W=14423 B=559 C=559
+PASS E4_dato_tardio [c1]: traza igual (1375962 lineas), ticks igual (560 lineas), csv igual (562 lineas); eventos R=796310 L=563208 W=15326 B=559 C=559
+PASS F_rondas_10ms_1ms_01ms [c1]: traza igual (11191447 lineas), ticks igual (120 lineas), csv igual (121 lineas); eventos R=6071774 L=5116221 W=3214 B=119 C=119
+PASS G1_reset_desde_0 [c1]: traza igual (1225509 lineas), ticks igual (499 lineas), csv igual (501 lineas); eventos R=708024 L=502659 W=13830 B=498 C=498
+PASS G2_reset_a_mitad [c1]: traza igual (1229423 lineas), ticks igual (500 lineas), csv igual (501 lineas); eventos R=710241 L=504326 W=13857 B=499 C=500
+PASS H1_pegada_100 [c1]: traza igual (1223781 lineas), ticks igual (499 lineas), csv igual (501 lineas); eventos R=701855 L=507590 W=13340 B=498 C=498
+PASS H2_pegada_255 [c1]: traza igual (1228513 lineas), ticks igual (499 lineas), csv igual (501 lineas); eventos R=706067 L=508118 W=13332 B=498 C=498
+PASS H3_pegada_1_modo_seguro [c1]: traza igual (490794 lineas), ticks igual (199 lineas), csv igual (201 lineas); eventos R=280975 L=203496 W=5927 B=198 C=198
+PASS H4_serie_sin_normalizar [c1]: traza igual (1470107 lineas), ticks igual (599 lineas), csv igual (601 lineas); eventos R=851391 L=600990 W=16530 B=598 C=598
+
+Configuraciones: 17. Eventos comparados: R 24071950, L 18032421, W 315386, B 11821, C 11822, total 42443400
+
+Gemelo con y sin el atajo del sondeo, sw/c1.s, serie Meta completa (20 000 ticks):
+PASS periodo 100000 ns: decisiones, ticks y conteos identicos, 4/4 (3013340 vueltas de sondeo saltadas)
+PASS periodo 1000000 ns: decisiones, ticks y conteos identicos, 4/4 (40514196 vueltas de sondeo saltadas)
+PASS periodo 10000000 ns: decisiones, ticks y conteos identicos, 4/4 (415514196 vueltas de sondeo saltadas)
+
+PASS: 0 fallas
