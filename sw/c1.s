@@ -520,11 +520,11 @@ h3_publica:
     lw   x7, D_CAJA(x0)
     add  x8, x8, x7
     sw   x8, D_W(x0)
-    sb   x11, 2047(x0)        # el byte alto de la palabra D_W lleva el modo
+    sb   x11, 2003(x0)        # el byte alto de la palabra D_W lleva el modo
     li   x7, PER_BASE
     lw   x9, PER_BOTONES(x7)
-    andi x9, x9, 3
-    lbu  x9, D_W(x9)           # los interruptores 1 y 2 eligen el byte
+    andi x9, x9, 15
+    lbu  x9, D_W(x9)           # los botones eligen el byte: patrimonio y modo, caja, acciones, caja del clon
     sw   x9, PER_DIGITOS(x7)
     j    h3_espera
 
@@ -688,6 +688,9 @@ D_CM:       .word 2500
 D_TAB:      .word 0
 # hilo 3
 D_POL:      .word 0xFFFFFE00         # ningún tick: ni el actual ni el anterior
+# Las cuatro palabras que siguen son lo que la telemetría puede mostrar, un byte por vez:
+# el botón elegido (0 a 15) es el desplazamiento desde D_W
+D_W:        .word 10000            # patrimonio propio emulado (byte alto: modo)
 D_CAJA:     .word 10000            # cuenta propia: caja y acciones
 D_ACC:      .word 0
 D_CAJAC:    .word 10000            # cuenta del clon
@@ -699,5 +702,4 @@ D_MODO:     .word 0
 D_OBJ:      .word 0
 D_SA:       .word 0
 D_DIF:      .word 0
-D_W:        .word 10000            # patrimonio propio emulado (byte alto: modo)
 .org 0x800

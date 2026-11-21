@@ -10,7 +10,7 @@ Un caso es una serie, un período y un programa. Comprueba:
   2. Estado tick a tick (salvo --sin-estado): el byte escrito, el byte de la política, el modo,
      D, el patrimonio propio emulado, las dos cuentas (caja y acciones), el objetivo de la media
      posición, la clase de v^2, las sumas y el reloj de tramos del hilo 1, la posición del motor y
-     el LED de modo seguro.
+     el LED de modo seguro y el byte que muestran los 7 segmentos (--botones elige cuál).
   3. Conteos del testbench: llegaron todos los precios, una sola escritura en DECISION por tick,
      MISO sin X, ninguna violación del protocolo, el vigilante sin disparar, y el peor caso de
      la respuesta bajo el límite.
@@ -131,6 +131,8 @@ def main(argv=None):
     ap.add_argument("--vig-esperado", type=int, default=0)
     ap.add_argument("--medir", action="store_true")
     ap.add_argument("--sin-estado", action="store_true")
+    ap.add_argument("--botones", type=int, default=0,
+                    help="botones apretados (0 a 15): eligen el byte que muestran los 7 segmentos; se compara en cada tick")
     ap.add_argument("--sin-correr", action="store_true", help="solo revisa una corrida ya hecha")
     a = ap.parse_args(argv)
 
@@ -141,7 +143,7 @@ def main(argv=None):
     if not a.sin_correr:
         cmd = [a.sim, f"+PROGRAMA={d}/programa.hex", f"+TABLA={a.tabla}", f"+SERIE={a.serie}", f"+NTICKS={a.nticks}",
                f"+PERIODO_NS={a.periodo_ns}", f"+INICIO_NS={a.inicio_ns}", f"+SALIDA={d}/salida.csv",
-               f"+ESTADO={d}/estado.csv"] + plusargs(sb) + a.plus.split()
+               f"+ESTADO={d}/estado.csv", f"+BOTONES={a.botones}"] + plusargs(sb) + a.plus.split()
         with open(os.path.join(d, "tb.log"), "w") as log:
             subprocess.run(cmd, stdout=log, stderr=subprocess.STDOUT, cwd=RAIZ)
 
@@ -201,6 +203,9 @@ def main(argv=None):
                 revisar("modo", dato(fila, "D_MODO"), e["modo"])
                 revisar("D", s32(dato(fila, "D_DIF")), e["D"])
                 revisar("patrimonio emulado", dato(fila, "D_W") & 0xFFFFFF, e["W"] & 0xFFFFFF)
+                # telemetría: los 7 segmentos muestran el byte elegido de [patrimonio y modo, caja, acciones, caja del clon]
+                bloque = ((e["W"] & 0xFFFFFF) | (e["modo"] << 24), e["caja"] & 0xFFFFFFFF, e["acc"], e["cajac"] & 0xFFFFFFFF)
+                revisar("7 segmentos", int(fila[cab.index("digitos")]), (bloque[a.botones >> 2] >> (8 * (a.botones & 3))) & 0xFF)
                 revisar("caja", s32(dato(fila, "D_CAJA")), e["caja"])
                 revisar("acciones", dato(fila, "D_ACC"), e["acc"])
                 revisar("caja del clon", s32(dato(fila, "D_CAJAC")), e["cajac"])
