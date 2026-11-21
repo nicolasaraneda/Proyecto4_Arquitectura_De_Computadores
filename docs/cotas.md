@@ -8,9 +8,9 @@ Documento de estudio en construcción (17/11). Referencia: `ref/cotas.py`. Prueb
 
 Desde el 17/11 la serie de práctica es `data/practica_meta.csv`: 20 000 precios reales de Meta, uno por minuto de mercado (febrero a mayo de 2022), normalizados de modo que el mínimo es exactamente 100 y el máximo exactamente 255. Las series de la competencia serán períodos ocultos de Meta, Apple, Netflix, AMD o Tesla entre 2022 y 2024, normalizados de la misma forma.
 
-Si cada ronda se normaliza por separado, el precio de la ronda nunca sale de [100, 255] y toca los dos extremos. Ver 100 es ver el mínimo de la ronda: comprar ahí no puede salir peor que comprar en cualquier otro momento. Ver 255 es ver el máximo.
+Como cada ronda se normaliza por separado, el precio de la ronda nunca sale de [100, 255] y toca los dos extremos. Ver 100 es ver el mínimo de la ronda: comprar ahí no puede salir peor que comprar en cualquier otro momento. Ver 255 es ver el máximo.
 
-**Supuesto clave, sin confirmar:** que la normalización es por ronda. Si la ronda fuera un trozo de un período normalizado más largo, puede no tocar ningún extremo (sección 5, caso d). Es la primera pregunta para el ayudante (`docs/clase_18nov.md`, sección 3).
+**Hecho confirmado (Nicolás, 21/11):** cada ronda llega normalizada por separado, así que su mínimo es 100 y su máximo 255. Antes de esa fecha esto era un supuesto; la sección 5 evaluó el caso contrario (una ronda que fuera un trozo de un período más largo, sección 5, caso d) y queda como análisis de sensibilidad, no como riesgo vigente.
 
 **¿Es información externa a la serie?** No: es el formato de la serie que anunció el profesor, igual para todos los grupos, como que los precios son de 8 bits. La regla no guarda ninguna serie ni usa datos de fuera; decide con el precio que ve. Igual se deja como pregunta de defensa.
 
@@ -121,10 +121,10 @@ Con rivales que también usan los extremos, "espera con banda" queda primera en 
 
 ### 5.5 Conclusión
 
-- **Si cada ronda se normaliza por separado, las reglas de extremos dominan**: casi duplican el patrimonio y superan a `max_media` en más del 90 % de las ventanas, en las cinco empresas, en los tres largos y en las dos validaciones.
+- **Como cada ronda se normaliza por separado, las reglas de extremos dominan**: casi duplican el patrimonio y superan a `max_media` en más del 90 % de las ventanas, en las cinco empresas, en los tres largos y en las dos validaciones.
 - **Recomendada el 17/11: "espera" con banda 60** (centro de la meseta). **Desde el 19/11 compite la banda 40 (T140)**, elegida con los minutos reales de Alpaca: +205 por ronda con error estándar 101 sobre todas las ventanas reales, y la que menos pierde contra el rival de Tesla de la clase del 18/11 (`docs/decisiones.md`, T140). En la ronda de Tesla da 20 795 contra 18 779 de la banda 60, en AMD 26 470 contra 21 895 y en la serie Meta 21 392 contra 19 214. Es la de mayor media y mayor puntaje cuando otros grupos usan los extremos, y la única que no pierde si la hipótesis es falsa.
 - **Alternativa: comprar 20 al inicio con banda 70.** Mejor percentil 5 y más puntaje si nadie más usa los extremos, pero pierde hasta 2 100 si la hipótesis es falsa.
-- **Lo que no se sabe**: si las rondas de la competencia se normalizan por separado (pregunta al ayudante) y cómo es la forma por minuto de las otras cuatro empresas (el modelo usa la de Meta; con los minutos reales de Alpaca se puede repetir todo con `python3 ref/cotas/experimento.py`).
+- **Lo que no se sabe**: cómo es la forma por minuto de las otras cuatro empresas (el modelo usa la de Meta; con los minutos reales de Alpaca se puede repetir todo con `python3 ref/cotas/experimento.py`).
 
 Se reproduce con `python3 ref/cotas/validar.py` (el evaluador en C contra las referencias en Python), `python3 ref/cotas/validar_modelo.py` y `python3 ref/cotas/experimento.py` (20 segundos).
 
