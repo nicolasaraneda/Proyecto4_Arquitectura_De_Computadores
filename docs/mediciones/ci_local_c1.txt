@@ -50,3 +50,8 @@ PASS: 25 de 25 controles detectados, y el control en blanco pasa
 PASS: 57 de 57 casos de la matriz pasan. Peor caso de la respuesta en la matriz: 779 ciclos
 
 RESULTADO: 27 de 27 pasos en PASS (26 en la corrida 1 y el restante en la corrida 2; el cambio entre las dos solo toca tools/c1/generar.py)
+
+Corrida 3, completa: commit d48205e (rama c1), 21/11 16:39 a 17:22 (43 minutos)
+Los 24 pasos de ci_local.sh, make check-c1 C1_JOBS=8, los hash de bitstreams/ y que nada de bitstreams/, sw/ ni rtl/ cambie: los 27 pasos en PASS.
+RESULTADO: 0 pasos con FAIL
+Registro: ~/proyectos/cola/c1_ci_local3.log. Script: ~/proyectos/cola/ci_local_c1.sh. El commit corrido solo agrega documentos a b339add/06566dc (bitacora, banco de defensa, estado, autoprueba de R3 y su herramienta).
