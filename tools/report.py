@@ -135,70 +135,63 @@ def estrategia(peldano):
 
 # --- Punto 3.1 -----------------------------------------------------------------------
 def punto_31(c, peldano):
+    """Tabla del punto 3.1: la serie de práctica completa (20 000 ticks, ya normalizada entre 100 y 255
+    como una ronda) contra no operar y comprar y mantener. Decisión de Nicolás (21/11, T155): los
+    bloques de 2 000 ticks no van en el informe (una ronda tiene 20 000 ticks y normalizar cada bloque
+    infla el resultado); quedan en docs/mediciones/bloques_2000.txt."""
+    import regla_cotas   # noqa: E402
     practica = market.leer_serie(os.path.join(RAIZ, SERIE_PRACTICA))
     nuevo = estrategia(peldano)
     nombre = "regla de cotas, banda 40"
     filas = []
-    for etiqueta, n, per in (("20\\,000 ticks", 20000, None), ("2\\,000 ticks, testbench", 2000, 100000)):
+    for n, per, sufijo in ((20000, None, "Veinte"), (2000, 100000, "Dos")):
         p = practica[:n]
         perd = trader.ticks_perdidos(per) if per else 0
         mc = comprar_y_mantener(p)
-        cym = mc.w
-        candidatos = [("No operar", None), ("Comprar y mantener", "cym"),
-                      ("Regla base (media exponencial)", lambda: trader.ReglaBase()),
-                      (f"Nuestro algoritmo ({nombre})", nuevo)]
-        for nom, est in candidatos:
-            if est is None:
-                fila = [nom, num(market.CAJA0), 0, 0, 0]
-            elif est == "cym":
-                fila = [nom, num(cym), mc.ordenes, num(mc.comisiones), num(mc.max_dd)]
-                c[f"CymPerdidaMax{'Veinte' if n == 20000 else 'Dos'}"] = num(mc.max_dd)
-            else:
-                m = market.simular(p, trader.decisiones(p, est(), perd))
-                fila = [nom, num(m.w), num(m.ordenes), num(m.comisiones), num(m.max_dd)]
-                if nom.startswith("Nuestro"):
-                    sufijo = "Veinte" if n == 20000 else "Dos"
-                    # la misma regla con la banda de 60, la que compitió del 17 al 19/11 (T133)
-                    import regla_cotas   # noqa: E402
-                    b60 = market.simular(p, trader.decisiones(p, regla_cotas.Cotas("espera", banda=60), perd))
-                    c[f"PatrimonioBandaSesenta{sufijo}"] = num(b60.w)
-                    c[f"Patrimonio{sufijo}"] = num(m.w)
-                    c[f"Ordenes{sufijo}"] = num(m.ordenes)
-                    c[f"Comisiones{sufijo}"] = num(m.comisiones)
-                    c[f"PerdidaMax{sufijo}"] = num(m.max_dd)
-                    c[f"Cym{sufijo}"] = num(cym)
-            filas.append(fila)
-        filas.append("---")
-        c["PerdidosTb"] = trader.ticks_perdidos(100000)
-    filas = filas[:-1]
-    # inserta el subtítulo de cada serie
-    filas.insert(0, ["\\multicolumn{5}{l}{\\textit{Serie de práctica completa, 20\\,000 ticks}}", "", "", "", ""][:1])
-    filas.insert(6, ["\\multicolumn{5}{l}{\\textit{Primeros 2\\,000 ticks, como el testbench (pierde " +
-                     f"{trader.ticks_perdidos(100000)} precios en el reset)}}}}"])
+        m = market.simular(p, trader.decisiones(p, nuevo(), perd))
+        b60 = market.simular(p, trader.decisiones(p, regla_cotas.Cotas("espera", banda=60), perd))
+        c[f"Cym{sufijo}"] = num(mc.w)
+        c[f"CymPerdidaMax{sufijo}"] = num(mc.max_dd)
+        c[f"Patrimonio{sufijo}"] = num(m.w)
+        c[f"Ordenes{sufijo}"] = num(m.ordenes)
+        c[f"Comisiones{sufijo}"] = num(m.comisiones)
+        c[f"PerdidaMax{sufijo}"] = num(m.max_dd)
+        c[f"PatrimonioBandaSesenta{sufijo}"] = num(b60.w)
+        if n == 20000:
+            filas = [["No operar", num(market.CAJA0), 0, 0, 0],
+                     ["Comprar y mantener", num(mc.w), mc.ordenes, num(mc.comisiones), num(mc.max_dd)],
+                     [f"Nuestro algoritmo ({nombre})", num(m.w), num(m.ordenes), num(m.comisiones), num(m.max_dd)]]
+    c["PerdidosTb"] = trader.ticks_perdidos(100000)
     tabla(os.path.join(RAIZ, G, "t31.tex"), ["Estrategia", "Patrimonio", "Órdenes", "Comisiones", "Pérdida máx."],
           filas, "lrrrr")
+    bloques_docs(practica, nuevo)
 
-    # Bloques de 2 000 ticks. Cada ronda de la competencia llega normalizada por separado (mínimo 100,
-    # máximo 255), así que cada bloque se normaliza antes de correr: sin eso un tramo que no contiene
-    # los extremos de toda la serie no le da nada que hacer a la regla de cotas.
+
+def bloques_docs(practica, nuevo):
+    """Los 10 bloques de 2 000 ticks de la práctica, para docs/ y no para el informe. Se muestran sin
+    normalizar (como están en el archivo) y, solo de referencia, normalizando cada bloque."""
     normalizar = _normalizar()
-    bloques = [normalizar(b) for b in series.bloques(practica, 2000)]
-    cyms = [market.comprar_y_mantener(b) for b in bloques]
-    filas = []
-    for nom, est in (("Comprar y mantener", "cym"), ("Regla base (media exponencial)", lambda: trader.ReglaBase()),
-                     ("Nuestro algoritmo", nuevo)):
-        ws = []
-        for b in bloques:
-            ws.append(market.comprar_y_mantener(b) if est == "cym" else market.simular(b, trader.decisiones(b, est())).w)
-        gana = sum(w > y for w, y in zip(ws, cyms))
-        filas.append([nom, num(sum(ws) / len(ws)), num(min(ws)), num(max(ws)),
-                      "n/a" if est == "cym" else f"{gana} de {len(ws)}"])
-        if nom.startswith("Nuestro"):
-            c["BloquesMedia"] = num(sum(ws) / len(ws))
-            c["BloquesPeor"] = num(min(ws))
-            c["BloquesGana"] = gana
-    tabla(os.path.join(RAIZ, G, "t31bloques.tex"),
-          ["Estrategia", "Media", "Peor bloque", "Mejor bloque", "Supera a comprar y mantener"], filas, "lrrrr")
+    crudos = series.bloques(practica, 2000)
+    out = ["Bloques de 2000 ticks de la serie de practica (data/practica_meta.csv).",
+           "Generado por tools/report.py (make report). No va en el informe: una ronda tiene 20000 ticks.",
+           "Columnas: patrimonio final de comprar y mantener, de la regla base (media exponencial) y de la regla de cotas con banda 40.",
+           "Los bloques crudos casi nunca contienen el 100 y el 255 de la serie completa; los normalizados si, por",
+           "construccion, y por eso dan una ventaja que una ronda de 20000 ticks no tiene: son solo referencia.", ""]
+    for titulo, bloques in (("Bloques tal como estan en el archivo", crudos),
+                            ("Bloques normalizados uno a uno (solo referencia, infla el resultado)", [normalizar(b) for b in crudos])):
+        out.append(titulo)
+        out.append(f"{'bloque':>6} {'comprar y mant.':>16} {'regla base':>11} {'cotas banda 40':>15} {'ordenes':>8}")
+        tot = [0, 0, 0]
+        for i, b in enumerate(bloques):
+            cym = market.comprar_y_mantener(b)
+            base = market.simular(b, trader.decisiones(b, trader.ReglaBase())).w
+            mm = market.simular(b, trader.decisiones(b, nuevo()))
+            out.append(f"{i + 1:>6} {cym:>16} {base:>11} {mm.w:>15} {mm.ordenes:>8}")
+            tot = [tot[0] + cym, tot[1] + base, tot[2] + mm.w]
+        out.append(f"{'media':>6} {tot[0] / len(bloques):>16.0f} {tot[1] / len(bloques):>11.0f} {tot[2] / len(bloques):>15.0f}")
+        out.append("")
+    with open(os.path.join(RAIZ, M, "bloques_2000.txt"), "w", encoding="utf-8") as f:
+        f.write("\n".join(out))
 
 
 # --- Punto 3.2 -----------------------------------------------------------------------

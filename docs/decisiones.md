@@ -838,3 +838,10 @@ Tomadas por mí siguiendo el encargo de T151. Detalle en `docs/c1_plan.md` y `do
   - Los primeros 2000 ticks de la serie de práctica no tocan los dos extremos (la banda 40 termina en 10 000 con 0 órdenes): el informe lo explica en una frase.
   - Las mediciones de 3.2 y 3.3 pasan a la banda 40 en R2 (el seguro). Las de R3 (C1, el que compite) se miden y se guardan en `docs/mediciones/`, pero entran al informe en la pasada de R3, después del día de prueba.
   - Las mediciones que duren más de 30 minutos esperan su visto bueno.
+
+### T155. La tabla de 3.1 es la serie completa; los bloques de 2000 ticks salen del informe (21/11)
+
+- **Decisión de Nicolás** (21/11): no se aprueba normalizar cada bloque de 2000 ticks, "porque una ronda tiene 20 000 ticks y eso infla el resultado". Opción A: la tabla de 3.1 es la serie de práctica completa, normalizada como una ronda, contra no operar y comprar y mantener, con patrimonio final, órdenes, comisiones y pérdida máxima, que es lo que pide el enunciado.
+- **Qué cambia**: `tools/report.py` (se revierte la normalización por bloque y la tabla de bloques; ya no hay `t31bloques.tex`), `informe/informe.tex` (sin la tabla de bloques ni la regla base; los primeros 2000 ticks quedan en una frase con cifras generadas). Los bloques quedan en `docs/mediciones/bloques_2000.txt`, crudos y, solo de referencia, normalizados, con el aviso de que esa versión infla el resultado.
+- **Qué se pierde**: la fila de la regla base (media exponencial) sale de la tabla del informe, porque la opción A fija las dos referencias (no operar, comprar y mantener); sigue en `docs/mediciones/tabla_3_1.txt` y en `bloques_2000.txt`.
+- **Otras decisiones de Nicolás del mismo día (21/11)**: la extensión `emad`/`devk` va en 3.3 como alternativa evaluada, con sus números medidos sobre `max_media` y una frase que diga que la regla que compite no la usa; 11 operaciones útiles para la regla de cotas; para R3 se guardan IC, ciclos, CPI y perfil por hilo, y Amdahl y roofline quedan para la pasada de R3.

@@ -1,0 +1,33 @@
+Bloques de 2000 ticks de la serie de practica (data/practica_meta.csv).
+Generado por tools/report.py (make report). No va en el informe: una ronda tiene 20000 ticks.
+Columnas: patrimonio final de comprar y mantener, de la regla base (media exponencial) y de la regla de cotas con banda 40.
+Los bloques crudos casi nunca contienen el 100 y el 255 de la serie completa; los normalizados si, por
+construccion, y por eso dan una ventaja que una ronda de 20000 ticks no tiene: son solo referencia.
+
+Bloques tal como estan en el archivo
+bloque  comprar y mant.  regla base  cotas banda 40  ordenes
+     1            11375       10846           10000        0
+     2             8140       10474           10000        0
+     3            11620       10005           10000        0
+     4            11843        9907           10000        0
+     5            10653       10348           10000        0
+     6             9555        9831           10000        0
+     7             9029       10452           10000        0
+     8             6845        7960           10000        0
+     9            13695       11104           18270        2
+    10             8645        8803           10000        0
+ media            10140        9973           10827
+
+Bloques normalizados uno a uno (solo referencia, infla el resultado)
+bloque  comprar y mant.  regla base  cotas banda 40  ordenes
+     1            14545       11655           22205        4
+     2             5995       10509           13938        2
+     3            15203       11836           24572        4
+     4            21771       12731           25325        4
+     5            16455       11585           24545        4
+     6             7619        7257           10844        2
+     7             5193        8712           10305        2
+     8             4921        6018           11079        2
+     9            15179        8867           25019        4
+    10             6275        9719           10000        0
+ media            11316        9889           17783
