@@ -12,6 +12,7 @@ Según `docs/defensa/plan_estudio.md`, sección 2, Santiago es dueño de **`sw/f
 4. `docs/arbol_decision.md`, `docs/checklist_26nov.md` (con el registrador, sección 4b) y `docs/checklist_1dic.md`.
 5. `docs/registrador.md` (nuevo) y `docs/contingencia.md`.
 6. `docs/mediciones/placa_16nov.md`: qué pasó la placa y qué falta.
+7. `docs/defensa/c1.md`, secciones 3, 4, 7 y 9, y `docs/c1_dia_de_prueba.md` entero: los cuatro hilos de `sw/c1.s`, la degradación, la rutina por ronda con reset por USB, la telemetría y su límite, y la autoprueba de R3 (sección 9 del día de prueba).
 
 ## 2. Lo que tiene que poder dibujar sin mirar
 
@@ -32,9 +33,9 @@ Según `docs/defensa/plan_estudio.md`, sección 2, Santiago es dueño de **`sw/f
 
 ## 4. Preguntas del banco que responde en profundidad
 
-- **Avanzadas [A]**: 8, 99, 100, 101, 102, 105, 106, 107, 109, 110, 111, 112, 113, 114, 117, 118, 120, 121, 123, 124, 148, 149, 150, 151, 153 y 155.
-- **Incómodas [I] de su pieza**: 3, 4, 9, 103, 104, 122, 125, 147 y 154.
-- **Básicas [B]**: las 53 del banco.
+- **Avanzadas [A]**: 8, 99, 100, 101, 102, 105, 106, 107, 109, 110, 111, 112, 113, 114, 117, 118, 120, 121, 123, 124, 148, 149, 150, 151, 153 y 155; de R3 (sección 14 del banco): 161 (datos entre hilos), 162 (máquina de modos), 171 (hilo colgado), 172 (hilo 0 colgado y relevo), 178 (rondas seguidas), 180 (autoprueba) y 181 (telemetría y su límite).
+- **Incómodas [I] de su pieza**: 3, 4, 9, 103, 104, 122, 125, 147 y 154. De R3: 164 (comisión o caja distintas) y 182 (hardware sin maestra, quién decide).
+- **Básicas [B]**: las 57 del banco (las 4 de R3 son la 157, 158, 160 y 170).
 
 ## 5. Lo que tiene que saber de las piezas de los otros
 

@@ -12,6 +12,7 @@ Según `docs/defensa/plan_estudio.md`, sección 2, Nicolás es dueño de **los p
 4. `docs/defensa/extension.md`: `emad` y `devk`, la codificación, y por qué toda otra palabra de custom-0 no hace nada.
 5. `docs/defensa/verificacion.md`, `docs/verificacion_exhaustiva.md` (nuevo) y `docs/puertas.md`.
 6. `docs/revision_p10.md` cuando esté integrado: lo que encontró el revisor adversarial, en particular el hallazgo del esclavo SPI con el contador de bits en 7.
+7. `docs/defensa/c1.md`, secciones 3, 5, 7 y 9: R3 vista como hardware y verificación. Qué cambia respecto de R2 (tabla de 512 palabras, `rtl/pochoco_tabla512.v`), por qué el core no se verificó de nuevo salvo la campaña sobre el SoC de R3, y qué prueban las puertas de `docs/puertas.md`, sección "R3".
 
 ## 2. Lo que tiene que poder dibujar sin mirar
 
@@ -33,9 +34,9 @@ Según `docs/defensa/plan_estudio.md`, sección 2, Nicolás es dueño de **los p
 
 ## 4. Preguntas del banco que responde en profundidad
 
-- **Avanzadas [A]**: 56, 58, 59, 60, 61, 63, 64, 65, 66, 67, 73, 74, 75, 77, 78, 79, 80, 81, 83, 87, 89, 90, 91, 93, 94, 95, 128, 129, 131, 134 y 136.
-- **Incómodas [I] de su pieza**: 55, 68, 76, 88, 92, 132 y 137. Se responden tal como están escritas, sin esconder lo que se aceptó.
-- **Básicas [B]**: las 53 del banco, igual que los otros dos.
+- **Avanzadas [A]**: 56, 58, 59, 60, 61, 63, 64, 65, 66, 67, 73, 74, 75, 77, 78, 79, 80, 81, 83, 87, 89, 90, 91, 93, 94, 95, 128, 129, 131, 134 y 136; de R3 (sección 14 del banco): 176 (por qué cuatro hilos y no uno) y 179 (cómo se verificó el programa).
+- **Incómodas [I] de su pieza**: 55, 68, 76, 88, 92, 132 y 137. Se responden tal como están escritas, sin esconder lo que se aceptó. De R3: 177 (memoria al 94 % y plazo en 81 % del límite).
+- **Básicas [B]**: las 57 del banco (las 4 de R3 son la 157, 158, 160 y 170), igual que los otros dos.
 
 ## 5. Lo que tiene que saber de las piezas de los otros
 

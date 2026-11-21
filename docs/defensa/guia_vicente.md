@@ -11,6 +11,7 @@ Según `docs/defensa/plan_estudio.md`, sección 2, Vicente es dueño de **el alg
 3. `docs/trade_s.md` y `docs/defensa/espino_base.md`, sección 5: punto fijo, multiplicar por 32 con sumas, dividir leyendo un byte, sin saltos que dependan del precio.
 4. `docs/codiseno.md`: la tabla de variantes, Amdahl medido contra predicho, la escalera de la clase 7 y el roofline.
 5. `docs/defensa/cifras.md`, sección del algoritmo.
+6. `docs/defensa/c1.md`, secciones 1, 2, 4, 5, 6 y 8: de dónde salen las tablas (modelo de paseo condicionado y programación dinámica, `ref/c1/paseo.py` y `tablas.py`), la aritmética sin multiplicar, el examen de la exploración y por qué la nota esperada no sube.
 
 ## 2. Lo que tiene que poder dibujar sin mirar
 
@@ -32,9 +33,9 @@ Según `docs/defensa/plan_estudio.md`, sección 2, Vicente es dueño de **el alg
 
 ## 4. Preguntas del banco que responde en profundidad
 
-- **Avanzadas [A]**: 13, 14, 15, 19, 20, 22, 27, 28, 29, 30, 31, 33, 35, 40, 41, 43, 47, 48, 141, 142 y 146.
-- **Incómodas [I] de su pieza**: 12, 18, 23, 24, 25, 26, 34, 145 y **156** (por qué no usaron la regla que da 40 957). La 156 cambia según lo que decida Nicolás sobre `zscore`: hay que repasarla después de esa decisión.
-- **Básicas [B]**: las 53 del banco.
+- **Avanzadas [A]**: 13, 14, 15, 19, 20, 22, 27, 28, 29, 30, 31, 33, 35, 40, 41, 43, 47, 48, 141, 142 y 146; de R3 (sección 14 del banco): 163 (el clon y la ventaja D), 165 (órdenes sin multiplicar), 166 (la división de la media posición), 167 (clase de volatilidad) y 169 (de dónde salen los umbrales).
+- **Incómodas [I] de su pieza**: 12, 18, 23, 24, 25, 26, 34, 145 y **156** (por qué no usaron la regla que da 40 957). La 156 cambia según lo que decida Nicolás sobre `zscore`: hay que repasarla después de esa decisión. De R3: 159 (si no sube la nota, por qué), 168 (no hay precios en la tabla), 173 (el candado es para siempre), 174 (cuánto es suerte), 175 (constantes elegidas mirando datos) y 183 (rival igual o distinto).
+- **Básicas [B]**: las 57 del banco (las 4 de R3 son la 157, 158, 160 y 170).
 
 ## 5. Lo que tiene que saber de las piezas de los otros
 

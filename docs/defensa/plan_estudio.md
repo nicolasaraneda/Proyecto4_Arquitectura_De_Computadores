@@ -25,9 +25,9 @@ La propuesta del encargo (Nicolás el RTL y la verificación, Vicente el algorit
 
 | Persona | Dueño de | Documentos de estudio | Preguntas del banco que responde en profundidad |
 |---------|----------|-----------------------|--------------------------------------------------|
-| Nicolás | Espino base, segmentado, barrel, extensión de la ISA, verificación (formal, mutaciones, gemelo, puertas) | `espino_base.md`, `segmentado.md`, `barrel.md`, `extension.md`, `verificacion.md`; fuentes `docs/espino_*.md`, `docs/extension_isa.md`, `docs/gemelo.md`, `docs/puertas.md` | Secciones 4, 5, 6, 7 y 10 (50 a 96 y 126 a 137) |
-| Vicente | Algoritmo, protocolo de evaluación, `sw/trade.s`, co-diseño (variantes, Amdahl, roofline, PLL, ASIC) | `algoritmo.md`, `espino_base.md` (sección 5); fuentes `docs/algoritmo.md`, `docs/protocolo.md`, `docs/trade_s.md`, `docs/codiseno.md` | Secciones 2, 3 y 11 (11 a 49 y 138 a 146) |
-| Santiago | `sw/fondo.s` (supervisor, gestores, memoria compartida, degradación), tabla, `icebram` y moldes, vigilante y relevo, operación del 26/11 y del 1/12 (medidor, árbol, checklists, `retune`) | `fondo.md`, `tabla_vigilante.md`; fuentes `docs/fondo.md`, `docs/tabla_vigilante.md`, `docs/contingencia.md`, `docs/arbol_decision.md`, `docs/checklist_26nov.md`, `docs/checklist_1dic.md` | Secciones 1, 8, 9 y 12 (1 a 10, 97 a 125 y 147 a 155) |
+| Nicolás | Espino base, segmentado, barrel, extensión de la ISA, verificación (formal, mutaciones, gemelo, puertas) | `espino_base.md`, `segmentado.md`, `barrel.md`, `extension.md`, `verificacion.md`; fuentes `docs/espino_*.md`, `docs/extension_isa.md`, `docs/gemelo.md`, `docs/puertas.md` | Secciones 4, 5, 6, 7 y 10 (50 a 96 y 126 a 137), y de la 14 la 176, 177 y 179 |
+| Vicente | Algoritmo, protocolo de evaluación, `sw/trade.s`, co-diseño (variantes, Amdahl, roofline, PLL, ASIC) | `algoritmo.md`, `espino_base.md` (sección 5); fuentes `docs/algoritmo.md`, `docs/protocolo.md`, `docs/trade_s.md`, `docs/codiseno.md` | Secciones 2, 3 y 11 (11 a 49 y 138 a 146), y de la 14 la 159, 163, 165 a 169, 173 a 175 y 183 |
+| Santiago | `sw/fondo.s` (supervisor, gestores, memoria compartida, degradación), tabla, `icebram` y moldes, vigilante y relevo, operación del 26/11 y del 1/12 (medidor, árbol, checklists, `retune`) | `fondo.md`, `tabla_vigilante.md`; fuentes `docs/fondo.md`, `docs/tabla_vigilante.md`, `docs/contingencia.md`, `docs/arbol_decision.md`, `docs/checklist_26nov.md`, `docs/checklist_1dic.md` | Secciones 1, 8, 9 y 12 (1 a 10, 97 a 125 y 147 a 155), y de la 14 la 161, 162, 164, 171, 172, 178 y 180 a 182 |
 
 "Dueño" quiere decir: responde cualquier pregunta [A] de su pieza con el `archivo:línea` en la mano, y es quien contesta primero si la pregunta va dirigida al grupo.
 
@@ -35,7 +35,7 @@ La propuesta del encargo (Nicolás el RTL y la verificación, Vicente el algorit
 
 Sin mirar nada, cada uno de los tres:
 
-1. **Las preguntas [B] y [I] de todo el banco.** Son 77 de las 155: 53 [B] y 24 [I]. Las [I] tienen respuestas ya escritas: hay que decirlas así, sin esconder lo que se aceptó a sabiendas.
+1. **Las preguntas [B] y [I] de todo el banco.** Son 91 de las 183: 57 [B] y 34 [I]. Las [I] tienen respuestas ya escritas: hay que decirlas así, sin esconder lo que se aceptó a sabiendas.
 2. **El recorrido completo de un tick**: la maestra baja `CS_n` y manda el precio; `byte_done`; el programa sale del sondeo, lee `PRICE`, calcula `dev`, decide sin saltos, escribe `DECISION` una vez; el byte sale en la transacción siguiente y la maestra lo ejecuta al precio de ese tick. En R0 (`sw/trade.s:91` a `:129`) y en R1 (supervisor, gestores y votos, `docs/defensa/fondo.md`, sección 3).
 3. **La escalera R0, R1 y R2**, qué hardware tiene cada peldaño y el árbol de decisión del 1/12 (`docs/arbol_decision.md`).
 4. **La ley de hierro aplicada a cada pieza**: segmentado y barrel atacan el CPI, la extensión el IC, el PLL atacaría Tclk y no existe en el VQ100.
@@ -63,7 +63,7 @@ Cada sesión de repaso cruzado dura una hora: cada uno pregunta al otro sobre **
 
 Simula la defensa. Unos 45 minutos.
 
-1. Se sortean 30 números entre 1 y 155 (por ejemplo, `python3 -c "import random; print(sorted(random.sample(range(1, 156), 30)))"`). Se fuerza que entren al menos 8 de las [I].
+1. Se sortean 30 números entre 1 y 183 (por ejemplo, `python3 -c "import random; print(sorted(random.sample(range(1, 184), 30)))"`). Se fuerza que entren al menos 8 de las [I].
 2. Para cada número, se sortea quién responde entre los tres, **excluyendo al dueño de la pieza** en dos de cada tres preguntas. El enunciado exige que cualquiera responda cualquier parte.
 3. 20 segundos para responder, con el dato y, si se puede, el archivo. Sin mirar.
 4. Los otros dos anotan: bien, incompleta (faltó el dato o la fuente), mal.

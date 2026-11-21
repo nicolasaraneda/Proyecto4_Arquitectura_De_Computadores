@@ -684,3 +684,115 @@ Dato: `docs/contingencia.md:82`, `docs/decisiones.md:595`.
 **156. [I] ¿Por qué no usaron la regla que da 40 957 en la práctica?**
 Porque 40 957 es el resultado en la misma serie con que se eligieron sus parámetros, compuesto sobre 20 000 ticks: en los 10 bloques de 2000 la ventaja sobre `max_media` es +346 +- 321 por bloque, un error, y su vecino a 2,75 desviaciones da 22 421 en la misma serie. Con el criterio que fijamos antes de medir (remuestreos de trozos de 100 ticks y el modelo calibrado, con una semilla reservada) pierde 0,09 puntos por ronda. Lo que no ocultamos: con trozos de 250 ticks o más, y eligiendo los parámetros en una mitad de la práctica para probarlos en la otra, `zscore` gana; en series del modelo, no. Depende de si la serie oculta se parece a la práctica en escalas de cientos de ticks, y eso no se sabe. La decisión y su razón están en `docs/decisiones.md` (T129 y siguientes).
 Dato: `docs/zscore.md:101` (largo del trozo), `:131` (las dos lecturas) y `:142` (la grilla en la práctica); `docs/mediciones/zscore/trozos.txt`, `reservada_s4.txt`.
+
+## 14. R3: C1 en los cuatro hilos
+
+Se agregó el 21/11. Las preguntas salen de `docs/defensa/c1.md` (documento de estudio de la pieza) y de `docs/puertas.md`, sección "R3". Los números de línea son los de `sw/c1.s` del bitstream congelado.
+
+**157. [B] ¿Qué es R3 y en qué se diferencia de R2?**
+Es el cuarto peldaño de la escalera. Mismo hardware que R2 (barrel con `emad` y `devk`, vigilante) más una tabla de 512 palabras en vez de 256, y otro programa: `sw/c1.s` en lugar de `sw/fondo.s`. La imagen de respaldo sigue siendo R0 con la banda 40. Cuesta 1038 celdas y 14 bloques de memoria contra 1015 y 13 de R2.
+Dato: `docs/puertas.md`, sección "R3" (tabla de recursos); `rtl/pochoco_tabla512.v`.
+
+**158. [B] ¿Qué agrega C1 a la banda 40?**
+Tres piezas. Una apuesta de media posición en la fase A (antes de ver los dos extremos), un motor que decide con una política calculada por programación dinámica, y un candado que copia a la banda 40 cuando la ventaja sobre un clon de la banda 40 llega a 100. Es un desempate: la banda 40 más intentos de quedar un poco arriba, y volver a copiarla cuando se logra.
+Dato: `docs/defensa/c1.md`, secciones 1 y 2.
+
+**159. [I] ¿Por qué complicar la banda 40 si C1 no sube la nota?**
+No la sube: en la exploración la nota esperada con C1 fue entre 0,003 y 0,006 menor que con la banda 40 sola. Lo que cambia es con qué frecuencia se gana un mano a mano: 81,8 % de los torneos contra 45,7 %, porque rompe los empates que la banda 40 deja contra rivales que corren lo mismo. Se paga con más derrotas (nd baja de 90,4 a 83,3). Se aceptó a sabiendas, como en la pregunta 3.
+Dato: `docs/defensa/c1.md`, secciones 1 y 8.1.
+
+**160. [B] ¿Qué hace cada hilo de `sw/c1.s`?**
+El hilo 0 lee el precio, calcula la banda 40, espera la política con plazo y escribe `DECISION` una vez por tick: es el único que toca el SPI. El hilo 1 mide la volatilidad y el reloj de los tramos. El hilo 2 lee la celda de la tabla y la compara con el precio. El hilo 3 ejecuta las órdenes propia y del clon, calcula la ventaja D, lleva los modos y arma el byte de la política.
+Dato: `sw/c1.s:87` a `:179` (hilo 0), `:191` a `:314` (1), `:322` a `:383` (2), `:390` a `:530` (3).
+
+**161. [A] ¿Cómo se pasan los datos entre hilos y cómo se detecta un dato viejo?**
+Por memoria compartida, con una sola escritora por palabra (`D_PUB`, `D_REG`, `D_TAB`, `D_POL`, `D_ORD`). Todo lo publicado lleva el número de tick en los bits 31:8, y quien espera relee hasta ver el tick actual. Una escritura de palabra es atómica, así que no hacen falta candados. El testbench vigila las dos reglas en todas las corridas y no hubo violaciones.
+Dato: `docs/defensa/c1.md`, sección 3; `sw/c1.s:668` en adelante (palabras compartidas).
+
+**162. [A] ¿Cómo es la máquina de modos?**
+Tres modos sin vuelta atrás: fase A, motor (desde el primer extremo, el 100 o el 255) y candado (cuando D llega a 100). Si la apuesta de la fase A ya ganó 100 al llegar al primer extremo, pasa directo al candado. En el candado el byte de la política es el que publicó el hilo 0 con la banda 40.
+Dato: `sw/c1.s:430` a `:447`, `docs/defensa/c1.md`, sección 4.
+
+**163. [A] ¿Cómo saben cuánto tiene el rival?**
+No lo saben. El hilo 3 lleva dos cuentas con la contabilidad oficial (caja 10 000, comisión 5): la propia, con el byte que realmente escribió el hilo 0, y la de un clon que opera la banda 40 pura. D es el patrimonio propio menos el del clon, y el candado se decide con ese D. Si el rival real hace otra cosa, el candado se decide igual contra el clon.
+Dato: `sw/c1.s:390` a `:447`, `docs/defensa/c1.md`, sección 4.
+
+**164. [I] ¿Qué pasa si la comisión no es 5 o la caja inicial no es 10 000?**
+Las dos cuentas quedan mal y el candado puede cerrar donde no debe: es la dependencia más delicada de C1. La banda 40 no la tiene. Por eso el 26/11 se compara la cuenta emulada, que se lee en los 7 segmentos, con la pantalla de la maestra, y la regla de Nicolás dice que si no calza compite la banda 40.
+Dato: `docs/c1_dia_de_prueba.md`, secciones 3 y 4.
+
+**165. [A] ¿Cómo ejecutan una orden si no hay multiplicador ni desplazador completo?**
+Con los múltiplos p, 2p, 4p, 8p, 16p y 32p (cinco sumas por tick). Se resta del saldo de mayor a menor mientras quede cantidad y alcance, y lo que queda es la caja nueva. No hace falta dividir. El producto de D (acciones por precio) se hace duplicando y sumando sobre los 8 bits del precio.
+Dato: `sw/c1.s:541` (`ejecutar`) y `:620` (`producto`).
+
+**166. [A] ¿Cómo dividen para la media posición?**
+Es la única división del programa: el objetivo floor(patrimonio / 2p) se calcula con 9 pasos de resta y comparación, una vez al entrar. El hilo 3 la adelanta en cada tick de la fase A sin posición, antes de esperar al hilo 2, porque si no, al coincidir con un tick lento del hilo 1 el byte llegaba pasado el plazo y se usaba el respaldo (se vio en 3 de 40 ventanas).
+Dato: `sw/c1.s:449` a `:472`, `docs/bitacora/c1.md` (tiempos, vuelta 3).
+
+**167. [A] ¿Qué es la clase de volatilidad y para qué tiene histéresis?**
+Es S2 / t, la suma de diferencias al cuadrado sobre los ticks transcurridos, clasificada en ocho valores (de 1/8 a 2) para elegir la fila de la tabla. Se calcula sin dividir: se compara 64 S2 contra siete sumas que crecen una constante por tick. La histéresis de 64 ticks evita que la clase salte entre dos valores vecinos. Se usa desde el tick 390.
+Dato: `sw/c1.s:257`, `docs/defensa/c1.md`, secciones 5 y 6.
+
+**168. [I] ¿Guardan precios o series dentro de la tabla? ¿Eso cumple la regla del enunciado?**
+No hay ningún precio de ninguna serie. Los umbrales los calcula un script (`ref/c1/tablas.py`) desde un modelo matemático: paseo aleatorio condicionado a mínimo 100 y máximo 255 en 20 000 ticks. Entran la varianza, el largo, los extremos y el costo de la comisión. `make c1-generar` los recalcula desde cero y comprueba que son los de la placa. La memoria es de solo lectura y no decide: decide el procesador.
+Dato: `docs/defensa/c1.md`, sección 6; `ref/c1/paseo.py`, `ref/c1/tablas.py`.
+
+**169. [A] ¿De dónde salen los umbrales?**
+Para cada tiempo restante y precio se calcula por recurrencia hacia atrás la probabilidad de que el 255 llegue antes que el 100. Con programación dinámica se saca la política que maximiza el patrimonio esperado en logaritmo pagando comisión, y se comprime a un umbral por celda: 8 clases por 16 tramos de 1250 ticks en la fase A, y 3 fases por 8 clases por 8 tramos de 2500 en el motor. Son 320 celdas de 2 bytes, 640 bytes. Recalculadas desde cero dieron 0 celdas distintas de las de la exploración.
+Dato: `docs/defensa/c1.md`, sección 6; `docs/bitacora/c1.md` (Tablas).
+
+**170. [B] ¿La tabla decide? ¿Cómo se apaga la política?**
+No decide: es una memoria de solo lectura y el procesador compara y decide. Con la palabra `POLITICA` de la tabla en 0 el hilo 0 parte en modo seguro y decide la banda 40 exacta. Con la política apagada R3 dio los mismos bytes que R2 en 46 corridas por el RTL y en 203 series del gemelo.
+Dato: `sw/c1.s:94` y `:95`, `docs/puertas.md`, sección "R3", puerta a.
+
+**171. [A] ¿Qué pasa si se cuelga el hilo 1, 2 o 3?**
+El hilo 0 espera la política con un plazo de 28 vueltas. Pasado el plazo, si el byte es del tick anterior sostiene la orden si era completa (comprar 63 o vender 63) y mantiene si era parcial. Si es más viejo, entra a modo seguro: banda 40 sin política hasta el final de la ronda, con LED1 encendido. Se probó en 26 casos con la decisión siempre a tiempo, el peor en 907 ciclos de 1131.
+Dato: `sw/c1.s:151` a `:173`, `docs/mediciones/c1/degradacion.txt`.
+
+**172. [A] ¿Y si se cuelga el hilo 0?**
+Deja de escribir `DECISION` y el vigilante de R2 cuenta cinco precios sin respuesta. Entonces la placa se reconfigura con R0 y la banda 40, y MISO queda con pull-up (0xFF, mantener) durante la reconfiguración, unos 35,50 ms medidos. Se comprobó dentro del bitstream de R3: con el hilo 0 colgado en el tick 100, BOOT pide la imagen 01 al terminar la transacción 105.
+Dato: `docs/puertas.md`, criterio 8 de la puerta c de R3; `docs/c1_dia_de_prueba.md`, sección 7.
+
+**173. [I] ¿Por qué el candado es para siempre? ¿No pierden ganancias?**
+Copiando al clon las dos cuentas hacen las mismas órdenes y D casi no cambia (solo por lo que alcanza a comprar cada una). Volver a arriesgar la ventaja es lo que la exploración midió que no conviene. El costo está en el otro lado: en las rondas en que el 100 llega antes que el 255, el motor cierra el candado en la mitad y en la otra mitad queda unos 316 pesos abajo.
+Dato: `docs/defensa/c1.md`, secciones 4 y 8.1.
+
+**174. [I] ¿Cuánto del resultado de C1 es suerte?**
+La medida se fijó antes de mirar y se corrió una sola vez en 3600 ventanas de cinco empresas. g subió 36,1 puntos con error estándar de 2,4, así que no es ruido. nd bajó 7,1 con error estándar de 2,5 y el criterio era a lo más 8: se cumple por 0,9 puntos, menos que su error estándar, y hay que decirlo así. La nota esperada no cambia. Lo que no mide: el pronóstico de rivales es un supuesto.
+Dato: `docs/defensa/c1.md`, sección 8.1.
+
+**175. [I] ¿Las constantes 0,95 y 100 no son sobreajuste?**
+Son los dos parámetros que se eligieron mirando datos, y se eligieron con otras 100 acciones, no con las cinco empresas del examen ni con las series de práctica. Son parámetros como el 140 y el 215 de la banda. El tick 390 sale del diseño de la exploración (los minutos de un día de mercado) y las tablas salen del modelo, sin datos. Con eso no se descarta del todo el riesgo: la serie oculta puede no parecerse.
+Dato: `docs/defensa/c1.md`, sección 6.
+
+**176. [A] ¿Por qué cuatro hilos y no uno?**
+En un solo hilo del barrel el trabajo de los cuatro iría en serie: unas 470 instrucciones por tick en promedio y 700 en el peor, a 4 ciclos cada una, entre 1900 y 2800 ciclos. La ronda 3 da 2262 y la puerta pide la mitad (1131). Con cuatro hilos las dos cuentas, la volatilidad y la tabla avanzan en paralelo y el peor tick queda en 807 ciclos.
+Dato: `docs/defensa/c1.md`, sección 10, pregunta 9; `docs/puertas.md`, tabla de recursos de R3.
+
+**177. [I] ¿No están muy justos? Memoria al 94 % y el plazo en 81 % del límite.**
+Sí, y está dicho. El programa ocupa 482 de 512 palabras (quedan 30) y con un hilo colgado responde en 916 ciclos de 1131, el margen más chico del diseño. El sano responde en 779 a 807. Hay recortes de reserva documentados y no aplicados, porque cada cambio de `sw/c1.s` obliga a repetir todas las puertas. El período mínimo que soporta con holgura sube a unos 50 µs (R2: 13,5 µs).
+Dato: `docs/c1_plan.md`, sección 10; `docs/puertas.md`, tabla de recursos de R3.
+
+**178. [A] ¿Qué pasa con rondas seguidas sin reiniciar la placa?**
+C1 supone una ronda de 20 000 ticks contada desde el reset: el reloj de tramos, el modo (el candado no tiene vuelta) y las dos cuentas parten de cero solo ahí. Pasado el tick 20 000 R3 entra a modo seguro y decide la banda 40; no falla, pero ya no es C1. Por eso entre rondas se desconecta y se conecta el USB (decisión de Nicolás del 21/11).
+Dato: `sw/c1.s:94` (carga de `D_N_RONDA`) y `:672`; `docs/c1_dia_de_prueba.md`, sección 2.
+
+**179. [A] ¿Cómo saben que el programa hace lo que midieron en Python?**
+Por capas. La referencia entera da los mismos bytes que el C1 de la exploración en 2400 ventanas (48 millones de bytes). El programa da los mismos bytes y el mismo estado que la referencia en 4,14 millones de ticks por el RTL y en 12,18 millones en el gemelo a los tres períodos. Además: 4/4 en el testbench oficial, 27 mutaciones detectadas en el core, 26 de 26 de degradación, 25 de 25 controles negativos y el bitstream ruteado simulado por los pines.
+Dato: `docs/puertas.md`, sección "R3"; `docs/bitacora/c1.md`.
+
+**180. [A] ¿Qué prueba la autoprueba de R3 en la placa y qué no?**
+Un bitstream aparte con el mismo SoC y el mismo programa más una maestra interna que manda 2000 precios y acumula una firma de las decisiones. La esperada es `984c` ("4C" en los 7 segmentos y "98" con SW4); si la placa decidiera la banda 40 daría `a639`. No ejercita la apuesta de la fase A (la caminata se mueve en todos los ticks y la tabla nunca apuesta) ni los cables con la maestra externa. Costó 1208 celdas.
+Dato: `docs/c1_dia_de_prueba.md`, sección 9; `tools/autoprueba.py`.
+
+**181. [A] ¿Qué muestra la telemetría de R3 y cuál es su límite?**
+Los 7 segmentos muestran un byte de las cuentas emuladas, elegido con los cuatro botones: patrimonio, modo, caja, acciones y caja del clon. Sirve para comparar con la pantalla de la maestra. El límite: el programa lee los botones y escribe el display una vez por tick, así que al terminar la ronda queda congelado en el byte que elegían los botones en el último precio. Sin tocar nada se ve el byte bajo del patrimonio. Nicolás decidió dejarlo así para no tocar el bitstream congelado.
+Dato: `sw/c1.s:519` a `:529`, `docs/c1_dia_de_prueba.md`, sección 3; `docs/bitacora/c1.md`, cuarta parte.
+
+**182. [I] ¿R3 usa hardware que no pasó por la maestra real? ¿Quién decide si compite?**
+Sí: la tabla de 512 palabras es hardware nuevo y no estuvo el 18/11. Solo compite si pasa la prueba del 26/11 y la decisión es de Nicolás. Si la caja o el patrimonio no calzan con la pantalla, o algo falla, compite la banda 40 (R2 o R0). Por eso R3 queda sobre los otros peldaños en la escalera y no en lugar de ellos: R0, R1 y R2 siguen intactos y con sus bitstreams.
+Dato: `docs/c1_dia_de_prueba.md`, encabezado y sección 2; `docs/defensa/c1.md`, sección 9.
+
+**183. [I] ¿Qué pasa si el rival corre exactamente la banda 40, o algo distinto?**
+Contra un clon exacto de la banda 40, C1 queda debajo en 16,6 % de los torneos: es el costo de arriesgar una apuesta que el rival no hace. Contra otros rivales el candado igual se decide con el clon y no con el rival real, así que la ventaja D es una estimación. El examen sorteó rivales (extremos puros, la regla de Fila 5 y bandas de 30 a 60) y ese pronóstico de quién es el rival es un supuesto que no se puede verificar antes de la competencia.
+Dato: `docs/defensa/c1.md`, sección 8.1.
