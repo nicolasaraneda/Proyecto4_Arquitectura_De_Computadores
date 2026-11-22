@@ -13,7 +13,7 @@ Estos documentos **resumen y ordenan** los documentos de estudio de `docs/`, que
 | `resumen.md` | Una página: qué compite y por qué, la escalera R0, R1 y R2, qué está probado y qué falta, qué leer primero |
 | `cifras.md` | Las cifras que hay que saber de memoria, cada una con su fuente |
 | `plan_estudio.md` | Quién domina qué, qué deben poder explicar los tres, calendario de repasos hasta el 1/12 y el ensayo con preguntas al azar |
-| `preguntas.md` | Banco de 183 preguntas con respuesta corta y `archivo:línea`, agrupadas por pieza, con las incómodas marcadas **[I]** |
+| `preguntas.md` | Banco de 185 preguntas con respuesta corta y `archivo:línea`, agrupadas por pieza, con las incómodas marcadas **[I]** |
 | `espino_base.md` | El core del curso: las dos fases de cada instrucción, CPI de 2 más load y salto tomado, banco de registros síncrono, el SoC, cómo se mide, el tick de R0 |
 | `segmentado.md` | El pipeline de 3 etapas: lectura en el flanco de bajada, adelantamiento, riesgos, contra lo que estimó la clase |
 | `barrel.md` | Cuatro hilos por cuatro etapas: por qué no hay riesgos, dónde viven los contextos, qué cuesta en latencia |

@@ -35,7 +35,7 @@ Según `docs/defensa/plan_estudio.md`, sección 2, Nicolás es dueño de **los p
 ## 4. Preguntas del banco que responde en profundidad
 
 - **Avanzadas [A]**: 56, 58, 59, 60, 61, 63, 64, 65, 66, 67, 73, 74, 75, 77, 78, 79, 80, 81, 83, 87, 89, 90, 91, 93, 94, 95, 128, 129, 131, 134 y 136; de R3 (sección 14 del banco): 176 (por qué cuatro hilos y no uno) y 179 (cómo se verificó el programa).
-- **Incómodas [I] de su pieza**: 55, 68, 76, 88, 92, 132 y 137. Se responden tal como están escritas, sin esconder lo que se aceptó. De R3: 177 (memoria al 94 % y plazo en 81 % del límite).
+- **Incómodas [I] de su pieza**: 55, 68, 76, 88, 92, 132 y 137. Se responden tal como están escritas, sin esconder lo que se aceptó. De R3: 177 (memoria al 94 % y plazo en 81 % del límite). De la sección 15: 184 y 185 (por qué compiten con la variante más lenta, R2 y R3).
 - **Básicas [B]**: las 57 del banco (las 4 de R3 son la 157, 158, 160 y 170), igual que los otros dos.
 
 ## 5. Lo que tiene que saber de las piezas de los otros
