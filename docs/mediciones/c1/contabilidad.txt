@@ -1,0 +1,49 @@
+Contabilidad de la maestra contra la que emula R3 (sw/c1.s y ref/c1/c1.py)
+Generado por tools/c1/contabilidad.py (make c1-contabilidad). No editar a mano.
+
+Commit de partida: bafbe99. Icarus Verilog version 14.0 (devel) (s20260301-403-g5ab23063f-dirty)
+tb/tb_proyecto_4.sv sha256 f83486755fe2b3de...
+sw/c1.s sha256 353f6806d5482d14...
+ref/c1/c1.py sha256 d51bb29c38227a6a...
+ref/market.py sha256 de8a73605f164042...
+
+1. La tarea `ejecutar` del testbench oficial contra las tres copias
+Rutina `ejecutar` de sw/c1.s (62 palabras) idéntica, salvo la dirección absoluta de D_COM, a la del ensamblado de sw/c1.s desde la palabra 349: sí
+
+Comisión 0: 2272080 vectores (byte, precio, caja, acciones) por la tarea del testbench oficial, ref/market.py, ref/c1/c1.py y la rutina ensamblada
+  ref/market.py contra el testbench: 0 diferencias
+  ref/c1/c1.py `ejecutar` contra el testbench: 459137 diferencias:
+    byte con las dos acciones en 1: 459137; ejemplo (byte, precio, caja, acciones; testbench; este) = (193, 1, 1, 0, (1, 0), (0, 1))
+  sw/c1.s `ejecutar` ensamblado contra el testbench: 459137 diferencias:
+    byte con las dos acciones en 1: 459137; ejemplo (byte, precio, caja, acciones; testbench; este) = (193, 1, 1, 0, (1, 0), (0, 1))
+  dentro de lo que la competencia puede producir (precio de 100 a 255, byte sin acción 11): 1061040 vectores; diferencias: market.py 0, ref/c1/c1.py 0, sw/c1.s 0
+
+Comisión 5: 2285680 vectores (byte, precio, caja, acciones) por la tarea del testbench oficial, ref/market.py, ref/c1/c1.py y la rutina ensamblada
+  ref/market.py contra el testbench: 0 diferencias
+  ref/c1/c1.py `ejecutar` contra el testbench: 459137 diferencias:
+    byte con las dos acciones en 1: 458882; ejemplo (byte, precio, caja, acciones; testbench; este) = (193, 1, 6, 0, (6, 0), (0, 1))
+    venta que no cubre la comision: 255; ejemplo (byte, precio, caja, acciones; testbench; este) = (129, 1, 0, 1, (0, 1), (-4, 0))
+  sw/c1.s `ejecutar` ensamblado contra el testbench: 459137 diferencias:
+    byte con las dos acciones en 1: 458882; ejemplo (byte, precio, caja, acciones; testbench; este) = (193, 1, 6, 0, (6, 0), (0, 1))
+    venta que no cubre la comision: 255; ejemplo (byte, precio, caja, acciones; testbench; este) = (129, 1, 0, 1, (0, 1), (-4, 0))
+  dentro de lo que la competencia puede producir (precio de 100 a 255, byte sin acción 11): 1060961 vectores; diferencias: market.py 0, ref/c1/c1.py 0, sw/c1.s 0
+
+Comisión 50: 2394480 vectores (byte, precio, caja, acciones) por la tarea del testbench oficial, ref/market.py, ref/c1/c1.py y la rutina ensamblada
+  ref/market.py contra el testbench: 0 diferencias
+  ref/c1/c1.py `ejecutar` contra el testbench: 466633 diferencias:
+    byte con las dos acciones en 1: 451835; ejemplo (byte, precio, caja, acciones; testbench; este) = (193, 1, 51, 0, (51, 0), (0, 1))
+    venta que no cubre la comision: 14798; ejemplo (byte, precio, caja, acciones; testbench; este) = (129, 1, 0, 1, (0, 1), (-49, 0))
+  sw/c1.s `ejecutar` ensamblado contra el testbench: 466633 diferencias:
+    byte con las dos acciones en 1: 451835; ejemplo (byte, precio, caja, acciones; testbench; este) = (193, 1, 51, 0, (51, 0), (0, 1))
+    venta que no cubre la comision: 14798; ejemplo (byte, precio, caja, acciones; testbench; este) = (129, 1, 0, 1, (0, 1), (-49, 0))
+  dentro de lo que la competencia puede producir (precio de 100 a 255, byte sin acción 11): 1069226 vectores; diferencias: market.py 0, ref/c1/c1.py 0, sw/c1.s 0
+
+2. Tick a tick: la cuenta que emula ref/c1/c1.py contra la de la maestra (ref/market.py)
+
+data/practica_meta.csv: 1 series; 1 con apuesta de la fase A, 1 órdenes parciales, 6 órdenes de la maestra; ticks con diferencia entre la cuenta emulada y la maestra: 0
+tb/practica.csv: 1 series; 0 con apuesta de la fase A, 0 órdenes parciales, 2 órdenes de la maestra; ticks con diferencia entre la cuenta emulada y la maestra: 0
+sintéticas (14 familias de ref/series.py, normalizadas, 20 000 ticks): 350 series; 42 con apuesta de la fase A, 57 órdenes parciales, 18409 órdenes de la maestra; ticks con diferencia entre la cuenta emulada y la maestra: 0
+otras acciones (110, ventanas de 20 000 minutos normalizadas, $P4_DATOS/otras): 2200 series; 587 con apuesta de la fase A, 661 órdenes parciales, 14322 órdenes de la maestra; ticks con diferencia entre la cuenta emulada y la maestra: 0
+cinco empresas (ventanas de 20 000 minutos normalizadas, $P4_DATOS/minuto): 500 series; 128 con apuesta de la fase A, 139 órdenes parciales, 3152 órdenes de la maestra; ticks con diferencia entre la cuenta emulada y la maestra: 0
+
+PASS: 0 comprobaciones falladas (97 s)

@@ -981,7 +981,7 @@ asic-barrel-imagen:
 # Decisión T151 (21/11): opción A, se construye. Las puertas están en tools/c1 y
 # su estado en docs/puertas.md. R0, R1 y R2 no cambian.
 .PHONY: c1-modelo c1-generar c1-contra-exploracion c1-sim c1-meta c1-timing c1-cosim c1-tb-tabla c1-puerta-a c1-puerta-b \
-        c1-oficial c1-series c1-fases c1-criterio5 c1-degradacion c1-controles c1-estres c1-ticks c1-bitstreams c1-puerta check-c1
+        c1-oficial c1-series c1-fases c1-criterio5 c1-degradacion c1-controles c1-estres c1-ticks c1-contabilidad c1-bitstreams c1-puerta check-c1
 C1_DEFS := -DESPINO_BARREL -DESPINO_XD_EMAD -DESPINO_XD_DEVK -DESPINO_TABLA -DESPINO_TABLA_512 -DESPINO_VIGILANTE
 C1_SIM  := $(BUILD)/c1/r3/obj/sim
 # Tablas desde el modelo del paseo normalizado (menos de 10 minutos la primera vez)
@@ -1041,6 +1041,11 @@ c1-estres:
 	JOBS=$(C1_JOBS) tools/c1/estres.sh
 c1-ticks:
 	tools/c1/ticks.sh
+# La contabilidad de la maestra contra la que emula R3 (unos 2 minutos): la tarea del
+# testbench oficial contra market.py, ref/c1/c1.py y la rutina de sw/c1.s ensamblada, y
+# la cuenta emulada contra la de la maestra tick a tick (docs/mediciones/c1/contabilidad.txt)
+c1-contabilidad:
+	$(PYTHON) tools/c1/contabilidad.py -o docs/mediciones/c1/contabilidad.txt
 # Criterio 8 y molde: síntesis de R3 y de su molde, icebram, simulación desde el
 # .asc, vigilante dentro del bitstream e imagen múltiple con R0 (unos 20 minutos)
 c1-bitstreams:

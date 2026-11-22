@@ -2,6 +2,16 @@
 
 Se actualiza al cerrar cada tramo de trabajo. La versión anterior queda en el historial de git.
 
+## Tramo 20: la contabilidad de la maestra contra la que emula R3, y el banco de preguntas (21/11, rama `c1`)
+
+**Qué quedó hecho.** Inventario de los testbenches de la maestra y del curso y comparación línea por línea de la contabilidad oficial con la de `ref/c1/c1.py` y `sw/c1.s` (`docs/bitacora/c1.md`, octava parte). Herramienta nueva `tools/c1/contabilidad.py` (`make c1-contabilidad`, 97 s, resultado en `docs/mediciones/c1/contabilidad.txt`). Preguntas 184 y 185 del banco ("por qué compiten con la variante más lenta", R2 y R3). No se tocó `rtl/`, `sw/` ni `bitstreams/`.
+
+**Qué se midió.** La tarea `ejecutar` del testbench oficial contra `market.py`, `c1.py` y la rutina ensamblada de `sw/c1.s`: 6,95 millones de vectores a comisión 0, 5 y 50, 0 diferencias dentro de lo que la competencia puede producir (precio de 100 a 255, byte sin acción 11). Las dos diferencias fuera de eso: el byte 11xxxxxx (el testbench mantiene, el programa compra, R3 no lo escribe) y la venta que no cubre la comisión (el testbench no la ejecuta, el programa sí). Tick a tick, la cuenta emulada contra la de la maestra en 3 052 series de 20 000 ticks: 0 diferencias, con la fase A apostando en 758 y 858 órdenes parciales.
+
+**Qué falta.** (1) El visto bueno de Nicolás para la corrida de R3 por el RTL contra el testbench oficial con un monitor de la cuenta emulada: 13 series (12 de otras acciones con apuesta y Meta) a 0,1, 1 y 10 ms, unos 25 minutos en 22 núcleos (4 minutos sin 10 ms); la propuesta y las series están en la bitácora. (2) El visto bueno del diff de `.github/workflows/ci.yml` (compilar el informe con `PELDANO_INFORME=r2`), sin commit. (3) Con la maestra real no se puede verificar: órdenes parciales, caja y comisión definitivas, ronda de 20 000 ticks.
+
+**Qué conviene después.** Aprobar o recortar la corrida (sin los 10 ms es de 4 minutos y el ritmo no entra en la contabilidad), y llevar al día de prueba la rutina de `docs/c1_dia_de_prueba.md`.
+
 ## Tramo 19: el informe pasa a la regla de cotas con banda 40 (21/11, rama `c1`)
 
 **Qué quedó hecho.** `informe/informe.tex` describe la regla de cotas con banda 40 (T154, T155): introducción, 3.1, 3.2 y 3.3. La tabla de 3.1 es la serie de práctica completa contra no operar y comprar y mantener; los bloques de 2000 ticks salieron del informe (`docs/mediciones/bloques_2000.txt`). R0 por tick vuelto a medir con la serie Meta. 3.3 medido con la regla de cotas en base, segmentado, barrel y R2 (`tools/p7/cotas.py`, `docs/mediciones/p7/cotas/`), con 11 operaciones útiles y la extensión `emad`/`devk` como alternativa evaluada sobre `max_media`. R3: IC, ciclos, CPI y perfil por hilo guardados (`docs/mediciones/c1/perfil_hilos.txt`). T153 resuelta.
