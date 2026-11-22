@@ -316,7 +316,7 @@ Un detalle del método. Con profundidad de inducción 6 la mutación `ctx_escrit
 
 ### 8.5 Lo que no está cubierto
 
-- **La placa y la maestra real.** Lo anterior es simulación. El 16/11, R2, que usa el barrel con `emad` y `devk`, pasó en la placa la firma a 0,1 ms y la media hora sin disparo del vigilante (`docs/mediciones/placa_16nov.md`). Faltan la firma de R2 a 1 ms y 10 ms, las tres firmas de R1 y la puerta de la maestra real (26/11).
+- **La placa y la maestra real.** Lo anterior es simulación. El 16/11, R2, que usa el barrel con `emad` y `devk`, pasó en la placa la firma a 0,1 ms y la media hora sin disparo del vigilante (`docs/mediciones/placa_16nov.md`). Faltan la firma de R2 a 1 ms y 10 ms, las tres firmas de R1 y la puerta de la maestra real (miércoles 25/11, por confirmar).
 - **Prueba formal de lo que calcula cada instrucción.** Las propiedades son de estructura. Que un `add` sume se apoya en la comparación contra el Espino base. No se corrió riscv-formal ni una equivalencia formal contra el base.
 - **El gemelo digital** modela el barrel desde P4 (`docs/gemelo.md`, sección 7).
 - **Cuatro hilos accediendo al SPI mientras llegan precios por los pines**, comparados contra el base. Ahí lo que ve cada hilo depende de cuál leyó `PRICE` primero y no hay un Espino base de referencia. Se cubre con el bus quieto, con un solo hilo en el SPI y en la comparación de netlist contra RTL.
@@ -338,7 +338,7 @@ Un detalle del método. Con profundidad de inducción 6 la mutación `ctx_escrit
 
 ## 10. Riesgos
 
-1. **La puerta de placa está incompleta y falta la maestra real.** El 16/11 R2, que usa el barrel con `emad` y `devk`, pasó en la placa la firma a 0,1 ms y la media hora sin disparo (`docs/mediciones/placa_16nov.md`); faltan la firma de R2 a 1 ms y 10 ms, las tres firmas de R1 y la prueba con la maestra el 26/11.
+1. **La puerta de placa está incompleta y falta la maestra real.** El 16/11 R2, que usa el barrel con `emad` y `devk`, pasó en la placa la firma a 0,1 ms y la media hora sin disparo (`docs/mediciones/placa_16nov.md`); faltan la firma de R2 a 1 ms y 10 ms, las tres firmas de R1 y la prueba con la maestra el miércoles 25/11, por confirmar.
 2. **Que cada instrucción calcula lo que debe está comprobado por simulación**, no por una prueba formal.
 3. **El software concurrente es más difícil que el hardware.** El core no tiene riesgos entre instrucciones, pero un programa con cuatro hilos sí puede tener carreras sobre la memoria compartida.
 4. **Un hilo ocioso desperdicia su turno.** Con un solo hilo con trabajo el barrel rinde menos que el base.

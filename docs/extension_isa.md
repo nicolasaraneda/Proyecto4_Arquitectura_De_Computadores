@@ -260,7 +260,7 @@ Riesgos:
 2. **k cableado en 5.** Si después del 25/11 el algoritmo necesitara otro alfa, el hardware no sirve y hay que volver a las sumas. El ensamblador rechaza cualquier otro k y el core lo trata como ilegal, así que no hay forma de ejecutar otro k en silencio.
 3. **Un programa con la extensión no corre en el base ni en el segmentado.** Ahí las instrucciones no hacen nada. Por eso el ensamblador exige `.extension xd`. R0 no usa la extensión.
 4. **El comando del encabezado del testbench oficial no lleva definiciones.** Compila el Espino base. Si R1 compite, el valor por defecto del SoC tiene que pasar a ser el barrel con la extensión (pendiente de P5, decisión T55).
-5. **La placa, en parte.** En la placa solo se comprobó R2 a 0,1 ms y la media hora sin disparo (16/11, `docs/mediciones/placa_16nov.md`). Todo lo que quiera competir pasa por la maestra el 26/11.
+5. **La placa, en parte.** En la placa solo se comprobó R2 a 0,1 ms y la media hora sin disparo (16/11, `docs/mediciones/placa_16nov.md`). Todo lo que quiera competir pasa por la maestra el miércoles 25/11, por confirmar.
 
 ## 11. Cómo reproducir
 

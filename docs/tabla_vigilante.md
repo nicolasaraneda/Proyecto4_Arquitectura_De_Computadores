@@ -187,7 +187,7 @@ Fuera de la puerta, en dos casos de exploración con períodos de 11,5 y 13,5 µ
 
 ## 8. Límites y lo que falta
 
-- **La puerta de placa está incompleta.** El 16/11 R2 pasó la firma a 0,1 ms y la media hora sin disparo, y el relevo se midió en 35,50 ms por la UART; faltan la firma de R2 a 1 ms y 10 ms, ver la imagen testigo después del relevo y las tres firmas de R1 (`docs/mediciones/placa_16nov.md`). La maestra real se prueba el 26/11.
+- **La puerta de placa está incompleta.** El 16/11 R2 pasó la firma a 0,1 ms y la media hora sin disparo, y el relevo se midió en 35,50 ms por la UART; faltan la firma de R2 a 1 ms y 10 ms, ver la imagen testigo después del relevo y las tres firmas de R1 (`docs/mediciones/placa_16nov.md`). La maestra real se prueba el miércoles 25/11, por confirmar.
 - **El tiempo de reconfiguración tiene una sola medición (35,50 ms) y el nivel de MISO durante el relevo no está medido.** De eso depende cuántos ticks se pierden y si la maestra realmente lee mantener.
 - **Reconfigurar durante una ronda está cubierto por la respuesta general del profesor** (16/11: cualquier decisión de diseño es válida), sin confirmación específica (T126). Si el ayudante lo prohibiera de forma explícita, R2 no compite y el titular es R1.
 - **El vigilante no cubre un programa que escribe basura.** Solo ve que se escribió `DECISION`, no qué se escribió. Es lo que pide la especificación: disparar por falla dura y nunca por una condición del algoritmo.

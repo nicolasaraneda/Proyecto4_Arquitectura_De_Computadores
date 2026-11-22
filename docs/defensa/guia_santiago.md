@@ -2,7 +2,7 @@
 
 Grupo: Nicolás Araneda, Vicente Calderón y Santiago Muñoz.
 
-Según `docs/defensa/plan_estudio.md`, sección 2, Santiago es dueño de **`sw/fondo.s` entero, la tabla y `icebram`, el vigilante y el relevo, y la operación del 26/11 y del 1/12** (medidor, registrador, árbol, checklists, `retune`). Acompaña a Nicolás el 26/11. En la presentación de 5 minutos dice el tercer bloque (`docs/defensa/guiones.md`).
+Según `docs/defensa/plan_estudio.md`, sección 2, Santiago es dueño de **`sw/fondo.s` entero, la tabla y `icebram`, el vigilante y el relevo, y la operación del miércoles 25/11, por confirmar y del 1/12** (medidor, registrador, árbol, checklists, `retune`). Acompaña a Nicolás el miércoles 25/11, por confirmar. En la presentación de 5 minutos dice el tercer bloque (`docs/defensa/guiones.md`).
 
 ## 1. Qué leer, en orden
 
@@ -48,7 +48,7 @@ Según `docs/defensa/plan_estudio.md`, sección 2, Santiago es dueño de **`sw/f
 |-------|-----|
 | Hasta el 18/11 | Puntos 1 a 3 de la sección 1 |
 | 21/11 | Prueba de práctica 1, respondida por Santiago |
-| 24/11 | Repaso de todas las [I]; ensayar el checklist del 26/11 paso por paso con la placa |
-| 26/11 | Maestra real: medidor, peldaños, registrador, relevo; anotar en la plantilla |
-| 27/11 | Agregar al banco lo que salga del 26/11 |
+| 24/11 | Repaso de todas las [I]; ensayar el checklist del miércoles 25/11, por confirmar paso por paso con la placa |
+| 25/11, por confirmar | Maestra real: medidor, peldaños, registrador, relevo; anotar en la plantilla |
+| 27/11 | Agregar al banco lo que salga del miércoles 25/11, por confirmar |
 | 30/11 | Guion de 5 minutos con cronómetro y prueba de práctica 2 |

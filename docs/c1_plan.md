@@ -169,7 +169,7 @@ Umbral pedido: 85 % de cada presupuesto.
 **Hardware.** C1 no cabe en el hardware de R2 sin tocarlo. Las celdas de las tablas son 640 bytes; la tabla de R2 tiene 252 palabras libres (504 bytes) y la memoria del programa ya está al 94 %. El cambio mínimo es duplicar la tabla: `rtl/pochoco_tabla512.v` (el mismo módulo con 512 palabras) y un `ifdef` en `rtl/pochoco_soc.v`. Sin la definición `ESPINO_TABLA_512` el SoC es texto idéntico al de antes y R0, R1 y R2 no cambian (comprobado con la síntesis). Lo que el cambio implica:
 
 - R3 no es "el molde de R2 más `icebram`". Es una síntesis nueva, con su propio molde (`bitstreams/moldes/r3_molde.asc.gz`), su temporización, su bitstream simulado por los pines y su imagen múltiple.
-- El hardware de R3 no es el que ya pasó por la maestra el 18/11. Para competir tiene que pasar la prueba del 26/11 por su cuenta. El core, el SPI y el vigilante son los mismos; cambia una memoria de solo lectura.
+- El hardware de R3 no es el que ya pasó por la maestra el 18/11. Para competir tiene que pasar la prueba del miércoles 25/11, por confirmar por su cuenta. El core, el SPI y el vigilante son los mismos; cambia una memoria de solo lectura.
 - La verificación del core (criterio 5) se repitió igual sobre el SoC de R3, y el gemelo del barrel se amplió a la tabla de 512 palabras y se validó contra el RTL.
 
 ## 10. Decisión y reserva de recortes

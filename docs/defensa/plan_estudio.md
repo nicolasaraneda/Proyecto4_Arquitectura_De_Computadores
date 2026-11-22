@@ -11,7 +11,7 @@ El enunciado dice que en la defensa "se harán preguntas sobre cualquier parte d
 | Lun 16/11 | Kit de defensa listo | Empieza la lectura individual |
 | Dom 22/11 | Fecha de corte del diseño integrado | Si R1 no tiene la puerta de simulación, R0 es el titular: el foco de la defensa cambia (sección 6) |
 | Mié 25/11 | Congelamiento del hardware, etiqueta `v-maestra-26nov` | Las cifras de hardware ya no cambian |
-| **Jue 26/11** | **Maestra real** | Se suman a la defensa los resultados de la placa y las respuestas del ayudante |
+| **Mié 25/11, por confirmar** | **Maestra real** | Se suman a la defensa los resultados de la placa y las respuestas del ayudante |
 | Dom 29/11 | Congelamiento total | Se regenera `cifras.md` si cambió algo; el banco queda fijo |
 | Lun 30/11 | Ensayo general de las rondas y de la defensa | Ensayo con preguntas al azar (sección 5) |
 | **Mar 1/12** | Entrega 10:00, competencia y defensa 10:30 | |
@@ -21,13 +21,13 @@ El enunciado dice que en la defensa "se harán preguntas sobre cualquier parte d
 La propuesta del encargo (Nicolás el RTL y la verificación, Vicente el algoritmo y el co-diseño, Santiago el fondo, el vigilante y la operación del día) se mantiene, con dos ajustes:
 
 1. **`sw/trade.s` pasa a Vicente.** El punto 3.2 del enunciado (assembly y mediciones por tick) está pegado al algoritmo: punto fijo, cómo se hace la división sin shifter, por qué no hay saltos que dependan del precio, y qué parte consume más ciclos, que es la entrada del perfil y de Amdahl del punto 3.3. Así Vicente cubre completos los puntos 3.1, 3.2 y 3.3 del informe.
-2. **`sw/fondo.s` es de Santiago entero**, incluido el assembly y no solo el protocolo. Y Santiago acompaña a Nicolás el 26/11: es el dueño de la operación del día y del árbol de decisión, y lo que se vea con la maestra es lo que va a tener que defender.
+2. **`sw/fondo.s` es de Santiago entero**, incluido el assembly y no solo el protocolo. Y Santiago acompaña a Nicolás el miércoles 25/11, por confirmar: es el dueño de la operación del día y del árbol de decisión, y lo que se vea con la maestra es lo que va a tener que defender.
 
 | Persona | Dueño de | Documentos de estudio | Preguntas del banco que responde en profundidad |
 |---------|----------|-----------------------|--------------------------------------------------|
 | Nicolás | Espino base, segmentado, barrel, extensión de la ISA, verificación (formal, mutaciones, gemelo, puertas) | `espino_base.md`, `segmentado.md`, `barrel.md`, `extension.md`, `verificacion.md`; fuentes `docs/espino_*.md`, `docs/extension_isa.md`, `docs/gemelo.md`, `docs/puertas.md` | Secciones 4, 5, 6, 7 y 10 (50 a 96 y 126 a 137), y de la 14 la 176, 177 y 179, y de la 15 la 184 y 185 |
 | Vicente | Algoritmo, protocolo de evaluación, `sw/trade.s`, co-diseño (variantes, Amdahl, roofline, PLL, ASIC) | `algoritmo.md`, `espino_base.md` (sección 5); fuentes `docs/algoritmo.md`, `docs/protocolo.md`, `docs/trade_s.md`, `docs/codiseno.md` | Secciones 2, 3 y 11 (11 a 49 y 138 a 146), y de la 14 la 159, 163, 165 a 169, 173 a 175 y 183 |
-| Santiago | `sw/fondo.s` (supervisor, gestores, memoria compartida, degradación), tabla, `icebram` y moldes, vigilante y relevo, operación del 26/11 y del 1/12 (medidor, árbol, checklists, `retune`) | `fondo.md`, `tabla_vigilante.md`; fuentes `docs/fondo.md`, `docs/tabla_vigilante.md`, `docs/contingencia.md`, `docs/arbol_decision.md`, `docs/checklist_26nov.md`, `docs/checklist_1dic.md` | Secciones 1, 8, 9 y 12 (1 a 10, 97 a 125 y 147 a 155), y de la 14 la 161, 162, 164, 171, 172, 178 y 180 a 182 |
+| Santiago | `sw/fondo.s` (supervisor, gestores, memoria compartida, degradación), tabla, `icebram` y moldes, vigilante y relevo, operación del miércoles 25/11, por confirmar y del 1/12 (medidor, árbol, checklists, `retune`) | `fondo.md`, `tabla_vigilante.md`; fuentes `docs/fondo.md`, `docs/tabla_vigilante.md`, `docs/contingencia.md`, `docs/arbol_decision.md`, `docs/checklist_26nov.md`, `docs/checklist_1dic.md` | Secciones 1, 8, 9 y 12 (1 a 10, 97 a 125 y 147 a 155), y de la 14 la 161, 162, 164, 171, 172, 178 y 180 a 182 |
 
 "Dueño" quiere decir: responde cualquier pregunta [A] de su pieza con el `archivo:línea` en la mano, y es quien contesta primero si la pregunta va dirigida al grupo.
 
@@ -40,7 +40,7 @@ Sin mirar nada, cada uno de los tres:
 3. **La escalera R0, R1 y R2**, qué hardware tiene cada peldaño y el árbol de decisión del 1/12 (`docs/arbol_decision.md`).
 4. **La ley de hierro aplicada a cada pieza**: segmentado y barrel atacan el CPI, la extensión el IC, el PLL atacaría Tclk y no existe en el VQ100.
 5. **Las cifras de `docs/defensa/cifras.md`** que están en negrita o que aparecen en las preguntas [B]: celdas y frecuencia de R0, R1 y R2; 41/44/49 y 223/443/444 ciclos; presupuestos 249 762, 24 762 y 2 262; 19,6 %; CPI 2, 1,350, 1 y 4; 25 973, 27 062, 6 497 y 10 000; +0,007 y -0,005; 0,7 % y 1,4 %; 35,50 ms medidos (53 de la hoja de datos) y 361 ticks; 110 y 115 kHz.
-6. **Qué está probado y qué no** (`docs/defensa/resumen.md`): la puerta de simulación completa en los tres peldaños; en la placa, R2 a 0,1 ms y media hora sin disparo, el relevo medido en 35,50 ms y la mitad baja de la firma de R0 (`docs/mediciones/placa_16nov.md`); la maestra real, el 26/11.
+6. **Qué está probado y qué no** (`docs/defensa/resumen.md`): la puerta de simulación completa en los tres peldaños; en la placa, R2 a 0,1 ms y media hora sin disparo, el relevo medido en 35,50 ms y la mitad baja de la firma de R0 (`docs/mediciones/placa_16nov.md`); la maestra real, el miércoles 25/11, por confirmar.
 
 ## 4. Calendario de estudio
 
@@ -53,8 +53,8 @@ Cada sesión de repaso cruzado dura una hora: cada uno pregunta al otro sobre **
 | Jue 19 a sáb 21/11 | Cada uno lee los documentos de las otras dos piezas: Nicolás `algoritmo.md` y `fondo.md`; Vicente `barrel.md`, `extension.md` y `fondo.md`; Santiago `segmentado.md`, `extension.md` y `algoritmo.md` |
 | Sáb 21/11 | **Repaso 2**: secciones 2, 6 y 8 del banco, preguntadas cruzado (Nicolás pregunta algoritmo a Santiago, Santiago pregunta barrel a Vicente, Vicente pregunta fondo a Nicolás) |
 | Mar 24/11 | **Repaso 3**: secciones 5, 7, 9 y 10, cruzado. Todas las [I] del banco, una vez cada una, con los tres presentes |
-| Jue 26/11 | Maestra (Nicolás y Santiago). En la noche, Santiago anota en la plantilla del checklist lo visto y lo que respondió el ayudante |
-| Vie 27/11 | Se agregan al banco las preguntas que salgan del 26/11 (resultado de cada peldaño, SCLK medido, lo que diga el ayudante sobre el warm boot, si dice algo). Se ajusta la sección 6 de este plan si compite R0 |
+| Mié 25/11, por confirmar | Maestra (Nicolás y Santiago). En la noche, Santiago anota en la plantilla del checklist lo visto y lo que respondió el ayudante |
+| Vie 27/11 | Se agregan al banco las preguntas que salgan del miércoles 25/11, por confirmar (resultado de cada peldaño, SCLK medido, lo que diga el ayudante sobre el warm boot, si dice algo). Se ajusta la sección 6 de este plan si compite R0 |
 | Sáb 28/11 | **Repaso 4**: secciones 3, 11 y 12, cruzado. Repaso de `cifras.md` con tarjetas: uno dice la cifra, otro dice de dónde sale |
 | Dom 29/11 | Congelamiento. Cada uno relee las preguntas que anotó como falladas en los repasos |
 | **Lun 30/11** | **Ensayo general** (sección 5) |

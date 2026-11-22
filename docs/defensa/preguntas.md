@@ -36,7 +36,7 @@ La regla base de reversión a la media con el umbral de entrada en 3 unidades ba
 Dato: `sw/trade.s:64`, `docs/decisiones.md:335`.
 
 **6. [B] ¿Qué está probado y qué no?**
-R0, R1 y R2 pasaron los ocho criterios de la puerta de simulación. La puerta de placa está incompleta: el 16/11, en la placa, R2 pasó la firma a 0,1 ms y la media hora sin disparo, y el relevo se midió en 35,50 ms por la UART; R0 mostró a los tres períodos la mitad baja de su firma ("3C") y le falta la mitad alta ("A2"); faltan además las tres firmas de R1, la de R2 a 1 ms y 10 ms y ver la imagen testigo después del relevo (`docs/mediciones/placa_16nov.md`). Falta la puerta de la maestra real del 26/11.
+R0, R1 y R2 pasaron los ocho criterios de la puerta de simulación. La puerta de placa está incompleta: el 16/11, en la placa, R2 pasó la firma a 0,1 ms y la media hora sin disparo, y el relevo se midió en 35,50 ms por la UART; R0 mostró a los tres períodos la mitad baja de su firma ("3C") y le falta la mitad alta ("A2"); faltan además las tres firmas de R1, la de R2 a 1 ms y 10 ms y ver la imagen testigo después del relevo (`docs/mediciones/placa_16nov.md`). Falta la puerta de la maestra real del miércoles 25/11, por confirmar.
 Dato: `docs/puertas.md`, secciones de R0, R1 y R2 y "Puerta de placa"; `docs/mediciones/placa_16nov.md`.
 
 **7. [B] ¿Qué es la puerta de simulación?**
@@ -44,7 +44,7 @@ Ocho criterios: testbench oficial 4/4, equivalencia con la referencia, timing en
 Dato: `docs/puertas.md:17` a `:24`.
 
 **8. [A] ¿Qué compila el comando del encabezado del testbench oficial?**
-Sin definiciones compila R0. Si compite R1 o R2, `make peldano-fijar` agrega `rtl/00_peldano.v` con las definiciones (va primero en orden alfabético) y `sw/trade.s` pasa a ser `sw/fondo.s`. Está preparado y se ejecuta después del 26/11.
+Sin definiciones compila R0. Si compite R1 o R2, `make peldano-fijar` agrega `rtl/00_peldano.v` con las definiciones (va primero en orden alfabético) y `sw/trade.s` pasa a ser `sw/fondo.s`. Está preparado y se ejecuta después del miércoles 25/11, por confirmar.
 Dato: `docs/peldano.md`, sección "Cómo se hace".
 
 **9. [I] ¿Un Espino de cuatro hilos con instrucciones propias sigue siendo Espino?**
@@ -596,7 +596,7 @@ El SoC del peldaño con una maestra SPI dentro de la FPGA que manda 2000 precios
 Dato: `tools/autoprueba.py:61`, `docs/decisiones.md:532`.
 
 **137. [I] ¿Qué no está probado?**
-La puerta de placa está incompleta. El 16/11, en la placa, R2 pasó la firma a 0,1 ms y la media hora sin disparo, y el relevo se midió en 35,50 ms por la UART; R0 mostró a los tres períodos la mitad baja de su firma ("3C") y le falta la mitad alta ("A2"); faltan además las tres firmas de R1, la de R2 a 1 ms y 10 ms y ver la imagen testigo después del relevo (`docs/mediciones/placa_16nov.md`). El tiempo de reconfiguración tiene una sola medición de tres pedidas. Falta la maestra real el 26/11.
+La puerta de placa está incompleta. El 16/11, en la placa, R2 pasó la firma a 0,1 ms y la media hora sin disparo, y el relevo se midió en 35,50 ms por la UART; R0 mostró a los tres períodos la mitad baja de su firma ("3C") y le falta la mitad alta ("A2"); faltan además las tres firmas de R1, la de R2 a 1 ms y 10 ms y ver la imagen testigo después del relevo (`docs/mediciones/placa_16nov.md`). El tiempo de reconfiguración tiene una sola medición de tres pedidas. Falta la maestra real el miércoles 25/11, por confirmar.
 Dato: `docs/puertas.md`, sección "Puerta de placa"; `docs/mediciones/placa_16nov.md`.
 
 ---
@@ -648,7 +648,7 @@ Hasta 4 MHz todos los diseños responden igual. Hacia abajo, R1 responde a tiemp
 Dato: `docs/mediciones/fondo/r1/sclk_minimo.txt:51`, `docs/decisiones.md:613`.
 
 **148. [A] ¿Cómo sabrán el SCLK real?**
-Con el medidor del SPI: un bitstream aparte que escucha a la maestra y muestra en los 7 segmentos el período de SCLK, el período entre precios y los tiempos de `CS_n`. Se graba el 26/11 antes que los peldaños.
+Con el medidor del SPI: un bitstream aparte que escucha a la maestra y muestra en los 7 segmentos el período de SCLK, el período entre precios y los tiempos de `CS_n`. Se graba el miércoles 25/11, por confirmar antes que los peldaños.
 Dato: `rtl/medidor/medidor_spi.v:15`, `docs/decisiones.md:589`.
 
 **149. [A] ¿Cuál es el período mínimo que soporta cada peldaño?**
@@ -667,7 +667,7 @@ Dato: `docs/contingencia.md`, sección 2.
 El peldaño que dé el árbol, el inmediatamente inferior como respaldo 1 y R0 como respaldo 2; los juegos de contingencia solo si anuncian otra comisión.
 Dato: `docs/checklist_1dic.md:50`.
 
-**153. [A] ¿Qué se prueba el 26/11 con la maestra?**
+**153. [A] ¿Qué se prueba el miércoles 25/11, por confirmar con la maestra?**
 Medir el SPI con el medidor, después los peldaños del más seguro al más arriesgado, el relevo de R2 con la falla inyectada si se permite, y las preguntas al ayudante.
 Dato: `docs/checklist_26nov.md:40`, `:64` y `:85`.
 
@@ -718,7 +718,7 @@ No lo saben. El hilo 3 lleva dos cuentas con la contabilidad oficial (caja 10 00
 Dato: `sw/c1.s:390` a `:447`, `docs/defensa/c1.md`, sección 4.
 
 **164. [I] ¿Qué pasa si la comisión no es 5 o la caja inicial no es 10 000?**
-Las dos cuentas quedan mal y el candado puede cerrar donde no debe: es la dependencia más delicada de C1. La banda 40 no la tiene. Por eso el 26/11 se compara la cuenta emulada, que se lee en los 7 segmentos, con la pantalla de la maestra, y la regla de Nicolás dice que si no calza compite la banda 40.
+Las dos cuentas quedan mal y el candado puede cerrar donde no debe: es la dependencia más delicada de C1. La banda 40 no la tiene. Por eso el miércoles 25/11, por confirmar se compara la cuenta emulada, que se lee en los 7 segmentos, con la pantalla de la maestra, y la regla de Nicolás dice que si no calza compite la banda 40.
 Dato: `docs/c1_dia_de_prueba.md`, secciones 3 y 4.
 
 **165. [A] ¿Cómo ejecutan una orden si no hay multiplicador ni desplazador completo?**
@@ -790,7 +790,7 @@ Los 7 segmentos muestran un byte de las cuentas emuladas, elegido con los cuatro
 Dato: `sw/c1.s:519` a `:529`, `docs/c1_dia_de_prueba.md`, sección 3; `docs/bitacora/c1.md`, cuarta parte.
 
 **182. [I] ¿R3 usa hardware que no pasó por la maestra real? ¿Quién decide si compite?**
-Sí: la tabla de 512 palabras es hardware nuevo y no estuvo el 18/11. Solo compite si pasa la prueba del 26/11 y la decisión es de Nicolás. Si la caja o el patrimonio no calzan con la pantalla, o algo falla, compite la banda 40 (R2 o R0). Por eso R3 queda sobre los otros peldaños en la escalera y no en lugar de ellos: R0, R1 y R2 siguen intactos y con sus bitstreams.
+Sí: la tabla de 512 palabras es hardware nuevo y no estuvo el 18/11. Solo compite si pasa la prueba del miércoles 25/11, por confirmar y la decisión es de Nicolás. Si la caja o el patrimonio no calzan con la pantalla, o algo falla, compite la banda 40 (R2 o R0). Por eso R3 queda sobre los otros peldaños en la escalera y no en lugar de ellos: R0, R1 y R2 siguen intactos y con sus bitstreams.
 Dato: `docs/c1_dia_de_prueba.md`, encabezado y sección 2; `docs/defensa/c1.md`, sección 9.
 
 **183. [I] ¿Qué pasa si el rival corre exactamente la banda 40, o algo distinto?**
@@ -806,5 +806,5 @@ Es cierto y está medido. R2 responde en 123 ciclos de promedio y 127 de peor ca
 Dato: `docs/mediciones/p7/cotas/variantes.txt:6` y `:9`, `docs/mediciones/p7/cotas/roofline.csv:2` y `:5`, `docs/mediciones/p7/cotas/amdahl.txt:61`, `docs/mediciones/fondo/r2/ticks.txt:14` y `:25` a `:29`, `tb/tb_proyecto_4.sv:133`, `docs/tabla_vigilante.md:17`, `:67` y `:136`, `docs/mediciones/placa_16nov.md:16`.
 
 **185. [I] ¿Por qué compiten con la variante más lenta? (R3)**
-R3 es todavía más lenta que R2. Responde en 529,86 ciclos de promedio (132,72 instrucciones) y 783 de peor caso (196 instrucciones), contra 56,5 y 60 de R0: unas 9,4 veces más ciclos de promedio. El peor caso sano usa el 34,6 % de los 2262 ciclos de presupuesto y el tick completo llega a 807. Con un hilo colgado el peor tick medido es de 916 ciclos, el 81 % de los 1131 que pide la puerta (la mitad del presupuesto): es el margen más chico del diseño. La latencia no da patrimonio mientras la decisión llegue antes de la transacción siguiente. Lo que se compra: los cuatro hilos hacen en paralelo las dos cuentas, la volatilidad y la tabla de 512 palabras, que en un solo hilo darían entre 1900 y 2800 ciclos (pregunta 176), y con eso C1, cuyo examen sube g 36,1 puntos (error estándar 2,4) y baja nd 7,1 (error estándar 2,5). Lo que no está medido: el Amdahl y el roofline de R3 quedan para después del 26/11, así que no hay MOPS de R3 en el informe. Si algo falla con la maestra compite la banda 40. Ver también 159, 177 y 182.
+R3 es todavía más lenta que R2. Responde en 529,86 ciclos de promedio (132,72 instrucciones) y 783 de peor caso (196 instrucciones), contra 56,5 y 60 de R0: unas 9,4 veces más ciclos de promedio. El peor caso sano usa el 34,6 % de los 2262 ciclos de presupuesto y el tick completo llega a 807. Con un hilo colgado el peor tick medido es de 916 ciclos, el 81 % de los 1131 que pide la puerta (la mitad del presupuesto): es el margen más chico del diseño. La latencia no da patrimonio mientras la decisión llegue antes de la transacción siguiente. Lo que se compra: los cuatro hilos hacen en paralelo las dos cuentas, la volatilidad y la tabla de 512 palabras, que en un solo hilo darían entre 1900 y 2800 ciclos (pregunta 176), y con eso C1, cuyo examen sube g 36,1 puntos (error estándar 2,4) y baja nd 7,1 (error estándar 2,5). Lo que no está medido: el Amdahl y el roofline de R3 quedan para después del miércoles 25/11, por confirmar, así que no hay MOPS de R3 en el informe. Si algo falla con la maestra compite la banda 40. Ver también 159, 177 y 182.
 Dato: `docs/mediciones/c1/perfil_hilos.txt:8` y `:10`, `docs/mediciones/p7/cotas/variantes.txt:6`, `docs/c1_plan.md:159` y `:160`, `docs/defensa/c1.md:161` y `:162`, `docs/decisiones.md:847`.

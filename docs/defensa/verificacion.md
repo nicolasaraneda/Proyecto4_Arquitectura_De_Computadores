@@ -138,9 +138,9 @@ R2 no tiene columna propia en el gemelo, que no modela el vigilante: el vigilant
 |--------|---------------|-----------------|
 | Placa | **Autoprueba** (`docs/autoprueba.md`): el SoC del peldaño con una maestra SPI dentro de la FPGA que manda 2000 precios de un paseo aleatorio a los tres períodos y muestra una firma CRC-16 de las decisiones. La firma esperada sale del gemelo y de la referencia | R0: firma `a23c` igual en gemelo, referencia, RTL y bitstream ruteado, en simulación; en la placa (16/11) se vio la mitad baja ("3C") a los tres períodos y falta la mitad alta ("A2"). R2: firma a 0,1 ms en la placa; faltan 1 ms y 10 ms. R1: pendiente (`docs/mediciones/placa_16nov.md`) |
 | Placa, R2 | El relevo ocurre al inyectar la falla y no ocurre en media hora de funcionamiento normal | Media hora sin disparo: pasa. Relevo: la UART midió 35,50 ms de reconfiguración, pero no se anotó si apareció la imagen testigo (`docs/mediciones/placa_16nov.md`) |
-| Maestra (26/11) | Las tres rondas sin perder precios ni decisiones; patrimonio igual al que predice el gemelo si la serie es conocida | Pendiente: `docs/checklist_26nov.md` |
+| Maestra (miércoles 25/11, por confirmar) | Las tres rondas sin perder precios ni decisiones; patrimonio igual al que predice el gemelo si la serie es conocida | Pendiente: `docs/checklist_26nov.md` |
 
-Antes de los peldaños, el 26/11 se graba el **medidor del SPI** (`rtl/medidor/medidor_spi.v`, T120): un bitstream aparte que escucha a la maestra y muestra en los 7 segmentos el período de SCLK, el período entre precios y los tiempos de `CS_n`. El SCLK real decide entre R0 y R1 (`docs/arbol_decision.md`, regla 3).
+Antes de los peldaños, el miércoles 25/11, por confirmar se graba el **medidor del SPI** (`rtl/medidor/medidor_spi.v`, T120): un bitstream aparte que escucha a la maestra y muestra en los 7 segmentos el período de SCLK, el período entre precios y los tiempos de `CS_n`. El SCLK real decide entre R0 y R1 (`docs/arbol_decision.md`, regla 3).
 
 ## 11. Integración continua
 
@@ -155,6 +155,6 @@ Antes de los peldaños, el 26/11 se graba el **medidor del SPI** (`rtl/medidor/m
 5. **¿Qué probaron formalmente?** Que el base no cambió, la estructura del barrel (aislamiento de hilos), cada instrucción de la extensión contra su especificación y el vigilante. No: el cálculo de cada instrucción RV32E en el barrel.
 6. **¿Por qué simulan el bitstream si ya simularon el RTL?** Porque la tabla de R1 salió en cero en el bitstream con el RTL funcionando (`rtl/pochoco_tabla.v:36`). Lo que se graba tiene que ser lo que se simula.
 7. **¿Por qué no basta el testbench oficial?** Recorre solo 4 de las 8 fases del sondeo, usa un solo SCLK y tiempos fijos. El peor caso real de R0 es 49 y no 44.
-8. **¿Qué falta?** Completar la puerta de placa (las tres firmas de R1, R2 a 1 ms y 10 ms, la imagen testigo del relevo y la mitad alta de la firma de R0) y la puerta de la maestra del 26/11. Lo demás es simulación, salvo lo que se probó en la placa el 16/11 (`docs/mediciones/placa_16nov.md`).
+8. **¿Qué falta?** Completar la puerta de placa (las tres firmas de R1, R2 a 1 ms y 10 ms, la imagen testigo del relevo y la mitad alta de la firma de R0) y la puerta de la maestra del miércoles 25/11, por confirmar. Lo demás es simulación, salvo lo que se probó en la placa el 16/11 (`docs/mediciones/placa_16nov.md`).
 9. **¿Qué encontró la verificación?** En los cores, ningún error. En los métodos varios: generador en punto fijo, variable estática en tres testbenches, propiedad formal sin signo, control mal elegido, tabla vacía en el bitstream.
 10. **¿Cómo se reproduce todo?** Un objetivo de `make` por número; la integración continua corre las versiones cortas en cada push (`.github/workflows/ci.yml`).

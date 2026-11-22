@@ -1,4 +1,4 @@
-# Checklist del 26/11: pruebas con la maestra real
+# Checklist del miércoles 25/11, por confirmar: pruebas con la maestra real
 
 Grupo: Nicolás Araneda, Vicente Calderón y Santiago Muñoz.
 

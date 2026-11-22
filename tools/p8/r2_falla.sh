@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # r2_falla.sh: R2 con la falla inyectada, para ver el relevo con la maestra real
-# el 26/11 (docs/checklist_26nov.md, sección 5).
+# el miércoles 25/11, por confirmar (docs/checklist_26nov.md, sección 5).
 #
 # Grupo: Nicolás Araneda, Vicente Calderón y Santiago Muñoz.
 # Arquitectura de Computadores, Universidad de los Andes, 2026-2.

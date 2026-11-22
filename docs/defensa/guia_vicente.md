@@ -49,5 +49,5 @@ Según `docs/defensa/plan_estudio.md`, sección 2, Vicente es dueño de **el alg
 | Hasta el 18/11 | Puntos 1 a 3 de la sección 1; la tabla del largo del trozo de memoria |
 | 21/11 | Prueba de práctica 1, preguntando a Santiago la parte de algoritmo |
 | 24/11 | Repaso de todas las [I]; ensayar la 156 en voz alta con la decisión ya tomada |
-| 27/11 | Agregar al banco lo que salga del 26/11 sobre el generador de las series |
+| 27/11 | Agregar al banco lo que salga del miércoles 25/11, por confirmar sobre el generador de las series |
 | 30/11 | Guion de 5 minutos con cronómetro y prueba de práctica 3 |

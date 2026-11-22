@@ -2,7 +2,7 @@
 
 Grupo: Nicolás Araneda, Vicente Calderón y Santiago Muñoz.
 
-Dos guiones para decir en voz alta: uno de 1 minuto (si piden "cuéntennos qué hicieron") y uno de 5 minutos (si hay tiempo para presentar). Los dos están escritos para decirse, no para leerse: frases cortas, un número por idea. Cada número sale de `docs/defensa/cifras.md`. Si el 26/11 cambia el peldaño que compite o el 29/11 cambia el algoritmo, se ajustan las frases marcadas con (*).
+Dos guiones para decir en voz alta: uno de 1 minuto (si piden "cuéntennos qué hicieron") y uno de 5 minutos (si hay tiempo para presentar). Los dos están escritos para decirse, no para leerse: frases cortas, un número por idea. Cada número sale de `docs/defensa/cifras.md`. Si el miércoles 25/11, por confirmar cambia el peldaño que compite o el 29/11 cambia el algoritmo, se ajustan las frases marcadas con (*).
 
 ## Guion de 1 minuto
 

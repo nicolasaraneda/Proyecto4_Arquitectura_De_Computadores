@@ -50,5 +50,5 @@ Según `docs/defensa/plan_estudio.md`, sección 2, Nicolás es dueño de **los p
 | Hasta el 18/11 | Puntos 1 a 4 de la sección 1 y la sección 3 de memoria |
 | 21/11 | Prueba de práctica 1 (`docs/defensa/pruebas_practica.md`), respondida por Santiago con Nicolás preguntando |
 | 24/11 | Repaso de todas las [I] del banco con los tres |
-| 26/11 | Maestra real con Santiago: anotar todo lo que se vea en la plantilla del checklist |
+| 25/11, por confirmar | Maestra real con Santiago: anotar todo lo que se vea en la plantilla del checklist |
 | 30/11 | Guion de 5 minutos con cronómetro y prueba de práctica 3 |

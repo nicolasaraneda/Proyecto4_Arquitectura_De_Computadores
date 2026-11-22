@@ -41,7 +41,7 @@ ese mismo comando, sin cambiar nada, y obtener el diseño que compite con 4/4.
 Uso:
     python3 tools/peldano.py oficial                 # make peldano-oficial
     python3 tools/peldano.py probar r1               # make peldano-probar PELDANO=r1
-    python3 tools/peldano.py fijar r1                # make peldano-fijar PELDANO=r1 (después del 26/11)
+    python3 tools/peldano.py fijar r1                # make peldano-fijar PELDANO=r1 (después del miércoles 25/11, por confirmar)
 Para deshacer `fijar` antes del commit: git checkout -- . && git clean -fd rtl/ sw/
 """
 import argparse

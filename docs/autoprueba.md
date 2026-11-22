@@ -17,7 +17,7 @@ Documento de estudio del paquete P6: un bitstream que prueba en la Go Board, sin
 
 ## 1. Para qué sirve
 
-La maestra real existe un solo día (26/11). Si ese día algo falla, hay que saber si el problema es nuestro diseño, la placa, los cables o la maestra. La autoprueba separa la primera parte antes de llegar: si la placa muestra la firma correcta a los tres períodos, el SoC, el programa y la FPGA funcionan, y lo que quede por probar el 26/11 es la conexión con la maestra.
+La maestra real existe un solo día (miércoles 25/11, por confirmar). Si ese día algo falla, hay que saber si el problema es nuestro diseño, la placa, los cables o la maestra. La autoprueba separa la primera parte antes de llegar: si la placa muestra la firma correcta a los tres períodos, el SoC, el programa y la FPGA funcionan, y lo que quede por probar el miércoles 25/11, por confirmar es la conexión con la maestra.
 
 No reemplaza a la prueba con la maestra: la autoprueba genera los precios dentro de la FPGA, con el mismo reloj, así que no prueba la sincronización con una maestra externa ni los cables del PMOD.
 
@@ -138,7 +138,7 @@ Para agregar un peldaño basta una entrada en `PELDANOS` de `tools/autoprueba.py
 
 **¿Por qué no se usan los tiempos exactos del oficial?** Porque 500 ns no son un número entero de ciclos de 40 ns, y porque la versión con contadores de fase no cabía junto a R0. La autoprueba no busca reproducir la maestra: la matriz de estrés ya cubre SCLK de 100 kHz a 1 MHz en simulación.
 
-**¿Qué prueba y qué no?** Prueba que la FPGA configurada con nuestro SoC y nuestro programa toma las mismas 2000 decisiones que la referencia, a tiempo, en los tres períodos. No prueba la entrada asíncrona desde una maestra externa ni los cables: eso es el 26/11.
+**¿Qué prueba y qué no?** Prueba que la FPGA configurada con nuestro SoC y nuestro programa toma las mismas 2000 decisiones que la referencia, a tiempo, en los tres períodos. No prueba la entrada asíncrona desde una maestra externa ni los cables: eso es el miércoles 25/11, por confirmar.
 
 **¿No es trampa que la firma esperada esté dentro del bitstream?** No es la edición de competencia: es un bitstream de prueba, que no se lleva a la competencia. Y la firma también se muestra, así que se puede comparar a mano con la que da el gemelo.
 

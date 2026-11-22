@@ -60,7 +60,7 @@ Sugerencia de uso con el plan de estudio: la prueba 1 en el repaso del 21/11, la
 12. [B] ¿Cuáles son los tres modelos y cómo se comparan? *(pregunta 126, sección 10)*
 13. [A] ¿Qué es la autoprueba en placa? *(pregunta 136, sección 10)*
 14. [B] ¿Qué desempeño logra cada variante? *(pregunta 144, sección 11)*
-15. [A] ¿Qué se prueba el 26/11 con la maestra? *(pregunta 153, sección 12)*
+15. [A] ¿Qué se prueba el miércoles 25/11, por confirmar con la maestra? *(pregunta 153, sección 12)*
 
 ## Pauta de la prueba 1
 
@@ -117,7 +117,7 @@ Ninguna de las tres en sentido estricto, y lo decimos: la más rápida por hilo 
 Dato: `docs/codiseno.md:346`.
 
 **14. [A] ¿Cómo sabrán el SCLK real?** (pregunta 148)
-Con el medidor del SPI: un bitstream aparte que escucha a la maestra y muestra en los 7 segmentos el período de SCLK, el período entre precios y los tiempos de `CS_n`. Se graba el 26/11 antes que los peldaños.
+Con el medidor del SPI: un bitstream aparte que escucha a la maestra y muestra en los 7 segmentos el período de SCLK, el período entre precios y los tiempos de `CS_n`. Se graba el miércoles 25/11, por confirmar antes que los peldaños.
 Dato: `rtl/medidor/medidor_spi.v:15`, `docs/decisiones.md:589`.
 
 **15. [I] ¿Por qué no usaron la regla que da 40 957 en la práctica?** (pregunta 156)
@@ -127,7 +127,7 @@ Dato: `docs/zscore.md:101` (largo del trozo), `:131` (las dos lecturas) y `:142`
 ## Pauta de la prueba 2
 
 **1. [B] ¿Qué está probado y qué no?** (pregunta 6)
-R0, R1 y R2 pasaron los ocho criterios de la puerta de simulación. La puerta de placa está incompleta: el 16/11, en la placa, R2 pasó la firma a 0,1 ms y la media hora sin disparo, y el relevo se midió en 35,50 ms por la UART; R0 mostró a los tres períodos la mitad baja de su firma ("3C") y le falta la mitad alta ("A2"); faltan además las tres firmas de R1, la de R2 a 1 ms y 10 ms y ver la imagen testigo después del relevo (`docs/mediciones/placa_16nov.md`). Falta la puerta de la maestra real del 26/11.
+R0, R1 y R2 pasaron los ocho criterios de la puerta de simulación. La puerta de placa está incompleta: el 16/11, en la placa, R2 pasó la firma a 0,1 ms y la media hora sin disparo, y el relevo se midió en 35,50 ms por la UART; R0 mostró a los tres períodos la mitad baja de su firma ("3C") y le falta la mitad alta ("A2"); faltan además las tres firmas de R1, la de R2 a 1 ms y 10 ms y ver la imagen testigo después del relevo (`docs/mediciones/placa_16nov.md`). Falta la puerta de la maestra real del miércoles 25/11, por confirmar.
 Dato: `docs/puertas.md`, secciones de R0, R1 y R2 y "Puerta de placa"; `docs/mediciones/placa_16nov.md`.
 
 **2. [I] ¿Un Espino de cuatro hilos con instrucciones propias sigue siendo Espino?** (pregunta 9)
@@ -244,6 +244,6 @@ Dato: `tools/autoprueba.py:61`, `docs/decisiones.md:532`.
 R0 3,92 MOPS, segmentado 7,41, barrel un hilo 2,08, barrel con extensión 4,17, R1 5,34 (56 operaciones por tick).
 Dato: `docs/mediciones/p7/variantes.txt:28` a `:33`.
 
-**15. [A] ¿Qué se prueba el 26/11 con la maestra?** (pregunta 153)
+**15. [A] ¿Qué se prueba el miércoles 25/11, por confirmar con la maestra?** (pregunta 153)
 Medir el SPI con el medidor, después los peldaños del más seguro al más arriesgado, el relevo de R2 con la falla inyectada si se permite, y las preguntas al ayudante.
 Dato: `docs/checklist_26nov.md:40`, `:64` y `:85`.

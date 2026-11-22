@@ -2,6 +2,16 @@
 
 Se actualiza al cerrar cada tramo de trabajo. La versión anterior queda en el historial de git.
 
+## Tramo 21: R3 contra la maestra emulada por el RTL, registro del 18/11 y cambios al día de prueba (21/11, rama `c1`)
+
+**Qué quedó hecho.** CI: el informe compila también con `PELDANO_INFORME=r2` (`2f96614`). Corrida de R3 por el RTL contra el testbench oficial con un monitor de la cuenta emulada, 13 series a 0,1 y 1 ms (`make c1-contabilidad-rtl`, `84c45fa`). Registro de la clase del 18/11 en `docs/puertas.md`. `docs/c1_dia_de_prueba.md`: primer paso con el medidor del SPI y la regla de 250 y 150 kHz (sección 2.2) y la verificación con Meta a 10 ms (sección 10). `tools/c1/series_reales.py` (`make c1-series-reales`). El día de prueba pasa a "miércoles 25/11, por confirmar" en los documentos vigentes. No se tocó `rtl/`, `sw/` ni `bitstreams/`.
+
+**Qué se midió.** 28 de 28 corridas, 0 diferencias: `decisiones.csv` idéntico al de `ref/c1/c1.py` (caja, acciones y patrimonio por tick), monitor con 0 diferencias en 20 000 ticks, 32 órdenes parciales ejecutadas por la maestra en 10 de las 13 series, peor caso 807 de 2262 ciclos. Controles negativos: la dirección equivocada y la orden un tick tarde (1 953 ticks con diferencia, la primera en la compra de la fase A) dan diferencias. Con Meta a 10 ms, C1 compra 22 en el tick 8234 a 222, la siguiente orden va en el 10966 y el patrimonio final es 22 682 (9 de 9 comprobaciones).
+
+**Qué falta.** (1) El choque de calendario: el plan congela el hardware el 25/11 en la noche y ahora la prueba es ese día (detalle en la bitácora, novena parte). (2) Confirmar la fecha de la prueba. (3) Los 10 ms no se corrieron (serían cerca de una hora con 22 procesos). (4) Con la maestra real no se puede verificar: órdenes parciales, caja y comisión definitivas, ronda de 20 000 ticks y el SCLK; el medidor es el primer paso del día.
+
+**Qué conviene después.** Decidir la fecha de la etiqueta `v-maestra-26nov` y ensayar el paso del medidor con la placa antes de la prueba.
+
 ## Tramo 20: la contabilidad de la maestra contra la que emula R3, y el banco de preguntas (21/11, rama `c1`)
 
 **Qué quedó hecho.** Inventario de los testbenches de la maestra y del curso y comparación línea por línea de la contabilidad oficial con la de `ref/c1/c1.py` y `sw/c1.s` (`docs/bitacora/c1.md`, octava parte). Herramienta nueva `tools/c1/contabilidad.py` (`make c1-contabilidad`, 97 s, resultado en `docs/mediciones/c1/contabilidad.txt`). Preguntas 184 y 185 del banco ("por qué compiten con la variante más lenta", R2 y R3). No se tocó `rtl/`, `sw/` ni `bitstreams/`.

@@ -167,7 +167,7 @@ Lo que paga por eso:
 
 A 20 000 ticks y solo en las familias plausibles, la variante de la meseta (z = 1,5, memorias 32 y 128) sí le gana a `max_media` en el puesto: +0,050 +- 0,006 puntos H3b con las series interiores y +0,044 +- 0,005 con la vista de parada, y gana el 65 % de las rondas y el 74 % de las competencias. En patrimonio (H3a) empata (+0,006 +- 0,006). En los remuestreos del mismo largo pierde (-0,036 en H3b, gana el 44 % de las rondas), y a 2000 ticks pierde en todo.
 
-No cambia el veredicto: el criterio se fijó sobre la evidencia completa antes de medir, y elegir después el subconjunto donde una variante gana es justamente lo que el protocolo evita. Pero es un dato que depende de dos respuestas del 26/11 (cuántos ticks dura cada ronda y si las series salen del mismo generador), y por eso queda anotado en `docs/pendientes_nicolas.md` con las opciones.
+No cambia el veredicto: el criterio se fijó sobre la evidencia completa antes de medir, y elegir después el subconjunto donde una variante gana es justamente lo que el protocolo evita. Pero es un dato que depende de dos respuestas del miércoles 25/11, por confirmar (cuántos ticks dura cada ronda y si las series salen del mismo generador), y por eso queda anotado en `docs/pendientes_nicolas.md` con las opciones.
 
 ## 8. Qué cambiaría si se adoptara (punto e)
 

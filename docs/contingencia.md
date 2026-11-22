@@ -76,7 +76,7 @@ Qué elige (`docs/arbol_decision.md`, sección 2): con comisión de 0 a 10, los 
 
 ## 5. Preguntas de defensa
 
-1. **¿Qué pasa si la maestra usa un SCLK más lento?** Hasta 110 kHz en la ronda 3, R1 responde a tiempo; bajo eso compite R0, que responde en 44 ciclos. El árbol usa 115 kHz para dejar margen. Se mide con el medidor el 26/11.
+1. **¿Qué pasa si la maestra usa un SCLK más lento?** Hasta 110 kHz en la ronda 3, R1 responde a tiempo; bajo eso compite R0, que responde en 44 ciclos. El árbol usa 115 kHz para dejar margen. Se mide con el medidor el miércoles 25/11, por confirmar.
 2. **¿Y si cambian la comisión?** Las decisiones no cambian solas, porque el programa no lleva contabilidad. `retune` busca umbrales nuevos con el mismo protocolo, y para comisión de 20 y 50 los bitstreams ya están construidos y simulados.
 3. **¿Por qué no se ajusta solo, en el chip?** Porque el programa no sabe la comisión: no la recibe por SPI. Ajustarla en vivo exigiría inferirla del patrimonio, que el chip no ve.
 4. **¿Cómo saben que un bitstream hecho con `icebram` es correcto?** Por el control: con los parámetros de siempre, `icebram` sobre el molde da los bitstreams guardados byte por byte. Y cada juego nuevo se simula por los pines antes de guardarse.

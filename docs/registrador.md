@@ -2,7 +2,7 @@
 
 Grupo: Nicolás Araneda, Vicente Calderón y Santiago Muñoz.
 
-Herramienta para la prueba con la maestra real del 26/11. Es un bitstream aparte que escucha el SPI de la maestra y manda cada precio por la UART al computador, donde `tools/registrador.py` lo guarda como CSV. **No es parte del diseño de competencia y no guarda ninguna serie**: no tiene memoria para eso y no hay nada en el hardware de R0, R1 ni R2 que cambie. La serie queda en el computador, como cualquier otra medición.
+Herramienta para la prueba con la maestra real del miércoles 25/11, por confirmar. Es un bitstream aparte que escucha el SPI de la maestra y manda cada precio por la UART al computador, donde `tools/registrador.py` lo guarda como CSV. **No es parte del diseño de competencia y no guarda ninguna serie**: no tiene memoria para eso y no hay nada en el hardware de R0, R1 ni R2 que cambie. La serie queda en el computador, como cualquier otra medición.
 
 | Archivo | Qué es |
 |---------|--------|
@@ -15,7 +15,7 @@ Herramienta para la prueba con la maestra real del 26/11. Es un bitstream aparte
 
 ## 1. Para qué sirve
 
-1. **La puerta de maestra pide comparar el patrimonio que muestra la maestra con el que predice el gemelo "para la misma serie, si la serie es conocida"** (`docs/puertas.md` y decisión T50). Si la maestra del 26/11 usa una serie que no conocemos, el registrador la hace conocida: con el CSV, `build/gemelo --serie` y `ref/fondo.py` dan el patrimonio que R0, R1 y R2 deberían obtener, y se compara con la pantalla.
+1. **La puerta de maestra pide comparar el patrimonio que muestra la maestra con el que predice el gemelo "para la misma serie, si la serie es conocida"** (`docs/puertas.md` y decisión T50). Si la maestra del miércoles 25/11, por confirmar usa una serie que no conocemos, el registrador la hace conocida: con el CSV, `build/gemelo --serie` y `ref/fondo.py` dan el patrimonio que R0, R1 y R2 deberían obtener, y se compara con la pantalla.
 2. Mide además el período real entre precios, tick por tick, y marca las transacciones que no tuvieron 8 bits. Complementa al medidor del SPI (`docs/checklist_26nov.md`, sección 3), que da mínimos y máximos pero no la serie.
 
 ## 2. Cómo funciona
@@ -63,7 +63,7 @@ maestra --SCLK, MOSI, CS_n--> sincronizadores --> registro de desplazamiento -->
 
 **Un error encontrado por los controles negativos.** La primera versión comparaba `esc - lec` (punteros de 3 bits) con un entero: Verilog hace esa resta en 32 bits y, cuando los punteros dan la vuelta, la cola llena no se veía y un registro nuevo sobrescribía al que se estaba transmitiendo. A 0,1 ms no ocurre (la cola nunca pasa de un registro), pero a 30 µs aparecían registros con la secuencia de uno y el precio de otro. El control negativo que debía demostrar que la secuencia delata las pérdidas no falló, y eso llevó al error. Se corrigió guardando la resta en 3 bits, se agregó al testbench la comprobación de que cada registro que llega tiene el precio de su transacción, y la versión antigua quedó como control negativo (`cola_llena_en_32_bits`).
 
-## 4. Uso el 26/11
+## 4. Uso el miércoles 25/11, por confirmar
 
 Paso a paso, con usbipd, en `docs/clase_18nov.md` (la clase con la maestra) y en `docs/checklist_26nov.md`, sección 4b. En resumen:
 

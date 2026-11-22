@@ -2,7 +2,7 @@
 
 Grupo: Nicolás Araneda, Vicente Calderón y Santiago Muñoz.
 
-Complementa `docs/checklist_26nov.md` (conexión, medidor, registrador y peldaños R0 a R2), que no cambia. Aquí está solo lo de R3: en qué orden se carga, la rutina de cada ronda, cómo se lee en la placa la cuenta que R3 emula, contra qué se compara, y la autoprueba que se puede correr antes sin la maestra (sección 9). La regla del día la fijó Nicolás (21/11): **si la caja o el patrimonio no calzan con la pantalla de la maestra, se anota la diferencia y compite la banda 40**. Este documento no decide qué peldaño compite.
+**Día de prueba: miércoles 25/11, por confirmar.** Complementa `docs/checklist_26nov.md` (conexión, medidor, registrador y peldaños R0 a R2), que no cambia. Aquí está solo lo de R3: en qué orden se carga, la rutina de cada ronda, cómo se lee en la placa la cuenta que R3 emula, contra qué se compara, y la autoprueba que se puede correr antes sin la maestra (sección 9). La regla del día la fijó Nicolás (21/11): **si la caja o el patrimonio no calzan con la pantalla de la maestra, se anota la diferencia y compite la banda 40**. Este documento no decide qué peldaño compite.
 
 ## 1. Qué se lleva de R3
 
@@ -10,6 +10,7 @@ Complementa `docs/checklist_26nov.md` (conexión, medidor, registrador y peldañ
 
 | Archivo | Para qué |
 |---------|----------|
+| `medidor_spi.bin` | El medidor del SPI de la maestra. **Va antes que R2 y que R3**: con su medida se decide si R3 sigue (sección 2.2). Su hash está en `docs/checklist_26nov.md`, sección 1 |
 | `r2_banda40_multi.bin` | R2, la banda 40. Va primero: es el respaldo y la vara de comparación |
 | `r3_c1_multi.bin` | R3: imagen 0 C1, imagen 1 R0 con la banda 40 |
 | `r3_c1_apagada_multi.bin` | R3 con la política apagada en la tabla: el hardware de R3 decidiendo la banda 40. Sirve para separar un problema del hardware nuevo de un problema de la política |
@@ -20,9 +21,10 @@ Todas son imágenes múltiples: se graban con `iceprog -b` (borra la flash enter
 
 ## 2. Orden de carga
 
-1. **R2 primero.** `iceprog -b bitstreams/r2_banda40_multi.bin`. Las rondas que dé la maestra, como en la sección 4 de `docs/checklist_26nov.md`. Anotar el patrimonio (y la caja, si la muestra) de cada ronda. Con eso la banda 40 queda probada antes de tocar nada nuevo.
-2. **R3 después.** `iceprog -b bitstreams/r3_c1_multi.bin`. Las mismas rondas, leyendo la placa al final de cada una (secciones 3 y 4).
-3. Si queda tiempo: `r3_c1_apagada_multi.bin` (sección 6) y `r3_c1_falla_multi.bin` (sección 7).
+1. **El medidor antes que R2 y que R3.** `iceprog bitstreams/medidor_spi.bin`, una ronda y leer el SCLK. Con eso se decide si R3 sigue o si compite la banda 40 (sección 2.2).
+2. **R2.** `iceprog -b bitstreams/r2_banda40_multi.bin`. Las rondas que dé la maestra, como en la sección 4 de `docs/checklist_26nov.md`. Anotar el patrimonio (y la caja, si la muestra) de cada ronda. Con eso la banda 40 queda probada antes de tocar nada nuevo.
+3. **R3 después**, solo si el medidor lo permite. `iceprog -b bitstreams/r3_c1_multi.bin`. Las mismas rondas, leyendo la placa al final de cada una (secciones 3 y 4).
+4. Si queda tiempo: `r3_c1_apagada_multi.bin` (sección 6) y `r3_c1_falla_multi.bin` (sección 7).
 
 Decisión de Nicolás (21/11): **entre rondas se desconecta y se conecta el USB**. C1 no se rearma sola y no hace falta que lo haga. La razón:
 
@@ -61,6 +63,24 @@ Con los cables del PMOD puestos y la maestra encendida, antes de cada partida:
 | `10` y `27` todo el tiempo, con el modo en `00` | R3 recibe precios pero nunca operó: la serie no tocó ningún extremo ni cumplió la apuesta. Con una serie normalizada de 20 000 ticks no debería pasar |
 
 En los tres primeros casos la placa decidió la banda 40 en toda la ronda o en parte: el patrimonio de la pantalla se compara con el de R2 en la misma serie, y se anota que esa ronda no prueba a C1.
+
+### 2.2 El primer paso: el medidor del SPI y la regla de 250 y 150 kHz
+
+Decisión de Nicolás (21/11). R3 responde más lento que R2 (hasta 807 ciclos con los cuatro hilos sanos y 916 con un hilo colgado, contra los 127 o 128 de R2), así que con un SCLK lento le queda menos tiempo libre entre transacciones. Por eso lo primero del día es medir el SCLK de la maestra con `medidor_spi.bin`, antes de grabar R2 y R3. El 18/11 R2 corrió con la maestra real (`docs/puertas.md`, sección "Puerta de maestra: la clase del 18/11"), pero eso no prueba el SPI de R3.
+
+1. `iceprog bitstreams/medidor_spi.bin`. Al terminar ("VERIFY OK"): LED1 a LED4 apagados y `FF` en los 7 segmentos. Si la verificación falla, repetir con `-b`.
+2. Pedir una ronda a la maestra. Conviene la de 0,1 ms, que es la que deja menos tiempo libre; si la maestra solo da la de 10 ms primero, medir ahí y repetir en la de 0,1 ms cuando se pueda.
+3. Sin apretar SW3, leer con SW1 las medidas 0 y 1 (período mínimo y máximo de SCLK, en ciclos de 40 ns; byte bajo sin SW4 y alto con SW4 apretado). El procedimiento completo y la tabla de las ocho medidas están en `docs/checklist_26nov.md`, sección 3. **Decide la medida 1**, el período más largo, porque es el SCLK más lento que vio el esclavo. SCLK en kHz = 25 000 dividido por la medida.
+
+| SCLK medido | Medida 1 | Qué se hace |
+|-------------|----------|-------------|
+| 250 kHz o más | 100 (`0x0064`) o menos | **R3 sigue.** Se continúa con R2 y R3 como en la sección 2 |
+| Entre 150 y 250 kHz | 101 a 166 (`0x0065` a `0x00A6`) | **R3 sigue y se anota el margen**: el SCLK, la medida 6 (tiempo libre mínimo entre transacciones, en ciclos) y cuánto le sobra a R3, que es la medida 6 menos 916 |
+| Menos de 150 kHz | 167 (`0x00A7`) o más | **Compite la banda 40** (R2 o R0 según el árbol, `docs/arbol_decision.md`). R3 no se prueba como candidato |
+
+Qué hay medido detrás de estos números, para saber hasta dónde llega: en la matriz de estrés de R3 (`docs/mediciones/c1/estres.txt`) la respuesta sale a tiempo con SCLK de 200 kHz a 0,1 ms (peor caso 725 ciclos de 1362 disponibles, línea 13), de 500 kHz y de 1 MHz, y no sale con 100 kHz (la maestra de ese caso deja 237 ciclos libres, línea 72, exploración). Los casos de 150 y de 250 kHz no se simularon: caen entre un caso que falla y uno que pasa (150 kHz) o sobre uno que pasa (250 kHz). Además, en esa matriz el tiempo de `CS_n` crece con el período de SCLK; el de la maestra real es otro y lo dicen las medidas 4 y 5 del medidor.
+
+Al terminar el medidor se sigue con R2 (sección 2, paso 2). Si el medidor enciende LED4 (transacciones con otro número de flancos, flancos con `CS_n` en alto o modo 2 o 3), se anota y se aplica lo que dice `docs/checklist_26nov.md`, sección 3.
 
 ## 3. Qué muestra la placa
 
@@ -175,6 +195,8 @@ Se reconoce el relevo porque la telemetría desaparece: R0 no escribe los 7 segm
 | 2 | 1 ms | | | | | | | | | | |
 | 3 | 0,1 ms | | | | | | | | | | |
 
+SCLK medido por el medidor (medida 1, ciclos de 40 ns y kHz): ________ y ________. Margen anotado si cae entre 150 y 250 kHz (medida 6 menos 916): ________
+
 Hash grabado (lo que imprime `sha256sum bitstreams/r3_c1_multi.bin`): ________
 
 ## 9. Autoprueba de R3 en la placa (antes del día de prueba, sin maestra)
@@ -263,3 +285,20 @@ Para cada período: los LED encendidos y los cuatro dígitos (sin y con SW4).
 | LED4 con otros dígitos | Alguna decisión fue distinta o llegó tarde | Anotar los cuatro dígitos y el período. Si falla solo a 0,1 ms es de tiempo; si en los tres, de lógica o de memoria |
 | Los cuatro LED encendidos y "--" sin haber grabado la falla | El vigilante disparó con el programa sano | Anotar la hora y los minutos con SW4 |
 | Al configurar ya corre, o no pasa nada al apretar | Botones o configuración | Revisar "cdone: high" y probar otro botón |
+
+## 10. Verificación con la serie de práctica Meta a 10 ms (si la maestra la permite)
+
+Si la maestra deja correr la serie de práctica de Meta (`data/practica_meta.csv`) a 10 ms, es la mejor prueba de la apuesta de la fase A, que la autoprueba no ejercita (sección 9.1). La serie es la misma del testbench y R3 hace lo mismo en ella cada vez. Lo que tiene que pasar, calculado con `ref/c1/c1.py` (`make c1-series-reales`, `docs/mediciones/c1/series_reales.txt`, script `tools/c1/series_reales.py`):
+
+| Orden | Tick | Precio | Qué hace R3 | Después, en la placa |
+|-------|------|--------|-------------|----------------------|
+| 1 | **8234** | **222** | **Compra 22 acciones en la fase A** (byte `0x56`): la media posición, caja 10 000 a 5 111 | SW4: `16` (22 acciones). SW3: `F7` y SW3 + SW1: `13` (5 111) |
+| 2 | **10966** | 250 | Vende 63, recortada a las 22 que hay (modo candado) | SW4: `00`. SW3: `6E` y SW3 + SW1: `29` (10 606) |
+| 3 y 4 | 17085 y 17086 | 100 y 101 | Compra 63, recortada a la caja | |
+| 5 y 6 | 19084 y 19085 | 216 y 215 | Vende 63 | |
+| Final | | | **Patrimonio 22 682**, 6 órdenes | Caja 22 682, acciones 0, modo `02`: byte bajo `9A`, SW1 `58` |
+
+- El tick es la posición del precio en la serie contando desde 0 (el precio del tick 8234 es la fila 8234 del archivo sin el encabezado). A 10 ms cada tick dura 10 ms: la orden 1 cae unos 82,3 s después del primer precio y la orden 2 unos 109,7 s.
+- La orden que ejecuta la maestra en el tick n es la que R3 decidió al ver el precio n-1.
+- **Si la primera compra no ocurre en el tick 8234 al precio 222**, anotar el tick, el precio, las acciones y la caja: o la serie que corrió la maestra no es la de práctica (normalizada de otra forma, o con otro largo) o la apuesta de la fase A hace otra cosa en la placa que en la simulación. En los dos casos se anota y, por la regla de Nicolás, compite la banda 40.
+- Esta prueba es solo para el ritmo de 10 ms: es el único donde da tiempo de leer la placa con la ronda corriendo (sección 4).

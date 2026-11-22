@@ -8,7 +8,7 @@ Mide la serie Meta a 0,1 ms (20 000 ticks) con el gemelo (--barrel --xd 3 y la t
 512 palabras) y el perfil por dirección. Agrupa cada dirección por la rutina a la que
 pertenece (la etiqueta anterior de sw/c1.s) y por hilo. Las mediciones por tick del RTL
 (docs/mediciones/c1/ticks.txt) son las que van en la sección 3.2; esto las acompaña con el
-perfil. Amdahl y roofline de R3 quedan para la pasada de R3, después del 26/11 (T155).
+perfil. Amdahl y roofline de R3 quedan para la pasada de R3, después del miércoles 25/11, por confirmar (T155).
 
 Deja docs/mediciones/c1/perfil_hilos.txt y c1/perfil/gemelo.txt.
 Uso: python3 tools/p7/c1_perfil.py   (o make p7-c1-perfil). Segundos.

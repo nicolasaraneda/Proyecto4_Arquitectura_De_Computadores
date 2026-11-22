@@ -2,7 +2,7 @@
 
 Grupo: Nicolás Araneda, Vicente Calderón y Santiago Muñoz.
 
-Un bitstream sube a la escalera solo si pasa tres puertas, en orden: simulación, placa y maestra real (26/11). Este documento dice cómo se comprueba cada criterio de la puerta de simulación y deja el estado de cada peldaño. La escalera y la razón de cada peldaño están en la decisión T50.
+Un bitstream sube a la escalera solo si pasa tres puertas, en orden: simulación, placa y maestra real (miércoles 25/11, por confirmar). Este documento dice cómo se comprueba cada criterio de la puerta de simulación y deja el estado de cada peldaño. La escalera y la razón de cada peldaño están en la decisión T50.
 
 | Peldaño | Hardware | Programa | Archivo |
 |---------|----------|----------|---------|
@@ -87,7 +87,7 @@ Bitstreams (`make c1-bitstreams`, copiados a `bitstreams/` con `GUARDAR=1`):
 | `moldes/r3_molde.asc.gz` | `709a0516e6c8598d486c62e43fcf1cf2813011cb8fcddabe5c8f9dbc21aa3dec` |
 | `moldes/molde_tabla512.hex` | `b78ca6b58510199084ae274a17331a59685d54fade64cf3cc6bd88bea96685a5` |
 
-R3 pasó la puerta de simulación. Le faltan la de placa y la de la maestra real el 26/11 (`docs/c1_dia_de_prueba.md`). Para la de placa tiene su autoprueba, `bitstreams/autoprueba_r3_multi.bin` (firma `984c`, 1208 celdas; `docs/autoprueba.md`, sección 12).
+R3 pasó la puerta de simulación. Le faltan la de placa y la de la maestra real el miércoles 25/11, por confirmar (`docs/c1_dia_de_prueba.md`). El 18/11 R2 ya había corrido con la maestra real (sección "Puerta de maestra: la clase del 18/11"), pero eso no valida los tiempos SPI de R3, porque R2 responde en 128 ciclos y R3 en hasta 916. Para la de placa tiene su autoprueba, `bitstreams/autoprueba_r3_multi.bin` (firma `984c`, 1208 celdas; `docs/autoprueba.md`, sección 12).
 
 ## R0 con banda 40 (T140, 19/11)
 
@@ -134,7 +134,7 @@ Medido el 15/11 (paquete P0). Los registros completos están en `docs/mediciones
 | 7 | 60 casos en el rango pedido, todos pasan (`docs/mediciones/estres_base.txt`). SCLK funciona hasta 4 MHz; a 5 MHz no (exploración, decisión T53). Repetido el 15/11 en P4 después de corregir `tb_estres.sv`, cuyas rondas seguidas no cambiaban de período (T81): siguen pasando los 60 |
 | 8 | 2 000 ticks a 0,1 ms del `.asc` ruteado idénticos a la referencia |
 
-R0 pasó la puerta de simulación. De la de placa (la corre Nicolás con la autoprueba de P6, `docs/autoprueba.md`, sección 5) le falta la mitad alta de la firma (sección "Puerta de placa"), y le falta la de la maestra real el 26/11.
+R0 pasó la puerta de simulación. De la de placa (la corre Nicolás con la autoprueba de P6, `docs/autoprueba.md`, sección 5) le falta la mitad alta de la firma (sección "Puerta de placa"), y le falta la de la maestra real el miércoles 25/11, por confirmar.
 
 
 ## Espino barrel con un programa de un hilo
@@ -240,7 +240,7 @@ Medido el 15/11 (paquete P5). R1 es el barrel con `emad`, `devk` y la tabla de p
 
 Comandos: `make fondo-puerta HW=r1` (criterios 1, 2, 3, 4, 6 y 7), `make fondo-criterio5 HW=r1` y `make fondo-bitstreams` (criterio 8 de los dos peldaños). Con `HW=r2` para R2.
 
-**R1 y R2 pasaron la puerta de simulación.** La de placa (autoprueba de P6) está incompleta: R2 pasó el 16/11 la firma a 0,1 ms y la media hora sin disparo, y R1 no se ha corrido (sección "Puerta de placa"). Les falta la de la maestra real el 26/11.
+**R1 y R2 pasaron la puerta de simulación.** La de placa (autoprueba de P6) está incompleta: R2 pasó el 16/11 la firma a 0,1 ms y la media hora sin disparo, y R1 no se ha corrido (sección "Puerta de placa"). Les falta la de la maestra real el miércoles 25/11, por confirmar.
 
 Lo propio de R2:
 
@@ -272,3 +272,18 @@ La corre Nicolás con las autopruebas de P6 (`docs/autoprueba.md`, secciones 5, 
 | Tiempo del relevo | No aplica | No aplica | 35,50 ms (35,42 a 35,59), una medición de tres pedidas |
 
 Ningún peldaño pasó todavía la puerta de placa completa. A R2 le falta la firma a 1 ms y 10 ms y ver la testigo después del relevo; a R1 las tres firmas; a R0 la mitad alta de su firma. La lista con los comandos está en `docs/pendientes_nicolas.md`.
+
+## Puerta de maestra: la clase del 18/11 (R2 con la regla de cotas)
+
+El 18/11, en la clase, `bitstreams/r2_cotas_multi.bin` (R2 con la regla de cotas de banda 60, hardware de R2) corrió con la maestra real en las tres rondas. Nicolás lo grabó desde su Mac con `iceprog -b` y terminó en "VERIFY OK". Resultados, como los informó Nicolás (fuente: su registro de terminal y los resultados anotados en la clase; las sesiones de trabajo no vieron ese registro):
+
+| Ronda | Período | Serie | Patrimonio | Lugar |
+|-------|---------|-------|------------|-------|
+| 3 | 0,1 ms | No registrada | Cerca de 25 000 (cifra aproximada) | Primeros |
+| 2 | 1 ms | No registrada | 18 870 | Primeros |
+| 1 | 10 ms | AMD | 21 895 | No anotado |
+| 1 | 10 ms | Tesla | 18 779 | No anotado |
+
+- **Qué respalda.** Los 21 895 de AMD y los 18 779 de Tesla son exactamente lo que da la referencia con banda 60 (`ref/trader.py`, `docs/decisiones.md:770`, `docs/bitacora/banda40.md:11`): con órdenes de 63, la maestra real usa caja 10 000 y comisión 5, ejecuta al precio del mismo tick en que lee el byte, recorta la compra a `(caja - 5) / p` y no cobra una orden que queda en cero. Las series de 0,1 ms y 1 ms no se registraron, así que esas dos cifras no tienen referencia con qué compararlas.
+- **Qué prueba del hardware.** El de R2 (barrel con la tabla, el vigilante y la imagen múltiple) recibió precios de la maestra real a los tres ritmos y operó en las tres rondas, con el primer lugar en las de 0,1 y 1 ms. Lo que informó Nicolás no dice si el vigilante hizo un relevo en alguna ronda.
+- **Qué no prueba.** No valida los tiempos SPI de R3: R2 responde en 128 ciclos (127 en el testbench oficial) y R3 en hasta 807 ciclos con los cuatro hilos sanos y 916 con un hilo colgado, así que con un SCLK lento R3 se queda sin tiempo antes que R2 (de ahí la regla de SCLK de `docs/c1_dia_de_prueba.md`, sección 2.2). Tampoco prueba la tabla de 512 palabras, que es hardware nuevo, ni las órdenes parciales (menos de 63) de la media posición de C1.
