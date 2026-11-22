@@ -10,7 +10,7 @@ El enunciado dice que en la defensa "se harán preguntas sobre cualquier parte d
 |-------|------|------------------------------|
 | Lun 16/11 | Kit de defensa listo | Empieza la lectura individual |
 | Dom 22/11 | Fecha de corte del diseño integrado | Si R1 no tiene la puerta de simulación, R0 es el titular: el foco de la defensa cambia (sección 6) |
-| Mié 25/11 | Congelamiento del hardware, etiqueta `v-maestra-26nov` | Las cifras de hardware ya no cambian |
+| Dom 22/11 | Congelamiento del hardware y del algoritmo, etiqueta `v-maestra-25nov` (decisión T156) | Las cifras de hardware y de algoritmo ya no cambian |
 | **Mié 25/11, por confirmar** | **Maestra real** | Se suman a la defensa los resultados de la placa y las respuestas del ayudante |
 | Dom 29/11 | Congelamiento total | Se regenera `cifras.md` si cambió algo; el banco queda fijo |
 | Lun 30/11 | Ensayo general de las rondas y de la defensa | Ensayo con preguntas al azar (sección 5) |

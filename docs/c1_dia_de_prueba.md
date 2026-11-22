@@ -2,7 +2,7 @@
 
 Grupo: Nicolás Araneda, Vicente Calderón y Santiago Muñoz.
 
-**Día de prueba: miércoles 25/11, por confirmar.** Complementa `docs/checklist_26nov.md` (conexión, medidor, registrador y peldaños R0 a R2), que no cambia. Aquí está solo lo de R3: en qué orden se carga, la rutina de cada ronda, cómo se lee en la placa la cuenta que R3 emula, contra qué se compara, y la autoprueba que se puede correr antes sin la maestra (sección 9). La regla del día la fijó Nicolás (21/11): **si la caja o el patrimonio no calzan con la pantalla de la maestra, se anota la diferencia y compite la banda 40**. Este documento no decide qué peldaño compite.
+**Día de prueba: miércoles 25/11, por confirmar.** La versión de una página, en orden, es `docs/checklist_25nov.md`. Este documento complementa `docs/checklist_26nov.md` (conexión, medidor, registrador y peldaños R0 a R2), que no cambia. Aquí está solo lo de R3: en qué orden se carga, la rutina de cada ronda, cómo se lee en la placa la cuenta que R3 emula, contra qué se compara, y la autoprueba que se puede correr antes sin la maestra (sección 9). La regla del día la fijó Nicolás (21/11): **si la caja o el patrimonio no calzan con la pantalla de la maestra, se anota la diferencia y compite la banda 40**. Este documento no decide qué peldaño compite.
 
 ## 1. Qué se lleva de R3
 

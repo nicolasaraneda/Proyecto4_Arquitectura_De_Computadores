@@ -8,9 +8,9 @@ Puerta de maestra (`docs/puertas.md` y decisión T50): cada peldaño tiene que c
 
 Desde el 19/11 los tres peldaños corren la regla de cotas con **banda 40** (decisión T140): compra con 140 o menos y vende con 215 o más, después de haber visto 100 y 255. Los bitstreams son los `*_banda40*.bin`. Los de banda 60 (`r0_cotas.bin`, `r1_cotas.bin`, `r2_cotas.bin`, `r2_cotas_multi.bin`), que corrieron con la maestra el 18/11, quedan en `bitstreams/` como anteriores y no se llevan como peldaños; tienen el mismo hardware, así que lo que se vio el 18/11 con `r2_cotas_multi.bin` vale para el hardware de los nuevos.
 
-## 1. Antes de salir (25/11 en la noche)
+## 1. Antes de salir (la noche anterior)
 
-1. `git checkout v-maestra-26nov` (la etiqueta del congelamiento del hardware) y `make check` en verde.
+1. `git checkout v-maestra-25nov` (la etiqueta del congelamiento del hardware y del algoritmo, T156) y `make check` en verde.
 2. `cd bitstreams && sha256sum -c SHA256SUMS && cd ..`: todas las líneas en `OK`. Se llevan, en este orden de uso:
 
    | Archivo | Para qué | sha256 (primeros 16) |
