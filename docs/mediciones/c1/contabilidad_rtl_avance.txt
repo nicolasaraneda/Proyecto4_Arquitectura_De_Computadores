@@ -1,0 +1,57 @@
+23:18:55 == corrida con ritmos [100000, 1000000], commit 2f96614
+23:19:25 INICIO meta_1000000
+23:19:25 INICIO ABBV_155637_1000000
+23:19:25 INICIO ABT_291663_1000000
+23:19:25 INICIO AMAT_97161_1000000
+23:19:25 INICIO BAC_356296_1000000
+23:19:25 INICIO C_348318_1000000
+23:19:25 INICIO AMAT_97161_100000
+23:19:25 INICIO BAC_356296_100000
+23:19:25 INICIO AMGN_4414_100000
+23:19:25 INICIO AMGN_4414_1000000
+23:19:25 INICIO APD_347768_1000000
+23:19:25 INICIO COP_308673_1000000
+23:19:25 INICIO BSX_435843_1000000
+23:19:25 INICIO meta_100000
+23:19:25 INICIO CVX_429203_1000000
+23:19:25 INICIO EL_332787_1000000
+23:19:25 INICIO ABT_291663_100000
+23:19:25 INICIO ABBV_155637_100000
+23:19:25 INICIO APD_347768_100000
+23:19:25 INICIO MCD_343483_1000000
+23:19:25 INICIO COP_308673_100000
+23:19:25 INICIO BSX_435843_100000
+23:20:03 FIN AMAT_97161_100000 (38 s): PASS AMAT_97161 a 0,1 ms: 4/4, decisiones.csv idéntico a ref/c1/c1.py (20000 filas con caja, acciones y patrimonio), monitor 20000 ticks y 0 diferencias, patrimonio 25461, 8 órdenes (0 parciales), peor caso 783 de 2262 ciclos
+23:20:03 INICIO CVX_429203_100000
+23:20:06 FIN BSX_435843_100000 (41 s): PASS BSX_435843 a 0,1 ms: 4/4, decisiones.csv idéntico a ref/c1/c1.py (20000 filas con caja, acciones y patrimonio), monitor 20000 ticks y 0 diferencias, patrimonio 20923, 6 órdenes (1 parciales), peor caso 759 de 2262 ciclos
+23:20:06 INICIO C_348318_100000
+23:20:06 FIN ABT_291663_100000 (42 s): PASS ABT_291663 a 0,1 ms: 4/4, decisiones.csv idéntico a ref/c1/c1.py (20000 filas con caja, acciones y patrimonio), monitor 20000 ticks y 0 diferencias, patrimonio 10685, 4 órdenes (1 parciales), peor caso 759 de 2262 ciclos
+23:20:06 INICIO EL_332787_100000
+23:20:07 FIN meta_100000 (43 s): PASS meta a 0,1 ms: 4/4, decisiones.csv idéntico a ref/c1/c1.py (20000 filas con caja, acciones y patrimonio), monitor 20000 ticks y 0 diferencias, patrimonio 22682, 6 órdenes (1 parciales), peor caso 783 de 2262 ciclos
+23:20:07 INICIO MCD_343483_100000
+23:20:08 FIN AMGN_4414_100000 (44 s): PASS AMGN_4414 a 0,1 ms: 4/4, decisiones.csv idéntico a ref/c1/c1.py (20000 filas con caja, acciones y patrimonio), monitor 20000 ticks y 0 diferencias, patrimonio 14360, 4 órdenes (0 parciales), peor caso 735 de 2262 ciclos
+23:20:08 INICIO meta_100000_control_direccion
+23:20:09 FIN COP_308673_100000 (45 s): PASS COP_308673 a 0,1 ms: 4/4, decisiones.csv idéntico a ref/c1/c1.py (20000 filas con caja, acciones y patrimonio), monitor 20000 ticks y 0 diferencias, patrimonio 28242, 13 órdenes (1 parciales), peor caso 807 de 2262 ciclos
+23:20:09 INICIO meta_100000_control_desfase
+23:20:10 FIN APD_347768_100000 (46 s): PASS APD_347768 a 0,1 ms: 4/4, decisiones.csv idéntico a ref/c1/c1.py (20000 filas con caja, acciones y patrimonio), monitor 20000 ticks y 0 diferencias, patrimonio 16844, 6 órdenes (2 parciales), peor caso 783 de 2262 ciclos
+23:20:12 FIN ABBV_155637_100000 (48 s): PASS ABBV_155637 a 0,1 ms: 4/4, decisiones.csv idéntico a ref/c1/c1.py (20000 filas con caja, acciones y patrimonio), monitor 20000 ticks y 0 diferencias, patrimonio 14204, 4 órdenes (1 parciales), peor caso 783 de 2262 ciclos
+23:20:18 FIN BAC_356296_100000 (53 s): PASS BAC_356296 a 0,1 ms: 4/4, decisiones.csv idéntico a ref/c1/c1.py (20000 filas con caja, acciones y patrimonio), monitor 20000 ticks y 0 diferencias, patrimonio 22835, 8 órdenes (2 parciales), peor caso 783 de 2262 ciclos
+23:20:44 FIN CVX_429203_100000 (41 s): PASS CVX_429203 a 0,1 ms: 4/4, decisiones.csv idéntico a ref/c1/c1.py (20000 filas con caja, acciones y patrimonio), monitor 20000 ticks y 0 diferencias, patrimonio 10289, 10 órdenes (3 parciales), peor caso 759 de 2262 ciclos
+23:20:47 FIN C_348318_100000 (42 s): PASS C_348318 a 0,1 ms: 4/4, decisiones.csv idéntico a ref/c1/c1.py (20000 filas con caja, acciones y patrimonio), monitor 20000 ticks y 0 diferencias, patrimonio 11950, 2 órdenes (0 parciales), peor caso 735 de 2262 ciclos
+23:20:47 FIN MCD_343483_100000 (40 s): PASS MCD_343483 a 0,1 ms: 4/4, decisiones.csv idéntico a ref/c1/c1.py (20000 filas con caja, acciones y patrimonio), monitor 20000 ticks y 0 diferencias, patrimonio 12238, 8 órdenes (3 parciales), peor caso 783 de 2262 ciclos
+23:20:48 FIN meta_100000_control_direccion (40 s): PASS control negativo meta a 0,1 ms: con D_CAJA apuntando a D_ACC el monitor ve 20000 ticks con diferencia (primero en el 0); el testbench oficial sigue en 4/4
+23:20:50 FIN meta_100000_control_desfase (41 s): PASS control negativo meta a 0,1 ms: comparando el programa del tick n con la maestra del tick n-1 (una orden ejecutada un tick tarde) el monitor ve 1953 ticks con diferencia (primero en el 8234); el testbench oficial sigue en 4/4
+23:20:50 FIN EL_332787_100000 (44 s): PASS EL_332787 a 0,1 ms: 4/4, decisiones.csv idéntico a ref/c1/c1.py (20000 filas con caja, acciones y patrimonio), monitor 20000 ticks y 0 diferencias, patrimonio 11197, 8 órdenes (1 parciales), peor caso 759 de 2262 ciclos
+23:23:49 FIN ABT_291663_1000000 (264 s): PASS ABT_291663 a 1 ms: 4/4, decisiones.csv idéntico a ref/c1/c1.py (20000 filas con caja, acciones y patrimonio), monitor 20000 ticks y 0 diferencias, patrimonio 10685, 4 órdenes (1 parciales), peor caso 751 de 24762 ciclos
+23:23:51 FIN CVX_429203_1000000 (266 s): PASS CVX_429203 a 1 ms: 4/4, decisiones.csv idéntico a ref/c1/c1.py (20000 filas con caja, acciones y patrimonio), monitor 20000 ticks y 0 diferencias, patrimonio 10289, 10 órdenes (3 parciales), peor caso 751 de 24762 ciclos
+23:23:53 FIN APD_347768_1000000 (269 s): PASS APD_347768 a 1 ms: 4/4, decisiones.csv idéntico a ref/c1/c1.py (20000 filas con caja, acciones y patrimonio), monitor 20000 ticks y 0 diferencias, patrimonio 16762, 6 órdenes (2 parciales), peor caso 775 de 24762 ciclos
+23:23:53 FIN ABBV_155637_1000000 (269 s): PASS ABBV_155637 a 1 ms: 4/4, decisiones.csv idéntico a ref/c1/c1.py (20000 filas con caja, acciones y patrimonio), monitor 20000 ticks y 0 diferencias, patrimonio 14204, 4 órdenes (1 parciales), peor caso 775 de 24762 ciclos
+23:23:56 FIN AMAT_97161_1000000 (272 s): PASS AMAT_97161 a 1 ms: 4/4, decisiones.csv idéntico a ref/c1/c1.py (20000 filas con caja, acciones y patrimonio), monitor 20000 ticks y 0 diferencias, patrimonio 25461, 8 órdenes (0 parciales), peor caso 775 de 24762 ciclos
+23:23:57 FIN BAC_356296_1000000 (272 s): PASS BAC_356296 a 1 ms: 4/4, decisiones.csv idéntico a ref/c1/c1.py (20000 filas con caja, acciones y patrimonio), monitor 20000 ticks y 0 diferencias, patrimonio 22814, 8 órdenes (2 parciales), peor caso 775 de 24762 ciclos
+23:23:57 FIN AMGN_4414_1000000 (273 s): PASS AMGN_4414 a 1 ms: 4/4, decisiones.csv idéntico a ref/c1/c1.py (20000 filas con caja, acciones y patrimonio), monitor 20000 ticks y 0 diferencias, patrimonio 14360, 4 órdenes (0 parciales), peor caso 727 de 24762 ciclos
+23:23:58 FIN MCD_343483_1000000 (274 s): PASS MCD_343483 a 1 ms: 4/4, decisiones.csv idéntico a ref/c1/c1.py (20000 filas con caja, acciones y patrimonio), monitor 20000 ticks y 0 diferencias, patrimonio 12238, 8 órdenes (3 parciales), peor caso 775 de 24762 ciclos
+23:23:58 FIN meta_1000000 (274 s): PASS meta a 1 ms: 4/4, decisiones.csv idéntico a ref/c1/c1.py (20000 filas con caja, acciones y patrimonio), monitor 20000 ticks y 0 diferencias, patrimonio 22682, 6 órdenes (1 parciales), peor caso 775 de 24762 ciclos
+23:24:00 FIN C_348318_1000000 (276 s): PASS C_348318 a 1 ms: 4/4, decisiones.csv idéntico a ref/c1/c1.py (20000 filas con caja, acciones y patrimonio), monitor 20000 ticks y 0 diferencias, patrimonio 11950, 2 órdenes (0 parciales), peor caso 703 de 24762 ciclos
+23:24:02 FIN COP_308673_1000000 (278 s): PASS COP_308673 a 1 ms: 4/4, decisiones.csv idéntico a ref/c1/c1.py (20000 filas con caja, acciones y patrimonio), monitor 20000 ticks y 0 diferencias, patrimonio 28242, 13 órdenes (1 parciales), peor caso 799 de 24762 ciclos
+23:24:02 FIN EL_332787_1000000 (278 s): PASS EL_332787 a 1 ms: 4/4, decisiones.csv idéntico a ref/c1/c1.py (20000 filas con caja, acciones y patrimonio), monitor 20000 ticks y 0 diferencias, patrimonio 11197, 8 órdenes (1 parciales), peor caso 751 de 24762 ciclos
+23:24:04 FIN BSX_435843_1000000 (279 s): PASS BSX_435843 a 1 ms: 4/4, decisiones.csv idéntico a ref/c1/c1.py (20000 filas con caja, acciones y patrimonio), monitor 20000 ticks y 0 diferencias, patrimonio 20923, 6 órdenes (1 parciales), peor caso 751 de 24762 ciclos

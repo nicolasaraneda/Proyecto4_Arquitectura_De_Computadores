@@ -1,0 +1,59 @@
+R3 por el RTL contra el testbench oficial, con la cuenta emulada comparada con la de la maestra
+Generado por tools/c1/contabilidad_rtl.py. No editar a mano.
+
+Commit de partida: 2f96614. Verilator 5.053 devel rev v5.052-22-g7cf8c5cca (mod)
+tb/tb_proyecto_4.sv sha256 f83486755fe2b3de...
+tb/c1/tb_mon.sv sha256 c47f00750e8b07ad...
+sw/c1.s sha256 353f6806d5482d14...
+sw/c1_tabla.hex sha256 9954f116f860faca...
+ref/c1/c1.py sha256 d51bb29c38227a6a...
+Hardware (R3): pochoco_soc con -DESPINO_BARREL -DESPINO_XD_EMAD -DESPINO_XD_DEVK -DESPINO_TABLA -DESPINO_VIGILANTE -DESPINO_TABLA_512
+Direcciones de la cuenta emulada: D_CAJA 2004, D_ACC 2008, D_W 2000
+Ritmos: 0,1 ms, 1 ms. 20 000 ticks por serie.
+
+Escaneo: 600 ventanas de 60 acciones (semilla 11); 172 con apuesta de la fase A (29 %)
+grupo                                accion  inicio entradas ticks media parciales   W ref ordenes
+2 o 3 entradas                       CVX     429203        3        4658         3   10289      10
+2 o 3 entradas                       MCD     343483        3         708         3   12258       8
+2 o 3 entradas                       APD     347768        2        1677         2   16762       6
+2 o 3 entradas                       BAC     356296        2        4801         2   22814       8
+1 entrada, termina en candado        ABBV    155637        1        4698         1   14204       4
+1 entrada, termina en candado        ABT     291663        1         689         1   10685       4
+1 entrada, termina en recuperacion   BSX     435843        1         169         1   20923       6
+1 entrada, termina en recuperacion   C       348318        1           1         1   11921       4
+1 entrada, recuperacion y candado    COP     308673        1         220         1   28041      13
+1 entrada, recuperacion y candado    EL      332787        1         370         1   11197       8
+sin apuesta (control)                AMAT     97161        0           0         0   25461       8
+sin apuesta (control)                AMGN      4414        0           0         0   14360       4
+(más Meta, data/practica_meta.csv)
+
+PASS meta a 1 ms: 4/4, decisiones.csv idéntico a ref/c1/c1.py (20000 filas con caja, acciones y patrimonio), monitor 20000 ticks y 0 diferencias, patrimonio 22682, 6 órdenes (1 parciales), peor caso 775 de 24762 ciclos
+PASS ABBV_155637 a 1 ms: 4/4, decisiones.csv idéntico a ref/c1/c1.py (20000 filas con caja, acciones y patrimonio), monitor 20000 ticks y 0 diferencias, patrimonio 14204, 4 órdenes (1 parciales), peor caso 775 de 24762 ciclos
+PASS ABT_291663 a 1 ms: 4/4, decisiones.csv idéntico a ref/c1/c1.py (20000 filas con caja, acciones y patrimonio), monitor 20000 ticks y 0 diferencias, patrimonio 10685, 4 órdenes (1 parciales), peor caso 751 de 24762 ciclos
+PASS AMAT_97161 a 1 ms: 4/4, decisiones.csv idéntico a ref/c1/c1.py (20000 filas con caja, acciones y patrimonio), monitor 20000 ticks y 0 diferencias, patrimonio 25461, 8 órdenes (0 parciales), peor caso 775 de 24762 ciclos
+PASS AMGN_4414 a 1 ms: 4/4, decisiones.csv idéntico a ref/c1/c1.py (20000 filas con caja, acciones y patrimonio), monitor 20000 ticks y 0 diferencias, patrimonio 14360, 4 órdenes (0 parciales), peor caso 727 de 24762 ciclos
+PASS APD_347768 a 1 ms: 4/4, decisiones.csv idéntico a ref/c1/c1.py (20000 filas con caja, acciones y patrimonio), monitor 20000 ticks y 0 diferencias, patrimonio 16762, 6 órdenes (2 parciales), peor caso 775 de 24762 ciclos
+PASS BAC_356296 a 1 ms: 4/4, decisiones.csv idéntico a ref/c1/c1.py (20000 filas con caja, acciones y patrimonio), monitor 20000 ticks y 0 diferencias, patrimonio 22814, 8 órdenes (2 parciales), peor caso 775 de 24762 ciclos
+PASS BSX_435843 a 1 ms: 4/4, decisiones.csv idéntico a ref/c1/c1.py (20000 filas con caja, acciones y patrimonio), monitor 20000 ticks y 0 diferencias, patrimonio 20923, 6 órdenes (1 parciales), peor caso 751 de 24762 ciclos
+PASS COP_308673 a 1 ms: 4/4, decisiones.csv idéntico a ref/c1/c1.py (20000 filas con caja, acciones y patrimonio), monitor 20000 ticks y 0 diferencias, patrimonio 28242, 13 órdenes (1 parciales), peor caso 799 de 24762 ciclos
+PASS CVX_429203 a 1 ms: 4/4, decisiones.csv idéntico a ref/c1/c1.py (20000 filas con caja, acciones y patrimonio), monitor 20000 ticks y 0 diferencias, patrimonio 10289, 10 órdenes (3 parciales), peor caso 751 de 24762 ciclos
+PASS C_348318 a 1 ms: 4/4, decisiones.csv idéntico a ref/c1/c1.py (20000 filas con caja, acciones y patrimonio), monitor 20000 ticks y 0 diferencias, patrimonio 11950, 2 órdenes (0 parciales), peor caso 703 de 24762 ciclos
+PASS EL_332787 a 1 ms: 4/4, decisiones.csv idéntico a ref/c1/c1.py (20000 filas con caja, acciones y patrimonio), monitor 20000 ticks y 0 diferencias, patrimonio 11197, 8 órdenes (1 parciales), peor caso 751 de 24762 ciclos
+PASS MCD_343483 a 1 ms: 4/4, decisiones.csv idéntico a ref/c1/c1.py (20000 filas con caja, acciones y patrimonio), monitor 20000 ticks y 0 diferencias, patrimonio 12238, 8 órdenes (3 parciales), peor caso 775 de 24762 ciclos
+PASS meta a 0,1 ms: 4/4, decisiones.csv idéntico a ref/c1/c1.py (20000 filas con caja, acciones y patrimonio), monitor 20000 ticks y 0 diferencias, patrimonio 22682, 6 órdenes (1 parciales), peor caso 783 de 2262 ciclos
+PASS ABBV_155637 a 0,1 ms: 4/4, decisiones.csv idéntico a ref/c1/c1.py (20000 filas con caja, acciones y patrimonio), monitor 20000 ticks y 0 diferencias, patrimonio 14204, 4 órdenes (1 parciales), peor caso 783 de 2262 ciclos
+PASS ABT_291663 a 0,1 ms: 4/4, decisiones.csv idéntico a ref/c1/c1.py (20000 filas con caja, acciones y patrimonio), monitor 20000 ticks y 0 diferencias, patrimonio 10685, 4 órdenes (1 parciales), peor caso 759 de 2262 ciclos
+PASS AMAT_97161 a 0,1 ms: 4/4, decisiones.csv idéntico a ref/c1/c1.py (20000 filas con caja, acciones y patrimonio), monitor 20000 ticks y 0 diferencias, patrimonio 25461, 8 órdenes (0 parciales), peor caso 783 de 2262 ciclos
+PASS AMGN_4414 a 0,1 ms: 4/4, decisiones.csv idéntico a ref/c1/c1.py (20000 filas con caja, acciones y patrimonio), monitor 20000 ticks y 0 diferencias, patrimonio 14360, 4 órdenes (0 parciales), peor caso 735 de 2262 ciclos
+PASS APD_347768 a 0,1 ms: 4/4, decisiones.csv idéntico a ref/c1/c1.py (20000 filas con caja, acciones y patrimonio), monitor 20000 ticks y 0 diferencias, patrimonio 16844, 6 órdenes (2 parciales), peor caso 783 de 2262 ciclos
+PASS BAC_356296 a 0,1 ms: 4/4, decisiones.csv idéntico a ref/c1/c1.py (20000 filas con caja, acciones y patrimonio), monitor 20000 ticks y 0 diferencias, patrimonio 22835, 8 órdenes (2 parciales), peor caso 783 de 2262 ciclos
+PASS BSX_435843 a 0,1 ms: 4/4, decisiones.csv idéntico a ref/c1/c1.py (20000 filas con caja, acciones y patrimonio), monitor 20000 ticks y 0 diferencias, patrimonio 20923, 6 órdenes (1 parciales), peor caso 759 de 2262 ciclos
+PASS COP_308673 a 0,1 ms: 4/4, decisiones.csv idéntico a ref/c1/c1.py (20000 filas con caja, acciones y patrimonio), monitor 20000 ticks y 0 diferencias, patrimonio 28242, 13 órdenes (1 parciales), peor caso 807 de 2262 ciclos
+PASS CVX_429203 a 0,1 ms: 4/4, decisiones.csv idéntico a ref/c1/c1.py (20000 filas con caja, acciones y patrimonio), monitor 20000 ticks y 0 diferencias, patrimonio 10289, 10 órdenes (3 parciales), peor caso 759 de 2262 ciclos
+PASS C_348318 a 0,1 ms: 4/4, decisiones.csv idéntico a ref/c1/c1.py (20000 filas con caja, acciones y patrimonio), monitor 20000 ticks y 0 diferencias, patrimonio 11950, 2 órdenes (0 parciales), peor caso 735 de 2262 ciclos
+PASS EL_332787 a 0,1 ms: 4/4, decisiones.csv idéntico a ref/c1/c1.py (20000 filas con caja, acciones y patrimonio), monitor 20000 ticks y 0 diferencias, patrimonio 11197, 8 órdenes (1 parciales), peor caso 759 de 2262 ciclos
+PASS MCD_343483 a 0,1 ms: 4/4, decisiones.csv idéntico a ref/c1/c1.py (20000 filas con caja, acciones y patrimonio), monitor 20000 ticks y 0 diferencias, patrimonio 12238, 8 órdenes (3 parciales), peor caso 783 de 2262 ciclos
+PASS control negativo meta a 0,1 ms: con D_CAJA apuntando a D_ACC el monitor ve 20000 ticks con diferencia (primero en el 0); el testbench oficial sigue en 4/4
+PASS control negativo meta a 0,1 ms: comparando el programa del tick n con la maestra del tick n-1 (una orden ejecutada un tick tarde) el monitor ve 1953 ticks con diferencia (primero en el 8234); el testbench oficial sigue en 4/4
+
+PASS: 28 de 28 corridas (279 s)

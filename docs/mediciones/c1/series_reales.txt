@@ -1,0 +1,58 @@
+C1, banda 40, banda 60 y el rival de Tesla en la serie de práctica Meta y en las series de la clase del 18/11
+Generado por tools/c1/series_reales.py (make c1-series-reales). No editar a mano.
+
+Meta (20000 ticks, data/practica_meta.csv)
+  C1: patrimonio 22682, 6 órdenes
+    tick 8234, precio 222, compra 22 (byte 56), decidida en fase A
+    tick 10966, precio 250, venta 63 (byte BF), decidida en candado (extremo visto)
+    tick 17085, precio 100, compra 63 (byte 7F), decidida en candado (extremo visto)
+    tick 17086, precio 101, compra 63 (byte 7F), decidida en candado (extremo visto)
+    tick 19084, precio 216, venta 63 (byte BF), decidida en candado (extremo visto)
+    tick 19085, precio 215, venta 63 (byte BF), decidida en candado (extremo visto)
+  Banda 40: patrimonio 21392, 4 órdenes
+  Banda 60: patrimonio 19214, 4 órdenes
+  UnaVez 100 220: patrimonio 21752, 4 órdenes
+
+Tesla (20000 ticks, build/reales/tesla.csv)
+  C1: patrimonio 21224, 8 órdenes
+    tick 5030, precio 137, compra 63 (byte 7F), decidida en motor (extremo visto)
+    tick 5031, precio 137, compra 63 (byte 7F), decidida en motor (extremo visto)
+    tick 5060, precio 140, venta 63 (byte BF), decidida en candado (extremo visto)
+    tick 5061, precio 141, venta 63 (byte BF), decidida en candado (extremo visto)
+    tick 12041, precio 103, compra 63 (byte 7F), decidida en candado (extremo visto)
+    tick 12042, precio 104, compra 63 (byte 7F), decidida en candado (extremo visto)
+    tick 19487, precio 216, venta 63 (byte BF), decidida en candado (extremo visto)
+    tick 19488, precio 216, venta 63 (byte BF), decidida en candado (extremo visto)
+  Banda 40: patrimonio 20795, 4 órdenes
+  Banda 60: patrimonio 18779, 4 órdenes
+  UnaVez 100 220: patrimonio 21467, 4 órdenes
+
+AMD (20000 ticks, build/reales/amd.csv)
+  C1: patrimonio 27199, 11 órdenes
+    tick 3589, precio 142, compra 63 (byte 7F), decidida en motor (extremo visto)
+    tick 3590, precio 142, compra 63 (byte 7F), decidida en motor (extremo visto)
+    tick 3677, precio 146, venta 63 (byte BF), decidida en candado (extremo visto)
+    tick 3678, precio 146, venta 63 (byte BF), decidida en candado (extremo visto)
+    tick 5052, precio 100, compra 63 (byte 7F), decidida en candado (extremo visto)
+    tick 5053, precio 101, compra 63 (byte 7F), decidida en candado (extremo visto)
+    tick 8230, precio 216, venta 63 (byte BF), decidida en candado (extremo visto)
+    tick 8231, precio 216, venta 63 (byte BF), decidida en candado (extremo visto)
+    tick 10964, precio 140, compra 63 (byte 7F), decidida en candado (extremo visto)
+    tick 10965, precio 140, compra 63 (byte 7F), decidida en candado (extremo visto)
+    tick 10966, precio 140, compra 63 (byte 7F), decidida en candado (extremo visto)
+  Banda 40: patrimonio 26470, 8 órdenes
+  Banda 60: patrimonio 21895, 6 órdenes
+  UnaVez 100 220: patrimonio 21824, 4 órdenes
+
+Comprobaciones
+PASS Banda 60 en Tesla: 18779 (esperado 18779, lo que mostró la maestra el 18/11)
+PASS Banda 60 en AMD: 21895 (esperado 21895, lo que mostró la maestra el 18/11)
+PASS Banda 40 en Meta: 21392 (esperado 21392, docs/decisiones.md, T140)
+PASS Banda 40 en Tesla: 20795 (esperado 20795, docs/decisiones.md, T140)
+PASS Banda 40 en AMD: 26470 (esperado 26470, docs/decisiones.md, T140)
+PASS UnaVez 100 220 en Tesla: 21467 (esperado 21467, el rival de la ronda de Tesla)
+PASS C1 en Meta: la primera orden es (8234, 222, 86) en fase A (esperado: tick 8234, precio 222, compra de 22 en la fase A)
+PASS C1 en Meta: la segunda orden va en el tick 10966 (esperado 10966)
+PASS C1 en Meta: patrimonio final 22682 con 6 órdenes (esperado 22682 con 6)
+
+PASS: 0 comprobaciones falladas

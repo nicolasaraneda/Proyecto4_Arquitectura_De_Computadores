@@ -762,7 +762,7 @@ check-p8: medidor p8-matriz-rapida
 #   igual a su referencia. Corre en la integración continua.
 # peldano-probar: el cambio a R1 (o R2) hecho en una copia, con el comando
 #   oficial y otras pruebas después del cambio. No toca este árbol.
-# peldano-fijar: el cambio de verdad, en este árbol, sin commit. Después del 26/11.
+# peldano-fijar: el cambio de verdad, en este árbol, sin commit. Después del miércoles 25/11, por confirmar.
 .PHONY: peldano-oficial peldano-probar peldano-fijar
 PELDANO ?= r1
 peldano-oficial:
@@ -911,7 +911,7 @@ zscore-reservada: zscore-arnes zscore-series
 ensayo:
 	$(PYTHON) tools/ensayo.py --jobs 5
 
-# Registrador de la maestra para el 26/11 (docs/registrador.md): testbench, controles
+# Registrador de la maestra para el miércoles 25/11, por confirmar (docs/registrador.md): testbench, controles
 # negativos, 10 semillas, bitstream, simulación del bitstream ruteado y prueba de
 # tools/registrador.py (unos 6 minutos). Resultado en docs/mediciones/registrador.txt.
 .PHONY: registrador
@@ -981,7 +981,7 @@ asic-barrel-imagen:
 # Decisión T151 (21/11): opción A, se construye. Las puertas están en tools/c1 y
 # su estado en docs/puertas.md. R0, R1 y R2 no cambian.
 .PHONY: c1-modelo c1-generar c1-contra-exploracion c1-sim c1-meta c1-timing c1-cosim c1-tb-tabla c1-puerta-a c1-puerta-b \
-        c1-oficial c1-series c1-fases c1-criterio5 c1-degradacion c1-controles c1-estres c1-ticks c1-contabilidad c1-bitstreams c1-puerta check-c1
+        c1-oficial c1-series c1-fases c1-criterio5 c1-degradacion c1-controles c1-estres c1-ticks c1-contabilidad c1-contabilidad-rtl c1-series-reales c1-bitstreams c1-puerta check-c1
 C1_DEFS := -DESPINO_BARREL -DESPINO_XD_EMAD -DESPINO_XD_DEVK -DESPINO_TABLA -DESPINO_TABLA_512 -DESPINO_VIGILANTE
 C1_SIM  := $(BUILD)/c1/r3/obj/sim
 # Tablas desde el modelo del paseo normalizado (menos de 10 minutos la primera vez)
@@ -1046,6 +1046,14 @@ c1-ticks:
 # la cuenta emulada contra la de la maestra tick a tick (docs/mediciones/c1/contabilidad.txt)
 c1-contabilidad:
 	$(PYTHON) tools/c1/contabilidad.py -o docs/mediciones/c1/contabilidad.txt
+# R3 por el RTL contra el testbench oficial con un monitor de la cuenta emulada (0,1 y 1 ms,
+# 13 series de 20 000 ticks; unos 7 minutos con 22 procesos). Por la cola de lo pesado
+c1-contabilidad-rtl:
+	$(PYTHON) tools/c1/contabilidad_rtl.py
+# C1, banda 40, banda 60 y el rival de Tesla en Meta, Tesla y AMD, y lo que se mira en la
+# maestra con la serie de práctica Meta a 10 ms (docs/c1_dia_de_prueba.md, sección 10)
+c1-series-reales:
+	$(PYTHON) tools/c1/series_reales.py -o docs/mediciones/c1/series_reales.txt
 # Criterio 8 y molde: síntesis de R3 y de su molde, icebram, simulación desde el
 # .asc, vigilante dentro del bitstream e imagen múltiple con R0 (unos 20 minutos)
 c1-bitstreams:
