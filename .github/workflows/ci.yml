@@ -199,12 +199,14 @@ jobs:
       - name: Instalar LaTeX
         run: sudo apt-get update && sudo apt-get install -y --no-install-recommends texlive-latex-recommended texlive-latex-extra texlive-lang-spanish texlive-pictures texlive-fonts-recommended lmodern latexmk
 
-      - name: Informe con el diseño por defecto y con R1
+      - name: Informe con el diseño por defecto, con R1 y con R2
         run: |
           make informe
           cp informe/informe.pdf informe_por_defecto.pdf
           make informe PELDANO_INFORME=r1
           cp informe/informe.pdf informe_r1.pdf
+          make informe PELDANO_INFORME=r2
+          cp informe/informe.pdf informe_r2.pdf
 
       - uses: actions/upload-artifact@v4
         with:
@@ -212,6 +214,7 @@ jobs:
           path: |
             informe_por_defecto.pdf
             informe_r1.pdf
+            informe_r2.pdf
 
   # Ejecución manual: la corrida completa con el simulador del testbench oficial
   equiv-icarus:
