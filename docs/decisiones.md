@@ -867,3 +867,12 @@ Tomadas por mí siguiendo el encargo de T151. Detalle en `docs/c1_plan.md` y `do
 - **Alternativas** (no elegidas): comprar minutos de Actions o subir el límite de gasto del repositorio privado; seguir privado y correr la integración continua solo en local (`docs/mediciones/ci_local_c1.txt` ya muestra esa corrida de 27 pasos).
 - **Qué se pierde.** Mientras el repositorio sea público, cualquier persona puede leer el algoritmo de C1, las tablas, los bitstreams y las referencias antes de la competencia del 1/12. Es el riesgo que Nicolás acepta con su razón.
 - **Documentos que quedan desactualizados** (no se tocaron en esta sesión): `docs/checklist_1dic.md`, sección "29/11: acceso al repositorio privado", que supone un repositorio privado al que hay que invitar al profesor y a los ayudantes.
+
+### T159. Definición de operación útil de R3 en la escalera (26/11)
+
+- **Decisión técnica** tomada al armar la tabla de la escalera de R3 con las definiciones de la clase 7. Detalle en `docs/bitacora/c1.md`, duodécima parte (26/11), y salida en `docs/mediciones/c1/ops_roofline.txt`.
+- **Definición.** En C1 la cantidad de trabajo depende de los datos, así que no se cuenta a mano como en la banda 40. Una operación útil de R3 es una instrucción aritmética, lógica o de comparación de los cuatro hilos, fuera de las esperas y de la telemetría. No cuentan loads, stores, saltos, `li`, `la` ni `mv`. En los lazos en que un hilo espera el dato de otro se cuenta una sola pasada por tick. El conteo se hace sobre el perfil (encabezado de `tools/report_c1.py`).
+- **Resultado.** 146,4 operaciones útiles por tick, 6,89 MOPS y 0,39 Op/B.
+- **Escala distinta a la de la banda 40.** Las 11 operaciones de la banda 40 se contaron a mano (decisión de Nicolás del 21/11, T155). El conteo de R3 es más amplio: aplicado a la banda 40 da 21 operaciones por tick, con 10,50 MOPS en R0 y 3,12 en R2. La tabla de la escalera marca la fila de R3 y su pie da R0 y R2 en esta misma escala, para que la comparación sea entre números contados igual.
+- **Alternativas** (no elegidas): contar a mano las operaciones de C1, que no tiene un número fijo por tick; contar todas las instrucciones fuera de la espera del precio, que mide instrucciones por segundo y no trabajo útil, lo que la clase 7 advierte no hacer; aplicar a R3 la definición manual de la banda 40, que no existe para las cuentas, la volatilidad ni la tabla.
+- **Qué se pierde.** Los MOPS de R3 no se comparan directo con los de la banda 40 en la escala manual (11 operaciones); solo con la fila marcada en la escala amplia.
