@@ -597,7 +597,7 @@ def perfil_r3(mc, num, resp):
     mc.poner("TrabajoSerie", num(serie, 0), o)
     mc.poner("TrabajoSerieCiclos", num(4 * serie, 0), o)
     mc.poner("EsperaHiloCero", num(vueltas[0] * 4 / nticks, 0), o)
-    return dict(ops=ops_t, mops=mops, inten=inten, k_cic=k_cic, k_ic=k_ic)
+    return dict(ops=ops_t, mops=mops, inten=inten, k_cic=k_cic, k_ic=k_ic, banda=banda, mops_r0=mops_r0, mops_r2=mops_r2)
 
 
 def punto_33(mc, tabla, num, hw, resp, p):
@@ -616,15 +616,17 @@ def punto_33(mc, tabla, num, hw, resp, p):
                       f(v["mops_logrado"]), f(v["ppeak_mops"], 2).replace("{,}00", "").replace("{,}50", "{,}5"), f(v["uso_r3_pct"], 1)])
     filas.append("---")
     filas.append(["R3: tabla de 512 palabras", f"{num(hw['celdas'])} / {hw['lut4']} / {hw['bram']}", num(hw["fmin"], 2),
-                  f"{num(resp['prom'], 1)} / {resp['peor']}", "4{,}00", num(p["ops"], 1), num(p["mops"], 2), "25",
+                  f"{num(resp['prom'], 1)} / {resp['peor']}", "4{,}00", num(p["ops"], 1) + "$^*$", num(p["mops"], 2) + "$^*$", "25",
                   num(100.0 * resp["peor"] / PRESUPUESTO[3], 1)])
     ancha(tabla, os.path.join(G, "t33r3.tex"),
           ["Peldaño", "Celdas / LUT4 / BRAM", "$f_{\\max}$ (MHz)", "Resp. prom. / peor", "CPI",
            "Ops/tick", "MOPS", "$P_{peak}$", "\\% presup."], filas, "lrrrrrrrr",
           "R0 a R2 corren la banda 40 y R3 corre C1. Recursos: 10 semillas de nextpnr a 25 MHz, todas cierran; $f_{\\max}$ es la "
-          "mínima. Respuesta en ciclos, serie de práctica a 0,1 ms; \\% presup.: peor caso sobre los 2\\,262 ciclos de la ronda 3. "
-          "CPI del kernel (4 por hilo en el barrel). MOPS = operaciones útiles $\\times$ 25 MHz / ciclos del kernel. Fuentes: "
-          "\\texttt{docs/mediciones/p7/cotas/variantes.txt}, \\texttt{docs/mediciones/c1/timing.txt} y \\texttt{ops\\_roofline.txt}.")
+          "mínima. Respuesta en ciclos, práctica a 0,1 ms; \\% presup.: peor caso sobre 2\\,262 ciclos. CPI del kernel (4 por hilo "
+          "en el barrel). MOPS = operaciones útiles $\\times$ 25 MHz / ciclos del kernel. Fuentes: "
+          "\\texttt{docs/mediciones/p7/cotas/variantes.txt}, \\texttt{docs/mediciones/c1/timing.txt} y \\texttt{ops\\_roofline.txt}. "
+          f"$^*$R3 usa otra definición de operación útil, el conteo por clase de instrucción: en esa escala la banda 40 tiene "
+          f"{num(p['banda'])} operaciones y no 11, R0 logra {num(p['mops_r0'], 2)} MOPS y R2 {num(p['mops_r2'], 2)}.")
     o = "docs/mediciones/p7/cotas/variantes.csv"
     mc.poner("RceroRespProm", f(var["r0"]["resp_prom_ciclos"], 1), o)
     mc.poner("RceroRespPeor", var["r0"]["resp_peor_ciclos"], o)

@@ -195,7 +195,7 @@ hilo 0: escribe DECISION, publica D_ORD
 
 **Vigilante y relevo.** Si el hilo 0 deja de escribir `DECISION` durante 5 precios seguidos, el vigilante reconfigura la FPGA con `SB_WARMBOOT` y arranca la imagen 1 de la flash, que es R0 con la banda 40. En R3 con el hilo 0 colgado en el tick 100 el relevo se pide al terminar la transacción 105 (`bitstreams/README.md`). El relevo de R2 se midió en la placa en 35,50 ms (`docs/mediciones/placa_16nov.md`).
 
-**Por qué R2 usa un hilo y R3 cuatro.** La banda 40 son unas 42 instrucciones por tick: en el hilo 0 responde en 127 ciclos y los otros tres hilos quedan en espera. El trabajo de C1 en un solo hilo serían del orden de 470 instrucciones por tick en promedio y 700 en el peor caso, a 4 ciclos cada una: entre 1 900 y 2 800 ciclos, contra 2 262 de la ronda 3. Repartido en cuatro hilos que avanzan en paralelo, el peor tick queda en 807 (`docs/defensa/c1.md`, pregunta 9).
+**Por qué R2 usa un hilo y R3 cuatro.** La banda 40 son unas 42 instrucciones por tick: en el hilo 0 responde en 127 ciclos y los otros tres hilos quedan en espera. El trabajo de C1 son 369 instrucciones por tick en promedio sin contar esperas: en un solo hilo del barrel, a 4 ciclos cada una, serían unos 1 477 ciclos en promedio, sobre los 1 131 que la puerta de simulación pone como límite (`docs/mediciones/c1/ops_roofline.txt`). Es una estimación: ese programa no se escribió y su peor caso no se midió. Repartido en cuatro hilos que avanzan en paralelo, la respuesta promedio es de 529,9 ciclos y el peor tick queda en 807 (`docs/defensa/c1.md`, pregunta 9).
 
 ## 7. Hardware de R0 a R3
 
@@ -269,7 +269,10 @@ No se necesitan herramientas de RISC-V: el ensamblador es propio. El informe nec
 python3 tools/pochoasm.py sw/trade.s -o sw/trade.hex      # R0, o make asm
 make fondo-hex                                            # R1 y R2
 python3 tools/c1/generar.py --check                       # R3: sw/c1.s y sw/c1_tabla.hex al día
+mkdir -p build/c1 && python3 tools/pochoasm.py sw/c1.s -o build/c1/c1.hex   # R3: el programa que compite
 ```
+
+`sw/trade.s` es la versión base: la banda 40 en el Espino del curso (R0), y es lo que corre el comando oficial del testbench. El programa que compite es `sw/c1.s` (C1 en R3): necesita el hardware de R3, así que su testbench oficial se corre con `make c1-oficial` y no con el comando por defecto.
 
 La sintaxis del ensamblador y sus extensiones están en `docs/ensamblador.md`; sus tests, en `make test-asm`.
 
@@ -286,7 +289,7 @@ vvp -n /tmp/tb_p4
 | `make check` | Ensamblador, referencia y testbench oficial de R0 |
 | `make equiv` | R0 contra la referencia, byte a byte |
 | `make check-fondo HW=r2` | R1 o R2, versión corta de la puerta |
-| `make c1-oficial` | El testbench oficial con R3 |
+| `make c1-oficial` | El testbench oficial, sin modificar, con R3 y `sw/c1.s`: el diseño que compite |
 | `make check-c1` | R3, versión corta (la de la integración continua) |
 | `make c1-puerta` | Las cuatro puertas de R3 completas; necesita los datos de `$P4_DATOS` |
 

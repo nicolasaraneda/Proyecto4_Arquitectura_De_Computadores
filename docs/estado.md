@@ -2,6 +2,27 @@
 
 Se actualiza al cerrar cada tramo de trabajo. La versión anterior queda en el historial de git.
 
+## Tramo 24: el informe describe C1 en R3 (26/11, rama `main`)
+
+**Qué quedó hecho.** El informe se reescribió con C1 en R3 como el diseño que compite (encargo de Nicolás del 26/11); la banda 40 queda como base y respaldo, y R0 a R2 como la escalera de co-diseño. R3 es el cuarto peldaño del sistema de condicionales: `make informe PELDANO_INFORME=r3` usa el cuerpo `informe/informe_r3.tex` y las cifras de `informe/generado/cifras_c1.tex`, que genera `tools/report_c1.py` con el archivo de origen al lado de cada una y comprobaciones cruzadas (si una cifra, un parámetro o un número de línea citado deja de calzar, el informe no se genera). R0, R1 y R2 compilan como antes: el texto del PDF de R2 es idéntico al anterior. `INFORME_SALIDA=carpeta` compila sin tocar `informe/informe.pdf`. Los registros del examen de C1 y de las 100 acciones ajenas se copiaron de la rama `minutos-reales` (commit `17d7284`) a `docs/mediciones/c1/c1_examen.txt` y `v5_finalistas.txt`. El commit del informe es `419fcb0`. Después: README y `docs/defensa/c1.md` corregidos (C1 en un solo hilo y dos citas de línea), el README dice que `sw/trade.s` es la versión base y que compite `sw/c1.s` con `make c1-oficial`, y la tabla de la escalera marca que R3 usa otra definición de operación útil. Detalle en `docs/bitacora/c1.md`, duodécima parte. No se tocó `rtl/`, `sw/` ni `bitstreams/`.
+
+**Qué se midió.** Desempeño logrado, roofline y Amdahl de R3, sobre el perfil por dirección que ya estaba guardado (`docs/mediciones/c1/ops_roofline.txt`, segundos de máquina):
+
+| Qué | Valor |
+|-----|-------|
+| Operaciones útiles de C1 por tick, conteo por clase de instrucción | 146,4 |
+| Desempeño logrado de R3 | 6,89 MOPS, con techo de 25 |
+| Intensidad operacional | 0,39 Op/B, a la derecha del quiebre de 0,25 |
+| La banda 40 con ese mismo conteo | 21 operaciones y no 11: R0 10,50 MOPS y R2 3,12 |
+| Rutina `ejecutar` del hilo 3 | 154,7 ciclos por tick, 29,2 % de la respuesta: speedup de la respuesta a lo más 1,41 (predicción, la variante no se construyó) |
+| Trabajo de los cuatro hilos sin contar esperas | 369 instrucciones por tick: unos 1 477 ciclos en promedio en un solo hilo del barrel (estimación) |
+
+El informe de R3 tiene 8 páginas (el anterior, 6) y compila sin errores ni referencias sin definir.
+
+**Qué falta.** (1) `docs/defensa/preguntas.md`, preguntas 160 y 176, todavía trae las citas de línea 383 y 530 y la cifra vieja de C1 en un hilo (470 a 700 instrucciones, 1900 a 2800 ciclos). (2) El README (sección 11) y `docs/puertas.md` dicen que el peldaño que compite no está decidido, y el informe describe R3 como el que compite: falta registrar la decisión de Nicolás o ajustar esos dos textos. (3) Las tablas anchas de las versiones R0, R1 y R2 del informe salen ilegibles, porque la nota queda dentro del cuadro que se reescala; en R3 está corregido con la nota en un archivo aparte. (4) La integración continua compila el informe de R0, R1 y R2, no el de R3. (5) `tools/peldano.py` no conoce R3: el comando oficial del testbench corre R0. (6) Sigue sin verificarse R3 con la maestra real a 1 ms y a 0,1 ms, y el SCLK.
+
+**Qué conviene después.** Corregir `docs/defensa/preguntas.md` antes de estudiar, porque es lo que el grupo va a repetir en la defensa y hoy contradice al informe en la pregunta de por qué cuatro hilos. Después, dejar escrita la decisión del peldaño, para que el README, `docs/puertas.md` y el informe digan lo mismo.
+
 ## Tramo 23: el día de prueba con la maestra (25/11, rama `main`)
 
 **Qué quedó hecho.** Registro del día de prueba en `docs/bitacora/c1.md` (undécima parte), `docs/puertas.md` (sección "Puerta de maestra: el 25/11") y este archivo. Decisiones T157 (`c1` integrada a `main`, que pasa a ser la rama de trabajo) y T158 (el repositorio se hace público hoy) en `docs/decisiones.md`. Borrador nuevo del README con el estado y los resultados de la maestra real. No se tocó `rtl/`, `sw/` ni `bitstreams/`.

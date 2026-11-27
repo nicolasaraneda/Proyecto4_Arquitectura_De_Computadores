@@ -182,7 +182,7 @@ Además del Espino base se construyeron, verificaron y midieron cinco alternativ
 
 Del Espino base al segmentado la respuesta baja a la mitad con menos celdas, y del segmentado al barrel sube casi cuatro veces, porque un programa de un solo hilo usa uno de cada cuatro ciclos. R2 es el peldaño de menor desempeño logrado, \ctresRdosMops{} MOPS contra \ctresRceroMops{} de R0, porque tres de sus cuatro hilos esperan. R3 rompe la tendencia en los dos sentidos: es el que más tarda en responder, \ctresRespPeor{} ciclos contra \ctresRdosRespPeor{} de R2, y el único que ocupa los cuatro hilos. La fila de R2 es la síntesis de su bitstream; sintetizado con su programa actual ocupa \ctresCeldasRdosMismaSintesis{} celdas (\arch{docs/mediciones/fondo/r2/timing.txt}), así que la tabla de 512 palabras cuesta \ctresCeldasSobreRdos{} celdas y un BRAM.
 
-\textbf{Operación útil.} En la banda 40 son las 11 operaciones de la regla por tick, contadas a mano: 4 comparaciones con los umbrales, 2 que recuerdan los extremos vistos, 1 que los reúne y 4 que arman comprar y vender (\arch{tools/p7/cotas.py}). En C1 la cantidad depende de los datos, y se cuentan sobre el perfil las instrucciones aritméticas, lógicas y de comparación de los cuatro hilos; no cuentan loads, stores, saltos, cargas de constantes, esperas ni telemetría. Son \ctresOps{} por tick y \ctresMops{} MOPS (\arch{docs/mediciones/c1/ops\_roofline.txt}). Ese conteo es más amplio que el manual: aplicado a la banda 40 da \ctresOpsBandaPorClase{} operaciones, \ctresMopsRceroPorClase{} MOPS en R0 y \ctresMopsRdosPorClase{} en R2. En la misma escala, R3 logra \ctresMopsSobreRdos{} veces el trabajo útil por segundo de R2 con el mismo procesador, y queda debajo de R0.
+\textbf{Operación útil.} En la banda 40 son las 11 operaciones de la regla por tick, contadas a mano: 4 comparaciones con los umbrales, 2 que recuerdan los extremos vistos, 1 que los reúne y 4 que arman comprar y vender (\arch{tools/p7/cotas.py}). En C1 la cantidad depende de los datos, y se cuentan sobre el perfil las instrucciones aritméticas, lógicas y de comparación de los cuatro hilos; no cuentan loads, stores, saltos, cargas de constantes, esperas ni telemetría. Son \ctresOps{} por tick y \ctresMops{} MOPS (\arch{docs/mediciones/c1/ops\_roofline.txt}). Ese conteo es más amplio que el manual, y el pie de la tabla da a R0 y R2 en esa escala: R3 logra \ctresMopsSobreRdos{} veces el trabajo útil por segundo de R2 con el mismo procesador, y queda debajo de R0.
 
 \subsection{En qué se gastan los ciclos y qué predice Amdahl}
 
@@ -200,13 +200,13 @@ En R3 el perfil por hilo y por rutina (\arch{docs/mediciones/c1/perfil\_hilos.tx
 En el roofline (figura~\ref{fig:roofline}) el ancho de banda de Pochoco es $B_s = 4$~B por ciclo a 25\,MHz, \pSieteBs\,MB/s. Cada variante tiene su techo $P_{peak} = f \times \text{instrucciones por ciclo} \times \text{operaciones por instrucción}$: 12,5 MOPS el Espino base, 25 el segmentado, 6,25 el barrel con un hilo útil y 25 el barrel con sus cuatro hilos. Todos los kernels quedan a la derecha del quiebre de su variante, limitados por cómputo y no por memoria, y ninguno llega a su techo porque leer, escribir, saltar y esperar no son operaciones útiles. R3 queda en \ctresIntensidad\,Op/B, con menos operaciones por byte que la banda 40 de R0 porque los hilos se pasan los datos por memoria.
 
 \begin{figure}[H]\centering
-\resizebox{0.74\linewidth}{!}{\input{generado/roofline_r3.tex}}
+\resizebox{0.68\linewidth}{!}{\input{generado/roofline_r3.tex}}
 \caption{Roofline de Espino con los techos de cada variante. En azul, el kernel de la banda 40 en cada peldaño; en rojo, el de C1 en R3, con el conteo por clase de instrucción.}\label{fig:roofline}
 \end{figure}
 
 \subsection{PLL}
 
-El encapsulado VQ100 de la Go Board no tiene PLL: nextpnr termina con \emph{PLL couldn't be placed anywhere, no suitable BEL found} (\arch{docs/mediciones/p7/pll.txt}). Un duplicador de reloj por lógica cierra timing en \pSieteDobleSemillas{} de \pSieteDobleSemillasTotal{} semillas con el segmentado y en ninguna con el Espino base (\arch{docs/mediciones/p7/negativos.txt}). No se subió la frecuencia, y el presupuesto de cada ronda es el de 25\,MHz.
+El encapsulado VQ100 de la Go Board no tiene PLL: nextpnr termina con \emph{PLL couldn't be placed anywhere, no suitable BEL found} (\arch{docs/mediciones/p7/pll.txt}). Un duplicador de reloj por lógica cierra timing en \pSieteDobleSemillas{} de \pSieteDobleSemillasTotal{} semillas con el segmentado y en ninguna con el Espino base (\arch{docs/mediciones/p7/negativos.txt}), así que el presupuesto de cada ronda es el de 25\,MHz.
 
 \subsection{Variante final: por qué compite la más lenta}
 
