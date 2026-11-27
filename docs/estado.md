@@ -2,6 +2,24 @@
 
 Se actualiza al cerrar cada tramo de trabajo. La versión anterior queda en el historial de git.
 
+## Tramo 23: el día de prueba con la maestra (25/11, rama `main`)
+
+**Qué quedó hecho.** Registro del día de prueba en `docs/bitacora/c1.md` (undécima parte), `docs/puertas.md` (sección "Puerta de maestra: el 25/11") y este archivo. Decisiones T157 (`c1` integrada a `main`, que pasa a ser la rama de trabajo) y T158 (el repositorio se hace público hoy) en `docs/decisiones.md`. Borrador nuevo del README con el estado y los resultados de la maestra real. No se tocó `rtl/`, `sw/` ni `bitstreams/`.
+
+**Qué se midió.** Nada en esta sesión. Lo registrado es lo que informó Vicente (Nicolás no estuvo), solo a 10 ms, sin medidor y sin rondas de 1 ms ni de 0,1 ms:
+
+| Serie a 10 ms | Placa | C1 en simulación | Banda 40 |
+|---------------|-------|------------------|----------|
+| Meta, febrero de 2022 | 22 682 con 6 órdenes | 22 682 con 6 | 21 392 con 4 |
+| Tesla, enero de 2022 | 21 224 con 8 órdenes | 21 224 con 8 | 20 795 |
+| AMD, enero de 2022 | 8 315 con 1 orden | 27 199 con 11 | 26 470 con 8 |
+
+Meta y Tesla son idénticos a la simulación de C1: la apuesta de la fase A queda confirmada en la placa, con su orden parcial. AMD no calza con C1 ni con la banda 40: una sola compra de 48 acciones a unos 208, nunca vendió, decisión final 0x7F. Causa sin explicar (hipótesis de Nicolás: mala conexión en el puerto de esa ronda, que no fue el de las otras dos, o un bitstream distinto). Vicente dice que en Meta corrió R2, pero los números son de C1. Rivales en esa clase: 23 215 en Meta y 21 659 en Tesla.
+
+**Qué falta.** (1) Explicar la ronda de AMD: sin hash grabado ni lectura de la placa, solo se puede repetir con el mismo puerto y con el otro, leyendo los 7 segmentos y anotando el hash. (2) El SCLK de la maestra real y los ritmos de 1 ms y 0,1 ms, que son los que más exigen a R3. (3) Decidir qué peldaño compite: la regla del 21/11 pide que la caja y el patrimonio calcen en las rondas leídas y la de AMD no calzó. No hay decisión registrada. (4) `docs/checklist_1dic.md` supone un repositorio privado (T158). (5) La pasada de R3 en el informe.
+
+**Qué conviene después.** Antes de decidir el peldaño, repetir la ronda de AMD con la placa en el mismo puerto que Meta y Tesla: si da 27 199, la causa fue la conexión; si da 8 315, es del bitstream o del programa y hay que mirarlo. Es lo que más información da por menos trabajo.
+
 ## Tramo 22: etiqueta `v-maestra-25nov` y checklist de una página (22/11, rama `c1`)
 
 **Qué quedó hecho.** Decisión T156: el hardware y el algoritmo quedan congelados hoy y la etiqueta anotada `v-maestra-25nov` se crea sobre el último commit de `c1` (local, sin subir). Nombre y fecha actualizados en el plan de estudio, el resumen de defensa y `docs/checklist_26nov.md`; los registros históricos quedan como estaban. Nuevo `docs/checklist_25nov.md`: qué llevar, paso 0 con el medidor y su umbral, R2 con la banda 40, R3 con C1, la verificación con Meta a 10 ms, qué anotar y la regla de decisión. Commits sin subir antes de este tramo: 0.

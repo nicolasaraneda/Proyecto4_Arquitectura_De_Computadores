@@ -852,3 +852,18 @@ Tomadas por mí siguiendo el encargo de T151. Detalle en `docs/c1_plan.md` y `do
 - **Qué cambia.** El nombre de la etiqueta y la fecha del congelamiento en los documentos vigentes: `docs/defensa/plan_estudio.md` (calendario), `docs/defensa/resumen.md` y `docs/checklist_26nov.md` (paso 1). Nuevo `docs/checklist_25nov.md`, de una página, para el día de prueba; resume `docs/c1_dia_de_prueba.md` sin agregar pasos. La etiqueta es anotada y local: no se sube, la sube Nicolás.
 - **Qué no cambia.** T44 (las fechas se mueven una semana) y la bitácora siguen como estaban, con `v-maestra-26nov` donde lo dicen: eran el plan de entonces. Esta entrada es la que manda desde hoy.
 - **Qué se pierde.** El margen del 23 al 25/11 para cambiar hardware o algoritmo: lo que se descubra en esos días y exija tocarlos necesita una decisión nueva y una etiqueta nueva. Lo que sí sigue abierto es documentación, informe y defensa.
+
+### T157. `c1` se integra a `main` y `main` pasa a ser la rama de trabajo (25/11)
+
+- **Decisión de Nicolás** (25/11): la rama `c1` quedó integrada a `main` por avance rápido en `5cd03a3` (`main`, `c1`, `origin/main` y `origin/c1` apuntan al mismo commit) y desde hoy se trabaja en `main`. No se usa más `c1`.
+- **Qué cambia.** Los commits nuevos van a `main`. Las bitácoras y los registros anteriores que dicen "rama `c1`" quedan como estaban: eran el plan de entonces.
+- **Alternativas** (no elegidas): seguir en `c1` hasta la entrega, lo que deja `main` sin el hardware ni el algoritmo que compiten; integrar con un commit de fusión, que agrega un commit sin contenido nuevo.
+- **Qué se pierde.** Nada de lo medido. La rama `c1` sigue existiendo en local y en `origin` por si hace falta volver a un punto.
+
+### T158. El repositorio se hace público hoy, antes de la entrega (25/11)
+
+- **Decisión de Nicolás** (25/11), con su razón textual: "nadie lo va a ver". Motivo práctico: a la integración continua del repositorio privado se le acabaron los minutos de GitHub Actions, y en un repositorio público corre gratis.
+- **Qué cambia.** La instrucción original del proyecto era mantenerlo privado hasta la entrega porque es una competencia (sección 7 de las instrucciones). Esa regla queda sin efecto desde hoy. La visibilidad se cambia en GitHub y la cambia Nicolás: esta sesión no la modificó.
+- **Alternativas** (no elegidas): comprar minutos de Actions o subir el límite de gasto del repositorio privado; seguir privado y correr la integración continua solo en local (`docs/mediciones/ci_local_c1.txt` ya muestra esa corrida de 27 pasos).
+- **Qué se pierde.** Mientras el repositorio sea público, cualquier persona puede leer el algoritmo de C1, las tablas, los bitstreams y las referencias antes de la competencia del 1/12. Es el riesgo que Nicolás acepta con su razón.
+- **Documentos que quedan desactualizados** (no se tocaron en esta sesión): `docs/checklist_1dic.md`, sección "29/11: acceso al repositorio privado", que supone un repositorio privado al que hay que invitar al profesor y a los ayudantes.

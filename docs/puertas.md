@@ -2,7 +2,7 @@
 
 Grupo: Nicolás Araneda, Vicente Calderón y Santiago Muñoz.
 
-Un bitstream sube a la escalera solo si pasa tres puertas, en orden: simulación, placa y maestra real (miércoles 25/11, por confirmar). Este documento dice cómo se comprueba cada criterio de la puerta de simulación y deja el estado de cada peldaño. La escalera y la razón de cada peldaño están en la decisión T50.
+Un bitstream sube a la escalera solo si pasa tres puertas, en orden: simulación, placa y maestra real (25/11). Este documento dice cómo se comprueba cada criterio de la puerta de simulación y deja el estado de cada peldaño. La escalera y la razón de cada peldaño están en la decisión T50.
 
 | Peldaño | Hardware | Programa | Archivo |
 |---------|----------|----------|---------|
@@ -287,3 +287,20 @@ El 18/11, en la clase, `bitstreams/r2_cotas_multi.bin` (R2 con la regla de cotas
 - **Qué respalda.** Los 21 895 de AMD y los 18 779 de Tesla son exactamente lo que da la referencia con banda 60 (`ref/trader.py`, `docs/decisiones.md:770`, `docs/bitacora/banda40.md:11`): con órdenes de 63, la maestra real usa caja 10 000 y comisión 5, ejecuta al precio del mismo tick en que lee el byte, recorta la compra a `(caja - 5) / p` y no cobra una orden que queda en cero. Las series de 0,1 ms y 1 ms no se registraron, así que esas dos cifras no tienen referencia con qué compararlas.
 - **Qué prueba del hardware.** El de R2 (barrel con la tabla, el vigilante y la imagen múltiple) recibió precios de la maestra real a los tres ritmos y operó en las tres rondas, con el primer lugar en las de 0,1 y 1 ms. Lo que informó Nicolás no dice si el vigilante hizo un relevo en alguna ronda.
 - **Qué no prueba.** No valida los tiempos SPI de R3: R2 responde en 128 ciclos (127 en el testbench oficial) y R3 en hasta 807 ciclos con los cuatro hilos sanos y 916 con un hilo colgado, así que con un SCLK lento R3 se queda sin tiempo antes que R2 (de ahí la regla de SCLK de `docs/c1_dia_de_prueba.md`, sección 2.2). Tampoco prueba la tabla de 512 palabras, que es hardware nuevo, ni las órdenes parciales (menos de 63) de la media posición de C1.
+
+## Puerta de maestra: el 25/11 (R3 con C1, a 10 ms)
+
+El 25/11 Vicente probó la placa con la maestra real, solo a 10 ms, sin el medidor del SPI y sin las rondas de 1 ms ni de 0,1 ms. Nicolás no estuvo: lo que sigue es lo que Vicente informó, sin registro de terminal en el repositorio. Detalle en `docs/bitacora/c1.md`, undécima parte.
+
+| Serie (10 ms) | Placa | Referencia de C1 | Banda 40 | Resultado |
+|---------------|-------|------------------|----------|-----------|
+| Meta, febrero de 2022 | 22 682 con 6 órdenes | 22 682 con 6 | 21 392 con 4 | Idéntico a C1 |
+| Tesla, enero de 2022 | 21 224 con 8 órdenes | 21 224 con 8 | 20 795 | Idéntico a C1 |
+| AMD, enero de 2022 (primera ronda) | 8 315 con 1 orden | 27 199 con 11 | 26 470 con 8 | **No calza** con ninguna de las dos |
+
+- **Qué respalda.** Que la maestra real ejecuta lo que emula R3, incluida una orden parcial: en Meta la compra de 22 acciones de la fase A (tick 8234, precio 222) es parte del 22 682. Con eso se cumple la verificación de `docs/c1_dia_de_prueba.md`, sección 10, y la apuesta de la fase A queda confirmada en la placa.
+- **Qué no prueba.** El SCLK de la maestra (el medidor no se usó), los ritmos de 1 ms y 0,1 ms, y la telemetría de la placa, que no se leyó.
+- **AMD, sin explicar.** Según Vicente la placa compró 48 acciones a unos 208 con una sola orden (caja 11), nunca vendió y terminó con la decisión 0x7F. En esa ronda la placa estaba en otra fila de la maestra (PMOD JA arriba y no JC). Hipótesis de Nicolás: mala conexión en ese puerto o un bitstream distinto. No se anotó el hash grabado y no se leyó la placa en esa ronda, así que ninguna está comprobada.
+- **Inconsistencia.** Vicente dice que en Meta corrió R2, pero los números son de C1 (R2 con banda 40 da 21 392). Sin hash grabado no se puede decidir cuál de los dos era.
+- **Rivales de la clase** (sin conocer su regla): 23 215 en Meta y 21 659 en Tesla, sobre nuestros 22 682 y 21 224 en esas rondas.
+- **Qué peldaño compite: sin decidir.** La regla de `docs/checklist_25nov.md`, sección 6, pide que la caja y el patrimonio calcen en las rondas leídas; la ronda de AMD no calzó. Queda para Nicolás.
