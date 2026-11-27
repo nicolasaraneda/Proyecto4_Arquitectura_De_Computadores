@@ -824,12 +824,17 @@ p7: p7-recursos p7-medir p7-rtl p7-pll p7-doble
 # report: rehace informe/generado/ (cifras y tablas) desde las referencias y
 #   docs/mediciones/, y compila el PDF si hay LaTeX (latexmk). El peldaño sale de
 #   rtl/00_peldano.v; sin él, de PELDANO (por defecto r0, como el comando oficial).
+#   La versión que se entrega es la de R3: make informe PELDANO_INFORME=r3.
+#   INFORME_SALIDA=carpeta deja el PDF y los archivos auxiliares en esa carpeta
+#   y no toca informe/informe.pdf.
 .PHONY: report informe
 report: p7-rapido informe
 informe: $(GEMELO) fondo-hex
 	$(PYTHON) tools/report.py $(if $(PELDANO_INFORME),--peldano $(PELDANO_INFORME))
 	@if command -v latexmk > /dev/null; then \
-	  cd informe && latexmk -pdf -interaction=nonstopmode -halt-on-error informe.tex > /dev/null && echo "informe/informe.pdf listo"; \
+	  $(if $(INFORME_SALIDA),mkdir -p $(INFORME_SALIDA) &&) cd informe && \
+	  latexmk -pdf -interaction=nonstopmode -halt-on-error $(if $(INFORME_SALIDA),-outdir=$(abspath $(INFORME_SALIDA))) informe.tex > /dev/null && \
+	  echo "$(if $(INFORME_SALIDA),$(INFORME_SALIDA),informe)/informe.pdf listo"; \
 	else echo "No hay LaTeX en esta maquina: el PDF lo compila la integracion continua (trabajo informe)"; fi
 
 # autoprueba-r1 / autoprueba-r2: lo mismo para R1 y R2 (docs/autoprueba.md,

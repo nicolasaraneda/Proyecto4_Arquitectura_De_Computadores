@@ -1,0 +1,13 @@
+% Generado por tools/report.py (make report). No editar a mano.
+\begin{tabular}{lrrrlrr}
+\toprule
+Hilo & IC mín. & IC prom. & IC máx. & Publica & Ciclo prom. & Ciclo máx. \\
+\midrule
+0, corredor & 100 & 132{,}7 & 196 & \texttt{D\_PUB} & 35{,}0 & 35 \\
+1, régimen & 110 & 118{,}7 & 133 & \texttt{D\_REG} & 130{,}0 & 536 \\
+2, política & 47 & 58{,}0 & 156 & \texttt{D\_TAB} & 270{,}9 & 665 \\
+3, emulador & 129 & 156{,}5 & 218 & \texttt{D\_POL} & 496{,}4 & 742 \\
+0, corredor &  &  &  & \texttt{DECISION} & 529{,}9 & 783 \\
+\bottomrule
+\end{tabular}
+\par\smallskip{\footnotesize Ronda 3, serie de práctica, por el RTL. IC: instrucciones del hilo por tick fuera de su lazo de espera del precio (CPI 4 por hilo). Ciclo: ciclos desde \texttt{byte\_done} hasta que el hilo publica. Fuente: \texttt{docs/mediciones/c1/ticks.txt}.}

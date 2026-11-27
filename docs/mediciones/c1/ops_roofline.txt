@@ -1,0 +1,34 @@
+Desempeno logrado, roofline y Amdahl de R3 (sw/c1.s), sobre el perfil por direccion del gemelo
+Generado por tools/report_c1.py (make informe PELDANO_INFORME=r3). No editar a mano.
+
+Perfil: docs/mediciones/c1/perfil/gemelo.txt (make p7-c1-perfil), serie data/practica_meta.csv, 20000 ticks a 0,1 ms,
+19998 ticks medidos. Las palabras del perfil son las de sw/c1.s ensamblado hoy.
+
+Definiciones (encabezado de tools/report_c1.py): operacion util = instruccion aritmetica, logica o de
+comparacion fuera de las esperas y de la telemetria; no cuentan loads, stores, saltos, li, la ni mv.
+Kernel = hilo 0, de leer PRICE a volver al sondeo. Bytes = loads y stores de los cuatro hilos fuera de
+los lazos de espera del precio. Trabajo = instrucciones fuera de la espera del precio, con una sola
+pasada por tick de los lazos en que un hilo espera el dato de otro; vueltas = las pasadas repetidas.
+
+ hilo   trabajo   vueltas  ops utiles    bytes   (por tick, promedio)
+    0     60.00     72.72       38.00   105.81
+    1    118.68      0.00       39.75   136.09
+    2     33.94     24.03       19.02    44.94
+    3    156.51      0.00       49.63    85.06
+ suma    369.13     96.75      146.40   371.89
+
+Llamadas a producto: 4731 para D y 19998 para la telemetria; a D se le asigna el 19.13 % de la rutina.
+Kernel del hilo 0: 132.72 instrucciones y 530.86 ciclos por tick (CPI 4.000).
+Desempeno logrado: 146.40 x 25 MHz / 530.86 = 6.895 MOPS. Ppeak 25 MOPS (cuatro hilos).
+Intensidad operacional: 146.40 / 371.89 = 0.3937 Op/B (quiebre de R3 en Ppeak / Bs = 0.25 Op/B).
+Con el mismo conteo por clase, la banda 40 tiene 21 operaciones por tick y no las 11 contadas a mano de la
+tabla de R0 a R2: en esa escala R0 logra 10.50 MOPS y R2 3.12, contra 6.89 de R3.
+
+Amdahl. El hilo 3 es el ultimo en publicar (D_POL) y el hilo 0 escribe DECISION apenas lo ve.
+Su rutina mas cara es `ejecutar` (las dos cuentas): 38.68 instrucciones y 154.73 ciclos por tick,
+f = 154.73 / 529.86 = 0.2920 de la respuesta promedio.
+S = 1 / ((1 - f) + f / F): con F = 2, 1.171; con F infinito, 1.412 (la respuesta bajaria de 529.86 a 375.13 ciclos).
+Es una prediccion: no se construyo una variante de R3 con la contabilidad acelerada.
+
+Trabajo de los cuatro hilos en serie: 369.13 instrucciones por tick; a 4 ciclos por instruccion en un solo hilo
+del barrel serian 1476.5 ciclos en promedio (estimado: el programa de un hilo no se escribio).

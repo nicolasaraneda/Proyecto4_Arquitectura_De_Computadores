@@ -8,6 +8,9 @@
 % partir de las referencias y de docs/mediciones/. El peldaño que compite (R0,
 % R1 o R2) se elige igual que el diseño por defecto del repositorio
 % (docs/peldano.md), y el texto que depende de él va en \ifpeldanofondo.
+% Con R3 (make informe PELDANO_INFORME=r3), que es la versión que se entrega, el
+% cuerpo completo es informe_r3.tex: C1 en los cuatro hilos, con R0 a R2 como la
+% escalera de co-diseño.
 \documentclass[11pt,a4paper]{article}
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
@@ -37,6 +40,9 @@
 \begin{document}
 \maketitle
 
+\ifpeldanotres
+\input{informe_r3.tex}
+\else
 \noindent Diseño descrito: \textbf{\cifraPeldano}. R0, R1 y R2 corren la misma regla, la de cotas con banda 40 (decisiones T133 y T140 de \arch{docs/decisiones.md}). \ifpeldanofondo R1 y R2 son el Espino barrel de cuatro hilos con una tabla de parámetros en BRAM\ifpeldanodos{} y un vigilante que reconfigura la FPGA con un respaldo\fi: el hilo 0 ejecuta la regla y los otros tres esperan (\arch{sw/fondo.s}, líneas 1 a 8).\else R0 es el Espino base del curso corriendo \arch{sw/trade.s}.\fi{} Cada número de este informe se regenera con \texttt{make report} desde el repositorio (commit \texttt{\commitinforme}); cada tabla indica su archivo de medición, y \arch{docs/comandos.md} el comando que produce cada uno.
 
 % ==============================================================================
@@ -226,6 +232,7 @@ El encapsulado VQ100 de la Go Board no tiene PLL: nextpnr termina con \emph{PLL 
 El diseño descrito es R2. En los términos del enunciado ninguna variante gana patrimonio: todas ejecutan la misma regla, responden antes del tick siguiente y toman las mismas decisiones. La más rápida es el segmentado, que responde en \pCotasRespPeorSeg{} ciclos en el peor caso contra \pCotasRespPeorRdos{} de R2, y R2 es la de menor desempeño logrado (\pCotasMopsRdos{} MOPS contra \pCotasMopsRcero{} de R0). No se elige por velocidad: cabe con margen (\pCotasCeldasRdos{} de 1\,280 celdas), usa el \cifraUsoPresuRondaTres\,\% del presupuesto de la ronda 3 y aporta lo que las otras no tienen, los umbrales en una BRAM que se cambia sin sintetizar de nuevo y un vigilante que reconfigura la FPGA con un respaldo si el hilo 0 deja de escribir. El riesgo queda cubierto con una escalera de respaldo en la que R0, el Espino base con la misma regla, está listo para grabar.
 \else
 El diseño descrito es R0, el Espino base con la regla de cotas. En los términos del enunciado ninguna variante gana patrimonio: todas ejecutan la misma regla, responden antes del tick siguiente y toman las mismas decisiones. La más rápida es el segmentado (\pCotasRespPeorSeg{} ciclos en el peor caso). R0 responde en \cifraRespPeor{} ciclos, el \cifraUsoPresuRondaTres\,\% del presupuesto de la ronda 3, no agrega hardware al core del curso y pasó la puerta de simulación completa (\arch{docs/puertas.md}). Las otras variantes quedan en el repositorio, medidas y verificadas, como edición de exhibición.
+\fi
 \fi
 
 \end{document}

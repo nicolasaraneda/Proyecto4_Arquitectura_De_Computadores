@@ -11,20 +11,21 @@ según el peldaño que compite (el algoritmo, el programa, las mediciones por
 tick) se elige con el mismo criterio que el comando oficial del testbench:
 
   - si existe rtl/00_peldano.v (make peldano-fijar), el peldaño es el suyo;
-  - si no, el de la variable PELDANO (r0, r1 o r2), y sin ella r0, que es lo
-    que hoy da el comando oficial.
+  - si no, el de la variable PELDANO (r0, r1, r2 o r3), y sin ella r0, que es
+    lo que hoy da el comando oficial. Con r3 se agregan las cifras y tablas de
+    C1 (tools/report_c1.py).
 
 Así, al fijar el peldaño que compite, make report regenera el informe solo.
 
 Salidas en informe/generado/:
   cifras.tex      macros con cada cifra que cita el texto (\\cifra...)
-  peldano.tex     \\peldano, y el condicional \\ifpeldanofondo
+  peldano.tex     \\peldano, y los condicionales \\ifpeldanofondo, \\ifpeldanodos e \\ifpeldanotres
   t31*.tex        tablas del punto 3.1
   t32*.tex        tablas del punto 3.2
   t33*.tex        tablas del punto 3.3 (desde docs/mediciones/p7/)
   roofline.csv y techos.csv  datos de la figura del roofline
 
-Uso: python3 tools/report.py [--peldano r0|r1|r2]
+Uso: python3 tools/report.py [--peldano r0|r1|r2|r3]
 """
 import argparse
 import csv
@@ -331,15 +332,21 @@ def main(argv=None):
     else:
         peldano = a.peldano or "r0"
         origen = "PELDANO" if a.peldano else "por defecto (sin rtl/00_peldano.v)"
-    if peldano not in ("r0", "r1", "r2"):
+    if peldano not in ("r0", "r1", "r2", "r3"):
         raise SystemExit(f"peldano desconocido: {peldano}")
     os.makedirs(G, exist_ok=True)
     c = Cifras()
     c["Peldano"] = peldano.upper()
+    # R3 es el hardware de R2 con otra tabla y otro programa (sw/c1.s). Las cifras y tablas de la escalera
+    # R0 a R2 se generan igual que para R2; lo propio de R3 lo agrega tools/report_c1.py al final.
+    describe = peldano
+    if peldano == "r3":
+        peldano = "r2"
     with open(os.path.join(G, "peldano.tex"), "w") as f:
         f.write("% Generado por tools/report.py (make report). No editar a mano.\n")
         f.write(f"\\newif\\ifpeldanofondo\\peldanofondo{'true' if peldano != 'r0' else 'false'}\n")
         f.write(f"\\newif\\ifpeldanodos\\peldanodos{'true' if peldano == 'r2' else 'false'}\n")
+        f.write(f"\\newif\\ifpeldanotres\\peldanotres{'true' if describe == 'r3' else 'false'}\n")
         commit = subprocess.run(["git", "rev-parse", "--short", "HEAD"], capture_output=True, text=True).stdout.strip()
         f.write(f"\\newcommand{{\\commitinforme}}{{{commit}}}\n")
     punto_31(c, peldano)
@@ -367,7 +374,11 @@ def main(argv=None):
     import report_33   # noqa: E402  (tools/report_33.py: tablas y figura del punto 3.3)
     report_33.punto_33(c, peldano, tabla, num, leer)
     c.escribir(os.path.join(G, "cifras.tex"))
-    print(f"report: peldano {peldano.upper()} ({origen}); {len(c.d)} cifras y tablas en {G}/")
+    extra = ""
+    if describe == "r3":
+        import report_c1   # noqa: E402  (tools/report_c1.py: cifras, tablas y figura de R3)
+        extra = f", mas {report_c1.punto_c1(tabla, num)} cifras de R3 en cifras_c1.tex"
+    print(f"report: peldano {describe.upper()} ({origen}); {len(c.d)} cifras y tablas en {G}/{extra}")
     return 0
 
 
